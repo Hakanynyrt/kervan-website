@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <rect x="2" y="2" width="116" height="116" rx="14" fill="#E8781A"/>
+  <rect x="7" y="7" width="106" height="106" rx="10" fill="#1A1A1A"/>
+  <text x="60" y="84" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-weight="700" font-size="52" fill="#E8781A" text-anchor="middle">Krv</text>
+</svg>
