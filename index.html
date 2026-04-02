@@ -49,6 +49,22 @@ body {
 }
 .fade-up.vis { opacity: 1; transform: translateY(0); }
 
+/* Hero elements: CSS-only entrance — no JS needed */
+.hero .fade-up {
+  animation: heroEntrance 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.hero .fade-up:nth-child(1) { animation-delay: 0.1s; }
+.hero .fade-up:nth-child(2) { animation-delay: 0.2s; }
+.hero .fade-up:nth-child(3) { animation-delay: 0.35s; }
+.hero .fade-up:nth-child(4) { animation-delay: 0.5s; }
+.hero .fade-up:nth-child(5) { animation-delay: 0.65s; }
+@keyframes heroEntrance {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Fallback: noscript handled via noscript tag in head */
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
@@ -393,6 +409,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 }
 </style>
 </head>
+<noscript><style>.fade-up{opacity:1!important;transform:none!important;}</style></noscript>
 <body>
 
 <!-- NAV -->
@@ -569,7 +586,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
       <div class="contact-blocks fade-up">
         <div class="c-block"><div class="c-block-label">Adres</div><div class="c-block-val">Sadun Atığ Cad. No: 112/A<br>Kartepe / Kocaeli</div></div>
         <div class="c-block"><div class="c-block-label">Telefon</div><div class="c-block-val"><a href="tel:+902623711005">0 (262) 371 10 05</a></div></div>
-        <div class="c-block"><div class="c-block-label">E-Posta</div><div class="c-block-val"><a href="/cdn-cgi/l/email-protection#abc0ced9ddcac586c0d9ddebc3c4dfc6cac2c785c8c4c6"><span class="__cf_email__" data-cfemail="19727c6b6f787734726b6f5971766d74787075377a7674">[email&#160;protected]</span></a></div></div>
+        <div class="c-block"><div class="c-block-label">E-Posta</div><div class="c-block-val"><a href="/cdn-cgi/l/email-protection#ea818f989c8b84c781989caa82859e878b8386c4898587"><span class="__cf_email__" data-cfemail="fb909e898d9a95d690898dbb93948f969a9297d5989496">[email&#160;protected]</span></a></div></div>
         <div class="c-block"><div class="c-block-label">Çalışma Saatleri</div><div class="c-block-val">Pazartesi — Cumartesi: 08:00 – 18:00</div></div>
       </div>
       <div class="contact-cta-card fade-up" style="transition-delay:0.1s">
@@ -602,13 +619,94 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-const nav=document.getElementById('nav');
-window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>50));
-const burger=document.getElementById('burger'),mob=document.getElementById('mob');
-burger.addEventListener('click',()=>{burger.classList.toggle('on');mob.classList.toggle('on');document.body.style.overflow=mob.classList.contains('on')?'hidden':'';});
-mob.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{burger.classList.remove('on');mob.classList.remove('on');document.body.style.overflow='';}));
-const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('vis');io.unobserve(x.target);}});},{threshold:0.12,rootMargin:'0px 0px -30px 0px'});
-document.querySelectorAll('.fade-up').forEach(el=>io.observe(el));
-const cio=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const el=x.target,t=+el.dataset.t,d=1800,s=performance.now(),tick=n=>{const p=Math.min((n-s)/d,1);el.textContent=Math.round(t*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(tick);};requestAnimationFrame(tick);cio.unobserve(el);}});},{threshold:0.5});
-document.querySelectorAll('.num-val[data-t]').forEach(el=>cio.observe(el));
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Nav scroll
+  var nav = document.getElementById('nav');
+  window.addEventListener('scroll', function() {
+    nav.classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Hamburger
+  var burger = document.getElementById('burger');
+  var mob = document.getElementById('mob');
+  burger.addEventListener('click', function() {
+    burger.classList.toggle('on');
+    mob.classList.toggle('on');
+    document.body.style.overflow = mob.classList.contains('on') ? 'hidden' : '';
+  });
+  mob.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      burger.classList.remove('on');
+      mob.classList.remove('on');
+      document.body.style.overflow = '';
+    });
+  });
+
+  // Reveal on scroll (skip hero — hero uses CSS animation)
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('vis');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
+
+    document.querySelectorAll('.fade-up').forEach(function(el) {
+      if (!el.closest('.hero')) {
+        io.observe(el);
+      }
+    });
+  } else {
+    // Fallback: show everything
+    document.querySelectorAll('.fade-up').forEach(function(el) {
+      el.classList.add('vis');
+    });
+  }
+
+  // Counter animation
+  if ('IntersectionObserver' in window) {
+    var cio = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var el = entry.target;
+          var target = parseInt(el.getAttribute('data-t'));
+          var duration = 1800;
+          var start = performance.now();
+          function tick(now) {
+            var p = Math.min((now - start) / duration, 1);
+            var ease = 1 - Math.pow(1 - p, 3);
+            el.textContent = Math.round(target * ease);
+            if (p < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+          cio.unobserve(el);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    document.querySelectorAll('.num-val[data-t]').forEach(function(el) {
+      cio.observe(el);
+    });
+  }
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  // Safety: force everything visible after 3s
+  setTimeout(function() {
+    document.querySelectorAll('.fade-up').forEach(function(el) {
+      el.classList.add('vis');
+    });
+  }, 3000);
+});
+</script>
+</body>
+</html>
