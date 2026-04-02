@@ -336,6 +336,80 @@ nav.scrolled {
   background: var(--brand-dim); border-radius: 100px;
   font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--brand); font-weight: 500;
 }
+.svc-card--interactive { cursor: pointer; }
+.svc-card--interactive:focus-visible {
+  outline: 2px solid var(--brand); outline-offset: 3px;
+}
+
+/* Service detail modal */
+.svc-modal {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.svc-modal.svc-modal--open {
+  opacity: 1; visibility: visible; pointer-events: all;
+}
+.svc-modal-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(6, 6, 8, 0.72);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.svc-modal-panel {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 520px; max-height: min(88vh, 720px);
+  overflow: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px 28px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+  transform: translateY(20px) scale(0.98);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.svc-modal.svc-modal--open .svc-modal-panel {
+  transform: translateY(0) scale(1);
+}
+.svc-modal-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 40px; height: 40px; border: none; border-radius: var(--radius-sm);
+  background: var(--bg-2); color: var(--text-2);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.svc-modal-close:hover { background: var(--bg-3); color: var(--text-1); }
+.svc-modal-close svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
+.svc-modal-tag {
+  display: inline-block; margin-bottom: 12px; padding: 5px 12px;
+  background: var(--brand-dim); border-radius: 100px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--brand); font-weight: 500;
+}
+.svc-modal-panel h2 {
+  font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700;
+  letter-spacing: -0.5px; line-height: 1.2; margin-bottom: 16px; padding-right: 40px;
+}
+.svc-modal-body { font-size: 15px; color: var(--text-2); line-height: 1.75; }
+.svc-modal-body p { margin-bottom: 14px; }
+.svc-modal-body p:last-of-type { margin-bottom: 0; }
+.svc-modal-body ul {
+  margin: 12px 0 16px; padding-left: 1.15em;
+  list-style: disc; color: var(--text-2);
+}
+.svc-modal-body li { margin-bottom: 8px; }
+.svc-modal-body li:last-child { margin-bottom: 0; }
+.svc-modal-cta {
+  display: inline-flex; margin-top: 24px; align-items: center; gap: 8px;
+  padding: 12px 24px; background: var(--brand); color: #fff !important;
+  font-weight: 600; font-size: 14px; border-radius: 100px; text-decoration: none;
+  transition: background 0.25s, box-shadow 0.25s;
+}
+.svc-modal-cta:hover { background: var(--brand-light); box-shadow: 0 4px 24px var(--brand-glow); }
+@media (prefers-reduced-motion: reduce) {
+  .svc-modal, .svc-modal-panel { transition: none; }
+  .svc-modal.svc-modal--open .svc-modal-panel { transform: none; }
+}
 
 /* ═══ PROCESS ═══ */
 .process-section { background: var(--bg-1); }
@@ -583,37 +657,37 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
     <div class="section-title fade-up">Uzmanlaştığımız Alanlar</div>
     <p class="section-desc fade-up">Her parçanın ihtiyacına özel, kontrollü atmosfer ve hassas sıcaklık yönetimiyle profesyonel çözümler.</p>
     <div class="services-grid">
-      <div class="svc-card fade-up">
+      <div class="svc-card svc-card--interactive fade-up" role="button" tabindex="0" data-svc="karbonlama" aria-haspopup="dialog" aria-label="Karbonlama hizmeti — detayları aç">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg></div>
         <h3>Karbonlama</h3>
         <p>Propan-hava karışımıyla kontrollü atmosferde yüzey karbon zenginleştirmesi. Yüzeyde sertlik, çekirdekte süneklik.</p>
         <span class="svc-tag">850–950°C</span>
       </div>
-      <div class="svc-card fade-up" style="transition-delay:0.08s">
+      <div class="svc-card svc-card--interactive fade-up" style="transition-delay:0.08s" role="button" tabindex="0" data-svc="sondurme" aria-haspopup="dialog" aria-label="Söndürme hizmeti — detayları aç">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
         <h3>Söndürme</h3>
         <p>Yağ ve polimer banyolarında kontrollü soğutma. Vinç operasyonlu havuzlarla homojen sertlik dağılımı.</p>
         <span class="svc-tag">Yağ & Polimer</span>
       </div>
-      <div class="svc-card fade-up" style="transition-delay:0.16s">
+      <div class="svc-card svc-card--interactive fade-up" style="transition-delay:0.16s" role="button" tabindex="0" data-svc="menevis" aria-haspopup="dialog" aria-label="Meneviş hizmeti — detayları aç">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M12 2c-4 6-8 10-8 14a8 8 0 0016 0c0-4-4-8-8-14z"/></svg></div>
         <h3>Meneviş</h3>
         <p>Söndürme sonrası gerilim giderme ve tokluk kazandırma. Hedeflenen sertlik değerine hassas ayarlama.</p>
         <span class="svc-tag">150–650°C</span>
       </div>
-      <div class="svc-card fade-up" style="transition-delay:0.08s">
+      <div class="svc-card svc-card--interactive fade-up" style="transition-delay:0.08s" role="button" tabindex="0" data-svc="normalizasyon" aria-haspopup="dialog" aria-label="Normalizasyon hizmeti — detayları aç">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 4V1M15 4V1M9 23v-3M15 23v-3"/></svg></div>
         <h3>Normalizasyon</h3>
         <p>Döküm ve dövme parçalarda homojen tane yapısı elde etmek için kontrollü havada soğutma.</p>
         <span class="svc-tag">Havada Soğutma</span>
       </div>
-      <div class="svc-card fade-up" style="transition-delay:0.16s">
+      <div class="svc-card svc-card--interactive fade-up" style="transition-delay:0.16s" role="button" tabindex="0" data-svc="gerilim-giderme" aria-haspopup="dialog" aria-label="Gerilim giderme hizmeti — detayları aç">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M4 20h16M8 20v-6a4 4 0 018 0v6"/><circle cx="12" cy="9" r="2.5"/></svg></div>
         <h3>Gerilim Giderme</h3>
         <p>Kaynak ve işleme sonrası iç gerilimlerin kontrollü sıcaklıkta giderilmesi. Boyutsal stabilite.</p>
         <span class="svc-tag">Stres Relief</span>
       </div>
-      <div class="svc-card fade-up" style="transition-delay:0.24s">
+      <div class="svc-card svc-card--interactive fade-up" style="transition-delay:0.24s" role="button" tabindex="0" data-svc="sertlik-testi" aria-haspopup="dialog" aria-label="Sertlik testi hizmeti — detayları aç">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg></div>
         <h3>Sertlik Testi</h3>
         <p>İşlem sonrası Rockwell ve Vickers sertlik ölçümü ile kalite kontrol ve raporlama.</p>
@@ -717,6 +791,19 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
   </div>
 </footer>
 
+<div id="svc-modal" class="svc-modal" role="dialog" aria-modal="true" aria-labelledby="svc-modal-title" aria-hidden="true">
+  <div class="svc-modal-backdrop" data-close tabindex="-1"></div>
+  <div class="svc-modal-panel">
+    <button type="button" class="svc-modal-close" aria-label="Kapat">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <span class="svc-modal-tag" id="svc-modal-tag"></span>
+    <h2 id="svc-modal-title"></h2>
+    <div class="svc-modal-body" id="svc-modal-body"></div>
+    <a href="#iletisim" class="svc-modal-cta">Teklif Alın</a>
+  </div>
+</div>
+
 <a href="https://wa.me/905316693734" class="wa-float" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp ile yazın">
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
@@ -802,6 +889,108 @@ document.addEventListener('DOMContentLoaded', function() {
       if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
+
+  // Service detail modal
+  var SERVICE_DETAILS = {
+    karbonlama: {
+      title: 'Karbonlama',
+      tag: '850–950°C',
+      body: '<p>Propan–hava karışımı ile beslenen kontrollü atmosferde yüzey karbon zenginleştirmesi uygulanır. Amaç; aşınma ve yorulma direnci gerektiren yüzeyde yüksek sertlik sağlarken çekirdekte sünekliği korumaktır.</p><p><strong>Öne çıkanlar</strong></p><ul><li>Endüstriyel dişli, mil ve bağlantı elemanları için uygun reçete</li><li>Sıcaklık ve süre ile yüzey sertliği hedefe göre ayarlanır</li><li>Söndürme ve meneviş ile tamamlanabilen süreç</li></ul><p>Parça geometrisi ve malzeme cinsine göre parametreler birlikte planlanır.</p>'
+    },
+    sondurme: {
+      title: 'Söndürme',
+      tag: 'Yağ & Polimer',
+      body: '<p>Sertleştirme sonrası yağ veya polimer banyolarında kontrollü soğutma ile martensitik yapı oluşturulur. Homojen sertlik dağılımı için transfer süreleri ve banyo sıcaklıkları kritiktir.</p><p><strong>Tesis özellikleri</strong></p><ul><li>Vinç operasyonlu havuzlarla hızlı ve güvenli transfer</li><li>Parça ağırlığına uygun sürükleme ve yükleme düzeni</li><li>Yağ ve polimer seçenekleri ile proses esnekliği</li></ul><p>Ardından meneviş ile hedef sertlik ve tokluk dengesi sağlanır.</p>'
+    },
+    menevis: {
+      title: 'Meneviş',
+      tag: '150–650°C',
+      body: '<p>Söndürme sonrası uygulanan ısıl işlemdir; iç gerilimleri azaltır, tokunurluğu artırır ve kırılganlığı düşürür. Hedef Rockwell veya HB değeri reçeteye göre belirlenir.</p><p><strong>Uygulama alanı</strong></p><ul><li>Sertleştirilmiş çelik parçalarda son ayar</li><li>Belirli sertlik aralığına getirme (ör. dişli, kama, burç)</li><li>Çatlak riskinin azaltılması</li></ul><p>Sıcaklık–süre eğrileri malzeme datasına göre optimize edilir.</p>'
+    },
+    normalizasyon: {
+      title: 'Normalizasyon',
+      tag: 'Havada Soğutma',
+      body: '<p>Döküm, dövme veya kaynak sonrası oluşan heterojen tane yapısını gidermek için parça austenit sıcaklığına getirilir ve genelde havada soğutulur. Sonraki işleme veya ısıl işlem için homojen mikroyapı sağlar.</p><p><strong>Ne zaman tercih edilir?</strong></p><ul><li>Talaşlı imalat öncesi yapı düzenleme</li><li>İşlenebilirliği artırma</li><li>Önceki proseslerden gelen iç gerilimleri azaltma</li></ul><p>Gerekirse tam tavlama veya başka ısıl işlem adımlarıyla birlikte planlanır.</p>'
+    },
+    'gerilim-giderme': {
+      title: 'Gerilim Giderme',
+      tag: 'Stres Relief',
+      body: '<p>Kaynak, soğuk işleme veya işleme sonrası oluşan iç gerilimler, belirli sıcaklıkta tutma ile kontrollü şekilde giderilir. Boyutsal stabilite ve çatlak riskinin azaltılması hedeflenir.</p><p><strong>Faydalar</strong></p><ul><li>Parça ve montajda deformasyon riskinin düşürülmesi</li><li>Hassas bileşenlerde ölçü güvenilirliği</li><li>Sonraki işlem veya boya öncesi hazırlık</li></ul><p>Malzeme ve önceki işlem geçmişine göre sıcaklık–süre aralığı seçilir.</p>'
+    },
+    'sertlik-testi': {
+      title: 'Sertlik Testi',
+      tag: 'HRC / HV',
+      body: '<p>Isıl işlem sonrası kalite doğrulaması için Rockwell (HRC) ve gerektiğinde Vickers (HV) sertlik ölçümü yapılır. Ölçüm noktaları teknik şartname veya müşteri spesifikasyonuna göre belirlenir.</p><p><strong>Raporlama</strong></p><ul><li>Ölçüm sonuçlarının kayıt altına alınması</li><li>Hedef aralıkla karşılaştırma</li><li>İzlenebilirlik için parti ve parça referansı</li></ul><p>Teklif ve üretim planında ölçüm kriterleri önceden netleştirilir.</p>'
+    }
+  };
+
+  var svcModal = document.getElementById('svc-modal');
+  var svcModalTitle = document.getElementById('svc-modal-title');
+  var svcModalTag = document.getElementById('svc-modal-tag');
+  var svcModalBody = document.getElementById('svc-modal-body');
+  var svcModalLastFocus = null;
+
+  function setBodyInert(on) {
+    if (!('inert' in HTMLElement.prototype)) return;
+    Array.prototype.forEach.call(document.body.children, function(el) {
+      if (el.id === 'svc-modal') return;
+      if (on) el.setAttribute('inert', '');
+      else el.removeAttribute('inert');
+    });
+  }
+
+  function openSvcModal(key) {
+    var data = SERVICE_DETAILS[key];
+    if (!data || !svcModal) return;
+    svcModalLastFocus = document.activeElement;
+    svcModalTitle.textContent = data.title;
+    svcModalTag.textContent = data.tag;
+    svcModalBody.innerHTML = data.body;
+    svcModal.classList.add('svc-modal--open');
+    svcModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setBodyInert(true);
+    var closeBtn = svcModal.querySelector('.svc-modal-close');
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function closeSvcModal() {
+    if (!svcModal || !svcModal.classList.contains('svc-modal--open')) return;
+    svcModal.classList.remove('svc-modal--open');
+    svcModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    setBodyInert(false);
+    if (svcModalLastFocus && typeof svcModalLastFocus.focus === 'function') {
+      svcModalLastFocus.focus();
+    }
+    svcModalLastFocus = null;
+  }
+
+  document.querySelectorAll('.svc-card--interactive[data-svc]').forEach(function(card) {
+    card.addEventListener('click', function() {
+      openSvcModal(card.getAttribute('data-svc'));
+    });
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openSvcModal(card.getAttribute('data-svc'));
+      }
+    });
+  });
+
+  if (svcModal) {
+    svcModal.querySelector('.svc-modal-backdrop').addEventListener('click', closeSvcModal);
+    svcModal.querySelector('.svc-modal-close').addEventListener('click', closeSvcModal);
+    svcModal.querySelector('.svc-modal-cta').addEventListener('click', function() {
+      closeSvcModal();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && svcModal.classList.contains('svc-modal--open')) {
+        closeSvcModal();
+      }
+    });
+  }
+
   // Safety: force everything visible after 3s
   setTimeout(function() {
     document.querySelectorAll('.fade-up').forEach(function(el) {
