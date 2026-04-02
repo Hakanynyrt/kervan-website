@@ -515,71 +515,6 @@ nav.scrolled {
 }
 .map-frame:hover iframe { filter: grayscale(0.5) brightness(0.5) contrast(1.1); }
 
-/* ═══ GALLERY (TESİS) ═══ */
-.gallery-section { background: var(--bg-1); }
-.gallery-slider {
-  position: relative; margin-top: 48px;
-  max-width: 900px; margin-left: auto; margin-right: auto;
-}
-.gallery-viewport {
-  overflow: hidden; border-radius: var(--radius-lg);
-  border: 1px solid var(--border); background: var(--bg-0);
-}
-.gallery-track {
-  display: flex; transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
-}
-.gallery-slide {
-  flex: 0 0 100%; margin: 0; min-width: 0;
-}
-.gallery-slide img {
-  width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover;
-  display: block;
-}
-.gallery-slide figcaption {
-  padding: 14px 18px; font-size: 14px; color: var(--text-2); line-height: 1.5;
-  background: var(--bg-2); border-top: 1px solid var(--border);
-}
-.gallery-nav {
-  position: absolute; top: 42%; transform: translateY(-50%);
-  z-index: 2; width: 44px; height: 44px; border: none; border-radius: 50%;
-  background: rgba(22, 22, 25, 0.92); color: var(--text-1);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: background 0.2s, color 0.2s, transform 0.2s;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
-}
-.gallery-nav:hover { background: var(--brand); color: #fff; }
-.gallery-nav:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-.gallery-prev { left: 10px; }
-.gallery-next { right: 10px; }
-.gallery-nav svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.gallery-dots {
-  display: flex; justify-content: center; align-items: center; flex-wrap: wrap;
-  gap: 10px; margin-top: 20px;
-}
-.gallery-dot {
-  width: 9px; height: 9px; border-radius: 50%; border: none; padding: 0;
-  background: var(--border-hover); cursor: pointer;
-  transition: background 0.25s, transform 0.25s;
-}
-.gallery-dot:hover { background: var(--text-3); }
-.gallery-dot[aria-current="true"] {
-  background: var(--brand); transform: scale(1.15);
-}
-.gallery-dot:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
-.gallery-counter {
-  text-align: center; margin-top: 12px;
-  font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-3); letter-spacing: 0.5px;
-}
-@media (max-width: 768px) {
-  .gallery-nav { width: 40px; height: 40px; }
-  .gallery-prev { left: 6px; }
-  .gallery-next { right: 6px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .gallery-track { transition: none; }
-}
-
 /* ═══ FOOTER ═══ */
 footer { padding: 40px 0; border-top: 1px solid var(--border); }
 .footer-inner {
@@ -614,7 +549,6 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
   .sector-tag { padding: 10px 20px; font-size: 13px; }
   .contact-cta-card { padding: 32px 24px; }
   .contact-cta-card h3 { font-size: 28px; }
-  .gallery-slider { max-width: none; }
   .footer-inner { flex-direction: column; gap: 12px; text-align: center; padding: 0 20px; }
 }
 @media (max-width: 480px) {
@@ -648,7 +582,6 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
       <li><a href="#surec">Süreç</a></li>
       <li><a href="#kapasite">Kapasite</a></li>
       <li><a href="#sektorler">Sektörler</a></li>
-      <li><a href="#tesis">Tesis</a></li>
       <li><a href="#iletisim" class="nav-cta-btn">İletişim</a></li>
     </ul>
     <div class="hamburger" id="burger"><span></span><span></span><span></span></div>
@@ -659,7 +592,6 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
   <a href="#surec">Süreç</a>
   <a href="#kapasite">Kapasite</a>
   <a href="#sektorler">Sektörler</a>
-  <a href="#tesis">Tesis</a>
   <a href="#iletisim">İletişim</a>
 </div>
 
@@ -812,45 +744,6 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
       <span class="sector-tag fade-up" style="transition-delay:0.24s">Tarım Makinaları</span>
       <span class="sector-tag fade-up" style="transition-delay:0.28s">Enerji</span>
       <span class="sector-tag fade-up" style="transition-delay:0.32s">Genel Endüstri</span>
-    </div>
-  </div>
-</section>
-
-<!-- TESIS GALLERY -->
-<section class="section gallery-section" id="tesis">
-  <div class="container">
-    <div class="section-label fade-up">Tesis</div>
-    <div class="section-title fade-up">Tesisimizden Kareler</div>
-    <p class="section-desc fade-up">Üretim alanımız, fırın hatları ve kalite kontrol ortamımızdan örnek görüntüler — görselleri kendi tesis fotoğraflarınızla değiştirebilirsiniz.</p>
-    <div class="gallery-slider fade-up" id="gallery-slider" role="region" aria-roledescription="Slayt gösterisi" aria-label="Tesis fotoğrafları">
-      <div class="gallery-viewport" id="gallery-viewport" tabindex="0">
-        <div class="gallery-track" id="gallery-track">
-          <figure class="gallery-slide">
-            <img src="https://images.unsplash.com/photo-1581092160562-40aa08c7880a?auto=format&fit=crop&w=1200&q=80" alt="Endüstriyel üretim ve iş güvenliği ortamı" width="1200" height="675" decoding="async" fetchpriority="high">
-            <figcaption>Üretim hattı ve güvenli çalışma alanı</figcaption>
-          </figure>
-          <figure class="gallery-slide">
-            <img src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=1200&q=80" alt="Metal işleme ve endüstriyel tesis içi" width="1200" height="675" loading="lazy" decoding="async">
-            <figcaption>Fırın ve işleme bölgesi — örnek görsel</figcaption>
-          </figure>
-          <figure class="gallery-slide">
-            <img src="https://images.unsplash.com/photo-1504917595217-cb0e7490f0d0?auto=format&fit=crop&w=1200&q=80" alt="Fabrika ve endüstriyel ekipman" width="1200" height="675" loading="lazy" decoding="async">
-            <figcaption>Tesis içi lojistik ve ekipman düzeni</figcaption>
-          </figure>
-          <figure class="gallery-slide">
-            <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=1200&q=80" alt="Kaynak ve metal işçiliği" width="1200" height="675" loading="lazy" decoding="async">
-            <figcaption>Kalite ve ölçüm süreçleri — örnek görsel</figcaption>
-          </figure>
-        </div>
-      </div>
-      <button type="button" class="gallery-nav gallery-prev" id="gallery-prev" aria-label="Önceki fotoğraf">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <button type="button" class="gallery-nav gallery-next" id="gallery-next" aria-label="Sonraki fotoğraf">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
-      <div class="gallery-dots" id="gallery-dots"></div>
-      <p class="gallery-counter" id="gallery-counter" aria-live="polite"></p>
     </div>
   </div>
 </section>
@@ -1097,74 +990,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-
-  // Tesis galeri slider
-  (function initGallery() {
-    var track = document.getElementById('gallery-track');
-    var viewport = document.getElementById('gallery-viewport');
-    var dotsWrap = document.getElementById('gallery-dots');
-    var prevBtn = document.getElementById('gallery-prev');
-    var nextBtn = document.getElementById('gallery-next');
-    var counterEl = document.getElementById('gallery-counter');
-    if (!track || !viewport || !dotsWrap || !prevBtn || !nextBtn) return;
-
-    var slides = track.querySelectorAll('.gallery-slide');
-    var n = slides.length;
-    if (!n) return;
-
-    var current = 0;
-    var touchStartX = 0;
-
-    function updateGallery() {
-      track.style.transform = 'translateX(-' + (current * 100) + '%)';
-      dotsWrap.querySelectorAll('.gallery-dot').forEach(function(dot, i) {
-        dot.setAttribute('aria-current', i === current ? 'true' : 'false');
-      });
-      if (counterEl) {
-        counterEl.textContent = (current + 1) + ' / ' + n;
-      }
-    }
-
-    function go(delta) {
-      current = (current + delta + n) % n;
-      updateGallery();
-    }
-
-    for (var i = 0; i < n; i++) {
-      (function (idx) {
-        var dot = document.createElement('button');
-        dot.type = 'button';
-        dot.className = 'gallery-dot';
-        dot.setAttribute('aria-label', 'Fotoğraf ' + (idx + 1));
-        dot.addEventListener('click', function() {
-          current = idx;
-          updateGallery();
-        });
-        dotsWrap.appendChild(dot);
-      })(i);
-    }
-
-    prevBtn.addEventListener('click', function() { go(-1); });
-    nextBtn.addEventListener('click', function() { go(1); });
-
-    viewport.addEventListener('keydown', function(e) {
-      if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
-      else if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
-    });
-
-    viewport.addEventListener('touchstart', function(e) {
-      if (e.touches.length === 1) touchStartX = e.touches[0].clientX;
-    }, { passive: true });
-    viewport.addEventListener('touchend', function(e) {
-      if (!e.changedTouches.length) return;
-      var dx = e.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(dx) < 45) return;
-      if (dx > 0) go(-1);
-      else go(1);
-    }, { passive: true });
-
-    updateGallery();
-  })();
 
   // Safety: force everything visible after 3s
   setTimeout(function() {
