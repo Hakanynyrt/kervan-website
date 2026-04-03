@@ -542,24 +542,6 @@ nav.scrolled {
 }
 .map-frame:hover iframe { }
 
-/* ═══ KATALOG ═══ */
-.katalog-section { background: var(--bg-1); }
-.katalog-frame {
-  margin-top: 48px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: var(--bg-2);
-  max-width: 794px;
-}
-.katalog-frame iframe {
-  width: 100%;
-  height: 700px;
-  border: none;
-  display: block;
-}
-@media (max-width: 768px) { .katalog-frame iframe { height: 500px; } }
-@media (max-width: 480px) { .katalog-frame iframe { height: 420px; } }
 
 /* ═══ FORM ═══ */
 .quote-form { display: flex; flex-direction: column; gap: 14px; }
@@ -665,7 +647,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
       <li><a href="#kapasite">Kapasite</a></li>
       <li><a href="#sektorler">Sektörler</a></li>
       <li><a href="#galeri">Galeri</a></li>
-      <li><a href="#katalog">Katalog</a></li>
+      <li><a href="/katalog">Katalog</a></li>
       <li><a href="#iletisim" class="nav-cta-btn">İletişim</a></li>
     </ul>
     <div class="nav-end">
@@ -679,7 +661,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
   <a href="#kapasite">Kapasite</a>
   <a href="#sektorler">Sektörler</a>
   <a href="#galeri">Galeri</a>
-  <a href="#katalog">Katalog</a>
+  <a href="/katalog">Katalog</a>
   <a href="#iletisim">İletişim</a>
 </div>
 
@@ -854,20 +836,6 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
   </div>
 </section>
 
-<!-- KATALOG -->
-<section class="section katalog-section" id="katalog">
-  <div class="container">
-    <div class="section-label fade-up">Katalog</div>
-    <h2 class="section-title fade-up">Ürün Kataloğumuz</h2>
-    <p class="section-desc fade-up">Tüm ısıl işlem hizmetlerimiz, kapasite bilgileri ve teknik detaylar için kataloğumuzu inceleyebilirsiniz.</p>
-    <div class="katalog-frame fade-up">
-      <iframe
-        src="https://docs.google.com/viewer?url=https://kervanheat.com/katalog.pdf&embedded=true"
-        title="Kervan Isıl İşlem Ürün Kataloğu"
-      ></iframe>
-    </div>
-  </div>
-</section>
 
 <!-- CONTACT -->
 <section class="section contact-section" id="iletisim">
