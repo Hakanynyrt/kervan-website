@@ -868,7 +868,11 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
         <form class="quote-form" id="quote-form">
           <input type="hidden" name="access_key" value="8f55e1c5-b170-4414-9ceb-477cbf6fca58">
           <input type="hidden" name="subject" value="Kervan Isıl İşlem — Yeni Teklif Talebi">
-          <input type="hidden" name="from_name" value="Kervan Website">
+          <input type="hidden" name="from_name" value="Kervan Isıl İşlem">
+          <input type="hidden" name="replyto" value="">
+          <input type="hidden" name="redirect" value="">
+          <input type="hidden" name="autoresponse_subject" value="Teklif Talebiniz Alındı — Kervan Isıl İşlem">
+          <input type="hidden" name="autoresponse" value="Merhaba,&#10;&#10;Teklif talebinizi aldık. En kısa sürede sizinle iletişime geçeceğiz.&#10;&#10;Hizmetlerimiz ve teknik detaylar hakkında bilgi almak için ürün kataloğumuzu inceleyebilirsiniz:&#10;https://kervanheat.com/katalog.pdf&#10;&#10;Saygılarımızla,&#10;Kervan Isıl İşlem&#10;+90 531 669 37 34&#10;kervanheat.com">
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="qf-name">Ad Soyad *</label>
@@ -880,8 +884,8 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="qf-email">E-Posta</label>
-            <input class="form-input" type="email" id="qf-email" name="email" placeholder="ornek@firma.com">
+            <label class="form-label" for="qf-email">E-Posta *</label>
+            <input class="form-input" type="email" id="qf-email" name="email" placeholder="ornek@firma.com" required>
           </div>
           <div class="form-group">
             <label class="form-label" for="qf-service">Hizmet</label>
