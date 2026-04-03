@@ -552,10 +552,12 @@ nav.scrolled {
 }
 .katalog-frame iframe {
   width: 100%;
-  aspect-ratio: 210 / 297;
+  height: 700px;
   border: none;
   display: block;
 }
+@media (max-width: 768px) { .katalog-frame iframe { height: 500px; } }
+@media (max-width: 480px) { .katalog-frame iframe { height: 420px; } }
 
 /* ═══ FOOTER ═══ */
 footer { padding: 40px 0; border-top: 1px solid var(--border); }
@@ -802,9 +804,8 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
     <p class="section-desc fade-up">Tüm ısıl işlem hizmetlerimiz, kapasite bilgileri ve teknik detaylar için kataloğumuzu inceleyebilirsiniz.</p>
     <div class="katalog-frame fade-up">
       <iframe
-        src="katalog.pdf"
+        src="https://docs.google.com/viewer?url=https://kervanheat.com/katalog.pdf&embedded=true"
         title="Kervan Isıl İşlem Ürün Kataloğu"
-        loading="lazy"
       ></iframe>
     </div>
   </div>
