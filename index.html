@@ -27,6 +27,81 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://kervanheat.com/#business",
+      "name": "Kervan Isıl İşlem",
+      "alternateName": "Kervan Heat Treatment",
+      "url": "https://kervanheat.com",
+      "logo": "https://kervanheat.com/favicon.svg",
+      "image": "https://kervanheat.com/hero.jpg",
+      "description": "Kocaeli Kartepe'de endüstriyel ısıl işlem hizmetleri: karbonlama, söndürme, meneviş, normalizasyon ve gerilim giderme.",
+      "telephone": "+905316693734",
+      "email": "info@kervanheat.com",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Sadun Atığ Cad. No: 112/A",
+        "addressLocality": "Kartepe",
+        "addressRegion": "Kocaeli",
+        "addressCountry": "TR"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "40.73",
+        "longitude": "29.72"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+        "opens": "08:00",
+        "closes": "18:00"
+      },
+      "sameAs": ["https://www.instagram.com/kervanmakina/"]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Isıl işlem nedir?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Isıl işlem; metallerin mekanik özelliklerini iyileştirmek amacıyla kontrollü ısıtma ve soğutma döngülerine tabi tutulması işlemidir. Çelik parçalara sertlik, dayanıklılık ve yorulma direnci kazandırmak için uygulanır."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Isıl işlem nasıl yapılır?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Isıl işlem; parçanın belirli bir sıcaklığa ısıtılması (karbonlama için 900–1050°C), bu sıcaklıkta tutulması ve ardından kontrollü biçimde söndürme banyosunda veya havada soğutulmasıyla gerçekleştirilir. İşlem tipine göre meneviş (temperleme) aşaması da uygulanır."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kaç çeşit ısıl işlem vardır?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Başlıca ısıl işlem türleri şunlardır: Karbonlama (sementasyon), Söndürme (su verme), Meneviş (temperleme), Normalizasyon, Gerilim giderme ve Tavlama. Kervan Isıl İşlem bu işlemlerin tamamını profesyonel ekipmanlarla gerçekleştirmektedir."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Isıl işlem ne kadar sürer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Isıl işlem süresi parça boyutuna, malzeme türüne ve uygulanan işleme göre değişir. Karbonlama işlemi birkaç saatten 24 saate kadar sürebilirken, normalizasyon ve gerilim giderme işlemleri genellikle daha kısa sürer."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -583,6 +658,30 @@ nav.scrolled {
 .form-success span { font-size: 14px; color: var(--text-2); }
 @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
 
+/* ═══ FAQ ═══ */
+.faq-list { max-width: 720px; margin-top: 40px; display: flex; flex-direction: column; gap: 12px; }
+.faq-item {
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: var(--radius-md); overflow: hidden;
+  transition: border-color 0.2s;
+}
+.faq-item:hover { border-color: var(--border-hover); }
+.faq-item[open] { border-color: rgba(232,120,26,0.2); }
+.faq-item summary {
+  padding: 20px 24px; font-size: 15px; font-weight: 600; color: var(--text-1);
+  cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;
+  gap: 16px;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: '+'; font-size: 20px; font-weight: 400; color: var(--brand);
+  flex-shrink: 0; transition: transform 0.2s;
+}
+.faq-item[open] summary::after { transform: rotate(45deg); }
+.faq-item p {
+  padding: 0 24px 20px; font-size: 14px; line-height: 1.7; color: var(--text-2);
+}
+
 /* ═══ FOOTER ═══ */
 footer { padding: 40px 0; border-top: 1px solid var(--border); }
 .footer-inner {
@@ -651,6 +750,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
       <li><a href="#kapasite">Kapasite</a></li>
       <li><a href="#sektorler">Sektörler</a></li>
       <li><a href="#galeri">Galeri</a></li>
+      <li><a href="#sss">SSS</a></li>
       <li><a href="/katalog">Katalog</a></li>
       <li><a href="#iletisim" class="nav-cta-btn">İletişim</a></li>
     </ul>
@@ -665,6 +765,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
   <a href="#kapasite">Kapasite</a>
   <a href="#sektorler">Sektörler</a>
   <a href="#galeri">Galeri</a>
+  <a href="#sss">SSS</a>
   <a href="/katalog">Katalog</a>
   <a href="#iletisim">İletişim</a>
 </div>
@@ -694,7 +795,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
   <div class="container hero-content">
     <div class="hero-badge fade-up"><span class="dot"></span> Kocaeli / Kartepe</div>
     <h1 class="fade-up" style="transition-delay:0.1s">Çeliğe<br><span class="gradient">Karakter</span><br>Kazandırıyoruz</h1>
-    <p class="hero-desc fade-up" style="transition-delay:0.2s">Kuyu tipi fırınlar ve kontrollü söndürme banyolarıyla, endüstriyel parçalarınıza en yüksek sertlik, dayanıklılık ve performansı kazandırıyoruz.</p>
+    <p class="hero-desc fade-up" style="transition-delay:0.2s">Endüstriyel ısıl işlemde Kocaeli / Kartepe'nin güvenilir adresi. Kuyu tipi fırın ve söndürme banyolarıyla çelik parçalara sertlik, dayanıklılık ve uzun ömür kazandırıyoruz.</p>
     <div class="hero-btns fade-up" style="transition-delay:0.3s">
       <a href="#iletisim" class="btn-fill">Teklif Alın <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
       <a href="#hizmetler" class="btn-outline">Hizmetleri Keşfet</a>
@@ -726,7 +827,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 <section class="section" id="hizmetler">
   <div class="container">
     <div class="section-label fade-up">Hizmetler</div>
-    <div class="section-title fade-up">Uzmanlaştığımız Alanlar</div>
+    <h2 class="section-title fade-up">Uzmanlaştığımız Alanlar</h2>
     <p class="section-desc fade-up">Her parçanın ihtiyacına özel, kontrollü atmosfer ve hassas sıcaklık yönetimiyle profesyonel çözümler.</p>
     <div class="services-grid">
       <div class="svc-card svc-card--interactive fade-up" role="button" tabindex="0" data-svc="karbonlama" aria-haspopup="dialog" aria-label="Karbonlama hizmeti — detayları aç">
@@ -773,7 +874,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 <section class="section process-section" id="surec">
   <div class="container">
     <div class="section-label fade-up">Süreç</div>
-    <div class="section-title fade-up">Adım Adım İş Akışımız</div>
+    <h2 class="section-title fade-up">Adım Adım İş Akışımız</h2>
     <p class="section-desc fade-up">Parçanız teslim alındığı andan itibaren her adım kontrol altında.</p>
     <div class="process-track fade-up">
       <div class="proc-step"><div class="proc-num">01</div><h4>Parça Teslim</h4><p>Malzeme cinsi, teknik çizim ve sertlik değerlerinin ön değerlendirmesi.</p></div>
@@ -790,7 +891,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 <section class="section" id="kapasite">
   <div class="container">
     <div class="section-label fade-up">Kapasite</div>
-    <div class="section-title fade-up">Rakamlarla Tesisimiz</div>
+    <h2 class="section-title fade-up">Rakamlarla Tesisimiz</h2>
     <div class="numbers-grid">
       <div class="num-card fade-up"><div class="num-val" data-t="1050">0</div><div class="num-unit">°C</div><div class="num-label">Maks. Fırın Sıcaklığı</div></div>
       <div class="num-card fade-up" style="transition-delay:0.08s"><div class="num-val" data-t="12">0</div><div class="num-unit">TON / GÜN</div><div class="num-label">İşleme Kapasitesi</div></div>
@@ -804,7 +905,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 <section class="section sectors-section" id="sektorler">
   <div class="container">
     <div class="section-label fade-up">Sektörler</div>
-    <div class="section-title fade-up">Hizmet Verdiğimiz Alanlar</div>
+    <h2 class="section-title fade-up">Hizmet Verdiğimiz Alanlar</h2>
     <p class="section-desc fade-up">Ağır sanayiden hassas mühendislik uygulamalarına, geniş yelpazede ısıl işlem çözümleri.</p>
     <div class="sectors-wrap">
       <span class="sector-tag fade-up">Otomotiv</span>
@@ -839,11 +940,37 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 </section>
 
 
+<!-- FAQ -->
+<section class="section" id="sss">
+  <div class="container">
+    <div class="section-label fade-up">SSS</div>
+    <h2 class="section-title fade-up">Sık Sorulan Sorular</h2>
+    <div class="faq-list fade-up">
+      <details class="faq-item">
+        <summary>Isıl işlem nedir?</summary>
+        <p>Isıl işlem; metallerin mekanik özelliklerini iyileştirmek amacıyla kontrollü ısıtma ve soğutma döngülerine tabi tutulması işlemidir. Çelik parçalara sertlik, dayanıklılık ve yorulma direnci kazandırmak için uygulanır. Otomotiv, savunma, tarım ve iş makinesi sektörlerinde kritik parçaların üretiminde vazgeçilmezdir.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Isıl işlem nasıl yapılır?</summary>
+        <p>Parçanın belirli bir sıcaklığa ısıtılması (karbonlama için 900–1050°C), bu sıcaklıkta bekletilmesi ve ardından kontrollü biçimde söndürme banyosunda ya da havada soğutulmasıyla gerçekleştirilir. İşlem tipine göre meneviş (temperleme) aşaması da uygulanarak iç gerilimler giderilir.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Kaç çeşit ısıl işlem vardır?</summary>
+        <p>Başlıca ısıl işlem türleri şunlardır: <strong>Karbonlama</strong> (sementasyon), <strong>Söndürme</strong> (su verme), <strong>Meneviş</strong> (temperleme), <strong>Normalizasyon</strong>, <strong>Gerilim giderme</strong> ve <strong>Tavlama</strong>. Kervan Isıl İşlem bu işlemlerin tamamını kuyu tipi fırın ve söndürme banyolarıyla gerçekleştirmektedir.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Isıl işlem ne kadar sürer?</summary>
+        <p>Süre; parça boyutuna, çelik kalitesine ve uygulanan işlem türüne göre değişir. Karbonlama işlemi birkaç saatten 24 saate kadar sürebilirken, normalizasyon ve gerilim giderme işlemleri genellikle daha kısadır. Teklif aşamasında tahmini süre tarafınıza iletilir.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
 <!-- CONTACT -->
 <section class="section contact-section" id="iletisim">
   <div class="container">
     <div class="section-label fade-up">İletişim</div>
-    <div class="section-title fade-up">Bize Ulaşın</div>
+    <h2 class="section-title fade-up">Bize Ulaşın</h2>
     <div class="contact-layout">
       <div class="contact-blocks fade-up">
         <div class="c-block"><div class="c-block-label">Adres</div><div class="c-block-val">Sadun Atığ Cad. No: 112/A<br>Kartepe / Kocaeli</div></div>
