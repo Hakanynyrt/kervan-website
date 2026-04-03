@@ -187,16 +187,20 @@ nav.scrolled {
 .hero {
   min-height: 100vh; display: flex; align-items: center;
   position: relative; overflow: hidden;
+  background-image: url('hero.jpg');
+  background-size: cover;
+  background-position: center 30%;
 }
-.hero-glow {
-  position: absolute; width: 700px; height: 700px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(232,120,26,0.10) 0%, transparent 65%);
-  top: -10%; right: -10%; pointer-events: none; animation: float 8s ease-in-out infinite;
-}
-.hero-glow-2 {
-  position: absolute; width: 500px; height: 500px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(232,120,26,0.06) 0%, transparent 65%);
-  bottom: -5%; left: -5%; pointer-events: none; animation: float 10s ease-in-out infinite reverse;
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    105deg,
+    rgba(12,12,14,0.93) 0%,
+    rgba(12,12,14,0.80) 45%,
+    rgba(12,12,14,0.45) 100%
+  );
+  z-index: 0;
 }
 .hero-sparks {
   position: absolute; inset: 0; pointer-events: none; z-index: 1; overflow: hidden;
@@ -667,8 +671,6 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-glow"></div>
-  <div class="hero-glow-2"></div>
   <div class="hero-sparks" aria-hidden="true">
     <span class="hero-spark" style="--sx:6%;--sy:78%;--sd:8s;--sdelay:0s;--dx:12px;--dy:-48px;--dx2:-8px;--dy2:-100px"></span>
     <span class="hero-spark" style="--sx:14%;--sy:88%;--sd:6.5s;--sdelay:1.2s;--dx:-6px;--dy:-62px;--dx2:4px;--dy2:-115px"></span>
