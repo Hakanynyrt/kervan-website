@@ -560,6 +560,42 @@ nav.scrolled {
 @media (max-width: 768px) { .katalog-frame iframe { height: 500px; } }
 @media (max-width: 480px) { .katalog-frame iframe { height: 420px; } }
 
+/* ═══ FORM ═══ */
+.quote-form { display: flex; flex-direction: column; gap: 14px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500;
+  color: var(--brand); letter-spacing: 1.5px; text-transform: uppercase;
+}
+.form-input, .form-select, .form-textarea {
+  background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 16px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px;
+  color: var(--text-1); outline: none; width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none; appearance: none;
+}
+.form-input::placeholder, .form-textarea::placeholder { color: var(--text-3); }
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-dim);
+}
+.form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235C5C72' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; cursor: pointer; }
+.form-select option { background: var(--bg-3); color: var(--text-1); }
+.form-textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+.form-submit {
+  margin-top: 4px; width: 100%; justify-content: center;
+  padding: 14px 24px; font-size: 15px;
+}
+.form-success {
+  display: none; text-align: center; padding: 32px 16px;
+  color: var(--text-1);
+}
+.form-success svg { margin: 0 auto 16px; display: block; color: var(--brand); }
+.form-success strong { display: block; font-size: 18px; margin-bottom: 8px; }
+.form-success span { font-size: 14px; color: var(--text-2); }
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
 /* ═══ FOOTER ═══ */
 footer { padding: 40px 0; border-top: 1px solid var(--border); }
 .footer-inner {
@@ -827,9 +863,53 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
         <div class="c-block"><div class="c-block-label">Instagram</div><div class="c-block-val"><a href="https://www.instagram.com/kervanmakina/" target="_blank" rel="noopener noreferrer">@kervanmakina</a></div></div>
       </div>
       <div class="contact-cta-card fade-up" style="transition-delay:0.1s">
-        <h3>Projeniz için<br><span class="gradient">teklif alın</span></h3>
-        <p>Parça detaylarınızı, malzeme cinsi ve hedef sertlik değerlerini iletin — en uygun ısıl işlem reçetesini belirleyelim.</p>
-        <a href="tel:+905316693734" class="btn-fill" style="align-self:flex-start">Hemen Arayın <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></a>
+        <h3 style="margin-bottom:20px">Teklif <span class="gradient">Alın</span></h3>
+        <!-- Web3Forms: web3forms.com adresinden ücretsiz access key alıp aşağıya girin -->
+        <form class="quote-form" id="quote-form">
+          <input type="hidden" name="access_key" value="BURAYA-WEB3FORMS-KEY-GIRIN">
+          <input type="hidden" name="subject" value="Kervan Isıl İşlem — Yeni Teklif Talebi">
+          <input type="hidden" name="from_name" value="Kervan Website">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="qf-name">Ad Soyad *</label>
+              <input class="form-input" type="text" id="qf-name" name="name" placeholder="Ahmet Yılmaz" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="qf-phone">Telefon *</label>
+              <input class="form-input" type="tel" id="qf-phone" name="phone" placeholder="+90 5xx xxx xx xx" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="qf-email">E-Posta</label>
+            <input class="form-input" type="email" id="qf-email" name="email" placeholder="ornek@firma.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="qf-service">Hizmet</label>
+            <select class="form-select" id="qf-service" name="hizmet">
+              <option value="">Seçiniz…</option>
+              <option>Karbonlama</option>
+              <option>Söndürme</option>
+              <option>Meneviş</option>
+              <option>Normalizasyon</option>
+              <option>Gerilim Giderme</option>
+              <option>Sertlik Testi</option>
+              <option>Diğer / Birden Fazla</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="qf-note">Parça / Malzeme Detayı</label>
+            <textarea class="form-textarea" id="qf-note" name="detay" placeholder="Malzeme cinsi, adet, hedef sertlik değeri…"></textarea>
+          </div>
+          <button type="submit" class="btn-fill form-submit">
+            Teklif Gönder
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>
+          </button>
+        </form>
+        <div class="form-success" id="form-success">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+          <strong>Talebiniz alındı!</strong>
+          <span>En kısa sürede sizinle iletişime geçeceğiz.</span>
+        </div>
       </div>
     </div>
     <!-- iframe: embed; paylaşım linki https://maps.app.goo.gl/Jh3BTdVLzGRquCcw5 ile aynı konum -->
@@ -1054,6 +1134,36 @@ document.addEventListener('DOMContentLoaded', function() {
       if (e.key === 'Escape' && svcModal.classList.contains('svc-modal--open')) {
         closeSvcModal();
       }
+    });
+  }
+
+  // Teklif formu
+  var quoteForm = document.getElementById('quote-form');
+  var formSuccess = document.getElementById('form-success');
+  if (quoteForm) {
+    quoteForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var btn = quoteForm.querySelector('button[type=submit]');
+      btn.disabled = true;
+      btn.textContent = 'Gönderiliyor…';
+      var data = new FormData(quoteForm);
+      fetch('https://api.web3forms.com/submit', { method: 'POST', body: data })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          if (res.success) {
+            quoteForm.style.display = 'none';
+            formSuccess.style.display = 'block';
+          } else {
+            btn.disabled = false;
+            btn.innerHTML = 'Teklif Gönder <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>';
+            alert('Bir hata oluştu, lütfen tekrar deneyin.');
+          }
+        })
+        .catch(function() {
+          btn.disabled = false;
+          btn.innerHTML = 'Teklif Gönder <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>';
+          alert('Bağlantı hatası, lütfen tekrar deneyin.');
+        });
     });
   }
 
