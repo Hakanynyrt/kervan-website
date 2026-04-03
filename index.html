@@ -23,6 +23,7 @@
 <meta name="theme-color" content="#0C0C0E">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="favicon.svg">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -869,10 +870,6 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
           <input type="hidden" name="access_key" value="8f55e1c5-b170-4414-9ceb-477cbf6fca58">
           <input type="hidden" name="subject" value="Kervan Isıl İşlem — Yeni Teklif Talebi">
           <input type="hidden" name="from_name" value="Kervan Isıl İşlem">
-          <input type="hidden" name="replyto" value="">
-          <input type="hidden" name="redirect" value="">
-          <input type="hidden" name="autoresponse_subject" value="Teklif Talebiniz Alındı — Kervan Isıl İşlem">
-          <input type="hidden" name="autoresponse" value="Merhaba,&#10;&#10;Teklif talebinizi aldık. En kısa sürede sizinle iletişime geçeceğiz.&#10;&#10;Hizmetlerimiz ve teknik detaylar hakkında bilgi almak için ürün kataloğumuzu inceleyebilirsiniz:&#10;https://kervanheat.com/katalog.pdf&#10;&#10;Saygılarımızla,&#10;Kervan Isıl İşlem&#10;+90 531 669 37 34&#10;kervanheat.com">
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="qf-name">Ad Soyad *</label>
@@ -959,6 +956,9 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 </a>
 
 <script>
+// EmailJS — autoresponder (katalog maili müşteriye)
+emailjs.init('EMAILJS_PUBLIC_KEY');
+
 document.addEventListener('DOMContentLoaded', function() {
   // Nav scroll
   var nav = document.getElementById('nav');
@@ -1155,6 +1155,11 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(function(r) { return r.json(); })
         .then(function(res) {
           if (res.success) {
+            // EmailJS: müşteriye otomatik katalog maili gönder
+            emailjs.send('EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', {
+              name: data.get('name'),
+              to_email: data.get('email')
+            }).catch(function() {}); // silent fail — müşteriye mail gitsin gitmesin form başarılı
             quoteForm.style.display = 'none';
             formSuccess.style.display = 'block';
           } else {
