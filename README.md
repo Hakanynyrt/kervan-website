@@ -4,7 +4,7 @@ Kervan Isıl İşlem firması kurumsal web sitesi.
 
 **Teknoloji:** Statik HTML/CSS/JS (tek dosya)  
 **Hosting:** Cloudflare Pages  
-**Domain:** kervanmakina.com.tr
+**Domain:** kervanheat.com
 
 ## Deploy
 
