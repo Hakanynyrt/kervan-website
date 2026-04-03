@@ -957,7 +957,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 
 <script>
 // EmailJS — autoresponder (katalog maili müşteriye)
-emailjs.init('EMAILJS_PUBLIC_KEY');
+emailjs.init('uatVKfRZ9B22M-giX');
 
 document.addEventListener('DOMContentLoaded', function() {
   // Nav scroll
@@ -1156,7 +1156,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(function(res) {
           if (res.success) {
             // EmailJS: müşteriye otomatik katalog maili gönder
-            emailjs.send('EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', {
+            emailjs.send('service_pl9xwt8', 'template_iewzoib', {
               name: data.get('name'),
               to_email: data.get('email')
             }).catch(function() {}); // silent fail — müşteriye mail gitsin gitmesin form başarılı
