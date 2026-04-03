@@ -6,7 +6,7 @@ This file documents the codebase structure, conventions, and workflows for AI as
 
 Corporate website for **Kervan Isıl İşlem** (Kervan Heat Treatment), a Turkish industrial heat treatment company. The site is a **single-file static website** with no build step or dependencies.
 
-- **Domain**: kervanmakina.com.tr
+- **Domain**: kervanheat.com
 - **Hosting**: Cloudflare Pages (auto-deploys on push to `main`)
 - **Language**: Turkish throughout (UI content, comments, commit messages)
 
@@ -100,7 +100,7 @@ Key functions in the script block:
 
 ## Deployment
 
-Push to `main` → Cloudflare Pages auto-deploys to kervanmakina.com.tr.
+Push to `main` → Cloudflare Pages auto-deploys to kervanheat.com.
 
 **No build step required.** Changes to `index.html` are live after deploy.
 
