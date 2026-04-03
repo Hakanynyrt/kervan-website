@@ -540,6 +540,25 @@ nav.scrolled {
 }
 .map-frame:hover iframe { filter: grayscale(0.5) brightness(0.5) contrast(1.1); }
 
+/* ═══ KATALOG ═══ */
+.katalog-section { background: var(--bg-1); }
+.katalog-frame {
+  margin-top: 48px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.katalog-frame iframe {
+  width: 100%;
+  height: 680px;
+  border: none;
+  display: block;
+}
+@media (max-width: 1024px) { .katalog-frame iframe { height: 560px; } }
+@media (max-width: 768px)  { .katalog-frame iframe { height: 420px; } }
+@media (max-width: 480px)  { .katalog-frame iframe { height: 320px; } }
+
 /* ═══ FOOTER ═══ */
 footer { padding: 40px 0; border-top: 1px solid var(--border); }
 .footer-inner {
@@ -607,6 +626,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
       <li><a href="#surec">Süreç</a></li>
       <li><a href="#kapasite">Kapasite</a></li>
       <li><a href="#sektorler">Sektörler</a></li>
+      <li><a href="#katalog">Katalog</a></li>
       <li><a href="#iletisim" class="nav-cta-btn">İletişim</a></li>
     </ul>
     <div class="nav-end">
@@ -619,6 +639,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
   <a href="#surec">Süreç</a>
   <a href="#kapasite">Kapasite</a>
   <a href="#sektorler">Sektörler</a>
+  <a href="#katalog">Katalog</a>
   <a href="#iletisim">İletişim</a>
 </div>
 
@@ -771,6 +792,22 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
       <span class="sector-tag fade-up" style="transition-delay:0.24s">Tarım Makinaları</span>
       <span class="sector-tag fade-up" style="transition-delay:0.28s">Enerji</span>
       <span class="sector-tag fade-up" style="transition-delay:0.32s">Genel Endüstri</span>
+    </div>
+  </div>
+</section>
+
+<!-- KATALOG -->
+<section class="section katalog-section" id="katalog">
+  <div class="container">
+    <div class="section-label fade-up">Katalog</div>
+    <h2 class="section-title fade-up">Ürün Kataloğumuz</h2>
+    <p class="section-desc fade-up">Tüm ısıl işlem hizmetlerimiz, kapasite bilgileri ve teknik detaylar için kataloğumuzu inceleyebilirsiniz.</p>
+    <div class="katalog-frame fade-up">
+      <iframe
+        src="katalog.pdf"
+        title="Kervan Isıl İşlem Ürün Kataloğu"
+        loading="lazy"
+      ></iframe>
     </div>
   </div>
 </section>
