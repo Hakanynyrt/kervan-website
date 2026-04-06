@@ -157,39 +157,9 @@ body {
   box-shadow: 0 0 8px rgba(232,120,26,0.45);
 }
 
-/* ═══ SCROLL ANIMATIONS ═══ */
-.anim-left, .anim-right, .anim-scale, .anim-drop {
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-  transition-delay: calc(var(--i, 0) * 0.08s);
-}
-.anim-left  { opacity: 0; transform: translateX(-56px); }
-.anim-right { opacity: 0; transform: translateX(56px); }
-.anim-scale { opacity: 0; transform: scale(0.84); }
-.anim-drop  { opacity: 0; transform: translateY(-36px); }
-.anim-left.vis, .anim-right.vis { opacity: 1; transform: translateX(0); }
-.anim-scale.vis { opacity: 1; transform: scale(1); }
-.anim-drop.vis  { opacity: 1; transform: translateY(0); }
-
-/* ═══ PROCESS LINE ═══ */
-.proc-line-wrap {
-  height: 2px; margin-top: 28px; background: var(--border);
-  border-radius: 2px; overflow: hidden;
-}
-.proc-line-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--brand), var(--brand-light));
-  transform-origin: left center; transform: scaleX(0);
-  box-shadow: 0 0 10px rgba(232,120,26,0.35);
-}
-
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .anim-left, .anim-right, .anim-scale, .anim-drop {
-    transition: none !important; opacity: 1 !important; transform: none !important;
-  }
   #scroll-bar { display: none; }
-  .hero-content { transition: none !important; opacity: 1 !important; transform: none !important; }
 }
 
 /* Hero elements: CSS-only entrance — no JS needed */
@@ -311,9 +281,8 @@ nav.scrolled {
   position: relative; overflow: hidden;
   background-image: url('hero.jpg');
   background-size: cover;
-  background-position: center calc(30% + var(--parallax-y, 0px));
+  background-position: center 30%;
 }
-.hero-content { will-change: transform, opacity; }
 .hero::before {
   content: '';
   position: absolute; inset: 0;
@@ -938,7 +907,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 }
 </style>
 </head>
-<noscript><style>.fade-up,.anim-left,.anim-right,.anim-scale,.anim-drop{opacity:1!important;transform:none!important;}</style></noscript>
+<noscript><style>.fade-up{opacity:1!important;transform:none!important;}</style></noscript>
 <body>
 <div id="scroll-bar" aria-hidden="true"></div>
 
@@ -1022,37 +991,37 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
     <h2 class="section-title fade-up">Uzmanlaştığımız Alanlar</h2>
     <p class="section-desc fade-up">Her parçanın ihtiyacına özel, kontrollü atmosfer ve hassas sıcaklık yönetimiyle profesyonel çözümler.</p>
     <div class="services-grid">
-      <div class="svc-card svc-card--interactive anim-left" style="--i:0" role="button" tabindex="0" data-svc="karbonlama" aria-haspopup="dialog" aria-label="Karbonlama hizmeti — detayları aç">
+      <div class="svc-card svc-card--interactive" role="button" tabindex="0" data-svc="karbonlama" aria-haspopup="dialog" aria-label="Karbonlama hizmeti — detayları aç">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg></div>
         <h3>Karbonlama</h3>
         <p>Propan-hava karışımıyla kontrollü atmosferde yüzey karbon zenginleştirmesi. Yüzeyde sertlik, çekirdekte süneklik.</p>
         <span class="svc-tag">850–950°C</span>
       </div>
-      <div class="svc-card svc-card--interactive anim-right" style="--i:1" role="button" tabindex="0" data-svc="sondurme" aria-haspopup="dialog" aria-label="Söndürme hizmeti — detayları aç">
+      <div class="svc-card svc-card--interactive" role="button" tabindex="0" data-svc="sondurme" aria-haspopup="dialog" aria-label="Söndürme hizmeti — detayları aç">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
         <h3>Söndürme</h3>
         <p>Yağ ve polimer banyolarında kontrollü soğutma. Vinç operasyonlu havuzlarla homojen sertlik dağılımı.</p>
         <span class="svc-tag">Yağ & Polimer</span>
       </div>
-      <div class="svc-card svc-card--interactive anim-left" style="--i:2" role="button" tabindex="0" data-svc="menevis" aria-haspopup="dialog" aria-label="Meneviş hizmeti — detayları aç">
+      <div class="svc-card svc-card--interactive" role="button" tabindex="0" data-svc="menevis" aria-haspopup="dialog" aria-label="Meneviş hizmeti — detayları aç">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M12 2c-4 6-8 10-8 14a8 8 0 0016 0c0-4-4-8-8-14z"/></svg></div>
         <h3>Meneviş</h3>
         <p>Söndürme sonrası gerilim giderme ve tokluk kazandırma. Hedeflenen sertlik değerine hassas ayarlama.</p>
         <span class="svc-tag">150–650°C</span>
       </div>
-      <div class="svc-card svc-card--interactive anim-right" style="--i:2" role="button" tabindex="0" data-svc="normalizasyon" aria-haspopup="dialog" aria-label="Normalizasyon hizmeti — detayları aç">
+      <div class="svc-card svc-card--interactive" role="button" tabindex="0" data-svc="normalizasyon" aria-haspopup="dialog" aria-label="Normalizasyon hizmeti — detayları aç">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 4V1M15 4V1M9 23v-3M15 23v-3"/></svg></div>
         <h3>Normalizasyon</h3>
         <p>Döküm ve dövme parçalarda homojen tane yapısı elde etmek için kontrollü havada soğutma.</p>
         <span class="svc-tag">Havada Soğutma</span>
       </div>
-      <div class="svc-card svc-card--interactive anim-left" style="--i:3" role="button" tabindex="0" data-svc="gerilim-giderme" aria-haspopup="dialog" aria-label="Gerilim giderme hizmeti — detayları aç">
+      <div class="svc-card svc-card--interactive" role="button" tabindex="0" data-svc="gerilim-giderme" aria-haspopup="dialog" aria-label="Gerilim giderme hizmeti — detayları aç">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M4 20h16M8 20v-6a4 4 0 018 0v6"/><circle cx="12" cy="9" r="2.5"/></svg></div>
         <h3>Gerilim Giderme</h3>
         <p>Kaynak ve işleme sonrası iç gerilimlerin kontrollü sıcaklıkta giderilmesi. Boyutsal stabilite.</p>
         <span class="svc-tag">Stres Relief</span>
       </div>
-      <div class="svc-card svc-card--interactive anim-right" style="--i:3" role="button" tabindex="0" data-svc="sertlik-testi" aria-haspopup="dialog" aria-label="Sertlik testi hizmeti — detayları aç">
+      <div class="svc-card svc-card--interactive" role="button" tabindex="0" data-svc="sertlik-testi" aria-haspopup="dialog" aria-label="Sertlik testi hizmeti — detayları aç">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg></div>
         <h3>Sertlik Testi</h3>
         <p>İşlem sonrası Rockwell ve Vickers sertlik ölçümü ile kalite kontrol ve raporlama.</p>
@@ -1069,14 +1038,13 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
     <h2 class="section-title fade-up">Adım Adım İş Akışımız</h2>
     <p class="section-desc fade-up">Parçanız teslim alındığı andan itibaren her adım kontrol altında.</p>
     <div class="process-track">
-      <div class="proc-step anim-left" style="--i:0"><div class="proc-num">01</div><h4>Parça Teslim</h4><p>Malzeme cinsi, teknik çizim ve sertlik değerlerinin ön değerlendirmesi.</p></div>
-      <div class="proc-step anim-left" style="--i:1"><div class="proc-num">02</div><h4>Reçete</h4><p>Sıcaklık, süre, atmosfer ve söndürme parametrelerinin planlanması.</p></div>
-      <div class="proc-step anim-left" style="--i:2"><div class="proc-num">03</div><h4>Yükleme</h4><p>Eşit ısı dağılımı için optimize fırın yükleme düzeni.</p></div>
-      <div class="proc-step anim-left" style="--i:3"><div class="proc-num">04</div><h4>Isıl İşlem</h4><p>Karbonlama, sertleştirme veya normalizasyon prosesi.</p></div>
-      <div class="proc-step anim-left" style="--i:4"><div class="proc-num">05</div><h4>Söndürme</h4><p>Vinç ile hızlı transfer, yağ veya polimer banyosunda soğutma.</p></div>
-      <div class="proc-step anim-left" style="--i:5"><div class="proc-num">06</div><h4>Kontrol</h4><p>Meneviş, sertlik ölçümü ve kalite raporlaması.</p></div>
+      <div class="proc-step fade-up"><div class="proc-num">01</div><h4>Parça Teslim</h4><p>Malzeme cinsi, teknik çizim ve sertlik değerlerinin ön değerlendirmesi.</p></div>
+      <div class="proc-step fade-up"><div class="proc-num">02</div><h4>Reçete</h4><p>Sıcaklık, süre, atmosfer ve söndürme parametrelerinin planlanması.</p></div>
+      <div class="proc-step fade-up"><div class="proc-num">03</div><h4>Yükleme</h4><p>Eşit ısı dağılımı için optimize fırın yükleme düzeni.</p></div>
+      <div class="proc-step fade-up"><div class="proc-num">04</div><h4>Isıl İşlem</h4><p>Karbonlama, sertleştirme veya normalizasyon prosesi.</p></div>
+      <div class="proc-step fade-up"><div class="proc-num">05</div><h4>Söndürme</h4><p>Vinç ile hızlı transfer, yağ veya polimer banyosunda soğutma.</p></div>
+      <div class="proc-step fade-up"><div class="proc-num">06</div><h4>Kontrol</h4><p>Meneviş, sertlik ölçümü ve kalite raporlaması.</p></div>
     </div>
-    <div class="proc-line-wrap fade-up"><div class="proc-line-fill" id="proc-line-fill"></div></div>
   </div>
 </section>
 
@@ -1086,10 +1054,10 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
     <div class="section-label fade-up">Kapasite</div>
     <h2 class="section-title fade-up">Rakamlarla Tesisimiz</h2>
     <div class="numbers-grid">
-      <div class="num-card anim-scale" style="--i:0"><div class="num-val" data-t="1050">0</div><div class="num-unit">°C</div><div class="num-label">Maks. Fırın Sıcaklığı</div></div>
-      <div class="num-card anim-scale" style="--i:1"><div class="num-val" data-t="12">0</div><div class="num-unit">TON / GÜN</div><div class="num-label">İşleme Kapasitesi</div></div>
-      <div class="num-card anim-scale" style="--i:2"><div class="num-val" data-t="3">0</div><div class="num-unit">ADET</div><div class="num-label">Kuyu Tipi Fırın</div></div>
-      <div class="num-card anim-scale" style="--i:3"><div class="num-val" data-t="1200">0</div><div class="num-unit">MM</div><div class="num-label">Pota Çapı</div></div>
+      <div class="num-card fade-up"><div class="num-val" data-t="1050">0</div><div class="num-unit">°C</div><div class="num-label">Maks. Fırın Sıcaklığı</div></div>
+      <div class="num-card fade-up"><div class="num-val" data-t="12">0</div><div class="num-unit">TON / GÜN</div><div class="num-label">İşleme Kapasitesi</div></div>
+      <div class="num-card fade-up"><div class="num-val" data-t="3">0</div><div class="num-unit">ADET</div><div class="num-label">Kuyu Tipi Fırın</div></div>
+      <div class="num-card fade-up"><div class="num-val" data-t="1200">0</div><div class="num-unit">MM</div><div class="num-label">Pota Çapı</div></div>
     </div>
   </div>
 </section>
@@ -1101,15 +1069,15 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
     <h2 class="section-title fade-up">Hizmet Verdiğimiz Alanlar</h2>
     <p class="section-desc fade-up">Ağır sanayiden hassas mühendislik uygulamalarına, geniş yelpazede ısıl işlem çözümleri.</p>
     <div class="sectors-wrap">
-      <span class="sector-tag anim-scale" style="--i:0">Otomotiv</span>
-      <span class="sector-tag anim-scale" style="--i:1">Madencilik</span>
-      <span class="sector-tag anim-scale" style="--i:2">İnşaat Makinaları</span>
-      <span class="sector-tag anim-scale" style="--i:3">Hidrolik Kırıcılar</span>
-      <span class="sector-tag anim-scale" style="--i:4">Dişli & Mil İmalatı</span>
-      <span class="sector-tag anim-scale" style="--i:5">Savunma Sanayi</span>
-      <span class="sector-tag anim-scale" style="--i:6">Tarım Makinaları</span>
-      <span class="sector-tag anim-scale" style="--i:7">Enerji</span>
-      <span class="sector-tag anim-scale" style="--i:8">Genel Endüstri</span>
+      <span class="sector-tag fade-up">Otomotiv</span>
+      <span class="sector-tag fade-up">Madencilik</span>
+      <span class="sector-tag fade-up">İnşaat Makinaları</span>
+      <span class="sector-tag fade-up">Hidrolik Kırıcılar</span>
+      <span class="sector-tag fade-up">Dişli & Mil İmalatı</span>
+      <span class="sector-tag fade-up">Savunma Sanayi</span>
+      <span class="sector-tag fade-up">Tarım Makinaları</span>
+      <span class="sector-tag fade-up">Enerji</span>
+      <span class="sector-tag fade-up">Genel Endüstri</span>
     </div>
   </div>
 </section>
@@ -1139,47 +1107,47 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
     <div class="section-label fade-up">SSS</div>
     <h2 class="section-title fade-up">Sık Sorulan Sorular</h2>
     <div class="faq-list">
-      <details class="faq-item anim-drop" style="--i:0">
+      <details class="faq-item fade-up">
         <summary>Isıl işlem nedir?</summary>
         <p>Isıl işlem; metallerin mekanik özelliklerini iyileştirmek amacıyla kontrollü ısıtma ve soğutma döngülerine tabi tutulması işlemidir. Çelik parçalara sertlik, dayanıklılık ve yorulma direnci kazandırmak için uygulanır. Otomotiv, savunma, tarım ve iş makinesi sektörlerinde kritik parçaların üretiminde vazgeçilmezdir.</p>
       </details>
-      <details class="faq-item anim-drop" style="--i:1">
+      <details class="faq-item fade-up">
         <summary>Isıl işlem nasıl yapılır?</summary>
         <p>Parçanın belirli bir sıcaklığa ısıtılması (karbonlama için 900–1050°C), bu sıcaklıkta bekletilmesi ve ardından kontrollü biçimde söndürme banyosunda ya da havada soğutulmasıyla gerçekleştirilir. İşlem tipine göre meneviş (temperleme) aşaması da uygulanarak iç gerilimler giderilir.</p>
       </details>
-      <details class="faq-item anim-drop" style="--i:2">
+      <details  class="faq-item fade-up">
         <summary>Kaç çeşit ısıl işlem vardır?</summary>
         <p>Başlıca ısıl işlem türleri şunlardır: <strong>Karbonlama</strong> (sementasyon), <strong>Söndürme</strong> (su verme), <strong>Meneviş</strong> (temperleme), <strong>Normalizasyon</strong>, <strong>Gerilim giderme</strong> ve <strong>Tavlama</strong>. Kervan Isıl İşlem bu işlemlerin tamamını kuyu tipi fırın ve söndürme banyolarıyla gerçekleştirmektedir.</p>
       </details>
-      <details class="faq-item anim-drop" style="--i:3">
+      <details  class="faq-item fade-up">
         <summary>Isıl işlem ne kadar sürer?</summary>
         <p>Süre; parça boyutuna, çelik kalitesine ve uygulanan işlem türüne göre değişir. Karbonlama işlemi birkaç saatten 24 saate kadar sürebilirken, normalizasyon ve gerilim giderme işlemleri genellikle daha kısadır. Teklif aşamasında tahmini süre tarafınıza iletilir.</p>
       </details>
-      <details class="faq-item anim-drop" style="--i:4">
+      <details  class="faq-item fade-up">
         <summary>Hangi çelik kaliteleri işlenebilir?</summary>
         <p>Yapı çelikleri (S235, S355), ıslah çelikleri (42CrMo4, 34CrNiMo6), sementasyon çelikleri (16MnCr5, 20MnCr5), yay çelikleri ve takım çelikleri başta olmak üzere geniş bir çelik yelpazesi işlenebilir. Malzeme sertlik alabilirliği, hedef sertlik değeri ve parça geometrisine göre uygun proses birlikte planlanır.</p>
       </details>
-      <details class="faq-item anim-drop" style="--i:5">
+      <details  class="faq-item fade-up">
         <summary>Minimum / maksimum parça boyutu nedir?</summary>
         <p>Kuyu tipi fırınlarımızın pota çapı <strong>1200 mm</strong>'dir; uzun mil ve büyük döküm parçalar dahil geniş bir boyut aralığına hizmet veriyoruz. Parça ölçülerinizin uygunluğu için bizimle iletişime geçin.</p>
       </details>
-      <details class="faq-item anim-drop" style="--i:6">
+      <details  class="faq-item fade-up">
         <summary>Sertlik belgesi / raporu veriyor musunuz?</summary>
         <p>Evet. Talep üzerine Rockwell (HRC) veya Vickers (HV) yöntemiyle ölçüm yapılır ve ölçüm sonuçlarını, parti bilgisini ve hedef aralığı içeren bir sertlik raporu düzenlenir. Ölçüm noktaları teknik şartname veya müşteri spesifikasyonuna göre belirlenir.</p>
       </details>
-      <details class="faq-item anim-drop" style="--i:7">
+      <details  class="faq-item fade-up">
         <summary>Fiyatlandırma nasıl yapılıyor?</summary>
         <p>Fiyatlar; hizmet türüne, malzeme cinsine, parça ağırlığına ve boyutuna göre TL/kg bazında hesaplanır. Karbonlama 30–50 ₺/kg, söndürme 12–22 ₺/kg, meneviş 8–16 ₺/kg aralığındadır (KDV hariç, yaklaşık 2025 fiyatları). Kesin teklif için parça detaylarıyla iletişime geçin.</p>
       </details>
-      <details class="faq-item anim-drop" style="--i:8">
+      <details  class="faq-item fade-up">
         <summary>İş teslim süresi ne kadar?</summary>
         <p>Standart siparişlerde genellikle 2–5 iş günü içinde teslim sağlanır. Acil ve büyük hacimli işler için önceden bilgilendirmenizi öneririz; fırın programına göre öncelik planlaması yapılabilir. Tahmini süre, teklif aşamasında kesinleştirilir.</p>
       </details>
-      <details class="faq-item anim-drop" style="--i:9">
+      <details  class="faq-item fade-up">
         <summary>Isıl işlem sonrası parçada çarpılma / deformasyon olur mu?</summary>
         <p>Her ısıl işlemde bir miktar boyutsal değişim beklenebilir; özellikle söndürme işleminde ince kesitli veya asimetrik parçalarda bu risk artar. Doğru fırın yükleme düzeni, uygun söndürme hızı ve gerektiğinde meneviş ile deformasyon minimize edilir. Kritik toleranslı parçalar için önceden bilgi verilmesini öneririz.</p>
       </details>
-      <details class="faq-item anim-drop" style="--i:10">
+      <details  class="faq-item fade-up">
         <summary>Numune veya prototip parça işlenebilir mi?</summary>
         <p>Evet, tek parça veya küçük seri prototipler de kabul edilmektedir. Numune çalışması; doğru proses parametrelerinin belirlenmesi ve seri üretim öncesi kalite doğrulaması için faydalıdır. Detayları paylaşarak ön değerlendirme için bizimle iletişime geçebilirsiniz.</p>
       </details>
@@ -1193,7 +1161,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
     <div class="section-label fade-up">İletişim</div>
     <h2 class="section-title fade-up">Bize Ulaşın</h2>
     <div class="contact-layout">
-      <div class="contact-blocks anim-left" style="--i:0">
+      <div class="contact-blocks fade-up">
         <div class="c-block"><div class="c-block-label">Adres</div><div class="c-block-val">Sadun Atığ Cad. No: 112/A<br>Kartepe / Kocaeli</div></div>
         <div class="c-block"><div class="c-block-label">Telefon</div><div class="c-block-val"><a href="tel:+905316693734">+90 531 669 37 34</a></div></div>
 
@@ -1201,7 +1169,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
         <div class="c-block"><div class="c-block-label">Çalışma Saatleri</div><div class="c-block-val">Pazartesi — Cumartesi: 08:00 – 18:00</div></div>
         <div class="c-block"><div class="c-block-label">Instagram</div><div class="c-block-val"><a href="https://www.instagram.com/kervanmakina/" target="_blank" rel="noopener noreferrer">@kervanmakina</a></div></div>
       </div>
-      <div class="contact-cta-card anim-right" style="--i:1">
+      <div class="contact-cta-card fade-up">
         <h3 style="margin-bottom:20px">Teklif <span class="gradient">Alın</span></h3>
         <!-- Web3Forms: web3forms.com adresinden ücretsiz access key alıp aşağıya girin -->
         <form class="quote-form" id="quote-form">
@@ -1382,14 +1350,14 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
 
-    document.querySelectorAll('.fade-up, .anim-left, .anim-right, .anim-scale, .anim-drop').forEach(function(el) {
+    document.querySelectorAll('.fade-up').forEach(function(el) {
       if (!el.closest('.hero')) {
         io.observe(el);
       }
     });
   } else {
     // Fallback: show everything
-    document.querySelectorAll('.fade-up, .anim-left, .anim-right, .anim-scale, .anim-drop').forEach(function(el) {
+    document.querySelectorAll('.fade-up').forEach(function(el) {
       el.classList.add('vis');
     });
   }
@@ -1429,32 +1397,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // ── SCROLL LINKED ────────────────────────────────────────────────
+  // ── SCROLL PROGRESS BAR ──────────────────────────────────────────
   var scrollBar = document.getElementById('scroll-bar');
-  var procLineFill = document.getElementById('proc-line-fill');
-  var procSection = document.getElementById('surec');
-  var heroEl = document.querySelector('.hero');
-  var heroContentEl = heroEl ? heroEl.querySelector('.hero-content') : null;
-  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var ticking = false;
 
   function updateScroll() {
     var scrollY = window.scrollY;
     var docH = document.documentElement.scrollHeight - window.innerHeight;
     if (scrollBar) scrollBar.style.width = (docH > 0 ? (scrollY / docH * 100) : 0) + '%';
-    if (!reducedMotion) {
-      if (heroEl) heroEl.style.setProperty('--parallax-y', (-scrollY * 0.25) + 'px');
-      if (heroContentEl && heroEl) {
-        var progress = Math.min(1, scrollY / (heroEl.offsetHeight * 0.7));
-        heroContentEl.style.opacity = Math.max(0, 1 - progress * 1.2);
-        heroContentEl.style.transform = 'translateY(' + scrollY * 0.06 + 'px)';
-      }
-      if (procLineFill && procSection) {
-        var rect = procSection.getBoundingClientRect();
-        var p = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / rect.height));
-        procLineFill.style.transform = 'scaleX(' + p + ')';
-      }
-    }
     ticking = false;
   }
 
@@ -1623,7 +1573,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Safety: force everything visible after 3s
   setTimeout(function() {
-    document.querySelectorAll('.fade-up, .anim-left, .anim-right, .anim-scale, .anim-drop').forEach(function(el) {
+    document.querySelectorAll('.fade-up').forEach(function(el) {
       el.classList.add('vis');
     });
   }, 3000);
