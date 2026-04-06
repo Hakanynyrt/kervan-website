@@ -2,7 +2,7 @@
 // Cloudflare Workers + Static Assets
 // KURULUM: Settings → Variables and Secrets → ANTHROPIC_API_KEY = sk-ant-...
 
-var SYSTEM_PROMPT = 'Kervan Isıl İşlem sanal asistanısın. Türkçe, kısa ve teknik yaz.\n\nŞİRKET: Kocaeli/Kartepe | +90 531 669 37 34 | Pzt-Cmt 08-18 | kervanheat.com\n\nHİZMETLER: Karbonlama(850-950°C) · Söndürme(yağ/polimer) · Meneviş(150-650°C) · Normalizasyon · Gerilim Giderme · Sertlik Testi(HRC/HV)\n\nYAPILMAYAN: Galvaniz · Kaplama · Boya · Nitrürleme · İndüksiyon · CNC · Kaynak → "Tesisimizde yapılmıyor."\n\nFİYAT (TL/kg, KDV hariç, ~2025): Karbonlama 30-50 · Söndürme 12-22 · Meneviş 8-16 · Normalizasyon 10-20 · Gerilim Giderme 8-15 · Sertlik Testi 80-150/parça\nFiyat sorusu: malzeme cinsi + kg + max boyut(mm) + hizmet sor, aralık ver.\n\nACİL: "acil/hemen/bugün/yarın sabah/son dakika" → yanıt başına [ACIL] ekle.\n\nTEKNİK ÖZET: hizmet+malzeme+miktar bilgisi tamamlanınca VEYA kullanıcı isteyince şu formatı üret:\n[OZET]\nisim: \ntelefon: \neposta: \nhizmet: \nmalzeme: \nagirlik: \nboyut: \nadet: \nnot: \n[/OZET]\nÖzetle birlikte kısa onay mesajı yaz.\n\nGÖRSEL: Teknik resim yüklendiyse ölçü, malzeme ve uygun ısıl işlemi belirt.\nBilmiyorsan: uzmanlarımızı arayın. Mesai dışıysa belirt.';
+var SYSTEM_PROMPT = 'Kervan Isıl İşlem sanal asistanısın. Türkçe, kısa ve teknik yaz.\n\nŞİRKET: Kocaeli/Kartepe | +90 531 669 37 34 | Pzt-Cmt 08-18 | kervanheat.com\n\nHİZMETLER: Karbonlama(850-950°C) · Söndürme(yağ/polimer) · Meneviş(150-650°C) · Normalizasyon · Gerilim Giderme · Sertlik Testi(HRC/HV)\n\nYAPILMAYAN: Galvaniz · Kaplama · Boya · Nitrürleme · İndüksiyon · CNC · Kaynak → "Tesisimizde yapılmıyor."\n\nFİYAT (TL/kg, KDV hariç, ~2025): Karbonlama 30-50 · Söndürme 12-22 · Meneviş 8-16 · Normalizasyon 10-20 · Gerilim Giderme 8-15 · Sertlik Testi 80-150/parça\nFiyat sorusu: malzeme cinsi + kg + max boyut(mm) + hizmet sor, aralık ver.\n\nACİL: "acil/hemen/bugün/yarın sabah/son dakika" → yanıt başına [ACIL] ekle.\nİNSAN TALEBİ: "operatör/yetkili/siz/biri arasın/görüşmek" → yanıt başına [CAGRI] ekle.\n\nTEKNİK ÖZET: hizmet+malzeme+miktar bilgisi tamamlanınca VEYA kullanıcı isteyince şu formatı üret:\n[OZET]\nisim: \ntelefon: \neposta: \nhizmet: \nmalzeme: \nagirlik: \nboyut: \nadet: \nnot: \n[/OZET]\nÖzetle birlikte kısa onay mesajı yaz.\n\nGÖRSEL: Teknik resim yüklendiyse ölçü, malzeme ve uygun ısıl işlemi belirt.\nBilmiyorsan: uzmanlarımızı arayın. Mesai dışıysa belirt.';
 
 var CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -10,7 +10,7 @@ var CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type'
 };
 
-async function handleChat(request, env) {
+async function handleChat(request, env, ctx) {
   var jsonHeaders = Object.assign({ 'Content-Type': 'application/json' }, CORS_HEADERS);
 
   if (!env.ANTHROPIC_API_KEY) {
@@ -78,6 +78,9 @@ async function handleChat(request, env) {
   var apiData = await apiResponse.json();
   var text = (apiData.content && apiData.content[0] && apiData.content[0].text) ? apiData.content[0].text : '';
 
+  var cagri = text.startsWith('[CAGRI]');
+  if (cagri) text = text.slice(7).trim();
+
   var urgent = text.startsWith('[ACIL]');
   if (urgent) text = text.slice(6).trim();
 
@@ -97,7 +100,27 @@ async function handleChat(request, env) {
     });
   }
 
-  return new Response(JSON.stringify({ message: text, urgent: urgent, ozet: ozet }), { headers: jsonHeaders });
+  // Müşteri operatör istedi → e-posta bildirimi gönder (yanıtı beklemeden)
+  if (cagri) {
+    var summary = claudeMessages.slice(-6).map(function(m) {
+      var role = m.role === 'user' ? 'Müşteri' : 'Bot';
+      var content = typeof m.content === 'string' ? m.content : '[dosya]';
+      return role + ': ' + content;
+    }).join('\n');
+    ctx.waitUntil(fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_key: '8f55e1c5-b170-4414-9ceb-477cbf6fca58',
+        subject: '⚡ Chatbot — Müşteri Operatör İstiyor',
+        from_name: 'Kervan Chatbot',
+        email: 'chatbot@kervanheat.com',
+        message: summary
+      })
+    }));
+  }
+
+  return new Response(JSON.stringify({ message: text, urgent: urgent, ozet: ozet, cagri: cagri }), { headers: jsonHeaders });
 }
 
 export default {
@@ -109,7 +132,7 @@ export default {
         return new Response(null, { headers: CORS_HEADERS });
       }
       if (request.method === 'POST') {
-        return handleChat(request, env);
+        return handleChat(request, env, ctx);
       }
       return new Response('Method Not Allowed', { status: 405 });
     }
