@@ -1538,7 +1538,7 @@ document.addEventListener('DOMContentLoaded', function() {
       typingEl.remove();
       chatSend.disabled = false;
       if (res.error) {
-        appendMsg('bot', 'Bir hata oluştu, lütfen tekrar deneyin.');
+        appendMsg('bot', res.error);
         return;
       }
       chatHistory.push({ role: 'assistant', content: res.message });
