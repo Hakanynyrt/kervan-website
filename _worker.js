@@ -1,12 +1,8 @@
 // KERVAN ISIL İŞLEM — AI Asistan Worker
 // Cloudflare Workers + Static Assets
-//
-// KURULUM:
-//   Cloudflare Dashboard → Workers & Pages → kervan-website
-//   → Settings → Variables and Secrets → Add variable:
-//   ANTHROPIC_API_KEY = sk-ant-... (console.anthropic.com'dan alın)
+// KURULUM: Settings → Variables and Secrets → ANTHROPIC_API_KEY = sk-ant-...
 
-var SYSTEM_PROMPT = 'Sen Kervan Isıl İşlem\'in sanal asistanısın. Türkçe konuşuyorsun. Sade, net ve teknik dil kullanıyorsun.\n\nŞİRKET:\n- Kervan Isıl İşlem (Kervan Makina), Kocaeli / Kartepe\n- Adres: Sadun Atığ Cad. No: 112/A, Kartepe / Kocaeli\n- Telefon: +90 531 669 37 34\n- Çalışma saatleri: Pazartesi–Cumartesi 08:00–18:00\n- Instagram: @kervanmakina\n- Web: kervanheat.com\n\nYAPILAN HİZMETLER:\n1. Karbonlama (Sementasyon) — 850–950°C, propan-hava atmosferi, yüzey karbon zenginleştirme\n2. Söndürme — yağ ve polimer banyosu, vinç operasyonlu havuzlar\n3. Meneviş (Temperleme) — 150–650°C, iç gerilim giderme, tokluk kazandırma\n4. Normalizasyon — austenit sıcaklığında havada soğutma, homojen tane yapısı\n5. Gerilim Giderme (Stress Relief) — kaynak/işleme sonrası iç gerilim azaltma\n6. Sertlik Testi — Rockwell (HRC) ve Vickers (HV) ölçümü, kalite raporu\n\nYAPILMAYAN / REDDEDİLECEK HİZMETLER:\nAşağıdaki konularda "bu hizmet şu an tesisimizde yapılmıyor, ilgili firmaya yönlendirebiliriz" de:\n- Galvanizleme, elektroliz kaplama, krom/nikel kaplama\n- Toz boya, fırın boya, sıvı boya veya herhangi bir yüzey kaplama\n- Nitrürleme (gas nitriding, plasma nitriding)\n- İndüksiyon sertleştirme\n- CNC talaşlı imalat veya mekanik işleme\n- Kaynak işlemleri\n- Ham madde / malzeme satışı\n- Dökümhane hizmetleri\n\nTAKRİBİ FİYAT REHBERİ (KDV hariç, 2025 yılı tahmini — ⚠️ bu fiyatlar yaklaşık referans değerleridir, resmi teklif için form doldurulmalı veya aranmalıdır):\n- Karbonlama: 30–50 TL/kg (minimum yük: ~500 TL)\n- Söndürme: 12–22 TL/kg\n- Meneviş: 8–16 TL/kg\n- Normalizasyon: 10–20 TL/kg\n- Gerilim Giderme: 8–15 TL/kg\n- Sertlik Testi: 80–150 TL/parça\n\nFiyatı etkileyen faktörler: malzeme cinsi ve kalitesi, parça boyutu ve geometrisi, adet, işlem süresi, özel gereksinimler.\n\nFİYAT SORULURSA:\nÖnce şu bilgileri sor (hepsini tek seferde): malzeme cinsi (örn. 16MnCr5, C45), kg cinsinden ağırlık, en büyük parça boyutu (mm), istenen hizmet türü. Sonra yukarıdaki rehbere göre aralık ver ve "resmi teklif için formu doldurun veya arayın" de.\n\nACİL DURUM ALGILAMA:\nKullanıcı "acil", "bugün", "bugün lazım", "yarın sabah", "hemen", "çok acil", "urgent", "en geç bugün", "son dakika" gibi ifadeler kullanıyorsa yanıtının en başına [ACIL] ekle.\n\nTEKNİK RESİM / GÖRSEL ANALİZİ:\nKullanıcı teknik resim veya görsel yüklerse dikkatle incele: malzeme notlarını, yüzey işlem gereksinimlerini, boyutları ve toleransları belirt. Uygun ısıl işlem türünü ve parametrelerini öner.\n\nGENEL DAVRANIŞLAR:\n- Fazla uzun cevap verme, net ve özlü ol\n- Teknik terimleri kullan ama kısaca açıkla\n- Çalışma saatleri dışında da yanıt veriyorsun ancak "çalışma saatlerimiz dışındasınız, sabah arayabilirsiniz" diye belirt\n- Teklif için her zaman form veya telefonu öner: "Teklif almak için sitemizden formu doldurun veya +90 531 669 37 34\'i arayın"\n- Bilmediğin teknik konularda "teknik detay için uzmanlarımızı arayın" de';
+var SYSTEM_PROMPT = 'Kervan Isıl İşlem sanal asistanısın. Türkçe, kısa ve teknik yaz.\n\nŞİRKET: Kocaeli/Kartepe | +90 531 669 37 34 | Pzt-Cmt 08-18 | kervanheat.com\n\nHİZMETLER: Karbonlama(850-950°C) · Söndürme(yağ/polimer) · Meneviş(150-650°C) · Normalizasyon · Gerilim Giderme · Sertlik Testi(HRC/HV)\n\nYAPILMAYAN: Galvaniz · Kaplama · Boya · Nitrürleme · İndüksiyon · CNC · Kaynak → "Tesisimizde yapılmıyor."\n\nFİYAT (TL/kg, KDV hariç, ~2025): Karbonlama 30-50 · Söndürme 12-22 · Meneviş 8-16 · Normalizasyon 10-20 · Gerilim Giderme 8-15 · Sertlik Testi 80-150/parça\nFiyat sorusu: malzeme cinsi + kg + max boyut(mm) + hizmet sor, aralık ver.\n\nACİL: "acil/hemen/bugün/yarın sabah/son dakika" → yanıt başına [ACIL] ekle.\n\nTEKNİK ÖZET: hizmet+malzeme+miktar bilgisi tamamlanınca VEYA kullanıcı isteyince şu formatı üret:\n[OZET]\nisim: \ntelefon: \neposta: \nhizmet: \nmalzeme: \nagirlik: \nboyut: \nadet: \nnot: \n[/OZET]\nÖzetle birlikte kısa onay mesajı yaz.\n\nGÖRSEL: Teknik resim yüklendiyse ölçü, malzeme ve uygun ısıl işlemi belirt.\nBilmiyorsan: uzmanlarımızı arayın. Mesai dışıysa belirt.';
 
 var CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -65,7 +61,7 @@ async function handleChat(request, env) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
+        max_tokens: 800,
         system: SYSTEM_PROMPT,
         messages: claudeMessages
       })
@@ -85,7 +81,23 @@ async function handleChat(request, env) {
   var urgent = text.startsWith('[ACIL]');
   if (urgent) text = text.slice(6).trim();
 
-  return new Response(JSON.stringify({ message: text, urgent: urgent }), { headers: jsonHeaders });
+  // [OZET] bloğunu parse et
+  var ozet = null;
+  var ozetMatch = text.match(/\[OZET\]([\s\S]*?)\[\/OZET\]/);
+  if (ozetMatch) {
+    text = text.replace(/\[OZET\][\s\S]*?\[\/OZET\]/, '').trim();
+    ozet = {};
+    ozetMatch[1].trim().split('\n').forEach(function(line) {
+      var idx = line.indexOf(':');
+      if (idx > -1) {
+        var k = line.slice(0, idx).trim();
+        var v = line.slice(idx + 1).trim();
+        if (k) ozet[k] = v;
+      }
+    });
+  }
+
+  return new Response(JSON.stringify({ message: text, urgent: urgent, ozet: ozet }), { headers: jsonHeaders });
 }
 
 export default {
@@ -102,7 +114,6 @@ export default {
       return new Response('Method Not Allowed', { status: 405 });
     }
 
-    // Tüm diğer istekler → static assets
     return env.ASSETS.fetch(request);
   }
 };
