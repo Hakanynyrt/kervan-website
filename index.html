@@ -17,13 +17,17 @@
 <meta property="og:description" content="Kocaeli Kartepe'de endüstriyel ısıl işlem: karbonlama, söndürme, meneviş, normalizasyon. Kuyu fırın ve kontrollü söndürme ile çelik parçalara yüksek performans.">
 <meta property="og:locale" content="tr_TR">
 <meta property="og:site_name" content="Kervan Isıl İşlem">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://kervanheat.com/hero.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="KERVAN ISIL İŞLEM — Endüstriyel Isıl İşlem">
 <meta name="twitter:description" content="Kocaeli'de karbonlama, söndürme, meneviş ve normalizasyon. Endüstriyel ısıl işlemde 5+ yıl tecrübe.">
+<meta name="twitter:image" content="https://kervanheat.com/hero.jpg">
 <meta name="theme-color" content="#1E2028">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="favicon.svg">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -119,7 +123,7 @@
   --border-hover: rgba(255,255,255,0.16);
   --text-1: #F0F0F2;
   --text-2: #A0A0B8;
-  --text-3: #6A6A88;
+  --text-3: #8080A0;
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 24px;
@@ -631,6 +635,12 @@ nav.scrolled {
 .form-success svg { margin: 0 auto 16px; display: block; color: var(--brand); }
 .form-success strong { display: block; font-size: 18px; margin-bottom: 8px; }
 .form-success span { font-size: 14px; color: var(--text-2); }
+.form-error {
+  display: none; padding: 12px 16px; border-radius: var(--radius-sm);
+  background: rgba(220,38,38,0.12); border: 1px solid rgba(220,38,38,0.3);
+  color: #f87171; font-size: 13px; margin-top: 12px;
+}
+.form-error.show { display: block; }
 @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
 
 /* ═══ FAQ ═══ */
@@ -1099,6 +1109,18 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
         <summary>Isıl işlem ne kadar sürer?</summary>
         <p>Süre; parça boyutuna, çelik kalitesine ve uygulanan işlem türüne göre değişir. Karbonlama işlemi birkaç saatten 24 saate kadar sürebilirken, normalizasyon ve gerilim giderme işlemleri genellikle daha kısadır. Teklif aşamasında tahmini süre tarafınıza iletilir.</p>
       </details>
+      <details class="faq-item">
+        <summary>Hangi çelik kaliteleri işlenebilir?</summary>
+        <p>Yapı çelikleri (S235, S355), ıslah çelikleri (42CrMo4, 34CrNiMo6), sementasyon çelikleri (16MnCr5, 20MnCr5), yay çelikleri ve takım çelikleri başta olmak üzere geniş bir çelik yelpazesi işlenebilir. Malzeme sertlik alabilirliği, hedef sertlik değeri ve parça geometrisine göre uygun proses birlikte planlanır.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Minimum / maksimum parça boyutu nedir?</summary>
+        <p>Kuyu tipi fırınlarımız sayesinde uzun mil ve büyük döküm parçalar dahil oldukça geniş bir boyut aralığına hizmet veriyoruz. Azami fırın yüksekliği ve çapı için bilgi almak üzere bizimle iletişime geçin; parça ölçülerinize göre uygunluğu değerlendiririz.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Sertlik belgesi / raporu veriyor musunuz?</summary>
+        <p>Evet. Talep üzerine Rockwell (HRC) veya Vickers (HV) yöntemiyle ölçüm yapılır ve ölçüm sonuçlarını, parti bilgisini ve hedef aralığı içeren bir sertlik raporu düzenlenir. Ölçüm noktaları teknik şartname veya müşteri spesifikasyonuna göre belirlenir.</p>
+      </details>
     </div>
   </div>
 </section>
@@ -1134,9 +1156,15 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
               <input class="form-input" type="tel" id="qf-phone" name="phone" placeholder="5xx xxx xx xx" required>
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="qf-email">E-Posta *</label>
-            <input class="form-input" type="email" id="qf-email" name="email" placeholder="ornek@firma.com" required>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="qf-email">E-Posta *</label>
+              <input class="form-input" type="email" id="qf-email" name="email" placeholder="ornek@firma.com" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="qf-company">Firma</label>
+              <input class="form-input" type="text" id="qf-company" name="firma" placeholder="Firma Adı" autocomplete="organization">
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label" for="qf-service">Hizmet</label>
@@ -1165,6 +1193,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
           <strong>Talebiniz alındı!</strong>
           <span>En kısa sürede sizinle iletişime geçeceğiz.</span>
         </div>
+        <div class="form-error" id="form-error" role="alert"></div>
       </div>
     </div>
     <!-- iframe: embed; paylaşım linki https://maps.app.goo.gl/Jh3BTdVLzGRquCcw5 ile aynı konum -->
@@ -1187,8 +1216,11 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
     </div>
     <div class="chat-header-info">
       <div class="chat-header-name">Kervan Asistan</div>
-      <div class="chat-header-status">Çevrimiçi</div>
+      <div class="chat-header-status" id="chat-status">Çevrimiçi</div>
     </div>
+    <button class="chat-action-btn" id="chat-reset" aria-label="Sohbeti sıfırla" title="Sohbeti sıfırla" style="margin-left:auto;margin-right:4px">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+    </button>
     <button class="chat-header-close" id="chat-close" aria-label="Kapat">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>
@@ -1252,10 +1284,9 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 </a>
 
 <script>
-// EmailJS — autoresponder (katalog maili müşteriye)
-emailjs.init('uatVKfRZ9B22M-giX');
-
 document.addEventListener('DOMContentLoaded', function() {
+  // EmailJS — autoresponder (katalog maili müşteriye) — defer ile yüklendiği için burada init
+  if (typeof emailjs !== 'undefined') emailjs.init('uatVKfRZ9B22M-giX');
   // Nav scroll
   var nav = document.getElementById('nav');
   window.addEventListener('scroll', function() {
@@ -1440,9 +1471,29 @@ document.addEventListener('DOMContentLoaded', function() {
   // Teklif formu
   var quoteForm = document.getElementById('quote-form');
   var formSuccess = document.getElementById('form-success');
+  var formError = document.getElementById('form-error');
+
+  function showFormError(msg) {
+    if (!formError) return;
+    formError.textContent = msg;
+    formError.classList.add('show');
+    formError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  function hideFormError() {
+    if (formError) formError.classList.remove('show');
+  }
+
   if (quoteForm) {
     quoteForm.addEventListener('submit', function(e) {
       e.preventDefault();
+      hideFormError();
+      // U2: telefon doğrulama
+      var rawPhone = quoteForm.querySelector('#qf-phone').value.replace(/\D/g, '');
+      if (rawPhone.length < 10 || rawPhone.length > 11) {
+        showFormError('Geçerli bir telefon numarası girin (örn. 532 123 45 67).');
+        quoteForm.querySelector('#qf-phone').focus();
+        return;
+      }
       var btn = quoteForm.querySelector('button[type=submit]');
       btn.disabled = true;
       btn.textContent = 'Gönderiliyor…';
@@ -1452,22 +1503,24 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(function(res) {
           if (res.success) {
             // EmailJS: müşteriye otomatik katalog maili gönder
-            emailjs.send('service_pl9xwt8', 'template_iewzoib', {
-              name: data.get('name'),
-              to_email: data.get('email')
-            }).catch(function() {}); // silent fail — müşteriye mail gitsin gitmesin form başarılı
+            if (typeof emailjs !== 'undefined') {
+              emailjs.send('service_pl9xwt8', 'template_iewzoib', {
+                name: data.get('name'),
+                to_email: data.get('email')
+              }).catch(function() {}); // silent fail
+            }
             quoteForm.style.display = 'none';
             formSuccess.style.display = 'block';
           } else {
             btn.disabled = false;
             btn.innerHTML = 'Teklif Gönder <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>';
-            alert('Bir hata oluştu, lütfen tekrar deneyin.');
+            showFormError('Bir hata oluştu, lütfen tekrar deneyin.');
           }
         })
         .catch(function() {
           btn.disabled = false;
           btn.innerHTML = 'Teklif Gönder <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>';
-          alert('Bağlantı hatası, lütfen tekrar deneyin.');
+          showFormError('Bağlantı hatası, lütfen tekrar deneyin.');
         });
     });
   }
@@ -1483,6 +1536,8 @@ document.addEventListener('DOMContentLoaded', function() {
   var chatBtn = document.getElementById('chat-btn');
   var chatWindow = document.getElementById('chat-window');
   var chatClose = document.getElementById('chat-close');
+  var chatReset = document.getElementById('chat-reset');
+  var chatStatus = document.getElementById('chat-status');
   var chatMessages = document.getElementById('chat-messages');
   var chatInput = document.getElementById('chat-input');
   var chatSend = document.getElementById('chat-send');
@@ -1494,6 +1549,19 @@ document.addEventListener('DOMContentLoaded', function() {
   var chatHistory = [];       // [{role:'user'|'assistant', content:'...'}]
   var pendingFile = null;     // {data: base64, mediaType: 'image/jpeg'|'application/pdf'}
   var chatOpened = false;
+
+  // C2: mesai saati kontrolü (Türkiye UTC+3)
+  function updateChatStatus() {
+    var now = new Date();
+    var trHour = (now.getUTCHours() + 3) % 24;
+    var trDay = new Date(now.getTime() + 3 * 3600000).getUTCDay(); // 0=Paz...6=Cmt
+    var isWork = trDay >= 1 && trDay <= 6 && trHour >= 8 && trHour < 18;
+    if (chatStatus) {
+      chatStatus.textContent = isWork ? 'Çevrimiçi' : 'Mesai saati dışında';
+      chatStatus.style.color = isWork ? '' : '#f59e3f';
+    }
+  }
+  updateChatStatus();
 
   var WELCOME_MSG = 'Merhaba! Ben Kervan Isıl İşlem sanal asistanıyım. 🔥\n\nHizmetlerimiz, fiyat tahmini veya teknik sorularınız için buradayım. Teknik resim de yükleyebilirsiniz.';
 
@@ -1610,6 +1678,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
   chatBtn.addEventListener('click', toggleChat);
   chatClose.addEventListener('click', toggleChat);
+
+  // C1: sohbeti sıfırla
+  if (chatReset) {
+    chatReset.addEventListener('click', function() {
+      chatHistory = [];
+      pendingFile = null;
+      chatFileName.textContent = '';
+      chatFileName.classList.remove('show');
+      chatMessages.innerHTML = '';
+      chatUrgentBar.classList.remove('show');
+      updateChatStatus();
+      appendMsg('bot', WELCOME_MSG);
+      chatInput.focus();
+    });
+  }
 
   chatSend.addEventListener('click', sendMessage);
   chatInput.addEventListener('keydown', function(e) {

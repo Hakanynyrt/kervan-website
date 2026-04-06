@@ -7,8 +7,25 @@ var SYSTEM_PROMPT = 'Kervan Isıl İşlem sanal asistanısın. Türkçe, kısa v
 var CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type'
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Max-Age': '86400'
 };
+
+// C3: Türkiye saatini (UTC+3) sistem prompt'una ekle
+function buildSystemPrompt() {
+  var now = new Date();
+  var utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+  var trMs = utcMs + 3 * 3600000; // UTC+3
+  var tr = new Date(trMs);
+  var days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+  var day = tr.getDay(); // 0=Pazar … 6=Cumartesi
+  var h = tr.getHours();
+  var m = tr.getMinutes();
+  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+  var isWork = day >= 1 && day <= 6 && h >= 8 && h < 18;
+  var timeInfo = 'ŞU AN (Türkiye): ' + days[day] + ' ' + pad(h) + ':' + pad(m) + ' — ' + (isWork ? 'mesai saatindeyiz.' : 'mesai saati dışındayız (Pzt-Cmt 08-18). Mesai dışı olduğunu belirt.');
+  return SYSTEM_PROMPT + '\n\n' + timeInfo;
+}
 
 async function handleChat(request, env, ctx) {
   var jsonHeaders = Object.assign({ 'Content-Type': 'application/json' }, CORS_HEADERS);
@@ -62,7 +79,7 @@ async function handleChat(request, env, ctx) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 800,
-        system: SYSTEM_PROMPT,
+        system: buildSystemPrompt(),
         messages: claudeMessages
       })
     });
@@ -78,11 +95,10 @@ async function handleChat(request, env, ctx) {
   var apiData = await apiResponse.json();
   var text = (apiData.content && apiData.content[0] && apiData.content[0].text) ? apiData.content[0].text : '';
 
-  var cagri = text.startsWith('[CAGRI]');
-  if (cagri) text = text.slice(7).trim();
-
-  var urgent = text.startsWith('[ACIL]');
-  if (urgent) text = text.slice(6).trim();
+  // B1: regex ile her iki flag'i sıradan bağımsız yakala
+  var cagri = /\[CAGRI\]/.test(text);
+  var urgent = /\[ACIL\]/.test(text);
+  text = text.replace(/\[(CAGRI|ACIL)\]\s*/g, '').trim();
 
   // [OZET] bloğunu parse et
   var ozet = null;
@@ -93,11 +109,13 @@ async function handleChat(request, env, ctx) {
     ozetMatch[1].trim().split('\n').forEach(function(line) {
       var idx = line.indexOf(':');
       if (idx > -1) {
-        var k = line.slice(0, idx).trim();
+        // B2: anahtarı normalize et (küçük harf, sadece [a-z])
+        var k = line.slice(0, idx).trim().toLowerCase().replace(/[^a-z]/g, '');
         var v = line.slice(idx + 1).trim();
-        if (k) ozet[k] = v;
+        if (k && v) ozet[k] = v;
       }
     });
+    if (!Object.keys(ozet).length) ozet = null;
   }
 
   // Müşteri operatör istedi → e-posta bildirimi gönder (yanıtı beklemeden)
@@ -129,7 +147,7 @@ export default {
 
     if (url.pathname === '/chat') {
       if (request.method === 'OPTIONS') {
-        return new Response(null, { headers: CORS_HEADERS });
+        return new Response(null, { status: 204, headers: CORS_HEADERS });
       }
       if (request.method === 'POST') {
         return handleChat(request, env, ctx);
