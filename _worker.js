@@ -64,7 +64,7 @@ async function handleChat(request, env) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 1024,
         system: SYSTEM_PROMPT,
         messages: claudeMessages
@@ -75,7 +75,8 @@ async function handleChat(request, env) {
   }
 
   if (!apiResponse.ok) {
-    return new Response(JSON.stringify({ error: 'AI servisi geçici olarak yanıt vermiyor.' }), { status: 502, headers: jsonHeaders });
+    var errBody = await apiResponse.text();
+    return new Response(JSON.stringify({ error: 'AI servisi yanıt vermedi (' + apiResponse.status + '): ' + errBody.slice(0, 200) }), { status: 502, headers: jsonHeaders });
   }
 
   var apiData = await apiResponse.json();
