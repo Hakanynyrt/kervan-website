@@ -20,7 +20,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="KERVAN ISIL İŞLEM — Endüstriyel Isıl İşlem">
 <meta name="twitter:description" content="Kocaeli'de karbonlama, söndürme, meneviş ve normalizasyon. Endüstriyel ısıl işlemde 5+ yıl tecrübe.">
-<meta name="theme-color" content="#0C0C0E">
+<meta name="theme-color" content="#1E2028">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="favicon.svg">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -181,7 +181,7 @@ nav {
   transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 nav.scrolled {
-  background: rgba(12,12,14,0.85);
+  background: rgba(30,32,40,0.90);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
 }
@@ -246,7 +246,7 @@ nav.scrolled {
 .hamburger.on span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
 
 .mobile-overlay {
-  position: fixed; inset: 0; background: rgba(12,12,14,0.97);
+  position: fixed; inset: 0; background: rgba(30,32,40,0.98);
   backdrop-filter: blur(24px); z-index: 99;
   display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 28px;
   opacity: 0; pointer-events: none; transition: opacity 0.35s;
@@ -271,8 +271,8 @@ nav.scrolled {
   position: absolute; inset: 0;
   background: linear-gradient(
     105deg,
-    rgba(12,12,14,0.93) 0%,
-    rgba(12,12,14,0.80) 45%,
+    rgba(20,22,30,0.93) 0%,
+    rgba(20,22,30,0.80) 45%,
     rgba(12,12,14,0.45) 100%
   );
   z-index: 0;
@@ -370,31 +370,6 @@ nav.scrolled {
 .h-stat .h-num .accent { color: var(--brand); }
 .h-stat .h-label { font-size: 13px; color: var(--text-3); margin-top: 4px; font-weight: 500; }
 
-/* ═══ TRUST BAR ═══ */
-.trust-bar {
-  padding: 48px 0; border-bottom: 1px solid var(--border); overflow: hidden;
-}
-.trust-label {
-  text-align: center; font-size: 12px; font-weight: 600;
-  color: var(--text-3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 28px;
-}
-.trust-scroll {
-  display: flex; gap: 56px; align-items: center;
-  animation: scroll-left 25s linear infinite; width: max-content;
-}
-.trust-item {
-  font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase; color: var(--text-3);
-  white-space: nowrap; display: flex; align-items: center; gap: 12px;
-}
-.trust-item::before {
-  content: ''; width: 4px; height: 4px;
-  background: var(--brand); border-radius: 50%;
-}
-@keyframes scroll-left {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
 
 /* ═══ SECTION COMMON ═══ */
 .section { padding: 120px 0; }
@@ -696,6 +671,143 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 }
 .footer-right { font-size: 12px; color: var(--text-3); }
 
+/* ═══ CHATBOT ═══ */
+#chat-btn {
+  position: fixed; bottom: calc(88px + env(safe-area-inset-bottom,0px));
+  right: calc(20px + env(safe-area-inset-right,0px)); z-index: 98;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--brand); color: #fff; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(232,120,26,0.45), 0 2px 12px rgba(0,0,0,0.25);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+#chat-btn:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(232,120,26,0.55); }
+#chat-btn svg { width: 26px; height: 26px; flex-shrink: 0; }
+#chat-btn .chat-badge {
+  position: absolute; top: -2px; right: -2px; width: 14px; height: 14px;
+  background: #ef4444; border-radius: 50%; border: 2px solid var(--bg-0);
+  display: none;
+}
+#chat-btn.has-notif .chat-badge { display: block; }
+
+#chat-window {
+  position: fixed; bottom: calc(156px + env(safe-area-inset-bottom,0px));
+  right: calc(20px + env(safe-area-inset-right,0px)); z-index: 99;
+  width: 360px; max-width: calc(100vw - 32px);
+  height: 520px; max-height: calc(100vh - 180px);
+  background: var(--bg-1); border: 1px solid var(--border-hover);
+  border-radius: var(--radius-xl); box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  display: flex; flex-direction: column; overflow: hidden;
+  opacity: 0; pointer-events: none; transform: translateY(16px) scale(0.97);
+  transition: opacity 0.3s cubic-bezier(0.22,1,0.36,1), transform 0.3s cubic-bezier(0.22,1,0.36,1);
+}
+#chat-window.open { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
+
+.chat-header {
+  padding: 16px 20px; background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.chat-header-avatar {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--brand-dim);
+  border: 2px solid var(--brand); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.chat-header-avatar svg { width: 18px; height: 18px; stroke: var(--brand); fill: none; stroke-width: 2; }
+.chat-header-info { flex: 1; min-width: 0; }
+.chat-header-name { font-family: 'Space Grotesk',sans-serif; font-size: 14px; font-weight: 700; color: var(--text-1); }
+.chat-header-status { font-size: 11px; color: #4ade80; display: flex; align-items: center; gap: 5px; }
+.chat-header-status::before { content: ''; width: 6px; height: 6px; background: #4ade80; border-radius: 50%; flex-shrink: 0; }
+.chat-header-close {
+  width: 32px; height: 32px; border: none; border-radius: var(--radius-sm);
+  background: var(--bg-3); color: var(--text-2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+.chat-header-close:hover { background: var(--bg-card); color: var(--text-1); }
+.chat-header-close svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+#chat-urgent-bar {
+  background: rgba(239,68,68,0.12); border-bottom: 1px solid rgba(239,68,68,0.25);
+  padding: 10px 16px; display: none; align-items: center; gap: 10px; flex-shrink: 0;
+}
+#chat-urgent-bar.show { display: flex; }
+.urgent-text { font-size: 12px; color: #fca5a5; flex: 1; line-height: 1.4; }
+.urgent-call-btn {
+  padding: 6px 14px; background: #ef4444; color: #fff; border: none; border-radius: 100px;
+  font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+  transition: background 0.2s;
+}
+.urgent-call-btn:hover { background: #dc2626; }
+
+#chat-messages {
+  flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+  scroll-behavior: smooth;
+}
+#chat-messages::-webkit-scrollbar { width: 4px; }
+#chat-messages::-webkit-scrollbar-track { background: transparent; }
+#chat-messages::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 2px; }
+
+.chat-msg { display: flex; gap: 8px; max-width: 85%; }
+.chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.chat-msg.bot { align-self: flex-start; }
+.chat-bubble {
+  padding: 10px 14px; border-radius: 16px; font-size: 13px; line-height: 1.55;
+  word-break: break-word;
+}
+.chat-msg.user .chat-bubble { background: var(--brand); color: #fff; border-bottom-right-radius: 4px; }
+.chat-msg.bot .chat-bubble {
+  background: var(--bg-3); color: var(--text-1); border-bottom-left-radius: 4px;
+  border: 1px solid var(--border);
+}
+.chat-file-preview {
+  margin-top: 6px; padding: 6px 10px; background: rgba(255,255,255,0.08);
+  border-radius: 8px; font-size: 11px; color: rgba(255,255,255,0.7);
+  display: flex; align-items: center; gap: 6px;
+}
+.chat-file-preview svg { width: 14px; height: 14px; flex-shrink: 0; }
+.chat-typing { display: flex; gap: 4px; align-items: center; padding: 12px 14px; }
+.chat-typing span {
+  width: 7px; height: 7px; background: var(--text-3); border-radius: 50%;
+  animation: typing-bounce 1.2s ease-in-out infinite;
+}
+.chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+.chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+.chat-footer { padding: 12px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.chat-input-row { display: flex; gap: 8px; align-items: flex-end; }
+#chat-input {
+  flex: 1; background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 10px 14px;
+  font-family: 'Plus Jakarta Sans',sans-serif; font-size: 13px; color: var(--text-1);
+  outline: none; resize: none; min-height: 40px; max-height: 100px; line-height: 1.5;
+  transition: border-color 0.2s;
+}
+#chat-input::placeholder { color: var(--text-3); }
+#chat-input:focus { border-color: var(--brand); }
+.chat-action-btn {
+  width: 38px; height: 38px; border: none; border-radius: var(--radius-sm);
+  background: var(--bg-3); color: var(--text-2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+.chat-action-btn:hover { background: var(--bg-card); color: var(--text-1); }
+.chat-action-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; }
+#chat-send {
+  background: var(--brand); color: #fff; border-radius: var(--radius-md);
+}
+#chat-send:hover { background: var(--brand-light); }
+#chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+.chat-file-name {
+  font-size: 11px; color: var(--brand); padding: 4px 0 0 2px; display: none;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;
+}
+.chat-file-name.show { display: block; }
+
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 1024px) {
   .services-grid { grid-template-columns: repeat(2,1fr); }
@@ -746,9 +858,6 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
     </a>
     <ul class="nav-links">
       <li><a href="#hizmetler">Hizmetler</a></li>
-      <li><a href="#surec">Süreç</a></li>
-      <li><a href="#kapasite">Kapasite</a></li>
-      <li><a href="#sektorler">Sektörler</a></li>
       <li><a href="#galeri">Galeri</a></li>
       <li><a href="#sss">SSS</a></li>
       <li><a href="/katalog">Katalog</a></li>
@@ -761,9 +870,6 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 </nav>
 <div class="mobile-overlay" id="mob">
   <a href="#hizmetler">Hizmetler</a>
-  <a href="#surec">Süreç</a>
-  <a href="#kapasite">Kapasite</a>
-  <a href="#sektorler">Sektörler</a>
   <a href="#galeri">Galeri</a>
   <a href="#sss">SSS</a>
   <a href="/katalog">Katalog</a>
@@ -808,20 +914,6 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
   </div>
 </section>
 
-<!-- TRUST -->
-<div class="trust-bar">
-  <div class="trust-label">Hizmet Verdiğimiz Sektörler</div>
-  <div class="trust-scroll">
-    <span class="trust-item">Otomotiv</span><span class="trust-item">Madencilik</span>
-    <span class="trust-item">İnşaat Makinaları</span><span class="trust-item">Hidrolik Kırıcılar</span>
-    <span class="trust-item">Savunma Sanayi</span><span class="trust-item">Dişli & Mil</span>
-    <span class="trust-item">Enerji</span><span class="trust-item">Tarım Makinaları</span>
-    <span class="trust-item">Otomotiv</span><span class="trust-item">Madencilik</span>
-    <span class="trust-item">İnşaat Makinaları</span><span class="trust-item">Hidrolik Kırıcılar</span>
-    <span class="trust-item">Savunma Sanayi</span><span class="trust-item">Dişli & Mil</span>
-    <span class="trust-item">Enerji</span><span class="trust-item">Tarım Makinaları</span>
-  </div>
-</div>
 
 <!-- SERVICES -->
 <section class="section" id="hizmetler">
@@ -1036,6 +1128,48 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
     </div>
   </div>
 </section>
+
+<!-- CHATBOT -->
+<button id="chat-btn" aria-label="Asistan ile konuş" title="Kervan Asistan">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+  <span class="chat-badge" aria-hidden="true"></span>
+</button>
+
+<div id="chat-window" role="dialog" aria-label="Kervan Asistan" aria-hidden="true">
+  <div class="chat-header">
+    <div class="chat-header-avatar" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 100 10A5 5 0 0012 2zM4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    </div>
+    <div class="chat-header-info">
+      <div class="chat-header-name">Kervan Asistan</div>
+      <div class="chat-header-status">Çevrimiçi</div>
+    </div>
+    <button class="chat-header-close" id="chat-close" aria-label="Kapat">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div id="chat-urgent-bar" role="alert">
+    <span class="urgent-text">Acil talep algılandı. Sizi hemen aramamızı ister misiniz?</span>
+    <a href="tel:+905316693734" class="urgent-call-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.07 1.17 2 2 0 012.06 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      Şimdi Ara
+    </a>
+  </div>
+  <div id="chat-messages" role="log" aria-live="polite"></div>
+  <div class="chat-footer">
+    <input type="file" id="chat-file-input" accept="image/*,.pdf" style="display:none" aria-label="Teknik resim yükle">
+    <div class="chat-file-name" id="chat-file-name"></div>
+    <div class="chat-input-row">
+      <button class="chat-action-btn" id="chat-attach" aria-label="Teknik resim veya PDF yükle" title="Teknik resim yükle">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+      </button>
+      <textarea id="chat-input" placeholder="Sorunuzu yazın…" rows="1" aria-label="Mesajınızı yazın"></textarea>
+      <button class="chat-action-btn" id="chat-send" aria-label="Gönder">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- FOOTER -->
 <footer>
@@ -1299,6 +1433,178 @@ document.addEventListener('DOMContentLoaded', function() {
       el.classList.add('vis');
     });
   }, 3000);
+
+  // ── CHATBOT ──────────────────────────────────────────────────────────────
+  var chatBtn = document.getElementById('chat-btn');
+  var chatWindow = document.getElementById('chat-window');
+  var chatClose = document.getElementById('chat-close');
+  var chatMessages = document.getElementById('chat-messages');
+  var chatInput = document.getElementById('chat-input');
+  var chatSend = document.getElementById('chat-send');
+  var chatAttach = document.getElementById('chat-attach');
+  var chatFileInput = document.getElementById('chat-file-input');
+  var chatFileName = document.getElementById('chat-file-name');
+  var chatUrgentBar = document.getElementById('chat-urgent-bar');
+
+  var chatHistory = [];       // [{role:'user'|'assistant', content:'...'}]
+  var pendingFile = null;     // {data: base64, mediaType: 'image/jpeg'|'application/pdf'}
+  var chatOpened = false;
+
+  var WELCOME_MSG = 'Merhaba! Ben Kervan Isıl İşlem sanal asistanıyım. 🔥\n\nHizmetlerimiz, fiyat tahmini veya teknik sorularınız için buradayım. Teknik resim de yükleyebilirsiniz.';
+
+  function toggleChat() {
+    var isOpen = chatWindow.classList.contains('open');
+    if (isOpen) {
+      chatWindow.classList.remove('open');
+      chatWindow.setAttribute('aria-hidden', 'true');
+    } else {
+      chatWindow.classList.add('open');
+      chatWindow.setAttribute('aria-hidden', 'false');
+      chatBtn.classList.remove('has-notif');
+      if (!chatOpened) {
+        chatOpened = true;
+        appendMsg('bot', WELCOME_MSG);
+      }
+      chatInput.focus();
+    }
+  }
+
+  function appendMsg(role, text, fileInfo) {
+    var wrap = document.createElement('div');
+    wrap.className = 'chat-msg ' + role;
+
+    var bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    // Simple markdown-ish: bold (**text**), line breaks
+    bubble.innerHTML = text
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\n/g,'<br>');
+
+    if (fileInfo) {
+      var fp = document.createElement('div');
+      fp.className = 'chat-file-preview';
+      fp.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' + fileInfo;
+      bubble.appendChild(fp);
+    }
+
+    wrap.appendChild(bubble);
+    chatMessages.appendChild(wrap);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return wrap;
+  }
+
+  function appendTyping() {
+    var wrap = document.createElement('div');
+    wrap.className = 'chat-msg bot';
+    var bubble = document.createElement('div');
+    bubble.className = 'chat-bubble chat-typing';
+    bubble.innerHTML = '<span></span><span></span><span></span>';
+    wrap.appendChild(bubble);
+    chatMessages.appendChild(wrap);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return wrap;
+  }
+
+  function sendMessage() {
+    var text = chatInput.value.trim();
+    if (!text && !pendingFile) return;
+    if (chatSend.disabled) return;
+
+    var displayText = text || '(Teknik resim gönderildi)';
+    var fileLabel = pendingFile ? pendingFile.name : null;
+    appendMsg('user', displayText, fileLabel);
+
+    chatHistory.push({ role: 'user', content: text || 'Bu teknik resmi inceleyebilir misin?' });
+
+    chatInput.value = '';
+    chatInput.style.height = '';
+    chatSend.disabled = true;
+
+    var fileToSend = pendingFile ? { data: pendingFile.data, mediaType: pendingFile.mediaType } : null;
+    pendingFile = null;
+    chatFileName.textContent = '';
+    chatFileName.classList.remove('show');
+
+    var typingEl = appendTyping();
+
+    fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: chatHistory, file: fileToSend })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      typingEl.remove();
+      chatSend.disabled = false;
+      if (res.error) {
+        appendMsg('bot', 'Bir hata oluştu, lütfen tekrar deneyin.');
+        return;
+      }
+      chatHistory.push({ role: 'assistant', content: res.message });
+      appendMsg('bot', res.message);
+      if (res.urgent) {
+        chatUrgentBar.classList.add('show');
+      }
+      if (!chatWindow.classList.contains('open')) {
+        chatBtn.classList.add('has-notif');
+      }
+    })
+    .catch(function() {
+      typingEl.remove();
+      chatSend.disabled = false;
+      appendMsg('bot', 'Bağlantı hatası. İnternet bağlantınızı kontrol edin.');
+    });
+  }
+
+  chatBtn.addEventListener('click', toggleChat);
+  chatClose.addEventListener('click', toggleChat);
+
+  chatSend.addEventListener('click', sendMessage);
+  chatInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+  chatInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+  });
+
+  chatAttach.addEventListener('click', function() { chatFileInput.click(); });
+  chatFileInput.addEventListener('change', function() {
+    var file = chatFileInput.files[0];
+    if (!file) return;
+    var maxMB = 5;
+    if (file.size > maxMB * 1024 * 1024) {
+      alert('Dosya boyutu en fazla ' + maxMB + 'MB olabilir.');
+      chatFileInput.value = '';
+      return;
+    }
+    var allowed = ['image/jpeg','image/png','image/gif','image/webp','application/pdf'];
+    if (allowed.indexOf(file.type) === -1) {
+      alert('Desteklenen formatlar: JPG, PNG, GIF, WEBP, PDF');
+      chatFileInput.value = '';
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var dataUrl = e.target.result;
+      var base64 = dataUrl.split(',')[1];
+      pendingFile = { data: base64, mediaType: file.type, name: file.name };
+      chatFileName.textContent = '📎 ' + file.name;
+      chatFileName.classList.add('show');
+    };
+    reader.readAsDataURL(file);
+    chatFileInput.value = '';
+  });
+
+  // Escape key closes chat
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && chatWindow.classList.contains('open')) toggleChat();
+  });
+  // ── /CHATBOT ─────────────────────────────────────────────────────────────
 });
 </script>
 </body>
