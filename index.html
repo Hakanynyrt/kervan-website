@@ -1132,11 +1132,9 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 
 <!-- HERO -->
 <section class="hero">
-  <!-- Scroll-controlled video: video.mp4 hazır olunca source etiketini açın -->
-  <video id="hero-video" class="hero-video" muted playsinline preload="auto">
+  <video id="hero-video" class="hero-video" autoplay muted loop playsinline preload="auto">
     <source src="video.mp4" type="video/mp4">
   </video>
-  <!-- Gerçek video yokken gösterilir, video yüklenince JS gizler -->
   <div class="hero-placeholder" id="hero-placeholder" aria-hidden="true"></div>
   <div class="hero-sparks" aria-hidden="true">
     <span class="hero-spark" style="--sx:6%;--sy:78%;--sd:8s;--sdelay:0s;--dx:12px;--dy:-48px;--dx2:-8px;--dy2:-100px"></span>
@@ -1598,25 +1596,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // ── HERO VIDEO SCROLL CONTROL ────────────────────────────────────
+  // ── HERO VIDEO ───────────────────────────────────────────────────
   var heroVideo = document.getElementById('hero-video');
-  var heroPlaceholder = document.getElementById('hero-placeholder');
   if (heroVideo) {
-    heroVideo.addEventListener('loadedmetadata', function() {
-      heroVideo.classList.add('loaded');
-    });
     heroVideo.addEventListener('canplay', function() {
       heroVideo.classList.add('loaded');
     });
-    function syncVideoToScroll() {
-      var heroEl = document.querySelector('.hero');
-      var heroH = heroEl ? heroEl.offsetHeight : window.innerHeight;
-      var progress = Math.min(Math.max(window.scrollY / heroH, 0), 1);
-      if (heroVideo.duration) heroVideo.currentTime = progress * heroVideo.duration;
-    }
-    window.addEventListener('scroll', function() {
-      if (!prefersReducedMotion) syncVideoToScroll();
-    }, { passive: true });
+    // Zaten yüklüyse hemen göster
+    if (heroVideo.readyState >= 3) heroVideo.classList.add('loaded');
   }
 
   // ── SCROLL PROGRESS BAR ──────────────────────────────────────────
