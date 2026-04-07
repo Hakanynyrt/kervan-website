@@ -603,7 +603,7 @@ nav.scrolled {
 }
 .contact-layout {
   display: grid; grid-template-columns: 1fr 1fr; gap: 64px;
-  margin-top: 56px; position: relative; z-index: 2;
+  position: relative; z-index: 2;
 }
 .contact-blocks { display: flex; flex-direction: column; gap: 28px; }
 .c-block-label {
@@ -1207,10 +1207,12 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 <!-- CONTACT -->
 <section class="section contact-section" id="iletisim">
   <div class="container">
-    <div class="section-label fade-up">İletişim</div>
-    <h2 class="section-title fade-up">Bize Ulaşın</h2>
     <div class="contact-layout">
       <div class="contact-blocks fade-up">
+        <div>
+          <div class="section-label" style="margin-bottom:12px">İletişim</div>
+          <h2 class="section-title" style="margin-bottom:32px">Bize Ulaşın</h2>
+        </div>
         <div class="c-block"><div class="c-block-label">Adres</div><div class="c-block-val">Sadun Atığ Cad. No: 112/A<br>Kartepe / Kocaeli</div></div>
         <div class="c-block"><div class="c-block-label">Telefon</div><div class="c-block-val"><a href="tel:+905316693734">+90 531 669 37 34</a></div></div>
 
