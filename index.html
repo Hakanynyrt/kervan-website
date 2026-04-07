@@ -1619,25 +1619,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }, { passive: true });
   }
 
-  // ── SCROLL PROGRESS BAR + HERO PARALLAX ─────────────────────────
+  // ── SCROLL PROGRESS BAR ──────────────────────────────────────────
   var scrollBar = document.getElementById('scroll-bar');
-  var heroContent = document.querySelector('.hero-content');
-  var heroSection = document.querySelector('.hero');
   var ticking = false;
 
   function updateScroll() {
     var scrollY = window.scrollY;
     var docH = document.documentElement.scrollHeight - window.innerHeight;
     if (scrollBar) scrollBar.style.width = (docH > 0 ? (scrollY / docH * 100) : 0) + '%';
-
-    // Hero içerik parallax — yazılar yukarı kayıp solar
-    if (heroContent && !prefersReducedMotion) {
-      var heroH = heroSection ? heroSection.offsetHeight : window.innerHeight;
-      var p = Math.min(scrollY / heroH, 1);
-      heroContent.style.transform = 'translateY(' + (-scrollY * 0.28) + 'px)';
-      heroContent.style.opacity = Math.max(1 - p * 1.6, 0);
-    }
-
     ticking = false;
   }
 
