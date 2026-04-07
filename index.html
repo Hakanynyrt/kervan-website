@@ -478,24 +478,32 @@ nav.scrolled {
   background: rgba(255,255,255,0.09); transform: translateY(-2px);
 }
 .hero-stats {
-  display: flex; gap: 48px; margin-top: 72px;
-  padding-top: 32px; border-top: 1px solid var(--border);
+  display: flex; gap: 0; margin-top: 64px;
 }
+.h-stat {
+  padding: 18px 28px; border-left: 1px solid rgba(232,120,26,0.2);
+}
+.h-stat:first-child { padding-left: 0; border-left: none; }
 .h-stat .h-num {
   font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', Arial, sans-serif; font-size: 34px; font-weight: 800; letter-spacing: -1.5px;
 }
 .h-stat .h-num .accent { color: var(--brand); }
-.h-stat .h-label { font-size: 12px; color: var(--text-3); margin-top: 5px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; }
+.h-stat .h-label { font-size: 10px; color: var(--text-3); margin-top: 6px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; font-family: 'IBM Plex Mono', monospace; }
 
 
 /* ═══ SECTION COMMON ═══ */
 .section { padding: 120px 0; }
 @media (max-width: 768px) { .section { padding: 80px 0; } }
 .section-label {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 6px 14px; background: var(--brand-dim); border-radius: 100px;
-  font-family: 'IBM Plex Mono', monospace; font-size: 12px;
-  font-weight: 500; color: var(--brand); letter-spacing: 0.5px; margin-bottom: 20px;
+  display: inline-flex; align-items: center; gap: 14px;
+  padding: 0; background: none; border-radius: 0;
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  font-weight: 500; color: var(--brand); letter-spacing: 3px;
+  margin-bottom: 24px; text-transform: uppercase;
+}
+.section-label::before {
+  content: ''; display: block; width: 32px; height: 1px;
+  background: var(--brand); flex-shrink: 0;
 }
 .section-title {
   font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', Arial, sans-serif; font-weight: 800;
@@ -504,8 +512,42 @@ nav.scrolled {
 }
 .section-desc { font-size: 18px; color: var(--text-2); max-width: 560px; line-height: 1.72; letter-spacing: -0.01em; }
 
+/* ═══ TEMP SCALE ═══ */
+.temp-scale {
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  background: var(--bg-0); overflow: hidden;
+}
+.temp-scale-inner {
+  max-width: 1200px; margin: 0 auto; padding: 20px 32px;
+  display: flex; align-items: center; gap: 0;
+  overflow-x: auto; scrollbar-width: none;
+}
+.temp-scale-inner::-webkit-scrollbar { display: none; }
+.ts-item {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  flex-shrink: 0; min-width: 88px; text-align: center;
+}
+.ts-num {
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500;
+  color: var(--text-3); line-height: 1; transition: color 0.3s;
+}
+.ts-item--hot .ts-num { color: var(--brand); }
+.ts-label { font-size: 9px; color: var(--text-3); letter-spacing: 0.8px; text-transform: uppercase; opacity: 0.6; }
+.ts-line {
+  flex: 1; height: 1px; min-width: 20px;
+  background: linear-gradient(90deg, rgba(232,120,26,0.15), rgba(232,120,26,0.05));
+}
+@media (max-width: 768px) { .temp-scale-inner { padding: 16px 20px; } }
+
 /* ═══ SERVICES ═══ */
 .services-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 56px; }
+@media (min-width: 769px) {
+  .services-grid .svc-card:first-child { grid-column: span 2; }
+  .services-grid .svc-card:first-child h3 { font-size: 22px; margin-bottom: 14px; }
+  .services-grid .svc-card:first-child p { font-size: 16px; line-height: 1.75; max-width: 460px; }
+  .services-grid .svc-card:first-child .svc-icon { width: 60px; height: 60px; margin-bottom: 28px; }
+  .services-grid .svc-card:first-child .svc-icon svg { width: 26px; height: 26px; }
+}
 .svc-card {
   background: rgba(255,255,255,0.028);
   border: 1px solid rgba(232,120,26,0.22);
@@ -623,9 +665,11 @@ nav.scrolled {
 .proc-step { background: var(--bg-1); padding: 40px 28px; transition: background 0.35s, transform 0.35s cubic-bezier(0.22,1,0.36,1); }
 .proc-step:hover { background: var(--bg-2); }
 .proc-num {
-  font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500;
-  color: var(--brand); letter-spacing: 1px; margin-bottom: 16px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 40px; font-weight: 700;
+  color: rgba(232,120,26,0.14); letter-spacing: -2px; margin-bottom: 12px;
+  line-height: 1; transition: color 0.35s;
 }
+.proc-step:hover .proc-num { color: rgba(232,120,26,0.38); }
 .proc-step h4 { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', Arial, sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 10px; }
 .proc-step p { font-size: 13px; color: var(--text-2); line-height: 1.6; }
 
@@ -643,8 +687,8 @@ nav.scrolled {
   transition: opacity 0.4s;
 }
 .num-card:hover { border-color: rgba(255,255,255,0.09); transform: translateY(-4px); box-shadow: 0 20px 56px rgba(0,0,0,0.4); }
-.num-val { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', Arial, sans-serif; font-size: 58px; font-weight: 800; line-height: 1; letter-spacing: -3px; }
-.num-val .u { color: var(--brand); font-size: 28px; letter-spacing: -1px; }
+.num-val { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', Arial, sans-serif; font-size: 68px; font-weight: 800; line-height: 1; letter-spacing: -4px; }
+.num-val .u { color: var(--brand); font-size: 30px; letter-spacing: -1px; vertical-align: super; font-size: 36px; }
 .num-unit { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--brand); margin-top: 10px; letter-spacing: 1.5px; text-transform: uppercase; }
 .num-label { font-size: 13px; color: var(--text-3); margin-top: 6px; font-weight: 500; letter-spacing: -0.01em; }
 
@@ -1209,6 +1253,25 @@ footer { padding: 48px 0; border-top: 1px solid var(--border); background: rgba(
   </div>
 </section>
 
+
+<!-- TEMP SCALE -->
+<div class="temp-scale" aria-hidden="true">
+  <div class="temp-scale-inner">
+    <div class="ts-item"><div class="ts-num">150°C</div><div class="ts-label">Meneviş Alt</div></div>
+    <div class="ts-line"></div>
+    <div class="ts-item"><div class="ts-num">300°C</div><div class="ts-label">Orta Meneviş</div></div>
+    <div class="ts-line"></div>
+    <div class="ts-item"><div class="ts-num">650°C</div><div class="ts-label">Yüksek Meneviş</div></div>
+    <div class="ts-line"></div>
+    <div class="ts-item"><div class="ts-num">780°C</div><div class="ts-label">Ön Isıtma</div></div>
+    <div class="ts-line"></div>
+    <div class="ts-item"><div class="ts-num">850°C</div><div class="ts-label">Sertleştirme</div></div>
+    <div class="ts-line"></div>
+    <div class="ts-item"><div class="ts-num">950°C</div><div class="ts-label">Karbonlama</div></div>
+    <div class="ts-line"></div>
+    <div class="ts-item ts-item--hot"><div class="ts-num">1050°C</div><div class="ts-label">Maks. Sıcaklık</div></div>
+  </div>
+</div>
 
 <!-- SERVICES -->
 <section class="section" id="hizmetler">
