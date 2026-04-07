@@ -13,3 +13,8 @@
 
 /hero.jpg
   Cache-Control: public, max-age=604800
+
+/video.mp4
+  Content-Type: video/mp4
+  Cache-Control: public, max-age=604800
+  Accept-Ranges: bytes

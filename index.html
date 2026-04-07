@@ -344,10 +344,7 @@ nav.scrolled {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover; z-index: 1;
-  opacity: 0;
-  transition: opacity 0.8s ease;
 }
-.hero-video.loaded { opacity: 1; }
 .hero-placeholder {
   position: absolute; inset: 0; z-index: 0;
   background:
@@ -1596,15 +1593,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // ── HERO VIDEO ───────────────────────────────────────────────────
-  var heroVideo = document.getElementById('hero-video');
-  if (heroVideo) {
-    heroVideo.addEventListener('canplay', function() {
-      heroVideo.classList.add('loaded');
-    });
-    // Zaten yüklüyse hemen göster
-    if (heroVideo.readyState >= 3) heroVideo.classList.add('loaded');
-  }
 
   // ── SCROLL PROGRESS BAR ──────────────────────────────────────────
   var scrollBar = document.getElementById('scroll-bar');
