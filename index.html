@@ -1054,23 +1054,102 @@ footer { padding: 48px 0; border-top: 1px solid var(--border); background: rgba(
   .nav-links { display: none; }
   .hamburger { display: flex; }
   .nav-inner { padding: 0 20px; }
-  .hero { min-height: auto; padding: 140px 0 80px; }
-  .hero-stats { flex-wrap: wrap; gap: 24px; margin-top: 48px; }
-  .services-grid { grid-template-columns: 1fr; }
+
+  /* Kompakt bölüm padding */
+  .section { padding: 52px 0; }
+  .section-title { font-size: 28px; letter-spacing: -1px; margin-bottom: 10px; }
+  .section-label { margin-bottom: 12px; }
+  /* Açıklamalar mobilde gizlenir — başlık yeterli */
+  .section-desc { display: none; }
+
+  /* Hero kompakt */
+  .hero { min-height: 0; padding: 110px 0 48px; }
+  .hero-stats { flex-wrap: nowrap; overflow-x: auto; gap: 0; margin-top: 32px; scrollbar-width: none; }
+  .hero-stats::-webkit-scrollbar { display: none; }
+  .h-stat { padding: 10px 14px; }
+  .h-stat .h-num { font-size: 24px; }
+  .h-stat .h-label { font-size: 9px; }
+
+  /* Servis kartları 2 kolon */
+  .services-grid { grid-template-columns: repeat(2,1fr); gap: 10px; margin-top: 28px; }
+  .svc-card { padding: 20px 16px; }
+  .svc-icon { width: 36px; height: 36px; margin-bottom: 14px; }
+  .svc-card h3 { font-size: 15px; }
+  .svc-card p { font-size: 13px; line-height: 1.55; }
+  .services-grid .svc-card:first-child { grid-column: span 2; }
+  .services-grid .svc-card:first-child h3 { font-size: 17px; }
+  .services-grid .svc-card:first-child p { font-size: 14px; max-width: 100%; }
+
+  /* Süreç kompakt */
   .process-track { grid-template-columns: repeat(2,1fr); }
-  .numbers-grid { grid-template-columns: repeat(2,1fr); }
-  .sectors-wrap { gap: 8px; }
-  .sector-tag { padding: 10px 20px; font-size: 13px; }
-  .contact-cta-card { padding: 32px 24px; }
-  .contact-cta-card h3 { font-size: 28px; }
+  .proc-step { padding: 18px 14px; }
+  .process-section { padding: 116px 0; }
+
+  .numbers-grid { grid-template-columns: repeat(2,1fr); margin-top: 28px; }
+  .num-val { font-size: 44px; }
+  .sectors-wrap { gap: 8px; margin-top: 24px; }
+  .sector-tag { padding: 8px 16px; font-size: 13px; }
+
+  /* Galeri mobilde gizlenir — Instagram embed yavaş yüklenir */
+  #galeri { display: none; }
+
+  /* SSS kompakt */
+  .faq-list { margin-top: 20px; }
+  .faq-q { font-size: 14px; padding: 14px 0; }
+  .faq-a { font-size: 14px; }
+
+  /* İletişim */
+  .contact-cta-card { padding: 28px 20px; }
+  .contact-cta-card h3 { font-size: 26px; }
+
   .footer-inner { flex-direction: column; gap: 12px; text-align: center; padding: 0 20px; }
+  /* Footer altındaki sticky bar için boşluk */
+  footer { padding-bottom: 72px; }
+
+  /* Mevcut float butonları sticky bar ile çakışmasın */
+  .wa-float { display: none; }
+  #chat-btn { bottom: calc(76px + env(safe-area-inset-bottom,0px)); right: 16px; width: 48px; height: 48px; }
+  #chat-window { bottom: calc(136px + env(safe-area-inset-bottom,0px)); right: 16px; width: calc(100vw - 32px); max-width: 380px; }
 }
 @media (max-width: 480px) {
-  .hero h1 { font-size: 36px; }
+  .section { padding: 40px 0; }
+  .hero { padding: 96px 0 36px; }
+  .hero h1 { font-size: 30px !important; letter-spacing: -1.5px; }
+  .hero-stats { display: none; }
   .hero-btns { flex-direction: column; }
   .hero-btns .btn-fill, .hero-btns .btn-outline { width: 100%; justify-content: center; }
+  .section-title { font-size: 24px; }
+  /* Çok küçük ekranda kartlar 1 kolon */
+  .services-grid { grid-template-columns: 1fr; }
+  .services-grid .svc-card:first-child { grid-column: span 1; }
   .process-track { grid-template-columns: 1fr; }
-  .num-val { font-size: 40px; }
+  .process-section { padding: 88px 0; }
+  .num-val { font-size: 36px; }
+}
+
+/* ═══ MOBİL STICKY CTA BAR ═══ */
+.mobile-cta-bar { display: none; }
+@media (max-width: 768px) {
+  .mobile-cta-bar {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 97;
+    background: rgba(17,17,19,0.96); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid var(--border);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom,0px));
+    gap: 10px;
+  }
+  .mcta-call {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px 12px; background: var(--brand); color: #fff; border-radius: var(--radius-md);
+    font-size: 15px; font-weight: 700; text-decoration: none; letter-spacing: -0.2px;
+  }
+  .mcta-call svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; flex-shrink: 0; }
+  .mcta-wa {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px 12px; background: rgba(37,211,102,0.12); color: #25D366;
+    border: 1px solid rgba(37,211,102,0.28); border-radius: var(--radius-md);
+    font-size: 15px; font-weight: 700; text-decoration: none; letter-spacing: -0.2px;
+  }
+  .mcta-wa svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
 }
 
 /* ═══ BÖLÜM GÖRSEL ÇEŞİTLİLİĞİ ═══ */
@@ -1555,6 +1634,18 @@ footer { padding: 48px 0; border-top: 1px solid var(--border); background: rgba(
       </button>
     </div>
   </div>
+</div>
+
+<!-- MOBİL STICKY CTA BAR -->
+<div class="mobile-cta-bar" role="complementary" aria-label="Hızlı iletişim">
+  <a href="tel:+905316693734" class="mcta-call" aria-label="Şimdi ara">
+    <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.89 9.11 19.79 19.79 0 01.82 4.48 2 2 0 012.8 2.27h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 9.91a16 16 0 006.29 6.29l1.2-1.2a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+    Hemen Ara
+  </a>
+  <a href="https://wa.me/905316693734" class="mcta-wa" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.659 1.438 5.168L2 22l4.981-1.406A9.962 9.962 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" fill-rule="evenodd" clip-rule="evenodd"/></svg>
+    WhatsApp
+  </a>
 </div>
 
 <!-- FOOTER -->
