@@ -1,2 +1,13 @@
+.git
+.git/**
+.claude
+.claude/**
+.claude-flow
+.claude-flow/**
+.mcp.json
+.wranglerignore
+.assetsignore
 _worker.js
 wrangler.toml
+CLAUDE.md
+README.md
