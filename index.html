@@ -508,7 +508,7 @@ nav.scrolled {
 .services-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 56px; }
 .svc-card {
   background: rgba(255,255,255,0.028);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(232,120,26,0.22);
   border-radius: var(--radius-xl); padding: 40px 32px;
   transition: all 0.5s cubic-bezier(0.22,1,0.36,1); position: relative; overflow: hidden;
 }
@@ -518,8 +518,8 @@ nav.scrolled {
   opacity: 0; transition: opacity 0.4s;
 }
 .svc-card:hover {
-  border-color: rgba(255,255,255,0.09); transform: translateY(-6px);
-  box-shadow: 0 24px 64px rgba(0,0,0,0.45), 0 0 0 1px rgba(232,120,26,0.08);
+  border-color: rgba(232,120,26,0.50); transform: translateY(-6px);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.45), 0 0 0 1px rgba(232,120,26,0.12);
   background: rgba(255,255,255,0.04);
 }
 .svc-card:hover::before { opacity: 1; }
