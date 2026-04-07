@@ -339,6 +339,14 @@ nav.scrolled {
   );
   z-index: 1;
 }
+.hero::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 160px;
+  background: linear-gradient(to bottom, transparent, var(--bg-0));
+  z-index: 2;
+  pointer-events: none;
+}
 /* ── HERO VIDEO ── */
 .hero-video {
   position: absolute; inset: 0;
