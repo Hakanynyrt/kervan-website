@@ -412,7 +412,7 @@ nav.scrolled {
 @media (prefers-reduced-motion: reduce) {
   .hero-spark { animation: none !important; opacity: 0.12; }
 }
-.hero-content { position: relative; z-index: 2; will-change: transform, opacity; }
+.hero-content { position: relative; z-index: 2; }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 8px 18px; background: var(--brand-dim);
@@ -989,6 +989,102 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
   .process-track { grid-template-columns: 1fr; }
   .num-val { font-size: 40px; }
 }
+
+/* ═══ BÖLÜM GÖRSEL ÇEŞİTLİLİĞİ ═══ */
+
+/* Hizmetler — sol altta turuncu ışın */
+#hizmetler {
+  background:
+    radial-gradient(ellipse 70% 60% at 5% 90%, rgba(232,120,26,0.09) 0%, transparent 55%),
+    var(--bg-0);
+}
+/* Çift numaralı kartlar biraz farklı */
+.services-grid .svc-card:nth-child(even) { background: var(--bg-2); }
+/* İlk kart öne çıkar */
+.services-grid .svc-card:first-child {
+  border-color: rgba(232,120,26,0.30);
+  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(232,120,26,0.07) 100%);
+}
+.services-grid .svc-card:first-child::before { opacity: 1 !important; }
+
+/* Süreç — eğimli geçiş + hayalet rakamlar */
+.process-section {
+  clip-path: polygon(0 52px, 100% 0, 100% calc(100% - 52px), 0 100%);
+  margin: -52px 0;
+  padding: 172px 0;
+  z-index: 1; position: relative;
+}
+.process-track { counter-reset: proc-ghost; }
+.proc-step { position: relative; overflow: hidden; counter-increment: proc-ghost; }
+.proc-step::after {
+  content: counter(proc-ghost, decimal-leading-zero);
+  position: absolute; bottom: -14px; right: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 96px; font-weight: 800;
+  color: rgba(255,255,255,0.04);
+  line-height: 1; pointer-events: none; user-select: none; z-index: 0;
+}
+.proc-step h4, .proc-step p, .proc-step .proc-num { position: relative; z-index: 1; }
+
+/* Kapasite — turuncu spotlight, dramatik koyu arka plan */
+#kapasite {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(232,120,26,0.13) 0%, transparent 65%),
+    linear-gradient(180deg, #14120a 0%, #1b1b22 50%, #141210 100%);
+  border-top: 1px solid rgba(232,120,26,0.15);
+  border-bottom: 1px solid rgba(232,120,26,0.15);
+}
+#kapasite .section-title { text-align: center; }
+#kapasite .section-label { display: block; text-align: center; }
+.num-val { font-size: 68px !important; line-height: 1; }
+.num-card {
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  backdrop-filter: blur(6px);
+}
+.num-card:hover {
+  background: rgba(232,120,26,0.07) !important;
+  border-color: rgba(232,120,26,0.25) !important;
+  box-shadow: 0 0 40px rgba(232,120,26,0.10) !important;
+}
+
+/* Sektörler — nokta kafes arka planı */
+.sectors-section {
+  background:
+    radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px),
+    var(--bg-1);
+  background-size: 30px 30px;
+}
+.sector-tag:nth-child(1),
+.sector-tag:nth-child(4),
+.sector-tag:nth-child(7) {
+  border-color: rgba(232,120,26,0.30);
+  color: var(--brand-light);
+  background: rgba(232,120,26,0.08);
+}
+
+/* SSS — ince turuncu grid arka plan */
+#sss {
+  background:
+    linear-gradient(rgba(232,120,26,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232,120,26,0.025) 1px, transparent 1px),
+    var(--bg-0);
+  background-size: 52px 52px, 52px 52px;
+}
+.faq-item[open] { border-left: 3px solid var(--brand) !important; }
+.faq-list { max-width: 800px; }
+
+/* İletişim — sağ tarafta ışın */
+.contact-section::before {
+  background: radial-gradient(ellipse 60% 80% at 90% 50%, rgba(232,120,26,0.09) 0%, transparent 60%) !important;
+}
+
+/* Responsive: clip-path kaldır küçük ekranlarda */
+@media (max-width: 768px) {
+  .process-section { clip-path: none !important; margin: 0 !important; padding: 80px 0 !important; }
+  .proc-step::after { font-size: 64px; }
+  .num-val { font-size: 52px !important; }
+}
 </style>
 </head>
 <noscript><style>.fade-up{opacity:1!important;transform:none!important;}</style></noscript>
@@ -1081,7 +1177,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 <section class="section" id="hizmetler">
   <div class="container">
     <div class="section-label fade-up">Hizmetler</div>
-    <h2 class="section-title fade-up">Uzmanlaştığımız Alanlar</h2>
+    <h2 class="section-title fade-up">Uzmanlaştığımız <span class="gradient">Alanlar</span></h2>
     <p class="section-desc fade-up">Her parçanın ihtiyacına özel, kontrollü atmosfer ve hassas sıcaklık yönetimiyle profesyonel çözümler.</p>
     <div class="services-grid">
       <div class="svc-card svc-card--interactive" role="button" tabindex="0" data-svc="karbonlama" aria-haspopup="dialog" aria-label="Karbonlama hizmeti — detayları aç">
@@ -1128,7 +1224,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 <section class="section process-section" id="surec">
   <div class="container">
     <div class="section-label fade-up">Süreç</div>
-    <h2 class="section-title fade-up">Adım Adım İş Akışımız</h2>
+    <h2 class="section-title fade-up">Adım Adım <span class="gradient">İş Akışımız</span></h2>
     <p class="section-desc fade-up">Parçanız teslim alındığı andan itibaren her adım kontrol altında.</p>
     <div class="process-track">
       <div class="proc-step fade-up"><div class="proc-num">01</div><h4>Parça Teslim</h4><p>Malzeme cinsi, teknik çizim ve sertlik değerlerinin ön değerlendirmesi.</p></div>
@@ -1145,7 +1241,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 <section class="section" id="kapasite">
   <div class="container">
     <div class="section-label fade-up">Kapasite</div>
-    <h2 class="section-title fade-up">Rakamlarla Tesisimiz</h2>
+    <h2 class="section-title fade-up">Rakamlarla <span class="gradient">Tesisimiz</span></h2>
     <div class="numbers-grid">
       <div class="num-card fade-up"><div class="num-val" data-t="1050">0</div><div class="num-unit">°C</div><div class="num-label">Maks. Fırın Sıcaklığı</div></div>
       <div class="num-card fade-up"><div class="num-val" data-t="12">0</div><div class="num-unit">TON / GÜN</div><div class="num-label">İşleme Kapasitesi</div></div>
@@ -1159,7 +1255,7 @@ footer { padding: 40px 0; border-top: 1px solid var(--border); }
 <section class="section sectors-section" id="sektorler">
   <div class="container">
     <div class="section-label fade-up">Sektörler</div>
-    <h2 class="section-title fade-up">Hizmet Verdiğimiz Alanlar</h2>
+    <h2 class="section-title fade-up"><span class="gradient">Hizmet</span> Verdiğimiz Alanlar</h2>
     <p class="section-desc fade-up">Ağır sanayiden hassas mühendislik uygulamalarına, geniş yelpazede ısıl işlem çözümleri.</p>
     <div class="sectors-wrap">
       <span class="sector-tag fade-up">Otomotiv</span>
