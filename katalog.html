@@ -99,6 +99,69 @@ main { flex: 1; max-width: 1200px; margin: 0 auto; width: 100%; padding: 56px 32
   border: none; display: block;
 }
 
+/* TALEP FORMU */
+.talep-section {
+  max-width: 860px; margin-top: 64px;
+}
+.talep-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500;
+  color: var(--brand); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px;
+}
+.talep-title {
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+  font-size: clamp(22px, 4vw, 32px); line-height: 1.2;
+  letter-spacing: -0.5px; margin-bottom: 32px;
+}
+.talep-title span {
+  background: linear-gradient(90deg, var(--brand), var(--brand-light));
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.talep-card {
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 40px;
+}
+.talep-form { display: flex; flex-direction: column; gap: 14px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500;
+  color: var(--brand); letter-spacing: 1.5px; text-transform: uppercase;
+}
+.form-input, .form-textarea {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 16px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px;
+  color: var(--text-1); outline: none; width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none; appearance: none;
+}
+.form-input::placeholder, .form-textarea::placeholder { color: var(--text-3); }
+.form-input:focus, .form-textarea:focus {
+  border-color: var(--brand); box-shadow: 0 0 0 3px rgba(232,120,26,0.12);
+}
+.form-textarea { resize: vertical; min-height: 110px; }
+.form-submit {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  background: var(--brand); color: #fff; border: none; cursor: pointer;
+  padding: 14px 28px; border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 600;
+  transition: background 0.2s, opacity 0.2s; margin-top: 4px;
+}
+.form-submit:hover { background: var(--brand-light); }
+.form-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+.talep-success {
+  display: none; flex-direction: column; align-items: center; gap: 10px;
+  text-align: center; padding: 40px 20px; color: var(--text-2);
+}
+.talep-success svg { color: var(--brand); }
+.talep-success strong { color: var(--text-1); font-size: 18px; }
+.talep-error {
+  display: none; padding: 12px 16px; border-radius: 8px;
+  background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
+  color: #f87171; font-size: 13px;
+}
+.talep-error.show { display: block; }
+
 /* FOOTER */
 footer {
   padding: 32px 0; border-top: 1px solid var(--border);
@@ -109,6 +172,8 @@ footer {
   .nav-inner { padding: 0 20px; }
   main { padding: 40px 20px 60px; }
   .katalog-frame iframe { height: 60vh; min-height: 380px; }
+  .talep-card { padding: 24px 20px; }
+  .form-row { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -144,9 +209,94 @@ footer {
       title="Kervan Isıl İşlem Ürün Kataloğu"
     ></iframe>
   </div>
+
+  <section class="talep-section">
+    <div class="talep-label">Talep Formu</div>
+    <h2 class="talep-title">Teklif <span>Alın</span></h2>
+    <div class="talep-card">
+      <form class="talep-form" id="talep-form">
+        <input type="hidden" name="access_key" value="8f55e1c5-b170-4414-9ceb-477cbf6fca58">
+        <input type="hidden" name="subject" value="Kervan Isıl İşlem — Katalog Sayfasından Talep">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="tf-name">Ad Soyad *</label>
+            <input class="form-input" type="text" id="tf-name" name="name" placeholder="Ahmet Yılmaz" required autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tf-phone">Telefon *</label>
+            <input class="form-input" type="tel" id="tf-phone" name="phone" placeholder="5xx xxx xx xx" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tf-email">E-Posta *</label>
+          <input class="form-input" type="email" id="tf-email" name="email" placeholder="ornek@firma.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tf-note">Talep Detayı</label>
+          <textarea class="form-textarea" id="tf-note" name="detay" placeholder="Malzeme, adet, hizmet türü veya diğer notlarınız…" maxlength="1000"></textarea>
+        </div>
+        <button type="submit" class="form-submit" id="talep-btn">
+          Talebi Gönder
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>
+        </button>
+      </form>
+      <div class="talep-success" id="talep-success">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+        <strong>Talebiniz alındı!</strong>
+        <span>En kısa sürede sizinle iletişime geçeceğiz.</span>
+      </div>
+      <div class="talep-error" id="talep-error"></div>
+    </div>
+  </section>
 </main>
 
 <footer>© 2026 Kervan Isıl İşlem. Kartepe / Kocaeli</footer>
 
+<script>
+(function() {
+  var form    = document.getElementById('talep-form');
+  var btn     = document.getElementById('talep-btn');
+  var success = document.getElementById('talep-success');
+  var errBox  = document.getElementById('talep-error');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    errBox.textContent = '';
+    errBox.classList.remove('show');
+
+    var rawPhone = form.querySelector('#tf-phone').value.replace(/\D/g, '');
+    if (rawPhone.length < 10 || rawPhone.length > 11) {
+      errBox.textContent = 'Geçerli bir telefon numarası girin (örn. 532 123 45 67).';
+      errBox.classList.add('show');
+      form.querySelector('#tf-phone').focus();
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Gönderiliyor…';
+
+    var data = new FormData(form);
+    fetch('https://api.web3forms.com/submit', { method: 'POST', body: data })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (res.success) {
+          form.style.display = 'none';
+          success.style.display = 'flex';
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Talebi Gönder';
+          errBox.textContent = 'Bir hata oluştu, lütfen tekrar deneyin.';
+          errBox.classList.add('show');
+        }
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.textContent = 'Talebi Gönder';
+        errBox.textContent = 'Bağlantı hatası, lütfen tekrar deneyin.';
+        errBox.classList.add('show');
+      });
+  });
+})();
+</script>
 </body>
 </html>
