@@ -1276,10 +1276,16 @@ footer { padding: 48px 0; border-top: 1px solid var(--border); background: rgba(
   .services-grid .svc-card:first-child h3 { font-size: 17px; }
   .services-grid .svc-card:first-child p { font-size: 14px; max-width: 100%; }
 
-  /* Süreç kompakt */
-  .process-track { grid-template-columns: repeat(2,1fr); }
-  .proc-step { padding: 18px 14px; }
-  .process-section { padding: 116px 0; }
+  /* Süreç — yatay scroll (scroll-snap ile adım adım geçiş) */
+  .process-track {
+    display: flex; overflow-x: scroll; overflow-y: hidden;
+    scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; -ms-overflow-style: none;
+    border-radius: var(--radius-lg); gap: 2px; margin-top: 32px;
+  }
+  .process-track::-webkit-scrollbar { display: none; }
+  .proc-step { flex-shrink: 0; width: 230px; scroll-snap-align: start; padding: 28px 20px; }
+  .process-section { padding: 52px 0; }
 
   .numbers-grid { grid-template-columns: repeat(2,1fr); margin-top: 28px; }
   .num-val { font-size: 44px; }
@@ -1318,8 +1324,8 @@ footer { padding: 48px 0; border-top: 1px solid var(--border); background: rgba(
   /* Çok küçük ekranda kartlar 1 kolon */
   .services-grid { grid-template-columns: 1fr; }
   .services-grid .svc-card:first-child { grid-column: span 1; }
-  .process-track { grid-template-columns: 1fr; }
-  .process-section { padding: 88px 0; }
+  .proc-step { width: 200px; }
+  .process-section { padding: 40px 0; }
   .num-val { font-size: 36px; }
 }
 
