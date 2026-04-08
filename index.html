@@ -1095,7 +1095,7 @@ footer { padding: 48px 0; border-top: 1px solid var(--border); background: rgba(
 .works-row {
   display: flex; gap: 14px; padding: 7px 0;
   overflow-x: scroll; scrollbar-width: none; -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
   cursor: grab; user-select: none; -webkit-user-select: none;
 }
 .works-row::-webkit-scrollbar { display: none; }
@@ -2123,12 +2123,15 @@ document.addEventListener('DOMContentLoaded', function() {
           requestAnimationFrame(glide);
         })();
       });
-      // Touch
+      // Touch — 5px eşik: basit tap dragging'i tetiklemez, click event korunur
       el.addEventListener('touchstart', function(e) {
-        dragging = true; startX = e.touches[0].pageX; startScroll = el.scrollLeft;
+        dragging = false;
+        startX = e.touches[0].pageX; startScroll = el.scrollLeft;
         lastX = e.touches[0].pageX; velX = 0;
       }, { passive: true });
       el.addEventListener('touchmove', function(e) {
+        var dx = Math.abs(e.touches[0].pageX - startX);
+        if (!dragging && dx > 5) dragging = true;
         if (!dragging) return;
         velX = e.touches[0].pageX - lastX; lastX = e.touches[0].pageX;
         el.scrollLeft = startScroll - (e.touches[0].pageX - startX);
