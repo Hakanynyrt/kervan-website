@@ -372,18 +372,18 @@ nav.scrolled {
   position: absolute; inset: 0;
   background: linear-gradient(
     105deg,
-    rgba(20,22,30,0.93) 0%,
-    rgba(20,22,30,0.80) 45%,
-    rgba(12,12,14,0.45) 100%
+    rgba(12,12,14,0.70) 0%,
+    rgba(12,12,14,0.50) 45%,
+    rgba(12,12,14,0.20) 100%
   );
-  z-index: 1;
+  z-index: 2;
 }
 .hero::after {
   content: '';
   position: absolute; bottom: 0; left: 0; right: 0;
   height: 160px;
   background: linear-gradient(to bottom, transparent, var(--bg-0));
-  z-index: 2;
+  z-index: 3;
   pointer-events: none;
 }
 /* ── HERO VIDEO ── */
@@ -425,7 +425,7 @@ nav.scrolled {
   .hero-placeholder::before, .hero-placeholder::after { animation: none; }
 }
 .hero-sparks {
-  position: absolute; inset: 0; pointer-events: none; z-index: 1; overflow: hidden;
+  position: absolute; inset: 0; pointer-events: none; z-index: 3; overflow: hidden;
 }
 .hero-spark {
   position: absolute;
@@ -458,7 +458,7 @@ nav.scrolled {
 @media (prefers-reduced-motion: reduce) {
   .hero-spark { animation: none !important; opacity: 0.12; }
 }
-.hero-content { position: relative; z-index: 2; }
+.hero-content { position: relative; z-index: 4; }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 8px 18px; background: var(--brand-dim);
@@ -1315,10 +1315,12 @@ footer { padding: 48px 0; border-top: 1px solid var(--border); background: rgba(
 }
 @media (max-width: 480px) {
   .section { padding: 40px 0; }
-  .hero { padding: 96px 0 36px; }
+  .hero { padding: 80px 0 32px; }
   .hero h1 { font-size: 30px !important; letter-spacing: -1.5px; }
+  .hero-badge { display: none; }
+  .hero-desc { display: none; }
   .hero-stats { display: none; }
-  .hero-btns { flex-direction: column; }
+  .hero-btns { flex-direction: column; margin-top: 0; }
   .hero-btns .btn-fill, .hero-btns .btn-outline { width: 100%; justify-content: center; }
   .section-title { font-size: 24px; }
   /* Çok küçük ekranda kartlar 1 kolon */
@@ -1494,7 +1496,9 @@ footer { padding: 48px 0; border-top: 1px solid var(--border); background: rgba(
 </nav>
 <div class="mobile-overlay" id="mob">
   <a href="#hizmetler">Hizmetler</a>
-  <a href="#galeri">Galeri</a>
+  <a href="#calisma">Çalışmalarımız</a>
+  <a href="#surec">Süreç</a>
+  <a href="#sektorler">Sektörler</a>
   <a href="/katalog">Katalog</a>
   <a href="#iletisim">İletişim</a>
 </div>
