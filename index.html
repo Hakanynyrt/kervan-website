@@ -2110,10 +2110,13 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('lb-backdrop').addEventListener('click', lbClose);
     document.getElementById('lb-prev').addEventListener('click', function() { lbShow(lbIndex - 1); });
     document.getElementById('lb-next').addEventListener('click', function() { lbShow(lbIndex + 1); });
-    // Swipe ile fotoğraf geçişi
+    // Swipe ile fotoğraf geçişi + dikey kaydırmayı engelle
     lbEl.addEventListener('touchstart', function(e) {
       _lbTouchStartX = e.touches[0].clientX;
     }, { passive: true });
+    lbEl.addEventListener('touchmove', function(e) {
+      e.preventDefault(); // fotoğrafın/sayfanın dikey kaymasını engelle
+    }, { passive: false });
     lbEl.addEventListener('touchend', function(e) {
       var dx = e.changedTouches[0].clientX - _lbTouchStartX;
       if (Math.abs(dx) > 50) {
