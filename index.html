@@ -1043,6 +1043,95 @@ footer { padding: 48px 0; border-top: 1px solid var(--border); background: rgba(
 }
 .chat-file-name.show { display: block; }
 
+/* ═══ ÇALIŞMALARIMIZ ═══ */
+.works-section {
+  padding: 80px 0 0; overflow: hidden;
+  background: var(--bg-0);
+}
+.works-section .container { padding-bottom: 48px; }
+.works-strip { position: relative; }
+/* kenar solma efekti */
+.works-strip::before, .works-strip::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 120px; z-index: 2; pointer-events: none;
+}
+.works-strip::before { left: 0; background: linear-gradient(to right, var(--bg-0), transparent); }
+.works-strip::after  { right: 0; background: linear-gradient(to left, var(--bg-0), transparent); }
+
+.works-row { display: flex; gap: 14px; padding: 7px 0; will-change: transform; }
+.works-row--fwd { animation: works-scroll-l 40s linear infinite; }
+.works-row--rev { animation: works-scroll-r 40s linear infinite; }
+.works-row:hover { animation-play-state: paused; }
+
+@keyframes works-scroll-l {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes works-scroll-r {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.work-card {
+  flex-shrink: 0; width: 240px; height: 320px; border-radius: var(--radius-lg);
+  overflow: hidden; position: relative; cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.work-card:hover {
+  transform: scale(1.04) translateY(-4px);
+  box-shadow: 0 20px 56px rgba(0,0,0,0.5), 0 0 0 1px rgba(232,120,26,0.18);
+}
+.work-card img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+.work-card:hover img { transform: scale(1.07); }
+/* Eğer fotoğraf yüklenmemişse gradient placeholder görünür */
+.work-card .work-ph {
+  position: absolute; inset: 0; z-index: 0;
+}
+.work-card img { position: relative; z-index: 1; }
+/* Fotoğraf yoksa placeholder göster, varsa gizle */
+.work-card img[src=""] { display: none; }
+.work-card img:not([src=""]) ~ .work-ph { display: none; }
+
+/* 10 farklı placeholder gradient */
+.wph-1 { background: radial-gradient(ellipse 70% 80% at 50% 58%, #ff5500 0%, #c03200 28%, #4a1000 60%, #0d0a08 100%); }
+.wph-2 { background: radial-gradient(ellipse 60% 50% at 50% 85%, #1a2838 0%, #0f1820 45%, #080c12 100%), linear-gradient(#09090d,#09090d); }
+.wph-3 { background: radial-gradient(ellipse 85% 70% at 47% 62%, #ff4200 0%, #9a2400 38%, #1c0600 68%, #0b0b0e 100%); }
+.wph-4 { background: linear-gradient(165deg, #1c1c16 0%, #232218 35%, #1a1408 65%, #0f0d0b 100%); }
+.wph-5 { background: linear-gradient(to bottom, #aaadb2 0%, #888b92 44%, #111116 50%, #090910 100%); }
+.wph-6 { background: radial-gradient(ellipse 55% 65% at 50% 50%, #ff6020 0%, #b03800 32%, #3a1000 62%, #0c0c0e 100%); }
+.wph-7 { background: radial-gradient(ellipse 90% 55% at 50% 75%, #ff3800 0%, #881800 42%, #1a0400 72%, #0a0a0c 100%); }
+.wph-8 { background: linear-gradient(145deg, #181818 0%, #1f1f1d 40%, #1a1612 70%, #0e0c0a 100%); }
+.wph-9 { background: radial-gradient(ellipse 75% 60% at 50% 60%, #e85000 0%, #a02800 35%, #280800 65%, #0c0b0a 100%); }
+.wph-10 { background: linear-gradient(to bottom, #9a9ea6 0%, #72767e 42%, #131318 50%, #09090e 100%); }
+
+/* Overlay: altta etiket */
+.work-label-wrap {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+  padding: 36px 16px 14px;
+  background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%);
+}
+.work-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500;
+  color: rgba(255,255,255,0.85); letter-spacing: 1.5px; text-transform: uppercase;
+}
+.work-label .work-heat {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--brand); margin-right: 7px; vertical-align: middle;
+  box-shadow: 0 0 6px var(--brand);
+}
+
+@media (max-width: 768px) {
+  .works-row--fwd { animation-duration: 28s; }
+  .works-row--rev { animation-duration: 34s; }
+  .work-card { width: 200px; height: 268px; }
+  .works-section { padding-top: 52px; }
+  .works-section .container { padding-bottom: 32px; }
+  .works-strip::before, .works-strip::after { width: 60px; }
+}
+
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 1024px) {
   .services-grid { grid-template-columns: repeat(2,1fr); }
@@ -1344,6 +1433,45 @@ footer { padding: 48px 0; border-top: 1px solid var(--border); background: rgba(
     <div class="ts-item ts-item--hot"><div class="ts-num">1050°C</div><div class="ts-label">Maks. Sıcaklık</div></div>
   </div>
 </div>
+
+<!-- ÇALIŞMALARIMIZ -->
+<section class="works-section" id="calisma" aria-label="Çalışmalarımız">
+  <div class="container">
+    <div class="section-label fade-up">Çalışmalarımız</div>
+    <h2 class="section-title fade-up">Gerçek İşler, <span class="gradient">Gerçek Sonuçlar</span></h2>
+  </div>
+  <div class="works-strip">
+    <!-- Satır 1 — sola doğru akar -->
+    <div class="works-row works-row--fwd" id="works-row-1">
+      <!-- 5 kart × 2 = seamless döngü -->
+      <div class="work-card"><img src="" alt="Karbonlama prosesi — fırından çıkan parçalar"><div class="work-ph wph-1"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Karbonlama</span></div></div>
+      <div class="work-card"><img src="" alt="Söndürme sonrası parçalar"><div class="work-ph wph-2"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Söndürme Sonrası</span></div></div>
+      <div class="work-card"><img src="" alt="Büyük endüstriyel parça ısıl işlemi"><div class="work-ph wph-3"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Ağır Parça</span></div></div>
+      <div class="work-card"><img src="" alt="Fırın yükleme düzeni"><div class="work-ph wph-4"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Fırın Yükleme</span></div></div>
+      <div class="work-card"><img src="" alt="Önce ve sonra karşılaştırması"><div class="work-ph wph-5"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Önce / Sonra</span></div></div>
+      <!-- Döngü için kopya -->
+      <div class="work-card" aria-hidden="true"><img src="" alt=""><div class="work-ph wph-1"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Karbonlama</span></div></div>
+      <div class="work-card" aria-hidden="true"><img src="" alt=""><div class="work-ph wph-2"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Söndürme Sonrası</span></div></div>
+      <div class="work-card" aria-hidden="true"><img src="" alt=""><div class="work-ph wph-3"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Ağır Parça</span></div></div>
+      <div class="work-card" aria-hidden="true"><img src="" alt=""><div class="work-ph wph-4"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Fırın Yükleme</span></div></div>
+      <div class="work-card" aria-hidden="true"><img src="" alt=""><div class="work-ph wph-5"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Önce / Sonra</span></div></div>
+    </div>
+    <!-- Satır 2 — sağa doğru akar -->
+    <div class="works-row works-row--rev" id="works-row-2">
+      <div class="work-card"><img src="" alt="Bağlantı elemanları toplu ısıl işlem"><div class="work-ph wph-6"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Bağlantı Elemanı</span></div></div>
+      <div class="work-card"><img src="" alt="Büyük çaplı parça transferi"><div class="work-ph wph-7"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Büyük Çaplı Parça</span></div></div>
+      <div class="work-card"><img src="" alt="Tesis içinden görünüm"><div class="work-ph wph-8"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Tesis</span></div></div>
+      <div class="work-card"><img src="" alt="Isıl işlem öncesi parça hazırlığı"><div class="work-ph wph-9"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>İşlem Öncesi</span></div></div>
+      <div class="work-card"><img src="" alt="Sertlik testi ve kalite kontrol"><div class="work-ph wph-10"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Kalite Kontrol</span></div></div>
+      <!-- Döngü için kopya -->
+      <div class="work-card" aria-hidden="true"><img src="" alt=""><div class="work-ph wph-6"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Bağlantı Elemanı</span></div></div>
+      <div class="work-card" aria-hidden="true"><img src="" alt=""><div class="work-ph wph-7"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Büyük Çaplı Parça</span></div></div>
+      <div class="work-card" aria-hidden="true"><img src="" alt=""><div class="work-ph wph-8"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Tesis</span></div></div>
+      <div class="work-card" aria-hidden="true"><img src="" alt=""><div class="work-ph wph-9"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>İşlem Öncesi</span></div></div>
+      <div class="work-card" aria-hidden="true"><img src="" alt=""><div class="work-ph wph-10"></div><div class="work-label-wrap"><span class="work-label"><span class="work-heat"></span>Kalite Kontrol</span></div></div>
+    </div>
+  </div>
+</section>
 
 <!-- SERVICES -->
 <section class="section" id="hizmetler">
