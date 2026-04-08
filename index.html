@@ -243,6 +243,41 @@ body {
 .container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
 @media (max-width: 768px) { .container { padding: 0 20px; } }
 
+/* ═══ LOADER ═══ */
+#loader {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg-0);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 28px; transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1), visibility 0.55s;
+}
+#loader.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader-logo-wrap {
+  animation: loader-breathe 2s ease-in-out infinite;
+}
+@keyframes loader-breathe {
+  0%,100% { opacity: 0.65; transform: scale(0.94); }
+  50%      { opacity: 1;    transform: scale(1); }
+}
+.loader-track {
+  width: 140px; height: 2px;
+  background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden;
+}
+.loader-fill {
+  height: 100%; width: 0; border-radius: 2px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-light));
+  animation: loader-bar 3s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes loader-bar {
+  0%  { width: 0; }
+  50% { width: 70%; }
+  85% { width: 90%; }
+  100%{ width: 100%; }
+}
+.loader-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  color: var(--text-3); letter-spacing: 3px; text-transform: uppercase; margin-top: -8px;
+}
+
 /* ═══ NAV ═══ */
 nav {
   position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
@@ -1335,6 +1370,22 @@ footer { padding: 48px 0; border-top: 1px solid var(--border); background: rgba(
 <body>
 <div id="scroll-bar" aria-hidden="true"></div>
 
+<!-- LOADER -->
+<div id="loader" role="status" aria-label="Yükleniyor">
+  <div class="loader-logo-wrap">
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" style="width:68px;height:68px">
+      <rect x="2" y="2" width="116" height="116" rx="14" fill="#E8781A"/>
+      <rect x="7" y="7" width="106" height="106" rx="10" fill="#1A1A1A"/>
+      <text x="16" y="30" font-family="Inter,system-ui,sans-serif" font-weight="700" font-size="18" fill="#E8781A">6</text>
+      <text x="104" y="30" font-family="Inter,system-ui,sans-serif" font-weight="400" font-size="14" fill="#E8781A" text-anchor="end">12.011</text>
+      <text x="60" y="82" font-family="Inter,system-ui,sans-serif" font-weight="700" font-size="52" fill="#E8781A" text-anchor="middle">Krv</text>
+      <text x="60" y="106" font-family="Inter,system-ui,sans-serif" font-weight="400" font-size="14" fill="#E8781A" text-anchor="middle">Carbon</text>
+    </svg>
+  </div>
+  <div class="loader-track"><div class="loader-fill"></div></div>
+  <span class="loader-label">Yükleniyor</span>
+</div>
+
 <!-- NAV -->
 <nav id="nav">
   <div class="nav-inner">
@@ -1901,6 +1952,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+
+  // ── LOADER ───────────────────────────────────────────────────────
+  (function() {
+    var loader = document.getElementById('loader');
+    var start  = Date.now();
+    var MIN_MS = 900; // en az bu kadar göster (çok hızlı flash olmasın)
+    document.body.style.overflow = 'hidden';
+    function hide() {
+      var wait = Math.max(0, MIN_MS - (Date.now() - start));
+      setTimeout(function() {
+        loader.classList.add('hide');
+        document.body.style.overflow = '';
+      }, wait);
+    }
+    window.addEventListener('load', hide);
+    setTimeout(hide, 7000); // max 7 sn sonra zaten aç
+  })();
 
   // ── SCROLL PROGRESS BAR ──────────────────────────────────────────
   var scrollBar = document.getElementById('scroll-bar');
