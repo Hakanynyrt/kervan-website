@@ -588,6 +588,84 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   color:var(--t-3);letter-spacing:.1em;
 }
 .compat__note b{color:var(--brand);font-weight:500}
+
+/* ═══ HEAT TREATMENT · layout #4 ═══ */
+/* 2-col: statement + credential card left, numbered process rows right */
+.heat{background:linear-gradient(180deg,var(--bg-0) 0%,#0B0D12 50%,var(--bg-0) 100%)}
+.heat__grid{
+  display:grid;grid-template-columns:.95fr 1.1fr;gap:80px;align-items:start;
+}
+@media(max-width:960px){.heat__grid{grid-template-columns:1fr;gap:56px}}
+
+.heat__left h2{font-size:clamp(32px,4.2vw,52px);line-height:1.06;letter-spacing:-.028em;margin-bottom:20px}
+.heat__left .eyebrow{margin-bottom:22px}
+.heat__left p{color:var(--t-2);font-size:16px;margin-bottom:38px;max-width:480px}
+
+/* credential card */
+.facility{
+  position:relative;padding:28px;
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  background:
+    radial-gradient(400px 220px at 100% 0%,rgba(232,120,26,.08),transparent 60%),
+    linear-gradient(165deg,var(--bg-2) 0%,var(--bg-1) 100%);
+}
+.facility::before{
+  content:"";position:absolute;top:-1px;left:28px;right:28px;height:2px;
+  background:linear-gradient(90deg,var(--brand),transparent);
+}
+.facility__label{
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--brand);letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:14px;
+}
+.facility h3{font-size:21px;letter-spacing:-.012em;margin-bottom:10px}
+.facility p{color:var(--t-2);font-size:14px;margin-bottom:24px;font-weight:400}
+.facility__specs{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:20px 14px;
+  padding-top:20px;border-top:1px solid var(--line);
+}
+.f-spec__v{
+  font-family:var(--f-head);font-size:19px;font-weight:700;
+  color:var(--t-1);letter-spacing:-.01em;line-height:1.1;margin-bottom:5px;
+}
+.f-spec__l{
+  font-family:var(--f-mono);font-size:9px;font-weight:500;
+  color:var(--t-3);letter-spacing:.12em;text-transform:uppercase;
+}
+
+/* process rows */
+.proc{border-top:1px solid var(--line)}
+.proc__item{
+  display:grid;grid-template-columns:auto 1fr auto;gap:26px;align-items:center;
+  padding:28px 0;border-bottom:1px solid var(--line);
+  transition:background .25s,padding .25s;
+}
+.proc__item:hover{
+  background:linear-gradient(90deg,rgba(232,120,26,.045),transparent 80%);
+  padding-left:16px;padding-right:16px;
+}
+.proc__num{
+  font-family:var(--f-mono);font-size:11px;font-weight:500;
+  color:var(--t-3);letter-spacing:.1em;min-width:26px;
+  transition:color .25s;
+}
+.proc__item:hover .proc__num{color:var(--brand)}
+.proc__body h4{
+  font-family:var(--f-head);font-size:19px;font-weight:600;
+  letter-spacing:-.012em;color:var(--t-1);margin-bottom:5px;
+}
+.proc__body p{font-size:13.5px;color:var(--t-2);line-height:1.5}
+.proc__temp{
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--brand);letter-spacing:.08em;
+  padding:6px 11px;border:1px solid rgba(232,120,26,.3);
+  border-radius:var(--r-sm);background:rgba(232,120,26,.06);
+  white-space:nowrap;
+}
+@media(max-width:560px){
+  .proc__item{grid-template-columns:auto 1fr;gap:14px}
+  .proc__temp{grid-column:2;justify-self:start;margin-top:8px}
+}
 </style>
 </head>
 <body>
@@ -942,6 +1020,87 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
     </div>
 
     <div class="compat__note">+ MANY MORE &nbsp;·&nbsp; DON'T SEE YOURS? <b>REQUEST A QUOTE →</b></div>
+  </div>
+</section>
+
+<!-- ═════════════════════ HEAT TREATMENT · layout #4 ═════════════════════ -->
+<section class="section heat" id="heat">
+  <div class="sec-num"><b>03</b> / HEAT TREATMENT</div>
+  <div class="wrap">
+    <div class="heat__grid">
+
+      <div class="heat__left">
+        <div class="eyebrow">Heat Treatment</div>
+        <h2>In-house heat treatment facility.</h2>
+        <p>Every chisel and piston we ship passes through our own pit-type furnaces with controlled atmospheres. We also offer heat treatment as a service to third-party manufacturers.</p>
+
+        <div class="facility">
+          <div class="facility__label">KRV · FACILITY</div>
+          <h3>Kartepe, Kocaeli</h3>
+          <p>Pit-type furnaces, controlled atmosphere, oil and polymer quench baths, in-house HRC / HV metrology.</p>
+          <div class="facility__specs">
+            <div><div class="f-spec__v">950 °C</div><div class="f-spec__l">Max Furnace</div></div>
+            <div><div class="f-spec__v">Ø 1500 mm</div><div class="f-spec__l">Pit Capacity</div></div>
+            <div><div class="f-spec__v">Oil · Polymer</div><div class="f-spec__l">Quench Media</div></div>
+            <div><div class="f-spec__v">HRC · HV</div><div class="f-spec__l">Lab Testing</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="heat__right">
+        <div class="proc">
+          <div class="proc__item">
+            <div class="proc__num">01</div>
+            <div class="proc__body">
+              <h4>Carburizing</h4>
+              <p>Surface hardening for wear-critical parts — chisels, pistons, bushings.</p>
+            </div>
+            <div class="proc__temp">850–950 °C</div>
+          </div>
+          <div class="proc__item">
+            <div class="proc__num">02</div>
+            <div class="proc__body">
+              <h4>Quenching</h4>
+              <p>Oil and polymer baths for controlled martensitic transformation.</p>
+            </div>
+            <div class="proc__temp">OIL · POLYMER</div>
+          </div>
+          <div class="proc__item">
+            <div class="proc__num">03</div>
+            <div class="proc__body">
+              <h4>Tempering</h4>
+              <p>Stress reduction and final toughness on hardened parts.</p>
+            </div>
+            <div class="proc__temp">150–650 °C</div>
+          </div>
+          <div class="proc__item">
+            <div class="proc__num">04</div>
+            <div class="proc__body">
+              <h4>Normalization</h4>
+              <p>Grain refinement for uniform mechanical properties.</p>
+            </div>
+            <div class="proc__temp">AIR COOL</div>
+          </div>
+          <div class="proc__item">
+            <div class="proc__num">05</div>
+            <div class="proc__body">
+              <h4>Stress Relief</h4>
+              <p>Removes residual stress from welding and CNC machining.</p>
+            </div>
+            <div class="proc__temp">600–650 °C</div>
+          </div>
+          <div class="proc__item">
+            <div class="proc__num">06</div>
+            <div class="proc__body">
+              <h4>Hardness Testing</h4>
+              <p>HRC and HV verification on every production batch.</p>
+            </div>
+            <div class="proc__temp">HRC · HV</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </section>
 
