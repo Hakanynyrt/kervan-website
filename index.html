@@ -666,6 +666,75 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   .proc__item{grid-template-columns:auto 1fr;gap:14px}
   .proc__temp{grid-column:2;justify-self:start;margin-top:8px}
 }
+
+/* ═══ WHY KERVAN · layout #5 ═══ */
+/* 2x2 card grid with giant outlined corner numbers */
+.why__head{
+  display:grid;grid-template-columns:.9fr 1.1fr;gap:60px;
+  align-items:end;margin-bottom:60px;
+}
+@media(max-width:860px){.why__head{grid-template-columns:1fr;gap:22px;align-items:start}}
+.why__head .eyebrow{margin-bottom:22px}
+.why__head h2{
+  font-size:clamp(34px,4.8vw,60px);line-height:1.02;letter-spacing:-.032em;
+}
+.why__head h2 em{
+  font-style:normal;
+  background:linear-gradient(120deg,var(--brand-hi) 0%,var(--brand) 50%,#E8B87A 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.why__head p{color:var(--t-2);font-size:16px;max-width:480px}
+
+.why__grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+@media(max-width:720px){.why__grid{grid-template-columns:1fr}}
+
+/* why card extends .card with a giant outlined corner number */
+.why-card{
+  position:relative;padding:40px 34px;
+  background:
+    radial-gradient(520px 280px at 100% 0%,rgba(232,120,26,.05),transparent 58%),
+    linear-gradient(165deg,var(--bg-2) 0%,var(--bg-1) 100%);
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  overflow:hidden;
+  transition:border-color .3s,transform .3s;
+}
+.why-card:hover{border-color:rgba(232,120,26,.26);transform:translateY(-3px)}
+
+/* giant outlined corner number (motif #5) */
+.why-card::before{
+  content:attr(data-n);
+  position:absolute;top:26px;right:32px;
+  font-family:var(--f-head);font-size:88px;font-weight:700;
+  color:transparent;-webkit-text-stroke:1px rgba(232,120,26,.26);
+  line-height:1;letter-spacing:-.04em;pointer-events:none;
+}
+
+.why-card__icon{
+  position:relative;z-index:1;
+  width:50px;height:50px;border-radius:12px;
+  background:linear-gradient(145deg,rgba(232,120,26,.2),rgba(232,120,26,.04));
+  border:1px solid rgba(232,120,26,.3);
+  display:grid;place-items:center;color:var(--brand);
+  margin-bottom:26px;
+}
+.why-card__icon svg{width:22px;height:22px}
+.why-card h3{
+  position:relative;font-size:22px;letter-spacing:-.015em;
+  margin-bottom:12px;max-width:82%;
+}
+.why-card p{
+  font-size:14.5px;color:var(--t-2);line-height:1.62;max-width:92%;
+}
+.why-card__tag{
+  margin-top:24px;padding-top:20px;border-top:1px solid var(--line);
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--t-3);letter-spacing:.1em;text-transform:uppercase;
+  display:flex;align-items:center;gap:9px;
+}
+.why-card__tag::before{
+  content:"";width:6px;height:6px;background:var(--brand);
+  box-shadow:0 0 8px var(--brand);
+}
 </style>
 </head>
 <body>
@@ -1099,6 +1168,77 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
           </div>
         </div>
       </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════ WHY KERVAN · layout #5 ═════════════════════ -->
+<section class="section why" id="why">
+  <div class="sec-num"><b>04</b> / WHY KERVAN</div>
+  <div class="wrap">
+    <div class="why__head">
+      <div>
+        <div class="eyebrow">Why Kervan</div>
+        <h2>Manufacturer. <em>Not a trader.</em></h2>
+      </div>
+      <p>We forge, machine and heat-treat under one roof. That means tighter tolerances, faster lead times and no middleman markups between you and the factory floor.</p>
+    </div>
+
+    <div class="why__grid">
+
+      <article class="why-card" data-n="01">
+        <div class="why-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 20h18"/>
+            <path d="M5 20V8l7-5 7 5v12"/>
+            <rect x="9" y="12" width="6" height="8"/>
+            <line x1="9" y1="16" x2="15" y2="16"/>
+          </svg>
+        </div>
+        <h3>Manufacturer, not reseller</h3>
+        <p>We own our forges, CNC lines and quality lab. No outsourcing, no middlemen — every invoice comes directly from the people who made the part.</p>
+        <div class="why-card__tag">One Factory · One Invoice</div>
+      </article>
+
+      <article class="why-card" data-n="02">
+        <div class="why-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 3c1.5 3 3 4.5 3 7a3 3 0 0 1-6 0c0-2.5 1.5-4 3-7z"/>
+            <path d="M5 14c0 4 3 7 7 7s7-3 7-7"/>
+          </svg>
+        </div>
+        <h3>In-house heat treatment</h3>
+        <p>Pit-type furnaces with controlled atmospheres. Oil and polymer quench baths. Every production batch verified HRC 48–52 in our own metrology lab.</p>
+        <div class="why-card__tag">HRC 48–52 · Lab Verified</div>
+      </article>
+
+      <article class="why-card" data-n="03">
+        <div class="why-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M2 12h20"/>
+            <path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>
+          </svg>
+        </div>
+        <h3>5–10 day delivery to Europe</h3>
+        <p>Container-ready packaging and door-to-door logistics for the EU, MENA and Africa. Standard parts often ship from stock the same week you order.</p>
+        <div class="why-card__tag">EU · MENA · Africa</div>
+      </article>
+
+      <article class="why-card" data-n="04">
+        <div class="why-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="8" width="18" height="10" rx="1"/>
+            <path d="M7 8V5h10v3"/>
+            <line x1="7" y1="18" x2="7" y2="21"/>
+            <line x1="17" y1="18" x2="17" y2="21"/>
+          </svg>
+        </div>
+        <h3>CNC precision</h3>
+        <p>Modern CNC machining centers hold OEM tolerances on every critical surface. No knock-off castings — every part starts as 42CrMo bar stock.</p>
+        <div class="why-card__tag">42CrMo · OEM Tolerances</div>
+      </article>
 
     </div>
   </div>
