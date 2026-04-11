@@ -735,6 +735,137 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   content:"";width:6px;height:6px;background:var(--brand);
   box-shadow:0 0 8px var(--brand);
 }
+
+/* ═══ QUOTE FORM · layout #6 ═══ */
+/* 2-col form inside a bordered surface, mono-labelled fields,
+   big primary button */
+.quote{
+  background:
+    radial-gradient(1000px 500px at 85% 0%,rgba(232,120,26,.08),transparent 65%),
+    linear-gradient(180deg,#0B0D12 0%,var(--bg-0) 100%);
+}
+.quote__wrap{
+  display:grid;grid-template-columns:.78fr 1.22fr;gap:72px;align-items:start;
+}
+@media(max-width:960px){.quote__wrap{grid-template-columns:1fr;gap:44px}}
+
+.quote__intro .eyebrow{margin-bottom:22px}
+.quote__intro h2{
+  font-size:clamp(32px,4.2vw,52px);line-height:1.04;
+  letter-spacing:-.028em;margin-bottom:18px;
+}
+.quote__intro p{color:var(--t-2);font-size:16px;max-width:400px;margin-bottom:36px}
+
+.quote__intro-list{
+  padding-top:24px;border-top:1px solid var(--line);
+}
+.quote__intro-list div{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:14px 0;border-bottom:1px solid var(--line);
+}
+.quote__intro-list div:last-child{border-bottom:0}
+.quote__intro-list b{
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--brand);letter-spacing:.12em;text-transform:uppercase;
+  min-width:56px;padding-top:3px;
+}
+.quote__intro-list span{color:var(--t-2);font-size:14px}
+
+/* bordered form surface */
+.quote__card{
+  position:relative;
+  padding:38px 38px 34px;
+  border:1px solid var(--line);border-radius:var(--r-xl);
+  background:
+    radial-gradient(500px 260px at 0% 0%,rgba(232,120,26,.05),transparent 60%),
+    linear-gradient(165deg,var(--bg-2) 0%,var(--bg-1) 100%);
+  overflow:hidden;
+}
+@media(max-width:560px){.quote__card{padding:28px 24px}}
+.quote__card::before{
+  content:"";position:absolute;top:0;left:38px;right:38px;height:2px;
+  background:linear-gradient(90deg,var(--brand),transparent 65%);
+}
+
+.quote__head{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid var(--line);
+}
+.quote__head-label{
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--brand);letter-spacing:.14em;text-transform:uppercase;
+}
+.quote__head-ref{
+  font-family:var(--f-mono);font-size:10px;
+  color:var(--t-3);letter-spacing:.1em;
+}
+.quote__head-ref b{color:var(--t-1);font-weight:500}
+
+/* form grid */
+.form{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:20px 18px;
+}
+.form__field{display:flex;flex-direction:column;gap:8px}
+.form__field--full{grid-column:1/-1}
+@media(max-width:560px){.form{grid-template-columns:1fr}.form__field--full{grid-column:1}}
+
+.form__label{
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--t-3);letter-spacing:.12em;text-transform:uppercase;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.form__label span{color:var(--brand)}
+
+.form__input,
+.form__select,
+.form__textarea{
+  width:100%;
+  padding:13px 14px;
+  background:var(--bg-1);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  font:inherit;color:var(--t-1);font-size:14px;
+  transition:border-color .2s,background .2s,box-shadow .2s;
+}
+.form__input::placeholder,
+.form__textarea::placeholder{color:var(--t-3)}
+.form__input:focus,
+.form__select:focus,
+.form__textarea:focus{
+  outline:0;
+  border-color:var(--brand);
+  background:var(--bg-2);
+  box-shadow:0 0 0 4px rgba(232,120,26,.12);
+}
+.form__select{
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23A8ADB8' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat:no-repeat;background-position:right 14px center;
+  padding-right:40px;cursor:pointer;
+}
+.form__textarea{resize:vertical;min-height:110px;font-family:var(--f-body)}
+
+.form__submit{
+  grid-column:1/-1;margin-top:10px;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  flex-wrap:wrap;
+}
+.form__note{
+  font-family:var(--f-mono);font-size:10px;color:var(--t-3);
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.form__note b{color:var(--brand);font-weight:500}
+.btn--submit{
+  padding:16px 32px;font-size:14px;
+}
+
+.form__status{
+  grid-column:1/-1;margin-top:4px;
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.04em;
+  color:var(--t-3);min-height:16px;
+}
+.form__status--ok{color:var(--brand)}
+.form__status--err{color:#F87171}
 </style>
 </head>
 <body>
@@ -1239,6 +1370,95 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p>Modern CNC machining centers hold OEM tolerances on every critical surface. No knock-off castings — every part starts as 42CrMo bar stock.</p>
         <div class="why-card__tag">42CrMo · OEM Tolerances</div>
       </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════ QUOTE FORM · layout #6 ═════════════════════ -->
+<section class="section quote" id="quote">
+  <div class="sec-num"><b>05</b> / REQUEST QUOTE</div>
+  <div class="wrap">
+    <div class="quote__wrap">
+
+      <div class="quote__intro">
+        <div class="eyebrow">Request a Quote</div>
+        <h2>Get a price in 24 hours.</h2>
+        <p>Tell us your breaker model and part — we'll send you a quote with lead time and FOB terms, usually within one business day.</p>
+
+        <div class="quote__intro-list">
+          <div><b>01</b><span>Send the form with your breaker model and part details.</span></div>
+          <div><b>02</b><span>We confirm fit, spec and stock within 24 hours.</span></div>
+          <div><b>03</b><span>Receive an FOB quote with lead time and payment terms.</span></div>
+          <div><b>04</b><span>Production &amp; door-to-door shipping to your site.</span></div>
+        </div>
+      </div>
+
+      <div class="quote__card">
+        <div class="quote__head">
+          <span class="quote__head-label">Quote Request · KRV Form</span>
+          <span class="quote__head-ref">REF <b>KVN-QTE-001</b></span>
+        </div>
+
+        <form class="form" id="quote-form" action="https://api.web3forms.com/submit" method="POST" novalidate>
+          <input type="hidden" name="access_key" value="8f55e1c5-b170-4414-9ceb-477cbf6fca58">
+          <input type="hidden" name="subject" value="KVN · New Quote Request">
+          <input type="hidden" name="from_name" value="kervanheat.com">
+          <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
+
+          <div class="form__field">
+            <label class="form__label" for="q-name">Full Name <span>*</span></label>
+            <input class="form__input" id="q-name" name="name" type="text" required placeholder="e.g. John Smith">
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="q-email">Email <span>*</span></label>
+            <input class="form__input" id="q-email" name="email" type="email" required placeholder="you@company.com">
+          </div>
+
+          <div class="form__field">
+            <label class="form__label" for="q-phone">Phone / WhatsApp</label>
+            <input class="form__input" id="q-phone" name="phone" type="tel" placeholder="+90 531 669 37 34">
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="q-qty">Quantity</label>
+            <input class="form__input" id="q-qty" name="quantity" type="number" min="1" placeholder="e.g. 10 pcs">
+          </div>
+
+          <div class="form__field">
+            <label class="form__label" for="q-part">Part Type <span>*</span></label>
+            <select class="form__select" id="q-part" name="part_type" required>
+              <option value="">— Select a part —</option>
+              <option value="chisel">Chisel / Moil</option>
+              <option value="piston">Piston</option>
+              <option value="bushing">Bushing</option>
+              <option value="through-bolt">Through Bolt</option>
+              <option value="repair-kit">Repair Kit</option>
+              <option value="wedge">Wedge</option>
+              <option value="front-head">Front Head</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="q-brand">Breaker Brand / Model <span>*</span></label>
+            <input class="form__input" id="q-brand" name="breaker" type="text" required placeholder="e.g. Furukawa HB20G, Rammer S84">
+          </div>
+
+          <div class="form__field form__field--full">
+            <label class="form__label" for="q-msg">Message</label>
+            <textarea class="form__textarea" id="q-msg" name="message" placeholder="Tool diameter, length, drawings, delivery address…"></textarea>
+          </div>
+
+          <div class="form__submit">
+            <span class="form__note">We reply within <b>24 HOURS</b> · Mon–Sat</span>
+            <button type="submit" class="btn btn--primary btn--submit">
+              Send Quote Request
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+
+          <div class="form__status" id="form-status" aria-live="polite"></div>
+        </form>
+      </div>
 
     </div>
   </div>
