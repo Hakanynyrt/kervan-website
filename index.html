@@ -272,7 +272,157 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.12;letter-sp
   content:"";width:28px;height:1px;background:var(--line-2);
 }
 @media(max-width:720px){.scroll-cue{display:none}}
-</style>
+
+/* ═══ SECTION HEADER (shared) ═══ */
+.section{padding:120px 0;position:relative}
+@media(max-width:720px){.section{padding:80px 0}}
+.sec-head{max-width:760px;margin-bottom:56px}
+.sec-head .eyebrow{margin-bottom:20px}
+.sec-head h2{
+  font-size:clamp(30px,4.2vw,52px);line-height:1.08;
+  letter-spacing:-.025em;margin-bottom:18px;
+}
+.sec-head p{font-size:clamp(15px,1.2vw,17px);color:var(--t-2);max-width:640px}
+.sec-num{
+  position:absolute;top:120px;right:24px;
+  font-family:var(--f-mono);font-size:11px;color:var(--t-3);
+  letter-spacing:.16em;text-transform:uppercase;
+}
+.sec-num b{color:var(--brand);font-weight:500}
+@media(max-width:720px){.sec-num{top:80px;right:24px}}
+
+/* ═══ PARTS ═══ */
+.parts{background:linear-gradient(180deg,#08090B 0%,#0B0D12 100%);border-top:1px solid var(--line)}
+.parts__grid{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:20px;
+}
+@media(max-width:960px){.parts__grid{grid-template-columns:repeat(6,1fr)}}
+@media(max-width:720px){.parts__grid{grid-template-columns:repeat(2,1fr);gap:14px}}
+
+.card{
+  position:relative;
+  background:
+    radial-gradient(500px 240px at 0% 0%,rgba(232,120,26,.05),transparent 55%),
+    linear-gradient(165deg,#12151C 0%,#0B0D12 100%);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:28px;
+  overflow:hidden;
+  transition:border-color .3s,transform .3s,box-shadow .3s;
+}
+.card:hover{
+  border-color:rgba(232,120,26,.32);
+  transform:translateY(-3px);
+  box-shadow:0 20px 60px rgba(0,0,0,.4),0 0 0 1px rgba(232,120,26,.08);
+}
+.card::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--brand) 0%,transparent 60%);
+  opacity:.0;transition:opacity .3s;
+}
+.card:hover::before{opacity:1}
+
+/* Hero chisel card — spans full width (6 cols) */
+.card--chisel{
+  grid-column:span 6;
+  padding:44px;
+  display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center;
+  background:
+    radial-gradient(600px 400px at 88% 40%,rgba(232,120,26,.16),transparent 65%),
+    radial-gradient(700px 380px at 0% 100%,rgba(232,120,26,.05),transparent 60%),
+    linear-gradient(145deg,#141821 0%,#0B0D12 100%);
+  border:1px solid rgba(232,120,26,.18);
+}
+.card--chisel::before{opacity:1}
+@media(max-width:860px){
+  .card--chisel{grid-template-columns:1fr;padding:32px;gap:32px}
+}
+.card__badge{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--brand);letter-spacing:.14em;text-transform:uppercase;
+  padding:5px 10px;background:rgba(232,120,26,.1);
+  border:1px solid rgba(232,120,26,.3);border-radius:4px;
+  margin-bottom:18px;
+}
+.card--chisel h3{
+  font-size:clamp(32px,3.6vw,46px);line-height:1.05;
+  letter-spacing:-.025em;margin-bottom:14px;
+}
+.card--chisel p{color:var(--t-2);font-size:16px;margin-bottom:26px;max-width:440px}
+.chisel-types{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:10px 24px;
+  margin-bottom:28px;
+}
+.chisel-types li{
+  list-style:none;
+  font-family:var(--f-mono);font-size:12px;font-weight:500;
+  color:var(--t-1);letter-spacing:.02em;
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-top:1px solid var(--line);
+}
+.chisel-types li::before{
+  content:"";width:6px;height:6px;background:var(--brand);
+  box-shadow:0 0 8px var(--brand);flex-shrink:0;
+}
+.spec-line{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--f-mono);font-size:11px;
+  color:var(--t-3);letter-spacing:.1em;text-transform:uppercase;
+  padding-top:20px;border-top:1px solid var(--line);
+}
+.spec-line b{color:var(--brand);font-weight:500}
+
+/* Chisel hero visual */
+.chisel-viz{
+  position:relative;aspect-ratio:1/1.05;
+  border:1px solid var(--line);border-radius:12px;
+  background:
+    radial-gradient(340px 260px at 50% 30%,rgba(232,120,26,.1),transparent 70%),
+    linear-gradient(155deg,#0E1116 0%,#080A0E 100%);
+  display:grid;place-items:center;
+}
+.chisel-viz::before{
+  content:"";position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:24px 24px;border-radius:12px;
+}
+.chisel-viz svg{position:relative;width:62%;height:auto;filter:drop-shadow(0 24px 70px rgba(232,120,26,.3))}
+.chisel-viz .hv__corner{width:18px;height:18px}
+
+/* Regular parts card (spans 2 cols on desktop, 1 on mobile) */
+.card--part{grid-column:span 2}
+@media(max-width:720px){.card--part{grid-column:span 1}}
+.card--part .icon{
+  width:44px;height:44px;border-radius:10px;
+  background:linear-gradient(145deg,rgba(232,120,26,.18),rgba(232,120,26,.04));
+  border:1px solid rgba(232,120,26,.22);
+  display:grid;place-items:center;color:var(--brand);
+  margin-bottom:22px;
+}
+.card--part .icon svg{width:22px;height:22px}
+.card--part h3{
+  font-size:20px;letter-spacing:-.01em;margin-bottom:10px;color:var(--t-1);
+}
+.card--part p{color:var(--t-2);font-size:14px;margin-bottom:22px;line-height:1.55}
+.card__foot{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-top:16px;border-top:1px solid var(--line);
+}
+.card__spec{
+  font-family:var(--f-mono);font-size:10px;color:var(--t-3);
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.card__arrow{
+  width:28px;height:28px;border-radius:7px;
+  border:1px solid var(--line-2);color:var(--t-2);
+  display:grid;place-items:center;
+  transition:background .25s,color .25s,border-color .25s,transform .25s;
+}
+.card--part:hover .card__arrow{background:var(--brand);color:#0A0B0D;border-color:var(--brand);transform:translate(2px,-2px)}
+.card__arrow svg{width:14px;height:14px}
 </head>
 <body>
 
@@ -363,6 +513,173 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.12;letter-sp
     </div>
   </div>
   <div class="scroll-cue">Scroll</div>
+</section>
+
+<!-- ═══════ PARTS ═══════ -->
+<section class="section parts" id="parts">
+  <div class="sec-num"><b>01</b> / PRODUCT RANGE</div>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Product Range</div>
+      <h2>Spare parts for every breaker.</h2>
+      <p>Manufactured in-house, not resold. Every part forged, CNC-machined and heat-treated under one roof in Kartepe, Kocaeli.</p>
+    </div>
+
+    <div class="parts__grid">
+
+      <!-- CHISELS — hero card -->
+      <article class="card card--chisel">
+        <div>
+          <span class="card__badge">Hero Product · 01</span>
+          <h3>Chisels</h3>
+          <p>Moil, flat, wedge, blunt, conical and wide — forged from 42CrMoA for every demolition job. Custom lengths to your breaker model.</p>
+          <ul class="chisel-types">
+            <li>Moil Point</li>
+            <li>Flat Chisel</li>
+            <li>Wedge</li>
+            <li>Blunt</li>
+            <li>Conical</li>
+            <li>Wide Chisel</li>
+          </ul>
+          <div class="spec-line">MATERIAL <b>42CrMoA</b> · HARDNESS <b>HRC 48–52</b></div>
+        </div>
+        <div class="chisel-viz">
+          <span class="hv__corner hv__corner--tl"></span>
+          <span class="hv__corner hv__corner--tr"></span>
+          <span class="hv__corner hv__corner--bl"></span>
+          <span class="hv__corner hv__corner--br"></span>
+          <svg viewBox="0 0 200 380" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="c-steel" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#5A6578"/>
+                <stop offset=".45" stop-color="#1C2029"/>
+                <stop offset="1" stop-color="#2D3748"/>
+              </linearGradient>
+              <linearGradient id="c-hot" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0" stop-color="#FFB05A"/>
+                <stop offset=".35" stop-color="#FF8A2B"/>
+                <stop offset=".7" stop-color="#E8781A"/>
+                <stop offset="1" stop-color="#1C2029"/>
+              </linearGradient>
+            </defs>
+            <rect x="76" y="8" width="48" height="50" rx="3" fill="url(#c-steel)" stroke="#5A6578" stroke-width="1"/>
+            <rect x="68" y="58" width="64" height="18" rx="2" fill="#2D3748" stroke="#4A5568" stroke-width="1"/>
+            <rect x="76" y="76" width="48" height="196" fill="url(#c-steel)" stroke="#5A6578" stroke-width="1"/>
+            <path d="M76 272 L100 360 L124 272 Z" fill="url(#c-hot)" stroke="#E8781A" stroke-width="1"/>
+            <line x1="100" y1="12" x2="100" y2="54" stroke="rgba(255,255,255,.18)" stroke-dasharray="2 3"/>
+            <line x1="100" y1="80" x2="100" y2="268" stroke="rgba(255,255,255,.14)" stroke-dasharray="2 3"/>
+            <text x="140" y="166" fill="#6B7280" font-family="JetBrains Mono" font-size="9">L=1420</text>
+            <text x="140" y="322" fill="#E8781A" font-family="JetBrains Mono" font-size="9">HRC 50</text>
+          </svg>
+        </div>
+      </article>
+
+      <!-- PISTONS -->
+      <article class="card card--part">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="7" y="3" width="10" height="18" rx="1"/>
+            <line x1="7" y1="8" x2="17" y2="8"/>
+            <line x1="7" y1="11" x2="17" y2="11"/>
+            <line x1="7" y1="14" x2="17" y2="14"/>
+          </svg>
+        </div>
+        <h3>Pistons</h3>
+        <p>Precision-ground striking pistons with superior impact resistance and long service life.</p>
+        <div class="card__foot">
+          <span class="card__spec">42CrMo · HRC 52</span>
+          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </article>
+
+      <!-- BUSHINGS -->
+      <article class="card card--part">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="9"/>
+            <circle cx="12" cy="12" r="4.5"/>
+          </svg>
+        </div>
+        <h3>Bushings</h3>
+        <p>Upper and lower tool bushings machined to tight diametral tolerances.</p>
+        <div class="card__foot">
+          <span class="card__spec">Hardened · Lapped</span>
+          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </article>
+
+      <!-- THROUGH BOLTS -->
+      <article class="card card--part">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="10" width="14" height="4"/>
+            <rect x="17" y="8" width="4" height="8"/>
+            <line x1="5" y1="10" x2="5" y2="14"/>
+            <line x1="8" y1="10" x2="8" y2="14"/>
+            <line x1="11" y1="10" x2="11" y2="14"/>
+          </svg>
+        </div>
+        <h3>Through Bolts</h3>
+        <p>High-tensile through bolts with matched nuts and washers, torque-spec ready.</p>
+        <div class="card__foot">
+          <span class="card__spec">Grade 12.9</span>
+          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </article>
+
+      <!-- REPAIR KITS -->
+      <article class="card card--part">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="7" width="18" height="13" rx="1"/>
+            <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+            <line x1="12" y1="11" x2="12" y2="17"/>
+            <line x1="9" y1="14" x2="15" y2="14"/>
+          </svg>
+        </div>
+        <h3>Repair Kits</h3>
+        <p>Complete seal and wear-part kits matched to your exact breaker model.</p>
+        <div class="card__foot">
+          <span class="card__spec">Full Rebuild</span>
+          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </article>
+
+      <!-- WEDGES -->
+      <article class="card card--part">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M4 19 L20 19 L14 5 Z"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+        </div>
+        <h3>Wedges</h3>
+        <p>Retaining wedges and pins — hardened for shock absorption and long life.</p>
+        <div class="card__foot">
+          <span class="card__spec">Induction · HRC 55</span>
+          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </article>
+
+      <!-- FRONT HEADS -->
+      <article class="card card--part">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="6" y="4" width="12" height="16" rx="1"/>
+            <circle cx="12" cy="10" r="2.2"/>
+            <line x1="12" y1="14" x2="12" y2="18"/>
+          </svg>
+        </div>
+        <h3>Front Heads</h3>
+        <p>Forged front heads machined to OEM tolerances with guaranteed fit.</p>
+        <div class="card__foot">
+          <span class="card__spec">Forged · CNC</span>
+          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </article>
+
+    </div>
+  </div>
 </section>
 
 </body>
