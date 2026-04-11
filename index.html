@@ -866,6 +866,109 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 }
 .form__status--ok{color:var(--brand)}
 .form__status--err{color:#F87171}
+
+/* ═══ CONTACT + FOOTER · layout #7 ═══ */
+/* 3-col (brand + address + hours) · mono tagline row above copyright */
+.foot{
+  position:relative;
+  padding:96px 0 34px;
+  border-top:1px solid var(--line);
+  background:
+    radial-gradient(1100px 460px at 50% 0%,rgba(232,120,26,.05),transparent 68%),
+    linear-gradient(180deg,var(--bg-0) 0%,#05060A 100%);
+}
+@media(max-width:780px){.foot{padding:72px 0 28px}}
+
+.foot__main{
+  display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:48px;
+  padding-bottom:56px;
+}
+@media(max-width:860px){.foot__main{grid-template-columns:1fr;gap:40px}}
+
+.foot__col h4{
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--brand);letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:20px;padding-bottom:14px;
+  border-bottom:1px solid var(--line);
+}
+
+/* brand column */
+.foot__brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.foot__brand .brand__mark{width:36px;height:36px;font-size:16px}
+.foot__brand .brand__text{font-size:17px}
+
+.foot__about{color:var(--t-2);font-size:14px;line-height:1.65;max-width:380px;margin-bottom:22px}
+
+.foot__social{display:flex;gap:10px}
+.foot__social a{
+  width:38px;height:38px;border-radius:8px;
+  border:1px solid var(--line);
+  display:grid;place-items:center;color:var(--t-2);
+  transition:color .25s,border-color .25s,background .25s,transform .25s;
+}
+.foot__social a:hover{
+  color:var(--brand);border-color:var(--brand);
+  background:rgba(232,120,26,.06);transform:translateY(-2px);
+}
+.foot__social svg{width:17px;height:17px}
+
+/* address / hours items */
+.foot__item{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:14px 0;border-bottom:1px solid var(--line);
+}
+.foot__item:last-child{border-bottom:0}
+.foot__item-icon{
+  width:30px;height:30px;border-radius:7px;flex-shrink:0;
+  background:rgba(232,120,26,.08);border:1px solid rgba(232,120,26,.22);
+  display:grid;place-items:center;color:var(--brand);
+}
+.foot__item-icon svg{width:14px;height:14px}
+.foot__item-body{flex:1;min-width:0}
+.foot__item-label{
+  font-family:var(--f-mono);font-size:9px;font-weight:500;
+  color:var(--t-3);letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:3px;
+}
+.foot__item-value{
+  color:var(--t-1);font-size:14px;line-height:1.45;
+  font-weight:500;
+}
+.foot__item-value a{
+  color:var(--t-1);transition:color .2s;
+}
+.foot__item-value a:hover{color:var(--brand)}
+
+/* mono tagline row above copyright */
+.foot__tagline{
+  display:flex;align-items:center;gap:20px;
+  padding:26px 0 22px;
+  border-top:1px solid var(--line);
+  font-family:var(--f-mono);font-size:11px;
+  color:var(--t-2);letter-spacing:.1em;text-transform:uppercase;
+  font-weight:500;
+}
+.foot__tagline::before,.foot__tagline::after{
+  content:"";flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line-2),transparent);
+}
+.foot__tagline::before{background:linear-gradient(90deg,var(--line-2),transparent)}
+.foot__tagline::after{background:linear-gradient(90deg,transparent,var(--line-2))}
+.foot__tagline span b{color:var(--brand);font-weight:500}
+@media(max-width:720px){
+  .foot__tagline{font-size:10px;gap:14px;text-align:center}
+  .foot__tagline::before,.foot__tagline::after{display:none}
+}
+
+/* copyright bottom */
+.foot__bottom{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:22px;border-top:1px solid var(--line);gap:18px;
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--t-3);letter-spacing:.1em;text-transform:uppercase;
+}
+.foot__bottom b{color:var(--t-1);font-weight:500}
+@media(max-width:560px){.foot__bottom{flex-direction:column;text-align:center;gap:10px}}
 </style>
 </head>
 <body>
@@ -1463,6 +1566,113 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
     </div>
   </div>
 </section>
+
+<!-- ═════════════════════ CONTACT + FOOTER · layout #7 ═════════════════════ -->
+<footer class="foot" id="contact">
+  <div class="wrap">
+
+    <div class="foot__main">
+
+      <!-- brand column -->
+      <div class="foot__col">
+        <h4>The Factory</h4>
+        <div class="foot__brand">
+          <span class="brand__mark">K</span>
+          <span class="brand__text">KERVAN<b>HEAT</b></span>
+        </div>
+        <p class="foot__about">Turkish manufacturer of aftermarket hydraulic breaker parts. We forge, CNC-machine and heat-treat every chisel, piston and bushing under one roof in Kartepe, Kocaeli — and ship worldwide.</p>
+        <div class="foot__social">
+          <a href="https://wa.me/905316693734" aria-label="WhatsApp" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-1.7-.9-2.9-1.6-4.1-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.7-1-2.3-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1 2.1 3.2 5 4.4c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4s.2-1.3.2-1.4c-.1-.2-.3-.2-.5-.3zM12 2a10 10 0 0 0-8.6 15l-1.4 5 5.2-1.4A10 10 0 1 0 12 2z"/></svg>
+          </a>
+          <a href="mailto:info@kervanheat.com" aria-label="Email">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M22 7 12 13 2 7"/></svg>
+          </a>
+          <a href="https://instagram.com/kervanmakina" aria-label="Instagram" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- address column -->
+      <div class="foot__col">
+        <h4>Contact</h4>
+        <div class="foot__item">
+          <div class="foot__item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s-8-7-8-13a8 8 0 0 1 16 0c0 6-8 13-8 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          </div>
+          <div class="foot__item-body">
+            <div class="foot__item-label">Factory</div>
+            <div class="foot__item-value">Sadun Atığ Cad. No: 112/A<br>Kartepe / Kocaeli · Turkey</div>
+          </div>
+        </div>
+        <div class="foot__item">
+          <div class="foot__item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 12.8 12.8 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5 12.8 12.8 0 0 0 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+          </div>
+          <div class="foot__item-body">
+            <div class="foot__item-label">Phone · WhatsApp</div>
+            <div class="foot__item-value"><a href="https://wa.me/905316693734">+90 531 669 37 34</a></div>
+          </div>
+        </div>
+        <div class="foot__item">
+          <div class="foot__item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M22 7 12 13 2 7"/></svg>
+          </div>
+          <div class="foot__item-body">
+            <div class="foot__item-label">Email</div>
+            <div class="foot__item-value"><a href="mailto:info@kervanheat.com">info@kervanheat.com</a></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- hours column -->
+      <div class="foot__col">
+        <h4>Hours · Service</h4>
+        <div class="foot__item">
+          <div class="foot__item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          </div>
+          <div class="foot__item-body">
+            <div class="foot__item-label">Working Hours</div>
+            <div class="foot__item-value">Mon – Sat<br>08:00 – 18:00 (GMT+3)</div>
+          </div>
+        </div>
+        <div class="foot__item">
+          <div class="foot__item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 22 2 13 21l-2-9z"/></svg>
+          </div>
+          <div class="foot__item-body">
+            <div class="foot__item-label">Shipping</div>
+            <div class="foot__item-value">Worldwide · 5–10 days<br>EU, MENA, Africa</div>
+          </div>
+        </div>
+        <div class="foot__item">
+          <div class="foot__item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7 9 18l-5-5"/></svg>
+          </div>
+          <div class="foot__item-body">
+            <div class="foot__item-label">Response</div>
+            <div class="foot__item-value">Quotes within 24 hours</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- mono tagline row above copyright -->
+    <div class="foot__tagline">
+      <span>Manufactured in <b>Turkey</b> · In-house <b>heat treatment</b> · Shipped <b>worldwide</b></span>
+    </div>
+
+    <!-- copyright -->
+    <div class="foot__bottom">
+      <span>© 2026 <b>Kervan Isıl İşlem Ltd. Şti.</b> · All rights reserved.</span>
+      <span>kervanheat.com</span>
+    </div>
+
+  </div>
+</footer>
 
 </body>
 </html>
