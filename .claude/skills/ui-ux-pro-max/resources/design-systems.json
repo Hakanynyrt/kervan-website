@@ -1,0 +1,255 @@
+{
+  "version": "1.0.0",
+  "systems": [
+    {
+      "id": "industrial-heavy",
+      "name": "Industrial / Heavy Machinery",
+      "tagline": "Blueprint precision meets forge heat.",
+      "keywords": {
+        "industrial": 10, "machinery": 10, "heavy": 8, "manufacturer": 10,
+        "parts": 7, "factory": 7, "forge": 6, "forging": 6, "steel": 6,
+        "metal": 5, "cnc": 6, "foundry": 5, "mining": 4, "construction": 4,
+        "oil": 3, "gas": 3, "energy": 3, "breaker": 8, "hydraulic": 7,
+        "excavator": 5, "chisel": 6, "piston": 5, "bolt": 3, "machine": 5,
+        "shipyard": 4, "plant": 3, "workshop": 4, "weld": 4, "cast": 4
+      },
+      "rationale": "Industrial manufacturers compete on trust, precision, and real-world durability — not cuteness. The design must look like the inside of an engineering drawing: confident typography, high-contrast dark surfaces, a single hot accent colour (forge orange or safety yellow), monospace for technical specs, blueprint grid overlays, and corner-bracket framing on product cards. Avoid anything that smells like a SaaS landing page template.",
+      "palette": {
+        "--bg-0": "#08090B",
+        "--bg-1": "#0E1014",
+        "--bg-2": "#151821",
+        "--bg-3": "#1C2029",
+        "--bg-4": "#262A34",
+        "--text-1": "#F5F6F8",
+        "--text-2": "#A8ADB8",
+        "--text-3": "#6B7280",
+        "--brand": "#E8781A",
+        "--brand-hi": "#FF8A2B",
+        "--brand-lo": "#B85810",
+        "--brand-glow": "rgba(232,120,26,0.22)",
+        "--line": "rgba(255,255,255,0.08)",
+        "--line-2": "rgba(255,255,255,0.14)",
+        "--steel": "#2D3748",
+        "--steel-hi": "#4A5568",
+        "--ok": "#4ADE80",
+        "--warn": "#FBBF24",
+        "--err": "#F87171"
+      },
+      "typography": {
+        "heading": {
+          "family": "'Space Grotesk', 'Inter', sans-serif",
+          "weights": [500, 600, 700],
+          "letter_spacing": "-0.025em",
+          "line_height": 1.06,
+          "features": "ss01"
+        },
+        "body": {
+          "family": "'Inter', system-ui, sans-serif",
+          "weights": [400, 500, 600, 700],
+          "letter_spacing": "-0.005em",
+          "line_height": 1.6
+        },
+        "mono": {
+          "family": "'JetBrains Mono', ui-monospace, monospace",
+          "weights": [400, 500],
+          "letter_spacing": "0.08em",
+          "line_height": 1.4,
+          "usage": "Spec chips, part numbers, temperatures, eyebrows, stat labels."
+        }
+      },
+      "spacing": {
+        "base": 4,
+        "scale": [4, 8, 12, 16, 24, 32, 48, 64, 96, 120]
+      },
+      "radii": {
+        "--r-sm": "4px",
+        "--r-md": "8px",
+        "--r-lg": "14px",
+        "--r-xl": "22px"
+      },
+      "motifs": [
+        "Blueprint grid background (24-56px) masked to fade at edges.",
+        "Corner-bracket framing on product / credential cards (engineering-drawing style).",
+        "Mono-font spec chips with orange-tinted border and a leading orange dot.",
+        "Diagonal hairline dividers between sections in --line-2 colour.",
+        "Giant outlined numeric marks (-webkit-text-stroke) for section numbering.",
+        "Drop shadows soft but dark (0 20px 60px rgba(0,0,0,.4)), plus subtle orange glow on hover.",
+        "SVG technical drawings as illustration (ruler marks, dotted centerlines, dimension text) — never photography for product heroes.",
+        "Hot-gradient highlights on impact surfaces: linear-gradient(var(--brand-hi), var(--brand-lo))."
+      ],
+      "components": {
+        "eyebrow": "Inline-flex chip, 11px mono, 0.14em tracking, UPPER, orange text on rgba(232,120,26,.06) with 1px rgba(232,120,26,.3) border and a leading glowing dot.",
+        "button_primary": "15/26 padding, 10px radius, solid --brand, black text, hover -> --brand-hi with 0 12px 40px brand glow, subtle translateY(-2px).",
+        "button_ghost": "Same geometry, transparent bg, 1px --line-2 border, hover -> --brand border + colour.",
+        "stat_row": "Border-separated horizontal row of 4 stats with mono 10px UPPER label and 22px Space Grotesk number.",
+        "card": "Gradient surface (165deg from --bg-2 to --bg-1), 1px --line border, 16px radius, top hover accent bar (2px orange gradient), translate(-3px) + glow on hover.",
+        "spec_chip": "Mono 10-11px, padding 5/10, 4px radius, border 1px rgba(232,120,26,.3), bg rgba(232,120,26,.06), colour --brand.",
+        "section_number": "Absolute top-right, 11px mono, UPPER, colour --text-3, leading bold number in --brand."
+      },
+      "layouts": [
+        "Hero: 1.15fr/0.85fr split — copy left, technical SVG visual right framed with corner brackets.",
+        "Product range: 6-col grid with one hero card spanning full width + six 2-col satellite cards.",
+        "Compatibility: tight bordered grid of brand cells (1px gap over --line).",
+        "Process / service list: 2-col with statement + credential card left, numbered process rows right.",
+        "Credential / why: 2x2 card grid with giant outlined corner numbers.",
+        "Quote form: 2-col form inside a bordered surface, mono-labelled fields, big primary button.",
+        "Footer: 3-col (brand + address + hours) with a mono tagline row above copyright."
+      ],
+      "dos": [
+        "Use ONE accent colour and commit to it across every state.",
+        "Put mono-font technical metadata next to every product (material, hardness, dimension).",
+        "Prefer SVG technical drawings over stock photography.",
+        "Use real numbers (°C, HRC, mm) — not lorem ipsum.",
+        "Dark backgrounds with high-contrast white for text hierarchy."
+      ],
+      "donts": [
+        "No rounded illustration characters or playful emojis.",
+        "No pastel gradients. No purple/teal duotone.",
+        "No 'Join the waitlist' SaaS hero pattern. Ship the quote form instead.",
+        "No centered hero unless you really mean it — asymmetric left-heavy composition reads stronger.",
+        "No 'pricing table'. This category prices by quote."
+      ],
+      "inspirations": [
+        "Caterpillar corporate site",
+        "Komatsu annual report covers",
+        "Atlas Copco product data sheets",
+        "Engineering drawing typography (ISO GPS standards)"
+      ]
+    },
+
+    {
+      "id": "luxury-premium",
+      "name": "Luxury / Premium",
+      "tagline": "Silence, generous space, and one perfect serif.",
+      "keywords": {
+        "luxury": 10, "premium": 8, "fashion": 7, "jewelry": 8, "jewellery": 8,
+        "haute": 6, "couture": 6, "atelier": 7, "boutique": 6, "watches": 6,
+        "perfume": 5, "fragrance": 5, "leather": 4, "silk": 4
+      },
+      "rationale": "Luxury brands sell restraint. The design is mostly white space, one elegant serif for headlines, generous letter spacing on UPPER micro-labels, and muted neutral palettes with a single signature accent (gold, champagne, or a very deep ink). No drop shadows, no gradients, no hover glitter — only fades and slow transitions.",
+      "palette": {
+        "--bg-0": "#FAF8F4",
+        "--bg-1": "#F2EEE7",
+        "--bg-2": "#E7E0D3",
+        "--ink": "#1A1814",
+        "--ink-2": "#4A453C",
+        "--ink-3": "#8A8479",
+        "--brand": "#9B7D45",
+        "--brand-hi": "#B59661",
+        "--line": "rgba(26,24,20,0.10)"
+      },
+      "typography": {
+        "heading": { "family": "'Cormorant Garamond', 'Playfair Display', serif", "weights": [300, 400, 500], "letter_spacing": "-0.01em", "line_height": 1.1 },
+        "body": { "family": "'Inter', sans-serif", "weights": [300, 400], "letter_spacing": "0", "line_height": 1.7 },
+        "mono": { "family": "'JetBrains Mono', monospace", "usage": "Avoid — use small UPPER sans with wide tracking instead." }
+      },
+      "motifs": [
+        "Wide letter-spaced UPPER micro-labels (Inter 10px, .2em tracking).",
+        "Thin 1px hairlines — never shadows.",
+        "Slow 600ms fades on image swaps.",
+        "Generous 160-200px vertical padding between sections."
+      ],
+      "dos": ["Lots of whitespace.", "One serif, one sans, nothing else.", "Image-led heroes with no copy overlay.", "Fade transitions only."],
+      "donts": ["No neon. No gradients. No 'Get started' CTA language.", "No dark mode unless it's the brand point.", "No icons — use typography instead."]
+    },
+
+    {
+      "id": "saas-fintech",
+      "name": "SaaS / Fintech Dashboard",
+      "tagline": "Dense product surfaces and calm gradients.",
+      "keywords": {
+        "saas": 10, "dashboard": 8, "fintech": 9, "bank": 7, "banking": 7,
+        "crypto": 6, "api": 7, "developer": 6, "platform": 5, "analytics": 5,
+        "finance": 6, "payment": 6, "startup": 4
+      },
+      "rationale": "Product-first websites live or die on demoing the product. Use a calm desaturated background with one cool accent, show real UI screenshots in the hero, and structure content as feature blocks with bullet proofs and metrics.",
+      "palette": {
+        "--bg-0": "#0B0D17",
+        "--bg-1": "#11131E",
+        "--bg-2": "#1A1D2E",
+        "--text-1": "#F8F9FC",
+        "--text-2": "#A5ACC2",
+        "--brand": "#6366F1",
+        "--brand-hi": "#818CF8",
+        "--accent": "#22D3EE",
+        "--line": "rgba(255,255,255,0.08)"
+      },
+      "typography": {
+        "heading": { "family": "'Inter', 'SF Pro Display', sans-serif", "weights": [600, 700, 800], "letter_spacing": "-0.03em" },
+        "body": { "family": "'Inter', sans-serif" },
+        "mono": { "family": "'JetBrains Mono', monospace", "usage": "Code blocks, API keys, SQL snippets." }
+      },
+      "motifs": ["Product screenshots with subtle floating UI chips around them.", "Gradient blur blobs (conic or radial) at -50% -50%.", "Metrics rows (4-6 columns of big numbers).", "Logo cloud (desaturated)."],
+      "dos": ["Show the product in hero.", "Use real metrics.", "Dark mode is fine but not required."],
+      "donts": ["No literal illustrations of gears or handshakes.", "No dense body copy in hero — 1 sentence max."]
+    },
+
+    {
+      "id": "creative-agency",
+      "name": "Creative Agency / Studio",
+      "tagline": "Big typography and deliberate weirdness.",
+      "keywords": { "creative": 9, "agency": 9, "studio": 8, "design": 6, "portfolio": 7, "art": 5, "brand": 4 },
+      "rationale": "Agency sites are portfolio vehicles. The site itself must prove the work. Use oversized display typography, scroll-triggered reveals, playful cursor interactions, and one aggressive colour decision.",
+      "palette": { "--bg-0": "#F5F5F0", "--ink": "#0A0A0A", "--brand": "#FF4D1F", "--line": "#0A0A0A" },
+      "typography": {
+        "heading": { "family": "'PP Neue Montreal', 'Inter', sans-serif", "weights": [700, 800], "letter_spacing": "-0.04em" },
+        "body": { "family": "'Inter', sans-serif" }
+      },
+      "motifs": ["150px+ hero type.", "Marquee scroll bands.", "Custom cursor.", "Case-study thumbnails."],
+      "dos": ["Go big on one typographic idea.", "Show 3-5 case studies max."],
+      "donts": ["Don't hide the work behind nav.", "Don't use a CMS-template grid."]
+    },
+
+    {
+      "id": "ecommerce-retail",
+      "name": "Ecommerce / Retail",
+      "tagline": "Product-first, friction-low.",
+      "keywords": { "ecommerce": 10, "shop": 8, "retail": 7, "store": 7, "marketplace": 6, "dtc": 6, "brand": 3 },
+      "rationale": "Every pixel should reduce the distance between customer and 'Add to cart'. Use product photography as the hero, show price and rating early, and keep the top nav tight.",
+      "palette": { "--bg-0": "#FFFFFF", "--bg-1": "#F6F6F4", "--ink": "#111", "--brand": "#E11D48" },
+      "typography": { "heading": { "family": "'Inter', sans-serif", "weights": [700, 800] }, "body": { "family": "'Inter', sans-serif" } },
+      "motifs": ["Product grid 4-col.", "Sticky 'Add to cart' on mobile.", "Review stars under every product."],
+      "dos": ["Show price up front.", "Fast CDN image loading."],
+      "donts": ["Don't hide shipping cost.", "No mystery-meat navigation."]
+    },
+
+    {
+      "id": "healthcare-medical",
+      "name": "Healthcare / Medical",
+      "tagline": "Clinical calm with real human faces.",
+      "keywords": { "healthcare": 10, "medical": 9, "clinic": 7, "hospital": 7, "telehealth": 7, "pharma": 6, "dental": 5, "wellness": 4 },
+      "rationale": "Trust is the only thing that matters. Use clean whites, one calm blue or green, real photos of real staff, and visible credentials (certifications, licenses, regulatory body logos). Avoid stock photography.",
+      "palette": { "--bg-0": "#FFFFFF", "--bg-1": "#F3F7FB", "--ink": "#0F172A", "--brand": "#0E7490" },
+      "typography": { "heading": { "family": "'Inter', sans-serif" }, "body": { "family": "'Inter', sans-serif" } },
+      "motifs": ["Certification badges strip.", "Real photos of staff + facility.", "Appointment CTA sticky on mobile."],
+      "dos": ["Show credentials.", "Keep language simple.", "Offer phone + form both."],
+      "donts": ["No emoji.", "No clip-art doctors."]
+    },
+
+    {
+      "id": "gaming-entertainment",
+      "name": "Gaming / Entertainment",
+      "tagline": "Neon maximalism with hard edges.",
+      "keywords": { "gaming": 10, "game": 8, "arcade": 7, "esports": 8, "streaming": 5, "cyberpunk": 7, "anime": 4 },
+      "rationale": "Brightness, saturation, and motion are the product. Dark base, two clashing neon accents, chromatic aberration on hover, and cut-corner card shapes (clip-path polygon).",
+      "palette": { "--bg-0": "#05060C", "--bg-1": "#0A0B15", "--brand": "#00E5FF", "--accent": "#FF00A8" },
+      "typography": { "heading": { "family": "'Orbitron', 'Rajdhani', sans-serif", "weights": [700, 900] }, "body": { "family": "'Inter', sans-serif" } },
+      "motifs": ["Glitch text on hover.", "Clip-path angular cards.", "Scanline overlays.", "HUD-style corner brackets."],
+      "dos": ["Commit to neon fully.", "Use motion."],
+      "donts": ["Don't soften it. Don't use Material Design."]
+    },
+
+    {
+      "id": "food-beverage",
+      "name": "Food / Beverage",
+      "tagline": "Appetite on the page.",
+      "keywords": { "food": 9, "restaurant": 9, "cafe": 7, "bakery": 7, "brewery": 7, "coffee": 7, "kitchen": 5, "menu": 5 },
+      "rationale": "Colour should come from the product — roasted beans, crumb, caramel, hops. Use warm off-whites, earthy browns or deep greens, and lead with large close-up food photography.",
+      "palette": { "--bg-0": "#F7F2EA", "--ink": "#2A1D12", "--brand": "#B4530A", "--accent": "#6B8E23" },
+      "typography": { "heading": { "family": "'Fraunces', 'Recoleta', serif", "weights": [500, 600] }, "body": { "family": "'Inter', sans-serif" } },
+      "motifs": ["Giant close-up food photo heroes.", "Handwritten signature details.", "Menu as a typographic block."],
+      "dos": ["Show the food bigger than seems reasonable."],
+      "donts": ["No stock photos of smiling baristas."]
+    }
+  ]
+}
