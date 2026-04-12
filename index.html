@@ -969,6 +969,64 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 }
 .foot__bottom b{color:var(--t-1);font-weight:500}
 @media(max-width:560px){.foot__bottom{flex-direction:column;text-align:center;gap:10px}}
+
+/* ═══ MOBILE DRAWER ═══ */
+.mob-panel{
+  position:fixed;inset:0;z-index:99;
+  background:rgba(8,9,11,.985);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);
+  backdrop-filter:blur(20px) saturate(160%);
+  display:flex;flex-direction:column;align-items:stretch;justify-content:center;
+  padding:96px 28px 48px;gap:4px;
+  opacity:0;visibility:hidden;
+  transform:translateY(-12px);
+  transition:opacity .28s ease,transform .28s ease,visibility .28s;
+}
+.mob-panel--open{opacity:1;visibility:visible;transform:translateY(0)}
+.mob-panel a{
+  font-family:var(--f-head);font-size:26px;font-weight:600;
+  color:var(--t-1);letter-spacing:-.02em;
+  padding:16px 0;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  transition:color .2s,padding .2s;
+}
+.mob-panel a::after{
+  content:"";width:14px;height:14px;
+  border-right:1.5px solid var(--t-3);border-top:1.5px solid var(--t-3);
+  transform:rotate(45deg);opacity:.5;transition:border-color .2s,opacity .2s;
+}
+.mob-panel a:hover,.mob-panel a:active{color:var(--brand);padding-left:8px}
+.mob-panel a:hover::after,.mob-panel a:active::after{border-color:var(--brand);opacity:1}
+.mob-panel .mob-panel__cta{
+  margin-top:26px;justify-content:center;
+  border-bottom:0;background:var(--brand);color:#0A0B0D;
+  border-radius:10px;padding:18px;font-size:15px;
+}
+.mob-panel .mob-panel__cta::after{display:none}
+.mob-panel__close{
+  position:absolute;top:16px;right:16px;
+  width:44px;height:44px;border-radius:8px;
+  display:grid;place-items:center;color:var(--t-1);
+  border:1px solid var(--line);
+}
+.mob-panel__close svg{width:20px;height:20px}
+
+/* ═══ FADE-UP ANIMATION ═══ */
+.fade-up{
+  opacity:0;transform:translateY(24px);
+  transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1);
+}
+.fade-up.is-in{opacity:1;transform:translateY(0)}
+.parts__grid.is-in > *:nth-child(1){transition-delay:0ms}
+.parts__grid.is-in > *:nth-child(2){transition-delay:60ms}
+.parts__grid.is-in > *:nth-child(3){transition-delay:120ms}
+.parts__grid.is-in > *:nth-child(4){transition-delay:180ms}
+.parts__grid.is-in > *:nth-child(5){transition-delay:240ms}
+.parts__grid.is-in > *:nth-child(6){transition-delay:300ms}
+.parts__grid.is-in > *:nth-child(7){transition-delay:360ms}
+@media(prefers-reduced-motion:reduce){
+  .fade-up{opacity:1!important;transform:none!important;transition:none!important}
+}
 </style>
 </head>
 <body>
@@ -981,16 +1039,16 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       <span class="brand__text">KERVAN<b>HEAT</b><sup>TR · MFG</sup></span>
     </a>
     <div class="nav__links">
-      <a href="#parts">Parts</a>
-      <a href="#compat">Compatibility</a>
-      <a href="#heat">Heat Treatment</a>
-      <a href="#why">Why Kervan</a>
-      <a href="#contact">Contact</a>
+      <a href="#parts" data-i18n="nav_parts">Parts</a>
+      <a href="#compat" data-i18n="nav_compat">Compatibility</a>
+      <a href="#heat" data-i18n="nav_heat">Heat Treatment</a>
+      <a href="#why" data-i18n="nav_why">Why Kervan</a>
+      <a href="#contact" data-i18n="nav_contact">Contact</a>
     </div>
     <div class="nav__right">
       <button class="lang-btn" id="lang-toggle" aria-label="Switch language"><b>EN</b> / TR</button>
-      <a href="#quote" class="nav__cta">Request Quote</a>
-      <button class="burger" aria-label="Menu">
+      <a href="#quote" class="nav__cta" data-i18n="nav_quote">Request Quote</a>
+      <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="3" y1="7" x2="21" y2="7"/>
           <line x1="3" y1="12" x2="21" y2="12"/>
@@ -1001,6 +1059,22 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   </div>
 </nav>
 
+<!-- mobile drawer -->
+<div class="mob-panel" id="mob-panel" aria-hidden="true">
+  <button class="mob-panel__close" id="mob-close" aria-label="Close menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="6" y1="6" x2="18" y2="18"/>
+      <line x1="6" y1="18" x2="18" y2="6"/>
+    </svg>
+  </button>
+  <a href="#parts" data-i18n="nav_parts">Parts</a>
+  <a href="#compat" data-i18n="nav_compat">Compatibility</a>
+  <a href="#heat" data-i18n="nav_heat">Heat Treatment</a>
+  <a href="#why" data-i18n="nav_why">Why Kervan</a>
+  <a href="#contact" data-i18n="nav_contact">Contact</a>
+  <a href="#quote" class="mob-panel__cta" data-i18n="nav_quote">Request Quote</a>
+</div>
+
 <!-- ═════════════════════ HERO ═════════════════════ -->
 <section class="hero" id="top">
   <div class="hero__num"><b>00</b> / HERO · KVN-LP-001</div>
@@ -1008,26 +1082,26 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   <div class="wrap hero__in">
     <!-- LEFT: copy -->
     <div class="hero__copy">
-      <div class="eyebrow">Manufacturer · Kartepe, Turkey</div>
+      <div class="eyebrow" data-i18n="hero_eyebrow">Manufacturer · Kartepe, Turkey</div>
       <h1 class="hero__title">
-        Hydraulic Breaker Parts
-        <span>Built to Outlast OEM.</span>
+        <span data-i18n="hero_title_1">Hydraulic Breaker Parts</span>
+        <span data-i18n="hero_title_2">Built to Outlast OEM.</span>
       </h1>
-      <p class="hero__sub">
+      <p class="hero__sub" data-i18n="hero_sub">
         Chisels, pistons, bushings, through bolts and repair kits for 40+ breaker brands. Forged from 42CrMo, CNC-machined and heat-treated in-house to HRC 48–52. Shipped worldwide in 5–10 days.
       </p>
       <div class="hero__ctas">
         <a href="#quote" class="btn btn--primary">
-          Request a Quote
+          <span data-i18n="hero_cta_quote">Request a Quote</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </a>
-        <a href="#parts" class="btn btn--ghost">Browse Parts</a>
+        <a href="#parts" class="btn btn--ghost" data-i18n="hero_cta_parts">Browse Parts</a>
       </div>
       <div class="hero__stats">
-        <div class="stat"><div class="stat__v">42CrMo</div><div class="stat__l">Chromoly Steel</div></div>
-        <div class="stat"><div class="stat__v">HRC 48–52</div><div class="stat__l">Core Hardness</div></div>
-        <div class="stat"><div class="stat__v">5–10 days</div><div class="stat__l">EU Delivery</div></div>
-        <div class="stat"><div class="stat__v">40+ Brands</div><div class="stat__l">OEM Compatible</div></div>
+        <div class="stat"><div class="stat__v">42CrMo</div><div class="stat__l" data-i18n="hero_stat_1_l">Chromoly Steel</div></div>
+        <div class="stat"><div class="stat__v">HRC 48–52</div><div class="stat__l" data-i18n="hero_stat_2_l">Core Hardness</div></div>
+        <div class="stat"><div class="stat__v" data-i18n="hero_stat_3_v">5–10 days</div><div class="stat__l" data-i18n="hero_stat_3_l">EU Delivery</div></div>
+        <div class="stat"><div class="stat__v" data-i18n="hero_stat_4_v">40+ Brands</div><div class="stat__l" data-i18n="hero_stat_4_l">OEM Compatible</div></div>
       </div>
     </div>
 
@@ -1119,7 +1193,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
     </div>
   </div>
 
-  <div class="hero__cue">Scroll</div>
+  <div class="hero__cue" data-i18n="hero_scroll">Scroll</div>
 </section>
 
 <!-- ═════════════════════ PARTS · layout #2 ═════════════════════ -->
@@ -1127,9 +1201,9 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   <div class="sec-num"><b>01</b> / PRODUCT RANGE</div>
   <div class="wrap">
     <div class="sec-head">
-      <div class="eyebrow">Product Range</div>
-      <h2>Spare parts for every breaker.</h2>
-      <p>Manufactured in-house, not resold. Every part forged, CNC-machined and heat-treated under one roof in Kartepe, Kocaeli.</p>
+      <div class="eyebrow" data-i18n="parts_eyebrow">Product Range</div>
+      <h2 data-i18n="parts_title">Spare parts for every breaker.</h2>
+      <p data-i18n="parts_sub">Manufactured in-house, not resold. Every part forged, CNC-machined and heat-treated under one roof in Kartepe, Kocaeli.</p>
     </div>
 
     <div class="parts__grid">
@@ -1137,18 +1211,18 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       <!-- Chisels hero card · spans full 6-col width -->
       <article class="card card--chisel">
         <div>
-          <span class="card__badge">Hero Product · 01</span>
-          <h3>Chisels</h3>
-          <p>Moil, flat, wedge, blunt, conical and wide — forged from 42CrMoA for every demolition job. Custom lengths cut to your breaker model.</p>
+          <span class="card__badge" data-i18n="chi_badge">Hero Product · 01</span>
+          <h3 data-i18n="chi_title">Chisels</h3>
+          <p data-i18n="chi_sub">Moil, flat, wedge, blunt, conical and wide — forged from 42CrMoA for every demolition job. Custom lengths cut to your breaker model.</p>
           <ul class="chisel-types">
-            <li>Moil Point</li>
-            <li>Flat Chisel</li>
-            <li>Wedge</li>
-            <li>Blunt</li>
-            <li>Conical</li>
-            <li>Wide Chisel</li>
+            <li data-i18n="chi_t_1">Moil Point</li>
+            <li data-i18n="chi_t_2">Flat Chisel</li>
+            <li data-i18n="chi_t_3">Wedge</li>
+            <li data-i18n="chi_t_4">Blunt</li>
+            <li data-i18n="chi_t_5">Conical</li>
+            <li data-i18n="chi_t_6">Wide Chisel</li>
           </ul>
-          <div class="spec-line">
+          <div class="spec-line" data-i18n-html="chi_spec_html">
             MATERIAL <b>42CrMoA</b>
             <span>·</span>
             HARDNESS <b>HRC 48–52</b>
@@ -1199,8 +1273,8 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <line x1="7" y1="14" x2="17" y2="14"/>
           </svg>
         </div>
-        <h3>Pistons</h3>
-        <p>Precision-ground striking pistons with superior impact resistance and long service life.</p>
+        <h3 data-i18n="p_pis_t">Pistons</h3>
+        <p data-i18n="p_pis_d">Precision-ground striking pistons with superior impact resistance and long service life.</p>
         <div class="card__foot">
           <span class="card__spec">42CrMo · HRC 52</span>
           <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
@@ -1215,10 +1289,10 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <circle cx="12" cy="12" r="4.5"/>
           </svg>
         </div>
-        <h3>Bushings</h3>
-        <p>Upper and lower tool bushings machined to tight diametral tolerances.</p>
+        <h3 data-i18n="p_bus_t">Bushings</h3>
+        <p data-i18n="p_bus_d">Upper and lower tool bushings machined to tight diametral tolerances.</p>
         <div class="card__foot">
-          <span class="card__spec">Hardened · Lapped</span>
+          <span class="card__spec" data-i18n="p_bus_s">Hardened · Lapped</span>
           <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
         </div>
       </article>
@@ -1234,8 +1308,8 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <line x1="11" y1="10" x2="11" y2="14"/>
           </svg>
         </div>
-        <h3>Through Bolts</h3>
-        <p>High-tensile through bolts with matched nuts and washers, torque-spec ready.</p>
+        <h3 data-i18n="p_bol_t">Through Bolts</h3>
+        <p data-i18n="p_bol_d">High-tensile through bolts with matched nuts and washers, torque-spec ready.</p>
         <div class="card__foot">
           <span class="card__spec">Grade 12.9</span>
           <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
@@ -1252,10 +1326,10 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <line x1="9" y1="14" x2="15" y2="14"/>
           </svg>
         </div>
-        <h3>Repair Kits</h3>
-        <p>Complete seal and wear-part kits matched to your exact breaker model.</p>
+        <h3 data-i18n="p_kit_t">Repair Kits</h3>
+        <p data-i18n="p_kit_d">Complete seal and wear-part kits matched to your exact breaker model.</p>
         <div class="card__foot">
-          <span class="card__spec">Full Rebuild</span>
+          <span class="card__spec" data-i18n="p_kit_s">Full Rebuild</span>
           <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
         </div>
       </article>
@@ -1268,8 +1342,8 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <line x1="9" y1="15" x2="15" y2="15"/>
           </svg>
         </div>
-        <h3>Wedges</h3>
-        <p>Retaining wedges and pins — hardened for shock absorption and long life.</p>
+        <h3 data-i18n="p_wed_t">Wedges</h3>
+        <p data-i18n="p_wed_d">Retaining wedges and pins — hardened for shock absorption and long life.</p>
         <div class="card__foot">
           <span class="card__spec">Induction · HRC 55</span>
           <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
@@ -1285,8 +1359,8 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <line x1="12" y1="14" x2="12" y2="18"/>
           </svg>
         </div>
-        <h3>Front Heads</h3>
-        <p>Forged front heads machined to OEM tolerances with guaranteed fit.</p>
+        <h3 data-i18n="p_fro_t">Front Heads</h3>
+        <p data-i18n="p_fro_d">Forged front heads machined to OEM tolerances with guaranteed fit.</p>
         <div class="card__foot">
           <span class="card__spec">Forged · CNC</span>
           <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
@@ -1302,9 +1376,9 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   <div class="sec-num"><b>02</b> / COMPATIBILITY</div>
   <div class="wrap">
     <div class="compat__head">
-      <div class="eyebrow">Compatibility</div>
-      <h2>Made to fit 40+ breaker brands.</h2>
-      <p>All Kervan parts are reverse-engineered from original equipment and fit-verified before shipping.</p>
+      <div class="eyebrow" data-i18n="compat_eyebrow">Compatibility</div>
+      <h2 data-i18n="compat_title">Made to fit 40+ breaker brands.</h2>
+      <p data-i18n="compat_sub">All Kervan parts are reverse-engineered from original equipment and fit-verified before shipping.</p>
     </div>
 
     <div class="compat__grid">
@@ -1322,7 +1396,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       <div class="brand-cell"><span class="brand-cell__dot"></span><span class="brand-cell__name">Daemo</span><span class="brand-cell__tag">DMB · Alicon</span></div>
     </div>
 
-    <div class="compat__note">+ MANY MORE &nbsp;·&nbsp; DON'T SEE YOURS? <b>REQUEST A QUOTE →</b></div>
+    <div class="compat__note" data-i18n-html="compat_note_html">+ MANY MORE &nbsp;·&nbsp; DON'T SEE YOURS? <b>REQUEST A QUOTE →</b></div>
   </div>
 </section>
 
@@ -1333,19 +1407,19 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
     <div class="heat__grid">
 
       <div class="heat__left">
-        <div class="eyebrow">Heat Treatment</div>
-        <h2>In-house heat treatment facility.</h2>
-        <p>Every chisel and piston we ship passes through our own pit-type furnaces with controlled atmospheres. We also offer heat treatment as a service to third-party manufacturers.</p>
+        <div class="eyebrow" data-i18n="heat_eyebrow">Heat Treatment</div>
+        <h2 data-i18n="heat_title">In-house heat treatment facility.</h2>
+        <p data-i18n="heat_sub">Every chisel and piston we ship passes through our own pit-type furnaces with controlled atmospheres. We also offer heat treatment as a service to third-party manufacturers.</p>
 
         <div class="facility">
           <div class="facility__label">KRV · FACILITY</div>
-          <h3>Kartepe, Kocaeli</h3>
-          <p>Pit-type furnaces, controlled atmosphere, oil and polymer quench baths, in-house HRC / HV metrology.</p>
+          <h3 data-i18n="fac_title">Kartepe, Kocaeli</h3>
+          <p data-i18n="fac_sub">Pit-type furnaces, controlled atmosphere, oil and polymer quench baths, in-house HRC / HV metrology.</p>
           <div class="facility__specs">
-            <div><div class="f-spec__v">950 °C</div><div class="f-spec__l">Max Furnace</div></div>
-            <div><div class="f-spec__v">Ø 1500 mm</div><div class="f-spec__l">Pit Capacity</div></div>
-            <div><div class="f-spec__v">Oil · Polymer</div><div class="f-spec__l">Quench Media</div></div>
-            <div><div class="f-spec__v">HRC · HV</div><div class="f-spec__l">Lab Testing</div></div>
+            <div><div class="f-spec__v">950 °C</div><div class="f-spec__l" data-i18n="fac_spec_1_l">Max Furnace</div></div>
+            <div><div class="f-spec__v">Ø 1500 mm</div><div class="f-spec__l" data-i18n="fac_spec_2_l">Pit Capacity</div></div>
+            <div><div class="f-spec__v">Oil · Polymer</div><div class="f-spec__l" data-i18n="fac_spec_3_l">Quench Media</div></div>
+            <div><div class="f-spec__v">HRC · HV</div><div class="f-spec__l" data-i18n="fac_spec_4_l">Lab Testing</div></div>
           </div>
         </div>
       </div>
@@ -1355,48 +1429,48 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
           <div class="proc__item">
             <div class="proc__num">01</div>
             <div class="proc__body">
-              <h4>Carburizing</h4>
-              <p>Surface hardening for wear-critical parts — chisels, pistons, bushings.</p>
+              <h4 data-i18n="proc_1_t">Carburizing</h4>
+              <p data-i18n="proc_1_d">Surface hardening for wear-critical parts — chisels, pistons, bushings.</p>
             </div>
             <div class="proc__temp">850–950 °C</div>
           </div>
           <div class="proc__item">
             <div class="proc__num">02</div>
             <div class="proc__body">
-              <h4>Quenching</h4>
-              <p>Oil and polymer baths for controlled martensitic transformation.</p>
+              <h4 data-i18n="proc_2_t">Quenching</h4>
+              <p data-i18n="proc_2_d">Oil and polymer baths for controlled martensitic transformation.</p>
             </div>
             <div class="proc__temp">OIL · POLYMER</div>
           </div>
           <div class="proc__item">
             <div class="proc__num">03</div>
             <div class="proc__body">
-              <h4>Tempering</h4>
-              <p>Stress reduction and final toughness on hardened parts.</p>
+              <h4 data-i18n="proc_3_t">Tempering</h4>
+              <p data-i18n="proc_3_d">Stress reduction and final toughness on hardened parts.</p>
             </div>
             <div class="proc__temp">150–650 °C</div>
           </div>
           <div class="proc__item">
             <div class="proc__num">04</div>
             <div class="proc__body">
-              <h4>Normalization</h4>
-              <p>Grain refinement for uniform mechanical properties.</p>
+              <h4 data-i18n="proc_4_t">Normalization</h4>
+              <p data-i18n="proc_4_d">Grain refinement for uniform mechanical properties.</p>
             </div>
-            <div class="proc__temp">AIR COOL</div>
+            <div class="proc__temp" data-i18n="proc_4_temp">AIR COOL</div>
           </div>
           <div class="proc__item">
             <div class="proc__num">05</div>
             <div class="proc__body">
-              <h4>Stress Relief</h4>
-              <p>Removes residual stress from welding and CNC machining.</p>
+              <h4 data-i18n="proc_5_t">Stress Relief</h4>
+              <p data-i18n="proc_5_d">Removes residual stress from welding and CNC machining.</p>
             </div>
             <div class="proc__temp">600–650 °C</div>
           </div>
           <div class="proc__item">
             <div class="proc__num">06</div>
             <div class="proc__body">
-              <h4>Hardness Testing</h4>
-              <p>HRC and HV verification on every production batch.</p>
+              <h4 data-i18n="proc_6_t">Hardness Testing</h4>
+              <p data-i18n="proc_6_d">HRC and HV verification on every production batch.</p>
             </div>
             <div class="proc__temp">HRC · HV</div>
           </div>
@@ -1413,10 +1487,10 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   <div class="wrap">
     <div class="why__head">
       <div>
-        <div class="eyebrow">Why Kervan</div>
-        <h2>Manufacturer. <em>Not a trader.</em></h2>
+        <div class="eyebrow" data-i18n="why_eyebrow">Why Kervan</div>
+        <h2 data-i18n-html="why_title_html">Manufacturer. <em>Not a trader.</em></h2>
       </div>
-      <p>We forge, machine and heat-treat under one roof. That means tighter tolerances, faster lead times and no middleman markups between you and the factory floor.</p>
+      <p data-i18n="why_sub">We forge, machine and heat-treat under one roof. That means tighter tolerances, faster lead times and no middleman markups between you and the factory floor.</p>
     </div>
 
     <div class="why__grid">
@@ -1430,9 +1504,9 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <line x1="9" y1="16" x2="15" y2="16"/>
           </svg>
         </div>
-        <h3>Manufacturer, not reseller</h3>
-        <p>We own our forges, CNC lines and quality lab. No outsourcing, no middlemen — every invoice comes directly from the people who made the part.</p>
-        <div class="why-card__tag">One Factory · One Invoice</div>
+        <h3 data-i18n="why_1_t">Manufacturer, not reseller</h3>
+        <p data-i18n="why_1_d">We own our forges, CNC lines and quality lab. No outsourcing, no middlemen — every invoice comes directly from the people who made the part.</p>
+        <div class="why-card__tag" data-i18n="why_1_tag">One Factory · One Invoice</div>
       </article>
 
       <article class="why-card" data-n="02">
@@ -1442,9 +1516,9 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <path d="M5 14c0 4 3 7 7 7s7-3 7-7"/>
           </svg>
         </div>
-        <h3>In-house heat treatment</h3>
-        <p>Pit-type furnaces with controlled atmospheres. Oil and polymer quench baths. Every production batch verified HRC 48–52 in our own metrology lab.</p>
-        <div class="why-card__tag">HRC 48–52 · Lab Verified</div>
+        <h3 data-i18n="why_2_t">In-house heat treatment</h3>
+        <p data-i18n="why_2_d">Pit-type furnaces with controlled atmospheres. Oil and polymer quench baths. Every production batch verified HRC 48–52 in our own metrology lab.</p>
+        <div class="why-card__tag" data-i18n="why_2_tag">HRC 48–52 · Lab Verified</div>
       </article>
 
       <article class="why-card" data-n="03">
@@ -1455,9 +1529,9 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>
           </svg>
         </div>
-        <h3>5–10 day delivery to Europe</h3>
-        <p>Container-ready packaging and door-to-door logistics for the EU, MENA and Africa. Standard parts often ship from stock the same week you order.</p>
-        <div class="why-card__tag">EU · MENA · Africa</div>
+        <h3 data-i18n="why_3_t">5–10 day delivery to Europe</h3>
+        <p data-i18n="why_3_d">Container-ready packaging and door-to-door logistics for the EU, MENA and Africa. Standard parts often ship from stock the same week you order.</p>
+        <div class="why-card__tag" data-i18n="why_3_tag">EU · MENA · Africa</div>
       </article>
 
       <article class="why-card" data-n="04">
@@ -1469,9 +1543,9 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <line x1="17" y1="18" x2="17" y2="21"/>
           </svg>
         </div>
-        <h3>CNC precision</h3>
-        <p>Modern CNC machining centers hold OEM tolerances on every critical surface. No knock-off castings — every part starts as 42CrMo bar stock.</p>
-        <div class="why-card__tag">42CrMo · OEM Tolerances</div>
+        <h3 data-i18n="why_4_t">CNC precision</h3>
+        <p data-i18n="why_4_d">Modern CNC machining centers hold OEM tolerances on every critical surface. No knock-off castings — every part starts as 42CrMo bar stock.</p>
+        <div class="why-card__tag" data-i18n="why_4_tag">42CrMo · OEM Tolerances</div>
       </article>
 
     </div>
@@ -1485,15 +1559,15 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
     <div class="quote__wrap">
 
       <div class="quote__intro">
-        <div class="eyebrow">Request a Quote</div>
-        <h2>Get a price in 24 hours.</h2>
-        <p>Tell us your breaker model and part — we'll send you a quote with lead time and FOB terms, usually within one business day.</p>
+        <div class="eyebrow" data-i18n="quote_eyebrow">Request a Quote</div>
+        <h2 data-i18n="quote_title">Get a price in 24 hours.</h2>
+        <p data-i18n="quote_sub">Tell us your breaker model and part — we'll send you a quote with lead time and FOB terms, usually within one business day.</p>
 
         <div class="quote__intro-list">
-          <div><b>01</b><span>Send the form with your breaker model and part details.</span></div>
-          <div><b>02</b><span>We confirm fit, spec and stock within 24 hours.</span></div>
-          <div><b>03</b><span>Receive an FOB quote with lead time and payment terms.</span></div>
-          <div><b>04</b><span>Production &amp; door-to-door shipping to your site.</span></div>
+          <div><b>01</b><span data-i18n="quote_step_1">Send the form with your breaker model and part details.</span></div>
+          <div><b>02</b><span data-i18n="quote_step_2">We confirm fit, spec and stock within 24 hours.</span></div>
+          <div><b>03</b><span data-i18n="quote_step_3">Receive an FOB quote with lead time and payment terms.</span></div>
+          <div><b>04</b><span data-i18n="quote_step_4">Production &amp; door-to-door shipping to your site.</span></div>
         </div>
       </div>
 
@@ -1510,51 +1584,51 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
           <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
 
           <div class="form__field">
-            <label class="form__label" for="q-name">Full Name <span>*</span></label>
-            <input class="form__input" id="q-name" name="name" type="text" required placeholder="e.g. John Smith">
+            <label class="form__label" for="q-name"><span data-i18n="form_name">Full Name</span> <span>*</span></label>
+            <input class="form__input" id="q-name" name="name" type="text" required placeholder="e.g. John Smith" data-i18n-ph="form_name_ph">
           </div>
           <div class="form__field">
-            <label class="form__label" for="q-email">Email <span>*</span></label>
-            <input class="form__input" id="q-email" name="email" type="email" required placeholder="you@company.com">
-          </div>
-
-          <div class="form__field">
-            <label class="form__label" for="q-phone">Phone / WhatsApp</label>
-            <input class="form__input" id="q-phone" name="phone" type="tel" placeholder="+90 531 669 37 34">
-          </div>
-          <div class="form__field">
-            <label class="form__label" for="q-qty">Quantity</label>
-            <input class="form__input" id="q-qty" name="quantity" type="number" min="1" placeholder="e.g. 10 pcs">
+            <label class="form__label" for="q-email"><span data-i18n="form_email">Email</span> <span>*</span></label>
+            <input class="form__input" id="q-email" name="email" type="email" required placeholder="you@company.com" data-i18n-ph="form_email_ph">
           </div>
 
           <div class="form__field">
-            <label class="form__label" for="q-part">Part Type <span>*</span></label>
+            <label class="form__label" for="q-phone"><span data-i18n="form_phone">Phone / WhatsApp</span></label>
+            <input class="form__input" id="q-phone" name="phone" type="tel" placeholder="+90 531 669 37 34" data-i18n-ph="form_phone_ph">
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="q-qty"><span data-i18n="form_qty">Quantity</span></label>
+            <input class="form__input" id="q-qty" name="quantity" type="number" min="1" placeholder="e.g. 10 pcs" data-i18n-ph="form_qty_ph">
+          </div>
+
+          <div class="form__field">
+            <label class="form__label" for="q-part"><span data-i18n="form_part">Part Type</span> <span>*</span></label>
             <select class="form__select" id="q-part" name="part_type" required>
-              <option value="">— Select a part —</option>
-              <option value="chisel">Chisel / Moil</option>
-              <option value="piston">Piston</option>
-              <option value="bushing">Bushing</option>
-              <option value="through-bolt">Through Bolt</option>
-              <option value="repair-kit">Repair Kit</option>
-              <option value="wedge">Wedge</option>
-              <option value="front-head">Front Head</option>
-              <option value="other">Other</option>
+              <option value="" data-i18n="form_part_opt">— Select a part —</option>
+              <option value="chisel" data-i18n="form_part_chisel">Chisel / Moil</option>
+              <option value="piston" data-i18n="form_part_piston">Piston</option>
+              <option value="bushing" data-i18n="form_part_bushing">Bushing</option>
+              <option value="through-bolt" data-i18n="form_part_bolt">Through Bolt</option>
+              <option value="repair-kit" data-i18n="form_part_kit">Repair Kit</option>
+              <option value="wedge" data-i18n="form_part_wedge">Wedge</option>
+              <option value="front-head" data-i18n="form_part_front">Front Head</option>
+              <option value="other" data-i18n="form_part_other">Other</option>
             </select>
           </div>
           <div class="form__field">
-            <label class="form__label" for="q-brand">Breaker Brand / Model <span>*</span></label>
-            <input class="form__input" id="q-brand" name="breaker" type="text" required placeholder="e.g. Furukawa HB20G, Rammer S84">
+            <label class="form__label" for="q-brand"><span data-i18n="form_brand">Breaker Brand / Model</span> <span>*</span></label>
+            <input class="form__input" id="q-brand" name="breaker" type="text" required placeholder="e.g. Furukawa HB20G, Rammer S84" data-i18n-ph="form_brand_ph">
           </div>
 
           <div class="form__field form__field--full">
-            <label class="form__label" for="q-msg">Message</label>
-            <textarea class="form__textarea" id="q-msg" name="message" placeholder="Tool diameter, length, drawings, delivery address…"></textarea>
+            <label class="form__label" for="q-msg"><span data-i18n="form_msg">Message</span></label>
+            <textarea class="form__textarea" id="q-msg" name="message" placeholder="Tool diameter, length, drawings, delivery address…" data-i18n-ph="form_msg_ph"></textarea>
           </div>
 
           <div class="form__submit">
-            <span class="form__note">We reply within <b>24 HOURS</b> · Mon–Sat</span>
+            <span class="form__note" data-i18n-html="form_note_html">We reply within <b>24 HOURS</b> · Mon–Sat</span>
             <button type="submit" class="btn btn--primary btn--submit">
-              Send Quote Request
+              <span data-i18n="form_submit">Send Quote Request</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </button>
           </div>
@@ -1575,12 +1649,12 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 
       <!-- brand column -->
       <div class="foot__col">
-        <h4>The Factory</h4>
+        <h4 data-i18n="foot_col_brand">The Factory</h4>
         <div class="foot__brand">
           <span class="brand__mark">K</span>
           <span class="brand__text">KERVAN<b>HEAT</b></span>
         </div>
-        <p class="foot__about">Turkish manufacturer of aftermarket hydraulic breaker parts. We forge, CNC-machine and heat-treat every chisel, piston and bushing under one roof in Kartepe, Kocaeli — and ship worldwide.</p>
+        <p class="foot__about" data-i18n="foot_about">Turkish manufacturer of aftermarket hydraulic breaker parts. We forge, CNC-machine and heat-treat every chisel, piston and bushing under one roof in Kartepe, Kocaeli — and ship worldwide.</p>
         <div class="foot__social">
           <a href="https://wa.me/905316693734" aria-label="WhatsApp" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-1.7-.9-2.9-1.6-4.1-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.7-1-2.3-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1 2.1 3.2 5 4.4c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4s.2-1.3.2-1.4c-.1-.2-.3-.2-.5-.3zM12 2a10 10 0 0 0-8.6 15l-1.4 5 5.2-1.4A10 10 0 1 0 12 2z"/></svg>
@@ -1596,14 +1670,14 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 
       <!-- address column -->
       <div class="foot__col">
-        <h4>Contact</h4>
+        <h4 data-i18n="foot_col_contact">Contact</h4>
         <div class="foot__item">
           <div class="foot__item-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s-8-7-8-13a8 8 0 0 1 16 0c0 6-8 13-8 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
           </div>
           <div class="foot__item-body">
-            <div class="foot__item-label">Factory</div>
-            <div class="foot__item-value">Sadun Atığ Cad. No: 112/A<br>Kartepe / Kocaeli · Turkey</div>
+            <div class="foot__item-label" data-i18n="foot_addr_l">Factory</div>
+            <div class="foot__item-value" data-i18n-html="foot_addr_html">Sadun Atığ Cad. No: 112/A<br>Kartepe / Kocaeli · Turkey</div>
           </div>
         </div>
         <div class="foot__item">
@@ -1611,7 +1685,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 12.8 12.8 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5 12.8 12.8 0 0 0 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
           </div>
           <div class="foot__item-body">
-            <div class="foot__item-label">Phone · WhatsApp</div>
+            <div class="foot__item-label" data-i18n="foot_phone_l">Phone · WhatsApp</div>
             <div class="foot__item-value"><a href="https://wa.me/905316693734">+90 531 669 37 34</a></div>
           </div>
         </div>
@@ -1620,7 +1694,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M22 7 12 13 2 7"/></svg>
           </div>
           <div class="foot__item-body">
-            <div class="foot__item-label">Email</div>
+            <div class="foot__item-label" data-i18n="foot_email_l">Email</div>
             <div class="foot__item-value"><a href="mailto:info@kervanheat.com">info@kervanheat.com</a></div>
           </div>
         </div>
@@ -1628,14 +1702,14 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 
       <!-- hours column -->
       <div class="foot__col">
-        <h4>Hours · Service</h4>
+        <h4 data-i18n="foot_col_hours">Hours · Service</h4>
         <div class="foot__item">
           <div class="foot__item-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
           </div>
           <div class="foot__item-body">
-            <div class="foot__item-label">Working Hours</div>
-            <div class="foot__item-value">Mon – Sat<br>08:00 – 18:00 (GMT+3)</div>
+            <div class="foot__item-label" data-i18n="foot_hours_l">Working Hours</div>
+            <div class="foot__item-value" data-i18n-html="foot_hours_html">Mon – Sat<br>08:00 – 18:00 (GMT+3)</div>
           </div>
         </div>
         <div class="foot__item">
@@ -1643,8 +1717,8 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 22 2 13 21l-2-9z"/></svg>
           </div>
           <div class="foot__item-body">
-            <div class="foot__item-label">Shipping</div>
-            <div class="foot__item-value">Worldwide · 5–10 days<br>EU, MENA, Africa</div>
+            <div class="foot__item-label" data-i18n="foot_ship_l">Shipping</div>
+            <div class="foot__item-value" data-i18n-html="foot_ship_html">Worldwide · 5–10 days<br>EU, MENA, Africa</div>
           </div>
         </div>
         <div class="foot__item">
@@ -1652,8 +1726,8 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7 9 18l-5-5"/></svg>
           </div>
           <div class="foot__item-body">
-            <div class="foot__item-label">Response</div>
-            <div class="foot__item-value">Quotes within 24 hours</div>
+            <div class="foot__item-label" data-i18n="foot_resp_l">Response</div>
+            <div class="foot__item-value" data-i18n="foot_resp">Quotes within 24 hours</div>
           </div>
         </div>
       </div>
@@ -1662,17 +1736,18 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 
     <!-- mono tagline row above copyright -->
     <div class="foot__tagline">
-      <span>Manufactured in <b>Turkey</b> · In-house <b>heat treatment</b> · Shipped <b>worldwide</b></span>
+      <span data-i18n-html="foot_tagline_html">Manufactured in <b>Turkey</b> · In-house <b>heat treatment</b> · Shipped <b>worldwide</b></span>
     </div>
 
     <!-- copyright -->
     <div class="foot__bottom">
-      <span>© 2026 <b>Kervan Isıl İşlem Ltd. Şti.</b> · All rights reserved.</span>
+      <span data-i18n-html="foot_copy_html">© 2026 <b>Kervan Isıl İşlem Ltd. Şti.</b> · All rights reserved.</span>
       <span>kervanheat.com</span>
     </div>
 
   </div>
 </footer>
 
+<script src="script.js"></script>
 </body>
 </html>
