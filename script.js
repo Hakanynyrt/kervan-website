@@ -31,6 +31,8 @@ why_1_t:"Manufacturer, not reseller",why_1_d:"We own our forges, CNC lines and q
 why_2_t:"In-house heat treatment",why_2_d:"Pit-type furnaces with controlled atmospheres. Oil and polymer quench baths. Every production batch verified HRC 48\u201352 in our own metrology lab.",why_2_tag:"HRC 48\u201352 \u00b7 Lab Verified",
 why_3_t:"5\u201310 day delivery to Europe",why_3_d:"Container-ready packaging and door-to-door logistics for the EU, MENA and Africa. Standard parts often ship from stock the same week you order.",why_3_tag:"EU \u00b7 MENA \u00b7 Africa",
 why_4_t:"CNC precision",why_4_d:"Modern CNC machining centers hold OEM tolerances on every critical surface. No knock-off castings \u2014 every part starts as 42CrMo bar stock.",why_4_tag:"42CrMo \u00b7 OEM Tolerances",
+gal_eyebrow:"From the Factory Floor",gal_title:"See where your parts are made.",gal_sub:"CNC machining centers, pit-type furnaces, quality control \u2014 every step happens under one roof in Kartepe, Kocaeli.",
+vid_eyebrow:"Facility Tour",vid_title:"Watch the process.",vid_sub:"From raw 42CrMo bar stock to finished, heat-treated chisel \u2014 see the full production line in Kartepe.",
 quote_eyebrow:"Request a Quote",quote_title:"Get a price in 24 hours.",quote_sub:"Tell us your breaker model and part \u2014 we\u2019ll send you a quote with lead time and FOB terms, usually within one business day.",
 quote_step_1:"Send the form with your breaker model and part details.",quote_step_2:"We confirm fit, spec and stock within 24 hours.",quote_step_3:"Receive an FOB quote with lead time and payment terms.",quote_step_4:"Production & door-to-door shipping to your site.",
 form_name:"Full Name",form_email:"Email",form_phone:"Phone / WhatsApp",form_qty:"Quantity",form_part:"Part Type",form_brand:"Breaker Brand / Model",form_msg:"Message",
@@ -45,7 +47,8 @@ foot_hours_l:"Working Hours",foot_hours_html:'Mon \u2013 Sat<br>08:00 \u2013 18:
 foot_ship_l:"Shipping",foot_ship_html:'Worldwide \u00b7 5\u201310 days<br>EU, MENA, Africa',
 foot_resp_l:"Response",foot_resp:"Quotes within 24 hours",
 foot_tagline_html:'Manufactured in <b>Turkey</b> \u00b7 In-house <b>heat treatment</b> \u00b7 Shipped <b>worldwide</b>',
-foot_copy_html:'\u00a9 2026 <b>Kervan Is\u0131l \u0130\u015flem Ltd. \u015eti.</b> \u00b7 All rights reserved.'
+foot_copy_html:'\u00a9 2026 <b>Kervan Is\u0131l \u0130\u015flem Ltd. \u015eti.</b> \u00b7 All rights reserved.',
+chat_title:"Kervan Assistant",chat_welcome:"Hi! I can help with breaker parts, specs and quotes. What are you looking for?",chat_input_ph:"Type a message\u2026",chat_send:"Send",chat_typing:"Typing\u2026",chat_err:"Connection error. Please try again."
 },
 tr:{
 nav_parts:"Par\u00e7alar",nav_compat:"Uyumluluk",nav_heat:"Is\u0131l \u0130\u015flem",nav_why:"Neden Kervan",nav_contact:"\u0130leti\u015fim",nav_quote:"Teklif \u0130ste",
@@ -79,6 +82,8 @@ why_1_t:"\u00dcretici, sat\u0131c\u0131 de\u011fil",why_1_d:"F\u0131r\u0131nlar,
 why_2_t:"Tesiste \u0131s\u0131l i\u015flem",why_2_d:"Kuyu tipi kontroll\u00fc atmosfer f\u0131r\u0131nlar. Her parti HRC 48\u201352 olarak do\u011frulan\u0131r.",why_2_tag:"HRC 48\u201352 \u00b7 Laboratuvar Onayl\u0131",
 why_3_t:"Avrupa\u2019ya 5\u201310 g\u00fcnde teslim",why_3_d:"Konteynere haz\u0131r paketleme. AB, MENA ve Afrika\u2019ya kap\u0131dan kap\u0131ya lojistik.",why_3_tag:"AB \u00b7 MENA \u00b7 Afrika",
 why_4_t:"CNC hassasiyeti",why_4_d:"Modern CNC i\u015fleme, her kritik y\u00fczeyde OEM toleranslar\u0131. Sahte d\u00f6k\u00fcm yok.",why_4_tag:"42CrMo \u00b7 OEM Tolerans",
+gal_eyebrow:"Fabrikadan Kareler",gal_title:"Par\u00e7alar\u0131n\u0131z nerede \u00fcretiliyor g\u00f6r\u00fcn.",gal_sub:"CNC i\u015fleme, kuyu tipi f\u0131r\u0131nlar, kalite kontrol \u2014 her ad\u0131m Kartepe/Kocaeli\u2019deki tek \u00e7at\u0131 alt\u0131nda.",
+vid_eyebrow:"Tesis Turu",vid_title:"S\u00fcreci izleyin.",vid_sub:"Ham 42CrMo \u00e7elik \u00e7ubuktan bitmi\u015f \u0131s\u0131l i\u015flemli keskiye \u2014 Kartepe\u2019deki tam \u00fcretim hatt\u0131.",
 quote_eyebrow:"Teklif Al",quote_title:"24 saatte fiyat al\u0131n.",quote_sub:"K\u0131r\u0131c\u0131 modelinizi ve par\u00e7ay\u0131 yaz\u0131n \u2014 termin ve FOB fiyat genellikle 1 i\u015f g\u00fcn\u00fc i\u00e7inde elinizde.",
 quote_step_1:"K\u0131r\u0131c\u0131 model ve par\u00e7a detaylar\u0131yla formu g\u00f6nderin.",quote_step_2:"24 saat i\u00e7inde uygunluk, spec ve stok onay\u0131.",quote_step_3:"Termin ve \u00f6deme ko\u015fullar\u0131yla FOB fiyat teklifi.",quote_step_4:"\u00dcretim ve sahaya kap\u0131dan kap\u0131ya sevkiyat.",
 form_name:"Ad Soyad",form_email:"E-posta",form_phone:"Telefon / WhatsApp",form_qty:"Adet",form_part:"Par\u00e7a Tipi",form_brand:"K\u0131r\u0131c\u0131 Marka / Model",form_msg:"Mesaj",
@@ -93,27 +98,17 @@ foot_hours_l:"\u00c7al\u0131\u015fma Saatleri",foot_hours_html:'Pzt \u2013 Cmt<b
 foot_ship_l:"Sevkiyat",foot_ship_html:'D\u00fcnya geneli \u00b7 5\u201310 g\u00fcn<br>AB, MENA, Afrika',
 foot_resp_l:"Yan\u0131t",foot_resp:"24 saat i\u00e7inde teklif",
 foot_tagline_html:'<b>T\u00fcrkiye</b>\u2019de \u00fcretilir \u00b7 Tesiste <b>\u0131s\u0131l i\u015flem</b> \u00b7 <b>D\u00fcnyaya</b> sevk',
-foot_copy_html:'\u00a9 2026 <b>Kervan Is\u0131l \u0130\u015flem Ltd. \u015eti.</b> \u00b7 T\u00fcm haklar\u0131 sakl\u0131d\u0131r.'
+foot_copy_html:'\u00a9 2026 <b>Kervan Is\u0131l \u0130\u015flem Ltd. \u015eti.</b> \u00b7 T\u00fcm haklar\u0131 sakl\u0131d\u0131r.',
+chat_title:"Kervan Asistan",chat_welcome:"Merhaba! K\u0131r\u0131c\u0131 par\u00e7alar\u0131, \u00f6zellikler ve teklif konusunda yard\u0131mc\u0131 olabilirim. Ne ar\u0131yorsunuz?",chat_input_ph:"Mesaj\u0131n\u0131z\u0131 yaz\u0131n\u2026",chat_send:"G\u00f6nder",chat_typing:"Yaz\u0131yor\u2026",chat_err:"Ba\u011flant\u0131 hatas\u0131. L\u00fctfen tekrar deneyin."
 }};
 
 var lang='en',userOverride=false;
 
 function apply(next){
-  lang=next;
-  var d=T[lang];
-  document.documentElement.lang=lang;
-  document.querySelectorAll('[data-i18n]').forEach(function(el){
-    var k=el.getAttribute('data-i18n');
-    if(d[k]!==undefined) el.textContent=d[k];
-  });
-  document.querySelectorAll('[data-i18n-html]').forEach(function(el){
-    var k=el.getAttribute('data-i18n-html');
-    if(d[k]!==undefined) el.innerHTML=d[k];
-  });
-  document.querySelectorAll('[data-i18n-ph]').forEach(function(el){
-    var k=el.getAttribute('data-i18n-ph');
-    if(d[k]!==undefined) el.setAttribute('placeholder',d[k]);
-  });
+  lang=next;var d=T[lang];document.documentElement.lang=lang;
+  document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(d[k]!==undefined)el.textContent=d[k];});
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el){var k=el.getAttribute('data-i18n-html');if(d[k]!==undefined)el.innerHTML=d[k];});
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el){var k=el.getAttribute('data-i18n-ph');if(d[k]!==undefined)el.setAttribute('placeholder',d[k]);});
   var btn=document.getElementById('lang-toggle');
   if(btn) btn.innerHTML=lang==='en'?'<b>EN</b> / TR':'EN / <b>TR</b>';
 }
@@ -122,33 +117,58 @@ function detect(){
   var nav=(navigator.language||'').toLowerCase();
   if(nav.indexOf('tr')===0){apply('tr');return;}
   apply('en');
-  try{
-    fetch('https://ipapi.co/json/',{cache:'force-cache'})
-      .then(function(r){return r.ok?r.json():null;})
-      .then(function(data){
-        if(data&&data.country_code==='TR'&&!userOverride&&lang!=='tr') apply('tr');
-      }).catch(function(){});
-  }catch(e){}
+  try{fetch('https://ipapi.co/json/',{cache:'force-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(data){if(data&&data.country_code==='TR'&&!userOverride&&lang!=='tr')apply('tr');}).catch(function(){});}catch(e){}
 }
 
 document.addEventListener('DOMContentLoaded',function(){
+  /* preloader */
+  var preloader=document.getElementById('preloader');
+  if(preloader) window.addEventListener('load',function(){preloader.classList.add('preloader--done');});
+
   detect();
 
   /* lang toggle */
   var langBtn=document.getElementById('lang-toggle');
-  if(langBtn) langBtn.addEventListener('click',function(){
-    userOverride=true;
-    apply(lang==='en'?'tr':'en');
+  if(langBtn) langBtn.addEventListener('click',function(){userOverride=true;apply(lang==='en'?'tr':'en');});
+
+  /* navbar scroll + active link */
+  var navEl=document.getElementById('nav');
+  var navLinks=document.querySelectorAll('.nav__links a[href^="#"]');
+  var sections=[];
+  navLinks.forEach(function(a){
+    var id=a.getAttribute('href').slice(1);
+    var sec=document.getElementById(id);
+    if(sec) sections.push({el:sec,link:a});
   });
 
-  /* navbar scroll */
-  var navEl=document.getElementById('nav');
   var onScroll=function(){
-    if(window.scrollY>20) navEl.classList.add('nav--scrolled');
+    var sy=window.scrollY;
+    if(sy>20) navEl.classList.add('nav--scrolled');
     else navEl.classList.remove('nav--scrolled');
+
+    /* scroll-to-top */
+    var toTop=document.getElementById('to-top');
+    if(toTop){
+      if(sy>600) toTop.classList.add('to-top--show');
+      else toTop.classList.remove('to-top--show');
+    }
+
+    /* active nav link */
+    var current='';
+    for(var i=sections.length-1;i>=0;i--){
+      if(sections[i].el.offsetTop-120<=sy) {current=sections[i].link.getAttribute('href');break;}
+    }
+    navLinks.forEach(function(a){
+      if(a.getAttribute('href')===current) a.classList.add('is-active');
+      else a.classList.remove('is-active');
+    });
   };
   window.addEventListener('scroll',onScroll,{passive:true});
   onScroll();
+
+  /* scroll-to-top click */
+  var toTopBtn=document.getElementById('to-top');
+  if(toTopBtn) toTopBtn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
 
   /* hamburger */
   var burger=document.getElementById('burger');
@@ -168,37 +188,108 @@ document.addEventListener('DOMContentLoaded',function(){
 
   /* fade-in on scroll */
   var io=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target);}
+    entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target);}});
+  },{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.section,.foot,.hero__copy,.drawing,.parts__grid,.compat__grid,.compat__head,.heat__left,.heat__right,.why-card,.why__head,.quote__intro,.quote__card,.foot__col,.gallery__grid,.vid__frame').forEach(function(el){
+    el.classList.add('fade-up');io.observe(el);
+  });
+
+  /* lightbox */
+  var lb=document.getElementById('lightbox');
+  var lbImg=document.getElementById('lb-img');
+  var lbClose=document.getElementById('lb-close');
+  if(lb){
+    document.querySelectorAll('.gallery__item').forEach(function(item){
+      item.addEventListener('click',function(){
+        var src=item.getAttribute('data-src')||item.querySelector('img').src;
+        lbImg.src=src;
+        lb.classList.add('lightbox--open');
+        document.body.style.overflow='hidden';
+      });
     });
-  },{threshold:0.12,rootMargin:'0px 0px -60px 0px'});
-  var fadeEls=document.querySelectorAll('.section,.foot,.hero__copy,.drawing,.parts__grid,.compat__grid,.compat__head,.heat__left,.heat__right,.why-card,.why__head,.quote__intro,.quote__card,.foot__col');
-  fadeEls.forEach(function(el){el.classList.add('fade-up');io.observe(el);});
+    var closeLb=function(){lb.classList.remove('lightbox--open');document.body.style.overflow='';lbImg.src='';};
+    lb.addEventListener('click',function(e){if(e.target===lb) closeLb();});
+    if(lbClose) lbClose.addEventListener('click',closeLb);
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&lb.classList.contains('lightbox--open')) closeLb();});
+  }
 
   /* form submit */
   var form=document.getElementById('quote-form');
   var status=document.getElementById('form-status');
   if(form) form.addEventListener('submit',function(e){
     e.preventDefault();
-    var d=T[lang];
-    var submitBtn=form.querySelector('.btn--submit');
-    submitBtn.disabled=true;
-    status.textContent=d.form_sending;
-    status.className='form__status';
+    var d=T[lang];var submitBtn=form.querySelector('.btn--submit');
+    submitBtn.disabled=true;status.textContent=d.form_sending;status.className='form__status';
     fetch(form.action,{method:'POST',headers:{'Accept':'application/json'},body:new FormData(form)})
       .then(function(r){return r.json();})
-      .then(function(json){
-        if(json.success){
-          status.textContent=d.form_ok;
-          status.className='form__status form__status--ok';
-          form.reset();
-        }else{throw new Error('fail');}
-      })
-      .catch(function(){
-        status.textContent=d.form_err;
-        status.className='form__status form__status--err';
-      })
+      .then(function(json){if(json.success){status.textContent=d.form_ok;status.className='form__status form__status--ok';form.reset();}else{throw new Error('fail');}})
+      .catch(function(){status.textContent=d.form_err;status.className='form__status form__status--err';})
       .finally(function(){submitBtn.disabled=false;});
   });
+
+  /* chatbot */
+  var chatFab=document.getElementById('chat-fab');
+  var chatPanel=document.getElementById('chat-panel');
+  var chatClose=document.getElementById('chat-close');
+  var chatMsgs=document.getElementById('chat-msgs');
+  var chatInput=document.getElementById('chat-input');
+  var chatSend=document.getElementById('chat-send');
+  var chatHistory=[];
+
+  if(chatFab&&chatPanel){
+    var toggleChat=function(open){
+      chatPanel.classList.toggle('chat-panel--open',open);
+      chatFab.classList.toggle('chat-fab--hidden',open);
+      if(open) chatInput.focus();
+    };
+    chatFab.addEventListener('click',function(){toggleChat(true);});
+    chatClose.addEventListener('click',function(){toggleChat(false);});
+
+    var addMsg=function(text,role){
+      var div=document.createElement('div');
+      div.className='chat__msg chat__msg--'+(role==='user'?'user':'bot');
+      div.textContent=text;
+      chatMsgs.appendChild(div);
+      chatMsgs.scrollTop=chatMsgs.scrollHeight;
+      return div;
+    };
+
+    var sendChat=function(){
+      var text=chatInput.value.trim();
+      if(!text) return;
+      chatInput.value='';
+      addMsg(text,'user');
+      chatHistory.push({role:'user',content:text});
+
+      var d=T[lang];
+      var typing=document.createElement('div');
+      typing.className='chat__msg chat__msg--bot chat__msg--typing';
+      typing.textContent=d.chat_typing;
+      chatMsgs.appendChild(typing);
+      chatMsgs.scrollTop=chatMsgs.scrollHeight;
+      chatSend.disabled=true;
+
+      fetch('/chat',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({messages:chatHistory.slice(-10)})
+      })
+        .then(function(r){return r.json();})
+        .then(function(data){
+          typing.remove();
+          var reply=data.message||data.error||d.chat_err;
+          addMsg(reply,'bot');
+          chatHistory.push({role:'assistant',content:reply});
+        })
+        .catch(function(){
+          typing.remove();
+          addMsg(d.chat_err,'bot');
+        })
+        .finally(function(){chatSend.disabled=false;chatInput.focus();});
+    };
+
+    chatSend.addEventListener('click',sendChat);
+    chatInput.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}});
+  }
 });
 })();

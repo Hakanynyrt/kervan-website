@@ -1027,9 +1027,233 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 @media(prefers-reduced-motion:reduce){
   .fade-up{opacity:1!important;transform:none!important;transition:none!important}
 }
+
+/* ═══ PRELOADER ═══ */
+.preloader{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg-0);
+  display:grid;place-items:center;
+  transition:opacity .5s ease,visibility .5s;
+}
+.preloader--done{opacity:0;visibility:hidden;pointer-events:none}
+.preloader__mark{
+  width:56px;height:56px;border-radius:12px;
+  background:linear-gradient(145deg,var(--brand-hi),var(--brand-lo));
+  display:grid;place-items:center;
+  font-family:var(--f-head);font-weight:700;color:#0A0B0D;font-size:22px;
+  animation:pulse-loader 1.2s ease-in-out infinite;
+}
+@keyframes pulse-loader{
+  0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(232,120,26,.4)}
+  50%{transform:scale(1.08);box-shadow:0 0 40px 8px rgba(232,120,26,.2)}
+}
+
+/* ═══ WHATSAPP FLOAT ═══ */
+.wa-float{
+  position:fixed;bottom:28px;right:28px;z-index:90;
+  width:58px;height:58px;border-radius:50%;
+  background:#25D366;color:#fff;
+  display:grid;place-items:center;
+  box-shadow:0 4px 20px rgba(37,211,102,.4),0 0 0 0 rgba(37,211,102,.3);
+  transition:transform .25s,box-shadow .25s;
+  animation:wa-ring 3s ease-in-out 4s infinite;
+}
+.wa-float:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,.5)}
+.wa-float svg{width:28px;height:28px}
+@keyframes wa-ring{
+  0%,100%{box-shadow:0 4px 20px rgba(37,211,102,.4),0 0 0 0 rgba(37,211,102,.3)}
+  10%{box-shadow:0 4px 20px rgba(37,211,102,.4),0 0 0 10px rgba(37,211,102,0)}
+  20%{box-shadow:0 4px 20px rgba(37,211,102,.4),0 0 0 0 rgba(37,211,102,.3)}
+  30%{box-shadow:0 4px 20px rgba(37,211,102,.4),0 0 0 10px rgba(37,211,102,0)}
+}
+@media(max-width:560px){.wa-float{bottom:20px;right:20px;width:52px;height:52px}}
+
+/* ═══ SCROLL-TO-TOP ═══ */
+.to-top{
+  position:fixed;bottom:28px;right:100px;z-index:90;
+  width:44px;height:44px;border-radius:10px;
+  background:var(--bg-3);border:1px solid var(--line-2);
+  color:var(--t-2);display:grid;place-items:center;
+  opacity:0;visibility:hidden;transform:translateY(10px);
+  transition:opacity .3s,visibility .3s,transform .3s,background .25s,color .25s;
+}
+.to-top--show{opacity:1;visibility:visible;transform:translateY(0)}
+.to-top:hover{background:var(--brand);color:#0A0B0D;border-color:var(--brand)}
+.to-top svg{width:18px;height:18px}
+@media(max-width:560px){.to-top{bottom:20px;right:82px;width:40px;height:40px}}
+
+/* ═══ NAV ACTIVE LINK ═══ */
+.nav__links a.is-active{color:var(--brand)}
+
+/* ═══ GALLERY ═══ */
+.gallery{
+  background:linear-gradient(180deg,var(--bg-0) 0%,#0B0D12 100%);
+}
+.gallery__grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+}
+@media(max-width:860px){.gallery__grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.gallery__grid{grid-template-columns:repeat(2,1fr);gap:8px}}
+
+.gallery__item{
+  position:relative;aspect-ratio:4/3;overflow:hidden;
+  border-radius:var(--r-md);border:1px solid var(--line);
+  cursor:pointer;
+}
+.gallery__item img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform .5s ease,filter .3s;
+  filter:brightness(.85) saturate(.9);
+}
+.gallery__item:hover img{transform:scale(1.06);filter:brightness(1) saturate(1)}
+.gallery__item::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 50%,rgba(8,9,11,.6));
+  pointer-events:none;
+}
+.gallery__label{
+  position:absolute;bottom:10px;left:12px;z-index:2;
+  font-family:var(--f-mono);font-size:9px;font-weight:500;
+  color:var(--t-2);letter-spacing:.1em;text-transform:uppercase;
+  opacity:0;transition:opacity .3s;
+}
+.gallery__item:hover .gallery__label{opacity:1}
+
+/* lightbox */
+.lightbox{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(8,9,11,.95);
+  display:none;place-items:center;
+  padding:40px;cursor:zoom-out;
+}
+.lightbox--open{display:grid}
+.lightbox img{
+  max-width:100%;max-height:90vh;object-fit:contain;
+  border-radius:var(--r-lg);border:1px solid var(--line-2);
+  box-shadow:0 40px 100px rgba(0,0,0,.6);
+}
+.lightbox__close{
+  position:absolute;top:20px;right:20px;
+  width:44px;height:44px;border-radius:8px;
+  border:1px solid var(--line);color:var(--t-1);
+  display:grid;place-items:center;cursor:pointer;
+  transition:border-color .2s,color .2s;
+}
+.lightbox__close:hover{border-color:var(--brand);color:var(--brand)}
+.lightbox__close svg{width:20px;height:20px}
+
+/* ═══ VIDEO ═══ */
+.vid{
+  background:linear-gradient(180deg,#0B0D12 0%,var(--bg-0) 100%);
+}
+.vid__frame{
+  position:relative;max-width:920px;
+  border-radius:var(--r-xl);overflow:hidden;
+  border:1px solid var(--line-2);
+  aspect-ratio:16/9;
+}
+.vid__frame::before{
+  content:"";position:absolute;top:-1px;left:22px;right:22px;height:2px;
+  background:linear-gradient(90deg,var(--brand),transparent 65%);z-index:2;
+}
+.vid__frame video{
+  width:100%;height:100%;object-fit:cover;
+  display:block;
+}
+
+/* ═══ CHATBOT ═══ */
+.chat-fab{
+  position:fixed;bottom:28px;left:28px;z-index:90;
+  width:54px;height:54px;border-radius:50%;
+  background:var(--brand);color:#0A0B0D;
+  display:grid;place-items:center;
+  box-shadow:0 4px 20px rgba(232,120,26,.35);
+  transition:transform .25s,box-shadow .25s;
+}
+.chat-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(232,120,26,.5)}
+.chat-fab svg{width:24px;height:24px}
+.chat-fab--hidden{display:none}
+
+.chat-panel{
+  position:fixed;bottom:28px;left:28px;z-index:91;
+  width:380px;max-height:520px;
+  background:var(--bg-1);border:1px solid var(--line-2);
+  border-radius:var(--r-xl);overflow:hidden;
+  display:none;flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(232,120,26,.08);
+}
+.chat-panel--open{display:flex}
+@media(max-width:560px){
+  .chat-panel{left:12px;right:12px;bottom:12px;width:auto;max-height:80vh}
+  .chat-fab{bottom:20px;left:20px;width:48px;height:48px}
+}
+
+.chat__head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:1px solid var(--line);
+  background:var(--bg-2);
+}
+.chat__head-title{
+  font-family:var(--f-head);font-size:14px;font-weight:600;
+  display:flex;align-items:center;gap:10px;
+}
+.chat__head-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#4ADE80;box-shadow:0 0 8px rgba(74,222,128,.6);
+}
+.chat__head-close{
+  width:32px;height:32px;border-radius:6px;
+  display:grid;place-items:center;color:var(--t-2);
+  border:1px solid var(--line);
+}
+.chat__head-close:hover{color:var(--brand);border-color:var(--brand)}
+.chat__head-close svg{width:16px;height:16px}
+
+.chat__msgs{
+  flex:1;overflow-y:auto;padding:16px 18px;
+  display:flex;flex-direction:column;gap:10px;
+  min-height:260px;
+}
+.chat__msg{
+  max-width:82%;padding:11px 14px;border-radius:12px;
+  font-size:13.5px;line-height:1.5;word-break:break-word;
+}
+.chat__msg--bot{
+  background:var(--bg-2);border:1px solid var(--line);
+  color:var(--t-1);align-self:flex-start;
+  border-bottom-left-radius:4px;
+}
+.chat__msg--user{
+  background:rgba(232,120,26,.12);border:1px solid rgba(232,120,26,.22);
+  color:var(--t-1);align-self:flex-end;
+  border-bottom-right-radius:4px;
+}
+.chat__msg--typing{color:var(--t-3);font-style:italic}
+
+.chat__input{
+  display:flex;gap:8px;padding:12px 14px;
+  border-top:1px solid var(--line);background:var(--bg-2);
+}
+.chat__input input{
+  flex:1;padding:10px 14px;border-radius:8px;
+  background:var(--bg-1);border:1px solid var(--line);
+  font:inherit;color:var(--t-1);font-size:13px;
+}
+.chat__input input::placeholder{color:var(--t-3)}
+.chat__input input:focus{outline:0;border-color:var(--brand)}
+.chat__input button{
+  padding:0 14px;border-radius:8px;
+  background:var(--brand);color:#0A0B0D;font-weight:600;font-size:13px;
+  transition:background .2s;
+}
+.chat__input button:hover{background:var(--brand-hi)}
+.chat__input button:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
+
+<!-- ═════════════════════ PRELOADER ═════════════════════ -->
+<div class="preloader" id="preloader"><div class="preloader__mark">K</div></div>
 
 <!-- ═════════════════════ NAVBAR ═════════════════════ -->
 <nav class="nav" id="nav">
@@ -1552,9 +1776,56 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   </div>
 </section>
 
+<!-- ═════════════════════ GALLERY ═════════════════════ -->
+<section class="section gallery" id="gallery">
+  <div class="sec-num"><b>05</b> / GALLERY</div>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow" data-i18n="gal_eyebrow">From the Factory Floor</div>
+      <h2 data-i18n="gal_title">See where your parts are made.</h2>
+      <p data-i18n="gal_sub">CNC machining centers, pit-type furnaces, quality control — every step happens under one roof in Kartepe, Kocaeli.</p>
+    </div>
+    <div class="gallery__grid">
+      <div class="gallery__item" data-src="images/IMG_9321.jpg"><img src="images/IMG_9321.jpg" alt="Kervan Heat facility" loading="lazy"><span class="gallery__label">CNC · 001</span></div>
+      <div class="gallery__item" data-src="images/IMG_9322.jpg"><img src="images/IMG_9322.jpg" alt="CNC machining" loading="lazy"><span class="gallery__label">CNC · 002</span></div>
+      <div class="gallery__item" data-src="images/IMG_9324.jpg"><img src="images/IMG_9324.jpg" alt="Heat treatment furnace" loading="lazy"><span class="gallery__label">FURNACE · 003</span></div>
+      <div class="gallery__item" data-src="images/IMG_9325.jpg"><img src="images/IMG_9325.jpg" alt="Production line" loading="lazy"><span class="gallery__label">PRODUCTION · 004</span></div>
+      <div class="gallery__item" data-src="images/IMG_9326.jpg"><img src="images/IMG_9326.jpg" alt="Quality control" loading="lazy"><span class="gallery__label">QC · 005</span></div>
+      <div class="gallery__item" data-src="images/IMG_9327.jpg"><img src="images/IMG_9327.jpg" alt="Finished parts" loading="lazy"><span class="gallery__label">PARTS · 006</span></div>
+      <div class="gallery__item" data-src="images/IMG_9328.jpg"><img src="images/IMG_9328.jpg" alt="Workshop" loading="lazy"><span class="gallery__label">WORKSHOP · 007</span></div>
+      <div class="gallery__item" data-src="images/IMG_9329.jpg"><img src="images/IMG_9329.jpg" alt="Material storage" loading="lazy"><span class="gallery__label">STOCK · 008</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox__close" id="lb-close" aria-label="Close">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+  </button>
+  <img id="lb-img" src="" alt="">
+</div>
+
+<!-- ═════════════════════ VIDEO ═════════════════════ -->
+<section class="section vid" id="video">
+  <div class="sec-num"><b>06</b> / FACILITY</div>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow" data-i18n="vid_eyebrow">Facility Tour</div>
+      <h2 data-i18n="vid_title">Watch the process.</h2>
+      <p data-i18n="vid_sub">From raw 42CrMo bar stock to finished, heat-treated chisel — see the full production line in Kartepe.</p>
+    </div>
+    <div class="vid__frame">
+      <video controls preload="metadata" poster="hero.jpg">
+        <source src="video.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+</section>
+
 <!-- ═════════════════════ QUOTE FORM · layout #6 ═════════════════════ -->
 <section class="section quote" id="quote">
-  <div class="sec-num"><b>05</b> / REQUEST QUOTE</div>
+  <div class="sec-num"><b>07</b> / REQUEST QUOTE</div>
   <div class="wrap">
     <div class="quote__wrap">
 
@@ -1747,6 +2018,40 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 
   </div>
 </footer>
+
+<!-- ═════════════════════ FLOATING ELEMENTS ═════════════════════ -->
+
+<!-- WhatsApp -->
+<a href="https://wa.me/905316693734" class="wa-float" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-1.7-.9-2.9-1.6-4.1-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.7-1-2.3-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1 2.1 3.2 5 4.4c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4s.2-1.3.2-1.4c-.1-.2-.3-.2-.5-.3zM12 2a10 10 0 0 0-8.6 15l-1.4 5 5.2-1.4A10 10 0 1 0 12 2z"/></svg>
+</a>
+
+<!-- Scroll to top -->
+<button class="to-top" id="to-top" aria-label="Scroll to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<!-- Chat FAB -->
+<button class="chat-fab" id="chat-fab" aria-label="Chat">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</button>
+
+<!-- Chat panel -->
+<div class="chat-panel" id="chat-panel">
+  <div class="chat__head">
+    <span class="chat__head-title"><span class="chat__head-dot"></span> <span data-i18n="chat_title">Kervan Assistant</span></span>
+    <button class="chat__head-close" id="chat-close" aria-label="Close chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+    </button>
+  </div>
+  <div class="chat__msgs" id="chat-msgs">
+    <div class="chat__msg chat__msg--bot" data-i18n="chat_welcome">Hi! I can help with breaker parts, specs and quotes. What are you looking for?</div>
+  </div>
+  <div class="chat__input">
+    <input type="text" id="chat-input" placeholder="Type a message…" data-i18n-ph="chat_input_ph" autocomplete="off">
+    <button id="chat-send" data-i18n="chat_send">Send</button>
+  </div>
+</div>
 
 <script src="script.js"></script>
 </body>
