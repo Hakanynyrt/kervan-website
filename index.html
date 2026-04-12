@@ -29,7 +29,7 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Manufacturer",
+  "@type": "Organization",
   "@id": "https://kervanheat.com/#manufacturer",
   "name": "Kervan Heat",
   "alternateName": "Kervan Isıl İşlem",
@@ -972,7 +972,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 
 /* ═══ MOBILE DRAWER ═══ */
 .mob-panel{
-  position:fixed;inset:0;z-index:99;
+  position:fixed;inset:0;z-index:101;
   background:rgba(8,9,11,.985);
   -webkit-backdrop-filter:blur(20px) saturate(160%);
   backdrop-filter:blur(20px) saturate(160%);
@@ -1049,7 +1049,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       <button class="lang-btn" id="lang-toggle" aria-label="Switch language"><b>EN</b> / TR</button>
       <a href="#quote" class="nav__cta" data-i18n="nav_quote">Request Quote</a>
       <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <line x1="3" y1="7" x2="21" y2="7"/>
           <line x1="3" y1="12" x2="21" y2="12"/>
           <line x1="3" y1="17" x2="21" y2="17"/>
@@ -1062,7 +1062,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 <!-- mobile drawer -->
 <div class="mob-panel" id="mob-panel" aria-hidden="true">
   <button class="mob-panel__close" id="mob-close" aria-label="Close menu">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <line x1="6" y1="6" x2="18" y2="18"/>
       <line x1="6" y1="18" x2="18" y2="6"/>
     </svg>
@@ -1093,7 +1093,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       <div class="hero__ctas">
         <a href="#quote" class="btn btn--primary">
           <span data-i18n="hero_cta_quote">Request a Quote</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </a>
         <a href="#parts" class="btn btn--ghost" data-i18n="hero_cta_parts">Browse Parts</a>
       </div>
@@ -1266,7 +1266,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       <!-- Pistons -->
       <article class="card card--part">
         <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <rect x="7" y="3" width="10" height="18" rx="1"/>
             <line x1="7" y1="8" x2="17" y2="8"/>
             <line x1="7" y1="11" x2="17" y2="11"/>
@@ -1277,14 +1277,14 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p data-i18n="p_pis_d">Precision-ground striking pistons with superior impact resistance and long service life.</p>
         <div class="card__foot">
           <span class="card__spec">42CrMo · HRC 52</span>
-          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
         </div>
       </article>
 
       <!-- Bushings -->
       <article class="card card--part">
         <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <circle cx="12" cy="12" r="9"/>
             <circle cx="12" cy="12" r="4.5"/>
           </svg>
@@ -1293,14 +1293,14 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p data-i18n="p_bus_d">Upper and lower tool bushings machined to tight diametral tolerances.</p>
         <div class="card__foot">
           <span class="card__spec" data-i18n="p_bus_s">Hardened · Lapped</span>
-          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
         </div>
       </article>
 
       <!-- Through Bolts -->
       <article class="card card--part">
         <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <rect x="3" y="10" width="14" height="4"/>
             <rect x="17" y="8" width="4" height="8"/>
             <line x1="5" y1="10" x2="5" y2="14"/>
@@ -1312,14 +1312,14 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p data-i18n="p_bol_d">High-tensile through bolts with matched nuts and washers, torque-spec ready.</p>
         <div class="card__foot">
           <span class="card__spec">Grade 12.9</span>
-          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
         </div>
       </article>
 
       <!-- Repair Kits -->
       <article class="card card--part">
         <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <rect x="3" y="7" width="18" height="13" rx="1"/>
             <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
             <line x1="12" y1="11" x2="12" y2="17"/>
@@ -1330,14 +1330,14 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p data-i18n="p_kit_d">Complete seal and wear-part kits matched to your exact breaker model.</p>
         <div class="card__foot">
           <span class="card__spec" data-i18n="p_kit_s">Full Rebuild</span>
-          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
         </div>
       </article>
 
       <!-- Wedges -->
       <article class="card card--part">
         <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <path d="M4 19 L20 19 L14 5 Z"/>
             <line x1="9" y1="15" x2="15" y2="15"/>
           </svg>
@@ -1346,14 +1346,14 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p data-i18n="p_wed_d">Retaining wedges and pins — hardened for shock absorption and long life.</p>
         <div class="card__foot">
           <span class="card__spec">Induction · HRC 55</span>
-          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
         </div>
       </article>
 
       <!-- Front Heads -->
       <article class="card card--part">
         <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <rect x="6" y="4" width="12" height="16" rx="1"/>
             <circle cx="12" cy="10" r="2.2"/>
             <line x1="12" y1="14" x2="12" y2="18"/>
@@ -1363,7 +1363,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p data-i18n="p_fro_d">Forged front heads machined to OEM tolerances with guaranteed fit.</p>
         <div class="card__foot">
           <span class="card__spec">Forged · CNC</span>
-          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span class="card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
         </div>
       </article>
 
@@ -1497,7 +1497,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 
       <article class="why-card" data-n="01">
         <div class="why-card__icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <path d="M3 20h18"/>
             <path d="M5 20V8l7-5 7 5v12"/>
             <rect x="9" y="12" width="6" height="8"/>
@@ -1511,7 +1511,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 
       <article class="why-card" data-n="02">
         <div class="why-card__icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <path d="M12 3c1.5 3 3 4.5 3 7a3 3 0 0 1-6 0c0-2.5 1.5-4 3-7z"/>
             <path d="M5 14c0 4 3 7 7 7s7-3 7-7"/>
           </svg>
@@ -1523,7 +1523,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 
       <article class="why-card" data-n="03">
         <div class="why-card__icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <circle cx="12" cy="12" r="9"/>
             <path d="M2 12h20"/>
             <path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>
@@ -1536,7 +1536,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 
       <article class="why-card" data-n="04">
         <div class="why-card__icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <rect x="3" y="8" width="18" height="10" rx="1"/>
             <path d="M7 8V5h10v3"/>
             <line x1="7" y1="18" x2="7" y2="21"/>
@@ -1629,7 +1629,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
             <span class="form__note" data-i18n-html="form_note_html">We reply within <b>24 HOURS</b> · Mon–Sat</span>
             <button type="submit" class="btn btn--primary btn--submit">
               <span data-i18n="form_submit">Send Quote Request</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </button>
           </div>
 
@@ -1657,13 +1657,13 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p class="foot__about" data-i18n="foot_about">Turkish manufacturer of aftermarket hydraulic breaker parts. We forge, CNC-machine and heat-treat every chisel, piston and bushing under one roof in Kartepe, Kocaeli — and ship worldwide.</p>
         <div class="foot__social">
           <a href="https://wa.me/905316693734" aria-label="WhatsApp" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-1.7-.9-2.9-1.6-4.1-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.7-1-2.3-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1 2.1 3.2 5 4.4c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4s.2-1.3.2-1.4c-.1-.2-.3-.2-.5-.3zM12 2a10 10 0 0 0-8.6 15l-1.4 5 5.2-1.4A10 10 0 1 0 12 2z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-1.7-.9-2.9-1.6-4.1-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.7-1-2.3-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1 2.1 3.2 5 4.4c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4s.2-1.3.2-1.4c-.1-.2-.3-.2-.5-.3zM12 2a10 10 0 0 0-8.6 15l-1.4 5 5.2-1.4A10 10 0 1 0 12 2z"/></svg>
           </a>
           <a href="mailto:info@kervanheat.com" aria-label="Email">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M22 7 12 13 2 7"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M22 7 12 13 2 7"/></svg>
           </a>
           <a href="https://instagram.com/kervanmakina" aria-label="Instagram" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg>
           </a>
         </div>
       </div>
@@ -1673,7 +1673,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <h4 data-i18n="foot_col_contact">Contact</h4>
         <div class="foot__item">
           <div class="foot__item-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s-8-7-8-13a8 8 0 0 1 16 0c0 6-8 13-8 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 22s-8-7-8-13a8 8 0 0 1 16 0c0 6-8 13-8 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
           </div>
           <div class="foot__item-body">
             <div class="foot__item-label" data-i18n="foot_addr_l">Factory</div>
@@ -1682,7 +1682,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         </div>
         <div class="foot__item">
           <div class="foot__item-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 12.8 12.8 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5 12.8 12.8 0 0 0 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 12.8 12.8 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5 12.8 12.8 0 0 0 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
           </div>
           <div class="foot__item-body">
             <div class="foot__item-label" data-i18n="foot_phone_l">Phone · WhatsApp</div>
@@ -1691,7 +1691,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         </div>
         <div class="foot__item">
           <div class="foot__item-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M22 7 12 13 2 7"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M22 7 12 13 2 7"/></svg>
           </div>
           <div class="foot__item-body">
             <div class="foot__item-label" data-i18n="foot_email_l">Email</div>
@@ -1705,7 +1705,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <h4 data-i18n="foot_col_hours">Hours · Service</h4>
         <div class="foot__item">
           <div class="foot__item-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
           </div>
           <div class="foot__item-body">
             <div class="foot__item-label" data-i18n="foot_hours_l">Working Hours</div>
@@ -1714,7 +1714,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         </div>
         <div class="foot__item">
           <div class="foot__item-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 22 2 13 21l-2-9z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 11 22 2 13 21l-2-9z"/></svg>
           </div>
           <div class="foot__item-body">
             <div class="foot__item-label" data-i18n="foot_ship_l">Shipping</div>
@@ -1723,7 +1723,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         </div>
         <div class="foot__item">
           <div class="foot__item-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7 9 18l-5-5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 7 9 18l-5-5"/></svg>
           </div>
           <div class="foot__item-body">
             <div class="foot__item-label" data-i18n="foot_resp_l">Response</div>
