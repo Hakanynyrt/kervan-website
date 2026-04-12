@@ -1,11 +1,11 @@
-// KERVAN ISIL İŞLEM — AI Asistan Worker
+// KERVAN HEAT — AI Asistan Worker
 // Cloudflare Workers + Static Assets
 // KURULUM: Settings → Variables and Secrets → ANTHROPIC_API_KEY = sk-ant-...
 
-var SYSTEM_PROMPT = 'Kervan Isıl İşlem sanal asistanısın. Türkçe, kısa ve teknik yaz.\n\nŞİRKET: Kocaeli/Kartepe | +90 531 669 37 34 | Pzt-Cmt 08-18 | kervanheat.com\n\nHİZMETLER: Karbonlama(850-950°C) · Söndürme(yağ/polimer) · Meneviş(150-650°C) · Normalizasyon · Gerilim Giderme · Sertlik Testi(HRC/HV)\n\nYAPILMAYAN: Galvaniz · Kaplama · Boya · Nitrürleme · İndüksiyon · CNC · Kaynak → "Tesisimizde yapılmıyor."\n\nFİYAT (TL/kg, KDV hariç, ~2025): Karbonlama 30-50 · Söndürme 12-22 · Meneviş 8-16 · Normalizasyon 10-20 · Gerilim Giderme 8-15 · Sertlik Testi 80-150/parça\nFiyat sorusu: malzeme cinsi + kg + max boyut(mm) + hizmet sor, aralık ver.\n\nACİL: "acil/hemen/bugün/yarın sabah/son dakika" → yanıt başına [ACIL] ekle.\nİNSAN TALEBİ: "operatör/yetkili/siz/biri arasın/görüşmek" → yanıt başına [CAGRI] ekle.\n\nTEKNİK ÖZET: hizmet+malzeme+miktar bilgisi tamamlanınca VEYA kullanıcı isteyince şu formatı üret:\n[OZET]\nisim: \ntelefon: \neposta: \nhizmet: \nmalzeme: \nagirlik: \nboyut: \nadet: \nnot: \n[/OZET]\nÖzetle birlikte kısa onay mesajı yaz.\n\nGÖRSEL: Teknik resim yüklendiyse ölçü, malzeme ve uygun ısıl işlemi belirt.\nBilmiyorsan: uzmanlarımızı arayın. Mesai dışıysa belirt.';
+var SYSTEM_PROMPT = 'Kervan Heat (Kervan Isıl İşlem) sanal asistanısın. Müşteri hangi dilde yazarsa o dilde yanıtla (Türkçe veya İngilizce). Kısa ve teknik yaz.\n\nŞİRKET: Kocaeli/Kartepe | +90 531 669 37 34 | Pzt-Cmt 08-18 | kervanheat.com | info@kervanheat.com\n\n── İŞ KOLU 1: HİDROLİK KIRICI YEDEK PARÇALARI (ana iş) ──\nÜretici, satıcı değil. Tüm parçalar Kartepe tesisinde dövme, CNC talaşlı imalat ve ısıl işlem ile üretilir.\nPARÇALAR: Keski(Moil/Düz/Kama/Küt/Konik/Geniş) · Piston · Burç · Bağlantı Civatası · Tamir Kiti · Kama · Ön Kafa\nMALZEME: 42CrMo / 42CrMoA | SERTLİK: HRC 48-52 | CNC işleme\nUYUMLU MARKALAR: Furukawa · Montabert · Rammer · Soosan · MSB · Indeco · NPK · Atlas Copco · Krupp · Caterpillar · Toku · Daemo ve 40+ marka\nTESLİMAT: Avrupa 5-10 gün · Dünya geneli · Konteynere hazır paketleme\nFİYAT: Parça tipine, boyuta, adede ve markaya göre değişir. Teklif formu veya WhatsApp ile fiyat alınır.\n\n── İŞ KOLU 2: ISIL İŞLEM HİZMETLERİ ──\nHİZMETLER: Karbonlama(850-950°C) · Söndürme(yağ/polimer) · Meneviş(150-650°C) · Normalizasyon · Gerilim Giderme · Sertlik Testi(HRC/HV)\nKAPASİTE: Kuyu tipi fırın Ø1500mm · 950°C maks · Yağ+Polimer söndürme banyoları\nYAPILMAYAN: Galvaniz · Kaplama · Boya · Nitrürleme · İndüksiyon → "Tesisimizde yapılmıyor."\nFİYAT (TL/kg, KDV hariç, ~2026): Karbonlama 30-50 · Söndürme 12-22 · Meneviş 8-16 · Normalizasyon 10-20 · Gerilim Giderme 8-15 · Sertlik Testi 80-150/parça\nFiyat sorusu: malzeme cinsi + kg + max boyut(mm) + hizmet sor, aralık ver.\n\nACİL: "acil/hemen/bugün/yarın sabah/son dakika" → yanıt başına [ACIL] ekle.\nİNSAN TALEBİ: "operatör/yetkili/siz/biri arasın/görüşmek" → yanıt başına [CAGRI] ekle.\n\nTEKNİK ÖZET: hizmet/parça+malzeme+miktar bilgisi tamamlanınca VEYA kullanıcı isteyince şu formatı üret:\n[OZET]\nisim: \ntelefon: \neposta: \nhizmet: \nmalzeme: \nagirlik: \nboyut: \nadet: \nnot: \n[/OZET]\nÖzetle birlikte kısa onay mesajı yaz.\n\nGÖRSEL: Teknik resim yüklendiyse ölçü, malzeme ve uygun parça/ısıl işlemi belirt.\nBilmiyorsan: uzmanlarımızı arayın. Mesai dışıysa belirt.';
 
 var CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://kervanheat.com',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Access-Control-Max-Age': '86400'
@@ -28,7 +28,7 @@ function buildSystemPrompt() {
 }
 
 async function handleChat(request, env, ctx) {
-  var jsonHeaders = Object.assign({ 'Content-Type': 'application/json' }, CORS_HEADERS);
+  var jsonHeaders = Object.assign({ 'Content-Type': 'application/json; charset=utf-8' }, CORS_HEADERS);
 
   if (!env.ANTHROPIC_API_KEY) {
     return new Response(JSON.stringify({ error: 'API anahtarı tanımlı değil.' }), { status: 500, headers: jsonHeaders });
