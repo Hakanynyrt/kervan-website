@@ -1183,8 +1183,9 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 }
 .chat-panel--open{display:flex}
 @media(max-width:560px){
-  .chat-panel{left:12px;right:12px;bottom:12px;width:auto;max-height:80vh}
+  .chat-panel{left:0;right:0;bottom:0;top:0;width:auto;max-height:none;border-radius:0;z-index:200}
   .chat-fab{bottom:20px;left:20px;width:48px;height:48px}
+  .chat__msgs{min-height:0;flex:1}
 }
 
 .chat__head{
@@ -1236,7 +1237,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 .chat__input input{
   flex:1;padding:10px 14px;border-radius:8px;
   background:var(--bg-1);border:1px solid var(--line);
-  font:inherit;color:var(--t-1);font-size:13px;
+  font:inherit;color:var(--t-1);font-size:16px;
 }
 .chat__input input::placeholder{color:var(--t-3)}
 .chat__input input:focus{outline:0;border-color:var(--brand)}
