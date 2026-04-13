@@ -51,7 +51,7 @@ foot_copy_html:'\u00a9 2026 <b>Kervan Is\u0131l \u0130\u015flem Ltd. \u015eti.</
 chat_title:"Kervan",chat_welcome:"Hey \u2014 need help finding a part or getting a price? Just ask.",chat_input_ph:"Ask us anything\u2026",chat_send:"Send",chat_typing:"Typing\u2026",chat_err:"Connection problem. Try again or WhatsApp us."
 },
 tr:{
-nav_parts:"Par\u00e7alar",nav_compat:"Uyumluluk",nav_heat:"Is\u0131l \u0130\u015flem",nav_why:"Neden Biz",nav_catalogue:"Katalog",nav_contact:"\u0130leti\u015fim",nav_quote:"Teklif Al",
+nav_parts:"Yedek Par\u00e7alar",nav_compat:"Uyumluluk",nav_heat:"Is\u0131l \u0130\u015flem",nav_why:"Neden Biz",nav_catalogue:"Katalog",nav_contact:"\u0130leti\u015fim",nav_quote:"Teklif Al",
 hero_eyebrow:"\u00dcretici \u00b7 Kartepe, T\u00fcrkiye",hero_title_1:"K\u0131r\u0131c\u0131 Par\u00e7alar\u0131.",hero_title_2:"Do\u011frudan Fabrikadan.",
 hero_sub:"Furukawa, Rammer, Soosan, Atlas Copco ve 40+ marka i\u00e7in u\u00e7, piston, bur\u00e7, saplama ve tamir tak\u0131m\u0131 yap\u0131yoruz. 42CrMo \u00e7elik, HRC 48\u201352, kendi tesisimizde \u0131s\u0131l i\u015flem. Stoktaysa ayn\u0131 g\u00fcn \u00e7\u0131kar. Yak\u0131n \u00fclkelere 5\u201310 g\u00fcn.",
 hero_cta_quote:"Teklif Al",hero_cta_parts:"Par\u00e7alar\u0131 G\u00f6r",
