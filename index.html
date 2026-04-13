@@ -495,7 +495,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 .chisel-viz .drawing__corner{width:18px;height:18px}
 
 /* Satellite part cards — span 2 on desktop, 1 on mobile */
-.card--part{grid-column:span 2;display:flex;flex-direction:column}
+.card--part{grid-column:span 2;display:flex;flex-direction:column;cursor:pointer}
 @media(max-width:960px){.card--part{grid-column:span 1}}
 
 .card--part .icon{
@@ -590,6 +590,8 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   color:var(--t-3);letter-spacing:.1em;
 }
 .compat__note b{color:var(--brand);font-weight:500}
+.compat__note a{color:inherit;transition:color .2s}
+.compat__note a:hover{color:var(--brand)}
 
 /* ═══ HEAT TREATMENT · layout #4 ═══ */
 /* 2-col: statement + credential card left, numbered process rows right */
@@ -1264,6 +1266,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       <a href="#compat" data-i18n="nav_compat">Compatibility</a>
       <a href="#heat" data-i18n="nav_heat">Heat Treatment</a>
       <a href="#why" data-i18n="nav_why">Why Kervan</a>
+      <a href="katalog.html" data-i18n="nav_catalogue">Catalogue</a>
       <a href="#contact" data-i18n="nav_contact">Contact</a>
     </div>
     <div class="nav__right">
@@ -1292,6 +1295,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   <a href="#compat" data-i18n="nav_compat">Compatibility</a>
   <a href="#heat" data-i18n="nav_heat">Heat Treatment</a>
   <a href="#why" data-i18n="nav_why">Why Kervan</a>
+  <a href="katalog.html" data-i18n="nav_catalogue">Catalogue</a>
   <a href="#contact" data-i18n="nav_contact">Contact</a>
   <a href="#quote" class="mob-panel__cta" data-i18n="nav_quote">Request Quote</a>
 </div>
@@ -1430,7 +1434,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
     <div class="parts__grid">
 
       <!-- Chisels hero card · spans full 6-col width -->
-      <article class="card card--chisel">
+      <article class="card card--chisel" data-part="chisel">
         <div>
           <span class="card__badge" data-i18n="chi_badge">Hero Product · 01</span>
           <h3 data-i18n="chi_title">Chisels</h3>
@@ -1485,7 +1489,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       </article>
 
       <!-- Pistons -->
-      <article class="card card--part">
+      <article class="card card--part" data-part="piston">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <rect x="7" y="3" width="10" height="18" rx="1"/>
@@ -1503,7 +1507,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       </article>
 
       <!-- Bushings -->
-      <article class="card card--part">
+      <article class="card card--part" data-part="bushing">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <circle cx="12" cy="12" r="9"/>
@@ -1519,7 +1523,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       </article>
 
       <!-- Through Bolts -->
-      <article class="card card--part">
+      <article class="card card--part" data-part="through-bolt">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <rect x="3" y="10" width="14" height="4"/>
@@ -1538,7 +1542,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       </article>
 
       <!-- Repair Kits -->
-      <article class="card card--part">
+      <article class="card card--part" data-part="repair-kit">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <rect x="3" y="7" width="18" height="13" rx="1"/>
@@ -1556,7 +1560,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       </article>
 
       <!-- Wedges -->
-      <article class="card card--part">
+      <article class="card card--part" data-part="wedge">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <path d="M4 19 L20 19 L14 5 Z"/>
@@ -1572,7 +1576,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       </article>
 
       <!-- Front Heads -->
-      <article class="card card--part">
+      <article class="card card--part" data-part="front-head">
         <div class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <rect x="6" y="4" width="12" height="16" rx="1"/>
@@ -1617,7 +1621,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       <div class="brand-cell"><span class="brand-cell__dot"></span><span class="brand-cell__name">Daemo</span><span class="brand-cell__tag">DMB · Alicon</span></div>
     </div>
 
-    <div class="compat__note" data-i18n-html="compat_note_html">+ MANY MORE &nbsp;·&nbsp; DON'T SEE YOURS? <b>REQUEST A QUOTE →</b></div>
+    <div class="compat__note" data-i18n-html="compat_note_html">+ MANY MORE &nbsp;·&nbsp; DON'T SEE YOURS? <a href="#quote"><b>REQUEST A QUOTE →</b></a></div>
   </div>
 </section>
 

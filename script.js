@@ -1,6 +1,6 @@
 (function(){
 var T={en:{
-nav_parts:"Parts",nav_compat:"Compatibility",nav_heat:"Heat Treatment",nav_why:"Why Kervan",nav_contact:"Contact",nav_quote:"Request Quote",
+nav_parts:"Parts",nav_compat:"Compatibility",nav_heat:"Heat Treatment",nav_why:"Why Kervan",nav_catalogue:"Catalogue",nav_contact:"Contact",nav_quote:"Request Quote",
 hero_eyebrow:"Manufacturer \u00b7 Kartepe, Turkey",hero_title_1:"Hydraulic Breaker Parts",hero_title_2:"Built to Outlast OEM.",
 hero_sub:"Chisels, pistons, bushings, through bolts and repair kits for 40+ breaker brands. Forged from 42CrMo, CNC-machined and heat-treated in-house to HRC 48\u201352. Shipped worldwide in 5\u201310 days.",
 hero_cta_quote:"Request a Quote",hero_cta_parts:"Browse Parts",
@@ -16,7 +16,7 @@ p_kit_t:"Repair Kits",p_kit_d:"Complete seal and wear-part kits matched to your 
 p_wed_t:"Wedges",p_wed_d:"Retaining wedges and pins \u2014 hardened for shock absorption and long life.",
 p_fro_t:"Front Heads",p_fro_d:"Forged front heads machined to OEM tolerances with guaranteed fit.",
 compat_eyebrow:"Compatibility",compat_title:"Made to fit 40+ breaker brands.",compat_sub:"All Kervan parts are reverse-engineered from original equipment and fit-verified before shipping.",
-compat_note_html:"+ MANY MORE &nbsp;\u00b7&nbsp; DON\u2019T SEE YOURS? <b>REQUEST A QUOTE \u2192</b>",
+compat_note_html:'+ MANY MORE &nbsp;\u00b7&nbsp; DON\u2019T SEE YOURS? <a href="#quote"><b>REQUEST A QUOTE \u2192</b></a>',
 heat_eyebrow:"Heat Treatment",heat_title:"In-house heat treatment facility.",heat_sub:"Every chisel and piston we ship passes through our own pit-type furnaces with controlled atmospheres. We also offer heat treatment as a service to third-party manufacturers.",
 fac_title:"Kartepe, Kocaeli",fac_sub:"Pit-type furnaces, controlled atmosphere, oil and polymer quench baths, in-house HRC / HV metrology.",
 fac_spec_1_l:"Max Furnace",fac_spec_2_l:"Pit Capacity",fac_spec_3_l:"Quench Media",fac_spec_4_l:"Lab Testing",
@@ -51,7 +51,7 @@ foot_copy_html:'\u00a9 2026 <b>Kervan Is\u0131l \u0130\u015flem Ltd. \u015eti.</
 chat_title:"Kervan Assistant",chat_welcome:"Hi! I can help with breaker parts, specs and quotes. What are you looking for?",chat_input_ph:"Type a message\u2026",chat_send:"Send",chat_typing:"Typing\u2026",chat_err:"Connection error. Please try again."
 },
 tr:{
-nav_parts:"Par\u00e7alar",nav_compat:"Uyumluluk",nav_heat:"Is\u0131l \u0130\u015flem",nav_why:"Neden Kervan",nav_contact:"\u0130leti\u015fim",nav_quote:"Teklif \u0130ste",
+nav_parts:"Par\u00e7alar",nav_compat:"Uyumluluk",nav_heat:"Is\u0131l \u0130\u015flem",nav_why:"Neden Kervan",nav_catalogue:"Katalog",nav_contact:"\u0130leti\u015fim",nav_quote:"Teklif \u0130ste",
 hero_eyebrow:"\u00dcretici \u00b7 Kartepe, T\u00fcrkiye",hero_title_1:"Hidrolik K\u0131r\u0131c\u0131 Par\u00e7alar\u0131",hero_title_2:"Orijinalden Uzun \u00d6m\u00fcrl\u00fc.",
 hero_sub:"40+ k\u0131r\u0131c\u0131 markas\u0131 i\u00e7in keski, piston, bur\u00e7, ba\u011flant\u0131 civatas\u0131 ve tamir kitleri. 42CrMo d\u00f6vme, CNC i\u015fleme ve tesisimizde \u0131s\u0131l i\u015flemle HRC 48\u201352. D\u00fcnya geneline 5\u201310 g\u00fcnde sevk.",
 hero_cta_quote:"Teklif \u0130ste",hero_cta_parts:"Par\u00e7alar\u0131 G\u00f6r",
@@ -67,7 +67,7 @@ p_kit_t:"Tamir Kitleri",p_kit_d:"K\u0131r\u0131c\u0131 modelinize \u00f6zel tam 
 p_wed_t:"Kamalar",p_wed_d:"Tutucu kamalar ve pimler \u2014 darbe i\u00e7in sertle\u015ftirilmi\u015f.",
 p_fro_t:"\u00d6n Kafalar",p_fro_d:"D\u00f6vme \u00f6n kafalar, OEM \u00f6l\u00e7\u00fclerinde garantili uyum.",
 compat_eyebrow:"Uyumluluk",compat_title:"40+ k\u0131r\u0131c\u0131 markas\u0131na uyumlu.",compat_sub:"T\u00fcm Kervan par\u00e7alar\u0131 orijinalinden \u00f6l\u00e7\u00fclendirilir, sevkiyat \u00f6ncesi uygunluk kontrol\u00fcnden ge\u00e7er.",
-compat_note_html:'VE FAZLASI &nbsp;\u00b7&nbsp; MARKANIZ YOK MU? <b>TEKL\u0130F \u0130STEY\u0130N \u2192</b>',
+compat_note_html:'VE FAZLASI &nbsp;\u00b7&nbsp; MARKANIZ YOK MU? <a href="#quote"><b>TEKL\u0130F \u0130STEY\u0130N \u2192</b></a>',
 heat_eyebrow:"Is\u0131l \u0130\u015flem",heat_title:"Tesisimizde \u0131s\u0131l i\u015flem.",heat_sub:"Sevk etti\u011fimiz her keski ve piston kuyu tipi f\u0131r\u0131nlar\u0131m\u0131zda kontroll\u00fc atmosferde i\u015flenir. \u00dc\u00e7\u00fcnc\u00fc taraf \u00fcreticilere de \u0131s\u0131l i\u015flem hizmeti sunuyoruz.",
 fac_title:"Kartepe, Kocaeli",fac_sub:"Kuyu tipi f\u0131r\u0131nlar, kontroll\u00fc atmosfer, ya\u011f ve polimer s\u00f6nd\u00fcrme banyolar\u0131, tesiste HRC / HV metroloji.",
 fac_spec_1_l:"Maks F\u0131r\u0131n",fac_spec_2_l:"Kuyu Kapasitesi",fac_spec_3_l:"S\u00f6nd\u00fcrme",fac_spec_4_l:"Laboratuvar",
@@ -169,6 +169,19 @@ document.addEventListener('DOMContentLoaded',function(){
   /* scroll-to-top click */
   var toTopBtn=document.getElementById('to-top');
   if(toTopBtn) toTopBtn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+
+  /* part card click → scroll to form + pre-select part type */
+  var partSelect=document.getElementById('q-part');
+  document.querySelectorAll('[data-part]').forEach(function(card){
+    card.addEventListener('click',function(){
+      var val=card.getAttribute('data-part');
+      if(partSelect){
+        partSelect.value=val;
+        var quote=document.getElementById('quote');
+        if(quote) quote.scrollIntoView({behavior:'smooth',block:'start'});
+      }
+    });
+  });
 
   /* hamburger */
   var burger=document.getElementById('burger');
