@@ -1,0 +1,13 @@
+{
+  "name": "Kervan Heat Design Generator",
+  "id": "kervan-heat-design-gen",
+  "api": "1.0.0",
+  "main": "code.js",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  }
+}
