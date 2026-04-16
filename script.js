@@ -31,8 +31,6 @@ furnace_title:"Pit Furnace Capacity",furnace_label:"KRV \u00b7 FURNACE SPEC",
 furnace_col_unit:"Furnace",furnace_col_dia:"Diameter",furnace_col_depth:"Depth",furnace_col_temp:"Max Temp",furnace_col_atm:"Atmosphere",
 furnace_atm_ctrl:"Controlled",furnace_atm_ctrl2:"Controlled \u00b7 Endo",furnace_atm_air:"Air",furnace_atm_oil:"Oil \u00b7 Polymer",
 furnace_temper:"Tempering Furnace",furnace_quench:"Quench Baths",furnace_two:"2 \u00d7 \u00d8 1200 mm",
-proof_eyebrow:"Credentials",proof_title:"Tested, certified, trusted.",proof_trust:"Trusted by demolition & mining operators worldwide",
-cert_iso_tag:"Quality Management",cert_mat_n:"Material Certificates",cert_hard_n:"Hardness Reports",cert_warr_n:"Fit Guarantee",cert_warr_tag:"OEM Tolerances",
 cta_eyebrow:"Ready When You Are",cta_title_html:'Need a part? <em>Send the specs.</em>',cta_sub:"Breaker model, part type and quantity \u2014 we reply with price, lead time and FOB terms within 24 hours. Or ping us on WhatsApp for a faster answer.",cta_quote:"Get a Quote",cta_wa:"WhatsApp",
 why_eyebrow:"Why Us",why_title_html:'We make it. <em>Right here.</em>',why_sub:"Forge, CNC, heat treatment \u2014 all under one roof. You buy from the factory that made your part. Shorter lead times, better prices.",
 why_1_t:"We\u2019re the factory",why_1_d:"Our furnaces, our CNC machines, our lab. When you call, you\u2019re talking to the people who made your parts.",why_1_tag:"Direct from Factory",
@@ -90,8 +88,6 @@ furnace_title:"Kuyu F\u0131r\u0131n Kapasitesi",furnace_label:"KRV \u00b7 FIRIN 
 furnace_col_unit:"F\u0131r\u0131n",furnace_col_dia:"\u00c7ap",furnace_col_depth:"Derinlik",furnace_col_temp:"Maks S\u0131cakl\u0131k",furnace_col_atm:"Atmosfer",
 furnace_atm_ctrl:"Kontroll\u00fc",furnace_atm_ctrl2:"Kontroll\u00fc \u00b7 Endo",furnace_atm_air:"Hava",furnace_atm_oil:"Ya\u011f \u00b7 Polimer",
 furnace_temper:"Menevi\u015f F\u0131r\u0131n\u0131",furnace_quench:"S\u00f6nd\u00fcrme Banyolar\u0131",furnace_two:"2 \u00d7 \u00d8 1200 mm",
-proof_eyebrow:"Belgeler",proof_title:"Test edilmi\u015f, belgelenmi\u015f, g\u00fcvenilir.",proof_trust:"D\u00fcnya \u00e7ap\u0131nda y\u0131k\u0131m ve maden operat\u00f6rleri taraf\u0131ndan tercih edilir",
-cert_iso_tag:"Kalite Y\u00f6netimi",cert_mat_n:"Malzeme Sertifikalar\u0131",cert_hard_n:"Sertlik Raporlar\u0131",cert_warr_n:"Uyum Garantisi",cert_warr_tag:"OEM Toleranslar\u0131",
 cta_eyebrow:"Haz\u0131r\u0131z",cta_title_html:'Par\u00e7a m\u0131 laz\u0131m? <em>\u00d6l\u00e7\u00fcleri g\u00f6nder.</em>',cta_sub:"K\u0131r\u0131c\u0131 modeli, par\u00e7a tipi ve adet \u2014 24 saat i\u00e7inde fiyat, termin ve FOB ko\u015fullar\u0131yla d\u00f6neriz. Daha h\u0131zl\u0131 cevap i\u00e7in WhatsApp\u2019tan yaz\u0131n.",cta_quote:"Teklif Al",cta_wa:"WhatsApp",
 why_eyebrow:"Neden Biz",why_title_html:'Biz \u00fcretiyoruz. <em>Burada.</em>',why_sub:"D\u00f6vme, CNC, \u0131s\u0131l i\u015flem \u2014 hepsi tek \u00e7at\u0131 alt\u0131nda. Fabrikadan do\u011frudan al\u0131rs\u0131n. Daha k\u0131sa termin, daha iyi fiyat.",
 why_1_t:"Fabrika biziz",why_1_d:"F\u0131r\u0131nlar bizim, CNC\u2019ler bizim, lab bizim. Arad\u0131\u011f\u0131nda par\u00e7ay\u0131 yapan adamla konu\u015fursun.",why_1_tag:"Fabrikadan Direkt",
@@ -218,7 +214,7 @@ document.addEventListener('DOMContentLoaded',function(){
   var io=new IntersectionObserver(function(entries){
     entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target);}});
   },{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
-  document.querySelectorAll('.section,.foot,.hero__copy,.drawing,.parts__grid,.compat__grid,.compat__head,.heat__head,.heat__base,.services-grid,.proof__certs,.proof__logos,.proof__head,.cta-band__in,.why-card,.why__head,.quote__intro,.quote__card,.foot__col,.gallery__grid,.vid__frame').forEach(function(el){
+  document.querySelectorAll('.section,.foot,.hero__copy,.drawing,.parts__grid,.compat__grid,.compat__head,.heat__head,.heat__base,.services-grid,.cta-band__in,.why-card,.why__head,.quote__intro,.quote__card,.foot__col,.gallery__grid,.vid__frame').forEach(function(el){
     el.classList.add('fade-up');io.observe(el);
   });
 
