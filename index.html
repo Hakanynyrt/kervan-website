@@ -1248,6 +1248,308 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 }
 .chat__input button:hover{background:var(--brand-hi)}
 .chat__input button:disabled{opacity:.5;cursor:not-allowed}
+
+/* ═══ NAV PHONE (desktop) ═══ */
+.nav__phone{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--f-mono);font-size:12px;font-weight:500;
+  color:var(--t-2);padding:7px 12px;
+  border:1px solid var(--line);border-radius:6px;
+  letter-spacing:.02em;
+  transition:color .2s,border-color .2s,background .2s;
+}
+.nav__phone:hover{color:var(--brand);border-color:rgba(232,120,26,.4);background:rgba(232,120,26,.06)}
+.nav__phone svg{width:13px;height:13px;color:var(--brand);flex-shrink:0}
+@media(max-width:1100px){.nav__phone{display:none}}
+
+/* ═══ SERVICES GRID · 7 heat-treatment categories ═══ */
+.services-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:18px;
+  margin-bottom:80px;
+}
+@media(max-width:960px){.services-grid{grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:56px}}
+@media(max-width:560px){.services-grid{grid-template-columns:1fr}}
+
+.service-card{
+  position:relative;overflow:hidden;
+  padding:30px 28px 26px;
+  background:
+    radial-gradient(400px 200px at 0% 0%,rgba(232,120,26,.04),transparent 55%),
+    linear-gradient(165deg,var(--bg-2) 0%,var(--bg-1) 100%);
+  border:1px solid var(--line);
+  border-radius:var(--r-lg);
+  display:flex;flex-direction:column;gap:14px;
+  transition:border-color .3s,transform .3s,box-shadow .3s,background .3s;
+  cursor:pointer;
+}
+.service-card::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--brand-hi),var(--brand) 50%,transparent);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .45s cubic-bezier(.2,.7,.2,1);
+}
+.service-card::after{
+  content:"";position:absolute;inset:auto 0 0 0;height:0;
+  background:radial-gradient(380px 160px at 0% 100%,rgba(232,120,26,.09),transparent 65%);
+  transition:height .4s ease;
+  pointer-events:none;
+}
+.service-card:hover{
+  border-color:rgba(232,120,26,.32);
+  transform:translateY(-4px);
+  box-shadow:0 22px 60px rgba(0,0,0,.42),0 0 0 1px rgba(232,120,26,.1);
+}
+.service-card:hover::before{transform:scaleX(1)}
+.service-card:hover::after{height:80%}
+.service-card:hover .service-card__arrow{background:var(--brand);color:#0A0B0D;border-color:var(--brand);transform:translate(3px,-3px)}
+.service-card:hover .service-card__icon{color:var(--brand-hi);border-color:rgba(232,120,26,.45);background:linear-gradient(145deg,rgba(232,120,26,.28),rgba(232,120,26,.06))}
+
+.service-card__icon{
+  width:44px;height:44px;border-radius:10px;
+  background:linear-gradient(145deg,rgba(232,120,26,.18),rgba(232,120,26,.04));
+  border:1px solid rgba(232,120,26,.25);
+  display:grid;place-items:center;color:var(--brand);
+  transition:color .3s,border-color .3s,background .3s;
+  position:relative;z-index:1;
+}
+.service-card__icon svg{width:20px;height:20px}
+
+.service-card__num{
+  position:absolute;top:24px;right:26px;z-index:1;
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--t-3);letter-spacing:.14em;
+}
+.service-card h3{
+  position:relative;z-index:1;
+  font-size:19px;letter-spacing:-.012em;color:var(--t-1);
+}
+.service-card p{
+  position:relative;z-index:1;
+  color:var(--t-2);font-size:13.5px;line-height:1.55;flex:1;
+}
+.service-card__meta{
+  position:relative;z-index:1;
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:16px;margin-top:4px;border-top:1px solid var(--line);
+}
+.service-card__temp{
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--brand);letter-spacing:.08em;text-transform:uppercase;
+  padding:5px 9px;border:1px solid rgba(232,120,26,.3);
+  border-radius:var(--r-sm);background:rgba(232,120,26,.06);
+}
+.service-card__arrow{
+  width:28px;height:28px;border-radius:7px;
+  border:1px solid var(--line-2);color:var(--t-2);
+  display:grid;place-items:center;
+  transition:background .25s,color .25s,border-color .25s,transform .25s;
+}
+.service-card__arrow svg{width:13px;height:13px}
+
+/* services-grid stagger */
+.services-grid.is-in > *:nth-child(1){transition-delay:0ms}
+.services-grid.is-in > *:nth-child(2){transition-delay:60ms}
+.services-grid.is-in > *:nth-child(3){transition-delay:120ms}
+.services-grid.is-in > *:nth-child(4){transition-delay:180ms}
+.services-grid.is-in > *:nth-child(5){transition-delay:240ms}
+.services-grid.is-in > *:nth-child(6){transition-delay:300ms}
+.services-grid.is-in > *:nth-child(7){transition-delay:360ms}
+
+/* ═══ PIT FURNACE SPEC TABLE ═══ */
+.furnace{
+  margin-top:18px;
+  border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;
+  background:linear-gradient(165deg,var(--bg-2) 0%,var(--bg-1) 100%);
+  position:relative;
+}
+.furnace::before{
+  content:"";position:absolute;top:0;left:28px;right:28px;height:2px;
+  background:linear-gradient(90deg,var(--brand),transparent 65%);
+}
+.furnace__head{
+  display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:22px 28px;border-bottom:1px solid var(--line);
+}
+.furnace__title{
+  font-family:var(--f-head);font-size:17px;font-weight:600;
+  letter-spacing:-.005em;color:var(--t-1);
+}
+.furnace__label{
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--brand);letter-spacing:.14em;text-transform:uppercase;
+}
+.furnace__table{width:100%;border-collapse:collapse;font-size:13.5px}
+.furnace__table thead th{
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--t-3);letter-spacing:.12em;text-transform:uppercase;
+  padding:16px 22px;text-align:left;
+  background:var(--bg-3);border-bottom:1px solid var(--line);
+}
+.furnace__table tbody td{
+  padding:16px 22px;border-bottom:1px solid var(--line);
+  color:var(--t-1);
+}
+.furnace__table tbody tr:last-child td{border-bottom:0}
+.furnace__table tbody tr:hover td{background:rgba(232,120,26,.03)}
+.furnace__table td:first-child{
+  font-family:var(--f-head);font-weight:600;color:var(--t-1);
+}
+.furnace__table td.num{font-family:var(--f-mono);color:var(--t-2);letter-spacing:.02em}
+.furnace__table td.hot{color:var(--brand);font-family:var(--f-mono);font-weight:500}
+@media(max-width:720px){
+  .furnace__head{padding:18px}
+  .furnace__table thead{display:none}
+  .furnace__table tbody tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .furnace__table tbody td{padding:4px 0;border:0;font-size:13px}
+  .furnace__table td:first-child{grid-column:1/-1;padding-bottom:6px;border-bottom:1px dashed var(--line);margin-bottom:6px}
+  .furnace__table td[data-l]::before{
+    content:attr(data-l) ":\a0";
+    font-family:var(--f-mono);font-size:9.5px;font-weight:500;
+    color:var(--t-3);letter-spacing:.1em;text-transform:uppercase;
+  }
+}
+
+/* ═══ HEAT (revised grid layout) ═══ */
+.heat__head{max-width:780px;margin:0 auto 54px;text-align:center}
+.heat__head .eyebrow{margin-bottom:22px}
+.heat__head h2{font-size:clamp(32px,4.4vw,54px);line-height:1.06;letter-spacing:-.028em;margin-bottom:18px}
+.heat__head p{color:var(--t-2);font-size:clamp(15px,1.15vw,17px);max-width:640px;margin:0 auto}
+.heat__base{display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:start}
+@media(max-width:960px){.heat__base{grid-template-columns:1fr;gap:28px}}
+
+/* ═══ SOCIAL PROOF · certs + trusted-by ═══ */
+.proof{
+  padding:72px 0;border-top:1px solid var(--line);
+  background:
+    radial-gradient(900px 360px at 50% 0%,rgba(232,120,26,.04),transparent 70%),
+    var(--bg-0);
+}
+@media(max-width:780px){.proof{padding:56px 0}}
+
+.proof__head{
+  text-align:center;max-width:640px;margin:0 auto 40px;
+}
+.proof__head .eyebrow{margin-bottom:18px}
+.proof__head h3{
+  font-size:clamp(22px,2.4vw,28px);letter-spacing:-.02em;color:var(--t-1);
+}
+
+/* certification badges */
+.proof__certs{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+  margin-bottom:44px;
+}
+@media(max-width:860px){.proof__certs{grid-template-columns:repeat(2,1fr)}}
+
+.cert{
+  display:flex;align-items:center;gap:14px;
+  padding:18px 20px;
+  background:linear-gradient(165deg,var(--bg-2) 0%,var(--bg-1) 100%);
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  transition:border-color .3s,transform .3s,background .3s;
+}
+.cert:hover{border-color:rgba(232,120,26,.3);transform:translateY(-2px)}
+.cert__icon{
+  width:40px;height:40px;border-radius:9px;flex-shrink:0;
+  background:linear-gradient(145deg,rgba(232,120,26,.18),rgba(232,120,26,.04));
+  border:1px solid rgba(232,120,26,.3);
+  display:grid;place-items:center;color:var(--brand);
+}
+.cert__icon svg{width:18px;height:18px}
+.cert__body{min-width:0}
+.cert__name{
+  font-family:var(--f-head);font-size:14px;font-weight:600;
+  color:var(--t-1);letter-spacing:-.005em;line-height:1.2;margin-bottom:3px;
+}
+.cert__tag{
+  font-family:var(--f-mono);font-size:9.5px;font-weight:500;
+  color:var(--t-3);letter-spacing:.12em;text-transform:uppercase;
+}
+
+/* customer / trusted-by strip */
+.proof__trust-label{
+  text-align:center;
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--t-3);letter-spacing:.16em;text-transform:uppercase;
+  margin-bottom:22px;
+}
+.proof__logos{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  overflow:hidden;
+}
+@media(max-width:860px){.proof__logos{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:480px){.proof__logos{grid-template-columns:repeat(2,1fr)}}
+
+.proof__logo{
+  background:linear-gradient(165deg,var(--bg-2),var(--bg-1));
+  padding:26px 18px;min-height:96px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--f-head);font-size:14px;font-weight:600;
+  color:var(--t-3);letter-spacing:.01em;text-align:center;
+  transition:color .3s,background .3s;
+  filter:grayscale(1);
+}
+.proof__logo:hover{
+  color:var(--brand);filter:grayscale(0);
+  background:linear-gradient(165deg,#1A1E28,#0F1218);
+}
+.proof__logo small{
+  display:block;font-family:var(--f-mono);font-size:9px;font-weight:500;
+  color:var(--t-3);letter-spacing:.12em;margin-top:3px;text-transform:uppercase;
+}
+
+/* ═══ CTA BAND · full-width pre-quote strip ═══ */
+.cta-band{
+  position:relative;overflow:hidden;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  padding:72px 0;
+  background:
+    radial-gradient(800px 400px at 80% 50%,rgba(232,120,26,.16),transparent 60%),
+    radial-gradient(700px 380px at 12% 50%,rgba(232,120,26,.06),transparent 70%),
+    linear-gradient(180deg,#0A0C10,#070809);
+}
+.cta-band::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);
+  background-size:52px 52px;
+  mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,#000 30%,transparent 88%);
+  -webkit-mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,#000 30%,transparent 88%);
+}
+.cta-band__in{
+  position:relative;z-index:1;
+  display:grid;grid-template-columns:1.5fr auto;gap:44px;align-items:center;
+}
+@media(max-width:860px){.cta-band__in{grid-template-columns:1fr;gap:28px;text-align:center}}
+
+.cta-band .eyebrow{margin-bottom:18px}
+.cta-band h2{
+  font-size:clamp(32px,4.2vw,50px);line-height:1.05;
+  letter-spacing:-.03em;color:var(--t-1);margin-bottom:14px;
+}
+.cta-band h2 em{
+  font-style:normal;
+  background:linear-gradient(120deg,var(--brand-hi) 0%,var(--brand) 50%,#E8B87A 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.cta-band p{color:var(--t-2);font-size:15px;max-width:540px}
+@media(max-width:860px){.cta-band p{margin:0 auto}}
+
+.cta-band__ctas{display:flex;gap:14px;flex-wrap:wrap}
+@media(max-width:860px){.cta-band__ctas{justify-content:center}}
+.btn--wa{
+  background:transparent;color:#25D366;border:1px solid rgba(37,211,102,.45);
+}
+.btn--wa:hover{
+  background:rgba(37,211,102,.08);
+  border-color:#25D366;color:#25D366;
+  box-shadow:0 12px 40px rgba(37,211,102,.2);
+  transform:translateY(-2px);
+}
+.btn--wa svg{color:#25D366}
 </style>
 </head>
 <body>
@@ -1271,6 +1573,10 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       <a href="#contact" data-i18n="nav_contact">Contact</a>
     </div>
     <div class="nav__right">
+      <a href="tel:+905316693734" class="nav__phone" aria-label="Call Kervan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 12.8 12.8 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5 12.8 12.8 0 0 0 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+        +90 531 669 37 34
+      </a>
       <button class="lang-btn" id="lang-toggle" aria-label="Switch language"><b>EN</b> / TR</button>
       <a href="#quote" class="nav__cta" data-i18n="nav_quote">Request Quote</a>
       <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">
@@ -1626,84 +1932,280 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   </div>
 </section>
 
-<!-- ═════════════════════ HEAT TREATMENT · layout #4 ═════════════════════ -->
-<section class="section heat" id="heat">
-  <div class="sec-num"><b>03</b> / HEAT TREATMENT</div>
+<!-- ═════════════════════ SOCIAL PROOF · certifications + customers ═════════════════════ -->
+<section class="proof" id="proof" aria-label="Certifications and customers">
   <div class="wrap">
-    <div class="heat__grid">
 
-      <div class="heat__left">
-        <div class="eyebrow" data-i18n="heat_eyebrow">Heat Treatment</div>
-        <h2 data-i18n="heat_title">In-house heat treatment facility.</h2>
-        <p data-i18n="heat_sub">Every chisel and piston we ship passes through our own pit-type furnaces with controlled atmospheres. We also offer heat treatment as a service to third-party manufacturers.</p>
+    <div class="proof__head">
+      <div class="eyebrow" data-i18n="proof_eyebrow">Credentials</div>
+      <h3 data-i18n="proof_title">Tested, certified, trusted.</h3>
+    </div>
 
-        <div class="facility">
-          <div class="facility__label">KRV · FACILITY</div>
-          <h3 data-i18n="fac_title">Kartepe, Kocaeli</h3>
-          <p data-i18n="fac_sub">Pit-type furnaces, controlled atmosphere, oil and polymer quench baths, in-house HRC / HV metrology.</p>
-          <div class="facility__specs">
-            <div><div class="f-spec__v">1050 °C</div><div class="f-spec__l" data-i18n="fac_spec_1_l">Max Furnace</div></div>
-            <div><div class="f-spec__v">Ø 1200 mm</div><div class="f-spec__l" data-i18n="fac_spec_2_l">Pit Capacity</div></div>
-            <div><div class="f-spec__v">Oil · Polymer</div><div class="f-spec__l" data-i18n="fac_spec_3_l">Quench Media</div></div>
-            <div><div class="f-spec__v">HRC · HV</div><div class="f-spec__l" data-i18n="fac_spec_4_l">Lab Testing</div></div>
-          </div>
+    <div class="proof__certs">
+
+      <div class="cert">
+        <div class="cert__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M12 2 4 5v7c0 5 3.5 9 8 10 4.5-1 8-5 8-10V5l-8-3z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="cert__body">
+          <div class="cert__name">ISO 9001</div>
+          <div class="cert__tag" data-i18n="cert_iso_tag">Quality Management</div>
         </div>
       </div>
 
-      <div class="heat__right">
-        <div class="proc">
-          <div class="proc__item">
-            <div class="proc__num">01</div>
-            <div class="proc__body">
-              <h4 data-i18n="proc_1_t">Carburizing</h4>
-              <p data-i18n="proc_1_d">Surface hardening for wear-critical parts — chisels, pistons, bushings.</p>
-            </div>
-            <div class="proc__temp">850–950 °C</div>
-          </div>
-          <div class="proc__item">
-            <div class="proc__num">02</div>
-            <div class="proc__body">
-              <h4 data-i18n="proc_2_t">Quenching</h4>
-              <p data-i18n="proc_2_d">Oil and polymer baths for controlled martensitic transformation.</p>
-            </div>
-            <div class="proc__temp">OIL · POLYMER</div>
-          </div>
-          <div class="proc__item">
-            <div class="proc__num">03</div>
-            <div class="proc__body">
-              <h4 data-i18n="proc_3_t">Tempering</h4>
-              <p data-i18n="proc_3_d">Stress reduction and final toughness on hardened parts.</p>
-            </div>
-            <div class="proc__temp">150–650 °C</div>
-          </div>
-          <div class="proc__item">
-            <div class="proc__num">04</div>
-            <div class="proc__body">
-              <h4 data-i18n="proc_4_t">Normalization</h4>
-              <p data-i18n="proc_4_d">Grain refinement for uniform mechanical properties.</p>
-            </div>
-            <div class="proc__temp" data-i18n="proc_4_temp">AIR COOL</div>
-          </div>
-          <div class="proc__item">
-            <div class="proc__num">05</div>
-            <div class="proc__body">
-              <h4 data-i18n="proc_5_t">Stress Relief</h4>
-              <p data-i18n="proc_5_d">Removes residual stress from welding and CNC machining.</p>
-            </div>
-            <div class="proc__temp">600–650 °C</div>
-          </div>
-          <div class="proc__item">
-            <div class="proc__num">06</div>
-            <div class="proc__body">
-              <h4 data-i18n="proc_6_t">Hardness Testing</h4>
-              <p data-i18n="proc_6_d">HRC and HV verification on every production batch.</p>
-            </div>
-            <div class="proc__temp">HRC · HV</div>
-          </div>
+      <div class="cert">
+        <div class="cert__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="12" cy="8" r="5"/><path d="M9 13l-1 9 4-2 4 2-1-9"/>
+          </svg>
+        </div>
+        <div class="cert__body">
+          <div class="cert__name" data-i18n="cert_mat_n">Material Certificates</div>
+          <div class="cert__tag">EN 10204 · 3.1</div>
+        </div>
+      </div>
+
+      <div class="cert">
+        <div class="cert__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="16" rx="1"/>
+            <path d="M7 8h10M7 12h10M7 16h6"/>
+          </svg>
+        </div>
+        <div class="cert__body">
+          <div class="cert__name" data-i18n="cert_hard_n">Hardness Reports</div>
+          <div class="cert__tag">HRC · HV · PER LOT</div>
+        </div>
+      </div>
+
+      <div class="cert">
+        <div class="cert__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M12 2 2 7v6c0 5 4 9 10 11 6-2 10-6 10-11V7L12 2z"/>
+            <path d="M8 12l3 3 5-6"/>
+          </svg>
+        </div>
+        <div class="cert__body">
+          <div class="cert__name" data-i18n="cert_warr_n">Fit Guarantee</div>
+          <div class="cert__tag" data-i18n="cert_warr_tag">OEM Tolerances</div>
         </div>
       </div>
 
     </div>
+
+    <div class="proof__trust-label" data-i18n="proof_trust">Trusted by demolition &amp; mining operators worldwide</div>
+
+    <div class="proof__logos">
+      <div class="proof__logo">Furukawa<small>HB Series</small></div>
+      <div class="proof__logo">Rammer<small>S · E</small></div>
+      <div class="proof__logo">Montabert<small>V · XL</small></div>
+      <div class="proof__logo">Soosan<small>SB</small></div>
+      <div class="proof__logo">Atlas Copco<small>HB · MB</small></div>
+      <div class="proof__logo">Indeco<small>HP</small></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═════════════════════ HEAT TREATMENT · layout #4 ═════════════════════ -->
+<section class="section heat" id="heat">
+  <div class="sec-num"><b>03</b> / HEAT TREATMENT</div>
+  <div class="wrap">
+
+    <div class="heat__head">
+      <div class="eyebrow" data-i18n="heat_eyebrow">Heat Treatment</div>
+      <h2 data-i18n="heat_title">Our furnaces. Our process.</h2>
+      <p data-i18n="heat_sub">Seven controlled heat-treatment services run daily in Kartepe — for our own parts and for third-party manufacturers. Pit furnaces, controlled atmosphere, oil and polymer quench, in-house hardness testing.</p>
+    </div>
+
+    <!-- 7 services · 3-col grid with hover accent reveal -->
+    <div class="services-grid">
+
+      <article class="service-card">
+        <span class="service-card__num">01</span>
+        <div class="service-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M4 20h16"/><path d="M4 20V9l8-5 8 5v11"/>
+            <path d="M9 20v-5h6v5"/><circle cx="12" cy="11" r="1.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <h3 data-i18n="proc_1_t">Carburizing</h3>
+        <p data-i18n="proc_1_d">Case hardening at 850–950°C. The surface gets hard, the core stays tough.</p>
+        <div class="service-card__meta">
+          <span class="service-card__temp">850–950 °C</span>
+          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </article>
+
+      <article class="service-card">
+        <span class="service-card__num">02</span>
+        <div class="service-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M12 3c1.6 3.2 3 4.8 3 7.3a3 3 0 0 1-6 0c0-2.5 1.4-4.1 3-7.3z"/>
+            <path d="M5 14c0 4 3 7 7 7s7-3 7-7"/>
+          </svg>
+        </div>
+        <h3 data-i18n="proc_2_t">Quenching</h3>
+        <p data-i18n="proc_2_d">Oil or polymer bath. Controlled cool-down for the right martensite structure.</p>
+        <div class="service-card__meta">
+          <span class="service-card__temp" data-i18n="proc_2_temp">OIL · POLYMER</span>
+          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </article>
+
+      <article class="service-card">
+        <span class="service-card__num">03</span>
+        <div class="service-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M3 20h18"/><path d="M6 20l2-10h8l2 10"/>
+            <path d="M9 10V6h6v4"/><path d="M12 14v3"/>
+          </svg>
+        </div>
+        <h3 data-i18n="proc_3_t">Tempering</h3>
+        <p data-i18n="proc_3_d">Takes the brittleness out. Gets you the toughness you actually need.</p>
+        <div class="service-card__meta">
+          <span class="service-card__temp">150–650 °C</span>
+          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </article>
+
+      <article class="service-card">
+        <span class="service-card__num">04</span>
+        <div class="service-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M4 12h16"/><path d="M4 7h16"/><path d="M4 17h16"/>
+            <circle cx="8" cy="7" r="1.2" fill="currentColor"/>
+            <circle cx="14" cy="12" r="1.2" fill="currentColor"/>
+            <circle cx="10" cy="17" r="1.2" fill="currentColor"/>
+          </svg>
+        </div>
+        <h3 data-i18n="proc_4_t">Normalization</h3>
+        <p data-i18n="proc_4_d">Evens out the grain. Consistent hardness across the whole part.</p>
+        <div class="service-card__meta">
+          <span class="service-card__temp" data-i18n="proc_4_temp">AIR COOL</span>
+          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </article>
+
+      <article class="service-card">
+        <span class="service-card__num">05</span>
+        <div class="service-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M4 12h16"/><path d="M4 6l4 4-4 4"/><path d="M20 10l-4-4 4-4" transform="translate(0 8)"/>
+            <path d="M20 18l-4-4 4-4"/>
+          </svg>
+        </div>
+        <h3 data-i18n="proc_5_t">Stress Relief</h3>
+        <p data-i18n="proc_5_d">After welding or heavy machining. Gets rid of internal stress before it causes cracks.</p>
+        <div class="service-card__meta">
+          <span class="service-card__temp">600–650 °C</span>
+          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </article>
+
+      <article class="service-card">
+        <span class="service-card__num">06</span>
+        <div class="service-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M13 3 5 14h6l-1 7 8-11h-6l1-7z" fill="currentColor" fill-opacity=".1"/>
+            <path d="M13 3 5 14h6l-1 7 8-11h-6l1-7z"/>
+          </svg>
+        </div>
+        <h3 data-i18n="proc_7_t">Induction Hardening</h3>
+        <p data-i18n="proc_7_d">Localised surface hardening by electromagnetic induction. Fast, precise, distortion-free.</p>
+        <div class="service-card__meta">
+          <span class="service-card__temp">HRC 55–62</span>
+          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </article>
+
+      <article class="service-card">
+        <span class="service-card__num">07</span>
+        <div class="service-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7v5l3 2"/>
+            <path d="M3 12h2M19 12h2"/>
+          </svg>
+        </div>
+        <h3 data-i18n="proc_6_t">Hardness Testing</h3>
+        <p data-i18n="proc_6_d">Every batch gets tested. HRC and HV. No exceptions.</p>
+        <div class="service-card__meta">
+          <span class="service-card__temp">HRC · HV</span>
+          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- Facility card + Pit furnace specs table -->
+    <div class="heat__base">
+
+      <div class="facility">
+        <div class="facility__label" data-i18n="fac_label">KRV · FACILITY</div>
+        <h3 data-i18n="fac_title">Kartepe, Kocaeli</h3>
+        <p data-i18n="fac_sub">Pit-type furnaces, controlled atmosphere, oil and polymer quench baths, in-house HRC / HV metrology.</p>
+        <div class="facility__specs">
+          <div><div class="f-spec__v">1050 °C</div><div class="f-spec__l" data-i18n="fac_spec_1_l">Max Temp</div></div>
+          <div><div class="f-spec__v">Ø 1200 mm</div><div class="f-spec__l" data-i18n="fac_spec_2_l">Pit Diameter</div></div>
+          <div><div class="f-spec__v">Oil · Polymer</div><div class="f-spec__l" data-i18n="fac_spec_3_l">Quench</div></div>
+          <div><div class="f-spec__v">HRC · HV</div><div class="f-spec__l" data-i18n="fac_spec_4_l">Testing</div></div>
+        </div>
+      </div>
+
+      <div class="furnace">
+        <div class="furnace__head">
+          <span class="furnace__title" data-i18n="furnace_title">Pit Furnace Capacity</span>
+          <span class="furnace__label" data-i18n="furnace_label">KRV · FURNACE SPEC</span>
+        </div>
+        <table class="furnace__table">
+          <thead>
+            <tr>
+              <th data-i18n="furnace_col_unit">Furnace</th>
+              <th data-i18n="furnace_col_dia">Diameter</th>
+              <th data-i18n="furnace_col_depth">Depth</th>
+              <th data-i18n="furnace_col_temp">Max Temp</th>
+              <th data-i18n="furnace_col_atm">Atmosphere</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Pit Furnace · 01</td>
+              <td class="num" data-l="Diameter">Ø 1200 mm</td>
+              <td class="num" data-l="Depth">2000 mm</td>
+              <td class="hot" data-l="Max Temp">1050 °C</td>
+              <td data-l="Atmosphere" data-i18n="furnace_atm_ctrl">Controlled</td>
+            </tr>
+            <tr>
+              <td>Pit Furnace · 02</td>
+              <td class="num" data-l="Diameter">Ø 900 mm</td>
+              <td class="num" data-l="Depth">1600 mm</td>
+              <td class="hot" data-l="Max Temp">950 °C</td>
+              <td data-l="Atmosphere" data-i18n="furnace_atm_ctrl2">Controlled · Endo</td>
+            </tr>
+            <tr>
+              <td data-i18n="furnace_temper">Tempering Furnace</td>
+              <td class="num" data-l="Diameter">Ø 800 mm</td>
+              <td class="num" data-l="Depth">1400 mm</td>
+              <td class="hot" data-l="Max Temp">700 °C</td>
+              <td data-l="Atmosphere" data-i18n="furnace_atm_air">Air</td>
+            </tr>
+            <tr>
+              <td data-i18n="furnace_quench">Quench Baths</td>
+              <td class="num" data-l="Diameter" data-i18n="furnace_two">2 × Ø 1200 mm</td>
+              <td class="num" data-l="Depth">2200 mm</td>
+              <td class="hot" data-l="Max Temp">80 °C</td>
+              <td data-l="Atmosphere" data-i18n="furnace_atm_oil">Oil · Polymer</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
   </div>
 </section>
 
@@ -1821,6 +2323,27 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       <video controls preload="metadata" poster="hero.jpg">
         <source src="video.mp4" type="video/mp4">
       </video>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════ CTA BAND · full-width pre-quote strip ═════════════════════ -->
+<section class="cta-band" aria-label="Request a quote or message us">
+  <div class="wrap cta-band__in">
+    <div>
+      <div class="eyebrow" data-i18n="cta_eyebrow">Ready When You Are</div>
+      <h2 data-i18n-html="cta_title_html">Need a part? <em>Send the specs.</em></h2>
+      <p data-i18n="cta_sub">Breaker model, part type and quantity — we reply with price, lead time and FOB terms within 24 hours. Or ping us on WhatsApp for a faster answer.</p>
+    </div>
+    <div class="cta-band__ctas">
+      <a href="#quote" class="btn btn--primary">
+        <span data-i18n="cta_quote">Get a Quote</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+      <a href="https://wa.me/905316693734" class="btn btn--wa" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-1.7-.9-2.9-1.6-4.1-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.7-1-2.3-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1 2.1 3.2 5 4.4c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4s.2-1.3.2-1.4c-.1-.2-.3-.2-.5-.3zM12 2a10 10 0 0 0-8.6 15l-1.4 5 5.2-1.4A10 10 0 1 0 12 2z"/></svg>
+        <span data-i18n="cta_wa">WhatsApp</span>
+      </a>
     </div>
   </div>
 </section>
