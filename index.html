@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kervan Heat — Hydraulic Breaker Parts Manufacturer Turkey</title>
-<meta name="description" content="Manufacturer of hydraulic breaker spare parts in Turkey. Chisels, pistons, bushings, through bolts and repair kits for Furukawa, Montabert, Rammer, Soosan, Atlas Copco, Indeco, NPK, Krupp. 42CrMo, HRC 48-52, CNC machined, in-house heat treated. Shipped worldwide 5-10 days.">
-<meta name="keywords" content="hydraulic breaker parts manufacturer Turkey, hydraulic breaker chisels, breaker piston manufacturer, Furukawa breaker parts, Montabert breaker parts, Rammer, Soosan, Atlas Copco breaker spares, 42CrMo chisel, aftermarket breaker parts">
+<meta name="description" content="Manufacturer of hydraulic breaker parts and in-house heat treatment services in Kartepe, Turkey. Chisels, pistons, bushings, through bolts, repair kits for Furukawa, Montabert, Rammer, Soosan, Atlas Copco. Carburizing, quenching, tempering, normalization, stress relief, induction hardening, hardness testing. 42CrMo, HRC 48-52. Shipped worldwide 5-10 days.">
+<meta name="keywords" content="hydraulic breaker parts manufacturer Turkey, heat treatment Kocaeli, carburizing Turkey, quenching service, tempering, induction hardening, hydraulic breaker chisels, breaker piston manufacturer, Furukawa breaker parts, Montabert breaker parts, Rammer, Soosan, Atlas Copco breaker spares, 42CrMo chisel, aftermarket breaker parts">
 <meta name="robots" content="index, follow">
 <meta name="author" content="Kervan Heat">
 <meta name="geo.region" content="TR-41">
@@ -47,6 +47,41 @@
     "addressCountry": "TR"
   },
   "areaServed": "Worldwide"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://kervanheat.com/#heat-treatment",
+  "name": "Kervan Heat Treatment",
+  "alternateName": "Kervan Isıl İşlem",
+  "image": "https://kervanheat.com/hero.jpg",
+  "url": "https://kervanheat.com/#heat",
+  "telephone": "+905316693734",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Sadun Atığ Cad. No: 112/A",
+    "addressLocality": "Kartepe",
+    "addressRegion": "Kocaeli",
+    "postalCode": "41250",
+    "addressCountry": "TR"
+  },
+  "areaServed": ["TR","EU","MENA","Worldwide"],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Heat Treatment Services",
+    "itemListElement": [
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Carburizing","serviceType":"Case hardening at 850–950 °C for wear-critical parts"}},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Quenching","serviceType":"Oil and polymer quench for controlled martensitic transformation"}},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Tempering","serviceType":"Stress reduction and toughness at 150–650 °C"}},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Normalization","serviceType":"Grain refinement for uniform mechanical properties"}},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Stress Relief","serviceType":"Residual stress removal after welding and machining at 600–650 °C"}},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Induction Hardening","serviceType":"Localised electromagnetic surface hardening to HRC 55–62"}},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Hardness Testing","serviceType":"HRC and HV verification on every production batch"}}
+    ]
+  }
 }
 </script>
 
@@ -221,6 +256,18 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
   background:linear-gradient(90deg,transparent,var(--line-2),transparent);
 }
+
+/* furnace fire video loop (below gradients/grid) */
+.hero__bg-video{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;z-index:0;
+  opacity:.18;filter:saturate(.85) contrast(1.1);
+  pointer-events:none;
+}
+.hero::before{z-index:1}
+.hero__num,.hero__cue{z-index:3}
+@media(prefers-reduced-motion:reduce){.hero__bg-video{display:none}}
+@media(max-width:720px){.hero__bg-video{opacity:.12}}
 
 /* motif #5 — giant outlined section number */
 .hero__num{
@@ -594,16 +641,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 .compat__note a:hover{color:var(--brand)}
 
 /* ═══ HEAT TREATMENT · layout #4 ═══ */
-/* 2-col: statement + credential card left, numbered process rows right */
 .heat{background:linear-gradient(180deg,var(--bg-0) 0%,#0B0D12 50%,var(--bg-0) 100%)}
-.heat__grid{
-  display:grid;grid-template-columns:.95fr 1.1fr;gap:80px;align-items:start;
-}
-@media(max-width:960px){.heat__grid{grid-template-columns:1fr;gap:56px}}
-
-.heat__left h2{font-size:clamp(32px,4.2vw,52px);line-height:1.06;letter-spacing:-.028em;margin-bottom:20px}
-.heat__left .eyebrow{margin-bottom:22px}
-.heat__left p{color:var(--t-2);font-size:16px;margin-bottom:38px;max-width:480px}
 
 /* credential card */
 .facility{
@@ -635,40 +673,6 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 .f-spec__l{
   font-family:var(--f-mono);font-size:9px;font-weight:500;
   color:var(--t-3);letter-spacing:.12em;text-transform:uppercase;
-}
-
-/* process rows */
-.proc{border-top:1px solid var(--line)}
-.proc__item{
-  display:grid;grid-template-columns:auto 1fr auto;gap:26px;align-items:center;
-  padding:28px 0;border-bottom:1px solid var(--line);
-  transition:background .25s,padding .25s;
-}
-.proc__item:hover{
-  background:linear-gradient(90deg,rgba(232,120,26,.045),transparent 80%);
-  padding-left:16px;padding-right:16px;
-}
-.proc__num{
-  font-family:var(--f-mono);font-size:11px;font-weight:500;
-  color:var(--t-3);letter-spacing:.1em;min-width:26px;
-  transition:color .25s;
-}
-.proc__item:hover .proc__num{color:var(--brand)}
-.proc__body h4{
-  font-family:var(--f-head);font-size:19px;font-weight:600;
-  letter-spacing:-.012em;color:var(--t-1);margin-bottom:5px;
-}
-.proc__body p{font-size:13.5px;color:var(--t-2);line-height:1.5}
-.proc__temp{
-  font-family:var(--f-mono);font-size:10px;font-weight:500;
-  color:var(--brand);letter-spacing:.08em;
-  padding:6px 11px;border:1px solid rgba(232,120,26,.3);
-  border-radius:var(--r-sm);background:rgba(232,120,26,.06);
-  white-space:nowrap;
-}
-@media(max-width:560px){
-  .proc__item{grid-template-columns:auto 1fr;gap:14px}
-  .proc__temp{grid-column:2;justify-self:start;margin-top:8px}
 }
 
 /* ═══ WHY KERVAN · layout #5 ═══ */
@@ -937,6 +941,14 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   color:var(--t-1);transition:color .2s;
 }
 .foot__item-value a:hover{color:var(--brand)}
+.foot__map-link{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--t-3);letter-spacing:.12em;text-transform:uppercase;
+  margin-top:6px;padding:4px 0;
+  transition:color .2s;
+}
+.foot__map-link:hover{color:var(--brand)}
 
 /* mono tagline row above copyright */
 .foot__tagline{
@@ -1294,15 +1306,18 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   transition:height .4s ease;
   pointer-events:none;
 }
-.service-card:hover{
+.service-card:hover,
+.service-card:focus-visible{
   border-color:rgba(232,120,26,.32);
   transform:translateY(-4px);
   box-shadow:0 22px 60px rgba(0,0,0,.42),0 0 0 1px rgba(232,120,26,.1);
+  outline:0;
 }
-.service-card:hover::before{transform:scaleX(1)}
-.service-card:hover::after{height:80%}
-.service-card:hover .service-card__arrow{background:var(--brand);color:#0A0B0D;border-color:var(--brand);transform:translate(3px,-3px)}
-.service-card:hover .service-card__icon{color:var(--brand-hi);border-color:rgba(232,120,26,.45);background:linear-gradient(145deg,rgba(232,120,26,.28),rgba(232,120,26,.06))}
+.service-card:focus-visible{box-shadow:0 22px 60px rgba(0,0,0,.42),0 0 0 2px var(--brand)}
+.service-card:hover::before,.service-card:focus-visible::before{transform:scaleX(1)}
+.service-card:hover::after,.service-card:focus-visible::after{height:80%}
+.service-card:hover .service-card__arrow,.service-card:focus-visible .service-card__arrow{background:#25D366;color:#0A0B0D;border-color:#25D366;transform:translate(3px,-3px)}
+.service-card:hover .service-card__icon,.service-card:focus-visible .service-card__icon{color:var(--brand-hi);border-color:rgba(232,120,26,.45);background:linear-gradient(145deg,rgba(232,120,26,.28),rgba(232,120,26,.06))}
 
 .service-card__icon{
   width:44px;height:44px;border-radius:10px;
@@ -1345,15 +1360,6 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
   transition:background .25s,color .25s,border-color .25s,transform .25s;
 }
 .service-card__arrow svg{width:13px;height:13px}
-
-/* services-grid stagger */
-.services-grid.is-in > *:nth-child(1){transition-delay:0ms}
-.services-grid.is-in > *:nth-child(2){transition-delay:60ms}
-.services-grid.is-in > *:nth-child(3){transition-delay:120ms}
-.services-grid.is-in > *:nth-child(4){transition-delay:180ms}
-.services-grid.is-in > *:nth-child(5){transition-delay:240ms}
-.services-grid.is-in > *:nth-child(6){transition-delay:300ms}
-.services-grid.is-in > *:nth-child(7){transition-delay:360ms}
 
 /* ═══ PIT FURNACE SPEC TABLE ═══ */
 .furnace{
@@ -1414,6 +1420,38 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 .heat__head .eyebrow{margin-bottom:22px}
 .heat__head h2{font-size:clamp(32px,4.4vw,54px);line-height:1.06;letter-spacing:-.028em;margin-bottom:18px}
 .heat__head p{color:var(--t-2);font-size:clamp(15px,1.15vw,17px);max-width:640px;margin:0 auto}
+
+/* heat capacity / credentials strip (verifiable) */
+.heat__stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  overflow:hidden;margin-bottom:56px;
+  background:linear-gradient(165deg,var(--bg-2) 0%,var(--bg-1) 100%);
+  position:relative;
+}
+.heat__stats::before{
+  content:"";position:absolute;top:0;left:28px;right:28px;height:2px;
+  background:linear-gradient(90deg,var(--brand),transparent 65%);
+}
+.h-stat{
+  padding:26px 22px;border-right:1px solid var(--line);
+  text-align:center;
+}
+.h-stat:last-child{border-right:0}
+.h-stat__v{
+  font-family:var(--f-head);font-size:clamp(22px,2.4vw,28px);
+  font-weight:700;color:var(--t-1);letter-spacing:-.015em;line-height:1.1;margin-bottom:8px;
+}
+.h-stat__l{
+  font-family:var(--f-mono);font-size:10px;font-weight:500;
+  color:var(--t-3);letter-spacing:.12em;text-transform:uppercase;
+}
+@media(max-width:720px){
+  .heat__stats{grid-template-columns:repeat(2,1fr);margin-bottom:44px}
+  .h-stat{border-right:0}
+  .h-stat:nth-child(1),.h-stat:nth-child(2){border-bottom:1px solid var(--line)}
+  .h-stat:nth-child(odd){border-right:1px solid var(--line)}
+}
 .heat__base{display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:start}
 @media(max-width:960px){.heat__base{grid-template-columns:1fr;gap:28px}}
 
@@ -1526,6 +1564,9 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
 
 <!-- ═════════════════════ HERO ═════════════════════ -->
 <section class="hero" id="top">
+  <video class="hero__bg-video" autoplay muted loop playsinline preload="none" poster="hero.jpg" aria-hidden="true">
+    <source src="video.mp4" type="video/mp4">
+  </video>
   <div class="hero__num"><b>00</b> / HERO · KVN-LP-001</div>
 
   <div class="wrap hero__in">
@@ -1860,10 +1901,30 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
       <p data-i18n="heat_sub">Seven controlled heat-treatment services run daily in Kartepe — for our own parts and for third-party manufacturers. Pit furnaces, controlled atmosphere, oil and polymer quench, in-house hardness testing.</p>
     </div>
 
+    <!-- Verifiable capacity strip -->
+    <div class="heat__stats">
+      <div class="h-stat">
+        <div class="h-stat__v">4</div>
+        <div class="h-stat__l" data-i18n="h_stat_1_l">Furnace Units</div>
+      </div>
+      <div class="h-stat">
+        <div class="h-stat__v">1050 °C</div>
+        <div class="h-stat__l" data-i18n="h_stat_2_l">Max Process Temp</div>
+      </div>
+      <div class="h-stat">
+        <div class="h-stat__v">Ø 1200 mm</div>
+        <div class="h-stat__l" data-i18n="h_stat_3_l">Pit Capacity</div>
+      </div>
+      <div class="h-stat">
+        <div class="h-stat__v" data-i18n="h_stat_4_v">Every Lot</div>
+        <div class="h-stat__l" data-i18n="h_stat_4_l">Hardness Tested</div>
+      </div>
+    </div>
+
     <!-- 7 services · 3-col grid with hover accent reveal -->
     <div class="services-grid">
 
-      <article class="service-card">
+      <article class="service-card" role="button" tabindex="0" data-service-key="proc_1_t" aria-label="Carburizing — contact via WhatsApp">
         <span class="service-card__num">01</span>
         <div class="service-card__icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -1875,11 +1936,11 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p data-i18n="proc_1_d">Case hardening at 850–950°C. The surface gets hard, the core stays tough.</p>
         <div class="service-card__meta">
           <span class="service-card__temp">850–950 °C</span>
-          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span class="service-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-1.7-.9-2.9-1.6-4.1-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.7-1-2.3-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1 2.1 3.2 5 4.4c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4s.2-1.3.2-1.4c-.1-.2-.3-.2-.5-.3zM12 2a10 10 0 0 0-8.6 15l-1.4 5 5.2-1.4A10 10 0 1 0 12 2z"/></svg></span>
         </div>
       </article>
 
-      <article class="service-card">
+      <article class="service-card" role="button" tabindex="0" data-service-key="proc_2_t" aria-label="Quenching — contact via WhatsApp">
         <span class="service-card__num">02</span>
         <div class="service-card__icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -1891,11 +1952,11 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p data-i18n="proc_2_d">Oil or polymer bath. Controlled cool-down for the right martensite structure.</p>
         <div class="service-card__meta">
           <span class="service-card__temp" data-i18n="proc_2_temp">OIL · POLYMER</span>
-          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span class="service-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-1.7-.9-2.9-1.6-4.1-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.7-1-2.3-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1 2.1 3.2 5 4.4c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4s.2-1.3.2-1.4c-.1-.2-.3-.2-.5-.3zM12 2a10 10 0 0 0-8.6 15l-1.4 5 5.2-1.4A10 10 0 1 0 12 2z"/></svg></span>
         </div>
       </article>
 
-      <article class="service-card">
+      <article class="service-card" role="button" tabindex="0" data-service-key="proc_3_t" aria-label="Tempering — contact via WhatsApp">
         <span class="service-card__num">03</span>
         <div class="service-card__icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -1907,11 +1968,11 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p data-i18n="proc_3_d">Takes the brittleness out. Gets you the toughness you actually need.</p>
         <div class="service-card__meta">
           <span class="service-card__temp">150–650 °C</span>
-          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span class="service-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-1.7-.9-2.9-1.6-4.1-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.7-1-2.3-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1 2.1 3.2 5 4.4c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4s.2-1.3.2-1.4c-.1-.2-.3-.2-.5-.3zM12 2a10 10 0 0 0-8.6 15l-1.4 5 5.2-1.4A10 10 0 1 0 12 2z"/></svg></span>
         </div>
       </article>
 
-      <article class="service-card">
+      <article class="service-card" role="button" tabindex="0" data-service-key="proc_4_t" aria-label="Normalization — contact via WhatsApp">
         <span class="service-card__num">04</span>
         <div class="service-card__icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -1925,11 +1986,11 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p data-i18n="proc_4_d">Evens out the grain. Consistent hardness across the whole part.</p>
         <div class="service-card__meta">
           <span class="service-card__temp" data-i18n="proc_4_temp">AIR COOL</span>
-          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span class="service-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-1.7-.9-2.9-1.6-4.1-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.7-1-2.3-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1 2.1 3.2 5 4.4c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4s.2-1.3.2-1.4c-.1-.2-.3-.2-.5-.3zM12 2a10 10 0 0 0-8.6 15l-1.4 5 5.2-1.4A10 10 0 1 0 12 2z"/></svg></span>
         </div>
       </article>
 
-      <article class="service-card">
+      <article class="service-card" role="button" tabindex="0" data-service-key="proc_5_t" aria-label="Stress Relief — contact via WhatsApp">
         <span class="service-card__num">05</span>
         <div class="service-card__icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -1941,11 +2002,11 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p data-i18n="proc_5_d">After welding or heavy machining. Gets rid of internal stress before it causes cracks.</p>
         <div class="service-card__meta">
           <span class="service-card__temp">600–650 °C</span>
-          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span class="service-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-1.7-.9-2.9-1.6-4.1-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.7-1-2.3-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1 2.1 3.2 5 4.4c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4s.2-1.3.2-1.4c-.1-.2-.3-.2-.5-.3zM12 2a10 10 0 0 0-8.6 15l-1.4 5 5.2-1.4A10 10 0 1 0 12 2z"/></svg></span>
         </div>
       </article>
 
-      <article class="service-card">
+      <article class="service-card" role="button" tabindex="0" data-service-key="proc_7_t" aria-label="Induction Hardening — contact via WhatsApp">
         <span class="service-card__num">06</span>
         <div class="service-card__icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -1957,11 +2018,11 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p data-i18n="proc_7_d">Localised surface hardening by electromagnetic induction. Fast, precise, distortion-free.</p>
         <div class="service-card__meta">
           <span class="service-card__temp">HRC 55–62</span>
-          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span class="service-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-1.7-.9-2.9-1.6-4.1-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.7-1-2.3-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1 2.1 3.2 5 4.4c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4s.2-1.3.2-1.4c-.1-.2-.3-.2-.5-.3zM12 2a10 10 0 0 0-8.6 15l-1.4 5 5.2-1.4A10 10 0 1 0 12 2z"/></svg></span>
         </div>
       </article>
 
-      <article class="service-card">
+      <article class="service-card" role="button" tabindex="0" data-service-key="proc_6_t" aria-label="Hardness Testing — contact via WhatsApp">
         <span class="service-card__num">07</span>
         <div class="service-card__icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -1974,7 +2035,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
         <p data-i18n="proc_6_d">Every batch gets tested. HRC and HV. No exceptions.</p>
         <div class="service-card__meta">
           <span class="service-card__temp">HRC · HV</span>
-          <span class="service-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span class="service-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-1.7-.9-2.9-1.6-4.1-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.7-1-2.3-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1 2.1 3.2 5 4.4c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4s.2-1.3.2-1.4c-.1-.2-.3-.2-.5-.3zM12 2a10 10 0 0 0-8.6 15l-1.4 5 5.2-1.4A10 10 0 1 0 12 2z"/></svg></span>
         </div>
       </article>
 
@@ -2013,31 +2074,31 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
           <tbody>
             <tr>
               <td>Pit Furnace · 01</td>
-              <td class="num" data-l="Diameter">Ø 1200 mm</td>
-              <td class="num" data-l="Depth">2000 mm</td>
-              <td class="hot" data-l="Max Temp">1050 °C</td>
-              <td data-l="Atmosphere" data-i18n="furnace_atm_ctrl">Controlled</td>
+              <td class="num" data-l="Diameter" data-l-key="furnace_col_dia">Ø 1200 mm</td>
+              <td class="num" data-l="Depth" data-l-key="furnace_col_depth">2000 mm</td>
+              <td class="hot" data-l="Max Temp" data-l-key="furnace_col_temp">1050 °C</td>
+              <td data-l="Atmosphere" data-l-key="furnace_col_atm" data-i18n="furnace_atm_ctrl">Controlled</td>
             </tr>
             <tr>
               <td>Pit Furnace · 02</td>
-              <td class="num" data-l="Diameter">Ø 900 mm</td>
-              <td class="num" data-l="Depth">1600 mm</td>
-              <td class="hot" data-l="Max Temp">950 °C</td>
-              <td data-l="Atmosphere" data-i18n="furnace_atm_ctrl2">Controlled · Endo</td>
+              <td class="num" data-l="Diameter" data-l-key="furnace_col_dia">Ø 900 mm</td>
+              <td class="num" data-l="Depth" data-l-key="furnace_col_depth">1600 mm</td>
+              <td class="hot" data-l="Max Temp" data-l-key="furnace_col_temp">950 °C</td>
+              <td data-l="Atmosphere" data-l-key="furnace_col_atm" data-i18n="furnace_atm_ctrl2">Controlled · Endo</td>
             </tr>
             <tr>
               <td data-i18n="furnace_temper">Tempering Furnace</td>
-              <td class="num" data-l="Diameter">Ø 800 mm</td>
-              <td class="num" data-l="Depth">1400 mm</td>
-              <td class="hot" data-l="Max Temp">700 °C</td>
-              <td data-l="Atmosphere" data-i18n="furnace_atm_air">Air</td>
+              <td class="num" data-l="Diameter" data-l-key="furnace_col_dia">Ø 800 mm</td>
+              <td class="num" data-l="Depth" data-l-key="furnace_col_depth">1400 mm</td>
+              <td class="hot" data-l="Max Temp" data-l-key="furnace_col_temp">700 °C</td>
+              <td data-l="Atmosphere" data-l-key="furnace_col_atm" data-i18n="furnace_atm_air">Air</td>
             </tr>
             <tr>
               <td data-i18n="furnace_quench">Quench Baths</td>
-              <td class="num" data-l="Diameter" data-i18n="furnace_two">2 × Ø 1200 mm</td>
-              <td class="num" data-l="Depth">2200 mm</td>
-              <td class="hot" data-l="Max Temp">80 °C</td>
-              <td data-l="Atmosphere" data-i18n="furnace_atm_oil">Oil · Polymer</td>
+              <td class="num" data-l="Diameter" data-l-key="furnace_col_dia" data-i18n="furnace_two">2 × Ø 1200 mm</td>
+              <td class="num" data-l="Depth" data-l-key="furnace_col_depth">2200 mm</td>
+              <td class="hot" data-l="Max Temp" data-l-key="furnace_col_temp">80 °C</td>
+              <td data-l="Atmosphere" data-l-key="furnace_col_atm" data-i18n="furnace_atm_oil">Oil · Polymer</td>
             </tr>
           </tbody>
         </table>
@@ -2312,6 +2373,7 @@ h1,h2,h3,h4{font-family:var(--f-head);font-weight:600;line-height:1.06;letter-sp
           <div class="foot__item-body">
             <div class="foot__item-label" data-i18n="foot_addr_l">Factory</div>
             <div class="foot__item-value" data-i18n-html="foot_addr_html">Sadun Atığ Cad. No: 112/A<br>Kartepe / Kocaeli · Turkey</div>
+            <a class="foot__map-link" href="https://www.google.com/maps/search/?api=1&query=Sadun+At%C4%B1%C4%9F+Cad+No+112%2FA+Kartepe+Kocaeli" target="_blank" rel="noopener" data-i18n="foot_map_link">Open in Maps →</a>
           </div>
         </div>
         <div class="foot__item">

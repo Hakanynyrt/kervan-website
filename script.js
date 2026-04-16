@@ -18,6 +18,7 @@ p_fro_t:"Front Heads",p_fro_d:"Forged and CNC machined to OEM dimensions. Drop-i
 compat_eyebrow:"Fits Your Breaker",compat_title:"40+ brands. We probably have yours.",compat_sub:"Every part is measured against the original. We check fit before it ships.",
 compat_note_html:'AND MORE &nbsp;\u00b7&nbsp; DON\u2019T SEE YOURS? <a href="#quote"><b>ASK US \u2192</b></a>',
 heat_eyebrow:"Heat Treatment",heat_title:"Our furnaces. Our process.",heat_sub:"Seven controlled heat-treatment services run daily in Kartepe \u2014 for our own parts and for third-party manufacturers. Pit furnaces, controlled atmosphere, oil and polymer quench, in-house hardness testing.",
+h_stat_1_l:"Furnace Units",h_stat_2_l:"Max Process Temp",h_stat_3_l:"Pit Capacity",h_stat_4_v:"Every Lot",h_stat_4_l:"Hardness Tested",
 fac_label:"KRV \u00b7 FACILITY",fac_title:"Kartepe, Kocaeli",fac_sub:"Pit furnaces with controlled atmosphere. Oil and polymer quench. HRC/HV testing in-house.",
 fac_spec_1_l:"Max Temp",fac_spec_2_l:"Pit Diameter",fac_spec_3_l:"Quench",fac_spec_4_l:"Testing",
 proc_1_t:"Carburizing",proc_1_d:"Case hardening at 850\u2013950\u00b0C. The surface gets hard, the core stays tough.",
@@ -47,14 +48,15 @@ form_part_opt:"\u2014 Pick one \u2014",form_part_chisel:"Chisel",form_part_pisto
 form_note_html:'Reply within <b>24 hours</b> \u00b7 Mon\u2013Sat',form_submit:"Send It",form_sending:"Sending\u2026",form_ok:"Got it. We\u2019ll get back to you within 24 hours.",form_err:"Didn\u2019t go through. Email us at info@kervanheat.com",
 foot_col_brand:"The Factory",foot_col_contact:"Contact",foot_col_hours:"Hours",
 foot_about:"We make hydraulic breaker parts in Kartepe, Turkey. Chisels, pistons, bushings, bolts. 42CrMo steel, CNC machined, heat-treated in our own furnaces. We ship worldwide.",
-foot_addr_l:"Factory",foot_addr_html:'Sadun At\u0131\u011f Cad. No: 112/A<br>Kartepe / Kocaeli, Turkey',
+foot_addr_l:"Factory",foot_addr_html:'Sadun At\u0131\u011f Cad. No: 112/A<br>Kartepe / Kocaeli, Turkey',foot_map_link:"Open in Maps \u2192",
 foot_phone_l:"Phone / WhatsApp",foot_email_l:"Email",
 foot_hours_l:"Open",foot_hours_html:'Mon \u2013 Sat<br>08:00 \u2013 18:00 (GMT+3)',
 foot_ship_l:"Shipping",foot_ship_html:'Turkey: same day (stock)<br>Nearby countries: 5\u201310 days',
 foot_resp_l:"Quotes",foot_resp:"Within 24 hours",
 foot_tagline_html:'Made in <b>Turkey</b> \u00b7 Heat-treated <b>in-house</b> \u00b7 Shipped <b>worldwide</b>',
 foot_copy_html:'\u00a9 2026 <b>Kervan Is\u0131l \u0130\u015flem Ltd. \u015eti.</b> \u00b7 All rights reserved.',
-chat_title:"Kervan",chat_welcome:"Hey \u2014 need help finding a part or getting a price? Just ask.",chat_input_ph:"Ask us anything\u2026",chat_send:"Send",chat_typing:"Typing\u2026",chat_err:"Connection problem. Try again or WhatsApp us."
+chat_title:"Kervan",chat_welcome:"Hey \u2014 need help finding a part or getting a price? Just ask.",chat_input_ph:"Ask us anything\u2026",chat_send:"Send",chat_typing:"Typing\u2026",chat_err:"Connection problem. Try again or WhatsApp us.",
+wa_service_msg:"Hello, I\u2019d like a quote for {service} service."
 },
 tr:{
 nav_parts:"Yedek Par\u00e7alar",nav_compat:"Uyumluluk",nav_heat:"Is\u0131l \u0130\u015flem",nav_why:"Neden Biz",nav_catalogue:"Katalog",nav_contact:"\u0130leti\u015fim",nav_quote:"Teklif Al",
@@ -75,6 +77,7 @@ p_fro_t:"Alt G\u00f6vdeler",p_fro_d:"D\u00f6vme, CNC i\u015flenmi\u015f. OEM \u0
 compat_eyebrow:"K\u0131r\u0131c\u0131n\u0131za Uyar",compat_title:"40+ marka. Sizinki muhtemelen listede.",compat_sub:"Her par\u00e7a orijinalinden \u00f6l\u00e7\u00fclenir. G\u00f6ndermeden \u00f6nce uyumu kontrol ederiz.",
 compat_note_html:'VE DAHA FAZLASI &nbsp;\u00b7&nbsp; MARKANIZ YOK MU? <a href="#quote"><b>SORUN \u2192</b></a>',
 heat_eyebrow:"Is\u0131l \u0130\u015flem",heat_title:"Bizim f\u0131r\u0131nlar. Bizim proses.",heat_sub:"Kartepe\u2019de her g\u00fcn yedi farkl\u0131 \u0131s\u0131l i\u015flem hizmeti \u00e7al\u0131\u015f\u0131r \u2014 kendi par\u00e7alar\u0131m\u0131z ve d\u0131\u015f \u00fcreticiler i\u00e7in. Kuyu f\u0131r\u0131n, kontroll\u00fc atmosfer, ya\u011f ve polimer s\u00f6nd\u00fcrme, tesiste sertlik testi.",
+h_stat_1_l:"F\u0131r\u0131n \u00dcnitesi",h_stat_2_l:"Maks \u0130\u015flem S\u0131cakl\u0131\u011f\u0131",h_stat_3_l:"Kuyu Kapasitesi",h_stat_4_v:"Her Parti",h_stat_4_l:"Sertlik Testli",
 fac_label:"KRV \u00b7 TES\u0130S",fac_title:"Kartepe, Kocaeli",fac_sub:"Kontroll\u00fc atmosfer kuyu f\u0131r\u0131nlar. Ya\u011f ve polimer s\u00f6nd\u00fcrme. Tesiste HRC/HV \u00f6l\u00e7\u00fcm.",
 fac_spec_1_l:"Maks S\u0131cakl\u0131k",fac_spec_2_l:"Kuyu \u00c7ap\u0131",fac_spec_3_l:"S\u00f6nd\u00fcrme",fac_spec_4_l:"Test",
 proc_1_t:"Karbonlama",proc_1_d:"850\u2013950\u00b0C\u2019de y\u00fczey sertle\u015ftirme. D\u0131\u015f\u0131 sert, i\u00e7i tok.",
@@ -104,14 +107,15 @@ form_part_opt:"\u2014 Se\u00e7 \u2014",form_part_chisel:"U\u00e7",form_part_pist
 form_note_html:'<b>24 saat</b> i\u00e7inde d\u00f6neriz \u00b7 Pzt\u2013Cmt',form_submit:"G\u00f6nder",form_sending:"G\u00f6nderiliyor\u2026",form_ok:"Ald\u0131k. 24 saat i\u00e7inde d\u00f6n\u00fc\u015f yapar\u0131z.",form_err:"G\u00f6nderilemedi. info@kervanheat.com\u2019a yaz\u0131n.",
 foot_col_brand:"Fabrika",foot_col_contact:"\u0130leti\u015fim",foot_col_hours:"Saatler",
 foot_about:"Kartepe\u2019de hidrolik k\u0131r\u0131c\u0131 yedek par\u00e7as\u0131 \u00fcretiyoruz. U\u00e7, piston, bur\u00e7, saplama. 42CrMo \u00e7elik, CNC i\u015fleme, kendi f\u0131r\u0131nlar\u0131m\u0131zda \u0131s\u0131l i\u015flem. D\u00fcnyaya g\u00f6ndeririz.",
-foot_addr_l:"Fabrika",foot_addr_html:'Sadun At\u0131\u011f Cad. No: 112/A<br>Kartepe / Kocaeli, T\u00fcrkiye',
+foot_addr_l:"Fabrika",foot_addr_html:'Sadun At\u0131\u011f Cad. No: 112/A<br>Kartepe / Kocaeli, T\u00fcrkiye',foot_map_link:"Haritada A\u00e7 \u2192",
 foot_phone_l:"Telefon / WhatsApp",foot_email_l:"E-posta",
 foot_hours_l:"A\u00e7\u0131k",foot_hours_html:'Pzt \u2013 Cmt<br>08:00 \u2013 18:00',
 foot_ship_l:"Kargo",foot_ship_html:'TR: ayn\u0131 g\u00fcn (stok)<br>Yak\u0131n \u00fclkeler: 5\u201310 g\u00fcn',
 foot_resp_l:"Teklif",foot_resp:"24 saat i\u00e7inde",
 foot_tagline_html:'<b>T\u00fcrkiye</b>\u2019de \u00fcretilir \u00b7 <b>Tesiste</b> \u0131s\u0131l i\u015flem \u00b7 <b>D\u00fcnyaya</b> g\u00f6nderilir',
 foot_copy_html:'\u00a9 2026 <b>Kervan Is\u0131l \u0130\u015flem Ltd. \u015eti.</b>',
-chat_title:"Kervan",chat_welcome:"Merhaba \u2014 par\u00e7a m\u0131 ar\u0131yorsun, fiyat m\u0131? Sor bakal\u0131m.",chat_input_ph:"Yaz\u0131n\u2026",chat_send:"G\u00f6nder",chat_typing:"Yaz\u0131yor\u2026",chat_err:"Ba\u011flanamad\u0131. Tekrar dene ya da WhatsApp\u2019tan yaz."
+chat_title:"Kervan",chat_welcome:"Merhaba \u2014 par\u00e7a m\u0131 ar\u0131yorsun, fiyat m\u0131? Sor bakal\u0131m.",chat_input_ph:"Yaz\u0131n\u2026",chat_send:"G\u00f6nder",chat_typing:"Yaz\u0131yor\u2026",chat_err:"Ba\u011flanamad\u0131. Tekrar dene ya da WhatsApp\u2019tan yaz.",
+wa_service_msg:"Merhaba, {service} hizmeti i\u00e7in teklif almak istiyorum."
 }};
 var lang='en',userOverride=false;
 
@@ -120,6 +124,7 @@ function apply(next){
   document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(d[k]!==undefined)el.textContent=d[k];});
   document.querySelectorAll('[data-i18n-html]').forEach(function(el){var k=el.getAttribute('data-i18n-html');if(d[k]!==undefined)el.innerHTML=d[k];});
   document.querySelectorAll('[data-i18n-ph]').forEach(function(el){var k=el.getAttribute('data-i18n-ph');if(d[k]!==undefined)el.setAttribute('placeholder',d[k]);});
+  document.querySelectorAll('[data-l-key]').forEach(function(el){var k=el.getAttribute('data-l-key');if(d[k]!==undefined)el.setAttribute('data-l',d[k]);});
   var btn=document.getElementById('lang-toggle');
   if(btn) btn.innerHTML=lang==='en'?'<b>EN</b> / TR':'EN / <b>TR</b>';
 }
@@ -192,6 +197,20 @@ document.addEventListener('DOMContentLoaded',function(){
         if(quote) quote.scrollIntoView({behavior:'smooth',block:'start'});
       }
     });
+  });
+
+  /* service card click → WhatsApp deep link with pre-filled, localized message */
+  var openServiceWA=function(card){
+    var k=card.getAttribute('data-service-key');
+    var d=T[lang];
+    var service=(d&&d[k])||card.querySelector('h3').textContent.trim();
+    var tpl=(d&&d.wa_service_msg)||'Hello, I\u2019d like a quote for {service} service.';
+    var msg=tpl.replace('{service}',service);
+    window.open('https://wa.me/905316693734?text='+encodeURIComponent(msg),'_blank','noopener');
+  };
+  document.querySelectorAll('.service-card[data-service-key]').forEach(function(card){
+    card.addEventListener('click',function(){openServiceWA(card);});
+    card.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openServiceWA(card);}});
   });
 
   /* hamburger */
