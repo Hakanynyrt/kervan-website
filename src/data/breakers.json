@@ -38,6 +38,34 @@
               "tr": "HB 3000 pistonu, eş taşıyıcı makineler için aftermarket üretimimizin en kritik kaleminden biri. Ø195 mm gövde taslağı dövme stoktan CNC tornalama ile işlenir, ardından Kervan'da indüksiyon sertleştirme hattına alınır (yüzeyde HRC 50–54, çekirdek HRC 32). İçi boş eksenli geometri, OEM tahrik süresiyle (pulse timing) uyumludur — çalışma basıncında titreşim profili orijinale %98 oranında benzerdir (dinamometre kontrolü). 920 mm toplam boy, toleranslar h6 seviyesinde kontrol edilir.",
               "en": "The HB 3000 piston is one of the most critical items in our aftermarket line for this breaker class. The Ø195 mm forging is CNC-turned from bar stock, then induction-hardened in-house (HRC 50–54 on the working surface, HRC 32 core). The hollow-axis geometry matches OEM pulse timing — vibration profile under operating pressure tracks the original to within 2% (dyno-verified). Overall length 920 mm; tolerances held to h6."
             }
+          },
+          {
+            "id": "bushing",
+            "name": { "tr": "Alt Buşing", "en": "Lower Bushing" },
+            "oem": "3363-0431-00",
+            "material": "34CrNiMo6",
+            "hardnessHRC": "48-52",
+            "weightKg": 18,
+            "image": "/images/products/atlas-copco-hb3000-bushing.jpg",
+            "specs": { "lengthMm": 220, "diameterMm": 168 },
+            "uniqueParagraphs": {
+              "tr": "HB 3000 alt buşingi, uç ile ön gövde arasında yük taşıyan aşınma elemanı. 34CrNiMo6 dövme stoktan CNC torna + iç taşlama ile işlenir; iç çap Ø165 H7, dış çap Ø168 h6 toleransında. Nitrürasyon sonrası yüzeyde HRC 48–52, 0.3–0.4 mm beyaz tabaka kontrol edilir. Yağ/gres kanalları OEM pozisyonuyla aynı; montajda pres ile oturtulur, zorlu madencilikte tipik 400–600 saat ömür verir.",
+              "en": "The HB 3000 lower bushing is the wear sleeve that carries load between the chisel and the front head. CNC-turned and internally ground from forged 34CrNiMo6; bore Ø165 H7, OD Ø168 h6. Nitrided to HRC 48–52 with a 0.3–0.4 mm white layer verified per batch. Oil/grease channels match OEM positions; press-fitted at install. Typical service life 400–600 hours in heavy mining duty."
+            }
+          },
+          {
+            "id": "through-bolt",
+            "name": { "tr": "Gergi Saplaması", "en": "Through Bolt" },
+            "oem": "3363-0210-00",
+            "material": "4340",
+            "hardnessHRC": "38-42",
+            "weightKg": 12,
+            "image": "/images/products/atlas-copco-hb3000-through-bolt.jpg",
+            "specs": { "lengthMm": 1120, "diameterMm": 42 },
+            "uniqueParagraphs": {
+              "tr": "HB 3000 gergi saplaması, arka kapak ile ön gövdeyi birleştiren 1120 mm uzunluğunda çekme elemanı. Dövme 4340 çeliği, ıslah (Q+T) sonrası HRC 38–42; diş kökleri indüksiyon ile 55 HRC'ye kadar yerel sertleştirilir — yorulma ömrü artar. Her parça ultrasonik test ile çatlak taranır. Somun + rondela seti dahil; tork değeri 1550 Nm ± 5%.",
+              "en": "The HB 3000 through bolt is the 1120 mm tie rod joining back cap to front head. Forged 4340, quenched-and-tempered to HRC 38–42; thread roots are locally induction-hardened up to HRC 55 for fatigue resistance. Each piece is ultrasonically inspected for cracks. Nut + washer set included; torque spec 1550 Nm ± 5%."
+            }
           }
         ]
       }
