@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="404 — Page Not Found" description="The page you're looking for doesn't exist." noindex={true}>
+<main class="container fourohfour">
+<p class="fourohfour__code" aria-hidden="true">404</p>
+<h1 class="fourohfour__title">
+<span lang="tr">Aradığınız sayfa bulunamadı.</span>
+<span lang="en">Page not found.</span>
+</h1>
+<p class="fourohfour__msg">
+<span lang="tr">URL değişmiş veya silinmiş olabilir.</span>
+<span lang="en">The URL may have moved or been removed.</span>
+</p>
+<div class="fourohfour__actions">
+<a class="btn-primary" href="/tr/">Türkçe →</a>
+<a class="btn-ghost" href="/en/">English →</a>
+</div>
+<ul class="fourohfour__links">
+<li><a href="/tr/kirici-parcalari/">Kırıcı Parçaları / Breaker Parts</a></li>
+<li><a href="/tr/isil-islem/">Isıl İşlem / Heat Treatment</a></li>
+<li><a href="/tr/parca-bul/">Parça Bul / Find Part</a></li>
+<li><a href="/tr/iletisim/">İletişim / Contact</a></li>
+</ul>
+</main>
+</BaseLayout>
+
+<style>
+  .fourohfour {
+    min-height: calc(100dvh - 200px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-block: var(--space-7);
+    text-align: center;
+  }
+  .fourohfour__code {
+    font-size: clamp(5rem, 15vw, 10rem);
+    font-weight: 700;
+    color: var(--accent-orange);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    margin: 0;
+  }
+  .fourohfour__title {
+    font-size: var(--fs-2xl);
+    margin: var(--space-3) 0 var(--space-2);
+  }
+  .fourohfour__title span { display: block; }
+  .fourohfour__msg { color: var(--text-secondary); margin: 0 0 var(--space-5); }
+  .fourohfour__actions { display: flex; gap: var(--space-3); margin-bottom: var(--space-5); }
+  .fourohfour__links {
+    list-style: none; padding: 0; margin: 0;
+    display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2) var(--space-4);
+  }
+  .fourohfour__links a { font-size: var(--fs-sm); color: var(--text-muted); }
+  .fourohfour__links a:hover { color: var(--accent-orange); }
+</style>

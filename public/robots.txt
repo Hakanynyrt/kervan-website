@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /*?
+Disallow: /api/
+Disallow: /legacy-backup/
+Disallow: /_preserve/
+
+Sitemap: https://kervanheat.com/sitemap-index.xml

@@ -1,0 +1,16 @@
+# www → apex canonical (force with !)
+https://www.kervanheat.com/*  https://kervanheat.com/:splat  301!
+
+# Legacy root → TR (matches original vanilla index.html)
+/index.html        /tr/                       301
+/katalog.html      /tr/kirici-parcalari/      301
+
+# Legacy EN if any
+/en/index.html     /en/                       301
+
+# TR path aliases (add more after Screaming Frog crawl of live site):
+# /isil-islem.html       /tr/isil-islem/                       301
+# /karburizasyon.html    /tr/isil-islem/karburizasyon/         301
+# /kirici-parca.html     /tr/kirici-parcalari/                 301
+# /iletisim.html         /tr/iletisim/                         301
+# /hakkimizda.html       /tr/hakkimizda/                       301
