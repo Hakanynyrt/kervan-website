@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { getLangFromUrl, useTranslations, type Lang } from '../i18n/utils';
+import WhatsAppFloat from '../components/WhatsAppFloat.astro';
 
 export interface Alternate {
   lang: Lang;
@@ -67,5 +68,6 @@ const hasEN = alternates.some((a) => a.lang === 'en');
 </head>
 <body>
 <slot />
+<WhatsAppFloat />
 </body>
 </html>

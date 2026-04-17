@@ -5,6 +5,7 @@ import Footer from '../../components/Footer.astro';
 import OrganizationSchema from '../../components/seo/OrganizationSchema.astro';
 import LocalBusinessSchema from '../../components/seo/LocalBusinessSchema.astro';
 import BreadcrumbSchema from '../../components/seo/BreadcrumbSchema.astro';
+import RfqForm from '../../components/RfqForm.astro';
 
 const canonical = 'https://kervanheat.com/tr/iletisim/';
 const alternates = [
@@ -24,9 +25,7 @@ const alternates = [
 <div class="contact-grid">
 <div>
 <h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">Teklif Talebi</h2>
-<p style="color: var(--text-muted); font-style: italic">
-RFQ formu (3 adımlı, dosya yüklemeli) FAZ 7'de eklenecektir. Şimdilik aşağıdaki kanallardan ulaşabilirsiniz.
-</p>
+<RfqForm />
 </div>
 <div>
 <h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">Bize Ulaşın</h2>

@@ -5,6 +5,7 @@ import Footer from '../../components/Footer.astro';
 import OrganizationSchema from '../../components/seo/OrganizationSchema.astro';
 import LocalBusinessSchema from '../../components/seo/LocalBusinessSchema.astro';
 import BreadcrumbSchema from '../../components/seo/BreadcrumbSchema.astro';
+import RfqForm from '../../components/RfqForm.astro';
 
 const canonical = 'https://kervanheat.com/en/contact/';
 const alternates = [
@@ -24,9 +25,7 @@ const alternates = [
 <div class="contact-grid">
 <div>
 <h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">Request a Quote</h2>
-<p style="color: var(--text-muted); font-style: italic">
-RFQ form (3-step, file upload) will be added in PHASE 7. For now, reach us via the channels on the right.
-</p>
+<RfqForm />
 </div>
 <div>
 <h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">Reach us</h2>
