@@ -8,17 +8,15 @@ import { useTranslations } from '../../../i18n/utils';
 import { getCollection } from 'astro:content';
 
 const t = useTranslations('en');
-const brands = (await getCollection('breakers')).sort((a, b) =>
-  a.data.brand.name.localeCompare(b.data.brand.name)
-);
+const parts = (await getCollection('breakers')).sort((a, b) => a.data.id.localeCompare(b.data.id));
 const alternates = [
   { lang: 'tr' as const, href: 'https://kervanheat.com/tr/kirici-parcalari/' },
   { lang: 'en' as const, href: 'https://kervanheat.com/en/breaker-parts/' },
 ];
 ---
 <BaseLayout
-  title={`Hydraulic Breaker Parts — ${t('site.title')}`}
-  description="Hydraulic breaker spare parts for Atlas Copco, Furukawa, Soosan, Rammer, Montabert, Indeco, NPK, Epiroc, Krupp, Hanwoo, Toku. 42CrMo4, HRC 48-56. Made in Turkey."
+  title={`Hydraulic Breaker Spare Parts — ${t('site.title')}`}
+  description="Aftermarket spare parts for hydraulic breakers: chisels, pistons, bushings, through bolts, front heads, retaining wedges. Forged 42CrMo4 / 4340, heat-treated in-house, compatible with all popular OEM models. Kartepe, Turkey."
   alternates={alternates}
 >
 <Fragment slot="head">
@@ -32,14 +30,19 @@ const alternates = [
 <main class="container" style="padding-block: var(--space-7)">
 <h1>Hydraulic Breaker Spare Parts</h1>
 <p style="color: var(--text-secondary); max-width: 60ch; margin: var(--space-3) 0 var(--space-6)">
-We manufacture chisels, pistons, bushings, through-bolts, and repair kits for 11 OEM brands from forged 42CrMo4. All parts are heat-treated in our Kartepe facility with full per-batch traceability.
+Kervan produces aftermarket replacement parts — we don't sell breakers. Six core part categories, forged 42CrMo4 / 4340 / 34CrNiMo6, compatible with all popular OEM breaker models. All heat treatment runs on-site in Kartepe; drop-in production against OEM part numbers or samples.
 </p>
-<ul class="brand-grid">
-  {brands.map((b) => (
-    <li class="brand-card">
-      <a href={`/en/breaker-parts/${b.data.brand.id}/`}>
-        <h3>{b.data.brand.name}</h3>
-        <span class="brand-count">{b.data.models.length} model{b.data.models.length === 1 ? '' : 's'}</span>
+<ul class="part-grid">
+  {parts.map((p) => (
+    <li class="part-card">
+      <a href={`/en/breaker-parts/${p.data.id}/`}>
+        <h3>{p.data.name.en}</h3>
+        <p>{p.data.shortDesc.en}</p>
+        <dl class="part-card__specs">
+          <dt>Material</dt><dd>{p.data.material}</dd>
+          <dt>HRC</dt><dd>{p.data.hardnessHRC}</dd>
+        </dl>
+        <span class="arrow" aria-hidden="true">→</span>
       </a>
     </li>
   ))}
@@ -52,12 +55,15 @@ We manufacture chisels, pistons, bushings, through-bolts, and repair kits for 11
 </BaseLayout>
 
 <style>
-  .brand-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); list-style: none; padding: 0; margin: 0; }
-  @media (max-width: 960px) { .brand-grid { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 720px) { .brand-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 480px) { .brand-grid { grid-template-columns: 1fr; } }
-  .brand-card a { display: block; padding: var(--space-4); background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); transition: border-color .2s, transform .15s; }
-  .brand-card a:hover { border-color: var(--accent-steel); transform: translateY(-2px); }
-  .brand-card h3 { font-size: var(--fs-lg); margin-bottom: var(--space-1); }
-  .brand-count { color: var(--text-muted); font-size: var(--fs-sm); font-family: ui-monospace, monospace; }
+  .part-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); list-style: none; padding: 0; margin: 0; }
+  @media (max-width: 860px) { .part-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .part-grid { grid-template-columns: 1fr; } }
+  .part-card a { display: block; padding: var(--space-4); background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius-lg); color: var(--text-primary); transition: border-color .2s, transform .15s; position: relative; min-height: 220px; }
+  .part-card a:hover { border-color: var(--accent-orange); transform: translateY(-2px); }
+  .part-card h3 { font-size: var(--fs-lg); margin-bottom: var(--space-2); }
+  .part-card p { color: var(--text-secondary); font-size: var(--fs-sm); margin: 0 0 var(--space-3); }
+  .part-card__specs { display: grid; grid-template-columns: max-content 1fr; column-gap: var(--space-3); row-gap: 0.2rem; font-size: var(--fs-xs); font-family: ui-monospace, monospace; margin: 0; }
+  .part-card__specs dt { color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .part-card__specs dd { color: var(--text-secondary); margin: 0; }
+  .part-card .arrow { position: absolute; right: var(--space-4); bottom: var(--space-4); color: var(--accent-orange); font-size: var(--fs-xl); }
 </style>

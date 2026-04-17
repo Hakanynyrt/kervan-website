@@ -6,37 +6,21 @@ const localizedString = z.object({ tr: z.string(), en: z.string() });
 const breakers = defineCollection({
   loader: file('src/data/breakers.json'),
   schema: z.object({
-    brand: z.object({ id: z.string(), name: z.string() }),
-    models: z.array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        weightKg: z.number(),
-        compatibleMachines: z.array(z.string()),
-        parts: z.array(
-          z.object({
-            id: z.string(),
-            name: localizedString,
-            oem: z.string(),
-            material: z.string(),
-            hardnessHRC: z.string(),
-            weightKg: z.number(),
-            image: z.string(),
-            model3d: z.boolean().optional(),
-            model3dUrl: z.string().nullable().optional(),
-            model3dPoster: z.string().nullable().optional(),
-            specs: z.object({
-              lengthMm: z.number(),
-              diameterMm: z.number(),
-            }),
-            uniqueParagraphs: z.object({
-              tr: z.string().min(80),
-              en: z.string().min(80),
-            }),
-          })
-        ),
-      })
-    ),
+    id: z.string(),
+    name: localizedString,
+    shortDesc: localizedString,
+    material: z.string(),
+    hardnessHRC: z.string(),
+    diameterRangeMm: z.string(),
+    lengthRangeMm: z.string(),
+    image: z.string(),
+    model3d: z.boolean().optional(),
+    model3dUrl: z.string().nullable().optional(),
+    model3dPoster: z.string().nullable().optional(),
+    uniqueParagraphs: z.object({
+      tr: z.string().min(200),
+      en: z.string().min(200),
+    }),
   }),
 });
 

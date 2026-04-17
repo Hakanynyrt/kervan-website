@@ -1,0 +1,107 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import OrganizationSchema from '../../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../../components/seo/BreadcrumbSchema.astro';
+import ProductSchema from '../../../components/seo/ProductSchema.astro';
+import ProductViewer3D from '../../../components/ProductViewer3D.astro';
+import { useTranslations } from '../../../i18n/utils';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const parts = await getCollection('breakers');
+  return parts.map((p) => ({ params: { part: p.data.id }, props: { part: p.data } }));
+}
+
+const { part } = Astro.props;
+const t = useTranslations('en');
+const canonical = `https://kervanheat.com/en/breaker-parts/${part.id}/`;
+const alternates = [
+  { lang: 'tr' as const, href: `https://kervanheat.com/tr/kirici-parcalari/${part.id}/` },
+  { lang: 'en' as const, href: canonical },
+];
+---
+<BaseLayout
+  title={`${part.name.en} — Hydraulic Breaker Aftermarket Part — ${t('site.title')}`}
+  description={part.shortDesc.en}
+  canonical={canonical}
+  alternates={alternates}
+>
+<Fragment slot="head">
+<OrganizationSchema />
+<ProductSchema
+  name={part.name.en}
+  sku={`KRV-${part.id.toUpperCase()}`}
+  brand="Kervan"
+  image={part.image}
+  description={part.uniqueParagraphs.en.slice(0, 300)}
+  material={part.material}
+  hardnessHRC={part.hardnessHRC}
+  url={canonical}
+  model3dUrl={part.model3dUrl ?? undefined}
+/>
+<BreadcrumbSchema items={[
+  { name: 'Home', url: '/en/' },
+  { name: t('nav.parts'), url: '/en/breaker-parts/' },
+  { name: part.name.en, url: canonical },
+]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7); max-width: 900px">
+<nav aria-label="breadcrumb" style="color: var(--text-muted); font-size: var(--fs-sm); margin-bottom: var(--space-4)">
+<a href="/en/breaker-parts/">← {t('nav.parts')}</a>
+</nav>
+<h1>{part.name.en}</h1>
+<p style="color: var(--text-secondary); font-size: var(--fs-lg); margin: var(--space-3) 0 var(--space-5); max-width: 70ch">
+{part.shortDesc.en}
+</p>
+
+<section style="margin-top: var(--space-5)">
+<p style="color: var(--text-secondary); max-width: 70ch; white-space: pre-line">{part.uniqueParagraphs.en}</p>
+</section>
+
+<section style="margin-top: var(--space-6)">
+<h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">{t('product.specs')}</h2>
+<dl class="spec-list">
+<dt>Material</dt><dd>{part.material}</dd>
+<dt>Hardness (HRC)</dt><dd>{part.hardnessHRC}</dd>
+<dt>Diameter range</dt><dd>{part.diameterRangeMm} mm</dd>
+<dt>Length range</dt><dd>{part.lengthRangeMm} mm</dd>
+<dt>Production</dt><dd>Forged bar + CNC + in-house heat treatment</dd>
+<dt>Certificate</dt><dd>EN 10204 Type 3.1</dd>
+<dt>Lead time</dt><dd>Same-day from stock · 2 business days from production</dd>
+</dl>
+</section>
+
+{part.model3d && part.model3dUrl && (
+<section style="margin-top: var(--space-6)">
+<h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">3D Model</h2>
+<ProductViewer3D
+  src={part.model3dUrl}
+  poster={part.model3dPoster ?? part.image}
+  alt={`${part.name.en} 3D`}
+  floating={true}
+  scrollParallax={true}
+  entranceAnimation={true}
+/>
+</section>
+)}
+
+<section style="margin-top: var(--space-6); display: flex; gap: var(--space-3); flex-wrap: wrap">
+<a href={`/en/contact/?part=${part.id}`} class="btn-primary">{t('product.requestQuote')}</a>
+<a href="https://wa.me/905316693734" class="btn-ghost" target="_blank" rel="noopener">{t('cta.whatsapp')}</a>
+</section>
+
+<p style="margin-top: var(--space-6); color: var(--text-muted); font-size: var(--fs-sm); max-width: 70ch">
+<em>{t('product.disclaimer')}</em>
+</p>
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .spec-list { display: grid; grid-template-columns: max-content 1fr; column-gap: var(--space-4); row-gap: var(--space-2); max-width: 600px; }
+  .spec-list dt { color: var(--text-muted); font-family: ui-monospace, monospace; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.08em; }
+  .spec-list dd { color: var(--text-primary); margin: 0; }
+</style>

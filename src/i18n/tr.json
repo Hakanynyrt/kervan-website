@@ -4,7 +4,6 @@
   "nav.home": "Ana Sayfa",
   "nav.services": "Isıl İşlem",
   "nav.parts": "Kırıcı Parçaları",
-  "nav.findPart": "Parça Bul",
   "nav.about": "Hakkımızda",
   "nav.contact": "İletişim",
   "nav.resources": "Rehber",
@@ -65,15 +64,6 @@
   "product.compat": "Uyumlu Taşıyıcı Makineler",
   "product.requestQuote": "Bu Parça İçin Teklif İste",
   "product.disclaimer": "OEM ticari markaları ilgili sahiplerine aittir. Listelenen parçalar OEM tarafından üretilmeyen aftermarket yedek parçalardır.",
-  "findPart.title": "Parçanızı Bulun",
-  "findPart.search": "OEM veya model ara",
-  "findPart.brand": "Marka",
-  "findPart.model": "Model",
-  "findPart.type": "Tip",
-  "findPart.all": "Tümü",
-  "findPart.export": "CSV İndir",
-  "findPart.noResults": "Sonuç yok",
-  "findPart.count": "sonuç",
   "viewer3d.hint": "360° Görüntüle",
   "viewer3d.ar": "AR"
 }

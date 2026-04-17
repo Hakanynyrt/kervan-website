@@ -29,7 +29,6 @@ export const pathMap = {
   tr: {
     services: '/isil-islem',
     parts: '/kirici-parcalari',
-    findPart: '/parca-bul',
     about: '/hakkimizda',
     contact: '/iletisim',
     resources: '/rehber',
@@ -41,7 +40,6 @@ export const pathMap = {
   en: {
     services: '/heat-treatment',
     parts: '/breaker-parts',
-    findPart: '/find-part',
     about: '/about',
     contact: '/contact',
     resources: '/resources',

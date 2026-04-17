@@ -4,7 +4,6 @@
   "nav.home": "Home",
   "nav.services": "Heat Treatment",
   "nav.parts": "Breaker Parts",
-  "nav.findPart": "Find Your Part",
   "nav.about": "About",
   "nav.contact": "Contact",
   "nav.resources": "Resources",
@@ -65,15 +64,6 @@
   "product.compat": "Compatible Carrier Machines",
   "product.requestQuote": "Request a Quote for This Part",
   "product.disclaimer": "OEM trademarks are property of their respective owners; listed parts are aftermarket replacements not manufactured by OEM.",
-  "findPart.title": "Find Your Part",
-  "findPart.search": "Search OEM or model",
-  "findPart.brand": "Brand",
-  "findPart.model": "Model",
-  "findPart.type": "Type",
-  "findPart.all": "All",
-  "findPart.export": "Download CSV",
-  "findPart.noResults": "No results",
-  "findPart.count": "results",
   "viewer3d.hint": "View in 360°",
   "viewer3d.ar": "AR"
 }
