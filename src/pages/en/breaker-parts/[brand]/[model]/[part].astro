@@ -5,6 +5,7 @@ import Footer from '../../../../../components/Footer.astro';
 import OrganizationSchema from '../../../../../components/seo/OrganizationSchema.astro';
 import BreadcrumbSchema from '../../../../../components/seo/BreadcrumbSchema.astro';
 import ProductSchema from '../../../../../components/seo/ProductSchema.astro';
+import ProductViewer3D from '../../../../../components/ProductViewer3D.astro';
 import { useTranslations } from '../../../../../i18n/utils';
 import { getCollection } from 'astro:content';
 
@@ -66,6 +67,20 @@ const title = `${brand.name} ${model.name} ${part.name.en}`;
 <section style="margin-top: var(--space-5)">
 <p style="color: var(--text-secondary); max-width: 70ch">{part.uniqueParagraphs.en}</p>
 </section>
+
+{part.model3d && part.model3dUrl && (
+<section style="margin-top: var(--space-6)">
+<h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">3D Model</h2>
+<ProductViewer3D
+  src={part.model3dUrl}
+  poster={part.model3dPoster ?? part.image}
+  alt={`${brand.name} ${model.name} ${part.name.en} 3D`}
+  floating={true}
+  scrollParallax={true}
+  entranceAnimation={true}
+/>
+</section>
+)}
 
 <section style="margin-top: var(--space-6)">
 <h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">{t('product.specs')}</h2>

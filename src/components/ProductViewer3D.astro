@@ -1,0 +1,220 @@
+---
+export interface Props {
+  src: string;
+  poster: string;
+  alt: string;
+  rotationSpeed?: number;
+  floating?: boolean;
+  scrollParallax?: boolean;
+  entranceAnimation?: boolean;
+  playEmbeddedAnimation?: boolean;
+}
+
+const {
+  src,
+  poster,
+  alt,
+  rotationSpeed = 9,
+  floating = true,
+  scrollParallax = true,
+  entranceAnimation = true,
+  playEmbeddedAnimation = false,
+} = Astro.props;
+
+const uid = 'mv_' + Math.random().toString(36).slice(2, 9);
+---
+<div class:list={[
+  'viewer-3d-wrap',
+  floating && 'is-floating',
+  entranceAnimation && 'is-entering',
+]}>
+  <model-viewer
+    id={uid}
+    src={src}
+    poster={poster}
+    alt={alt}
+    camera-controls
+    auto-rotate
+    auto-rotate-delay="0"
+    rotation-per-second={`${rotationSpeed}deg`}
+    interaction-prompt="none"
+    shadow-intensity="1.2"
+    shadow-softness="0.9"
+    exposure="1.05"
+    environment-image="neutral"
+    camera-orbit="0deg 75deg 105%"
+    min-camera-orbit="auto auto 70%"
+    max-camera-orbit="auto auto 200%"
+    loading="lazy"
+    reveal="interaction"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    touch-action="pan-y"
+  >
+    <button slot="ar-button" class="ar-btn" type="button">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M12 2v20M2 12h20"/>
+      </svg>
+      <span>AR</span>
+    </button>
+    <div slot="progress-bar" class="mv-progress"></div>
+    <button slot="poster" class="mv-poster-btn" type="button" aria-label="Load 3D model">
+      <img src={poster} alt={alt} loading="lazy" />
+      <span class="mv-poster-hint">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/>
+        </svg>
+        360°
+      </span>
+    </button>
+  </model-viewer>
+</div>
+
+<script type="module" define:vars={{ uid, scrollParallax, playEmbeddedAnimation }}>
+  if (!customElements.get('model-viewer')) {
+    await import('https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js');
+  }
+  const mv = document.getElementById(uid);
+  if (!mv) return;
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) mv.removeAttribute('auto-rotate');
+
+  mv.addEventListener('load', () => {
+    if (playEmbeddedAnimation && mv.availableAnimations?.length) {
+      mv.animationName = mv.availableAnimations[0];
+      mv.play({ repetitions: Infinity });
+    }
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'product_3d_view', src: mv.getAttribute('src') });
+  });
+
+  if (scrollParallax && !reduceMotion) {
+    let ticking = false;
+    const baseTheta = 75, basePhi = 0;
+    const updateCamera = () => {
+      const rect = mv.getBoundingClientRect();
+      const center = rect.top + rect.height / 2;
+      const progress = Math.max(-1, Math.min(1, (innerHeight / 2 - center) / innerHeight));
+      const theta = baseTheta - progress * 10;
+      const phi = basePhi + progress * 15;
+      mv.cameraOrbit = `${phi}deg ${theta}deg 105%`;
+      ticking = false;
+    };
+    const onScroll = () => {
+      if (!ticking) { requestAnimationFrame(updateCamera); ticking = true; }
+    };
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        addEventListener('scroll', onScroll, { passive: true });
+        updateCamera();
+      } else {
+        removeEventListener('scroll', onScroll);
+      }
+    }, { threshold: 0 });
+    io.observe(mv);
+  }
+
+  mv.addEventListener('pointerenter', () => mv.removeAttribute('auto-rotate'));
+  mv.addEventListener('pointerleave', () => { if (!reduceMotion) mv.setAttribute('auto-rotate', ''); });
+</script>
+
+<style>
+  .viewer-3d-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    max-height: 560px;
+    background: radial-gradient(ellipse at center, var(--bg-2) 0%, var(--bg-0) 80%);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .viewer-3d-wrap model-viewer {
+    width: 100%;
+    height: 100%;
+    --poster-color: transparent;
+    --progress-bar-color: var(--accent-orange);
+    --progress-bar-height: 2px;
+  }
+  .is-floating model-viewer {
+    animation: mv-float 6s ease-in-out infinite;
+    will-change: transform;
+  }
+  @keyframes mv-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .is-entering model-viewer {
+    animation: mv-entrance 1.2s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+  @keyframes mv-entrance {
+    0% { opacity: 0; transform: scale(0.94); filter: blur(4px); }
+    100% { opacity: 1; transform: scale(1); filter: blur(0); }
+  }
+  .viewer-3d-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 20%, var(--accent-orange-glow) 0%, transparent 50%);
+    pointer-events: none;
+    opacity: 0.35;
+    mix-blend-mode: screen;
+  }
+  .mv-poster-btn {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+  }
+  .mv-poster-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: brightness(0.7) contrast(1.1);
+  }
+  .mv-poster-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+  .ar-btn {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1rem;
+    background: var(--accent-orange);
+    color: #111;
+    border: 0;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px var(--accent-orange-glow);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .is-floating model-viewer,
+    .is-entering model-viewer { animation: none; }
+  }
+  @media (max-width: 640px) {
+    .viewer-3d-wrap { aspect-ratio: 1 / 1; max-height: 400px; }
+    .is-floating model-viewer { animation-duration: 8s; }
+  }
+</style>
