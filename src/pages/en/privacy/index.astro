@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+const canonical = 'https://kervanheat.com/en/privacy/';
+const alternates = [
+  { lang: 'tr' as const, href: 'https://kervanheat.com/tr/kvkk/' },
+  { lang: 'en' as const, href: canonical },
+];
+---
+<BaseLayout title="Privacy Policy — Kervan Heat Treatment" description="How we process your personal data, aligned with GDPR." canonical={canonical} alternates={alternates}>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7); max-width: 760px"><h1>Privacy Policy</h1>
+<p style="color: var(--text-secondary); margin-top: var(--space-3)"><em>[DRAFT — final text after legal review]</em></p>
+<h2 style="margin-top: var(--space-5); font-size: var(--fs-xl)">Controller</h2>
+<p>Kervan Heat Treatment Ltd., Sadun Atığ Cad. No: 112/A Kartepe/Kocaeli, Turkey.</p>
+<h2 style="margin-top: var(--space-5); font-size: var(--fs-xl)">Personal data processed</h2>
+<ul style="color: var(--text-secondary); padding-left: var(--space-4)">
+<li>Name, email, phone, company (via form submission)</li>
+<li>Technical contact data (IP, device, browser)</li>
+</ul>
+<h2 style="margin-top: var(--space-5); font-size: var(--fs-xl)">Your rights</h2>
+<p>Request erasure, correction, or restriction of your data via <a href="mailto:info@kervanheat.com">info@kervanheat.com</a>.</p>
+</main>
+<Footer />
+</BaseLayout>

@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import OrganizationSchema from '../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../components/seo/BreadcrumbSchema.astro';
+import { getCollection } from 'astro:content';
+
+const certs = await getCollection('certifications');
+const canonical = 'https://kervanheat.com/en/certifications/';
+const alternates = [
+  { lang: 'tr' as const, href: 'https://kervanheat.com/tr/sertifikalar/' },
+  { lang: 'en' as const, href: canonical },
+];
+---
+<BaseLayout title="Certifications — Kervan Heat Treatment" description="ISO 9001:2015, EN 10204 Type 3.1, per-batch hardness reports — quality documents." canonical={canonical} alternates={alternates}>
+<Fragment slot="head">
+<OrganizationSchema />
+<BreadcrumbSchema items={[{ name: 'Home', url: '/en/' }, { name: 'Certifications', url: canonical }]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7)">
+<h1>Certifications &amp; Quality Documents</h1>
+<ul class="cert-list">
+{certs.map((c) => (
+  <li>
+    <h3>{c.data.name}</h3>
+    <p class="cert-meta">{c.data.issuerName} · No: {c.data.number} · Valid until: {c.data.validUntil}</p>
+    <p>{c.data.description.en}</p>
+    <p class="cert-scope">Scope: {c.data.scope.en}</p>
+  </li>
+))}
+</ul>
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .cert-list { list-style: none; padding: 0; margin-top: var(--space-5); display: grid; gap: var(--space-4); }
+  .cert-list li { padding: var(--space-4); background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius-md); }
+  .cert-list h3 { font-size: var(--fs-lg); margin-bottom: var(--space-2); }
+  .cert-meta, .cert-scope { color: var(--text-muted); font-family: ui-monospace, monospace; font-size: var(--fs-sm); margin-top: var(--space-2); }
+  .cert-list p { color: var(--text-secondary); }
+</style>

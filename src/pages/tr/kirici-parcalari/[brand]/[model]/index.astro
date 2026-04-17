@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../../../../../layouts/BaseLayout.astro';
+import Header from '../../../../../components/Header.astro';
+import Footer from '../../../../../components/Footer.astro';
+import OrganizationSchema from '../../../../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../../../../components/seo/BreadcrumbSchema.astro';
+import { useTranslations } from '../../../../../i18n/utils';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const brands = await getCollection('breakers');
+  return brands.flatMap((b) =>
+    b.data.models.map((m) => ({
+      params: { brand: b.data.brand.id, model: m.id },
+      props: { brand: b.data.brand, model: m },
+    }))
+  );
+}
+const { brand, model } = Astro.props;
+const t = useTranslations('tr');
+const canonical = `https://kervanheat.com/tr/kirici-parcalari/${brand.id}/${model.id}/`;
+const alternates = [
+  { lang: 'tr' as const, href: canonical },
+  { lang: 'en' as const, href: `https://kervanheat.com/en/breaker-parts/${brand.id}/${model.id}/` },
+];
+---
+<BaseLayout
+  title={`${brand.name} ${model.name} Yedek Parçaları — ${t('site.title')}`}
+  description={`${brand.name} ${model.name} (${model.weightKg} kg) için aftermarket yedek parça üretimi. Uyumlu makineler: ${model.compatibleMachines.join(', ')}.`}
+  canonical={canonical}
+  alternates={alternates}
+>
+<Fragment slot="head">
+<OrganizationSchema />
+<BreadcrumbSchema items={[
+  { name: 'Ana Sayfa', url: '/tr/' },
+  { name: t('nav.parts'), url: '/tr/kirici-parcalari/' },
+  { name: brand.name, url: `/tr/kirici-parcalari/${brand.id}/` },
+  { name: model.name, url: canonical },
+]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7)">
+<nav aria-label="breadcrumb" style="color: var(--text-muted); font-size: var(--fs-sm); margin-bottom: var(--space-4)">
+<a href={`/tr/kirici-parcalari/${brand.id}/`}>← {brand.name}</a>
+</nav>
+<h1>{brand.name} {model.name}</h1>
+<dl class="model-meta">
+<dt>{t('product.compat')}</dt><dd>{model.compatibleMachines.join(', ')}</dd>
+<dt>Ağırlık</dt><dd>{model.weightKg} kg</dd>
+</dl>
+
+{model.parts.length > 0 ? (
+<>
+<h2 style="margin-top: var(--space-6)">Yedek Parçalar</h2>
+<ul class="part-grid">
+{model.parts.map((p) => (
+  <li>
+    <a href={`/tr/kirici-parcalari/${brand.id}/${model.id}/${p.id}/`}>
+      <h3>{p.name.tr}</h3>
+      <p>OEM: {p.oem} · {p.material} · HRC {p.hardnessHRC}</p>
+    </a>
+  </li>
+))}
+</ul>
+</>
+) : (
+<p style="color: var(--text-muted); margin-top: var(--space-4); font-style: italic">
+Bu model için parça listesi hazırlanıyor. <a href="/tr/iletisim/">Talebiniz için bizimle iletişime geçin</a>.
+</p>
+)}
+<p style="margin-top: var(--space-5); color: var(--text-muted); font-size: var(--fs-sm)"><em>{t('product.disclaimer')}</em></p>
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .model-meta { display: grid; grid-template-columns: max-content 1fr; column-gap: var(--space-4); row-gap: var(--space-2); max-width: 600px; margin-top: var(--space-4); }
+  .model-meta dt { color: var(--text-muted); font-family: ui-monospace, monospace; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.08em; }
+  .model-meta dd { color: var(--text-primary); margin: 0; }
+  .part-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-3); list-style: none; padding: 0; margin: var(--space-3) 0; }
+  @media (max-width: 720px) { .part-grid { grid-template-columns: 1fr; } }
+  .part-grid a { display: block; padding: var(--space-3); background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); }
+  .part-grid a:hover { border-color: var(--accent-orange); }
+  .part-grid h3 { font-size: var(--fs-base); margin-bottom: var(--space-1); }
+  .part-grid p { color: var(--text-muted); font-size: var(--fs-sm); margin: 0; font-family: ui-monospace, monospace; }
+</style>

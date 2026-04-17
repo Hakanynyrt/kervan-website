@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import OrganizationSchema from '../../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../../components/seo/BreadcrumbSchema.astro';
+import { useTranslations } from '../../../i18n/utils';
+import { getCollection } from 'astro:content';
+
+const t = useTranslations('tr');
+const cases = (await getCollection('caseStudies')).sort((a, b) => b.data.year - a.data.year);
+const alternates = [
+  { lang: 'tr' as const, href: 'https://kervanheat.com/tr/referanslar/' },
+  { lang: 'en' as const, href: 'https://kervanheat.com/en/case-studies/' },
+];
+---
+<BaseLayout
+  title={`${t('nav.caseStudies')} — ${t('site.title')}`}
+  description="Kervan referans projeleri: otomotiv dişli sementasyonu, madencilik kırıcı parçaları, savunma sanayii indüksiyon sertleştirme."
+  alternates={alternates}
+>
+<Fragment slot="head">
+<OrganizationSchema />
+<BreadcrumbSchema items={[
+  { name: 'Ana Sayfa', url: '/tr/' },
+  { name: t('nav.caseStudies'), url: '/tr/referanslar/' },
+]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7)">
+<h1>{t('nav.caseStudies')}</h1>
+<ul class="case-grid">
+{cases.map((c) => (
+  <li>
+    <a href={`/tr/referanslar/${c.data.slug.tr}/`}>
+      <span class="case-year">{c.data.year} · {c.data.industry}</span>
+      <h3>{c.data.title.tr}</h3>
+    </a>
+  </li>
+))}
+</ul>
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .case-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); list-style: none; padding: 0; margin: var(--space-5) 0; }
+  @media (max-width: 860px) { .case-grid { grid-template-columns: 1fr; } }
+  .case-grid a { display: block; padding: var(--space-4); background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); }
+  .case-grid a:hover { border-color: var(--accent-orange); }
+  .case-year { color: var(--text-muted); font-size: var(--fs-xs); font-family: ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.08em; }
+  .case-grid h3 { margin-top: var(--space-2); font-size: var(--fs-base); }
+</style>

@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import OrganizationSchema from '../../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../../components/seo/BreadcrumbSchema.astro';
+import ArticleSchema from '../../../components/seo/ArticleSchema.astro';
+import { useTranslations } from '../../../i18n/utils';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('resources');
+  return posts.map((p) => ({ params: { slug: p.data.slug.tr }, props: { post: p.data } }));
+}
+const { post } = Astro.props;
+const t = useTranslations('tr');
+const canonical = `https://kervanheat.com/tr/rehber/${post.slug.tr}/`;
+const alternates = [
+  { lang: 'tr' as const, href: canonical },
+  { lang: 'en' as const, href: `https://kervanheat.com/en/resources/${post.slug.en}/` },
+];
+---
+<BaseLayout title={`${post.title.tr} — ${t('site.title')}`} description={post.excerpt.tr} canonical={canonical} alternates={alternates}>
+<Fragment slot="head">
+<OrganizationSchema />
+<ArticleSchema title={post.title.tr} description={post.excerpt.tr} image={post.image} publishedAt={post.publishedAt} url={canonical} />
+<BreadcrumbSchema items={[
+  { name: 'Ana Sayfa', url: '/tr/' },
+  { name: t('nav.resources'), url: '/tr/rehber/' },
+  { name: post.title.tr, url: canonical },
+]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7); max-width: 760px">
+<p style="color: var(--text-muted); font-family: ui-monospace, monospace; font-size: var(--fs-sm)">{post.publishedAt}</p>
+<h1>{post.title.tr}</h1>
+<p style="color: var(--text-secondary); font-size: var(--fs-lg); margin-top: var(--space-2); margin-bottom: var(--space-5)">{post.excerpt.tr}</p>
+
+<div class="article-body">
+{post.body.tr.split('\n\n').map((para) => <p>{para}</p>)}
+</div>
+
+{post.tableData && (
+<table class="data-table">
+<thead><tr>{post.tableData.columns.map((c) => <th>{c}</th>)}</tr></thead>
+<tbody>{post.tableData.rows.map((r) => <tr>{r.map((cell) => <td>{cell}</td>)}</tr>)}</tbody>
+</table>
+)}
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .article-body p { color: var(--text-secondary); margin-bottom: var(--space-3); white-space: pre-line; }
+  .data-table { width: 100%; margin-top: var(--space-5); border-collapse: collapse; font-family: ui-monospace, monospace; font-size: var(--fs-sm); }
+  .data-table th, .data-table td { padding: var(--space-2) var(--space-3); text-align: left; border-bottom: 1px solid var(--border); }
+  .data-table th { color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; background: var(--bg-2); }
+  .data-table td { color: var(--text-primary); }
+</style>

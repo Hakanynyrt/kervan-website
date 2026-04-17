@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import OrganizationSchema from '../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../components/seo/BreadcrumbSchema.astro';
+import { useTranslations } from '../../i18n/utils';
+
+const t = useTranslations('en');
+const canonical = 'https://kervanheat.com/en/find-part/';
+const alternates = [
+  { lang: 'tr' as const, href: 'https://kervanheat.com/tr/parca-bul/' },
+  { lang: 'en' as const, href: canonical },
+];
+---
+<BaseLayout title={`${t('findPart.title')} — ${t('site.title')}`} description="Find hydraulic breaker spare parts by OEM or model number." canonical={canonical} alternates={alternates}>
+<Fragment slot="head">
+<OrganizationSchema />
+<BreadcrumbSchema items={[{ name: 'Home', url: '/en/' }, { name: t('findPart.title'), url: canonical }]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7)">
+<h1>{t('findPart.title')}</h1>
+<p style="color: var(--text-secondary); margin-top: var(--space-3); max-width: 60ch">
+Part finder tool (React island + VEGA DB 239 entries) will be added in PHASE 9. For now, browse by <a href="/en/breaker-parts/">brand catalogue</a>.
+</p>
+</main>
+<Footer />
+</BaseLayout>

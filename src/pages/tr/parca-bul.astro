@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import OrganizationSchema from '../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../components/seo/BreadcrumbSchema.astro';
+import { useTranslations } from '../../i18n/utils';
+
+const t = useTranslations('tr');
+const canonical = 'https://kervanheat.com/tr/parca-bul/';
+const alternates = [
+  { lang: 'tr' as const, href: canonical },
+  { lang: 'en' as const, href: 'https://kervanheat.com/en/find-part/' },
+];
+---
+<BaseLayout title={`${t('findPart.title')} — ${t('site.title')}`} description="OEM veya model numarası ile hidrolik kırıcı yedek parçası bul." canonical={canonical} alternates={alternates}>
+<Fragment slot="head">
+<OrganizationSchema />
+<BreadcrumbSchema items={[{ name: 'Ana Sayfa', url: '/tr/' }, { name: t('findPart.title'), url: canonical }]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7)">
+<h1>{t('findPart.title')}</h1>
+<p style="color: var(--text-secondary); margin-top: var(--space-3); max-width: 60ch">
+Parça bulucu aracı (React island + VEGA DB 239 entry) FAZ 9'da eklenecek. Şimdilik <a href="/tr/kirici-parcalari/">marka katalog sayfasından</a> gezinebilirsiniz.
+</p>
+</main>
+<Footer />
+</BaseLayout>

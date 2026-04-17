@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import OrganizationSchema from '../../components/seo/OrganizationSchema.astro';
+import LocalBusinessSchema from '../../components/seo/LocalBusinessSchema.astro';
+import BreadcrumbSchema from '../../components/seo/BreadcrumbSchema.astro';
+
+const canonical = 'https://kervanheat.com/tr/iletisim/';
+const alternates = [
+  { lang: 'tr' as const, href: canonical },
+  { lang: 'en' as const, href: 'https://kervanheat.com/en/contact/' },
+];
+---
+<BaseLayout title="İletişim — Kervan Isıl İşlem" description="Teklif talebi, adres, telefon ve harita. Sadun Atığ Cad. No: 112/A Kartepe/Kocaeli." canonical={canonical} alternates={alternates}>
+<Fragment slot="head">
+<OrganizationSchema />
+<LocalBusinessSchema />
+<BreadcrumbSchema items={[{ name: 'Ana Sayfa', url: '/tr/' }, { name: 'İletişim', url: canonical }]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7)">
+<h1>İletişim</h1>
+<div class="contact-grid">
+<div>
+<h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">Teklif Talebi</h2>
+<p style="color: var(--text-muted); font-style: italic">
+RFQ formu (3 adımlı, dosya yüklemeli) FAZ 7'de eklenecektir. Şimdilik aşağıdaki kanallardan ulaşabilirsiniz.
+</p>
+</div>
+<div>
+<h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">Bize Ulaşın</h2>
+<dl class="contact-list">
+<dt>Adres</dt><dd>Sadun Atığ Cad. No: 112/A<br/>Kartepe / Kocaeli, Türkiye</dd>
+<dt>Telefon</dt><dd><a href="tel:+905316693734">+90 531 669 37 34</a></dd>
+<dt>E-posta</dt><dd><a href="mailto:info@kervanheat.com">info@kervanheat.com</a></dd>
+<dt>WhatsApp</dt><dd><a href="https://wa.me/905316693734" target="_blank" rel="noopener">Mesaj gönder</a></dd>
+<dt>Çalışma saatleri</dt><dd>Pzt – Cmt · 08:00 – 18:00 (GMT+3)</dd>
+</dl>
+</div>
+</div>
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-top: var(--space-5); }
+  @media (max-width: 780px) { .contact-grid { grid-template-columns: 1fr; } }
+  .contact-list { display: grid; grid-template-columns: max-content 1fr; column-gap: var(--space-4); row-gap: var(--space-3); }
+  .contact-list dt { color: var(--text-muted); font-family: ui-monospace, monospace; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: .08em; }
+  .contact-list dd { color: var(--text-primary); margin: 0; }
+  .contact-list a { color: var(--accent-orange); }
+</style>

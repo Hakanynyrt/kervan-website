@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+const canonical = 'https://kervanheat.com/tr/kvkk/';
+const alternates = [
+  { lang: 'tr' as const, href: canonical },
+  { lang: 'en' as const, href: 'https://kervanheat.com/en/privacy/' },
+];
+---
+<BaseLayout title="KVKK Aydınlatma Metni — Kervan Isıl İşlem" description="6698 sayılı KVKK kapsamında kişisel verilerinizin işlenmesi hakkında bilgi." canonical={canonical} alternates={alternates}>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7); max-width: 760px">
+<h1>KVKK Aydınlatma Metni</h1>
+<p style="color: var(--text-secondary); margin-top: var(--space-3)"><em>[TASLAK — Hukuki inceleme sonrası nihai metin eklenecektir]</em></p>
+<h2 style="margin-top: var(--space-5); font-size: var(--fs-xl)">Veri Sorumlusu</h2>
+<p>Kervan Isıl İşlem Ltd. Şti., Sadun Atığ Cad. No: 112/A Kartepe/Kocaeli.</p>
+<h2 style="margin-top: var(--space-5); font-size: var(--fs-xl)">İşlenen Kişisel Veriler</h2>
+<ul style="color: var(--text-secondary); padding-left: var(--space-4)">
+<li>Ad-soyad, e-posta, telefon, şirket (form doldurma)</li>
+<li>Teknik iletişim verileri (IP, cihaz, tarayıcı)</li>
+</ul>
+<h2 style="margin-top: var(--space-5); font-size: var(--fs-xl)">Haklarınız</h2>
+<p>Verilerinizin silinmesi, düzeltilmesi veya işlenmesinin sınırlandırılmasını <a href="mailto:info@kervanheat.com">info@kervanheat.com</a> adresinden talep edebilirsiniz.</p>
+</main>
+<Footer />
+</BaseLayout>

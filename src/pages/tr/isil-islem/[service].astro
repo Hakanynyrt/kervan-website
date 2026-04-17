@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import OrganizationSchema from '../../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../../components/seo/BreadcrumbSchema.astro';
+import ServiceSchema from '../../../components/seo/ServiceSchema.astro';
+import FAQSchema from '../../../components/seo/FAQSchema.astro';
+import { useTranslations } from '../../../i18n/utils';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const services = await getCollection('services');
+  return services.map((s) => ({
+    params: { service: s.data.slug.tr },
+    props: { svc: s.data },
+  }));
+}
+const { svc } = Astro.props;
+const t = useTranslations('tr');
+const canonical = `https://kervanheat.com/tr/isil-islem/${svc.slug.tr}/`;
+const alternateEn = `https://kervanheat.com/en/heat-treatment/${svc.slug.en}/`;
+const alternates = [
+  { lang: 'tr' as const, href: canonical },
+  { lang: 'en' as const, href: alternateEn },
+];
+---
+<BaseLayout
+  title={`${svc.name.tr} — ${t('site.title')}`}
+  description={svc.shortDesc.tr}
+  canonical={canonical}
+  alternates={alternates}
+>
+<Fragment slot="head">
+<OrganizationSchema />
+<ServiceSchema
+  name={svc.name.tr}
+  description={svc.shortDesc.tr}
+  serviceType={svc.name.tr}
+  url={canonical}
+/>
+<FAQSchema questions={svc.faq.map((f) => ({ q: f.q.tr, a: f.a.tr }))} />
+<BreadcrumbSchema items={[
+  { name: 'Ana Sayfa', url: '/tr/' },
+  { name: t('nav.services'), url: '/tr/isil-islem/' },
+  { name: svc.name.tr, url: canonical },
+]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7); max-width: 760px">
+<nav aria-label="breadcrumb" style="color: var(--text-muted); font-size: var(--fs-sm); margin-bottom: var(--space-4)">
+<a href="/tr/isil-islem/">← {t('nav.services')}</a>
+</nav>
+<h1>{svc.name.tr}</h1>
+<p style="color: var(--text-secondary); font-size: var(--fs-lg); margin-top: var(--space-2); margin-bottom: var(--space-5)">{svc.shortDesc.tr}</p>
+
+<section style="margin-bottom: var(--space-6)">
+<h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">Süreç</h2>
+<p style="white-space: pre-line; color: var(--text-secondary)">{svc.process.tr}</p>
+</section>
+
+<section style="margin-bottom: var(--space-6)">
+<h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">Teknik Özellikler</h2>
+<dl class="spec-list">
+{Object.entries(svc.specs).map(([k, v]) => (
+  <><dt>{k}</dt><dd>{v}</dd></>
+))}
+</dl>
+</section>
+
+<section style="margin-bottom: var(--space-6)">
+<h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">Tipik Uygulamalar</h2>
+<ul style="color: var(--text-secondary); padding-left: var(--space-4)">
+{svc.applications.tr.map((a) => <li>{a}</li>)}
+</ul>
+</section>
+
+<section style="margin-bottom: var(--space-6)">
+<h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">Sıkça Sorulanlar</h2>
+{svc.faq.map((f) => (
+  <details class="faq-item">
+    <summary>{f.q.tr}</summary>
+    <p>{f.a.tr}</p>
+  </details>
+))}
+</section>
+
+<a href="/tr/iletisim/" class="btn-primary">{t('cta.rfq')}</a>
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .spec-list { display: grid; grid-template-columns: max-content 1fr; column-gap: var(--space-4); row-gap: var(--space-2); }
+  .spec-list dt { color: var(--text-muted); font-family: ui-monospace, monospace; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.08em; }
+  .spec-list dd { color: var(--text-primary); margin: 0; }
+  .faq-item { border-bottom: 1px solid var(--border); padding: var(--space-3) 0; }
+  .faq-item summary { cursor: pointer; font-weight: 600; color: var(--text-primary); }
+  .faq-item p { margin-top: var(--space-2); color: var(--text-secondary); }
+</style>

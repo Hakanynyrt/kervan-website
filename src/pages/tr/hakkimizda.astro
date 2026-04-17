@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import OrganizationSchema from '../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../components/seo/BreadcrumbSchema.astro';
+
+const canonical = 'https://kervanheat.com/tr/hakkimizda/';
+const alternates = [
+  { lang: 'tr' as const, href: canonical },
+  { lang: 'en' as const, href: 'https://kervanheat.com/en/about/' },
+];
+---
+<BaseLayout title="Hakkımızda — Kervan Isıl İşlem" description="Kartepe, Kocaeli'de 25+ yıldır endüstriyel ısıl işlem hizmeti veren Kervan Isıl İşlem hakkında." canonical={canonical} alternates={alternates}>
+<Fragment slot="head">
+<OrganizationSchema />
+<BreadcrumbSchema items={[{ name: 'Ana Sayfa', url: '/tr/' }, { name: 'Hakkımızda', url: canonical }]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7); max-width: 760px">
+<h1>Hakkımızda</h1>
+<p style="color: var(--text-secondary); margin-top: var(--space-3)">
+Kervan Isıl İşlem Kartepe, Kocaeli'de endüstriyel ısıl işlem ve hidrolik kırıcı yedek parça üretimi yapan bir aile şirketidir. Pit fırın tabanlı hizmet altyapımız, kendi metrology laboratuvarımız ve deneyimli uygulama ekibimiz ile otomotiv, madencilik, savunma ve makine imalatı sektörlerine hizmet veriyoruz.
+</p>
+<p style="color: var(--text-muted); margin-top: var(--space-5); font-style: italic">Tam hakkımızda metni (ekip bilgisi, tarihçe, tesis fotoğrafları) içerik hazırlığında.</p>
+</main>
+<Footer />
+</BaseLayout>

@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import OrganizationSchema from '../../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../../components/seo/BreadcrumbSchema.astro';
+import ArticleSchema from '../../../components/seo/ArticleSchema.astro';
+import { useTranslations } from '../../../i18n/utils';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const cases = await getCollection('caseStudies');
+  return cases.map((c) => ({ params: { slug: c.data.slug.en }, props: { cs: c.data } }));
+}
+const { cs } = Astro.props;
+const t = useTranslations('en');
+const canonical = `https://kervanheat.com/en/case-studies/${cs.slug.en}/`;
+const alternates = [
+  { lang: 'tr' as const, href: `https://kervanheat.com/tr/referanslar/${cs.slug.tr}/` },
+  { lang: 'en' as const, href: canonical },
+];
+---
+<BaseLayout title={`${cs.title.en} — ${t('site.title')}`} description={cs.challenge.en.slice(0,160)} canonical={canonical} alternates={alternates}>
+<Fragment slot="head">
+<OrganizationSchema />
+<ArticleSchema title={cs.title.en} description={cs.challenge.en.slice(0,160)} image={cs.image} publishedAt={`${cs.year}-01-01`} url={canonical} />
+<BreadcrumbSchema items={[
+  { name: 'Home', url: '/en/' },
+  { name: t('nav.caseStudies'), url: '/en/case-studies/' },
+  { name: cs.title.en, url: canonical },
+]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7); max-width: 760px">
+<p style="color: var(--text-muted); font-family: ui-monospace, monospace; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: .08em">{cs.year} · {cs.industry}</p>
+<h1>{cs.title.en}</h1>
+
+<dl class="spec-list">
+{Object.entries(cs.specs).map(([k, v]) => (
+  <><dt>{k}</dt><dd>{v}</dd></>
+))}
+</dl>
+
+<section style="margin-top: var(--space-6)"><h2>Challenge</h2><p>{cs.challenge.en}</p></section>
+<section style="margin-top: var(--space-5)"><h2>Solution</h2><p>{cs.solution.en}</p></section>
+<section style="margin-top: var(--space-5)"><h2>Result</h2><p>{cs.result.en}</p></section>
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .spec-list { display: grid; grid-template-columns: max-content 1fr; column-gap: var(--space-4); row-gap: var(--space-2); margin-top: var(--space-5); max-width: 600px; }
+  .spec-list dt { color: var(--text-muted); font-family: ui-monospace, monospace; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: .08em; }
+  .spec-list dd { color: var(--text-primary); margin: 0; }
+  section h2 { font-size: var(--fs-xl); margin-bottom: var(--space-2); }
+  section p { color: var(--text-secondary); }
+</style>

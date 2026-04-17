@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import OrganizationSchema from '../../../components/seo/OrganizationSchema.astro';
+import LocalBusinessSchema from '../../../components/seo/LocalBusinessSchema.astro';
+import BreadcrumbSchema from '../../../components/seo/BreadcrumbSchema.astro';
+import { useTranslations } from '../../../i18n/utils';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const locs = await getCollection('locations');
+  return locs.map((l) => ({ params: { location: l.data.slug }, props: { loc: l.data } }));
+}
+const { loc } = Astro.props;
+const t = useTranslations('tr');
+const canonical = `https://kervanheat.com/tr/lokasyon/${loc.slug}/`;
+// Location pages TR-only — alternates only contain self (TR).
+const alternates = [{ lang: 'tr' as const, href: canonical }];
+---
+<BaseLayout
+  title={`${loc.name}'de Isıl İşlem Hizmetleri — ${t('site.title')}`}
+  description={`${loc.name} bölgesinde endüstriyel ısıl işlem ve hidrolik kırıcı yedek parça tedariği. Kervan Kartepe tesisinden ${loc.distance}.`}
+  canonical={canonical}
+  alternates={alternates}
+>
+<Fragment slot="head">
+<OrganizationSchema />
+<LocalBusinessSchema />
+<BreadcrumbSchema items={[
+  { name: 'Ana Sayfa', url: '/tr/' },
+  { name: 'Lokasyon', url: '/tr/lokasyon/' },
+  { name: loc.name, url: canonical },
+]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7); max-width: 760px">
+<h1>{loc.name}'de Isıl İşlem Hizmetleri</h1>
+<dl class="spec-list">
+<dt>Mesafe</dt><dd>{loc.distance}</dd>
+<dt>Öne çıkan sektörler</dt><dd>{loc.industries.join(', ')}</dd>
+</dl>
+<section style="margin-top: var(--space-5)">
+<p style="color: var(--text-secondary)">{loc.content}</p>
+</section>
+<div style="margin-top: var(--space-6); display: flex; gap: var(--space-3); flex-wrap: wrap">
+<a href="/tr/iletisim/" class="btn-primary">{t('cta.rfq')}</a>
+<a href="https://wa.me/905316693734" class="btn-ghost" target="_blank" rel="noopener">{t('cta.whatsapp')}</a>
+</div>
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .spec-list { display: grid; grid-template-columns: max-content 1fr; column-gap: var(--space-4); row-gap: var(--space-2); margin-top: var(--space-4); max-width: 600px; }
+  .spec-list dt { color: var(--text-muted); font-family: ui-monospace, monospace; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: .08em; }
+  .spec-list dd { color: var(--text-primary); margin: 0; }
+</style>

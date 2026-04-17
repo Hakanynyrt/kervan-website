@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import OrganizationSchema from '../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../components/seo/BreadcrumbSchema.astro';
+
+const canonical = 'https://kervanheat.com/en/about/';
+const alternates = [
+  { lang: 'tr' as const, href: 'https://kervanheat.com/tr/hakkimizda/' },
+  { lang: 'en' as const, href: canonical },
+];
+---
+<BaseLayout title="About — Kervan Heat Treatment" description="A Kartepe, Kocaeli-based family-run industrial heat-treatment and hydraulic breaker parts manufacturer." canonical={canonical} alternates={alternates}>
+<Fragment slot="head">
+<OrganizationSchema />
+<BreadcrumbSchema items={[{ name: 'Home', url: '/en/' }, { name: 'About', url: canonical }]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7); max-width: 760px">
+<h1>About Kervan</h1>
+<p style="color: var(--text-secondary); margin-top: var(--space-3)">
+Kervan Heat Treatment is a family-run industrial heat-treatment and hydraulic breaker parts manufacturer based in Kartepe, Kocaeli. Our pit-furnace capacity, in-house metrology lab, and experienced application team serve the automotive, mining, defense, and machinery sectors.
+</p>
+<p style="color: var(--text-muted); margin-top: var(--space-5); font-style: italic">Full company story (team, history, facility photos) — content in preparation.</p>
+</main>
+<Footer />
+</BaseLayout>

@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../../../../../layouts/BaseLayout.astro';
+import Header from '../../../../../components/Header.astro';
+import Footer from '../../../../../components/Footer.astro';
+import OrganizationSchema from '../../../../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../../../../components/seo/BreadcrumbSchema.astro';
+import ProductSchema from '../../../../../components/seo/ProductSchema.astro';
+import { useTranslations } from '../../../../../i18n/utils';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const brands = await getCollection('breakers');
+  return brands.flatMap((b) =>
+    b.data.models.flatMap((m) =>
+      m.parts.map((p) => ({
+        params: { brand: b.data.brand.id, model: m.id, part: p.id },
+        props: { brand: b.data.brand, model: m, part: p },
+      }))
+    )
+  );
+}
+const { brand, model, part } = Astro.props;
+const t = useTranslations('tr');
+const canonical = `https://kervanheat.com/tr/kirici-parcalari/${brand.id}/${model.id}/${part.id}/`;
+const alternates = [
+  { lang: 'tr' as const, href: canonical },
+  { lang: 'en' as const, href: `https://kervanheat.com/en/breaker-parts/${brand.id}/${model.id}/${part.id}/` },
+];
+const title = `${brand.name} ${model.name} ${part.name.tr}`;
+---
+<BaseLayout
+  title={`${title} (OEM ${part.oem}) — ${t('site.title')}`}
+  description={`${title}, OEM ${part.oem}. ${part.material}, HRC ${part.hardnessHRC}, Ø${part.specs.diameterMm} × ${part.specs.lengthMm} mm.`}
+  canonical={canonical}
+  alternates={alternates}
+>
+<Fragment slot="head">
+<OrganizationSchema />
+<ProductSchema
+  name={title}
+  sku={part.oem}
+  brand={brand.name}
+  image={part.image}
+  description={part.uniqueParagraphs.tr.slice(0, 300)}
+  material={part.material}
+  hardnessHRC={part.hardnessHRC}
+  url={canonical}
+  model3dUrl={part.model3dUrl ?? undefined}
+/>
+<BreadcrumbSchema items={[
+  { name: 'Ana Sayfa', url: '/tr/' },
+  { name: t('nav.parts'), url: '/tr/kirici-parcalari/' },
+  { name: brand.name, url: `/tr/kirici-parcalari/${brand.id}/` },
+  { name: model.name, url: `/tr/kirici-parcalari/${brand.id}/${model.id}/` },
+  { name: part.name.tr, url: canonical },
+]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7); max-width: 900px">
+<nav aria-label="breadcrumb" style="color: var(--text-muted); font-size: var(--fs-sm); margin-bottom: var(--space-4)">
+<a href={`/tr/kirici-parcalari/${brand.id}/${model.id}/`}>← {brand.name} {model.name}</a>
+</nav>
+<h1>{title}</h1>
+<p style="color: var(--text-muted); font-family: ui-monospace, monospace; font-size: var(--fs-sm); margin-top: var(--space-2)">OEM {part.oem}</p>
+
+<section style="margin-top: var(--space-5)">
+<p style="color: var(--text-secondary); max-width: 70ch">{part.uniqueParagraphs.tr}</p>
+</section>
+
+<section style="margin-top: var(--space-6)">
+<h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-3)">{t('product.specs')}</h2>
+<dl class="spec-list">
+<dt>Malzeme</dt><dd>{part.material}</dd>
+<dt>Sertlik</dt><dd>HRC {part.hardnessHRC}</dd>
+<dt>Ağırlık</dt><dd>{part.weightKg} kg</dd>
+<dt>Çap</dt><dd>Ø{part.specs.diameterMm} mm</dd>
+<dt>Boy</dt><dd>{part.specs.lengthMm} mm</dd>
+<dt>OEM No</dt><dd>{part.oem}</dd>
+<dt>{t('product.compat')}</dt><dd>{model.compatibleMachines.join(', ')}</dd>
+</dl>
+</section>
+
+<section style="margin-top: var(--space-6); display: flex; gap: var(--space-3); flex-wrap: wrap">
+<a href={`/tr/iletisim/?sku=${part.oem}`} class="btn-primary">{t('product.requestQuote')}</a>
+<a href="https://wa.me/905316693734" class="btn-ghost" target="_blank" rel="noopener">{t('cta.whatsapp')}</a>
+</section>
+
+<p style="margin-top: var(--space-6); color: var(--text-muted); font-size: var(--fs-sm); max-width: 70ch">
+<em>{t('product.disclaimer')}</em>
+</p>
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .spec-list { display: grid; grid-template-columns: max-content 1fr; column-gap: var(--space-4); row-gap: var(--space-2); max-width: 600px; }
+  .spec-list dt { color: var(--text-muted); font-family: ui-monospace, monospace; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.08em; }
+  .spec-list dd { color: var(--text-primary); margin: 0; }
+</style>

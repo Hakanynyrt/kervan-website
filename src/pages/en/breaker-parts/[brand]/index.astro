@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import Header from '../../../../components/Header.astro';
+import Footer from '../../../../components/Footer.astro';
+import OrganizationSchema from '../../../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../../../components/seo/BreadcrumbSchema.astro';
+import { useTranslations } from '../../../../i18n/utils';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const brands = await getCollection('breakers');
+  return brands.map((b) => ({ params: { brand: b.data.brand.id }, props: { data: b.data } }));
+}
+const { data } = Astro.props;
+const t = useTranslations('en');
+const canonical = `https://kervanheat.com/en/breaker-parts/${data.brand.id}/`;
+const alternates = [
+  { lang: 'tr' as const, href: `https://kervanheat.com/tr/kirici-parcalari/${data.brand.id}/` },
+  { lang: 'en' as const, href: canonical },
+];
+---
+<BaseLayout
+  title={`${data.brand.name} Breaker Parts — ${t('site.title')}`}
+  description={`Aftermarket spare parts for ${data.brand.name} hydraulic breakers: ${data.models.map(m => m.name).join(', ')}.`}
+  canonical={canonical}
+  alternates={alternates}
+>
+<Fragment slot="head">
+<OrganizationSchema />
+<BreadcrumbSchema items={[
+  { name: 'Home', url: '/en/' },
+  { name: t('nav.parts'), url: '/en/breaker-parts/' },
+  { name: data.brand.name, url: canonical },
+]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7)">
+<nav aria-label="breadcrumb" style="color: var(--text-muted); font-size: var(--fs-sm); margin-bottom: var(--space-4)">
+<a href="/en/breaker-parts/">← {t('nav.parts')}</a>
+</nav>
+<h1>{data.brand.name} Hydraulic Breaker Parts</h1>
+<p style="color: var(--text-secondary); max-width: 60ch; margin: var(--space-3) 0 var(--space-6)">
+Forged 42CrMo4 aftermarket replacement parts for {data.brand.name} hydraulic breaker models.
+</p>
+<ul class="model-grid">
+{data.models.map((m) => (
+  <li>
+    <a href={`/en/breaker-parts/${data.brand.id}/${m.id}/`}>
+      <h3>{data.brand.name} {m.name}</h3>
+      <p>{m.weightKg} kg · {m.parts.length} part{m.parts.length === 1 ? '' : 's'} listed</p>
+    </a>
+  </li>
+))}
+</ul>
+<p style="margin-top: var(--space-5); color: var(--text-muted); font-size: var(--fs-sm)"><em>{t('product.disclaimer')}</em></p>
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .model-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); list-style: none; padding: 0; margin: 0; }
+  @media (max-width: 720px) { .model-grid { grid-template-columns: 1fr; } }
+  .model-grid a { display: block; padding: var(--space-4); background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); }
+  .model-grid a:hover { border-color: var(--accent-steel); }
+  .model-grid h3 { font-size: var(--fs-base); margin-bottom: var(--space-1); }
+  .model-grid p { color: var(--text-muted); font-size: var(--fs-sm); margin: 0; }
+</style>

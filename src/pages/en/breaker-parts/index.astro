@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import OrganizationSchema from '../../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../../components/seo/BreadcrumbSchema.astro';
+import { useTranslations } from '../../../i18n/utils';
+import { getCollection } from 'astro:content';
+
+const t = useTranslations('en');
+const brands = (await getCollection('breakers')).sort((a, b) =>
+  a.data.brand.name.localeCompare(b.data.brand.name)
+);
+const alternates = [
+  { lang: 'tr' as const, href: 'https://kervanheat.com/tr/kirici-parcalari/' },
+  { lang: 'en' as const, href: 'https://kervanheat.com/en/breaker-parts/' },
+];
+---
+<BaseLayout
+  title={`Hydraulic Breaker Parts — ${t('site.title')}`}
+  description="Hydraulic breaker spare parts for Atlas Copco, Furukawa, Soosan, Rammer, Montabert, Indeco, NPK, Epiroc, Krupp, Hanwoo, Toku. 42CrMo4, HRC 48-56. Made in Turkey."
+  alternates={alternates}
+>
+<Fragment slot="head">
+<OrganizationSchema />
+<BreadcrumbSchema items={[
+  { name: 'Home', url: '/en/' },
+  { name: t('nav.parts'), url: '/en/breaker-parts/' },
+]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7)">
+<h1>Hydraulic Breaker Spare Parts</h1>
+<p style="color: var(--text-secondary); max-width: 60ch; margin: var(--space-3) 0 var(--space-6)">
+We manufacture chisels, pistons, bushings, through-bolts, and repair kits for 11 OEM brands from forged 42CrMo4. All parts are heat-treated in our Kartepe facility with full per-batch traceability.
+</p>
+<ul class="brand-grid">
+  {brands.map((b) => (
+    <li class="brand-card">
+      <a href={`/en/breaker-parts/${b.data.brand.id}/`}>
+        <h3>{b.data.brand.name}</h3>
+        <span class="brand-count">{b.data.models.length} model{b.data.models.length === 1 ? '' : 's'}</span>
+      </a>
+    </li>
+  ))}
+</ul>
+<p style="margin-top: var(--space-5); color: var(--text-muted); font-size: var(--fs-sm)">
+<em>{t('product.disclaimer')}</em>
+</p>
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .brand-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); list-style: none; padding: 0; margin: 0; }
+  @media (max-width: 960px) { .brand-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 720px) { .brand-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .brand-grid { grid-template-columns: 1fr; } }
+  .brand-card a { display: block; padding: var(--space-4); background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); transition: border-color .2s, transform .15s; }
+  .brand-card a:hover { border-color: var(--accent-steel); transform: translateY(-2px); }
+  .brand-card h3 { font-size: var(--fs-lg); margin-bottom: var(--space-1); }
+  .brand-count { color: var(--text-muted); font-size: var(--fs-sm); font-family: ui-monospace, monospace; }
+</style>
