@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+const canonical = 'https://kervanheat.com/en/cookie-policy/';
+const alternates = [
+  { lang: 'tr' as const, href: 'https://kervanheat.com/tr/cerez-politikasi/' },
+  { lang: 'en' as const, href: canonical },
+];
+---
+<BaseLayout title="Cookie Policy — Kervan Heat Treatment" description="Cookies used, their purpose, and retention periods." canonical={canonical} alternates={alternates}>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7); max-width: 760px">
+<h1>Cookie Policy</h1>
+<p style="color: var(--text-secondary); margin-top: var(--space-3)"><em>[DRAFT — updated after analytics setup]</em></p>
+<table style="width: 100%; margin-top: var(--space-5); border-collapse: collapse; font-size: var(--fs-sm)">
+<thead><tr style="background: var(--bg-2)"><th style="text-align:left; padding: var(--space-2)">Cookie</th><th style="text-align:left; padding: var(--space-2)">Category</th><th style="text-align:left; padding: var(--space-2)">Retention</th></tr></thead>
+<tbody>
+<tr><td style="padding: var(--space-2); border-top: 1px solid var(--border)">pref_lang</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">Necessary</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">1 year</td></tr>
+<tr><td style="padding: var(--space-2); border-top: 1px solid var(--border)">kvh_consent_v2</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">Necessary</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">1 year</td></tr>
+<tr><td style="padding: var(--space-2); border-top: 1px solid var(--border)">_ga, _ga_*</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">Analytics</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">2 years</td></tr>
+<tr><td style="padding: var(--space-2); border-top: 1px solid var(--border)">_clck, _clsk</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">Analytics</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">1 year</td></tr>
+</tbody>
+</table>
+<p style="margin-top: var(--space-4)"><button type="button" class="btn-ghost" onclick="window.openCookiePrefs && window.openCookiePrefs()">Open cookie preferences</button></p>
+</main>
+<Footer />
+</BaseLayout>

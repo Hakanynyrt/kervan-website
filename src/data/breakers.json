@@ -1,0 +1,107 @@
+[
+  {
+    "id": "chisel",
+    "name": { "tr": "Sivri Uç / Keski", "en": "Moil Point / Chisel" },
+    "shortDesc": {
+      "tr": "Hidrolik kırıcılar için dövme 42CrMo4 uçlar — moil, düz, kama, küt, konik, geniş profiller.",
+      "en": "Forged 42CrMo4 chisels for hydraulic breakers — moil, flat, wedge, blunt, conical, and wide profiles."
+    },
+    "material": "42CrMo4",
+    "hardnessHRC": "52-56",
+    "diameterRangeMm": "80-180",
+    "lengthRangeMm": "900-1800",
+    "image": "/images/products/atlas-copco-hb3000-chisel.jpg",
+    "model3d": true,
+    "model3dUrl": "/models/atlas-copco-hb3000-chisel.glb",
+    "model3dPoster": "/images/products/atlas-copco-hb3000-chisel.jpg",
+    "uniqueParagraphs": {
+      "tr": "Hidrolik kırıcılar için tüm popüler OEM modellerine uyumlu aftermarket sivri uç serisi — Ø80 mm'den Ø180 mm'ye, 900–1800 mm boy aralığında. Dövme 42CrMo4 çubuk stoktan tek parça işlenir; Kervan pit fırınında 850°C'de östenitlenir, polimer söndürme ve 180–220°C temperleme ile uç bölgesinde HRC 52–56 elde edilir. Dış çap ISO h11, yan yüzeyler ISO h9 toleransında kontrol edilir; tutucu kama ve buşing yuvası OEM pozisyonlarına göre CNC ile işlenir. Müşteri OEM parça numarası veya numune gönderirse birebir interchangeable şekilde üretilir. Tüm ısıl işlem kendi tesisimizde yapılır; stoktan aynı gün, üretimden 2 iş günü sevkiyat, EN 10204 Type 3.1 sertifika dahil.",
+      "en": "Aftermarket moil point / chisel line compatible with all popular OEM breaker models — Ø80 mm to Ø180 mm diameter, 900–1800 mm length range. CNC-machined as a single piece from forged 42CrMo4 bar stock; austenitized at 850 °C in our pit furnace, polymer-quenched and tempered at 180–220 °C to HRC 52–56 at the working tip. OD held to ISO h11 and flats to ISO h9; retaining wedge and bushing seats CNC-machined to match OEM positions. On request we produce drop-in replacements referenced against your OEM part number or sample. Heat-treated entirely on-site; same-day from stock, 2 business days from production, EN 10204 Type 3.1 certificate included."
+    }
+  },
+  {
+    "id": "piston",
+    "name": { "tr": "Piston", "en": "Piston" },
+    "shortDesc": {
+      "tr": "İndüksiyon sertleştirilmiş dövme 42CrMo4 pistonlar, h6 toleransta taşlanmış koşu yüzeyi.",
+      "en": "Induction-hardened forged 42CrMo4 pistons, h6-toleranced ground running surface."
+    },
+    "material": "42CrMo4",
+    "hardnessHRC": "50-54",
+    "diameterRangeMm": "90-220",
+    "lengthRangeMm": "600-1100",
+    "image": "/images/products/atlas-copco-hb3000-piston.jpg",
+    "uniqueParagraphs": {
+      "tr": "Hidrolik kırıcı piston serisi — Ø90 mm'den Ø220 mm'ye, 600–1100 mm boy aralığında, tüm popüler OEM modellerine uyumlu aftermarket üretim. Dövme 42CrMo4 çubuktan CNC tornalama ile işlenir; Kervan'da indüksiyon sertleştirme hattında yüzeyde HRC 50–54, çekirdek HRC 32 elde edilir, koşu yüzeyi ISO h6 toleransında taşlanır (Ra ≤ 0.4 µm). Eksen hizası 0.02 mm/m, uçtan uca ultrasonik test dahil. OEM numarası veya orijinal numune üzerinden interchangeable şekilde üretilir; dinamometre testinde çalışma basıncındaki titreşim profili orijinalden ≤%2 sapar. Türkiye'de üretim, her parça HRC ve yüzey pürüzlülüğü raporu ile teslim.",
+      "en": "Piston line for hydraulic breakers — Ø90 mm to Ø220 mm, 600–1100 mm length range, aftermarket replacements compatible with all popular OEM models. CNC-turned from forged 42CrMo4; induction-hardened in-house to HRC 50–54 on the running surface with an HRC 32 core, running surface ground to ISO h6 (Ra ≤ 0.4 µm). Axis alignment 0.02 mm/m, end-to-end ultrasonic test included. Produced as drop-in replacements referenced to OEM part number or original sample; dyno vibration profile under operating pressure deviates ≤ 2 % from the original. Manufactured in Turkey; each piston ships with an HRC and surface-finish report."
+    }
+  },
+  {
+    "id": "bushing",
+    "name": { "tr": "Buşing", "en": "Bushing" },
+    "shortDesc": {
+      "tr": "Üst ve alt buşingler — 34CrNiMo6 dövme, nitrürasyon + iç taşlama.",
+      "en": "Upper and lower bushings — forged 34CrNiMo6, nitrided and internally ground."
+    },
+    "material": "34CrNiMo6",
+    "hardnessHRC": "48-52",
+    "diameterRangeMm": "85-200",
+    "lengthRangeMm": "150-300",
+    "image": "/images/products/atlas-copco-hb3000-bushing.jpg",
+    "uniqueParagraphs": {
+      "tr": "Hidrolik kırıcı buşing serisi (üst ve alt) — iç çap Ø85 mm'den Ø200 mm'ye, 150–300 mm uzunluk, tüm popüler OEM modellerine uyumlu aftermarket üretim. Dövme 34CrNiMo6 çubuktan CNC torna + iç taşlama ile işlenir; gaz nitrürasyon sonrası yüzeyde HRC 48–52 ve 0.3–0.4 mm beyaz tabaka (compound layer) kontrol edilir. İç çap ISO H7, dış çap ISO h6 toleransında; yağ ve gres kanalları OEM pozisyonlarıyla birebir eşleşir. OEM P/N veya eski buşing üzerinden interchangeable üretilir; standart pres fikstürü ile monte edilir, ön gövdede ek makine müdahalesi gerektirmez. Her parti için yüzey sertliği ve tabaka derinliği ölçümü rapor edilir, EN 10204 Type 3.1 sertifika dahil.",
+      "en": "Bushing line (upper and lower) for hydraulic breakers — bore Ø85 mm to Ø200 mm, 150–300 mm length, aftermarket replacements for all popular OEM models. CNC-turned and internally ground from forged 34CrNiMo6; gas-nitrided in-house to HRC 48–52 with a 0.3–0.4 mm compound (white) layer verified per batch. Bore held to ISO H7 and OD to ISO h6; oil and grease channels match OEM positions exactly. Produced drop-in against OEM P/N or an existing bushing sample; installs with the standard press fixture, no machining of the front head required. Per-batch surface-hardness and case-depth report; EN 10204 Type 3.1 certificate included."
+    }
+  },
+  {
+    "id": "through-bolt",
+    "name": { "tr": "Gergi Saplaması", "en": "Through Bolt" },
+    "shortDesc": {
+      "tr": "Dövme 4340 gergi saplamaları, Q+T sertleştirme + indüksiyon sertleştirilmiş diş kökleri.",
+      "en": "Forged 4340 through bolts, Q+T hardened with induction-hardened thread roots."
+    },
+    "material": "4340",
+    "hardnessHRC": "38-42",
+    "diameterRangeMm": "24-60",
+    "lengthRangeMm": "600-1400",
+    "image": "/images/products/atlas-copco-hb3000-through-bolt.jpg",
+    "uniqueParagraphs": {
+      "tr": "Hidrolik kırıcı gergi saplaması serisi — Ø24 mm'den Ø60 mm'ye, 600–1400 mm uzunluk aralığında, tüm popüler OEM modellerine uyumlu aftermarket üretim. Dövme 4340 çubuktan CNC ile işlenir; Kervan pit fırınında 850°C östenitleme + yağ söndürme + 580°C temperleme (Q+T) ile HRC 38–42. Diş kökleri indüksiyon ile lokal HRC 50–55'e sertleştirilir — yorulma ömrü kökten iki katına çıkar. Boy ve paralellik toleransı ISO 2768-m; her parça uçtan uca ultrasonik test ile çatlak taranır. OEM numarasına göre eşlenen somun ve sertleştirilmiş rondela setiyle teslim edilir, tork değeri müşteri servis kılavuzuyla doğrulanır. Türkiye üretim, EN 10204 Type 3.1 sertifika dahil.",
+      "en": "Through bolt line for hydraulic breakers — Ø24 mm to Ø60 mm, 600–1400 mm length range, aftermarket replacements compatible with all popular OEM models. CNC-machined from forged 4340; austenitized at 850 °C, oil-quenched and tempered at 580 °C (Q+T) in-house to HRC 38–42. Thread roots locally induction-hardened to HRC 50–55 — root fatigue life roughly doubles. Length and straightness toleranced to ISO 2768-m; each bolt is ultrasonically inspected end-to-end. Ships with matched nut and hardened washer set per the OEM reference; torque spec verified against the customer service manual. Manufactured in Turkey, EN 10204 Type 3.1 certificate included."
+    }
+  },
+  {
+    "id": "front-head",
+    "name": { "tr": "Alt Gövde (Front Head)", "en": "Front Head" },
+    "shortDesc": {
+      "tr": "Dövme ve CNC işlenmiş alt gövde — OEM toleranslarında drop-in üretim.",
+      "en": "Forged and CNC-machined front head — produced drop-in at OEM tolerances."
+    },
+    "material": "42CrMo4",
+    "hardnessHRC": "32-36",
+    "diameterRangeMm": "200-420",
+    "lengthRangeMm": "500-1100",
+    "image": "/images/products/atlas-copco-hb3000-chisel.jpg",
+    "uniqueParagraphs": {
+      "tr": "Hidrolik kırıcı alt gövde (front head) serisi — Ø200 mm'den Ø420 mm'ye, 500–1100 mm uzunluk aralığında, tüm popüler OEM modellerine uyumlu aftermarket üretim. Dövme 42CrMo4 bloktan CNC ile işlenir, kaynak gerekmez; Kervan tesisinde ıslah (Q+T) sonrası HRC 32–36 gövde sertliği, ardından 580–620°C gerilim giderme. Buşing yuvası ISO H7, gergi saplaması delikleri ISO H8 toleransında; dış geometri ve tutucu yuvalar OEM drop-in boyutlarda. Kaynak izi veya dolgu yok — tek parça dövme. Ultrasonik ve sıvı penetrant test her parça için zorunlu; üretim süresi 5–10 iş günü, Türkiye üretim, EN 10204 Type 3.1 sertifika dahil.",
+      "en": "Front head line for hydraulic breakers — Ø200 mm to Ø420 mm, 500–1100 mm length range, aftermarket replacements compatible with all popular OEM models. CNC-machined from forged 42CrMo4 blocks, no welding involved; quenched-and-tempered in-house to HRC 32–36, then stress-relieved at 580–620 °C. Bushing seat held to ISO H7, through-bolt holes to ISO H8; external geometry and retainer slots machined to OEM drop-in dimensions. No weld seams or inserts — single-piece forging. Ultrasonic and dye-penetrant testing mandatory on every piece; lead time 5–10 business days, manufactured in Turkey, EN 10204 Type 3.1 certificate included."
+    }
+  },
+  {
+    "id": "wedge",
+    "name": { "tr": "Tutucu Kama", "en": "Retaining Wedge / Pin" },
+    "shortDesc": {
+      "tr": "Sertleştirilmiş tutucu kamalar ve pimler — darbeyi emer, ucu yerinde tutar.",
+      "en": "Hardened retaining wedges and pins — absorb shock, keep the chisel seated."
+    },
+    "material": "42CrMo4 / 4340",
+    "hardnessHRC": "50-55",
+    "diameterRangeMm": "30-75",
+    "lengthRangeMm": "120-320",
+    "image": "/images/products/atlas-copco-hb3000-chisel.jpg",
+    "uniqueParagraphs": {
+      "tr": "Hidrolik kırıcı tutucu kama ve pim serisi — Ø30 mm'den Ø75 mm'ye, 120–320 mm boy aralığında, tüm popüler OEM modellerine uyumlu aftermarket üretim. Dövme 42CrMo4 veya 4340 çubuktan CNC ile işlenir; Kervan'da indüksiyon veya genel sertleştirme + temperleme ile HRC 50–55 elde edilir, darbe yüzeyi tek parça. Toleranslar ISO h9 dış çap, boy ±0.5 mm; O-ring yuvası (varsa) OEM pozisyonuyla eşleşir. OEM numarasına veya numuneye göre drop-in üretilir; her parti sertlik testi + görsel kontrolden geçer. Türkiye üretim, EN 10204 Type 3.1 sertifika, stoktan aynı gün veya üretimden 2 iş günü sevkiyat.",
+      "en": "Retaining wedge / pin line for hydraulic breakers — Ø30 mm to Ø75 mm, 120–320 mm length range, aftermarket replacements compatible with all popular OEM models. CNC-machined from forged 42CrMo4 or 4340; induction- or through-hardened + tempered in-house to HRC 50–55, impact face is a single piece. Tolerances ISO h9 on OD, length ±0.5 mm; O-ring groove (where applicable) matches OEM position. Produced drop-in against the OEM part number or a sample; every batch passes hardness test and visual inspection. Manufactured in Turkey, EN 10204 Type 3.1 certificate, ships same-day from stock or 2 business days from production."
+    }
+  }
+]

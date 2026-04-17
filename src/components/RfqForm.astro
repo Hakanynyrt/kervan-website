@@ -1,0 +1,206 @@
+---
+import { getLangFromUrl, useTranslations, getLocalizedPath } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const privacyPath = getLocalizedPath(lang, 'privacy') + '/';
+---
+<form class="rfq" id="rfq-form" action="/api/rfq" method="POST" enctype="multipart/form-data" novalidate>
+  <div class="rfq__steps" aria-live="polite">
+    <span class="rfq__step is-active" data-step="1">1. {t('rfq.step1')}</span>
+    <span class="rfq__step" data-step="2">2. {t('rfq.step2')}</span>
+    <span class="rfq__step" data-step="3">3. {t('rfq.step3')}</span>
+  </div>
+
+  <!-- Honeypot (hidden from users, traps bots) -->
+  <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true" />
+
+  <fieldset class="rfq__panel is-active" data-panel="1">
+    <label><span>{t('rfq.name')} *</span><input required name="name" type="text" autocomplete="name" /></label>
+    <label><span>{t('rfq.company')}</span><input name="company" type="text" autocomplete="organization" /></label>
+    <label><span>{t('rfq.email')} *</span><input required name="email" type="email" autocomplete="email" /></label>
+    <label><span>{t('rfq.phone')}</span><input name="phone" type="tel" autocomplete="tel" /></label>
+    <label><span>{t('rfq.country')}</span><input name="country" type="text" autocomplete="country-name" /></label>
+  </fieldset>
+
+  <fieldset class="rfq__panel" data-panel="2">
+    <label><span>{t('rfq.service')}</span><input name="service" type="text" placeholder="e.g. Atlas Copco HB3000 chisel / Carburizing" /></label>
+    <label><span>{t('rfq.qty')}</span><input name="qty" type="text" inputmode="numeric" /></label>
+    <label><span>{t('rfq.deadline')}</span><input name="deadline" type="text" placeholder="ASAP / 4 weeks / 2026-05-15" /></label>
+    <label class="rfq__full"><span>{t('rfq.specs')}</span><textarea name="specs" rows="4"></textarea></label>
+    <label class="rfq__full"><span>{t('rfq.message')}</span><textarea name="message" rows="4"></textarea></label>
+  </fieldset>
+
+  <fieldset class="rfq__panel" data-panel="3">
+    <label class="rfq__full"><span>{t('rfq.files')}</span><input name="attachment" type="file" accept=".pdf,.dwg,.dxf,.stp,.step,.igs,.zip,.jpg,.png" multiple /></label>
+    <label class="rfq__check">
+      <input required type="checkbox" name="kvkk_consent" value="1" />
+      <span>
+        {t('rfq.kvkk')} —
+        <a href={privacyPath} target="_blank" rel="noopener">{lang === 'tr' ? 'Aydınlatma Metni' : 'Privacy Policy'}</a>
+      </span>
+    </label>
+    <label class="rfq__check">
+      <input type="checkbox" name="marketing_consent" value="1" />
+      <span>{t('rfq.marketing')}</span>
+    </label>
+  </fieldset>
+
+  <div class="rfq__actions">
+    <button type="button" class="btn-ghost" id="rfq-back" hidden>{t('rfq.back')}</button>
+    <button type="button" class="btn-primary" id="rfq-next">{t('rfq.next')}</button>
+    <button type="submit" class="btn-primary" id="rfq-submit" hidden>{t('rfq.submit')}</button>
+  </div>
+
+  <p class="rfq__status" id="rfq-status" role="status" aria-live="polite"></p>
+</form>
+
+<script is:inline define:vars={{ successMsg: t('rfq.success'), errorMsg: t('rfq.error'), backMsg: t('rfq.back'), nextMsg: t('rfq.next') }}>
+(function () {
+  var form = document.getElementById('rfq-form');
+  if (!form) return;
+
+  var steps = form.querySelectorAll('.rfq__step');
+  var panels = form.querySelectorAll('.rfq__panel');
+  var btnBack = document.getElementById('rfq-back');
+  var btnNext = document.getElementById('rfq-next');
+  var btnSubmit = document.getElementById('rfq-submit');
+  var statusEl = document.getElementById('rfq-status');
+  var step = 1;
+  var total = panels.length;
+
+  // Pre-fill from ?sku=... query param into 'service'
+  try {
+    var params = new URLSearchParams(location.search);
+    var sku = params.get('sku');
+    if (sku) {
+      var svcField = form.querySelector('[name="service"]');
+      if (svcField) svcField.value = 'OEM ' + sku;
+    }
+  } catch (_) {}
+
+  // Draft restore
+  var DRAFT_KEY = 'rfq_draft_v1';
+  try {
+    var draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+    Object.keys(draft).forEach(function (k) {
+      var f = form.querySelector('[name="' + k + '"]');
+      if (!f) return;
+      if (f.type === 'checkbox') f.checked = !!draft[k];
+      else if (f.type !== 'file') f.value = draft[k];
+    });
+  } catch (_) {}
+
+  function saveDraft() {
+    try {
+      var d = {};
+      var els = form.querySelectorAll('input, textarea, select');
+      els.forEach(function (el) {
+        if (el.name === 'website' || el.type === 'file') return;
+        d[el.name] = el.type === 'checkbox' ? el.checked : el.value;
+      });
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+    } catch (_) {}
+  }
+  form.addEventListener('input', saveDraft);
+  form.addEventListener('change', saveDraft);
+
+  function showStep(n) {
+    step = n;
+    steps.forEach(function (s, i) { s.classList.toggle('is-active', i + 1 <= n); });
+    panels.forEach(function (p, i) { p.classList.toggle('is-active', i + 1 === n); });
+    btnBack.hidden = n === 1;
+    btnNext.hidden = n === total;
+    btnSubmit.hidden = n !== total;
+  }
+
+  function validateStep() {
+    var panel = panels[step - 1];
+    var required = panel.querySelectorAll('[required]');
+    for (var i = 0; i < required.length; i++) {
+      if (!required[i].checkValidity()) {
+        required[i].reportValidity();
+        return false;
+      }
+    }
+    return true;
+  }
+
+  btnNext.addEventListener('click', function () {
+    if (!validateStep()) return;
+    if (step < total) showStep(step + 1);
+  });
+  btnBack.addEventListener('click', function () {
+    if (step > 1) showStep(step - 1);
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!validateStep()) return;
+    btnSubmit.disabled = true;
+    statusEl.textContent = '…';
+    statusEl.className = 'rfq__status';
+
+    fetch(form.action, { method: 'POST', body: new FormData(form) })
+      .then(function (r) { return r.json(); })
+      .then(function (json) {
+        if (json && json.ok) {
+          statusEl.textContent = successMsg;
+          statusEl.className = 'rfq__status is-ok';
+          form.reset();
+          try { localStorage.removeItem(DRAFT_KEY); } catch (_) {}
+          showStep(1);
+        } else {
+          throw new Error('fail');
+        }
+      })
+      .catch(function () {
+        statusEl.textContent = errorMsg;
+        statusEl.className = 'rfq__status is-err';
+      })
+      .finally(function () { btnSubmit.disabled = false; });
+  });
+
+  showStep(1);
+})();
+</script>
+
+<style>
+  .rfq { display: flex; flex-direction: column; gap: var(--space-4); }
+  .rfq__steps {
+    display: flex; gap: var(--space-3);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--space-3);
+    font-family: ui-monospace, monospace; font-size: var(--fs-sm);
+    color: var(--text-muted); letter-spacing: 0.04em;
+  }
+  .rfq__step.is-active { color: var(--accent-orange); }
+  .rfq__panel {
+    display: none;
+    border: 0; padding: 0; margin: 0;
+    grid-template-columns: 1fr 1fr; gap: var(--space-3);
+  }
+  .rfq__panel.is-active { display: grid; }
+  .rfq__full { grid-column: 1 / -1; }
+  label { display: flex; flex-direction: column; gap: 0.4rem; font-size: var(--fs-sm); color: var(--text-secondary); }
+  label > span { color: var(--text-secondary); font-weight: 500; }
+  input[type='text'], input[type='email'], input[type='tel'], input[type='file'], textarea {
+    padding: 0.6rem 0.75rem;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font: inherit;
+  }
+  input:focus, textarea:focus { outline: 2px solid var(--accent-orange); outline-offset: 1px; }
+  .rfq__check { flex-direction: row; align-items: flex-start; gap: 0.6rem; font-size: var(--fs-sm); }
+  .rfq__check input { width: auto; margin-top: 0.2rem; }
+  .rfq__check a { color: var(--accent-orange); }
+  .rfq__actions { display: flex; gap: var(--space-3); margin-top: var(--space-2); }
+  .rfq__status { font-size: var(--fs-sm); min-height: 1.2em; color: var(--text-muted); }
+  .rfq__status.is-ok { color: var(--success); }
+  .rfq__status.is-err { color: var(--error); }
+  @media (max-width: 620px) {
+    .rfq__panel { grid-template-columns: 1fr; }
+  }
+</style>

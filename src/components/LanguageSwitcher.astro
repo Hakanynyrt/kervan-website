@@ -1,0 +1,62 @@
+---
+import { getLangFromUrl, type Lang } from '../i18n/utils';
+
+export interface Props {
+  alternates?: Array<{ lang: Lang; href: string }>;
+}
+const current = getLangFromUrl(Astro.url);
+const { alternates = [] } = Astro.props;
+const otherLang: Lang = current === 'tr' ? 'en' : 'tr';
+const alt = alternates.find((a) => a.lang === otherLang);
+const otherHref = alt?.href ?? `/${otherLang}/`;
+---
+<div class="lang-switch" role="group" aria-label="Language">
+<a href={`/${current}/`} class="lang-current" aria-current="page">{current.toUpperCase()}</a>
+<span class="lang-sep" aria-hidden="true">/</span>
+<a
+  href={otherHref}
+  class="lang-other"
+  data-lang-set={otherLang}
+  hreflang={otherLang === 'tr' ? 'tr-TR' : 'en-US'}
+>{otherLang.toUpperCase()}</a>
+</div>
+
+<script>
+  // Persist click-selected language; used by LanguageHint to suppress.
+  document.querySelectorAll<HTMLAnchorElement>('[data-lang-set]').forEach((a) => {
+    a.addEventListener('click', () => {
+      const next = a.getAttribute('data-lang-set');
+      if (!next) return;
+      try {
+        document.cookie = `pref_lang=${next}; path=/; max-age=31536000; samesite=lax`;
+        localStorage.setItem('pref_lang', next);
+      } catch {}
+    });
+  });
+</script>
+
+<style>
+  .lang-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .lang-current {
+    color: var(--accent-orange);
+    padding: 0.25rem 0.5rem;
+  }
+  .lang-other {
+    color: var(--text-muted);
+    padding: 0.25rem 0.5rem;
+    transition: color 0.15s;
+  }
+  .lang-other:hover {
+    color: var(--text-primary);
+  }
+  .lang-sep {
+    color: var(--border);
+  }
+</style>

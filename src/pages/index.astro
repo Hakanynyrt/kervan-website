@@ -1,0 +1,51 @@
+---
+import '../styles/global.css';
+import HeroSplit from '../components/HeroSplit.astro';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+
+const canonical = new URL('/', Astro.site).href;
+const alternates = [
+  { lang: 'tr' as const, href: new URL('/tr/', Astro.site).href },
+  { lang: 'en' as const, href: new URL('/en/', Astro.site).href },
+];
+---
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Kervan Isıl İşlem | Industrial Heat Treatment & Hydraulic Breaker Parts</title>
+<meta name="description" content="Kervan: endüstriyel ısıl işlem ve hidrolik kırıcı yedek parçaları. Kocaeli, Türkiye. | Industrial heat treatment and hydraulic breaker spare parts. Turkey." />
+<link rel="canonical" href={canonical} />
+<link rel="alternate" hreflang="tr-TR" href={new URL('/tr/', Astro.site).href} />
+<link rel="alternate" hreflang="en-US" href={new URL('/en/', Astro.site).href} />
+<link rel="alternate" hreflang="x-default" href={new URL('/tr/', Astro.site).href} />
+<meta property="og:title" content="Kervan Isıl İşlem — Industrial Heat Treatment & Breaker Parts" />
+<meta property="og:description" content="Industrial heat treatment and hydraulic breaker spare parts manufacturer." />
+<meta property="og:image" content={new URL('/hero.jpg', Astro.site).href} />
+<meta name="theme-color" content="#0a0b0d" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/Inter-Bold.woff2" as="font" type="font/woff2" crossorigin />
+</head>
+<body>
+<div class="root-lang-switch">
+<LanguageSwitcher alternates={alternates} />
+</div>
+<HeroSplit />
+</body>
+</html>
+
+<style>
+  .root-lang-switch {
+    position: fixed;
+    top: calc(var(--safe-top) + 1rem);
+    right: 1rem;
+    z-index: 10;
+    padding: 0.4rem 0.85rem;
+    background: rgba(10, 11, 13, 0.8);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+</style>

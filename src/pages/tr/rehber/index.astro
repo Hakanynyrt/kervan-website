@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import OrganizationSchema from '../../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../../components/seo/BreadcrumbSchema.astro';
+import { useTranslations } from '../../../i18n/utils';
+import { getCollection } from 'astro:content';
+
+const t = useTranslations('tr');
+const posts = (await getCollection('resources')).sort((a, b) => b.data.publishedAt.localeCompare(a.data.publishedAt));
+const alternates = [
+  { lang: 'tr' as const, href: 'https://kervanheat.com/tr/rehber/' },
+  { lang: 'en' as const, href: 'https://kervanheat.com/en/resources/' },
+];
+---
+<BaseLayout title={`${t('nav.resources')} — ${t('site.title')}`} description="Çelik seçimi, ısıl işlem prensipleri ve hidrolik kırıcı bakım rehberleri." alternates={alternates}>
+<Fragment slot="head">
+<OrganizationSchema />
+<BreadcrumbSchema items={[{ name: 'Ana Sayfa', url: '/tr/' }, { name: t('nav.resources'), url: '/tr/rehber/' }]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7)">
+<h1>{t('nav.resources')}</h1>
+<ul class="res-grid">
+{posts.map((p) => (
+  <li>
+    <a href={`/tr/rehber/${p.data.slug.tr}/`}>
+      <span class="res-date">{p.data.publishedAt}</span>
+      <h3>{p.data.title.tr}</h3>
+      <p>{p.data.excerpt.tr}</p>
+    </a>
+  </li>
+))}
+</ul>
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .res-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); list-style: none; padding: 0; margin: var(--space-5) 0; }
+  @media (max-width: 860px) { .res-grid { grid-template-columns: 1fr; } }
+  .res-grid a { display: block; padding: var(--space-4); background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); }
+  .res-grid a:hover { border-color: var(--accent-orange); }
+  .res-date { color: var(--text-muted); font-size: var(--fs-xs); font-family: ui-monospace, monospace; }
+  .res-grid h3 { margin-top: var(--space-2); font-size: var(--fs-base); margin-bottom: var(--space-2); }
+  .res-grid p { color: var(--text-secondary); font-size: var(--fs-sm); margin: 0; }
+</style>

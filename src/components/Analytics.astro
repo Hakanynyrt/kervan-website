@@ -1,0 +1,59 @@
+---
+// Renders:
+// 1. Consent Mode v2 defaults (denied)
+// 2. GA4 gtag.js (if PUBLIC_GA4_ID present)
+// 3. Microsoft Clarity (if PUBLIC_CLARITY_ID present)
+// All analytics load unconditionally but respect consent via gtag('consent','update',...).
+const ga4Id = import.meta.env.PUBLIC_GA4_ID;
+const clarityId = import.meta.env.PUBLIC_CLARITY_ID;
+---
+<script is:inline>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  window.gtag = gtag;
+  gtag('consent', 'default', {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+    functionality_storage: 'granted',
+    security_storage: 'granted',
+    wait_for_update: 500,
+  });
+  gtag('set', 'url_passthrough', true);
+  gtag('set', 'ads_data_redaction', true);
+
+  // Restore stored consent if any
+  try {
+    var stored = localStorage.getItem('kvh_consent_v2');
+    if (stored) {
+      var s = JSON.parse(stored);
+      gtag('consent', 'update', {
+        analytics_storage: s.analytics ? 'granted' : 'denied',
+        ad_storage: s.marketing ? 'granted' : 'denied',
+        ad_user_data: s.marketing ? 'granted' : 'denied',
+        ad_personalization: s.marketing ? 'granted' : 'denied',
+      });
+    }
+  } catch (_) {}
+</script>
+
+{ga4Id && (
+  <>
+    <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}></script>
+    <script is:inline define:vars={{ ga4Id }}>
+      gtag('js', new Date());
+      gtag('config', ga4Id, { send_page_view: true, anonymize_ip: true });
+    </script>
+  </>
+)}
+
+{clarityId && (
+  <script is:inline define:vars={{ clarityId }}>
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      var y2=l.getElementsByTagName(r)[0];y2.parentNode.insertBefore(t,y2);
+    })(window, document, "clarity", "script", clarityId);
+  </script>
+)}

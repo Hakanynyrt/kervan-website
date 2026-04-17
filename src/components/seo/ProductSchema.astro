@@ -1,0 +1,54 @@
+---
+export interface Props {
+  name: string;
+  sku: string;
+  brand: string;
+  image: string;
+  description: string;
+  material: string;
+  hardnessHRC: string;
+  url: string;
+  model3dUrl?: string | null;
+}
+const {
+  name,
+  sku,
+  brand,
+  image,
+  description,
+  material,
+  hardnessHRC,
+  url,
+  model3dUrl,
+} = Astro.props;
+
+const site = Astro.site?.origin ?? 'https://kervanheat.com';
+const fullImage = image.startsWith('http') ? image : `${site}${image}`;
+const fullUrl = url.startsWith('http') ? url : `${site}${url}`;
+
+const schema: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name,
+  sku,
+  image: fullImage,
+  description,
+  url: fullUrl,
+  brand: { '@type': 'Brand', name: brand },
+  manufacturer: { '@id': `${site}/#org` },
+  material,
+  additionalProperty: [
+    { '@type': 'PropertyValue', name: 'Hardness HRC', value: hardnessHRC },
+    { '@type': 'PropertyValue', name: 'Type', value: 'Aftermarket replacement' },
+  ],
+};
+
+if (model3dUrl) {
+  schema.subjectOf = {
+    '@type': '3DModel',
+    contentUrl: model3dUrl.startsWith('http') ? model3dUrl : `${site}${model3dUrl}`,
+    encodingFormat: 'model/gltf-binary',
+  };
+}
+---
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

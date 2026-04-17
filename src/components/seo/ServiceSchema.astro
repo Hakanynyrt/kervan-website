@@ -1,0 +1,22 @@
+---
+export interface Props {
+  name: string;
+  description: string;
+  serviceType: string;
+  url: string;
+}
+const { name, description, serviceType, url } = Astro.props;
+const site = Astro.site?.origin ?? 'https://kervanheat.com';
+const fullUrl = url.startsWith('http') ? url : `${site}${url}`;
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name,
+  description,
+  serviceType,
+  url: fullUrl,
+  provider: { '@id': `${site}/#org` },
+  areaServed: ['TR', 'EU', 'MENA', 'Worldwide'],
+};
+---
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

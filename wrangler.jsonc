@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "kervanheat",
+  "compatibility_date": "2026-04-17",
+  "pages_build_output_dir": "./dist",
+  "vars": {
+    "PUBLIC_SITE_URL": "https://kervanheat.com"
+  }
+}

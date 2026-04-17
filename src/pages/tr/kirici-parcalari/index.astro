@@ -1,0 +1,79 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import OrganizationSchema from '../../../components/seo/OrganizationSchema.astro';
+import BreadcrumbSchema from '../../../components/seo/BreadcrumbSchema.astro';
+import { useTranslations } from '../../../i18n/utils';
+import { getCollection } from 'astro:content';
+
+const t = useTranslations('tr');
+const parts = (await getCollection('breakers')).sort((a, b) => a.data.id.localeCompare(b.data.id));
+const alternates = [
+  { lang: 'tr' as const, href: 'https://kervanheat.com/tr/kirici-parcalari/' },
+  { lang: 'en' as const, href: 'https://kervanheat.com/en/breaker-parts/' },
+];
+---
+<BaseLayout
+  title={`Hidrolik Kırıcı Yedek Parçaları — ${t('site.title')}`}
+  description="Hidrolik kırıcılar için aftermarket yedek parça üretimi: sivri uç, piston, buşing, gergi saplaması, alt gövde, tutucu kama. 42CrMo4 / 4340, tesiste ısıl işlem, tüm popüler OEM modellerine uyumlu. Kartepe, Türkiye."
+  alternates={alternates}
+>
+<Fragment slot="head">
+<OrganizationSchema />
+<BreadcrumbSchema items={[
+  { name: 'Ana Sayfa', url: '/tr/' },
+  { name: t('nav.parts'), url: '/tr/kirici-parcalari/' },
+]} />
+</Fragment>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7)">
+<h1>Hidrolik Kırıcı Yedek Parçaları</h1>
+<p style="color: var(--text-secondary); max-width: 60ch; margin: var(--space-3) 0 var(--space-6)">
+Kervan aftermarket yedek parça üretir — marka/model satışı yok. 6 ana parça kategorisinde, tüm popüler OEM modellerine uyumlu, dövme 42CrMo4 / 4340 / 34CrNiMo6 malzemeden. Tüm ısıl işlem Kartepe tesisimizde; OEM numarası veya numune ile drop-in üretim.
+</p>
+<ul class="part-grid">
+  {parts.map((p) => (
+    <li class="part-card">
+      <a href={`/tr/kirici-parcalari/${p.data.id}/`}>
+        <h3>{p.data.name.tr}</h3>
+        <p>{p.data.shortDesc.tr}</p>
+        <dl class="part-card__specs">
+          <dt>Malzeme</dt><dd>{p.data.material}</dd>
+          <dt>HRC</dt><dd>{p.data.hardnessHRC}</dd>
+        </dl>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </li>
+  ))}
+</ul>
+<p style="margin-top: var(--space-5); color: var(--text-muted); font-size: var(--fs-sm)">
+<em>{t('product.disclaimer')}</em>
+</p>
+</main>
+<Footer />
+</BaseLayout>
+
+<style>
+  .part-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); list-style: none; padding: 0; margin: 0; }
+  @media (max-width: 860px) { .part-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .part-grid { grid-template-columns: 1fr; } }
+  .part-card a {
+    display: block;
+    padding: var(--space-4);
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    transition: border-color .2s, transform .15s;
+    position: relative;
+    min-height: 220px;
+  }
+  .part-card a:hover { border-color: var(--accent-orange); transform: translateY(-2px); }
+  .part-card h3 { font-size: var(--fs-lg); margin-bottom: var(--space-2); }
+  .part-card p { color: var(--text-secondary); font-size: var(--fs-sm); margin: 0 0 var(--space-3); }
+  .part-card__specs { display: grid; grid-template-columns: max-content 1fr; column-gap: var(--space-3); row-gap: 0.2rem; font-size: var(--fs-xs); font-family: ui-monospace, monospace; margin: 0; }
+  .part-card__specs dt { color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .part-card__specs dd { color: var(--text-secondary); margin: 0; }
+  .part-card .arrow { position: absolute; right: var(--space-4); bottom: var(--space-4); color: var(--accent-orange); font-size: var(--fs-xl); }
+</style>

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "automotive-gear-carburizing",
+    "slug": { "tr": "otomotiv-disli-sementasyon", "en": "automotive-gear-carburizing" },
+    "title": {
+      "tr": "Otomotiv Dişli Sementasyonu — 2500 adet/ay",
+      "en": "Automotive Gear Carburizing — 2500 pcs/month"
+    },
+    "industry": "Otomotiv",
+    "year": 2025,
+    "specs": {
+      "material": "20MnCr5",
+      "surfaceHRC": "58-62",
+      "caseDepth": "0.8-1.1 mm",
+      "quantity": "2500 adet/ay",
+      "distortion": "< 0.05 mm"
+    },
+    "challenge": {
+      "tr": "Müşteri, zincir dişlisinde ömür uzatma ve distorsiyon tolerans azaltma talebi getirdi. Önceki tedarikçide %8 geri dönüş oranı (re-machining gereksiniminden) vardı.",
+      "en": "Customer requested extended life and tighter distortion tolerance on chain sprockets. Previous supplier had an 8% return rate due to re-machining."
+    },
+    "solution": {
+      "tr": "Gaz karbürizasyon + press-quench kombinasyonu devreye alındı. 930°C'de 6 saat karbürizasyon, akabinde hassas press söndürme fikstüründe direkt söndürme.",
+      "en": "Switched to gas carburizing + press-quenching. 6 hours at 930 °C, followed by direct quench in a precision press-quench fixture."
+    },
+    "result": {
+      "tr": "Geri dönüş oranı %0.3'e düştü. Ortalama dişli ömrü %40 arttı (15.000 → 21.000 operasyon saati).",
+      "en": "Return rate dropped to 0.3%. Average gear life increased 40% (15,000 → 21,000 operating hours)."
+    },
+    "image": "/images/case-studies/automotive-gear.jpg"
+  },
+  {
+    "id": "mining-hb4700-chisels",
+    "slug": { "tr": "maden-hb4700-uclari", "en": "mining-hb4700-chisels" },
+    "title": {
+      "tr": "Madencilik HB4700 Uçları — 180 adet/parti",
+      "en": "Mining HB4700 Chisels — 180 pcs/batch"
+    },
+    "industry": "Madencilik",
+    "year": 2025,
+    "specs": {
+      "material": "42CrMo4",
+      "surfaceHRC": "52-56",
+      "quantity": "180 adet/parti",
+      "service": "200+ saat granit"
+    },
+    "challenge": {
+      "tr": "Büyük boyutlu HB4700 kırıcı uçlarında tip kırılması problemi. Yüksek darbe altında çatlak yayılımı gözlemleniyordu.",
+      "en": "Tip-snap failures on large HB4700 breaker chisels. Crack propagation under high-impact loading."
+    },
+    "solution": {
+      "tr": "Dövme stokunun kalite kontrolü artırıldı (her parti için ultrasonik test), ısıl işlem reçetesi iki aşamalı temperlemeye çevrildi (205°C + 195°C).",
+      "en": "Increased forging stock QC (ultrasonic test per batch); switched heat-treatment recipe to two-stage tempering (205 °C + 195 °C)."
+    },
+    "result": {
+      "tr": "Tip-snap hataları %1'in altına düştü. Ortalama saha ömrü 220 saat seviyesine ulaştı.",
+      "en": "Tip-snap failures dropped below 1%. Average field life reached 220 hours."
+    },
+    "image": "/images/case-studies/mining-hb4700.jpg"
+  },
+  {
+    "id": "defense-shaft-induction",
+    "slug": { "tr": "savunma-mil-induksiyon", "en": "defense-shaft-induction" },
+    "title": {
+      "tr": "Savunma Sanayii Mil İndüksiyon Sertleştirme",
+      "en": "Defense Shaft Induction Hardening"
+    },
+    "industry": "Savunma",
+    "year": 2024,
+    "specs": {
+      "material": "4340",
+      "depth": "2.5 mm",
+      "surfaceHRC": "58-62",
+      "quantity": "Prototip + 50 seri"
+    },
+    "challenge": {
+      "tr": "Prototipten seri üretime geçişte kısa termin (3 hafta) ile ±0.02 mm profil toleransı korunmalıydı.",
+      "en": "Prototype-to-production handoff required ±0.02 mm profile tolerance within a 3-week window."
+    },
+    "solution": {
+      "tr": "İndüksiyon sertleştirme parametreleri prototip parça ile kalibre edildi; her parti için ilk 3 parça tam metrolojik kontrolden geçti, kalanlar SPC ile denetlendi.",
+      "en": "Induction parameters were calibrated on the prototype; the first 3 parts of each batch received full metrology, remainder on SPC."
+    },
+    "result": {
+      "tr": "50 serinin tümü %100 kabul oranıyla teslim edildi, hiçbir parça hurdaya ayrılmadı.",
+      "en": "All 50 units delivered with 100% acceptance; zero scrap."
+    },
+    "image": "/images/case-studies/defense-shaft.jpg"
+  }
+]

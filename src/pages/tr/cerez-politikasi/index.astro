@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+const canonical = 'https://kervanheat.com/tr/cerez-politikasi/';
+const alternates = [
+  { lang: 'tr' as const, href: canonical },
+  { lang: 'en' as const, href: 'https://kervanheat.com/en/cookie-policy/' },
+];
+---
+<BaseLayout title="Çerez Politikası — Kervan Isıl İşlem" description="Kullanılan çerezler, amaçları ve saklama süreleri." canonical={canonical} alternates={alternates}>
+<Header alternates={alternates} />
+<main class="container" style="padding-block: var(--space-7); max-width: 760px">
+<h1>Çerez Politikası</h1>
+<p style="color: var(--text-secondary); margin-top: var(--space-3)"><em>[TASLAK — Final metin analytics setup sonrası güncellenecek]</em></p>
+<table style="width: 100%; margin-top: var(--space-5); border-collapse: collapse; font-size: var(--fs-sm)">
+<thead><tr style="background: var(--bg-2)"><th style="text-align:left; padding: var(--space-2)">Çerez</th><th style="text-align:left; padding: var(--space-2)">Kategori</th><th style="text-align:left; padding: var(--space-2)">Süre</th></tr></thead>
+<tbody>
+<tr><td style="padding: var(--space-2); border-top: 1px solid var(--border)">pref_lang</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">Zorunlu</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">1 yıl</td></tr>
+<tr><td style="padding: var(--space-2); border-top: 1px solid var(--border)">kvh_consent_v2</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">Zorunlu</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">1 yıl</td></tr>
+<tr><td style="padding: var(--space-2); border-top: 1px solid var(--border)">_ga, _ga_*</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">Analitik</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">2 yıl</td></tr>
+<tr><td style="padding: var(--space-2); border-top: 1px solid var(--border)">_clck, _clsk</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">Analitik</td><td style="padding: var(--space-2); border-top: 1px solid var(--border)">1 yıl</td></tr>
+</tbody>
+</table>
+<p style="margin-top: var(--space-4)"><button type="button" class="btn-ghost" onclick="window.openCookiePrefs && window.openCookiePrefs()">Çerez ayarlarını aç</button></p>
+</main>
+<Footer />
+</BaseLayout>

@@ -1,0 +1,36 @@
+---
+const site = Astro.site?.origin ?? 'https://kervanheat.com';
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${site}/#org`,
+  name: 'Kervan Isıl İşlem Ltd. Şti.',
+  alternateName: 'Kervan Heat Treatment',
+  url: site,
+  logo: `${site}/favicon.svg`,
+  image: `${site}/hero.jpg`,
+  description: 'Industrial heat treatment and hydraulic breaker parts manufacturer in Kartepe, Kocaeli, Turkey.',
+  telephone: '+905316693734',
+  email: 'info@kervanheat.com',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Sadun Atığ Cad. No: 112/A',
+    addressLocality: 'Kartepe',
+    addressRegion: 'Kocaeli',
+    postalCode: '41250',
+    addressCountry: 'TR',
+  },
+  contactPoint: [
+    {
+      '@type': 'ContactPoint',
+      contactType: 'sales',
+      telephone: '+905316693734',
+      email: 'info@kervanheat.com',
+      availableLanguage: ['tr', 'en'],
+    },
+  ],
+  sameAs: ['https://instagram.com/kervanmakina'],
+  areaServed: ['TR', 'EU', 'MENA', 'Worldwide'],
+};
+---
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
