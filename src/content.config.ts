@@ -55,21 +55,6 @@ const locations = defineCollection({
   }),
 });
 
-const certifications = defineCollection({
-  loader: file('src/data/certifications.json'),
-  schema: z.object({
-    id: z.string(),
-    name: z.string(),
-    issuer: z.string(),
-    issuerName: z.string(),
-    number: z.string(),
-    validUntil: z.string(),
-    scope: localizedString,
-    image: z.string(),
-    description: localizedString,
-  }),
-});
-
 const caseStudies = defineCollection({
   loader: file('src/data/case-studies.json'),
   schema: z.object({
@@ -109,7 +94,6 @@ export const collections = {
   breakers,
   services,
   locations,
-  certifications,
   caseStudies,
   resources,
 };

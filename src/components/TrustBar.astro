@@ -4,7 +4,6 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
 const items = [
-  { key: 'trust.iso', icon: 'iso' },
   { key: 'trust.experience', icon: 'clock' },
   { key: 'trust.export', icon: 'globe' },
   { key: 'trust.capacity', icon: 'factory' },
@@ -15,9 +14,6 @@ const items = [
     {items.map((it) => (
       <div class="trust-item">
         <span class="trust-item__icon" aria-hidden="true">
-          {it.icon === 'iso' && (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 4 5v7c0 5 3.5 9 8 10 4.5-1 8-5 8-10V5l-8-3z"/><path d="M9 12l2 2 4-4"/></svg>
-          )}
           {it.icon === 'clock' && (
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
           )}
@@ -42,7 +38,7 @@ const items = [
   }
   .trustbar__grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--space-4);
   }
   .trust-item {
