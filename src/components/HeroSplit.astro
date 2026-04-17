@@ -1,0 +1,99 @@
+---
+import { getLangFromUrl, useTranslations, getLocalizedPath } from '../i18n/utils';
+import { Picture } from 'astro:assets';
+import heroHeat from '../assets/hero-heat.jpg';
+import heroParts from '../assets/hero-parts.jpg';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+<section class="hero-split" aria-label="Hero">
+  <a class="half heat" href={getLocalizedPath(lang, 'services') + '/'}>
+    <Picture src={heroHeat} alt="" formats={['avif','webp']}
+      widths={[768, 1280, 1920]} sizes="(max-width: 768px) 100vw, 50vw"
+      loading="eager" fetchpriority="high" />
+    <div class="overlay">
+      <h2>{t('hero.heat.title')}</h2>
+      <p>{t('hero.heat.sub')}</p>
+      <span class="arrow" aria-hidden="true">→</span>
+    </div>
+  </a>
+  <a class="half parts" href={getLocalizedPath(lang, 'parts') + '/'}>
+    <Picture src={heroParts} alt="" formats={['avif','webp']}
+      widths={[768, 1280, 1920]} sizes="(max-width: 768px) 100vw, 50vw"
+      loading="eager" />
+    <div class="overlay">
+      <h2>{t('hero.parts.title')}</h2>
+      <p>{t('hero.parts.sub')}</p>
+      <span class="arrow" aria-hidden="true">→</span>
+    </div>
+  </a>
+</section>
+
+<style>
+  .hero-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: calc(100dvh - var(--safe-top));
+  }
+  .half {
+    position: relative;
+    overflow: hidden;
+    display: block;
+    color: var(--text-primary);
+  }
+  .half :global(img), .half :global(picture img) {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: brightness(0.45) saturate(0.9);
+    transition: filter 0.4s ease, transform 0.6s ease;
+  }
+  .half::before {
+    content: '';
+    position: absolute; inset: 0;
+    z-index: 1;
+    background: linear-gradient(180deg, transparent 30%, rgba(10,11,13,0.85) 100%);
+  }
+  .half.heat { box-shadow: inset 0 0 120px var(--accent-orange-glow); }
+  .half.heat .arrow { color: var(--accent-orange); }
+  .half.parts { box-shadow: inset 0 0 120px var(--accent-steel-glow); }
+  .half.parts .arrow { color: var(--accent-steel); }
+  .overlay {
+    position: relative; z-index: 2;
+    padding: var(--space-7) var(--space-5);
+    display: flex; flex-direction: column; justify-content: flex-end;
+    height: 100%;
+  }
+  .overlay h2 {
+    font-size: clamp(1.75rem, 4vw, var(--fs-3xl));
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0 0 var(--space-3);
+  }
+  .overlay p {
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-3);
+    max-width: 480px;
+  }
+  .overlay .arrow {
+    display: inline-block;
+    font-size: var(--fs-2xl);
+    transition: transform 0.25s ease;
+  }
+  .half:hover :global(img) {
+    filter: brightness(0.6) saturate(1.1);
+    transform: scale(1.03);
+  }
+  .half:hover .arrow { transform: translateX(8px); }
+
+  @media (max-width: 768px) {
+    .hero-split { grid-template-columns: 1fr; min-height: auto; }
+    .half { min-height: 60dvh; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .half, .half :global(img), .overlay .arrow { transition: none; }
+    .half:hover :global(img) { transform: none; }
+  }
+</style>
