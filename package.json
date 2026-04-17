@@ -10,7 +10,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "preview:pages": "wrangler pages dev dist --compatibility-date=2026-04-17",
+    "preview:worker": "wrangler dev",
+    "deploy": "astro build && wrangler deploy",
     "check": "astro check",
     "astro": "astro"
   },
