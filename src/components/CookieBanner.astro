@@ -1,0 +1,117 @@
+---
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+<div id="cookie-banner" class="cookie" hidden role="dialog" aria-live="polite" aria-label={t('cookie.title')}>
+<div class="cookie__body">
+<strong>{t('cookie.title')}</strong>
+<p>{t('cookie.body')}</p>
+<div class="cookie__checks">
+<label><input type="checkbox" disabled checked /> {t('cookie.necessary')}</label>
+<label><input type="checkbox" data-consent="analytics" /> {t('cookie.analytics')}</label>
+<label><input type="checkbox" data-consent="marketing" /> {t('cookie.marketing')}</label>
+</div>
+</div>
+<div class="cookie__actions">
+<button type="button" class="btn-ghost" data-cookie-reject>{t('cookie.reject')}</button>
+<button type="button" class="btn-ghost" data-cookie-save>{t('cookie.save')}</button>
+<button type="button" class="btn-primary" data-cookie-accept>{t('cookie.accept')}</button>
+</div>
+</div>
+
+<script is:inline>
+(function () {
+  var banner = document.getElementById('cookie-banner');
+  if (!banner) return;
+  var KEY = 'kvh_consent_v2';
+
+  function applyConsent(c) {
+    if (typeof gtag === 'function') {
+      gtag('consent', 'update', {
+        analytics_storage: c.analytics ? 'granted' : 'denied',
+        ad_storage: c.marketing ? 'granted' : 'denied',
+        ad_user_data: c.marketing ? 'granted' : 'denied',
+        ad_personalization: c.marketing ? 'granted' : 'denied',
+      });
+    }
+    if (typeof clarity === 'function') {
+      clarity('consent', c.analytics);
+    }
+  }
+  function save(c) {
+    try {
+      localStorage.setItem(KEY, JSON.stringify({ ...c, ts: Date.now() }));
+    } catch (_) {}
+    applyConsent(c);
+    banner.hidden = true;
+  }
+
+  var analyticsBox = banner.querySelector('[data-consent="analytics"]');
+  var marketingBox = banner.querySelector('[data-consent="marketing"]');
+
+  banner.querySelector('[data-cookie-accept]').addEventListener('click', function () {
+    analyticsBox.checked = true;
+    marketingBox.checked = true;
+    save({ analytics: true, marketing: true });
+  });
+  banner.querySelector('[data-cookie-reject]').addEventListener('click', function () {
+    analyticsBox.checked = false;
+    marketingBox.checked = false;
+    save({ analytics: false, marketing: false });
+  });
+  banner.querySelector('[data-cookie-save]').addEventListener('click', function () {
+    save({ analytics: analyticsBox.checked, marketing: marketingBox.checked });
+  });
+
+  // Show banner only when no prior choice
+  try {
+    var existing = localStorage.getItem(KEY);
+    if (existing) {
+      var c = JSON.parse(existing);
+      analyticsBox.checked = !!c.analytics;
+      marketingBox.checked = !!c.marketing;
+      applyConsent(c);
+      banner.hidden = true;
+    } else {
+      banner.hidden = false;
+    }
+  } catch (_) {
+    banner.hidden = false;
+  }
+
+  window.openCookiePrefs = function () {
+    banner.hidden = false;
+  };
+})();
+</script>
+
+<style>
+  .cookie {
+    position: fixed;
+    left: calc(1rem + var(--safe-left));
+    right: calc(1rem + var(--safe-right));
+    bottom: calc(1rem + var(--safe-bottom));
+    z-index: 60;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: var(--space-4);
+    background: rgba(18, 20, 24, 0.96);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .cookie[hidden] { display: none; }
+  .cookie strong { display: block; margin-bottom: var(--space-2); color: var(--text-primary); }
+  .cookie p { margin: 0 0 var(--space-3); color: var(--text-secondary); }
+  .cookie__checks { display: flex; flex-wrap: wrap; gap: var(--space-3); font-size: var(--fs-xs); }
+  .cookie__checks label { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--text-secondary); }
+  .cookie__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end; }
+  .cookie__actions button { padding: 0.5rem 0.9rem; font-size: var(--fs-sm); }
+</style>

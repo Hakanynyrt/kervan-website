@@ -2,6 +2,8 @@
 import '../styles/global.css';
 import { getLangFromUrl, useTranslations, type Lang } from '../i18n/utils';
 import WhatsAppFloat from '../components/WhatsAppFloat.astro';
+import Analytics from '../components/Analytics.astro';
+import CookieBanner from '../components/CookieBanner.astro';
 
 export interface Alternate {
   lang: Lang;
@@ -64,10 +66,12 @@ const hasEN = alternates.some((a) => a.lang === 'en');
 <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="/fonts/Inter-Bold.woff2" as="font" type="font/woff2" crossorigin />
 
+<Analytics />
 <slot name="head" />
 </head>
 <body>
 <slot />
 <WhatsAppFloat />
+<CookieBanner />
 </body>
 </html>
