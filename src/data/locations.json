@@ -1,0 +1,42 @@
+[
+  {
+    "id": "kocaeli",
+    "name": "Kocaeli",
+    "slug": "kocaeli",
+    "distance": "merkez (Kartepe)",
+    "industries": ["Otomotiv", "Petrokimya", "Makine imalatı", "Çelik işleme"],
+    "content": "Kervan Isıl İşlem tesisi Kocaeli Kartepe'de konumlanmış, bölgenin otomotiv OSB'lerine ve TÜPRAŞ, Petkim gibi ağır sanayi tesislerine 30 km içinde hizmet veriyor. Günlük aynı-gün pickup/delivery ile Gebze OSB, Dilovası, Çayırova ve İzmit sanayilerinden parça topluyor; sertleştirilmiş ürünü 18–48 saat içinde iade ediyoruz. Özellikle otomotiv dişli sementasyonu, hidrolik kırıcı ucu sertleştirme ve yapısal parça gerilim giderme hizmetlerinde bölge müşterilerimiz için sürekli referans olarak çalışıyoruz. Yıl boyu 7/24 acil üretim destek hattımız aktif."
+  },
+  {
+    "id": "kartepe",
+    "name": "Kartepe",
+    "slug": "kartepe",
+    "distance": "0 km (fabrika burada)",
+    "industries": ["Makine imalatı", "Otomotiv yedek parça"],
+    "content": "Kartepe Sadun Atığ Cad. üzerinde 2500 m² kapalı alanda faaliyet gösteriyoruz. Bölgedeki makine imalatçıları için haftalık ısıl işlem partisi programı kurduk; Kartepe Organize Sanayi Bölgesi ve etraftaki atölyeler, önceden kararlaştırılmış gün ve saatlerde parçalarını getirip ertesi gün sertleştirilmiş halde teslim alıyor. Kartepe Belediyesi'ne bağlı esnaf ve sanayicilere özel konum avantajı sağlıyoruz — navlun yok, ara stok yok, minimum tedarik süresi."
+  },
+  {
+    "id": "izmit",
+    "name": "İzmit",
+    "slug": "izmit",
+    "distance": "~15 km",
+    "industries": ["Ağır sanayi", "Gemi yan sanayii", "Enerji"],
+    "content": "İzmit Körfezi çevresindeki tersane yan sanayicileri, Hyundai-Ford-Renault fabrika tedarikçileri ve enerji sektörü parça üreticileri için Kervan en yakın tam entegre ısıl işlem tesisidir. Büyük boyutlu çelik komponentlerin (Ø1200 mm'ye kadar) stres giderme, normalizasyon ve sertleştirme işlemlerini bir günde tamamlıyoruz. İzmit sanayisinde özellikle gemi yedek parçası üreticileri ile uzun süreli iş birliklerimiz bulunuyor."
+  },
+  {
+    "id": "gebze",
+    "name": "Gebze",
+    "slug": "gebze",
+    "distance": "~40 km",
+    "industries": ["Otomotiv", "Elektronik", "Makine imalatı"],
+    "content": "Gebze Organize Sanayi Bölgesi'ndeki firmalar için haftada iki gün pickup-delivery rotası sürdürüyoruz. Otomotiv ana sanayi ve dişli kutusu üreticileri başta olmak üzere, Gebze'deki makine imalatı firmaları için karbürizasyon ve indüksiyon sertleştirme ana hizmetlerimiz. GEBKİM kimya sanayisindeki aşınmaya dirençli bileşenlerde de referans çalışmalarımız var."
+  },
+  {
+    "id": "istanbul",
+    "name": "İstanbul",
+    "slug": "istanbul",
+    "distance": "~90 km (Anadolu yakası)",
+    "industries": ["İnşaat makineleri", "Kalıp imalatı", "Metal işleme"],
+    "content": "İstanbul Anadolu ve Avrupa yakası metal işleme atölyeleri, kalıp imalatçıları ve hidrolik kırıcı servis firmaları için kargo + özel kurye ile 24–48 saat teslimatlı ısıl işlem hizmeti veriyoruz. İstanbul inşaat makineleri sektöründe hidrolik kırıcı yedek parçaları başta olmak üzere, darbe dayanımı gereken tüm bileşenlerde tercih ediliyoruz. Büyük partiler için kendi kamyonetimizle haftalık transferli teslimat mümkün."
+  }
+]

@@ -1,0 +1,182 @@
+[
+  {
+    "id": "karburizasyon",
+    "name": { "tr": "Sementasyon (Karbürizasyon)", "en": "Carburizing (Case Hardening)" },
+    "slug": { "tr": "karburizasyon", "en": "carburizing" },
+    "shortDesc": {
+      "tr": "Yüksek yüzey sertliği, tok çekirdek. Dişli, mil ve darbe alan parçalar için.",
+      "en": "High surface hardness with a tough core. Ideal for gears, shafts, and impact-loaded parts."
+    },
+    "process": {
+      "tr": "Karbürizasyon, düşük karbonlu çeliğin yüzeyine kontrollü karbon difüzyonu ile yüksek karbon içeriği kazandıran termokimyasal bir işlemdir. Kervan'daki gaz karbürizasyon hattımızda 900–950°C aralığında propan-hava karışımlı atmosferde 4–12 saat arası işlem yapılır. Hedef tabaka derinliği 0.3–2.5 mm arasında ayarlanır. İşlem sonrası direkt söndürme ile martensit dönüşümü tamamlanır; ardından 160–200°C'de temperleme ile iç gerilim alınır. Sonuç: yüzeyde HRC 58–62, çekirdekte HRC 30–40 toklukla birlikte aşınma ve yorulma ömrünü 3–5 kat uzatan kombinasyon.",
+      "en": "Carburizing is a thermochemical process that enriches the surface of low-carbon steel with carbon via controlled diffusion. In our gas carburizing line, parts run 4–12 hours in a propane-air atmosphere at 900–950 °C. Target case depth is tuned in the 0.3–2.5 mm range. Direct oil quenching transforms the case to martensite; tempering at 160–200 °C relieves internal stress. The result: HRC 58–62 on the surface with an HRC 30–40 tough core, typically extending wear and fatigue life 3–5×."
+    },
+    "applications": {
+      "tr": ["Otomotiv dişlisi", "Zincir dişlisi", "Mil", "Piston pimi", "Darbe rulmanı", "Kam"],
+      "en": ["Automotive gear", "Chain sprocket", "Shaft", "Piston pin", "Impact bearing", "Cam"]
+    },
+    "specs": {
+      "temp": "900-950°C",
+      "atmosphere": "Endogaz + propan",
+      "duration": "4-12 saat",
+      "caseDepth": "0.3-2.5 mm",
+      "surfaceHRC": "58-62",
+      "coreHRC": "30-40"
+    },
+    "faq": [
+      {
+        "q": { "tr": "Hangi çelik türleri karbürize edilir?", "en": "Which steel grades can be carburized?" },
+        "a": { "tr": "Düşük karbonlu alaşımlı çelikler (16MnCr5, 20MnCr5, 18CrNiMo7-6, 9310). Yüksek karbonlu ıslah çelikleri karbürize edilmez — sertleştirme + temperleme uygun.", "en": "Low-carbon alloy steels (16MnCr5, 20MnCr5, 18CrNiMo7-6, 9310). High-carbon quenched-and-tempered steels are NOT carburized; use through-hardening instead." }
+      },
+      {
+        "q": { "tr": "Tabaka derinliği nasıl belirlenir?", "en": "How is case depth determined?" },
+        "a": { "tr": "Parçanın temas basıncı, darbe yükü ve hizmet ömrü hedefine göre hesaplanır. Hesap için AGMA, DIN 3990 veya ISO 6336 standartlarını referans alıyoruz.", "en": "Determined from contact pressure, impact load, and target service life. We reference AGMA, DIN 3990, or ISO 6336 for the calculation." }
+      },
+      {
+        "q": { "tr": "Distorsiyon (çarpılma) ne kadar olur?", "en": "How much distortion occurs?" },
+        "a": { "tr": "Gaz karbürizasyon + direkt söndürmede tipik boyutsal değişim %0.1 civarı. Hassas parçalarda press-quench veya vakum karbürizasyon önerilir.", "en": "Typical dimensional change with gas carburizing + direct quench is around 0.1%. For precision parts we recommend press-quenching or vacuum carburizing." }
+      },
+      {
+        "q": { "tr": "Test ve raporlama dahil mi?", "en": "Are testing and reports included?" },
+        "a": { "tr": "Evet. Her parti için yüzey HRC, çekirdek HRC ve mikroyapı raporu sunuyoruz. Müşteri talep ederse metalografi numunesi de eklenir.", "en": "Yes. Each batch ships with surface HRC, core HRC, and microstructure reports. On request we include a metallographic sample." }
+      }
+    ]
+  },
+  {
+    "id": "sertlestirme",
+    "name": { "tr": "Sertleştirme (Quenching)", "en": "Through-Hardening (Quenching)" },
+    "slug": { "tr": "sertlestirme", "en": "hardening" },
+    "shortDesc": {
+      "tr": "Orta-yüksek karbonlu ıslah çelikleri için tek bütün martensit sertleştirme.",
+      "en": "Full martensitic hardening for medium- to high-carbon alloy steels."
+    },
+    "process": {
+      "tr": "Islah çelikleri (42CrMo4, 4140, 4340) östenitleme sıcaklığına (830–870°C) çıkarılır ve ya ısıtılmış yağ (60–80°C) ya da polimer çözeltide söndürülür. Soğuma hızı tümüyle martensite dönüşümü garantiler. Bu adım tek başına kırılgan bir yapı verir; temperleme (150–650°C) ile istenen HRC ve tokluk dengesi kurulur. Kervan'da her parti için söndürme banyosu sıcaklığı, çalkalama hızı ve döngü süreleri kayıt altına alınır; bu reçete tekrar edilebilir sonuçlar için kritiktir.",
+      "en": "Alloy steels (42CrMo4, 4140, 4340) are austenitized at 830–870 °C and quenched into heated oil (60–80 °C) or polymer solution. The cooling rate guarantees full martensitic transformation. On its own this leaves a brittle structure; tempering (150–650 °C) tunes the HRC–toughness balance. We log bath temperature, agitation, and cycle times per batch — critical for repeatable results."
+    },
+    "applications": {
+      "tr": ["Kırıcı ucu", "Piston", "Zincir baklası", "Eksen", "Kesici takım"],
+      "en": ["Breaker chisel", "Piston", "Chain link", "Axle", "Cutting tool"]
+    },
+    "specs": {
+      "temp": "830-870°C",
+      "quench": "Yağ veya polimer",
+      "surfaceHRC": "48-58",
+      "tempering": "150-650°C"
+    },
+    "faq": [
+      {
+        "q": { "tr": "Yağ mı polimer mi?", "en": "Oil or polymer?" },
+        "a": { "tr": "Basit geometri + düşük riskte yağ; ince kesit + hidrolik kırıcı ucu gibi şiddetli darbe altında polimer tercih edilir.", "en": "Oil for simple geometry with low risk; polymer is preferred for thin sections and high-impact duty like breaker chisels." }
+      },
+      {
+        "q": { "tr": "Temperleme ile HRC nasıl ayarlanır?", "en": "How does tempering tune HRC?" },
+        "a": { "tr": "Yüksek sıcaklık → düşük HRC + yüksek tokluk. Örn. 200°C → HRC 55, 550°C → HRC 35.", "en": "Higher temp → lower HRC + higher toughness. E.g. 200 °C → HRC 55, 550 °C → HRC 35." }
+      }
+    ]
+  },
+  {
+    "id": "temperleme",
+    "name": { "tr": "Temperleme (Menevişleme)", "en": "Tempering" },
+    "slug": { "tr": "temperleme", "en": "tempering" },
+    "shortDesc": {
+      "tr": "Sertleştirilmiş çelikte kırılganlığı alır, hedef toklukta dengeli bir yapı bırakır.",
+      "en": "Removes brittleness from hardened steel and leaves a tough, balanced structure."
+    },
+    "process": {
+      "tr": "Martensitik yapının kırılganlığı, sertleştirme sonrası 150–650°C arasında 1–4 saat süren temperleme ile azaltılır. Sıcaklık yükseldikçe HRC düşer ama tokluk artar; bu denge, uygulamaya göre belirlenir. Hidrolik kırıcı uçlarında 180–220°C (HRC 52–56), yay çeliğinde 380–420°C (HRC 46–48), yapısal komponentlerde 550–620°C (HRC 30–36) tipiktir.",
+      "en": "Martensitic brittleness is relieved by tempering at 150–650 °C for 1–4 hours after hardening. As temperature rises, HRC drops but toughness grows; the balance depends on the application. Typical: breaker chisels 180–220 °C (HRC 52–56), spring steel 380–420 °C (HRC 46–48), structural parts 550–620 °C (HRC 30–36)."
+    },
+    "applications": { "tr": ["Sertleştirilmiş her parça"], "en": ["All hardened parts"] },
+    "specs": { "temp": "150-650°C", "duration": "1-4 saat" },
+    "faq": [
+      {
+        "q": { "tr": "Çift temperleme ne zaman gerekir?", "en": "When is double tempering required?" },
+        "a": { "tr": "Takım çeliği (H13, D2) ve yüksek krom alaşımlarında kalıntı östeniti martensite dönüştürmek için.", "en": "For tool steels (H13, D2) and high-chromium alloys to transform retained austenite to martensite." }
+      }
+    ]
+  },
+  {
+    "id": "normalizasyon",
+    "name": { "tr": "Normalizasyon", "en": "Normalizing" },
+    "slug": { "tr": "normalizasyon", "en": "normalizing" },
+    "shortDesc": {
+      "tr": "Tane boyutunu düzeltir, mekanik özelliklerde homojenlik sağlar.",
+      "en": "Refines grain size and homogenizes mechanical properties." },
+    "process": {
+      "tr": "Parça östenitleme sıcaklığının (A3 + 30–50°C) üzerine çıkarılır ve havada soğutulur. Dökümden sonra kaba taneli yapı, kaynak sonrası ısıdan etkilenmiş bölge (HAZ) veya soğuk şekillendirme gerilmeleri bu işlemle düzeltilir. Özellikle büyük dökümlerde iç yapı homojenliğini artırmak için tercih edilir.",
+      "en": "Parts are heated above austenitizing temperature (A3 + 30–50 °C) and air-cooled. This refines coarse-grained structure from casting, HAZ from welding, or cold-work stresses. Particularly useful for large castings to improve internal uniformity."
+    },
+    "applications": { "tr": ["Dökümler", "Kaynak sonrası"], "en": ["Castings", "Post-weld"] },
+    "specs": { "temp": "830-900°C", "cooling": "Hava" },
+    "faq": [
+      {
+        "q": { "tr": "Tavlamadan farkı nedir?", "en": "How does it differ from annealing?" },
+        "a": { "tr": "Tavlamada fırında soğutma, normalizasyonda hava — sonuç: daha ince tane, daha yüksek mukavemet.", "en": "Annealing cools in the furnace; normalizing in air — resulting in finer grain and higher strength." }
+      }
+    ]
+  },
+  {
+    "id": "gerilim-giderme",
+    "name": { "tr": "Gerilim Giderme", "en": "Stress Relieving" },
+    "slug": { "tr": "gerilim-giderme", "en": "stress-relieving" },
+    "shortDesc": {
+      "tr": "Kaynak ve soğuk işleme sonrası iç gerilimleri düşürür, çarpılmayı azaltır.",
+      "en": "Reduces residual stress from welding and cold work; minimizes distortion."
+    },
+    "process": {
+      "tr": "Parçalar 550–650°C'ye ısıtılır, kesit başına saat başı tutulur ve fırında yavaşça soğutulur. Isıl işlemden önce uygulanırsa sonraki sertleştirmede çarpılma riskini düşürür. Kaynak sonrası çatlak riskini azaltır.",
+      "en": "Parts are heated to 550–650 °C, held for one hour per inch of section, and cooled slowly in the furnace. Applied before hardening it reduces distortion risk; after welding it mitigates crack risk."
+    },
+    "applications": { "tr": ["Kaynaklı yapılar", "Büyük CNC parçalar"], "en": ["Welded assemblies", "Large CNC parts"] },
+    "specs": { "temp": "550-650°C", "duration": "1h/25mm kesit" },
+    "faq": [
+      {
+        "q": { "tr": "Sertlik değişir mi?", "en": "Does hardness change?" },
+        "a": { "tr": "Genelde hayır; 550°C altında yapısal değişim minimumdur.", "en": "Usually not; below 550 °C structural change is minimal." }
+      }
+    ]
+  },
+  {
+    "id": "induksiyon",
+    "name": { "tr": "İndüksiyon Sertleştirme", "en": "Induction Hardening" },
+    "slug": { "tr": "induksiyon", "en": "induction-hardening" },
+    "shortDesc": {
+      "tr": "Bölgesel yüzey sertleştirme. Hızlı, hassas, deformasyonsuz.",
+      "en": "Localised surface hardening. Fast, precise, distortion-minimized."
+    },
+    "process": {
+      "tr": "Elektromanyetik indüksiyon ile yüzey saniyeler içinde östenitleme sıcaklığına çıkarılır ve su/spray ile söndürülür. Mil, kamshaft, dişli diş kökü gibi sadece yüzey sertliği gereken bölgeler için idealdir. 1–5 mm derinlikte HRC 55–62 elde edilir; iç yapı orijinal toklukta kalır.",
+      "en": "Electromagnetic induction heats the surface to austenitizing in seconds; water/spray quench follows. Ideal for shafts, camshafts, and gear tooth roots where only surface hardness is needed. Yields 1–5 mm deep HRC 55–62 while the core retains original toughness."
+    },
+    "applications": { "tr": ["Mil", "Kamshaft", "Diş kökü"], "en": ["Shaft", "Camshaft", "Gear root"] },
+    "specs": { "depth": "1-5 mm", "surfaceHRC": "55-62" },
+    "faq": [
+      {
+        "q": { "tr": "Karbürizasyondan farkı?", "en": "vs carburizing?" },
+        "a": { "tr": "İndüksiyon saniyeler; karbürizasyon saatler. Karbürizasyon kimyasal değişim, indüksiyon sadece faz dönüşümü.", "en": "Induction is seconds; carburizing is hours. Carburizing is chemical, induction is only phase transformation." }
+      }
+    ]
+  },
+  {
+    "id": "yuzey-sertlestirme",
+    "name": { "tr": "Yüzey Sertleştirme (Flame)", "en": "Surface Hardening (Flame)" },
+    "slug": { "tr": "yuzey-sertlestirme", "en": "flame-hardening" },
+    "shortDesc": {
+      "tr": "Alevli brülör ile bölgesel yüzey sertleştirme. Büyük, sabit parçalar için.",
+      "en": "Flame-torch localised surface hardening for large, fixed parts."
+    },
+    "process": {
+      "tr": "Oksijen-asetilen veya oksijen-propan alev ile parça yüzeyi 850–900°C'ye çıkarılır, ardından su veya yağ ile söndürülür. Büyük dişli çarkları, raylar ve kalıp yüzeyleri için uygundur. İndüksiyona göre daha basit ekipman, daha esnek geometri.",
+      "en": "Oxy-acetylene or oxy-propane flame heats the surface to 850–900 °C, followed by water/oil quench. Suitable for large gear wheels, rails, and die surfaces. Simpler equipment than induction, more flexible geometry."
+    },
+    "applications": { "tr": ["Büyük dişli", "Ray", "Kalıp yüzeyi"], "en": ["Large gear", "Rail", "Die surface"] },
+    "specs": { "depth": "2-6 mm", "surfaceHRC": "50-58" },
+    "faq": [
+      {
+        "q": { "tr": "Hassasiyet seviyesi?", "en": "Precision level?" },
+        "a": { "tr": "İndüksiyondan düşük (±0.5 mm derinlik), ekipman esnekliği daha yüksek.", "en": "Lower than induction (±0.5 mm depth), but equipment flexibility is higher." }
+      }
+    ]
+  }
+]

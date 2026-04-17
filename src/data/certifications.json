@@ -1,0 +1,47 @@
+[
+  {
+    "id": "iso-9001",
+    "name": "ISO 9001:2015",
+    "issuer": "TÜRKAK akredite belgelendirme kuruluşu",
+    "issuerName": "[Placeholder: TSE / Bureau Veritas / TÜV]",
+    "number": "[XXX-XXXXX]",
+    "validUntil": "2027-12-31",
+    "scope": {
+      "tr": "Endüstriyel ısıl işlem ve metalurjik test hizmetleri",
+      "en": "Industrial heat treatment and metallurgical testing services"
+    },
+    "image": "/images/certifications/iso-9001.jpg",
+    "description": {
+      "tr": "ISO 9001:2015 kalite yönetim sistemi sertifikası; tüm ısıl işlem süreçlerimizin (karbürizasyon, sertleştirme, temperleme, kalite kontrol) belgelendirilmiş prosedürlere göre yürütüldüğünü ve her parti için tam izlenebilirlik sağladığını gösterir.",
+      "en": "ISO 9001:2015 quality management system certificate; confirms that all heat-treatment processes (carburizing, hardening, tempering, quality control) run under documented procedures with full per-batch traceability."
+    }
+  },
+  {
+    "id": "material-cert-en10204",
+    "name": "EN 10204 Type 3.1 Raporları",
+    "issuer": "Tesis metalurji laboratuvarı",
+    "issuerName": "Kervan Metalurji Lab.",
+    "number": "Her parti için ayrı",
+    "validUntil": "İşlem tarihi ile geçerli",
+    "scope": { "tr": "Her teslim edilen partide 3.1 sertifikası", "en": "3.1 certificate issued per delivered batch" },
+    "image": "/images/certifications/en10204.jpg",
+    "description": {
+      "tr": "Her müşteri teslimatı EN 10204 Type 3.1 malzeme sertifikası ile birlikte çıkar. Kimyasal analiz, mekanik testler (HRC, HV, Charpy), sertlik dağılımı ve mikroyapı raporları içerir.",
+      "en": "Every delivery ships with an EN 10204 Type 3.1 material certificate including chemical analysis, mechanical tests (HRC, HV, Charpy), hardness distribution, and microstructure report."
+    }
+  },
+  {
+    "id": "hardness-reports",
+    "name": "Parti Bazlı Sertlik Raporları",
+    "issuer": "Tesis metrology labı",
+    "issuerName": "Kervan QC",
+    "number": "Partiye özgü",
+    "validUntil": "N/A",
+    "scope": { "tr": "HRC + HV testi, yüzey ve çekirdek", "en": "HRC + HV testing, surface and core" },
+    "image": "/images/certifications/hardness-lot.jpg",
+    "description": {
+      "tr": "Her üretim partisinden örnek alınıp hem HRC hem HV testine tabi tutuluyor; dağılım raporu (min/max/ortalama) müşteri ile paylaşılıyor.",
+      "en": "A sample from each production batch is tested on both HRC and HV scales; distribution report (min/max/average) is shared with the customer."
+    }
+  }
+]

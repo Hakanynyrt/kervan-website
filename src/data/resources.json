@@ -1,0 +1,88 @@
+[
+  {
+    "id": "42crmo-vs-4140",
+    "slug": { "tr": "42crmo-vs-4140-celik-karsilastirmasi", "en": "42crmo-vs-4140-steel-comparison" },
+    "title": {
+      "tr": "42CrMo vs 4140 Çelik Karşılaştırması",
+      "en": "42CrMo vs 4140 Steel Comparison"
+    },
+    "excerpt": {
+      "tr": "Hidrolik kırıcı ve otomotiv parçalarında en sık kullanılan iki krom-molibden alaşımının kimyasal, mekanik ve ısıl özelliklerini yan yana inceliyoruz.",
+      "en": "A side-by-side look at the two chromium-molybdenum alloys most commonly used in hydraulic breaker and automotive parts — chemistry, mechanical properties, and heat-treatment response."
+    },
+    "body": {
+      "tr": "[PLACEHOLDER — bu makale yayın öncesi 1500+ kelimeye genişletilecek]\n\n42CrMo (EN 10083'e göre 42CrMo4) ve AISI 4140 neredeyse eşdeğer ıslah çelikleridir; isimlendirmeleri farklı, kimyaları birkaç ondalık ötesinde aynıdır. 42CrMo4 karbon %0.38–0.45, krom %0.90–1.20, molibden %0.15–0.30 aralığında; AISI 4140 ise karbon %0.38–0.43, krom %0.80–1.10, molibden %0.15–0.25. Silikon ve mangan yaklaşık aynı. Özellikle Avrupa standardı 42CrMo4 (1.7225), Amerikan 4140 ile sertleşme profili, dövme davranışı ve temperleme tepkisi açısından birbiri yerine kullanılabilir.\n\nPratikte iki alaşım arasındaki seçim çoğunlukla pazar erişimi ve belge zorunluluğu ile belirlenir — sertlik, mukavemet veya tokluk farkı ihmal edilebilir düzeyde. Ancak yüksek hassasiyetli dişli uygulamalarında Fe-Mn-Cr dengesi özellikle Avrupa OEM'leri 42CrMo4 tercih eder; çünkü daha dar kimyasal bant Şirket bazlı tolerans kontrolü sağlar. Hidrolik kırıcı uçları gibi darbe ürünlerinde fark yok; performans heat-treatment reçetesine bağlı.\n\nJominy eğrileri hemen hemen örtüşür. 42CrMo4'te J10 (10/16 inç uzaklığı) HRC ~55, 4140'ta ~54 — fark ölçüm belirsizliği içinde. Söndürme sonrası martensit oluşumu her iki alaşımda da 25 mm kesite kadar güvenli. Daha kalın kesitlerde tercih edilen 4340 (Ni ilaveli) kullanılır.\n\nTypical HT recipe (her ikisi için): 850 ± 10 °C östenitleme, 60 °C yağda söndürme, 180–600 °C aralığında temperleme. Temperleme sıcaklığı HRC'yi belirler. 200 °C'de HRC 55, 400 °C'de HRC 42, 600 °C'de HRC 28.\n\nFiyat tarafında 42CrMo4 dövme stok Türkiye pazarında AISI 4140'tan %3–5 daha uygun fiyatlıdır (Kardemir, Ekinciler gibi yerli üreticiler); 4140 ithal daha yüksek maliyetli.",
+      "en": "[PLACEHOLDER — expand to 1500+ words before go-live]\n\n42CrMo (EN 10083 designation 42CrMo4) and AISI 4140 are near-equivalent quenched-and-tempered alloy steels; the naming differs but the chemistry is essentially identical to within a few decimals. 42CrMo4 specifies carbon 0.38–0.45, chromium 0.90–1.20, molybdenum 0.15–0.30; AISI 4140 specifies carbon 0.38–0.43, chromium 0.80–1.10, molybdenum 0.15–0.25. Silicon and manganese are about the same. The European 42CrMo4 (1.7225) is interchangeable with American 4140 in terms of hardenability profile, forging behavior, and tempering response.\n\nIn practice the choice between the two is usually determined by market availability and documentation requirements — hardness, strength, and toughness differences are negligible. However in precision gear applications European OEMs tend to prefer 42CrMo4 due to tighter in-house tolerance control. For impact products like breaker chisels there is no practical difference; performance depends on the heat-treatment recipe.\n\nJominy end-quench curves overlap almost exactly. 42CrMo4 at J10 (10/16-inch distance) is ~HRC 55, 4140 ~54 — a difference within measurement uncertainty. Both alloys form martensite safely in sections up to 25 mm; beyond that, 4340 (with nickel) is the preferred thick-section alloy.\n\nTypical HT recipe for both: 850 ± 10 °C austenitize, 60 °C oil quench, temper in the 180–600 °C range. Tempering temperature sets HRC — HRC 55 at 200 °C, HRC 42 at 400 °C, HRC 28 at 600 °C.\n\nOn cost, 42CrMo4 forging stock is typically 3–5% cheaper in the Turkish market (domestic producers like Kardemir, Ekinciler); AISI 4140 is imported and slightly more expensive."
+    },
+    "tableData": {
+      "columns": ["Property", "42CrMo4", "AISI 4140"],
+      "rows": [
+        ["Carbon %", "0.38-0.45", "0.38-0.43"],
+        ["Chromium %", "0.90-1.20", "0.80-1.10"],
+        ["Molybdenum %", "0.15-0.30", "0.15-0.25"],
+        ["Manganese %", "0.60-0.90", "0.75-1.00"],
+        ["Tensile (MPa)", "900-1100", "900-1050"],
+        ["Yield (MPa)", "700-900", "700-900"],
+        ["Hardenability J10", "~HRC 55", "~HRC 54"]
+      ]
+    },
+    "publishedAt": "2026-01-15",
+    "image": "/images/resources/steel-comparison.jpg"
+  },
+  {
+    "id": "jominy-guide",
+    "slug": { "tr": "jominy-sertlesebilirlik-rehberi", "en": "jominy-hardenability-guide" },
+    "title": {
+      "tr": "Jominy End-Quench Testi Rehberi",
+      "en": "Jominy End-Quench Hardenability Guide"
+    },
+    "excerpt": {
+      "tr": "Alaşımlı çeliklerde sertleşebilirliği ölçmenin standart yolu: Jominy testinin prensipleri, örnek eğriler ve pratik yorumlama.",
+      "en": "The standard way to measure hardenability in alloy steels: Jominy principles, example curves, and practical interpretation."
+    },
+    "body": {
+      "tr": "[PLACEHOLDER — yayın öncesi 1500+ kelimeye genişletilecek]\n\nJominy end-quench testi, ASTM A255'e göre standardize edilmiş bir sertleşebilirlik ölçüm yöntemidir. Silindirik (Ø25 × 100 mm) numune 870°C'de östenitlendikten sonra bir ucu su ile püskürtülerek söndürülür; diğer uca doğru soğuma hızı aşamalı olarak düşer. Her 1/16 inç mesafede HRC ölçülür; sonuç Jominy eğrisidir.\n\nEğrinin yatay uzunluğu çelik sertleşebilirliğini verir. 4140'ın J10 noktasında HRC 55, J20'de HRC 40 civarı; daha alaşımlı 4340'ta J20'de HRC 50 — yani 4340 daha derin sertleşir. Bu bilgi kesit başına soğuma hızı haritasına dönüşür: 25 mm Ø yağ söndürmede yüzey-to-çekirdek J2–J8 arası, 100 mm Ø'de J8–J20 arası.\n\nPratikte Jominy eğrisi tedarikçi malzeme sertifikasında verilmiştir. Uygun alaşım seçimi için: parçanın en kalın kesiti + söndürme türü → eğride karşılık gelen mesafe → beklenen HRC. HRC hedef sağlanamıyorsa daha hardenable alaşım (4340, 4330V) veya daha şiddetli söndürme (polimer/tuz) gerekir.",
+      "en": "[PLACEHOLDER — expand to 1500+ words before go-live]\n\nThe Jominy end-quench test, standardized by ASTM A255, measures alloy hardenability. A cylindrical specimen (Ø25 × 100 mm) is austenitized at 870 °C, then water-sprayed on one end; cooling rate tapers along the length. HRC is measured at every 1/16-inch distance; the result is the Jominy curve.\n\nThe horizontal length of the curve indicates hardenability. 4140 reads ~HRC 55 at J10 and ~HRC 40 at J20; more-alloyed 4340 reaches ~HRC 50 at J20 — meaning 4340 hardens deeper. This information translates into a cooling-rate map per section: oil-quenched Ø25 mm bar runs J2–J8 surface-to-core; Ø100 mm bar runs J8–J20.\n\nIn practice the Jominy curve is supplied with the mill certificate. To pick the right alloy: thickest section × quench severity → matching distance on the curve → expected HRC. If the HRC target is not met, use a more hardenable grade (4340, 4330V) or more severe quench (polymer or salt)."
+    },
+    "tableData": {
+      "columns": ["Jominy distance", "4140 HRC", "4340 HRC"],
+      "rows": [
+        ["J2 (1/16\")", "58", "58"],
+        ["J5 (5/16\")", "56", "56"],
+        ["J10 (10/16\")", "55", "55"],
+        ["J15 (15/16\")", "48", "52"],
+        ["J20 (20/16\")", "40", "50"],
+        ["J30 (30/16\")", "32", "45"]
+      ]
+    },
+    "publishedAt": "2026-02-10",
+    "image": "/images/resources/jominy.jpg"
+  },
+  {
+    "id": "breaker-maintenance",
+    "slug": { "tr": "hidrolik-kirici-bakim-rehberi", "en": "hydraulic-breaker-maintenance-guide" },
+    "title": {
+      "tr": "Hidrolik Kırıcı Bakım Rehberi",
+      "en": "Hydraulic Breaker Maintenance Guide"
+    },
+    "excerpt": {
+      "tr": "Kırıcı uçlarının ömrünü uzatan, piston ve buşing aşınmasını azaltan operasyonel bakım pratikleri.",
+      "en": "Operational maintenance practices that extend chisel life and reduce piston/bushing wear."
+    },
+    "body": {
+      "tr": "[PLACEHOLDER — yayın öncesi 1500+ kelimeye genişletilecek]\n\nHidrolik kırıcı bakımı üç ana başlıkta toplanır: gres yağı uygulaması, operasyonel doğru kullanım, ve periyodik komponent kontrolü.\n\nGres uygulaması — kırıcı her 2 saatte bir veya her 200 vuruşta bir (hangisi önce gelirse) otomatik gresleyici ile beslenmelidir. Elle greslemek manuel operasyonlarda risklidir: yetersiz gres → alt buşing kurur → uç iç yüzeyi çizilir → uç titreşimi artar. Önerilen gres: yüksek sıcaklık (200°C+) MoS2 katkılı lithium gres.\n\nDoğru kullanım — uç 90° açıyla malzemeye dik tutulmalı. 45° eğik darbe uç gövdesini yandan yükler; birkaç saat içinde yan çatlak oluşur. Uç yerleştirme tork değeri OEM manual'inde belirtilmiştir; 2500-3000 kg sınıfı için tipik 180-220 Nm.\n\nPeriyodik kontrol — her 100 saat bir piston eksen hizası, her 250 saat bir buşing iç çapı (mikrometreli kaliper), her 500 saat bir alt gövde çatlak testi (sıvı penetrant). Aşınma sınırı aşıldığında yedek parça değiştirilmeli; aşırı çalışan buşing yeni ucu bile birkaç saatte tüketir.",
+      "en": "[PLACEHOLDER — expand to 1500+ words before go-live]\n\nHydraulic breaker maintenance covers three areas: grease application, proper operating technique, and periodic component inspection.\n\nGrease — the breaker should be fed every 2 hours or 200 blows (whichever comes first) by an automatic greaser. Manual greasing is risky: insufficient grease → dry lower bushing → scored chisel inner surface → chisel vibration. Recommended: high-temp (200 °C+) MoS2-enhanced lithium grease.\n\nOperating technique — hold the chisel perpendicular (90°) to the material. A 45° oblique strike loads the chisel body laterally; side-cracks form within hours. Chisel installation torque is in the OEM manual; typical 180–220 Nm for the 2500–3000 kg class.\n\nPeriodic inspection — piston axis alignment every 100 hours, bushing inner diameter (micrometer caliper) every 250 hours, lower body crack test (dye penetrant) every 500 hours. When wear limit is exceeded, replace the part; a worn bushing will chew through a new chisel in hours."
+    },
+    "tableData": {
+      "columns": ["Interval", "Action"],
+      "rows": [
+        ["2h or 200 blows", "Grease (automatic)"],
+        ["100h", "Piston axis check"],
+        ["250h", "Bushing ID measurement"],
+        ["500h", "Lower body dye-penetrant"]
+      ]
+    },
+    "publishedAt": "2026-03-05",
+    "image": "/images/resources/breaker-maintenance.jpg"
+  }
+]
