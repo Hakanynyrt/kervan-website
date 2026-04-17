@@ -1,6 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import TrustBar from '../../components/TrustBar.astro';
+import LanguageHint from '../../components/LanguageHint.astro';
 import { useTranslations } from '../../i18n/utils';
+
 const t = useTranslations('en');
 const alternates = [
   { lang: 'tr' as const, href: 'https://kervanheat.com/tr/' },
@@ -8,8 +13,13 @@ const alternates = [
 ];
 ---
 <BaseLayout title={`${t('site.title')} · ${t('site.tagline')}`} alternates={alternates}>
-<main class="container" style="padding-block: var(--space-7)">
+<Header alternates={alternates} />
+<TrustBar />
+<main class="container" style="padding-block: var(--space-7); min-height: 60vh">
 <h1>{t('site.title')}</h1>
 <p>{t('site.tagline')}</p>
+<p style="margin-top: var(--space-4); color: var(--text-muted)">Kervanheat EN — placeholder (enriched with split-hero in PHASE 4).</p>
 </main>
+<Footer />
+<LanguageHint alternates={alternates} />
 </BaseLayout>

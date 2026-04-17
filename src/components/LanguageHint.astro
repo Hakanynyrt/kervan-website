@@ -1,0 +1,96 @@
+---
+import { getLangFromUrl, useTranslations, type Lang } from '../i18n/utils';
+
+export interface Props {
+  alternates?: Array<{ lang: Lang; href: string }>;
+}
+const current = getLangFromUrl(Astro.url);
+const t = useTranslations(current);
+const { alternates = [] } = Astro.props;
+const other: Lang = current === 'tr' ? 'en' : 'tr';
+const alt = alternates.find((a) => a.lang === other);
+const otherHref = alt?.href ?? `/${other}/`;
+---
+<div
+  id="lang-hint"
+  class="lang-hint"
+  data-other={other}
+  data-other-href={otherHref}
+  hidden
+>
+  <span class="lang-hint__msg">{t('lang.hint.title')}</span>
+  <a class="lang-hint__cta" href={otherHref} data-hint-accept>{t('lang.hint.cta')}</a>
+  <button type="button" class="lang-hint__dismiss" data-hint-dismiss aria-label={t('lang.hint.dismiss')}>×</button>
+</div>
+
+<script>
+  (function () {
+    const hint = document.getElementById('lang-hint');
+    if (!hint) return;
+    const other = hint.dataset.other;
+    if (!other) return;
+
+    try {
+      if (localStorage.getItem('lang_hint_dismissed') === '1') return;
+      if (localStorage.getItem('pref_lang')) return; // user already chose
+      const browserLang = (navigator.language || '').slice(0, 2).toLowerCase();
+      if (browserLang !== other) return;
+      hint.hidden = false;
+    } catch {
+      // localStorage disabled — skip silently
+    }
+
+    const dismiss = () => {
+      hint.hidden = true;
+      try {
+        localStorage.setItem('lang_hint_dismissed', '1');
+      } catch {}
+    };
+    hint.querySelector('[data-hint-dismiss]')?.addEventListener('click', dismiss);
+    hint.querySelector('[data-hint-accept]')?.addEventListener('click', () => {
+      try {
+        localStorage.setItem('pref_lang', other);
+        document.cookie = `pref_lang=${other}; path=/; max-age=31536000; samesite=lax`;
+      } catch {}
+    });
+  })();
+</script>
+
+<style>
+  .lang-hint {
+    position: fixed;
+    top: calc(var(--safe-top) + 1rem);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: rgba(18, 20, 24, 0.94);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+  .lang-hint[hidden] { display: none; }
+  .lang-hint__msg { color: var(--text-secondary); }
+  .lang-hint__cta {
+    color: var(--accent-orange);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .lang-hint__dismiss {
+    background: transparent;
+    color: var(--text-muted);
+    border: 0;
+    font-size: var(--fs-xl);
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0.25rem;
+  }
+  .lang-hint__dismiss:hover { color: var(--text-primary); }
+</style>
