@@ -1,0 +1,71 @@
+---
+import '../styles/global.css';
+import { getLangFromUrl, useTranslations, type Lang } from '../i18n/utils';
+
+export interface Alternate {
+  lang: Lang;
+  href: string;
+}
+export interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  ogImage?: string;
+  noindex?: boolean;
+  alternates?: Alternate[];
+}
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const {
+  title,
+  description = t('site.tagline'),
+  canonical,
+  ogImage = '/hero.jpg',
+  noindex = false,
+  alternates = [],
+} = Astro.props;
+
+const site = Astro.site?.origin ?? 'https://kervanheat.com';
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, site).href;
+const ogImageUrl = new URL(ogImage, site).href;
+const hasTR = alternates.some((a) => a.lang === 'tr');
+const hasEN = alternates.some((a) => a.lang === 'en');
+---
+<!doctype html>
+<html lang={lang}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalUrl} />
+{noindex && <meta name="robots" content="noindex,nofollow" />}
+
+{alternates.map((a) => (
+  <link rel="alternate" hreflang={a.lang === 'tr' ? 'tr-TR' : 'en-US'} href={a.href} />
+))}
+{hasTR && (
+  <link rel="alternate" hreflang="x-default" href={alternates.find((a) => a.lang === 'tr')!.href} />
+)}
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={t('site.title')} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:image" content={ogImageUrl} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#0a0b0d" />
+
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/Inter-Bold.woff2" as="font" type="font/woff2" crossorigin />
+
+<slot name="head" />
+</head>
+<body>
+<slot />
+</body>
+</html>

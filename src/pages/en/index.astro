@@ -1,13 +1,15 @@
 ---
-// EN placeholder — overwritten in FAZ 3
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { useTranslations } from '../../i18n/utils';
+const t = useTranslations('en');
+const alternates = [
+  { lang: 'tr' as const, href: 'https://kervanheat.com/tr/' },
+  { lang: 'en' as const, href: 'https://kervanheat.com/en/' },
+];
 ---
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>Kervan Heat Treatment</title>
-</head>
-<body>
-<h1>Kervanheat.com — EN placeholder</h1>
-</body>
-</html>
+<BaseLayout title={`${t('site.title')} · ${t('site.tagline')}`} alternates={alternates}>
+<main class="container" style="padding-block: var(--space-7)">
+<h1>{t('site.title')}</h1>
+<p>{t('site.tagline')}</p>
+</main>
+</BaseLayout>
