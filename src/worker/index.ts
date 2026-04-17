@@ -1,4 +1,14 @@
+/**
+ * Worker entry for Kervanheat.com
+ *
+ * Cloudflare Workers-with-Assets model:
+ * - Static Astro build (dist/) is served via env.ASSETS.fetch()
+ * - API routes (/api/*) are handled inline here
+ * - _headers and _redirects files inside dist/ are respected automatically
+ */
+
 interface Env {
+  ASSETS: Fetcher;
   RESEND_API_KEY?: string;
   MAILCHANNELS_DKIM_DOMAIN?: string;
   MAILCHANNELS_DKIM_SELECTOR?: string;
@@ -12,17 +22,24 @@ interface Env {
 const ALLOWED_ORIGINS = [
   'https://kervanheat.com',
   'https://www.kervanheat.com',
-  'https://kervanheat.pages.dev',
+  'https://kervan-website.hakanynyrt.workers.dev',
 ];
 
 const clean = (v: FormDataEntryValue | null, max = 500): string =>
   String(v ?? '').trim().slice(0, max);
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+function withSecurityHeaders(res: Response): Response {
+  const h = new Headers(res.headers);
+  h.set('X-Content-Type-Options', 'nosniff');
+  h.set('Referrer-Policy', 'no-referrer');
+  h.set('Cache-Control', 'no-store');
+  return new Response(res.body, { status: res.status, headers: h });
+}
+
+async function handleRfq(request: Request, env: Env): Promise<Response> {
   const origin = request.headers.get('Origin') ?? request.headers.get('Referer') ?? '';
   const originOk =
-    ALLOWED_ORIGINS.some((a) => origin.startsWith(a)) ||
-    origin.includes('.pages.dev'); // preview deployments
+    ALLOWED_ORIGINS.some((a) => origin.startsWith(a)) || origin.includes('.workers.dev');
   if (!originOk) {
     return Response.json({ ok: false, error: 'origin' }, { status: 403 });
   }
@@ -56,7 +73,6 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     return Response.json({ ok: false, error: 'validation' }, { status: 422 });
   }
 
-  // Attached files — metadata only for v1 (R2 in v2)
   const fileList: string[] = [];
   for (const [key, value] of form.entries()) {
     if (key === 'attachment' && value instanceof File) {
@@ -146,7 +162,7 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
     }
   }
 
-  // Telegram — always attempt, best-effort
+  // Telegram notification
   if (env.TG_BOT_TOKEN && env.TG_CHAT_ID) {
     try {
       const tgText =
@@ -169,4 +185,28 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
   }
 
   return Response.json({ ok: true, emailSent });
-};
+}
+
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const url = new URL(request.url);
+
+    // API routes
+    if (url.pathname === '/api/rfq') {
+      if (request.method !== 'POST') {
+        return Response.json({ ok: false, error: 'method' }, { status: 405 });
+      }
+      return withSecurityHeaders(await handleRfq(request, env));
+    }
+
+    if (url.pathname.startsWith('/api/')) {
+      return withSecurityHeaders(
+        Response.json({ ok: false, error: 'not-found' }, { status: 404 })
+      );
+    }
+
+    // Static assets — served by Cloudflare asset pipeline
+    // This also respects _headers and _redirects files in the assets directory
+    return env.ASSETS.fetch(request);
+  },
+} satisfies ExportedHandler<Env>;

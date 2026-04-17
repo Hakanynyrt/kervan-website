@@ -1,8 +1,17 @@
 {
   "$schema": "https://unpkg.com/wrangler/config-schema.json",
-  "name": "kervanheat",
+  "name": "kervan-website",
+  "main": "src/worker/index.ts",
   "compatibility_date": "2026-04-17",
-  "pages_build_output_dir": "./dist",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page"
+  },
+  "observability": {
+    "enabled": true
+  },
   "vars": {
     "PUBLIC_SITE_URL": "https://kervanheat.com"
   }
