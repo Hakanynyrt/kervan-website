@@ -1,16 +1,146 @@
-# www → apex canonical (force with !)
+# ═══════════════════════════════════════════════════════════════
+# Kervanheat.com — Cloudflare Pages redirects
+# ═══════════════════════════════════════════════════════════════
+#
+# Order matters: first matching rule wins. Keep specific before wildcard.
+# Add ! for forced redirect even when destination exists as a static file.
+#
+# After Screaming Frog crawl of the live site, uncomment / extend the sections
+# below for any legacy URL that returned a real response.
+
+# ═══ Canonical host ═══
+# www → apex (forced)
 https://www.kervanheat.com/*  https://kervanheat.com/:splat  301!
 
-# Legacy root → TR (matches original vanilla index.html)
-/index.html        /tr/                       301
-/katalog.html      /tr/kirici-parcalari/      301
+# Bare /index or /home → TR landing
+/index              /tr/                         301
+/home               /tr/                         301
+/anasayfa           /tr/                         301
 
-# Legacy EN if any
-/en/index.html     /en/                       301
+# ═══ Legacy vanilla HTML site (original single-file index.html) ═══
+/index.html         /tr/                         301
+/index.htm          /tr/                         301
+/katalog.html       /tr/kirici-parcalari/        301
+/katalog            /tr/kirici-parcalari/        301
+/en/index.html      /en/                         301
 
-# TR path aliases (add more after Screaming Frog crawl of live site):
-# /isil-islem.html       /tr/isil-islem/                       301
-# /karburizasyon.html    /tr/isil-islem/karburizasyon/         301
-# /kirici-parca.html     /tr/kirici-parcalari/                 301
-# /iletisim.html         /tr/iletisim/                         301
-# /hakkimizda.html       /tr/hakkimizda/                       301
+# ═══ Common TR static-site patterns (covers typical .html/.php legacy) ═══
+# Contact
+/iletisim           /tr/iletisim/                301
+/iletisim.html      /tr/iletisim/                301
+/iletisim.php       /tr/iletisim/                301
+/iletisim.asp       /tr/iletisim/                301
+/contact            /en/contact/                 301
+/contact.html       /en/contact/                 301
+/contact.php        /en/contact/                 301
+
+# About
+/hakkimizda         /tr/hakkimizda/              301
+/hakkimizda.html    /tr/hakkimizda/              301
+/hakkimizda.php     /tr/hakkimizda/              301
+/kurumsal           /tr/hakkimizda/              301
+/about              /en/about/                   301
+/about.html         /en/about/                   301
+/about-us           /en/about/                   301
+
+# Heat treatment services
+/isil-islem         /tr/isil-islem/              301
+/isil-islem.html    /tr/isil-islem/              301
+/hizmetler          /tr/isil-islem/              301
+/hizmetlerimiz      /tr/isil-islem/              301
+/services           /en/heat-treatment/          301
+/services.html      /en/heat-treatment/          301
+/heat-treatment     /en/heat-treatment/          301
+
+# Specific service slugs (TR)
+/karburizasyon      /tr/isil-islem/karburizasyon/       301
+/sementasyon        /tr/isil-islem/karburizasyon/       301
+/sertlestirme       /tr/isil-islem/sertlestirme/        301
+/menevisleme        /tr/isil-islem/temperleme/          301
+/temperleme         /tr/isil-islem/temperleme/          301
+/normalizasyon      /tr/isil-islem/normalizasyon/       301
+/gerilim-giderme    /tr/isil-islem/gerilim-giderme/     301
+/induksiyon         /tr/isil-islem/induksiyon/          301
+
+# Specific service slugs (EN)
+/carburizing        /en/heat-treatment/carburizing/     301
+/hardening          /en/heat-treatment/hardening/       301
+/tempering          /en/heat-treatment/tempering/       301
+/normalizing        /en/heat-treatment/normalizing/     301
+/induction-hardening /en/heat-treatment/induction-hardening/ 301
+
+# Breaker parts
+/urunler            /tr/kirici-parcalari/        301
+/urunler.html       /tr/kirici-parcalari/        301
+/urunlerimiz        /tr/kirici-parcalari/        301
+/yedek-parca        /tr/kirici-parcalari/        301
+/yedek-parcalar     /tr/kirici-parcalari/        301
+/kirici             /tr/kirici-parcalari/        301
+/kirici-parca       /tr/kirici-parcalari/        301
+/kirici-parcalari   /tr/kirici-parcalari/        301
+/products           /en/breaker-parts/           301
+/products.html      /en/breaker-parts/           301
+/breaker-parts      /en/breaker-parts/           301
+/spare-parts        /en/breaker-parts/           301
+
+# Individual part type slugs (TR → new flat categories)
+/ucat               /tr/kirici-parcalari/chisel/        301
+/uc                 /tr/kirici-parcalari/chisel/        301
+/keski              /tr/kirici-parcalari/chisel/        301
+/piston             /tr/kirici-parcalari/piston/        301
+/burc               /tr/kirici-parcalari/bushing/       301
+/saplama            /tr/kirici-parcalari/through-bolt/  301
+/alt-govde          /tr/kirici-parcalari/front-head/    301
+/on-govde           /tr/kirici-parcalari/front-head/    301
+/kama               /tr/kirici-parcalari/wedge/         301
+
+# Individual part type slugs (EN)
+/chisel             /en/breaker-parts/chisel/           301
+/piston-en          /en/breaker-parts/piston/           301
+/bushing            /en/breaker-parts/bushing/          301
+/through-bolt       /en/breaker-parts/through-bolt/     301
+/front-head         /en/breaker-parts/front-head/       301
+/wedge              /en/breaker-parts/wedge/            301
+
+# Legal
+/kvkk               /tr/kvkk/                    301
+/kvkk.html          /tr/kvkk/                    301
+/aydinlatma         /tr/kvkk/                    301
+/aydinlatma-metni   /tr/kvkk/                    301
+/privacy            /en/privacy/                 301
+/privacy.html       /en/privacy/                 301
+/privacy-policy     /en/privacy/                 301
+/cerez              /tr/cerez-politikasi/        301
+/cerez-politikasi   /tr/cerez-politikasi/        301
+/cookies            /en/cookie-policy/           301
+/cookie-policy      /en/cookie-policy/           301
+
+# References / resources
+/referanslar        /tr/referanslar/             301
+/referanslar.html   /tr/referanslar/             301
+/case-studies       /en/case-studies/            301
+/rehber             /tr/rehber/                  301
+/blog               /tr/rehber/                  301
+/resources          /en/resources/               301
+/sertifikalar       /tr/sertifikalar/            301
+/belgeler           /tr/sertifikalar/            301
+/certifications     /en/certifications/          301
+
+# Common WordPress / CMS patterns (if migrating from WP)
+/wp-admin/*         /404                         410
+/wp-login.php       /404                         410
+/?p=:id             /                            301
+/category/*         /tr/rehber/                  301
+/tag/*              /tr/rehber/                  301
+/feed               /                            301
+/feed/              /                            301
+/rss                /                            301
+/sitemap_index.xml  /sitemap-index.xml           301
+
+# Query-string cruft (bare URL with common tracking params → canonical)
+# Cloudflare _redirects does not support query-param rewriting out of the box;
+# rely on robots.txt "Disallow: /*?" + canonical tags in <head>.
+
+# Broken/old language path (some legacy sites used /tr.html or /en.html)
+/tr.html            /tr/                         301
+/en.html            /en/                         301
