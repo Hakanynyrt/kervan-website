@@ -1,157 +1,149 @@
-# CLAUDE.md — Kervan Heat Website
+# CLAUDE.md — Kervanheat.com
 
-This file documents the codebase structure, conventions, and workflows for AI assistants working on this repository.
+Bu dosya `kervanheat.com` için Claude Code'a kalıcı proje kuralları verir. Her oturumda bu kuralları yükle.
 
-## Project Overview
+## Rol ve ton
 
-Corporate website for **Kervan Heat** (Kervan Isıl İşlem), a Turkish industrial company with two business lines:
+- Türkçe cevap ver, kısa ve öz. Gereksiz açıklama yapma.
+- Aksiyon odaklı: "yapıyorum" diyip yap, "yapayım mı?" sorma.
+- Kod yorumları İngilizce, kullanıcı iletişimi Türkçe.
+- Hata çıkarsa: hatayı göster → 3 olası neden → en olası fix → uygula → doğrula.
 
-1. **Hydraulic Breaker Parts** (primary) — aftermarket chisels, pistons, bushings, through bolts, repair kits, wedges and front heads for 40+ breaker brands.
-2. **Heat Treatment Services** — carburizing, quenching, tempering, normalization, stress relief and hardness testing.
+## Stack (kesin, değiştirme)
 
-- **Domain**: kervanheat.com
-- **Hosting**: Cloudflare Pages (auto-deploys on push to `main`)
-- **Languages**: English (default) + Turkish (auto-detected via geolocation)
+- **Astro 5.16.x LTS** (Astro 6 alpha → KULLANMA)
+- **TypeScript strict** + `astro check` her commit öncesi
+- **Tailwind v4** (`@tailwindcss/vite` plugin; `@astrojs/tailwind` DEPRECATED)
+- **React 18** (sadece interaktif island'lar: FindYourPart, HeroShowcase)
+- **Three.js + @react-three/fiber + @react-three/drei** (sadece HeroShowcase için, lazy)
+- **model-viewer** (CDN lazy, ürün leaf sayfaları için)
+- **Output:** `static` + `build.format: 'directory'` + `trailingSlash: 'always'`
+- **Node 20 LTS** (`.nvmrc` = "20")
+- **Deploy:** Cloudflare Pages (GitHub integration)
+- **Backend:** Pages Functions (`/functions/api/*.ts`)
+- **Email:** Resend API (primary) + MailChannels (fallback, Cloudflare native)
+- **Storage:** R2 bucket (v2'de, şimdilik metadata-only)
 
-## Repository Structure
+## YASAKLAR
+
+- Vercel/Netlify/shared hosting stack'i önerme. Cloudflare Pages'te kalıyoruz.
+- IP-based auto-redirect EKLEME (Google International SEO'ya aykırı)
+- `localStorage` SSR'da patlatma — `client:only` veya `typeof window !== 'undefined'` guard
+- `@astrojs/tailwind` kurma (deprecated)
+- `.htaccess`, PHP yazma (Apache değil, Cloudflare Workers runtime)
+- Hero dışı görsele `fetchpriority="high"` koyma
+- Secret/token kod içinde hardcode etme
+- `main`'e direkt push YOK — feature branch + PR
+- Three.js'i her ürün sayfasında kullanma — sadece HeroShowcase (landing + hub)
+- 500+ kelime template paraphrasing — her sayfada ≥80 kelime gerçekten ORİJİNAL içerik
+
+## Dil/i18n kuralları
+
+- `defaultLocale: 'tr'`, `locales: ['tr', 'en']`
+- `prefixDefaultLocale: true` → `/tr/...` ve `/en/...`
+- Root `/` sadece split-hero + dil seçici (BaseLayout kullanma)
+- Hreflang her sayfada: tr-TR + en-US + x-default (→ tr)
+- Asimetrik içerik OK (TR 40+ sayfa, EN 12+ sayfa, farklı olabilir)
+- Manuel dil switcher + soft hint banner; auto-redirect YOK
+
+## Dosya yapısı (sapma yok)
 
 ```
-kervan-website/
-├── index.html          # HTML + CSS (≈1750 lines)
-├── script.js           # Vanilla JS: i18n, nav, burger, fade-in, form (≈200 lines)
-├── favicon.svg         # Brand icon (orange "K" on dark)
-├── hero.jpg            # OG image
-├── images/             # Product/facility photos
-├── katalog.html        # Catalogue page
-├── katalog.pdf         # PDF catalogue
-├── video.mp4           # Facility video
-├── _worker.js          # Cloudflare Worker: AI chatbot (/chat endpoint)
-├── _headers            # Cloudflare custom headers
-├── wrangler.toml       # Cloudflare config
-├── sitemap.xml         # SEO sitemap
-├── robots.txt          # Crawler directives
-├── .claude/skills/     # Claude Code skills (incl. ui-ux-pro-max)
-└── CLAUDE.md           # This file
+src/
+├── components/
+│   ├── seo/{OrganizationSchema, LocalBusinessSchema, ProductSchema,
+│   │       BreadcrumbSchema, ServiceSchema, FAQSchema, ArticleSchema}.astro
+│   ├── find-your-part/{FindYourPart.tsx, FindYourPartWrapper.astro}
+│   ├── hero-showcase/{HeroShowcase.tsx, HeroShowcaseWrapper.astro}
+│   ├── ProductViewer3D.astro
+│   ├── Header.astro, Footer.astro, HeroSplit.astro
+│   ├── LanguageSwitcher.astro, LanguageHint.astro
+│   ├── RfqForm.astro, WhatsAppFloat.astro, CookieBanner.astro
+│   └── TrustBar.astro, CaseStudyCard.astro
+├── content.config.ts          # Astro 5: ROOT'ta
+├── data/{breakers, services, vega-parts, locations, certifications, case-studies, resources}.json
+├── i18n/{tr.json, en.json, utils.ts}
+├── layouts/BaseLayout.astro
+├── pages/
+│   ├── index.astro, 404.astro
+│   ├── tr/...    (hakkimizda, iletisim, sertifikalar, kvkk, cerez-politikasi,
+│   │             isil-islem/{index,[service]}, kirici-parcalari/**,
+│   │             parca-bul, referanslar/**, rehber/**, lokasyon/**)
+│   └── en/...    (EN karşılıkları; /lokasyon/ TR-only)
+├── styles/{tokens.css, global.css}
+├── utils/analytics.ts
+└── assets/
+public/
+├── _headers, _redirects, robots.txt
+├── fonts/{Inter-Regular, Inter-Bold}.woff2
+├── images/{products, facility, certifications, case-studies, resources}/
+└── models/{featured/, *.glb, README.md}
+functions/api/
+├── rfq.ts
+└── _middleware.ts
+.github/workflows/{ci.yml, deploy.yml}
+wrangler.jsonc, CLAUDE.md, README.md
 ```
 
-## Architecture
+## Performans hedefleri
 
-### index.html
+- LCP < 2.0s hedef, < 2.5s tavan
+- CLS < 0.05, INP < 200ms
+- Build time < 60s (400 sayfada)
+- JS per page < 50KB (island'lar hariç)
+- ProductViewer3D sayfası +0KB base (CDN lazy)
+- HeroShowcase sayfası +150KB max (R3F)
+- GLB dosyaları < 1.5 MB / dosya
+- Lighthouse: Performance ≥90, SEO 100, A11y ≥95
 
-| Section | Content |
-|---------|---------|
-| `<head>` | Meta, SEO, OG, JSON-LD (Manufacturer schema), Google Fonts |
-| `<style>` | All CSS: design tokens, nav, hero, parts grid, compat, heat, why, quote form, footer, mobile drawer, fade-up animation |
-| `<nav>` | Fixed blur navbar with brand lockup, 5 links, EN/TR toggle, Request Quote CTA |
-| `<div#mob-panel>` | Mobile fullscreen drawer with links + CTA |
-| `<section#top>` | Hero: 1.15/0.85 split with engineering drawing SVG |
-| `<section#parts>` | 6-col grid: chisels hero card + 6 satellite cards |
-| `<section#compat>` | 12-brand bordered grid (Furukawa, Montabert, Rammer, etc.) |
-| `<section#heat>` | 2-col: facility credential card + 6 process rows |
-| `<section#why>` | 2x2 value-prop cards with outlined corner numbers |
-| `<section#quote>` | 2-col: intro steps + bordered form (web3forms) |
-| `<footer#contact>` | 3-col: brand + contact + hours, tagline strip, copyright |
+## Branding
 
-### script.js
+- Renkler: `--accent-orange: #ff7a00` (ısıl işlem), `--accent-steel: #5b6b7a` (parts)
+- BG: `#0a0b0d` (bg-0), `#121418` (bg-1), `#1a1d22` (bg-2)
+- Font: Inter (self-hosted WOFF2, swap)
+- Tema: dark industrial, minimum animasyon, `prefers-reduced-motion` uy
+- Animasyonlar: `transform` ve `opacity` only
 
-| Feature | Implementation |
-|---------|---------------|
-| i18n | `translations` object (EN/TR), `apply()` iterates `data-i18n`, `data-i18n-html`, `data-i18n-ph` |
-| Language detect | `navigator.language` first, then `ipapi.co/json/` IP fallback |
-| Manual toggle | `#lang-toggle` button, `userOverride` flag |
-| Nav scroll | Adds `.nav--scrolled` on 20px scroll |
-| Hamburger | Toggles `.mob-panel--open`, locks body overflow |
-| Fade-in | `IntersectionObserver` adds `.is-in` to `.fade-up` elements |
-| Form submit | Async fetch to web3forms, shows status in `#form-status` |
+## İçerik kuralları (thin content engelle)
 
-## Design System
+- Her ürün sayfasında ≥80 kelime orijinal el-yazımı paragraf (TR ve EN ayrı)
+- Specs tablosu ≥6 satır
+- OEM disclaimer her brand sayfasında: *"OEM trademarks are property of their respective owners; aftermarket replacements."*
+- GEO (LLM visibility): her sayfa FAQ schema, tablo formatı, Wikipedia-style tanım, gerçek sayılar
+- Pillar content (ilk 3): 42CrMo vs 4140, Jominy test, hidrolik kırıcı bakım — her biri 1500+ kelime
 
-Generated by `ui-ux-pro-max` skill (profile: `industrial-heavy`).
+## KVKK/GDPR
 
-### Custom Properties (Design Tokens)
+- Form'da 2 checkbox: `kvkk_consent` (required), `marketing_consent` (optional)
+- Cookie banner: Google Consent Mode v2, default denied
+- `/tr/kvkk/` + `/en/privacy/` CANLI olmadan form submit açma
+- Honeypot her formda: `<input name="website" hidden>`
 
-```css
---bg-0: #08090B          /* Deepest background */
---bg-1/2/3/4             /* Surface hierarchy */
---t-1/2/3                /* Text hierarchy */
---brand: #E8781A         /* Forge orange */
---brand-hi/lo            /* Orange variants */
---brand-glow             /* Orange glow for shadows */
---line / --line-2        /* Structural borders */
---steel / --steel-hi     /* Steel grey accents */
+## Commit convention
+
+Conventional Commits: `feat(i18n):`, `fix(rfq):`, `perf(images):`, `docs:`, `chore(ci):`, `feat(3d):`
+Branch: `feature/astro-rebuild`, `develop`'a PR. `main`'e direkt push yasak.
+
+## Destructive ops
+
+`git reset --hard`, `rm -rf`, `git push --force` → onay bekle.
+Normal işlemler (file edit, npm install, build, test, commit) → direkt yap.
+
+## Claude Code tooling (dokunma)
+
+- `.claude/` → settings, slash commands, agents, skills
+- `.claude-flow/` → workflow configs, sessions
+- `.mcp.json` → MCP server integrations
+- `.assetsignore`, `.wranglerignore` → CF Pages / Wrangler ignore
+
+Sadece `CLAUDE.md` revize edilir.
+
+## Build & test
+
+```bash
+npm run dev            # localhost:4321
+npm run build          # dist/
+npm run preview        # Astro preview
+npm run check          # astro check
+npx wrangler pages dev dist --compatibility-date=2026-04-17
 ```
-
-### Typography
-
-- **Headings**: Space Grotesk (500/600/700), tracking -0.025em
-- **Body**: Inter (400/500/600/700), tracking -0.005em
-- **Mono**: JetBrains Mono (400/500), tracking 0.08em — used for spec chips, part numbers, temperatures, eyebrows
-
-### Visual Motifs
-
-1. Blueprint grid overlay (56px, masked to fade at edges)
-2. Corner-bracket framing on product/credential cards
-3. Mono-font spec chips with orange-tinted border
-4. Giant outlined section numbers (`-webkit-text-stroke`)
-5. SVG technical drawings (ruler marks, dotted centerlines, dimension text)
-6. Hot-gradient highlights (`--brand-hi` → `--brand-lo`) on impact surfaces
-
-### Naming Conventions
-
-- BEM-like hyphenated: `.card--chisel`, `.nav--scrolled`, `.mob-panel--open`
-- Section comments: `/* ═══ SECTION NAME ═══ */`
-
-### Responsive Breakpoints
-
-- `560px`: small mobile
-- `720px`: mobile
-- `780px`: tablet-portrait
-- `860px`: tablet
-- `920px`: nav collapse
-- `960px`: 2-col → 1-col
-- `1000px`: hero grid collapse
-
-## i18n System
-
-All visible text has `data-i18n="key"` (text), `data-i18n-html="key"` (HTML), or `data-i18n-ph="key"` (placeholder) attributes. The `translations` object in `script.js` has `en` and `tr` keys. To add a new language, add a third key (e.g. `de`) and extend the toggle logic.
-
-## JavaScript Conventions
-
-- **Vanilla JS only** — no frameworks, no imports
-- **`var` declarations** — not `const`/`let` (project style)
-- IIFE wrapper `(function(){ ... })();`
-- DOM queries via `getElementById` / `querySelectorAll`
-- `IntersectionObserver` for scroll animations
-- Form submits via `fetch` to `web3forms`
-
-## Deployment
-
-Push to `main` → Cloudflare Pages auto-deploys to kervanheat.com.
-
-**No build step required.** Changes to `index.html` or `script.js` are live after deploy.
-
-## Key External Resources
-
-| Resource | Value |
-|----------|-------|
-| WhatsApp | +90 531 669 37 34 / `wa.me/905316693734` |
-| Email | info@kervanheat.com |
-| Address | Sadun Atığ Cad. No: 112/A, Kartepe / Kocaeli |
-| Instagram | @kervanmakina |
-| Hours | Monday–Saturday, 08:00–18:00 (GMT+3) |
-| Google Fonts | Space Grotesk, Inter, JetBrains Mono |
-| Form backend | web3forms (access key in form hidden field) |
-| Geo API | ipapi.co/json/ (free, no key) |
-
-## Guidelines for AI Assistants
-
-- **Do not introduce build tools or dependencies** — the zero-dependency approach is intentional.
-- **Preserve `var` declarations** in JS to keep style consistent.
-- **Keep both EN and TR translations in sync** — when adding new text, add both language keys.
-- **Use `data-i18n` attributes** on any new visible text elements.
-- **Maintain CSS variable usage** — do not hardcode colors or spacing already defined as tokens.
-- **Respect the design system motifs** — corner brackets, mono spec chips, section numbers, SVG drawings.
-- **Test visually in a browser** — there is no automated testing.
-- **Push to `main` to deploy** — no staging environment exists.
-- **Respect accessibility attributes** — keep ARIA roles, labels, `aria-hidden`, `aria-expanded`.
-- **Section comments** — maintain the `/* ═══ NAME ═══ */` comment style.
