@@ -1,5 +1,6 @@
 # ═══════════════════════════════════════════════════════════════
 # Kervanheat.com — Cloudflare Workers-with-Assets redirects
+# rev 2026-04-18-v2 (cache bust)
 # ═══════════════════════════════════════════════════════════════
 #
 # Order matters: first matching rule wins. Only relative paths allowed.
