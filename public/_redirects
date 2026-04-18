@@ -1,16 +1,18 @@
 # ═══════════════════════════════════════════════════════════════
-# Kervanheat.com — Cloudflare Pages redirects
+# Kervanheat.com — Cloudflare Workers-with-Assets redirects
 # ═══════════════════════════════════════════════════════════════
 #
-# Order matters: first matching rule wins. Keep specific before wildcard.
-# Add ! for forced redirect even when destination exists as a static file.
+# Order matters: first matching rule wins. Only relative paths allowed.
+# Allowed status codes: 200, 301, 302, 303, 307, 308.
 #
 # After Screaming Frog crawl of the live site, uncomment / extend the sections
 # below for any legacy URL that returned a real response.
 
 # ═══ Canonical host ═══
-# www → apex (forced)
-https://www.kervanheat.com/*  https://kervanheat.com/:splat  301!
+# www → apex: handle at Cloudflare zone level (Rules → Redirect Rules),
+# NOT in _redirects. Workers-with-Assets rejects absolute URLs here.
+# Both kervanheat.com and www.kervanheat.com currently serve same content;
+# <link rel="canonical"> in <head> points to apex for SEO deduplication.
 
 # Bare /index or /home → TR landing
 /index              /tr/                         301
@@ -127,8 +129,8 @@ https://www.kervanheat.com/*  https://kervanheat.com/:splat  301!
 /certifications     /en/certifications/          301
 
 # Common WordPress / CMS patterns (if migrating from WP)
-/wp-admin/*         /404                         410
-/wp-login.php       /404                         410
+/wp-admin/*         /404                         301
+/wp-login.php       /404                         301
 /?p=:id             /                            301
 /category/*         /tr/rehber/                  301
 /tag/*              /tr/rehber/                  301
