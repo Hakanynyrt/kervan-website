@@ -77,6 +77,10 @@ const DICT = {
         file:'Fotoğraf / PDF (opsiyonel)', fileBtn:'DOSYA SEÇ', fileHint:'Maks 5 MB · parça no. bilinmiyorsa yardımcı olur',
       },
       submit:'Gönder', note:'24 saat içinde yanıt · EN 10204 3.1 sertifikası dahil',
+      consentA:'Form üzerinden ilettiğim kişisel verilerin fiyat teklifi hazırlanması amacıyla işlenmesini kabul ediyorum. ',
+      consentLink:'KVKK Aydınlatma Metni',
+      consentB:'’ni okudum.',
+      consentErr:'Devam etmek için KVKK onayı gerekli.',
       success:'Aldık. 24 saat içinde dönüş yapacağız.',
     },
     foot: {
@@ -162,6 +166,10 @@ const DICT = {
         file:'Photo / PDF (optional)', fileBtn:'SELECT FILE', fileHint:'Max 5 MB · helps when part no. is unknown',
       },
       submit:'Send It', note:'Reply within 24h · EN 10204 3.1 cert included',
+      consentA:'I consent to processing of my personal data for the purpose of preparing a quote. ',
+      consentLink:'Privacy Notice (KVKK)',
+      consentB:' read and acknowledged.',
+      consentErr:'Privacy consent is required to continue.',
       success:'Got it. We\'ll get back to you within 24 hours.',
     },
     foot: {
@@ -247,6 +255,10 @@ const DICT = {
         file:'Foto / PDF (optional)', fileBtn:'DATEI WÄHLEN', fileHint:'Max 5 MB · hilft wenn Teile-Nr. unbekannt',
       },
       submit:'Senden', note:'Antwort < 24 h · EN 10204 3.1 inklusive',
+      consentA:'Ich willige in die Verarbeitung meiner personenbezogenen Daten zum Zweck der Angebotserstellung ein. ',
+      consentLink:'Datenschutzhinweis (KVKK)',
+      consentB:' gelesen.',
+      consentErr:'Datenschutz-Einwilligung erforderlich.',
       success:'Erhalten. Antwort innerhalb 24 Stunden.',
     },
     foot: {
@@ -332,6 +344,10 @@ const DICT = {
         file:'Фото / PDF (опц.)', fileBtn:'ВЫБРАТЬ ФАЙЛ', fileHint:'Макс 5 МБ · помогает без номера',
       },
       submit:'Отправить', note:'Ответ < 24 ч · EN 10204 3.1 в комплекте',
+      consentA:'Я согласен(на) на обработку моих персональных данных для подготовки коммерческого предложения. ',
+      consentLink:'Уведомление о конфиденциальности (KVKK)',
+      consentB:' прочитано.',
+      consentErr:'Требуется согласие на обработку данных.',
       success:'Получили. Ответим в течение 24 часов.',
     },
     foot: {
