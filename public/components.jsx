@@ -570,9 +570,9 @@ function RFQ({ t }) {
       fd.append('kvkk_consent', '1');
       const res = await fetch('/api/rfq', { method:'POST', body: fd, headers:{ Accept:'application/json' } });
       if (res.ok) { setSent(true); }
-      else { setErr('Gönderilemedi — hakan@kervanheat.com'); }
+      else { setErr('Gönderilemedi — info@kervanheat.com'); }
     } catch (e2) {
-      setErr('Gönderilemedi — hakan@kervanheat.com');
+      setErr('Gönderilemedi — info@kervanheat.com');
     } finally { setSending(false); }
   };
   const hv = [...t.rfq.hv];
