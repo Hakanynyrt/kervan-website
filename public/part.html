@@ -16,12 +16,8 @@
 <script>
 (async function(){
   const files = ['dict.jsx', 'components.jsx'];
-  for (const f of files) {
-    const src = await fetch(f).then(r => r.text());
-    const out = Babel.transform(src, { presets: ['react'] }).code;
-    const s = document.createElement('script'); s.textContent = out; document.body.appendChild(s);
-  }
-  const PART_PAGE = `
+  const sources = await Promise.all(files.map(f => fetch(f).then(r => r.text())));
+  const app = `
     function PartPage() {
       const [lang, setLang] = React.useState('tr');
       const p = new URLSearchParams(location.search);
@@ -77,8 +73,10 @@
     }
     ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(PartPage));
   `;
+  const bundle = sources.join('\n') + '\n' + app;
+  const out = Babel.transform(bundle, { presets: ['react'] }).code;
   const s = document.createElement('script');
-  s.textContent = Babel.transform(PART_PAGE, { presets: ['react'] }).code;
+  s.textContent = out;
   document.body.appendChild(s);
 })();
 </script>

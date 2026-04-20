@@ -22,17 +22,14 @@
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
 <script>
-// Fetch + transpile + run JSX files in strict order (avoids Babel standalone's async race on multiple src)
+// Fetch both JSX files, CONCATENATE them, transform once, run as single script.
+// Concat-then-transform ensures all consts share the same scope.
 (async function(){
-  const files = ['dict.jsx', 'components.jsx'];
-  for (const f of files) {
-    const src = await fetch(f).then(r => r.text());
-    const out = Babel.transform(src, { presets: ['react'] }).code;
-    const s = document.createElement('script');
-    s.textContent = out;
-    document.body.appendChild(s);
-  }
-  const app = Babel.transform(`
+  const [dict, comps] = await Promise.all([
+    fetch('dict.jsx').then(r => r.text()),
+    fetch('components.jsx').then(r => r.text()),
+  ]);
+  const app = `
     function App() {
       const [lang, setLang] = window.useLang();
       const t = window.DICT[lang] || window.DICT.en;
@@ -52,9 +49,11 @@
       );
     }
     ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
-  `, { presets: ['react'] }).code;
+  `;
+  const bundle = dict + '\n' + comps + '\n' + app;
+  const out = Babel.transform(bundle, { presets: ['react'] }).code;
   const s = document.createElement('script');
-  s.textContent = app;
+  s.textContent = out;
   document.body.appendChild(s);
 })();
 </script>

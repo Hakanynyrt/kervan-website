@@ -20,12 +20,8 @@
 <script>
 (async function(){
   const files = ['dict.jsx', 'components.jsx', 'pages-dict.jsx'];
-  for (const f of files) {
-    const src = await fetch(f).then(r => r.text());
-    const out = Babel.transform(src, { presets: ['react'] }).code;
-    const s = document.createElement('script'); s.textContent = out; document.body.appendChild(s);
-  }
-  const app = Babel.transform(`
+  const sources = await Promise.all(files.map(f => fetch(f).then(r => r.text())));
+  const app = `
     function About() {
       const [lang, setLang] = window.useLang();
       const t = window.DICT[lang] || window.DICT.en;
@@ -107,8 +103,12 @@
       );
     }
     ReactDOM.createRoot(document.getElementById('root')).render(<About/>);
-  `, { presets: ['react'] }).code;
-  const s = document.createElement('script'); s.textContent = app; document.body.appendChild(s);
+  `;
+  const bundle = sources.join('\n') + '\n' + app;
+  const out = Babel.transform(bundle, { presets: ['react'] }).code;
+  const s = document.createElement('script');
+  s.textContent = out;
+  document.body.appendChild(s);
 })();
 </script>
 </body>
