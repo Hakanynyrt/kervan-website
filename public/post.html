@@ -71,7 +71,8 @@
             return React.createElement('p', { key: i }, b.text);
           })
         ),
-        React.createElement(Footer, { t: t })
+        React.createElement(Footer, { t: t }),
+        React.createElement(WAFloat, { lang: lang })
       );
     }
     ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(PostPage));
