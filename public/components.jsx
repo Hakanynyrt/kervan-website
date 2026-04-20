@@ -557,10 +557,12 @@ function RFQ({ t }) {
   const [sending, setSending] = useState(false);
   const [fileName, setFileName] = useState('');
   const [err, setErr] = useState('');
+  const [consent, setConsent] = useState(false);
   const fileRef = useRef();
   const date = new Date().toISOString().slice(0, 10);
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (!consent) { setErr(t.rfq.consentErr || 'KVKK onayı gerekli.'); return; }
     setErr(''); setSending(true);
     try {
       const fd = new FormData(e.target);
@@ -641,10 +643,22 @@ function RFQ({ t }) {
                 <span>{t.rfq.success}</span>
               </div>
             ) : (
-              <div className="rfq__submit">
-                <span className="rfq__submit__note"><b>●</b> {err || t.rfq.note}</span>
-                <button type="submit" disabled={sending} className="btn-primary">{sending ? '...' : t.rfq.submit} <span>→</span></button>
-              </div>
+              <>
+                <div className="rfq__field rfq__field--full">
+                  <label className="rfq__consent">
+                    <input type="checkbox" checked={consent} onChange={e=>{ setConsent(e.target.checked); if (e.target.checked && err) setErr(''); }}/>
+                    <span className="rfq__consent__box" aria-hidden="true">{consent ? '✓' : ''}</span>
+                    <span className="rfq__consent__text">
+                      {t.rfq.consentA || 'Form üzerinden ilettiğim kişisel verilerin fiyat teklifi hazırlanması amacıyla işlenmesini kabul ediyorum.'}{' '}
+                      <a href="kvkk.html" target="_blank" rel="noopener">{t.rfq.consentLink || 'KVKK Aydınlatma Metni'}</a>{t.rfq.consentB || ''}
+                    </span>
+                  </label>
+                </div>
+                <div className="rfq__submit">
+                  <span className="rfq__submit__note"><b>●</b> {err || t.rfq.note}</span>
+                  <button type="submit" disabled={sending || !consent} className="btn-primary">{sending ? '...' : t.rfq.submit} <span>→</span></button>
+                </div>
+              </>
             )}
           </form>
         </div>
@@ -694,7 +708,11 @@ function Footer({ t }) {
         </div>
         <div className="foot__bot">
           <span>© 2026 KERVAN HEAT TREATMENT</span>
-          <span>{t.foot.bot}</span>
+          <span className="foot__bot__links">
+            <a href="kvkk.html">KVKK</a>
+            <span aria-hidden="true">·</span>
+            <span>{t.foot.bot}</span>
+          </span>
         </div>
       </div>
     </footer>
