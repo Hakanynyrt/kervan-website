@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Kervan Heat — Compatibility Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="kit.css"/>
+<link rel="stylesheet" href="finder.css"/>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="breakers.js"></script>
+
+<script>
+(async function(){
+  const files = ['dict.jsx', 'components.jsx'];
+  for (const f of files) {
+    const src = await fetch(f).then(r => r.text());
+    const out = Babel.transform(src, { presets: ['react'] }).code;
+    const s = document.createElement('script'); s.textContent = out; document.body.appendChild(s);
+  }
+  const app = Babel.transform(`
+    const { useState, useEffect } = React;
+    function Finder() {
+      const [lang, setLang] = window.useLang();
+      const t = window.DICT[lang] || window.DICT.en;
+      const ct = window.COMPAT_DICT[lang] || window.COMPAT_DICT.en;
+      const [brand, setBrand] = useState(null);
+      const [model, setModel] = useState(null);
+      const brands = Object.keys(window.BREAKERS);
+
+      const step = !brand ? 1 : !model ? 2 : 3;
+      const stepLabel = step === 1 ? ct.step1 : step === 2 ? ct.step2 : ct.step3;
+
+      return (
+        <>
+          <Nav lang={lang} setLang={setLang} t={t}/>
+          <section className="finder">
+            <div className="wrap">
+              <div className="finder__breadcrumb">
+                <a className={!brand?'active':''} onClick={()=>{setBrand(null);setModel(null);}}>{ct.step1}</a>
+                <span className="sep">/</span>
+                <a className={brand&&!model?'active':''} onClick={()=>setModel(null)}>{brand || ct.step2}</a>
+                <span className="sep">/</span>
+                <a className={model?'active':''}>{model ? model.model : ct.step3}</a>
+              </div>
+              <div className="finder__header">
+                <h1>{ct.title.split(' ')[0]} <em>{ct.title.split(' ').slice(1).join(' ')}</em></h1>
+                <span className="finder__step">● STEP 0{step} / 03 · {stepLabel}</span>
+              </div>
+
+              {step === 1 && (
+                <div className="brand-grid">
+                  {brands.map(b => (
+                    <div key={b} className="brand-cell" onClick={()=>setBrand(b)}>
+                      <span className="brand-cell__name">{b}</span>
+                      <span className="brand-cell__count"><b>●</b> {window.BREAKERS[b].length} MODEL</span>
+                      <span className="brand-cell__arrow">→</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {step === 2 && (
+                <>
+                  <table className="model-table">
+                    <thead>
+                      <tr>
+                        <th>{ct.model}</th>
+                        <th>{ct.weight}</th>
+                        <th>{ct.chisel}</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {window.BREAKERS[brand].map(m => (
+                        <tr key={m.model} onClick={()=>setModel(m)}>
+                          <td><span className="model-name">{m.model}</span></td>
+                          <td><span className="model-spec">{m.weight} kg</span></td>
+                          <td><span className="model-spec">{m.chisel}</span></td>
+                          <td style={{textAlign:'right'}}><span className="row-arrow">→</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div style={{marginTop:24}}>
+                    <a className="btn-ghost" style={{cursor:'pointer'}} onClick={()=>setBrand(null)}>{ct.back}</a>
+                  </div>
+                </>
+              )}
+
+              {step === 3 && model && (
+                <>
+                  <div className="parts-result">
+                    <div className="parts-result__cell"><b>BRAND</b><span className="orange">{brand}</span></div>
+                    <div className="parts-result__cell"><b>{ct.model.toUpperCase()}</b><span>{model.model}</span></div>
+                    <div className="parts-result__cell"><b>{ct.weight.toUpperCase()}</b><span>{model.weight} kg</span></div>
+                    <div className="parts-result__cell"><b>{ct.chisel.toUpperCase()}</b><span>{model.chisel}</span></div>
+                  </div>
+
+                  <div className="kit">
+                    <div>
+                      <div className="kit__name">{ct.kitName}</div>
+                      <p className="kit__desc">{ct.kitDesc}</p>
+                    </div>
+                    <div>
+                      <div className="kit__tag">● KIT · KVN-{model.pistonRef}</div>
+                    </div>
+                    <a className="btn-primary" href={\`part.html?ref=\${model.pistonRef}&brand=\${brand}&model=\${model.model}&lang=\${lang}\`}>SEE KIT →</a>
+                  </div>
+
+                  <table className="model-table">
+                    <thead>
+                      <tr><th>REF</th><th>{ct.parts}</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                      <tr onClick={()=>location.href=\`part.html?ref=CHS-42&brand=\${brand}&model=\${model.model}&lang=\${lang}\`}>
+                        <td><span className="model-spec">CHS-42</span></td>
+                        <td><span className="model-name">{t.parts.items[0].name}</span></td>
+                        <td style={{textAlign:'right'}}><span className="row-arrow">→</span></td>
+                      </tr>
+                      <tr onClick={()=>location.href=\`part.html?ref=\${model.pistonRef}&brand=\${brand}&model=\${model.model}&lang=\${lang}\`}>
+                        <td><span className="model-spec">{model.pistonRef}</span></td>
+                        <td><span className="model-name">{t.parts.items[1].name}</span></td>
+                        <td style={{textAlign:'right'}}><span className="row-arrow">→</span></td>
+                      </tr>
+                      <tr onClick={()=>location.href=\`part.html?ref=BSH-09&brand=\${brand}&model=\${model.model}&lang=\${lang}\`}>
+                        <td><span className="model-spec">BSH-09</span></td>
+                        <td><span className="model-name">{t.parts.items[2].name}</span></td>
+                        <td style={{textAlign:'right'}}><span className="row-arrow">→</span></td>
+                      </tr>
+                      <tr onClick={()=>location.href=\`part.html?ref=BLT-23&brand=\${brand}&model=\${model.model}&lang=\${lang}\`}>
+                        <td><span className="model-spec">BLT-23</span></td>
+                        <td><span className="model-name">{t.parts.items[3].name}</span></td>
+                        <td style={{textAlign:'right'}}><span className="row-arrow">→</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div className="cta-block">
+                    <p><b>{brand} {model.model}</b> — {ct.kitName.toLowerCase()} {ct.ask.toLowerCase()}</p>
+                    <a className="btn-primary" href={\`index.html?lang=\${lang}#contact\`}>{ct.ask} →</a>
+                  </div>
+                  <div style={{marginTop:24}}>
+                    <a className="btn-ghost" style={{cursor:'pointer'}} onClick={()=>setModel(null)}>{ct.back}</a>
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+          <Footer t={t}/>
+        </>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<Finder/>);
+  `, { presets: ['react'] }).code;
+  const s = document.createElement('script'); s.textContent = app; document.body.appendChild(s);
+})();
+</script>
+</body>
+</html>

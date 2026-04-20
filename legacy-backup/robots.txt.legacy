@@ -1,5 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /cdn-cgi/
-
-Sitemap: https://kervanheat.com/sitemap.xml

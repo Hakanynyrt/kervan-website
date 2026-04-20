@@ -2,9 +2,8 @@
  * Worker entry for Kervanheat.com
  *
  * Cloudflare Workers-with-Assets model:
- * - Static Astro build (dist/) is served via env.ASSETS.fetch()
+ * - Static site (public/) is served via env.ASSETS.fetch()
  * - API routes (/api/*) are handled inline here
- * - _headers and _redirects files inside dist/ are respected automatically
  */
 
 interface Env {
@@ -40,18 +39,12 @@ async function handleRfq(request: Request, env: Env): Promise<Response> {
   const origin = request.headers.get('Origin') ?? request.headers.get('Referer') ?? '';
   const originOk =
     ALLOWED_ORIGINS.some((a) => origin.startsWith(a)) || origin.includes('.workers.dev');
-  if (!originOk) {
-    return Response.json({ ok: false, error: 'origin' }, { status: 403 });
-  }
+  if (!originOk) return Response.json({ ok: false, error: 'origin' }, { status: 403 });
 
   let form: FormData;
-  try {
-    form = await request.formData();
-  } catch {
-    return Response.json({ ok: false, error: 'parse' }, { status: 400 });
-  }
+  try { form = await request.formData(); }
+  catch { return Response.json({ ok: false, error: 'parse' }, { status: 400 }); }
 
-  // Honeypot
   if (form.get('website')) return Response.json({ ok: true });
 
   const name = clean(form.get('name'), 100);
@@ -65,13 +58,11 @@ async function handleRfq(request: Request, env: Env): Promise<Response> {
   const specs = clean(form.get('specs'), 2000);
   const message = clean(form.get('message'), 3000);
   const kvkk = form.get('kvkk_consent') === '1' || form.get('kvkk_consent') === 'on';
-  const marketing =
-    form.get('marketing_consent') === '1' || form.get('marketing_consent') === 'on';
+  const marketing = form.get('marketing_consent') === '1' || form.get('marketing_consent') === 'on';
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
-  if (!name || !email || !kvkk || !emailValid) {
+  if (!name || !email || !kvkk || !emailValid)
     return Response.json({ ok: false, error: 'validation' }, { status: 422 });
-  }
 
   const fileList: string[] = [];
   for (const [key, value] of form.entries()) {
@@ -110,31 +101,18 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
   const mailTo = env.MAIL_TO ?? 'info@kervanheat.com';
   const mailFrom = env.MAIL_FROM ?? 'noreply@kervanheat.com';
 
-  // Primary: Resend
   let emailSent = false;
   if (env.RESEND_API_KEY) {
     try {
       const r = await fetch('https://api.resend.com/emails', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: mailFrom,
-          to: mailTo,
-          reply_to: email,
-          subject: emailSubject,
-          text: emailBody,
-        }),
+        headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: mailFrom, to: mailTo, reply_to: email, subject: emailSubject, text: emailBody }),
       });
       emailSent = r.ok;
-    } catch (e) {
-      console.error('Resend error', e);
-    }
+    } catch (e) { console.error('Resend error', e); }
   }
 
-  // Fallback: MailChannels (Cloudflare-native)
   if (!emailSent && env.MAILCHANNELS_DKIM_DOMAIN) {
     try {
       const personalization: Record<string, unknown> = {
@@ -142,9 +120,7 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
         dkim_domain: env.MAILCHANNELS_DKIM_DOMAIN,
         dkim_selector: env.MAILCHANNELS_DKIM_SELECTOR ?? 'mailchannels',
       };
-      if (env.MAILCHANNELS_DKIM_PRIVATE_KEY) {
-        personalization.dkim_private_key = env.MAILCHANNELS_DKIM_PRIVATE_KEY;
-      }
+      if (env.MAILCHANNELS_DKIM_PRIVATE_KEY) personalization.dkim_private_key = env.MAILCHANNELS_DKIM_PRIVATE_KEY;
       const r = await fetch('https://api.mailchannels.net/tx/v1/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -157,31 +133,18 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
         }),
       });
       emailSent = r.ok;
-    } catch (e) {
-      console.error('MailChannels error', e);
-    }
+    } catch (e) { console.error('MailChannels error', e); }
   }
 
-  // Telegram notification
   if (env.TG_BOT_TOKEN && env.TG_CHAT_ID) {
     try {
-      const tgText =
-        `🔔 *New RFQ*\n\n` +
-        `*Name:* ${name}\n*Company:* ${company}\n*Email:* ${email}\n*Phone:* ${phone}\n` +
-        `*Country:* ${country}\n*Service:* ${service}\n*Qty:* ${qty}\n*Deadline:* ${deadline}\n` +
-        `*Files:* ${fileList.length} item(s)\n\n_${(message || '(no message)').slice(0, 500)}_`;
+      const tgText = `🔔 *New RFQ*\n\n*Name:* ${name}\n*Company:* ${company}\n*Email:* ${email}\n*Phone:* ${phone}\n*Country:* ${country}\n*Service:* ${service}\n*Qty:* ${qty}\n*Files:* ${fileList.length} item(s)\n\n_${(message || '(no message)').slice(0, 500)}_`;
       await fetch(`https://api.telegram.org/bot${env.TG_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: env.TG_CHAT_ID,
-          text: tgText,
-          parse_mode: 'Markdown',
-        }),
+        body: JSON.stringify({ chat_id: env.TG_CHAT_ID, text: tgText, parse_mode: 'Markdown' }),
       });
-    } catch (e) {
-      console.error('Telegram error', e);
-    }
+    } catch (e) { console.error('Telegram error', e); }
   }
 
   return Response.json({ ok: true, emailSent });
@@ -191,22 +154,15 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    // API routes
     if (url.pathname === '/api/rfq') {
-      if (request.method !== 'POST') {
-        return Response.json({ ok: false, error: 'method' }, { status: 405 });
-      }
+      if (request.method !== 'POST') return Response.json({ ok: false, error: 'method' }, { status: 405 });
       return withSecurityHeaders(await handleRfq(request, env));
     }
 
     if (url.pathname.startsWith('/api/')) {
-      return withSecurityHeaders(
-        Response.json({ ok: false, error: 'not-found' }, { status: 404 })
-      );
+      return withSecurityHeaders(Response.json({ ok: false, error: 'not-found' }, { status: 404 }));
     }
 
-    // Static assets — served by Cloudflare asset pipeline
-    // This also respects _headers and _redirects files in the assets directory
     return env.ASSETS.fetch(request);
   },
 } satisfies ExportedHandler<Env>;

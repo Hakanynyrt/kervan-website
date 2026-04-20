@@ -1,59 +1,52 @@
-# Kervan Isıl İşlem — kervanheat.com
+# kervanheat.com
 
-Astro 5 + TypeScript + Tailwind v4 + React + Three.js (R3F) + Cloudflare Pages.
+Production static site for Kervan Heat Treatment — heat-treated chisels, pistons and kits for hydraulic breakers.
 
-**Domain:** kervanheat.com · **Hosting:** Cloudflare Pages (GitHub integration)
+## Stack
 
-## Development
+- **Static HTML + inline JSX** (React via CDN, Babel standalone) — no build step
+- **Cloudflare Worker** (`src/worker/index.ts`) — serves `public/` assets + handles `/api/rfq` RFQ submissions (Resend → MailChannels fallback + Telegram notifications)
 
-```bash
-npm install          # first time
-npm run dev          # localhost:4321
-npm run check        # astro check (TS + content schema)
-npm run build        # dist/
-npm run preview:pages # wrangler pages dev — full Pages Functions locally
-```
+## Layout
 
-## Project structure
-
-See `CLAUDE.md` for canonical project rules and file tree.
+- `public/` — all static assets served by Cloudflare (HTML, JSX, CSS, images)
+- `src/worker/index.ts` — Cloudflare Worker entry (static assets + RFQ API)
+- `legacy-astro/` — previous Astro build, archived for reference
 
 ## Deploy
 
-`main` → Cloudflare Pages production (`kervanheat.com`).
-`develop` / `feature/*` → preview deployments.
+Cloudflare Pages is connected to the `main` branch. Every push deploys automatically.
 
-Legacy vanilla HTML/JS site archived in `legacy-backup/` — kept in git history for reference and 301 redirect mapping.
+For local preview:
+```
+npm install
+npm run dev
+```
 
-## Cloudflare Pages setup (one-time)
+## Environment variables (Cloudflare dashboard)
 
-1. Cloudflare Dashboard → Workers & Pages → Create project → Connect to Git
-2. Repository: `hakanynyrt/kervan-website`
-3. Build settings:
-   - Build command: `npm run build`
-   - Build output directory: `dist`
-   - Root directory: `/`
-   - Node version: `20`
-4. Environment variables (set in Production + Preview):
-   - `PUBLIC_GA4_ID`, `PUBLIC_CLARITY_ID`
-   - `RESEND_API_KEY`, `MAIL_TO`, `MAIL_FROM`
-   - `MAILCHANNELS_DKIM_DOMAIN`, `MAILCHANNELS_DKIM_SELECTOR`, `MAILCHANNELS_DKIM_PRIVATE_KEY`
-   - `TG_BOT_TOKEN`, `TG_CHAT_ID`
-5. Custom domain: `kervanheat.com` (DNS proxied via Cloudflare, orange cloud ON)
-6. Pages Functions: auto-deployed from `functions/` on every build
+Required for the RFQ form to deliver email + Telegram:
 
-### GitHub Secrets (for deploy.yml)
+| Variable | Purpose |
+|---|---|
+| `RESEND_API_KEY` | Primary email sender |
+| `MAILCHANNELS_DKIM_DOMAIN` | Fallback email sender |
+| `MAILCHANNELS_DKIM_SELECTOR` | DKIM selector |
+| `MAILCHANNELS_DKIM_PRIVATE_KEY` | DKIM private key |
+| `TG_BOT_TOKEN` | Telegram bot token |
+| `TG_CHAT_ID` | Telegram chat ID for RFQ alerts |
+| `MAIL_TO` | Destination inbox (default: info@kervanheat.com) |
+| `MAIL_FROM` | Sender address (default: noreply@kervanheat.com) |
 
-- `CLOUDFLARE_API_TOKEN` (scope: Pages edit)
-- `CLOUDFLARE_ACCOUNT_ID`
-- `PUBLIC_GA4_ID`, `PUBLIC_CLARITY_ID`
+## Pages
 
-### Branch flow
-
-- `feature/*` → preview deploy
-- `develop` → staging
-- `main` → production
-
-### Rollback
-
-Cloudflare Pages → Deployments → select older deployment → **Rollback to this deployment**.
+- `/` — homepage (TR/EN/DE/RU)
+- `/about.html` — company story, Hakan Yünyurt bio
+- `/catalog.html` — full parts catalog (print-ready)
+- `/cases.html` — case studies
+- `/gallery.html` — workshop grid
+- `/certs.html` — certifications
+- `/blog.html` + `/post.html` — resources
+- `/diagram.html` — interactive exploded breaker
+- `/compat.html` — compatibility finder
+- `/part.html` — individual part detail

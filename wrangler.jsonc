@@ -4,11 +4,8 @@
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-04-17",
   "compatibility_flags": ["nodejs_compat"],
-  "build": {
-    "command": "rm -rf dist && npm run build"
-  },
   "assets": {
-    "directory": "./dist",
+    "directory": "./public",
     "binding": "ASSETS",
     "not_found_handling": "404-page"
   },

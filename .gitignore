@@ -1,11 +1,6 @@
 node_modules/
-dist/
-.astro/
 .wrangler/
+dist/
 .env
 .env.local
-.env.*.local
 .DS_Store
-*.log
-.claude-analysis.md
-_preserve/

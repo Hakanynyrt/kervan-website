@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Article — Kervan Heat</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="kit.css"/>
+<link rel="stylesheet" href="pages.css"/>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script>
+(async function(){
+  const files = ['dict.jsx', 'components.jsx', 'pages-dict.jsx', 'posts.jsx'];
+  for (const f of files) {
+    const src = await fetch(f).then(r => r.text());
+    const out = Babel.transform(src, { presets: ['react'] }).code;
+    const s = document.createElement('script'); s.textContent = out; document.body.appendChild(s);
+  }
+  const POST_PAGE = `
+    function PostPage() {
+      const [lang, setLang] = React.useState('tr');
+      const p = new URLSearchParams(location.search);
+      const slug = p.get('slug') || '';
+      const urlLang = p.get('lang');
+      React.useEffect(() => {
+        const l = urlLang || localStorage.getItem('kv_lang_v2') || 'tr';
+        setLang(l);
+        document.documentElement.lang = l;
+      }, []);
+      const t = DICT[lang] || DICT.en;
+      const pt = getPage(lang, 'blog');
+      const post = getPost(lang, slug);
+
+      return React.createElement(React.Fragment, null,
+        React.createElement(Nav, { t: t, lang: lang, setLang: setLang }),
+        React.createElement('article', { className:'post-wrap' },
+          React.createElement('a', {
+            href: 'blog.html',
+            style: { fontFamily:'var(--f-mono)', fontSize:11, letterSpacing:'0.2em', color:'var(--t-3)', textDecoration:'none', textTransform:'uppercase', display:'inline-block', marginBottom:24 }
+          }, pt.backToBlog),
+          React.createElement('h1', null, post.title),
+          React.createElement('div', { className:'post-meta' },
+            React.createElement('span', null, React.createElement('b', null, post.cat)),
+            React.createElement('span', null, post.date),
+            React.createElement('span', null, post.readTime)
+          ),
+          post.body.map((b, i) => {
+            if (b.type === 'h2') return React.createElement('h2', { key: i }, b.text);
+            if (b.type === 'h3') return React.createElement('h3', { key: i }, b.text);
+            if (b.type === 'quote') return React.createElement('blockquote', { key: i }, b.text);
+            // paragraphs — preserve line breaks as list items if contains \\n
+            if (b.text.includes('\\n')) {
+              return React.createElement('ul', { key: i },
+                b.text.split('\\n').filter(Boolean).map((line, j) =>
+                  React.createElement('li', { key: j }, line.replace(/^•\\s*/, ''))
+                )
+              );
+            }
+            return React.createElement('p', { key: i }, b.text);
+          })
+        ),
+        React.createElement(Footer, { t: t })
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(PostPage));
+  `;
+  const s = document.createElement('script');
+  s.textContent = Babel.transform(POST_PAGE, { presets: ['react'] }).code;
+  document.body.appendChild(s);
+})();
+</script>
+</body>
+</html>
