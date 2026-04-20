@@ -1,5 +1,5 @@
 /* global React */
-const { useState, useEffect, useRef } = React;
+// useState/useEffect/useRef come from dict.jsx which is loaded before this file.
 
 // ─── Typewriter ──────────────────────────────────────────────
 function useTypewriter(text, speed = 50, startDelay = 300) {

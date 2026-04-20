@@ -23,7 +23,6 @@
   const files = ['dict.jsx', 'components.jsx'];
   const sources = await Promise.all(files.map(f => fetch(f).then(r => r.text())));
   const app = `
-    const { useState, useEffect } = React;
     function Finder() {
       const [lang, setLang] = window.useLang();
       const t = window.DICT[lang] || window.DICT.en;

@@ -22,7 +22,6 @@
   const files = ['dict.jsx', 'components.jsx', 'pages-dict.jsx'];
   const sources = await Promise.all(files.map(f => fetch(f).then(r => r.text())));
   const app = `
-    const { useState } = React;
     function Diagram() {
       const [lang, setLang] = window.useLang();
       const t = window.DICT[lang] || window.DICT.en;

@@ -23,52 +23,36 @@
 
 <script>
 (async function(){
-  const logEl = document.createElement('div');
-  logEl.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#300;color:#fca;font:11px monospace;padding:8px;z-index:99999;white-space:pre-wrap;max-height:50vh;overflow:auto';
-  const log = (m) => { logEl.textContent += m + '\n'; if (!logEl.parentNode) document.body.appendChild(logEl); };
-  window.addEventListener('error', (e) => log('ERR: ' + (e.message || e.error) + ' @ ' + e.filename + ':' + e.lineno));
-  window.addEventListener('unhandledrejection', (e) => log('REJ: ' + (e.reason?.message || e.reason)));
-  try {
-    log('fetching jsx...');
-    const [dict, comps] = await Promise.all([
-      fetch('dict.jsx').then(r => r.text()),
-      fetch('components.jsx').then(r => r.text()),
-    ]);
-    log('fetched: dict=' + dict.length + ' comps=' + comps.length);
-    log('React: ' + (typeof React) + ' Babel: ' + (typeof Babel));
-    const app = `
-      function App() {
-        const [lang, setLang] = window.useLang();
-        const t = window.DICT[lang] || window.DICT.en;
-        return (
-          <>
-            <Nav lang={lang} setLang={setLang} t={t}/>
-            <Hero t={t}/>
-            <Ticker t={t}/>
-            <Parts t={t}/>
-            <OrbitSection t={t}/>
-            <Furnace t={t}/>
-            <Process t={t}/>
-            <Meters t={t}/>
-            <RFQ t={t}/>
-            <Footer t={t}/>
-          </>
-        );
-      }
-      ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
-    `;
-    const bundle = dict + '\n' + comps + '\n' + app;
-    log('transforming ' + bundle.length + ' chars...');
-    const out = Babel.transform(bundle, { presets: ['react'] }).code;
-    log('transformed ' + out.length + ' chars, injecting...');
-    const s = document.createElement('script');
-    s.textContent = out;
-    document.body.appendChild(s);
-    log('DONE');
-    setTimeout(() => { if (document.querySelector('#root').children.length) logEl.remove(); }, 500);
-  } catch(e) {
-    log('FATAL: ' + (e.message || e) + '\n' + (e.stack || ''));
-  }
+  const [dict, comps] = await Promise.all([
+    fetch('dict.jsx').then(r => r.text()),
+    fetch('components.jsx').then(r => r.text()),
+  ]);
+  const app = `
+    function App() {
+      const [lang, setLang] = window.useLang();
+      const t = window.DICT[lang] || window.DICT.en;
+      return (
+        <>
+          <Nav lang={lang} setLang={setLang} t={t}/>
+          <Hero t={t}/>
+          <Ticker t={t}/>
+          <Parts t={t}/>
+          <OrbitSection t={t}/>
+          <Furnace t={t}/>
+          <Process t={t}/>
+          <Meters t={t}/>
+          <RFQ t={t}/>
+          <Footer t={t}/>
+        </>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  `;
+  const bundle = dict + '\n' + comps + '\n' + app;
+  const out = Babel.transform(bundle, { presets: ['react'] }).code;
+  const s = document.createElement('script');
+  s.textContent = out;
+  document.body.appendChild(s);
 })();
 </script>
 </body>
