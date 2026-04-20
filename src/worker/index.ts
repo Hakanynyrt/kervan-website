@@ -94,6 +94,7 @@ Files:
 ${fileList.length ? fileList.join('\n') : 'No attachments'}
 
 Marketing consent: ${marketing ? 'YES' : 'NO'}
+KVKK consent: ${kvkk ? 'YES' : 'NO'}
 IP: ${request.headers.get('CF-Connecting-IP') ?? 'unknown'}
 Country (CF): ${request.headers.get('CF-IPCountry') ?? 'unknown'}
 UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
