@@ -23,29 +23,8 @@
   /* 3D scene sits fixed behind content */
   #scene-root { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
   #root { position: relative; z-index: 1; }
-  /* Make body transparent where sections don't paint, so 3D shows through */
   body { background: #000; }
-  /* Sections use semi-transparent dark backgrounds over 3D */
   section, .nav, footer { position: relative; }
-  /* Scroll-scene hint indicator */
-  .scroll-hint {
-    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
-    z-index: 50; pointer-events: none;
-    font-family: var(--f-mono,monospace); font-size: 10px; letter-spacing: .2em;
-    color: rgba(255,255,255,.55); text-transform: uppercase;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    opacity: 1; transition: opacity .5s;
-  }
-  .scroll-hint.hide { opacity: 0; }
-  .scroll-hint::after {
-    content: ''; width: 1px; height: 28px;
-    background: linear-gradient(to bottom, rgba(255,255,255,.6), transparent);
-    animation: scrollPulse 1.8s ease-in-out infinite;
-  }
-  @keyframes scrollPulse {
-    0%,100% { transform: scaleY(0.4); opacity: 0.3; transform-origin: top; }
-    50%     { transform: scaleY(1);   opacity: 1;   transform-origin: top; }
-  }
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"/>
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"/>
