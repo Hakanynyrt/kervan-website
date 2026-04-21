@@ -261,17 +261,17 @@
     if (!chisel) return;
 
     if (innerWidth <= 900) {
-      // Mobile: centered, lower third
-      outerPivot.position.set(0, -1.2, 0);
-      outerPivot.scale.setScalar(0.70);
+      // Mobile: centered, lower — tip reaches into view
+      outerPivot.position.set(0, -2.0, 0);
+      outerPivot.scale.setScalar(0.85);
     } else {
       // Desktop: right side, vertically centered in viewport
       const fovY = cam.fov * Math.PI / 180;
       const viewH = 2 * cam.position.z * Math.tan(fovY / 2);
       const viewW = viewH * aspect;
       const xOffset = Math.min(viewW * 0.22, 3.4);
-      outerPivot.position.set(xOffset, -0.6, 0);
-      outerPivot.scale.setScalar(1.0);
+      outerPivot.position.set(xOffset, -1.6, 0);
+      outerPivot.scale.setScalar(1.2);
     }
   }
 
@@ -284,13 +284,13 @@
   const clock = new THREE.Clock();
 
   // Burst pattern: 6s total cycle.
-  // 0.0–2.0s: burst of 5 rapid strikes (every 0.4s)
-  // 2.0–6.0s: quiet (no strikes, chisel idle)
+  // 0.0–1.0s: burst of 7 rapid strikes (every ~0.143s — jackhammer rate)
+  // 1.0–6.0s: quiet (no strikes, chisel idle)
   const BURST_CYCLE = 6.0;
-  const BURST_WINDOW = 2.0;    // time span containing 5 strikes
-  const STRIKE_COUNT = 5;
-  const STRIKE_INTERVAL = BURST_WINDOW / STRIKE_COUNT;  // 0.4s
-  const STRIKE_DUR = 0.34;     // each individual strike duration
+  const BURST_WINDOW = 1.0;
+  const STRIKE_COUNT = 7;
+  const STRIKE_INTERVAL = BURST_WINDOW / STRIKE_COUNT;  // ~0.143s
+  const STRIKE_DUR = 0.12;     // each strike very short to fit the cadence
   let lastStrikeIndex = -1;    // tracks which strike in current cycle has already emitted sparks
   let lastCycle = -1;
 
@@ -314,32 +314,33 @@
       const sp = strikeT / STRIKE_DUR;  // 0..1 within this strike, then idle
 
       if (sp <= 1) {
-        // Anticipation (0..0.25): up
-        // Slam (0.25..0.45): down fast
-        // Recoil (0.45..1.0): bounce back
-        if (sp < 0.25) {
-          const k = sp / 0.25;
-          impactY = easeOut(k) * 0.30;
-        } else if (sp < 0.45) {
-          const k = (sp - 0.25) / 0.20;
-          impactY = 0.30 - easeIn(k) * 1.05;
+        // Tight jackhammer motion — small anticipation, sharp down, quick recoil
+        // 0..0.15: up a little
+        // 0.15..0.40: slam down
+        // 0.40..1.0: bounce back
+        if (sp < 0.15) {
+          const k = sp / 0.15;
+          impactY = easeOut(k) * 0.18;
+        } else if (sp < 0.40) {
+          const k = (sp - 0.15) / 0.25;
+          impactY = 0.18 - easeIn(k) * 0.80;
         } else {
-          const k = (sp - 0.45) / 0.55;
-          impactY = -0.75 * Math.exp(-k * 7) * Math.cos(k * 16);
+          const k = (sp - 0.40) / 0.60;
+          impactY = -0.62 * Math.exp(-k * 8) * Math.cos(k * 18);
         }
 
-        if (sp >= 0.42 && sp < 0.70) {
-          const k = (sp - 0.42) / 0.28;
+        if (sp >= 0.35 && sp < 0.70) {
+          const k = (sp - 0.35) / 0.35;
           impactIntensity = 1 - k;
         }
 
-        if (sp >= 0.45 && sp < 0.80) {
-          const k = (sp - 0.45) / 0.35;
-          shake = (1 - k) * 0.10;
+        if (sp >= 0.38 && sp < 0.80) {
+          const k = (sp - 0.38) / 0.42;
+          shake = (1 - k) * 0.09;
         }
 
-        // Emit particles exactly once per strike at slam moment
-        if (sp >= 0.43 && strikeIdx > lastStrikeIndex) {
+        // Emit particles once per strike at slam moment
+        if (sp >= 0.38 && strikeIdx > lastStrikeIndex) {
           lastStrikeIndex = strikeIdx;
           const tipWorldY = outerPivot.position.y - 2.0 * outerPivot.scale.y;
           const ox = outerPivot.position.x;
