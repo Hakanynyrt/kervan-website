@@ -4,6 +4,7 @@
 (async function() {
   const THREE = await import('three');
   const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+  const { DRACOLoader } = await import('three/addons/loaders/DRACOLoader.js');
 
   const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
@@ -85,6 +86,9 @@
 
   let chisel = null;
   const loader = new GLTFLoader();
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
+  loader.setDRACOLoader(dracoLoader);
   loader.load(
     '/kirici-uc.glb',
     (gltf) => {
