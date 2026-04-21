@@ -249,30 +249,33 @@
   @media (max-width: 900px) { .products { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 400px) { .products { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
 
+  /* Product cards: photo-first, title overlaid, no body copy below */
   .product {
     position: relative;
     background: var(--bg-soft);
     border: 1px solid var(--line);
     border-radius: var(--radius);
     overflow: hidden;
-    transition: transform .3s ease, border-color .3s ease;
+    aspect-ratio: 4 / 5;
+    transition: transform .35s ease, border-color .35s ease;
+    cursor: default;
   }
   .product:hover {
     transform: translateY(-3px);
-    border-color: rgba(245,243,238,.2);
+    border-color: rgba(245,243,238,.22);
   }
   .product__photo {
-    aspect-ratio: 4 / 3;
+    position: absolute;
+    inset: 0;
     background: linear-gradient(135deg, #18191d 0%, #0f1014 100%);
-    position: relative;
     overflow: hidden;
   }
   .product__photo img {
     width: 100%; height: 100%;
     object-fit: cover;
-    transition: transform .7s cubic-bezier(.2,.7,.2,1);
+    transition: transform .8s cubic-bezier(.2,.7,.2,1);
   }
-  .product:hover .product__photo img { transform: scale(1.04); }
+  .product:hover .product__photo img { transform: scale(1.06); }
   .product__photo--placeholder::after {
     content: attr(data-caption);
     position: absolute;
@@ -280,36 +283,39 @@
     display: flex; align-items: center; justify-content: center;
     color: var(--text-muted);
     font-size: 11px;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     text-align: center;
     padding: 20px;
   }
-  .product__body {
-    padding: 22px 22px 24px;
+  /* Dark gradient overlay for label legibility */
+  .product::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,11,15,.82) 0%, rgba(10,11,15,.15) 45%, transparent 70%);
+    pointer-events: none;
   }
-  @media (max-width: 500px) {
-    .product__body { padding: 16px 14px 18px; }
-    .product__title { font-size: 15px; }
-    .product__desc { font-size: 12.5px; margin-bottom: 10px; }
-    .product__chip { font-size: 10px; padding: 3px 7px; }
+  .product__label {
+    position: absolute; left: 18px; right: 18px; bottom: 16px;
+    z-index: 2;
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px;
   }
   .product__title {
-    font-size: 18px; font-weight: 600; letter-spacing: -0.01em;
-    margin-bottom: 6px;
+    font-size: 17px; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--text);
   }
-  .product__desc {
-    font-size: 14px; color: var(--text-dim); line-height: 1.5;
-    margin-bottom: 14px;
+  .product__spec {
+    font-size: 11px; color: var(--text-dim);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
   }
-  .product__meta {
-    display: flex; gap: 6px; flex-wrap: wrap;
-  }
-  .product__chip {
-    padding: 4px 9px; font-size: 11px;
-    background: rgba(217,74,26,.12); color: var(--accent);
-    border-radius: 999px;
-    font-weight: 500; letter-spacing: 0.02em;
+  @media (max-width: 500px) {
+    .product { aspect-ratio: 3 / 4; }
+    .product__label { left: 12px; right: 12px; bottom: 12px; gap: 8px; }
+    .product__title { font-size: 14px; }
+    .product__spec { font-size: 9.5px; letter-spacing: 0.05em; }
   }
 
   /* ─── Services strip ─── */
@@ -354,14 +360,14 @@
     border-radius: var(--radius);
     overflow: hidden;
   }
-  @media (max-width: 900px) { .brands { grid-template-columns: repeat(4, 1fr); } }
-  @media (max-width: 500px) { .brands { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 900px) { .brands { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 500px) { .brands { grid-template-columns: repeat(2, 1fr); } }
   .brand {
     background: var(--bg);
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 5 / 3;
     display: flex; align-items: center; justify-content: center;
-    padding: 12px;
-    font-size: 13px; font-weight: 500;
+    padding: 16px;
+    font-size: 15px; font-weight: 500;
     color: var(--text-dim);
     text-align: center;
     letter-spacing: -0.01em;
@@ -420,22 +426,39 @@
   @media (max-width: 700px) { .stats { grid-template-columns: repeat(2, 1fr); } }
   .stat {
     background: var(--bg);
-    padding: 48px 28px;
-    display: flex; flex-direction: column; gap: 8px;
+    padding: 56px 32px 48px;
+    display: flex; flex-direction: column; gap: 10px;
+    position: relative;
+  }
+  .stat::before {
+    content: attr(data-index);
+    position: absolute;
+    top: 16px; right: 18px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
   }
   .stat__num {
-    font-size: clamp(40px, 5vw, 64px);
+    font-size: clamp(44px, 5.4vw, 72px);
     font-weight: 500;
-    letter-spacing: -0.03em;
-    line-height: 1;
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+    font-variant-numeric: tabular-nums;
   }
   .stat__num sup {
-    font-size: 0.45em; color: var(--accent); vertical-align: top;
+    font-size: 0.42em; color: var(--accent); vertical-align: top;
     font-weight: 500; margin-left: 4px;
+    letter-spacing: 0;
   }
   .stat__label {
     font-size: 13px; color: var(--text-dim);
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
+    line-height: 1.4;
+  }
+  @media (max-width: 500px) {
+    .stat { padding: 36px 20px 28px; }
+    .stat::before { top: 10px; right: 12px; font-size: 9px; }
   }
 
   /* ─── Contact / RFQ ─── */
@@ -624,7 +647,7 @@
       <button data-lang="de">DE</button>
       <button data-lang="ru">RU</button>
     </div>
-    <a class="nav__cta" href="#contact" data-tr="Teklif Al" data-en="Get a Quote" data-de="Angebot" data-ru="Запрос">Teklif Al</a>
+    <a class="nav__cta" href="#contact" data-tr="Teklif Al" data-en="Request Quote" data-de="Angebot" data-ru="Запрос">Teklif Al</a>
     <button class="nav__burger" aria-label="menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
@@ -632,117 +655,81 @@
 <!-- ─── HERO ─── -->
 <section class="hero">
   <div class="hero__copy reveal in">
-    <div class="hero__eyebrow" data-tr="Kartepe · Kocaeli · 1999'dan beri" data-en="Kartepe · Kocaeli · since 1999" data-de="Kartepe · Kocaeli · seit 1999" data-ru="Kartepe · Kocaeli · с 1999">Kartepe · Kocaeli · 1999'dan beri</div>
+    <div class="hero__eyebrow" data-tr="Kartepe · Kocaeli · 1999'dan beri" data-en="Kartepe · Kocaeli · since 1999" data-de="Kartepe · Kocaeli · seit 1999" data-ru="Картепе · Коджаэли · с 1999">Kartepe · Kocaeli · 1999'dan beri</div>
     <h1>
-      <span data-tr="Hidrolik kırıcı parçaları." data-en="Hydraulic breaker parts." data-de="Hammerteile." data-ru="Запчасти для молотов.">Hidrolik kırıcı parçaları.</span><br/>
-      <em data-tr="Doğrudan fabrikadan." data-en="Direct from the factory." data-de="Direkt vom Werk." data-ru="Напрямую с завода.">Doğrudan fabrikadan.</em>
+      <span data-tr="Hidrolik kırıcı" data-en="Hydraulic breaker" data-de="Hydraulikhammer-" data-ru="Запчасти для">Hidrolik kırıcı</span><br/>
+      <span data-tr="yedek parçaları." data-en="spare parts." data-de="Ersatzteile." data-ru="гидромолотов.">yedek parçaları.</span><br/>
+      <em data-tr="Türkiye'de dökülür, işlenir, sertleştirilir." data-en="Forged, machined and heat-treated in Turkey." data-de="Geschmiedet, bearbeitet, gehärtet — in der Türkei." data-ru="Ковка, обработка и закалка — в Турции.">Türkiye'de dökülür, işlenir, sertleştirilir.</em>
     </h1>
-    <p class="hero__sub" data-tr="Furukawa, Rammer, Soosan, Atlas Copco ve 40+ marka için keski, piston, burç, cıvata ve tamir kiti üretiyoruz. Tamamı kendi atölyemizde — ısıl işlem dahil." data-en="We make chisels, pistons, bushings, bolts and repair kits for Furukawa, Rammer, Soosan, Atlas Copco and 40+ brands. All produced — and heat-treated — under one roof." data-de="Wir fertigen Meißel, Kolben, Buchsen, Bolzen und Reparatursätze für Furukawa, Rammer, Soosan, Atlas Copco und 40+ Marken — inklusive Wärmebehandlung." data-ru="Производим пики, поршни, втулки, болты и ремкомплекты для Furukawa, Rammer, Soosan, Atlas Copco и 40+ марок. Всё под одной крышей — включая термообработку.">
-      Furukawa, Rammer, Soosan, Atlas Copco ve 40+ marka için keski, piston, burç, cıvata ve tamir kiti üretiyoruz. Tamamı kendi atölyemizde — ısıl işlem dahil.
+    <p class="hero__sub" data-tr="Furukawa, Rammer, Soosan, Atlas Copco ve 40'tan fazla marka için keski, piston, burç, cıvata ve sızdırmazlık kitleri. Her kalem kendi tesisimizde üretilir; ısıl işlemi, metalografisi ve 3.1 sertifikası dahil teslim edilir." data-en="Chisels, pistons, bushings, bolts and seal kits compatible with Furukawa, Rammer, Soosan, Atlas Copco and 40+ brands. Every line is produced in-house and ships with its own heat-treatment, metallography and 3.1 certification." data-de="Meißel, Kolben, Buchsen, Bolzen und Dichtsätze — kompatibel mit Furukawa, Rammer, Soosan, Atlas Copco und 40+ Marken. Alles im Haus gefertigt, mit Wärmebehandlung, Metallographie und 3.1-Zeugnis." data-ru="Пики, поршни, втулки, болты и ремкомплекты, совместимые с Furukawa, Rammer, Soosan, Atlas Copco и 40+ марками. Всё производится у нас, поставляется с термообработкой, металлографией и сертификатом 3.1.">
+      Furukawa, Rammer, Soosan, Atlas Copco ve 40'tan fazla marka için keski, piston, burç, cıvata ve sızdırmazlık kitleri. Her kalem kendi tesisimizde üretilir; ısıl işlemi, metalografisi ve 3.1 sertifikası dahil teslim edilir.
     </p>
     <div class="hero__ctas">
       <a class="btn btn--primary" href="#contact">
-        <span data-tr="Teklif Al" data-en="Get a Quote" data-de="Angebot erhalten" data-ru="Запросить цену">Teklif Al</span>
+        <span data-tr="Teklif Al" data-en="Request Quote" data-de="Angebot anfragen" data-ru="Запросить цену">Teklif Al</span>
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
       </a>
       <a class="btn btn--ghost" href="#products">
-        <span data-tr="Ürünleri Gör" data-en="View Products" data-de="Produkte ansehen" data-ru="Смотреть продукцию">Ürünleri Gör</span>
+        <span data-tr="Ürünleri İncele" data-en="Browse Products" data-de="Produkte ansehen" data-ru="Смотреть продукцию">Ürünleri İncele</span>
       </a>
     </div>
   </div>
   <div class="hero__3d-anchor"></div>
 </section>
 
-<!-- ─── STATS ─── -->
-<div class="stats reveal">
-  <div class="stat">
-    <div class="stat__num">40<sup>+</sup></div>
-    <div class="stat__label" data-tr="Uyumlu marka" data-en="Brands fit" data-de="Kompatible Marken" data-ru="Совместимых марок">Uyumlu marka</div>
-  </div>
-  <div class="stat">
-    <div class="stat__num">25<sup>+</sup></div>
-    <div class="stat__label" data-tr="Yıldır üretim" data-en="Years in production" data-de="Jahre Fertigung" data-ru="Лет в производстве">Yıldır üretim</div>
-  </div>
-  <div class="stat">
-    <div class="stat__num">500<sup>t</sup></div>
-    <div class="stat__label" data-tr="Aylık kapasite" data-en="Monthly capacity" data-de="Monatskapazität" data-ru="Месячная мощность">Aylık kapasite</div>
-  </div>
-  <div class="stat">
-    <div class="stat__num">3.1</div>
-    <div class="stat__label" data-tr="EN 10204 sertifika" data-en="EN 10204 certificate" data-de="EN 10204 Zertifikat" data-ru="Сертификат EN 10204">EN 10204 sertifika</div>
-  </div>
-</div>
+<!-- ─── STATS removed by request ─── -->
 
 <!-- ─── PRODUCTS ─── -->
 <section id="products">
   <div class="section__head reveal">
-    <div class="section__kicker" data-tr="Ürünler" data-en="Products" data-de="Produkte" data-ru="Продукция">Ürünler</div>
+    <div class="section__kicker" data-tr="Ürün Ailesi" data-en="Product Range" data-de="Produktfamilie" data-ru="Продуктовая линейка">Ürün Ailesi</div>
     <h2 class="section__title">
-      <span data-tr="Kırıcıyı çalıştıran her parça." data-en="Every part that keeps a breaker running." data-de="Jedes Teil, das einen Hammer am Laufen hält." data-ru="Всё, что нужно вашему молоту.">Kırıcıyı çalıştıran her parça.</span><br/>
-      <em data-tr="Tek atölyeden." data-en="From one workshop." data-de="Aus einer Werkstatt." data-ru="Из одной мастерской.">Tek atölyeden.</em>
+      <span data-tr="Kırıcıyı ayakta tutan her parça." data-en="Every component your breaker depends on." data-de="Jedes Teil, auf das Ihr Hammer angewiesen ist." data-ru="Каждый узел, от которого зависит молот.">Kırıcıyı ayakta tutan her parça.</span><br/>
+      <em data-tr="Tek tesisten, tek tedarik zincirinden." data-en="One facility, one supply chain." data-de="Ein Werk, eine Lieferkette." data-ru="Один завод, одна цепочка поставок.">Tek tesisten, tek tedarik zincirinden.</em>
     </h2>
   </div>
 
   <div class="products reveal-stagger">
     <article class="product">
-      <div class="product__photo"><img src="photos/chisel-stock.jpeg" alt="Keski stoku" loading="lazy"/></div>
-      <div class="product__body">
-        <h3 class="product__title" data-tr="Keskiler" data-en="Chisels" data-de="Meißel" data-ru="Пики">Keskiler</h3>
-        <p class="product__desc" data-tr="Moil, konik, düz ve kama tip. Ø45–Ø210 mm." data-en="Moil, conical, flat and blunt types. Ø45–Ø210 mm." data-de="Moil, konisch, flach und stumpf. Ø45–Ø210 mm." data-ru="Пика, конус, плоский и тупой. Ø45–Ø210 мм.">Moil, konik, düz ve kama tip. Ø45–Ø210 mm.</p>
-        <div class="product__meta">
-          <span class="product__chip">42CrMo</span>
-          <span class="product__chip">HRC 48–52</span>
-        </div>
+      <div class="product__photo"><img src="photos/chisel-stock.jpeg" alt="Keski" loading="lazy"/></div>
+      <div class="product__label">
+        <span class="product__title" data-tr="Keski" data-en="Chisel" data-de="Meißel" data-ru="Пика">Keski</span>
+        <span class="product__spec">Ø45–210 · 42CrMo · HRC 48–52</span>
       </div>
     </article>
     <article class="product">
-      <div class="product__photo"><img src="photos/workshop-overview.jpeg" alt="Üretim alanı" loading="lazy"/></div>
-      <div class="product__body">
-        <h3 class="product__title" data-tr="Pistonlar" data-en="Pistons" data-de="Kolben" data-ru="Поршни">Pistonlar</h3>
-        <p class="product__desc" data-tr="Nitrasyonlu. Parlatılmış yüzey, sıkı tolerans." data-en="Nitrided. Polished surface, tight tolerance." data-de="Nitriert. Polierte Oberfläche, enge Toleranz." data-ru="Азотированные. Полированная поверхность, точный допуск.">Nitrasyonlu. Parlatılmış yüzey, sıkı tolerans.</p>
-        <div class="product__meta">
-          <span class="product__chip" data-tr="Nitrasyon" data-en="Nitrided" data-de="Nitriert" data-ru="Азотирование">Nitrasyon</span>
-        </div>
+      <div class="product__photo"><img src="photos/workshop-overview.jpeg" alt="Piston" loading="lazy"/></div>
+      <div class="product__label">
+        <span class="product__title" data-tr="Piston" data-en="Piston" data-de="Kolben" data-ru="Поршень">Piston</span>
+        <span class="product__spec" data-tr="Nitrasyonlu · ±0.02 mm" data-en="Nitrided · ±0.02 mm" data-de="Nitriert · ±0.02 mm" data-ru="Азотирование · ±0.02 мм">Nitrasyonlu · ±0.02 mm</span>
       </div>
     </article>
     <article class="product">
-      <div class="product__photo product__photo--placeholder" data-caption="Fotoğraf: Burç"></div>
-      <div class="product__body">
-        <h3 class="product__title" data-tr="Burçlar" data-en="Bushings" data-de="Buchsen" data-ru="Втулки">Burçlar</h3>
-        <p class="product__desc" data-tr="Üst ve alt burçlar. Sıkı geçme, uzun ömür." data-en="Upper and lower bushings. Press-fit, long life." data-de="Ober- und Unterbuchsen. Presspassung, lange Lebensdauer." data-ru="Верхние и нижние втулки. Плотная посадка, долгий ресурс.">Üst ve alt burçlar. Sıkı geçme, uzun ömür.</p>
-        <div class="product__meta">
-          <span class="product__chip">34CrNiMo6</span>
-        </div>
+      <div class="product__photo product__photo--placeholder" data-caption="Fotoğraf — Burç"></div>
+      <div class="product__label">
+        <span class="product__title" data-tr="Burç" data-en="Bushing" data-de="Buchse" data-ru="Втулка">Burç</span>
+        <span class="product__spec">34CrNiMo6 · H7/g6</span>
       </div>
     </article>
     <article class="product">
-      <div class="product__photo product__photo--placeholder" data-caption="Fotoğraf: Cıvata seti"></div>
-      <div class="product__body">
-        <h3 class="product__title" data-tr="Cıvatalar" data-en="Bolts" data-de="Bolzen" data-ru="Болты">Cıvatalar</h3>
-        <p class="product__desc" data-tr="Uzun gövde cıvatalar. 12.9 kalite." data-en="Through bolts. Grade 12.9." data-de="Durchgangsschrauben. Güte 12.9." data-ru="Болты с полной длиной. Класс 12.9.">Uzun gövde cıvatalar. 12.9 kalite.</p>
-        <div class="product__meta">
-          <span class="product__chip">12.9</span>
-        </div>
+      <div class="product__photo product__photo--placeholder" data-caption="Fotoğraf — Cıvata"></div>
+      <div class="product__label">
+        <span class="product__title" data-tr="Cıvata" data-en="Bolt" data-de="Bolzen" data-ru="Болт">Cıvata</span>
+        <span class="product__spec" data-tr="12.9 kalite · Uzun gövde" data-en="Grade 12.9 · Through body" data-de="Güte 12.9 · Durchgang" data-ru="Класс 12.9 · Сквозной">12.9 kalite · Uzun gövde</span>
       </div>
     </article>
     <article class="product">
-      <div class="product__photo product__photo--placeholder" data-caption="Fotoğraf: Ön kafa"></div>
-      <div class="product__body">
-        <h3 class="product__title" data-tr="Ön kafalar" data-en="Front heads" data-de="Vorderköpfe" data-ru="Передние головки">Ön kafalar</h3>
-        <p class="product__desc" data-tr="Döküm ve işlenmiş tam set. Orijinal ölçüler." data-en="Cast and machined full assembly. OEM dimensions." data-de="Gegossen und bearbeitet. OEM-Maße." data-ru="Литьё и обработка. OEM размеры.">Döküm ve işlenmiş tam set. Orijinal ölçüler.</p>
-        <div class="product__meta">
-          <span class="product__chip">OEM</span>
-        </div>
+      <div class="product__photo product__photo--placeholder" data-caption="Fotoğraf — Ön kafa"></div>
+      <div class="product__label">
+        <span class="product__title" data-tr="Ön kafa" data-en="Front head" data-de="Vorderkopf" data-ru="Передняя головка">Ön kafa</span>
+        <span class="product__spec" data-tr="OEM ölçüleri" data-en="OEM dimensions" data-de="OEM-Maße" data-ru="OEM размеры">OEM ölçüleri</span>
       </div>
     </article>
     <article class="product">
-      <div class="product__photo product__photo--placeholder" data-caption="Fotoğraf: Tamir kiti"></div>
-      <div class="product__body">
-        <h3 class="product__title" data-tr="Tamir kitleri" data-en="Repair kits" data-de="Reparatursätze" data-ru="Ремкомплекты">Tamir kitleri</h3>
-        <p class="product__desc" data-tr="Conta, halka ve sızdırmazlık elemanları." data-en="Seals, rings and sealing elements." data-de="Dichtungen, Ringe und Dichtelemente." data-ru="Уплотнения, кольца и сальники.">Conta, halka ve sızdırmazlık elemanları.</p>
-        <div class="product__meta">
-          <span class="product__chip" data-tr="Tam set" data-en="Full set" data-de="Komplett" data-ru="Полный">Tam set</span>
-        </div>
+      <div class="product__photo product__photo--placeholder" data-caption="Fotoğraf — Sızdırmazlık seti"></div>
+      <div class="product__label">
+        <span class="product__title" data-tr="Sızdırmazlık seti" data-en="Seal kit" data-de="Dichtsatz" data-ru="Ремкомплект">Sızdırmazlık seti</span>
+        <span class="product__spec" data-tr="Tam set · Conta · Halka" data-en="Full set · Seals · Rings" data-de="Komplett · Dichtungen · Ringe" data-ru="Полный · Уплотнения · Кольца">Tam set · Conta · Halka</span>
       </div>
     </article>
   </div>
@@ -751,10 +738,10 @@
 <!-- ─── SERVICES ─── -->
 <section id="services">
   <div class="section__head reveal">
-    <div class="section__kicker" data-tr="Hizmetler" data-en="Services" data-de="Leistungen" data-ru="Услуги">Hizmetler</div>
+    <div class="section__kicker" data-tr="Üretim Zinciri" data-en="Production Chain" data-de="Fertigungskette" data-ru="Производственная цепочка">Üretim Zinciri</div>
     <h2 class="section__title">
-      <span data-tr="Ham çelikten sevkiyata." data-en="From raw steel to shipping." data-de="Vom Rohstahl zum Versand." data-ru="От стали до отгрузки.">Ham çelikten sevkiyata.</span><br/>
-      <em data-tr="Dört süreç, tek çatı." data-en="Four processes, one roof." data-de="Vier Prozesse, ein Dach." data-ru="Четыре процесса, одна крыша.">Dört süreç, tek çatı.</em>
+      <span data-tr="Ham çelikten paketlenmiş parçaya." data-en="From raw steel to packaged part." data-de="Vom Rohstahl zum verpackten Teil." data-ru="От стали до упакованной детали.">Ham çelikten paketlenmiş parçaya.</span><br/>
+      <em data-tr="Her adım bizim çatımız altında." data-en="Every stage under our own roof." data-de="Jede Stufe unter einem Dach." data-ru="Каждый этап — у нас.">Her adım bizim çatımız altında.</em>
     </h2>
   </div>
 
@@ -762,22 +749,22 @@
     <div class="service">
       <div class="service__num">01</div>
       <h3 class="service__title" data-tr="Isıl İşlem" data-en="Heat Treatment" data-de="Wärmebehandlung" data-ru="Термообработка">Isıl İşlem</h3>
-      <p class="service__desc" data-tr="Kendi fırınlarımızda su verme ve temperleme. 850 °C'de kontrollü çevrim." data-en="Quench and temper in our own furnaces. 850 °C controlled cycle." data-de="Härten und Anlassen in eigener Härterei. 850 °C kontrollierter Zyklus." data-ru="Закалка и отпуск в собственных печах. Контролируемый цикл 850 °C.">Kendi fırınlarımızda su verme ve temperleme. 850 °C'de kontrollü çevrim.</p>
+      <p class="service__desc" data-tr="Kendi fırınlarımızda su verme ve temperleme. 850 °C kontrollü çevrim; her parti için sertlik ve metalografi raporu." data-en="In-house quench and temper. 850 °C controlled cycle; hardness and metallography report per batch." data-de="Härten und Anlassen im eigenen Werk. 850 °C kontrollierter Zyklus; Härte- und Metallographie-Bericht pro Charge." data-ru="Закалка и отпуск в собственных печах. Контролируемый цикл 850 °C; отчёт по твёрдости и металлографии на каждую партию.">Kendi fırınlarımızda su verme ve temperleme. 850 °C kontrollü çevrim; her parti için sertlik ve metalografi raporu.</p>
     </div>
     <div class="service">
       <div class="service__num">02</div>
-      <h3 class="service__title" data-tr="CNC İşleme" data-en="CNC Machining" data-de="CNC-Bearbeitung" data-ru="ЧПУ обработка">CNC İşleme</h3>
-      <p class="service__desc" data-tr="Tornalama, frezeleme, taşlama. ±0.02 mm tolerans." data-en="Turning, milling, grinding. ±0.02 mm tolerance." data-de="Drehen, Fräsen, Schleifen. ±0,02 mm." data-ru="Токарная, фрезерная, шлифовка. ±0.02 мм.">Tornalama, frezeleme, taşlama. ±0.02 mm tolerans.</p>
+      <h3 class="service__title" data-tr="CNC İşleme" data-en="CNC Machining" data-de="CNC-Bearbeitung" data-ru="ЧПУ-обработка">CNC İşleme</h3>
+      <p class="service__desc" data-tr="Tornalama, frezeleme ve taşlama — ±0.02 mm tolerans. OEM teknik resimlerine birebir uygun ölçüler." data-en="Turning, milling and grinding to ±0.02 mm. Dimensions matched to OEM drawings." data-de="Drehen, Fräsen und Schleifen auf ±0,02 mm. Abmessungen nach OEM-Zeichnung." data-ru="Токарная, фрезерная и шлифовальная обработка с допуском ±0.02 мм. Размеры по OEM-чертежам.">Tornalama, frezeleme ve taşlama — ±0.02 mm tolerans. OEM teknik resimlerine birebir uygun ölçüler.</p>
     </div>
     <div class="service">
       <div class="service__num">03</div>
       <h3 class="service__title" data-tr="Kalite Kontrol" data-en="Quality Control" data-de="Qualitätskontrolle" data-ru="Контроль качества">Kalite Kontrol</h3>
-      <p class="service__desc" data-tr="Sertlik, metalografi, ultrasonik. EN 10204 3.1 sertifikası." data-en="Hardness, metallography, ultrasonic. EN 10204 3.1 certificate." data-de="Härte, Metallographie, Ultraschall. EN 10204 3.1 Zertifikat." data-ru="Твёрдость, металлография, УЗК. Сертификат EN 10204 3.1.">Sertlik, metalografi, ultrasonik. EN 10204 3.1 sertifikası.</p>
+      <p class="service__desc" data-tr="Sertlik, metalografi ve ultrasonik muayene. Her sevkiyat EN 10204 3.1 sertifikasıyla çıkar." data-en="Hardness, metallography and ultrasonic inspection. Every shipment leaves with its EN 10204 3.1 certificate." data-de="Härte, Metallographie und Ultraschallprüfung. Jede Lieferung mit EN 10204 3.1." data-ru="Твёрдость, металлография, УЗК. Каждая поставка — с сертификатом EN 10204 3.1.">Sertlik, metalografi ve ultrasonik muayene. Her sevkiyat EN 10204 3.1 sertifikasıyla çıkar.</p>
     </div>
     <div class="service">
       <div class="service__num">04</div>
-      <h3 class="service__title" data-tr="Sevkiyat" data-en="Shipping" data-de="Versand" data-ru="Отгрузка">Sevkiyat</h3>
-      <p class="service__desc" data-tr="5–10 iş günü teslimat. Türkiye ve dünya geneli sevkiyat." data-en="5–10 business days lead. Turkey and worldwide shipping." data-de="5–10 Werktage Lieferzeit. Türkei und weltweit." data-ru="Срок 5–10 рабочих дней. Турция и по всему миру.">5–10 iş günü teslimat. Türkiye ve dünya geneli sevkiyat.</p>
+      <h3 class="service__title" data-tr="Sevkiyat" data-en="Logistics" data-de="Versand" data-ru="Логистика">Sevkiyat</h3>
+      <p class="service__desc" data-tr="Stoktan 5–10 iş günü. Özel üretim 3–4 hafta. Yurt içi ve uluslararası sevkiyat organizasyonu." data-en="5–10 working days from stock; 3–4 weeks for custom production. Domestic and international shipping arranged." data-de="Ab Lager 5–10 Werktage; Sonderfertigung 3–4 Wochen. Inlands- und Auslandsversand." data-ru="Со склада — 5–10 рабочих дней; изготовление на заказ — 3–4 недели. Отгрузка по Турции и по всему миру.">Stoktan 5–10 iş günü. Özel üretim 3–4 hafta. Yurt içi ve uluslararası sevkiyat organizasyonu.</p>
     </div>
   </div>
 </section>
@@ -785,9 +772,9 @@
 <!-- ─── GALLERY ─── -->
 <section id="gallery">
   <div class="section__head reveal">
-    <div class="section__kicker" data-tr="Atölye" data-en="Workshop" data-de="Werkstatt" data-ru="Цех">Atölye</div>
+    <div class="section__kicker" data-tr="Tesis" data-en="Facility" data-de="Werk" data-ru="Цех">Tesis</div>
     <h2 class="section__title">
-      <span data-tr="Nerede, nasıl üretildiği." data-en="Where, and how, it's made." data-de="Wo und wie wir fertigen." data-ru="Где и как производится.">Nerede, nasıl üretildiği.</span>
+      <span data-tr="Nerede ve nasıl üretildiği." data-en="Where and how it's made." data-de="Wo und wie gefertigt wird." data-ru="Где и как это делается.">Nerede ve nasıl üretildiği.</span>
     </h2>
   </div>
   <div class="gallery reveal-stagger">
@@ -803,11 +790,11 @@
 <!-- ─── BRANDS ─── -->
 <section id="brands">
   <div class="section__head reveal">
-    <div class="section__kicker" data-tr="Uyumluluk" data-en="Compatibility" data-de="Kompatibilität" data-ru="Совместимость">Uyumluluk</div>
+    <div class="section__kicker" data-tr="Marka Uyumluluğu" data-en="Brand Compatibility" data-de="Markenkompatibilität" data-ru="Совместимость с марками">Marka Uyumluluğu</div>
     <h2 class="section__title">
-      <span data-tr="40+ marka." data-en="40+ brands." data-de="40+ Marken." data-ru="40+ марок.">40+ marka.</span> <em data-tr="Yüzlerce model." data-en="Hundreds of models." data-de="Hunderte Modelle." data-ru="Сотни моделей.">Yüzlerce model.</em>
+      <span data-tr="40'tan fazla marka." data-en="40+ brands." data-de="Über 40 Marken." data-ru="Более 40 марок.">40'tan fazla marka.</span> <em data-tr="Yüzlerce model." data-en="Hundreds of models." data-de="Hunderte Modelle." data-ru="Сотни моделей.">Yüzlerce model.</em>
     </h2>
-    <p class="section__lead" data-tr="Modeli listede bulamadıysanız, yazın — üretiriz." data-en="If your model isn't listed, just ask — we'll make it." data-de="Nicht gelistet? Fragen Sie an — wir fertigen." data-ru="Нет в списке? Напишите — изготовим.">Modeli listede bulamadıysanız, yazın — üretiriz.</p>
+    <p class="section__lead" data-tr="Modeliniz listede görünmüyorsa, parça numarasını veya teknik resmi iletin — üretiriz." data-en="If your model isn't listed, send the part number or drawing — we'll produce it." data-de="Modell nicht gelistet? Senden Sie uns Teilenummer oder Zeichnung — wir fertigen." data-ru="Нет в списке? Пришлите артикул или чертёж — изготовим.">Modeliniz listede görünmüyorsa, parça numarasını veya teknik resmi iletin — üretiriz.</p>
   </div>
 
   <div class="brands reveal-stagger">
@@ -832,9 +819,9 @@
     <div class="rfq__info">
       <h2>
         <span data-tr="Model numaranızı gönderin." data-en="Send us your model number." data-de="Schicken Sie Ihre Modellnummer." data-ru="Пришлите номер модели.">Model numaranızı gönderin.</span><br/>
-        <em data-tr="24 saat içinde cevap." data-en="We reply within 24 hours." data-de="Antwort innerhalb 24 Stunden." data-ru="Ответим в течение 24 часов.">24 saat içinde cevap.</em>
+        <em data-tr="En geç bir iş günü içinde döneriz." data-en="We reply within one business day." data-de="Rückmeldung binnen eines Werktags." data-ru="Ответим в течение одного рабочего дня.">En geç bir iş günü içinde döneriz.</em>
       </h2>
-      <p data-tr="Parça numarası, adet ve kırıcı modelinizi yazın. Fiyat, teslim süresi ve sertifikayı hazırlayıp dönelim." data-en="Share the part number, quantity and your breaker model. We'll come back with pricing, lead time and certification." data-de="Teilen Sie uns Artikelnummer, Menge und Hammermodell mit. Wir melden uns mit Preis, Lieferzeit und Zertifikat." data-ru="Укажите артикул, количество и модель молота. Пришлём цену, срок и сертификат.">Parça numarası, adet ve kırıcı modelinizi yazın. Fiyat, teslim süresi ve sertifikayı hazırlayıp dönelim.</p>
+      <p data-tr="Kırıcı markası ve modeli, parça numarası ve adedini belirtin. Fiyat teklifi, teslim süresi ve sertifika örneği ile birlikte geri döneriz." data-en="Share the breaker brand and model, part number and quantity. We'll come back with pricing, lead time and a sample certificate." data-de="Teilen Sie uns Hammermarke und -modell, Teilenummer und Menge mit. Sie erhalten Preis, Lieferzeit und Musterzeugnis." data-ru="Укажите марку и модель молота, артикул и количество. Пришлём цену, срок изготовления и образец сертификата.">Kırıcı markası ve modeli, parça numarası ve adedini belirtin. Fiyat teklifi, teslim süresi ve sertifika örneği ile birlikte geri döneriz.</p>
 
       <div class="rfq__contacts">
         <div class="rfq__line">
@@ -875,13 +862,13 @@
       </div>
       <div class="field">
         <label data-tr="Kırıcı markası ve modeli" data-en="Breaker brand & model" data-de="Hammermarke & Modell" data-ru="Марка и модель молота">Kırıcı markası ve modeli</label>
-        <input type="text" name="breaker" placeholder="Örn: Furukawa HB20G" required/>
+        <input type="text" name="breaker" placeholder="Furukawa HB20G, Rammer S25…" required/>
       </div>
       <div class="field">
-        <label data-tr="İhtiyacınız" data-en="What you need" data-de="Bedarf" data-ru="Что нужно">İhtiyacınız</label>
-        <textarea name="message" rows="4" placeholder="Parça, adet, teslimat yeri..." required></textarea>
+        <label data-tr="Parça ve ihtiyaç" data-en="Part requested & quantity" data-de="Benötigtes Teil & Menge" data-ru="Деталь и количество">Parça ve ihtiyaç</label>
+        <textarea name="message" rows="4" placeholder="Örn: 20 adet keski, OEM 12345, teslimat İzmir" required></textarea>
       </div>
-      <button type="submit" class="rfq__submit" data-tr="Teklif Al" data-en="Request Quote" data-de="Angebot anfordern" data-ru="Запросить">Teklif Al</button>
+      <button type="submit" class="rfq__submit" data-tr="Teklif Talebini Gönder" data-en="Submit Request" data-de="Anfrage senden" data-ru="Отправить запрос">Teklif Talebini Gönder</button>
     </form>
   </div>
 </section>
@@ -894,14 +881,14 @@
         <img src="logo-krv.png" alt="Kervan Heat" width="28" height="28"/>
         <span>Kervan Heat</span>
       </a>
-      <p data-tr="Kartepe, Kocaeli'de 1999'dan beri hidrolik kırıcı yedek parçaları ve ısıl işlem. Kendi fırınımız, kendi CNC'miz, kendi laboratuvarımız." data-en="Making breaker spare parts and heat-treating in Kartepe, Kocaeli since 1999. Our furnaces, our CNC, our lab." data-de="Seit 1999 fertigen wir Hammer-Ersatzteile und härten im Haus in Kartepe, Kocaeli." data-ru="С 1999 года производим запчасти для молотов и ведём термообработку в Kartepe, Kocaeli.">Kartepe, Kocaeli'de 1999'dan beri hidrolik kırıcı yedek parçaları ve ısıl işlem.</p>
+      <p data-tr="Hidrolik kırıcı yedek parçaları ve ısıl işlem — Kartepe, Kocaeli'de 1999'dan bu yana. Kendi fırını, kendi CNC tezgâhları, kendi kalite laboratuvarı." data-en="Hydraulic breaker spare parts and heat treatment in Kartepe, Kocaeli since 1999. Own furnaces, own CNC machines, own QC lab." data-de="Hydraulikhammer-Ersatzteile und Wärmebehandlung — seit 1999 in Kartepe, Kocaeli. Eigene Härterei, eigene CNC, eigenes Labor." data-ru="Запчасти для гидромолотов и термообработка — в Kartepe, Kocaeli с 1999. Свои печи, свои станки, своя лаборатория.">Hidrolik kırıcı yedek parçaları ve ısıl işlem — Kartepe, Kocaeli'de 1999'dan bu yana. Kendi fırını, kendi CNC tezgâhları, kendi kalite laboratuvarı.</p>
     </div>
     <div class="footer__col">
       <h4 data-tr="Ürünler" data-en="Products" data-de="Produkte" data-ru="Продукция">Ürünler</h4>
-      <a href="#products" data-tr="Keskiler" data-en="Chisels" data-de="Meißel" data-ru="Пики">Keskiler</a>
-      <a href="#products" data-tr="Pistonlar" data-en="Pistons" data-de="Kolben" data-ru="Поршни">Pistonlar</a>
-      <a href="#products" data-tr="Burçlar" data-en="Bushings" data-de="Buchsen" data-ru="Втулки">Burçlar</a>
-      <a href="#products" data-tr="Cıvatalar" data-en="Bolts" data-de="Bolzen" data-ru="Болты">Cıvatalar</a>
+      <a href="#products" data-tr="Keski" data-en="Chisel" data-de="Meißel" data-ru="Пика">Keski</a>
+      <a href="#products" data-tr="Piston" data-en="Piston" data-de="Kolben" data-ru="Поршень">Piston</a>
+      <a href="#products" data-tr="Burç" data-en="Bushing" data-de="Buchse" data-ru="Втулка">Burç</a>
+      <a href="#products" data-tr="Cıvata" data-en="Bolt" data-de="Bolzen" data-ru="Болт">Cıvata</a>
       <a href="catalog.html" data-tr="Tüm katalog" data-en="Full catalog" data-de="Gesamtkatalog" data-ru="Полный каталог">Tüm katalog</a>
     </div>
     <div class="footer__col">
@@ -922,7 +909,7 @@
   </div>
   <div class="footer__bot">
     <span>© 2026 Kervan Heat Treatment · Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti.</span>
-    <span data-tr="Türkiye'de üretildi · Dünyaya sevkiyat" data-en="Made in Turkey · Shipped worldwide" data-de="Hergestellt in der Türkei · Weltweit versandt" data-ru="Сделано в Турции · Отгрузка по всему миру">Türkiye'de üretildi · Dünyaya sevkiyat</span>
+    <span data-tr="Türkiye'de üretildi · 30+ ülkeye sevkiyat" data-en="Made in Turkey · Shipped to 30+ countries" data-de="Hergestellt in der Türkei · Versand in 30+ Länder" data-ru="Сделано в Турции · Поставки в 30+ стран">Türkiye'de üretildi · 30+ ülkeye sevkiyat</span>
   </div>
 </footer>
 
