@@ -18,7 +18,8 @@
   root.id = 'scene-root';
   root.style.cssText = `
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background: radial-gradient(ellipse at 70% 45%, #0A0B0F 0%, #050608 55%, #000 100%);
+    background: #0A0B0F;
+    transition: background 0.3s linear;
   `;
   document.body.insertBefore(root, document.body.firstChild);
 
@@ -150,10 +151,11 @@
 
   const parts = {};
 
-  // BILLET: a chunky cuboid with chamfered edges (stage 1-2)
+  // BILLET: round steel bar stock — this is how chisels actually start
+  // Cylindrical bar with slightly chamfered ends (forge-cut)
   {
-    const g = new THREE.BoxGeometry(1.2, 2.6, 1.2, 1, 1, 1);
-    // Slightly bevel by scaling corner vertices
+    const g = new THREE.CylinderGeometry(0.7, 0.7, 2.8, 48, 4);
+    // Slight surface roughness on the ends for forged look
     const m = heatMat();
     const billet = new THREE.Mesh(g, m);
     heroGroup.add(billet);
@@ -212,26 +214,41 @@
     parts.shank = shank;
   }
 
-  // Part 5: left retaining-pin flat
+  // Part 5: left retaining-pin flat (milled oval pocket where breaker retainer seats)
+  // Positioned on upper shank, sits slightly proud to read as a distinct milled feature
   {
-    const g = new THREE.BoxGeometry(0.07, 0.9, 0.55);
-    const m = heatMat(0x3a4250);
-    const flatL = new THREE.Mesh(g, m);
-    flatL.userData.rest = new THREE.Vector3(0.44, 0.15, 0);
-    flatL.userData.expl = new THREE.Vector3(4.0, 0.4, 0.5);
-    heroGroup.add(flatL);
-    parts.flatL = flatL;
+    const flatGroup = new THREE.Group();
+    // Main pocket (darker inset face)
+    const g = new THREE.BoxGeometry(0.12, 0.55, 0.32);
+    const m = heatMat(0x2a303a);
+    const flat = new THREE.Mesh(g, m);
+    flatGroup.add(flat);
+    // Top & bottom chamfer ridges — give pocket depth
+    const rG = new THREE.BoxGeometry(0.14, 0.04, 0.34);
+    const rM = heatMat(0x4a5260);
+    const rTop = new THREE.Mesh(rG, rM);   rTop.position.y = 0.29;  flatGroup.add(rTop);
+    const rBot = new THREE.Mesh(rG, rM);   rBot.position.y = -0.29; flatGroup.add(rBot);
+    flatGroup.userData.rest = new THREE.Vector3(0.42, 1.05, 0);
+    flatGroup.userData.expl = new THREE.Vector3(4.0, 1.6, 0.5);
+    heroGroup.add(flatGroup);
+    parts.flatL = flatGroup;
   }
 
-  // Part 6: right retaining-pin flat
+  // Part 6: right retaining-pin flat (mirror of left)
   {
-    const g = new THREE.BoxGeometry(0.07, 0.9, 0.55);
-    const m = heatMat(0x3a4250);
-    const flatR = new THREE.Mesh(g, m);
-    flatR.userData.rest = new THREE.Vector3(-0.44, 0.15, 0);
-    flatR.userData.expl = new THREE.Vector3(-4.0, 0.4, -0.5);
-    heroGroup.add(flatR);
-    parts.flatR = flatR;
+    const flatGroup = new THREE.Group();
+    const g = new THREE.BoxGeometry(0.12, 0.55, 0.32);
+    const m = heatMat(0x2a303a);
+    const flat = new THREE.Mesh(g, m);
+    flatGroup.add(flat);
+    const rG = new THREE.BoxGeometry(0.14, 0.04, 0.34);
+    const rM = heatMat(0x4a5260);
+    const rTop = new THREE.Mesh(rG, rM);   rTop.position.y = 0.29;  flatGroup.add(rTop);
+    const rBot = new THREE.Mesh(rG, rM);   rBot.position.y = -0.29; flatGroup.add(rBot);
+    flatGroup.userData.rest = new THREE.Vector3(-0.42, 1.05, 0);
+    flatGroup.userData.expl = new THREE.Vector3(-4.0, 1.6, -0.5);
+    heroGroup.add(flatGroup);
+    parts.flatR = flatGroup;
   }
 
   // Part 7: tapered neck
@@ -245,24 +262,34 @@
     parts.neck = neck;
   }
 
-  // Part 8: chisel tip (flat blade)
+  // Part 8: chisel tip — moil point style (conical sharp point)
+  // Upper cylinder blends into a conical taper ending in a sharp point
   {
-    const shape = new THREE.Shape();
-    shape.moveTo(-0.3, 0); shape.lineTo(0.3, 0);
-    shape.lineTo(0.06, -1.3); shape.lineTo(-0.06, -1.3);
-    shape.closePath();
-    const g = new THREE.ExtrudeGeometry(shape, {
-      depth: 0.18, bevelEnabled: true, bevelSize: 0.025, bevelThickness: 0.02, bevelSegments: 2
-    });
-    g.translate(0, 0, -0.09);
-    g.computeVertexNormals();
-    const m = heatMat(0x4a5260);
-    const tip = new THREE.Mesh(g, m);
-    tip.userData.rest = new THREE.Vector3(0, -1.6, 0);
-    tip.userData.expl = new THREE.Vector3(0, -4.5, 2.5);
-    tip.userData.rotExpl = new THREE.Euler(0.6, 0.4, 0.3);
-    heroGroup.add(tip);
-    parts.tip = tip;
+    const tipGroup = new THREE.Group();
+
+    // Upper cylindrical collar — blends with shank above
+    const collarG = new THREE.CylinderGeometry(0.42, 0.38, 0.35, 40);
+    const collar = new THREE.Mesh(collarG, heatMat(0x4a5260));
+    collar.position.y = 0.55;
+    tipGroup.add(collar);
+
+    // Main conical taper — this is the business end
+    const coneG = new THREE.CylinderGeometry(0.38, 0.04, 1.4, 40, 1);
+    const cone = new THREE.Mesh(coneG, heatMat(0x4a5260));
+    cone.position.y = -0.32;
+    tipGroup.add(cone);
+
+    // Very sharp tip cap
+    const pointG = new THREE.ConeGeometry(0.04, 0.15, 20);
+    const point = new THREE.Mesh(pointG, heatMat(0x2a2f38));
+    point.position.y = -1.1;
+    tipGroup.add(point);
+
+    tipGroup.userData.rest = new THREE.Vector3(0, -1.55, 0);
+    tipGroup.userData.expl = new THREE.Vector3(0, -4.5, 2.5);
+    tipGroup.userData.rotExpl = new THREE.Euler(0.6, 0.4, 0.3);
+    heroGroup.add(tipGroup);
+    parts.tip = tipGroup;
   }
 
   // Start: billet visible, chisel parts hidden (at rest position)
@@ -429,53 +456,95 @@
     // Clear all parts visibility first, then selectively show
     const showPart = (name, visible) => { if (parts[name]) parts[name].visible = visible; };
 
+    // Camera keyframes per stage — designed so the chisel is always visible
+    // and well-framed at each narrative beat.
+    // [camX, camY, camZ, lookAtX, lookAtY, lookAtZ]
+    const camKFs = [
+      { p: 0.00, v: [ 1.5,  0.3, 10, 0, 0, 0] },  // billet: 3/4 view from right
+      { p: 0.15, v: [ 2.0,  0.8,  9, 0, 0.3, 0] }, // heating: tighter, from above-right
+      { p: 0.35, v: [ 2.5,  0.0,  8, 0, 0, 0] },  // morphing: even closer
+      { p: 0.55, v: [ 0.0,  1.5,  7, 0, 0, 0] },  // post-forge: top-down hint
+      { p: 0.72, v: [ 3.5,  2.0, 11, 0, 0, 0] },  // explosion: pull way back, see spread
+      { p: 0.88, v: [ 2.0, -0.5,  9, 0,-0.5, 1] }, // assemble: down-right, follows reassembly
+      { p: 0.95, v: [ 1.0, -1.5,  7, 0,-2, 3] },  // strike: low, behind chisel
+      { p: 1.00, v: [ 0.5, -2.0,  6, 0,-3, 4] },  // impact: very close to impact point
+    ];
+
+    // Interpolate camera position
+    let ca = camKFs[0], cb = camKFs[1];
+    for (let i = 0; i < camKFs.length - 1; i++) {
+      if (p >= camKFs[i].p && p <= camKFs[i+1].p) { ca = camKFs[i]; cb = camKFs[i+1]; break; }
+      if (p > camKFs[camKFs.length-1].p) { ca = camKFs[camKFs.length-2]; cb = camKFs[camKFs.length-1]; }
+    }
+    const ck = cb.p === ca.p ? 0 : (p - ca.p) / (cb.p - ca.p);
+    const cke = ease(ck);
+    const baseCamX = lerp(ca.v[0], cb.v[0], cke);
+    const baseCamY = lerp(ca.v[1], cb.v[1], cke);
+    const baseCamZ = lerp(ca.v[2], cb.v[2], cke);
+    const lookX    = lerp(ca.v[3], cb.v[3], cke);
+    const lookY    = lerp(ca.v[4], cb.v[4], cke);
+    const lookZ    = lerp(ca.v[5], cb.v[5], cke);
+    // Subtle parallax wobble
+    const wobble = Math.sin(t * 0.25) * 0.08;
+    cam.userData.baseX = baseCamX + wobble;
+    cam.userData.baseY = baseCamY;
+    cam.userData.baseZ = baseCamZ;
+    cam.userData.lookX = lookX;
+    cam.userData.lookY = lookY;
+    cam.userData.lookZ = lookZ;
+
     if (p < 0.15) {
-      // STAGE 1: Raw billet, cold
+      // STAGE 1: Billet — already HOT and BIG (Kervan's forge never sleeps)
       const k = p / 0.15;
-      setHUD('Raw Steel · 42CrMo4', '+22°C');
+      setHUD('Forge · Heated Billet', `+${Math.round(1080 + Math.sin(t*2)*30)}°C`);
       for (const key in parts) showPart(key, key === 'billet');
-      setHeroHeat(0);
-      heroGroup.rotation.y = t * 0.2;
-      heroGroup.rotation.x = Math.sin(t * 0.3) * 0.06;
+      // Start hot — temp 0.85 (orange-yellow)
+      const tempK = 0.85 + Math.sin(t * 1.8) * 0.05;
+      setHeroHeat(tempK);
+      heroGroup.rotation.y = t * 0.18;
+      heroGroup.rotation.x = Math.sin(t * 0.3) * 0.08;
       heroGroup.position.set(0, 0, 0);
-      heroGroup.scale.set(1, 1, 1);
-      parts.billet.scale.set(1, 1, 1);
+      // BIG billet — 1.4x scale
+      const pulse = 1 + Math.sin(t * 2.2) * 0.015;
+      parts.billet.scale.set(1.4 * pulse, 1.4 * pulse, 1.4 * pulse);
     }
     else if (p < 0.35) {
-      // STAGE 2: Billet enters forge — heats up
+      // STAGE 2: Billet peaks then starts cooling as it shapes
       const k = (p - 0.15) / 0.20;
-      const tempK = smooth(k); // 0 → 1 over the stage
-      if (tempK < 0.35)      setHUD('Heating · Forge', `+${Math.round(200 + tempK * 1200)}°C`);
-      else if (tempK < 0.7)  setHUD('Austenitizing', `+${Math.round(200 + tempK * 1200)}°C`);
-      else                   setHUD('White Hot · 1180°C', `+${Math.round(200 + tempK * 1200)}°C`);
+      const kk = smooth(k);
+      // Peaks at k=0.3 (white-hot), then cools toward 0.6
+      const tempK = kk < 0.3 ? lerp(0.85, 1.0, kk / 0.3) : lerp(1.0, 0.7, (kk - 0.3) / 0.7);
+      const tempC = Math.round(1080 + tempK * 200);
+      if (kk < 0.3)      setHUD('Austenitizing · Peak', `+${tempC}°C`);
+      else if (kk < 0.7) setHUD('White Hot · Forging', `+${tempC}°C`);
+      else               setHUD('Shaping · Cooling', `+${tempC}°C`);
       for (const key in parts) showPart(key, key === 'billet');
       setHeroHeat(tempK);
-      heroGroup.rotation.y = t * 0.4;
+      heroGroup.rotation.y = t * 0.35;
       heroGroup.rotation.x = Math.sin(t * 0.5) * 0.1;
       heroGroup.position.set(0, 0, 0);
-      // Billet shimmers (slight scale pulse as it heats)
-      const pulse = 1 + Math.sin(t * 2.5) * 0.01 * tempK;
-      parts.billet.scale.set(pulse, pulse, pulse);
+      const pulse = 1 + Math.sin(t * 2.5) * 0.02 * tempK;
+      // Billet stays big, starts to compress slightly
+      const sc = lerp(1.4, 1.2, kk) * pulse;
+      parts.billet.scale.set(sc, sc, sc);
     }
     else if (p < 0.55) {
-      // STAGE 3: Billet MORPHS into chisel — hot steel forms
+      // STAGE 3: Morph billet → chisel, still warm
       const k = (p - 0.35) / 0.20;
       const kk = smooth(k);
-      const tempK = 1 - kk * 0.7; // cools from white-hot to warm-red
-      setHUD('Forging · Shaping', `+${Math.round(1180 - kk * 700)}°C`);
+      const tempK = lerp(0.7, 0.2, kk);
+      setHUD('Forging · Shaping', `+${Math.round(850 - kk * 700)}°C`);
 
-      // Billet shrinks/fades out, chisel parts appear
-      const billetScale = lerp(1, 0.05, kk);
+      const billetScale = lerp(1.2, 0.05, kk);
       parts.billet.scale.set(billetScale, billetScale, billetScale);
       parts.billet.visible = kk < 0.9;
 
-      // Show all chisel parts, assembled at rest pos, fade in
       const chiselParts = ['head','ringA','ringB','shank','flatL','flatR','neck','tip'];
       for (const name of chiselParts) {
         const pt = parts[name];
         pt.visible = kk > 0.15;
         pt.position.copy(pt.userData.rest);
-        pt.scale.setScalar(kk);
+        pt.scale.setScalar(kk * 1.1); // slightly larger than before
       }
 
       setHeroHeat(tempK);
@@ -484,19 +553,18 @@
       heroGroup.position.set(0, 0, 0);
     }
     else if (p < 0.72) {
-      // STAGE 4: Chisel cools to grey; then EXPLODES outward
+      // STAGE 4: Cool + EXPLODE outward
       const k = (p - 0.55) / 0.17;
       const kk = ease(k);
-      const tempK = Math.max(0, 0.3 - kk * 0.3);
-      setHUD(kk < 0.4 ? 'Quench · Temper' : 'Exploded View', kk < 0.4 ? `+${Math.round(350 - kk*700)}°C` : '42CrMo · HRC 48–52');
+      const tempK = Math.max(0, 0.2 - kk * 0.2);
+      setHUD(kk < 0.4 ? 'Quench · Temper' : 'Exploded View', kk < 0.4 ? `+${Math.round(200 - kk*400)}°C` : '42CrMo · HRC 48–52');
 
       parts.billet.visible = false;
       const chiselParts = ['head','ringA','ringB','shank','flatL','flatR','neck','tip'];
       for (const name of chiselParts) {
         const pt = parts[name];
         pt.visible = true;
-        pt.scale.setScalar(1);
-        // Interpolate from rest → exploded
+        pt.scale.setScalar(1.1);
         const rest = pt.userData.rest;
         const expl = pt.userData.expl;
         pt.position.set(
@@ -504,7 +572,6 @@
           lerp(rest.y, expl.y, kk),
           lerp(rest.z, expl.z, kk),
         );
-        // Gentle rotation of individual parts when exploded
         if (name === 'tip') pt.rotation.z = kk * 0.3 + Math.sin(t) * 0.05 * kk;
         else if (name === 'neck') pt.rotation.z = kk * 0.4;
         else if (name === 'flatL') pt.rotation.y = kk * 0.6;
@@ -518,10 +585,10 @@
       heroGroup.position.set(0, 0, 0);
     }
     else if (p < 0.90) {
-      // STAGE 5: Parts RUSH back to assemble
+      // STAGE 5: Parts RUSH back
       const k = (p - 0.72) / 0.18;
       const kk = ease(k);
-      const assembleK = kk; // 0 = exploded, 1 = assembled
+      const assembleK = kk;
       setHUD('Assembly · Final', 'Ready');
 
       parts.billet.visible = false;
@@ -529,16 +596,14 @@
       for (const name of chiselParts) {
         const pt = parts[name];
         pt.visible = true;
-        pt.scale.setScalar(1);
+        pt.scale.setScalar(1.1);
         const rest = pt.userData.rest;
         const expl = pt.userData.expl;
-        // Inverted interpolation: start at expl, end at rest
         pt.position.set(
           lerp(expl.x, rest.x, assembleK),
           lerp(expl.y, rest.y, assembleK),
           lerp(expl.z, rest.z, assembleK),
         );
-        // Reset rotations as they assemble
         if (name === 'tip')   pt.rotation.z = (1 - assembleK) * 0.3;
         if (name === 'neck')  pt.rotation.z = (1 - assembleK) * 0.4;
         if (name === 'flatL') pt.rotation.y = (1 - assembleK) * 0.6;
@@ -551,7 +616,7 @@
       heroGroup.position.set(0, assembleK * -0.3, assembleK * 1.5);
     }
     else {
-      // STAGE 6: IMPACT — assembled chisel strikes the rock
+      // STAGE 6: IMPACT
       const k = (p - 0.90) / 0.10;
       const kk = ease(k);
       setHUD('Strike · Impact', '~4.8 Hz');
@@ -561,10 +626,9 @@
       for (const name of chiselParts) {
         const pt = parts[name];
         pt.visible = true;
-        pt.scale.setScalar(1);
+        pt.scale.setScalar(1.1);
         pt.position.copy(pt.userData.rest);
       }
-      // Reset part-local rotations
       parts.tip.rotation.z = 0;
       parts.neck.rotation.z = 0;
       parts.flatL.rotation.y = 0;
@@ -573,8 +637,6 @@
       parts.ringB.rotation.y = 0;
 
       setHeroHeat(0);
-      // Thrust downward into the rock
-      const thrust = Math.sin(kk * Math.PI); // peak mid-impact
       heroGroup.rotation.y = t * 0.15;
       heroGroup.rotation.x = -0.5 + kk * 0.1;
       heroGroup.position.set(0, -0.3 - kk * 1.8, 1.5 + kk * 3.5);
@@ -594,6 +656,67 @@
 
     scrollProgress += (targetProgress - scrollProgress) * 0.085;
     const p = scrollProgress;
+
+    // ─── Dynamic background: white at top → black at bottom ────────
+    // Keep it bright early so the white hero section flows into the scene,
+    // then fade to black through the forge sequence.
+    // 0.00-0.12:  pure white (hero)
+    // 0.12-0.25:  white → warm orange (forge arrival)
+    // 0.25-0.55:  orange → deep ember red
+    // 0.55-1.00:  ember → black (cooling, strike)
+    let bgColor;
+    if (p < 0.12) {
+      bgColor = '#ffffff';
+    } else if (p < 0.25) {
+      const k = (p - 0.12) / 0.13;
+      // white → warm cream → amber
+      const r = Math.round(lerp(255, 255, k));
+      const g = Math.round(lerp(255, 200, k));
+      const b = Math.round(lerp(255, 140, k));
+      bgColor = `rgb(${r},${g},${b})`;
+    } else if (p < 0.55) {
+      const k = (p - 0.25) / 0.30;
+      // amber → deep ember
+      const r = Math.round(lerp(255, 90, k));
+      const g = Math.round(lerp(200, 30, k));
+      const b = Math.round(lerp(140, 20, k));
+      bgColor = `rgb(${r},${g},${b})`;
+    } else {
+      const k = (p - 0.55) / 0.45;
+      // ember → near black
+      const r = Math.round(lerp(90, 10, k));
+      const g = Math.round(lerp(30, 11, k));
+      const b = Math.round(lerp(20, 15, k));
+      bgColor = `rgb(${r},${g},${b})`;
+    }
+    root.style.background = bgColor;
+
+    // Toggle light theme for nav/scroll-hint when background is bright
+    const shouldBeLight = p < 0.18;
+    if (shouldBeLight && !document.body.classList.contains('scene-light')) {
+      document.body.classList.add('scene-light');
+    } else if (!shouldBeLight && document.body.classList.contains('scene-light')) {
+      document.body.classList.remove('scene-light');
+    }
+
+    // Adjust fog color and hemispheric light to match background — keeps
+    // the chisel grounded in the environment rather than floating awkwardly.
+    if (p < 0.12) {
+      scene.fog.color = new THREE.Color(0xffffff);
+      scene.fog.density = 0.015;
+      hemi.intensity = 1.2;
+      hemi.color.setHex(0xffffff);
+    } else if (p < 0.55) {
+      scene.fog.color = new THREE.Color(0x2a1408);
+      scene.fog.density = 0.022;
+      hemi.intensity = 0.5;
+      hemi.color.setHex(0xff9a4a);
+    } else {
+      scene.fog.color = new THREE.Color(0x000000);
+      scene.fog.density = 0.028;
+      hemi.intensity = 0.3;
+      hemi.color.setHex(0xa0b8d0);
+    }
 
     // Starfield
     stars.rotation.y = t * 0.006;
@@ -657,19 +780,20 @@
     // Screen shake
     if (shakeAmount > 0.001) {
       shakeAmount *= 0.88;
-      cam.position.x = (Math.random() - 0.5) * shakeAmount;
-      cam.position.y = (Math.random() - 0.5) * shakeAmount * 0.6;
+      cam.position.x = (cam.userData.baseX || 0) + (Math.random() - 0.5) * shakeAmount;
+      cam.position.y = (cam.userData.baseY || 0) + (Math.random() - 0.5) * shakeAmount * 0.6;
+      cam.position.z = cam.userData.baseZ || 10;
     } else {
-      cam.position.x = 0;
-      cam.position.y = 0;
+      cam.position.x = cam.userData.baseX || 0;
+      cam.position.y = cam.userData.baseY || 0;
+      cam.position.z = cam.userData.baseZ || 10;
     }
 
-    // Camera drift — subtle push in as scroll progresses, with slight orbit
-    const camBaseZ = 11 - 2 * Math.sin(p * Math.PI); // dip in the middle
-    cam.position.z = camBaseZ;
-    // Offset keeps chisel on right side of screen when content is left
-    const camTargetX = isMobile ? 0 : 1.0;
-    cam.lookAt(camTargetX, 0, 0);
+    cam.lookAt(
+      cam.userData.lookX || 0,
+      cam.userData.lookY || 0,
+      cam.userData.lookZ || 0,
+    );
 
     // Pulsing rim light (softer during forge, stronger at impact)
     rimLight.intensity = 1.8 + Math.sin(t * 1.5) * 0.3 + (p > 0.9 ? 2 : 0);

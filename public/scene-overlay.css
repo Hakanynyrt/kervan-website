@@ -1,13 +1,13 @@
 /* scene-overlay.css — makes content sections work over the fixed 3D canvas */
 
-/* Hero: transparent, so 3D chisel shows through */
+/* Hero: transparent, so 3D chisel shows through white bg */
 .hero {
   background: transparent !important;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: none !important;
   min-height: 92vh !important;
   padding: 84px 0 40px !important;
 }
-.hero__grid-bg { opacity: 0.25; }
+.hero__grid-bg { opacity: 0 !important; }
 .hero__glow    { opacity: 0; }
 
 /* Hide the SVG chisel drawing — 3D one replaces it */
@@ -18,9 +18,74 @@
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) !important;
   align-items: center;
 }
-.hero__copy { max-width: 680px; }
+.hero__copy {
+  max-width: 680px;
+  /* Dark text on white background — invert the hero copy */
+  color: #0A0B0F;
+}
+.hero__copy h1,
+.hero__copy h2,
+.hero__copy p,
+.hero__copy span:not(.chip) {
+  color: #0A0B0F !important;
+}
+.hero__copy .eyebrow,
+.hero__copy .kicker,
+.hero__copy [class*="eyebrow"] {
+  color: #E8791A !important;
+}
+.hero__copy .btn-primary,
+.hero__copy a[class*="primary"] {
+  background: #0A0B0F !important;
+  color: #fff !important;
+  border-color: #0A0B0F !important;
+}
+.hero__copy .btn-secondary,
+.hero__copy a[class*="secondary"],
+.hero__copy a.btn:not([class*="primary"]) {
+  background: transparent !important;
+  color: #0A0B0F !important;
+  border-color: #0A0B0F !important;
+}
+.hero__copy .chip,
+.hero__copy [class*="chip"],
+.hero__copy [class*="badge"] {
+  background: rgba(10,11,15,0.06) !important;
+  color: #0A0B0F !important;
+  border-color: rgba(10,11,15,0.18) !important;
+}
 
-/* Sections: darker semi-transparent backing for legibility */
+/* Nav becomes transparent with dark text while over white bg */
+body.scene-light .nav {
+  background: rgba(255,255,255,0.72) !important;
+  backdrop-filter: blur(12px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(140%) !important;
+}
+body.scene-light .nav,
+body.scene-light .nav a,
+body.scene-light .nav button {
+  color: #0A0B0F !important;
+}
+body.scene-light .nav a[class*="primary"] {
+  background: #0A0B0F !important;
+  color: #fff !important;
+}
+
+/* Scroll hint dark on white */
+body.scene-light .scroll-hint {
+  color: rgba(10,11,15,.65) !important;
+}
+body.scene-light .scroll-hint::after {
+  background: linear-gradient(to bottom, rgba(10,11,15,.65), transparent) !important;
+}
+
+/* Stage HUD dark on white */
+body.scene-light #scene-hud {
+  color: rgba(10,11,15,0.55) !important;
+}
+
+/* Sections: transparent — 3D shows through everywhere.
+   Only text blocks get local dark backdrops via inner containers. */
 .parts,
 .furnace,
 .process-track,
@@ -29,9 +94,43 @@
 .orbit-sec,
 .ticker {
   position: relative;
-  background: rgba(8, 9, 11, 0.82);
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Add subtle dark vignette to each section so text remains legible,
+   but leave the 3D chisel visible across the whole viewport. */
+.parts::before,
+.furnace::before,
+.process-track::before,
+.meters::before,
+.rfq-wrap::before,
+.orbit-sec::before,
+.ticker::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(8,9,11,0.82) 0%,
+    rgba(8,9,11,0.55) 45%,
+    rgba(8,9,11,0.0)  70%,
+    rgba(8,9,11,0.0)  100%
+  );
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Content inside sections goes above the vignette */
+.parts > *,
+.furnace > *,
+.process-track > *,
+.meters > *,
+.rfq-wrap > *,
+.orbit-sec > *,
+.ticker > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Tighten section padding — was too airy */
@@ -73,10 +172,9 @@ footer, .footer { background: #08090B; position: relative; z-index: 2; }
 
 /* Mobile: keep content opaque, 3D simplified */
 @media (max-width: 720px) {
-  .parts, .furnace, .process-track, .meters, .rfq-wrap, .orbit-sec, .ticker {
-    background: rgba(8, 9, 11, 0.94);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+  .parts::before, .furnace::before, .process-track::before,
+  .meters::before, .rfq-wrap::before, .orbit-sec::before, .ticker::before {
+    background: rgba(8, 9, 11, 0.92) !important;
   }
   .hero {
     min-height: 88vh !important;
