@@ -79,10 +79,9 @@
 
   // ─── Chisel ────────────────────────────────────────────────────
   const pivot = new THREE.Group();
+  // Start centered so it's guaranteed visible; layout() repositions after load.
+  pivot.position.set(0, 0, 0);
   scene.add(pivot);
-
-  // Position pivot: on desktop to the right; on mobile centered.
-  // Actual positioning happens in layout() since it depends on aspect.
 
   let chisel = null;
   const loader = new GLTFLoader();
@@ -95,7 +94,7 @@
       const box = new THREE.Box3().setFromObject(model);
       const size = new THREE.Vector3(); box.getSize(size);
       const maxDim = Math.max(size.x, size.y, size.z);
-      const targetHeight = 5.2;
+      const targetHeight = 4.0;
       model.scale.setScalar(targetHeight / maxDim);
 
       // Center on origin
@@ -118,11 +117,14 @@
 
       chisel = model;
       pivot.add(chisel);
+      console.log('[scene] Chisel loaded, size:', size, 'scale:', targetHeight / maxDim);
       layout();
     },
-    undefined,
+    (xhr) => {
+      console.log('[scene] Loading GLB...', Math.round((xhr.loaded / xhr.total) * 100) + '%');
+    },
     (err) => {
-      console.warn('[scene] GLB load failed', err);
+      console.error('[scene] GLB load failed', err);
     }
   );
 
@@ -137,20 +139,17 @@
     if (!chisel) return;
 
     if (isMobileNow()) {
-      // Mobile: centered, below the hero copy (hero copy is on top, model below)
-      // We want the chisel to sit in the lower 60% of viewport
-      pivot.position.set(0, -1.2, 0);
-      pivot.scale.setScalar(0.8);
+      // Mobile: centered, below the hero copy
+      pivot.position.set(0, -1.0, 0);
+      pivot.scale.setScalar(0.75);
     } else {
-      // Desktop: right side of viewport
-      // Convert viewport-right to world coords at chisel depth (z=0)
-      // At z=0, height at cam z=10 with fov 40deg = 2 * 10 * tan(20deg) ≈ 7.28
-      // Width = height * aspect
-      // We want pivot ~ 28% right of viewport centre
+      // Desktop: right side of viewport, around 25% right of centre
       const fovY = cam.fov * Math.PI / 180;
       const viewH = 2 * cam.position.z * Math.tan(fovY / 2);
       const viewW = viewH * aspect;
-      pivot.position.set(viewW * 0.22, -0.2, 0);
+      // Use a smaller x-offset on narrow desktops so it doesn't clip
+      const xOffset = Math.min(viewW * 0.20, 3.2);
+      pivot.position.set(xOffset, -0.2, 0);
       pivot.scale.setScalar(1.0);
     }
   }
