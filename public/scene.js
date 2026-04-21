@@ -112,8 +112,9 @@
   for (let i = 0; i < DEBRIS_COUNT; i++) debrisLife[i] = 0;
   debrisGeo.setAttribute('position', new THREE.BufferAttribute(debrisPos, 3));
   const debrisMat = new THREE.PointsMaterial({
-    color: 0x6a6660, size: 0.11, transparent: true, opacity: 0.7,
+    color: 0xc8a878, size: 0.28, transparent: true, opacity: 0.95,
     depthWrite: false,
+    blending: THREE.AdditiveBlending,
   });
   const debris = new THREE.Points(debrisGeo, debrisMat);
   scene.add(debris);
@@ -127,8 +128,8 @@
   for (let i = 0; i < DUST_COUNT; i++) dustLife[i] = 0;
   dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
   const dustMat = new THREE.PointsMaterial({
-    color: 0x8a857e, size: 0.42, transparent: true, opacity: 0.35,
-    depthWrite: false, blending: THREE.NormalBlending,
+    color: 0xe8d4a8, size: 0.85, transparent: true, opacity: 0.55,
+    depthWrite: false, blending: THREE.AdditiveBlending,
   });
   const dust = new THREE.Points(dustGeo, dustMat);
   scene.add(dust);

@@ -60,7 +60,7 @@
       <div class="kv-intro__meters">
         <span class="kv-intro__meter"><b data-count="40">00</b><i>+</i> MARKA</span>
         <span class="kv-intro__meter"><b data-count="26">00</b> YIL</span>
-        <span class="kv-intro__meter"><b class="kv-intro__meter__text">3.1</b> EN 10204</span>
+        <span class="kv-intro__meter"><b data-count="500">000</b> t/AY</span>
       </div>
     </div>
 

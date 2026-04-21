@@ -222,50 +222,6 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://kervanheat.com/cases.html"/>
   </url>
   <url>
-    <loc>https://kervanheat.com/certs.html?lang=tr</loc>
-    <lastmod>2026-04-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://kervanheat.com/certs.html?lang=tr"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://kervanheat.com/certs.html?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://kervanheat.com/certs.html?lang=de"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://kervanheat.com/certs.html?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://kervanheat.com/certs.html"/>
-  </url>
-  <url>
-    <loc>https://kervanheat.com/certs.html?lang=en</loc>
-    <lastmod>2026-04-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://kervanheat.com/certs.html?lang=tr"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://kervanheat.com/certs.html?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://kervanheat.com/certs.html?lang=de"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://kervanheat.com/certs.html?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://kervanheat.com/certs.html"/>
-  </url>
-  <url>
-    <loc>https://kervanheat.com/certs.html?lang=de</loc>
-    <lastmod>2026-04-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://kervanheat.com/certs.html?lang=tr"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://kervanheat.com/certs.html?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://kervanheat.com/certs.html?lang=de"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://kervanheat.com/certs.html?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://kervanheat.com/certs.html"/>
-  </url>
-  <url>
-    <loc>https://kervanheat.com/certs.html?lang=ru</loc>
-    <lastmod>2026-04-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://kervanheat.com/certs.html?lang=tr"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://kervanheat.com/certs.html?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://kervanheat.com/certs.html?lang=de"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://kervanheat.com/certs.html?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://kervanheat.com/certs.html"/>
-  </url>
-  <url>
     <loc>https://kervanheat.com/gallery.html?lang=tr</loc>
     <lastmod>2026-04-20</lastmod>
     <changefreq>monthly</changefreq>
@@ -423,12 +379,6 @@
   </url>
   <url>
     <loc>https://kervanheat.com/cases.html</loc>
-    <lastmod>2026-04-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://kervanheat.com/certs.html</loc>
     <lastmod>2026-04-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
