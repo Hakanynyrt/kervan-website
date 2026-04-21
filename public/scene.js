@@ -64,19 +64,24 @@
   scene.add(glow);
 
   // ─── Lighting ──────────────────────────────────────────────────
-  scene.add(new THREE.HemisphereLight(0x8a94a8, 0x0a0a0f, 0.35));
+  scene.add(new THREE.HemisphereLight(0xb8c2d4, 0x14151a, 0.55));
 
-  const keyLight = new THREE.DirectionalLight(0xfff1dc, 2.4);
+  const keyLight = new THREE.DirectionalLight(0xfff3dc, 3.4);
   keyLight.position.set(5, 6, 4);
   scene.add(keyLight);
 
-  const rimLight = new THREE.DirectionalLight(0xd94a1a, 1.6);  // hot-iron accent
+  const rimLight = new THREE.DirectionalLight(0xff6a28, 2.6);  // hot-iron rim
   rimLight.position.set(-6, -2, -3);
   scene.add(rimLight);
 
-  const fillLight = new THREE.PointLight(0x4a6aff, 0.6, 25);
+  const fillLight = new THREE.PointLight(0x6a8aff, 1.2, 25);
   fillLight.position.set(-4, 3, 6);
   scene.add(fillLight);
+
+  // Extra top rim for vertical chisel silhouette
+  const topRim = new THREE.DirectionalLight(0xffffff, 1.2);
+  topRim.position.set(2, 8, 2);
+  scene.add(topRim);
 
   // ─── Chisel ────────────────────────────────────────────────────
   const pivot = new THREE.Group();
@@ -106,13 +111,19 @@
       const center = new THREE.Vector3(); box.getCenter(center);
       model.position.sub(center);
 
-      // Re-skin with a clean industrial steel material
+      // Rotate to vertical: tip down, shank up.
+      // Model's longest axis is X (horizontal as it comes in) — rotate 90° so it stands vertically.
+      // Adjust sign if tip ends up pointing up instead of down.
+      model.rotation.z = -Math.PI / 2;
+
+      // Re-skin with a cleaner, brighter industrial steel material
       model.traverse((o) => {
         if (o.isMesh) {
           o.material = new THREE.MeshStandardMaterial({
-            color: 0x5c636e,
-            metalness: 0.88,
-            roughness: 0.34,
+            color: 0x8a929e,       // lighter base
+            metalness: 0.78,
+            roughness: 0.28,
+            envMapIntensity: 1.2,
           });
           o.castShadow = false;
           o.receiveShadow = false;
@@ -175,12 +186,12 @@
     glowMat.uniforms.uTime.value = t;
 
     if (chisel) {
-      // Idle rotation — slow and dignified
+      // Idle rotation — slow Y-axis spin keeps the vertical silhouette moving
       if (!reduce) {
-        chisel.rotation.y = t * 0.18;
-        chisel.rotation.x = Math.sin(t * 0.4) * 0.06;
+        pivot.rotation.y = t * 0.22;
+        pivot.rotation.x = Math.sin(t * 0.3) * 0.04;
       } else {
-        chisel.rotation.y = 0.3;
+        pivot.rotation.y = 0.3;
       }
     }
 
