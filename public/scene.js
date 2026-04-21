@@ -88,8 +88,8 @@
   flashLight.position.set(0, -3, 2);
   scene.add(flashLight);
 
-  // ─── Spark particles (created at impact) ───────────────────────
-  const SPARK_COUNT = 60;
+  // ─── Spark particles (bright, short-lived) ─────────────────────
+  const SPARK_COUNT = 120;
   const sparkGeo = new THREE.BufferGeometry();
   const sparkPos = new Float32Array(SPARK_COUNT * 3);
   const sparkVel = new Float32Array(SPARK_COUNT * 3);
@@ -97,26 +97,93 @@
   for (let i = 0; i < SPARK_COUNT; i++) sparkLife[i] = 0;
   sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
   const sparkMat = new THREE.PointsMaterial({
-    color: 0xffb060, size: 0.08, transparent: true, opacity: 0.9,
+    color: 0xffb060, size: 0.09, transparent: true, opacity: 0.95,
     blending: THREE.AdditiveBlending, depthWrite: false,
   });
   const sparks = new THREE.Points(sparkGeo, sparkMat);
   scene.add(sparks);
 
+  // ─── Debris particles (gray/dark, gravity-affected, longer life) ─
+  const DEBRIS_COUNT = 80;
+  const debrisGeo = new THREE.BufferGeometry();
+  const debrisPos = new Float32Array(DEBRIS_COUNT * 3);
+  const debrisVel = new Float32Array(DEBRIS_COUNT * 3);
+  const debrisLife = new Float32Array(DEBRIS_COUNT);
+  for (let i = 0; i < DEBRIS_COUNT; i++) debrisLife[i] = 0;
+  debrisGeo.setAttribute('position', new THREE.BufferAttribute(debrisPos, 3));
+  const debrisMat = new THREE.PointsMaterial({
+    color: 0x6a6660, size: 0.11, transparent: true, opacity: 0.7,
+    depthWrite: false,
+  });
+  const debris = new THREE.Points(debrisGeo, debrisMat);
+  scene.add(debris);
+
+  // ─── Dust cloud (large, fading) ────────────────────────────────
+  const DUST_COUNT = 40;
+  const dustGeo = new THREE.BufferGeometry();
+  const dustPos = new Float32Array(DUST_COUNT * 3);
+  const dustVel = new Float32Array(DUST_COUNT * 3);
+  const dustLife = new Float32Array(DUST_COUNT);
+  for (let i = 0; i < DUST_COUNT; i++) dustLife[i] = 0;
+  dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+  const dustMat = new THREE.PointsMaterial({
+    color: 0x8a857e, size: 0.42, transparent: true, opacity: 0.35,
+    depthWrite: false, blending: THREE.NormalBlending,
+  });
+  const dust = new THREE.Points(dustGeo, dustMat);
+  scene.add(dust);
+
   function emitSparks(originX, originY) {
-    for (let i = 0; i < SPARK_COUNT; i++) {
+    // Emit ~35 sparks per strike (overwriting oldest)
+    let emitted = 0;
+    for (let i = 0; i < SPARK_COUNT && emitted < 35; i++) {
+      if (sparkLife[i] > 0.1) continue;
       const ang = Math.random() * Math.PI * 2;
-      const spd = 2 + Math.random() * 4;
-      const up = Math.random() * 0.3; // sparks mostly fly sideways & down
-      sparkPos[i * 3 + 0] = originX;
+      const spd = 2.5 + Math.random() * 5;
+      sparkPos[i * 3 + 0] = originX + (Math.random() - 0.5) * 0.3;
       sparkPos[i * 3 + 1] = originY;
-      sparkPos[i * 3 + 2] = 0;
+      sparkPos[i * 3 + 2] = (Math.random() - 0.5) * 0.3;
       sparkVel[i * 3 + 0] = Math.cos(ang) * spd;
-      sparkVel[i * 3 + 1] = Math.sin(ang) * spd * 0.5 - up;
-      sparkVel[i * 3 + 2] = (Math.random() - 0.5) * 2;
-      sparkLife[i] = 1.0;
+      sparkVel[i * 3 + 1] = Math.abs(Math.sin(ang)) * spd * 0.4 + Math.random() * 1.2;
+      sparkVel[i * 3 + 2] = (Math.random() - 0.5) * 2.5;
+      sparkLife[i] = 0.8 + Math.random() * 0.4;
+      emitted++;
     }
-    sparkGeo.attributes.position.needsUpdate = true;
+  }
+
+  function emitDebris(originX, originY) {
+    // Chunks of rock — tumble out with gravity
+    let emitted = 0;
+    for (let i = 0; i < DEBRIS_COUNT && emitted < 20; i++) {
+      if (debrisLife[i] > 0.1) continue;
+      const ang = Math.random() * Math.PI * 2;
+      const spd = 1.5 + Math.random() * 3;
+      debrisPos[i * 3 + 0] = originX + (Math.random() - 0.5) * 0.4;
+      debrisPos[i * 3 + 1] = originY - 0.2;
+      debrisPos[i * 3 + 2] = (Math.random() - 0.5) * 0.4;
+      debrisVel[i * 3 + 0] = Math.cos(ang) * spd;
+      debrisVel[i * 3 + 1] = Math.random() * 2.5 + 1;  // mostly upward initial
+      debrisVel[i * 3 + 2] = (Math.random() - 0.5) * 2;
+      debrisLife[i] = 1.5 + Math.random() * 0.8;
+      emitted++;
+    }
+  }
+
+  function emitDust(originX, originY) {
+    let emitted = 0;
+    for (let i = 0; i < DUST_COUNT && emitted < 10; i++) {
+      if (dustLife[i] > 0.1) continue;
+      const ang = Math.random() * Math.PI * 2;
+      const spd = 0.6 + Math.random() * 1.2;
+      dustPos[i * 3 + 0] = originX + (Math.random() - 0.5) * 0.6;
+      dustPos[i * 3 + 1] = originY;
+      dustPos[i * 3 + 2] = (Math.random() - 0.5) * 0.6;
+      dustVel[i * 3 + 0] = Math.cos(ang) * spd;
+      dustVel[i * 3 + 1] = Math.random() * 0.8 + 0.2;
+      dustVel[i * 3 + 2] = (Math.random() - 0.5) * 1;
+      dustLife[i] = 2.0 + Math.random();
+      emitted++;
+    }
   }
 
   // ─── Chisel ────────────────────────────────────────────────────
@@ -216,60 +283,70 @@
   // ─── Animation loop ────────────────────────────────────────────
   const clock = new THREE.Clock();
 
-  // Impact cycle: 4s total. 3.6s idle, 0.4s strike.
-  const IMPACT_CYCLE = 4.0;
-  const STRIKE_DUR = 0.4;
-  let nextImpactFlash = 0;
+  // Burst pattern: 6s total cycle.
+  // 0.0–2.0s: burst of 5 rapid strikes (every 0.4s)
+  // 2.0–6.0s: quiet (no strikes, chisel idle)
+  const BURST_CYCLE = 6.0;
+  const BURST_WINDOW = 2.0;    // time span containing 5 strikes
+  const STRIKE_COUNT = 5;
+  const STRIKE_INTERVAL = BURST_WINDOW / STRIKE_COUNT;  // 0.4s
+  const STRIKE_DUR = 0.34;     // each individual strike duration
+  let lastStrikeIndex = -1;    // tracks which strike in current cycle has already emitted sparks
+  let lastCycle = -1;
 
   function tick() {
     const t = clock.getElapsedTime();
-    const dt = clock.getDelta ? 0 : 0; // not used; we use absolute time
     glowMat.uniforms.uTime.value = t;
 
-    // ── Impact cycle ─────────────────────────────────────────────
-    // Phase within cycle: 0..1
-    const cyclePos = (t % IMPACT_CYCLE) / IMPACT_CYCLE;
-    const strikeStart = (IMPACT_CYCLE - STRIKE_DUR) / IMPACT_CYCLE; // ~0.9
+    // ── Burst timing ─────────────────────────────────────────────
+    const cycleTime = t % BURST_CYCLE;
+    const cycleIdx = Math.floor(t / BURST_CYCLE);
+    if (cycleIdx !== lastCycle) { lastCycle = cycleIdx; lastStrikeIndex = -1; }
+
     let impactY = 0;
     let impactIntensity = 0;
     let shake = 0;
 
-    if (!reduce && cyclePos > strikeStart) {
-      // Normalized strike progress 0..1
-      const sp = (cyclePos - strikeStart) / (1 - strikeStart);
-      // Anticipation wind-up (0..0.4): pull up slightly
-      // Strike (0.4..0.55): slam down fast
-      // Recoil (0.55..1.0): bounce back and settle
-      if (sp < 0.4) {
-        const k = sp / 0.4;
-        impactY = easeOut(k) * 0.35; // wind-up upward
-      } else if (sp < 0.55) {
-        const k = (sp - 0.4) / 0.15;
-        impactY = 0.35 - easeIn(k) * 1.1; // slam down to -0.75
-      } else {
-        const k = (sp - 0.55) / 0.45;
-        // Damped bounce back to 0
-        impactY = -0.75 * Math.exp(-k * 6) * Math.cos(k * 14);
-      }
+    if (!reduce && cycleTime < BURST_WINDOW) {
+      // Which strike are we in? 0..4
+      const strikeIdx = Math.floor(cycleTime / STRIKE_INTERVAL);
+      const strikeT = cycleTime - strikeIdx * STRIKE_INTERVAL;
+      const sp = strikeT / STRIKE_DUR;  // 0..1 within this strike, then idle
 
-      // Intensity peaks right at strike moment
-      if (sp >= 0.5 && sp < 0.75) {
-        const k = (sp - 0.5) / 0.25;
-        impactIntensity = 1 - k;
-      }
+      if (sp <= 1) {
+        // Anticipation (0..0.25): up
+        // Slam (0.25..0.45): down fast
+        // Recoil (0.45..1.0): bounce back
+        if (sp < 0.25) {
+          const k = sp / 0.25;
+          impactY = easeOut(k) * 0.30;
+        } else if (sp < 0.45) {
+          const k = (sp - 0.25) / 0.20;
+          impactY = 0.30 - easeIn(k) * 1.05;
+        } else {
+          const k = (sp - 0.45) / 0.55;
+          impactY = -0.75 * Math.exp(-k * 7) * Math.cos(k * 16);
+        }
 
-      // Camera shake after strike
-      if (sp >= 0.55 && sp < 0.8) {
-        const k = (sp - 0.55) / 0.25;
-        shake = (1 - k) * 0.08;
-      }
+        if (sp >= 0.42 && sp < 0.70) {
+          const k = (sp - 0.42) / 0.28;
+          impactIntensity = 1 - k;
+        }
 
-      // Emit sparks exactly once at strike moment
-      if (sp >= 0.52 && nextImpactFlash < Math.floor(t / IMPACT_CYCLE) + 1) {
-        nextImpactFlash = Math.floor(t / IMPACT_CYCLE) + 1;
-        // Origin in world space: bottom of chisel relative to outerPivot
-        const tipWorldY = outerPivot.position.y - 2.0 * outerPivot.scale.y;
-        emitSparks(outerPivot.position.x, tipWorldY);
+        if (sp >= 0.45 && sp < 0.80) {
+          const k = (sp - 0.45) / 0.35;
+          shake = (1 - k) * 0.10;
+        }
+
+        // Emit particles exactly once per strike at slam moment
+        if (sp >= 0.43 && strikeIdx > lastStrikeIndex) {
+          lastStrikeIndex = strikeIdx;
+          const tipWorldY = outerPivot.position.y - 2.0 * outerPivot.scale.y;
+          const ox = outerPivot.position.x;
+          emitSparks(ox, tipWorldY);
+          emitDebris(ox, tipWorldY);
+          emitDust(ox, tipWorldY);
+        }
       }
     }
 
@@ -284,38 +361,64 @@
     // ── Rotation: outer orbit + self-axis spin ──────────────────
     if (chisel) {
       if (!reduce) {
-        // Slow orbit around global Y (swings the chisel around)
-        outerPivot.rotation.y = t * 0.18;
+        outerPivot.rotation.y = t * 0.08;
         outerPivot.rotation.x = Math.sin(t * 0.3) * 0.04;
-
-        // Self-axis spin: chisel rotates on its own long axis.
-        // Because model is rotated -90° on Z (vertical), its local long axis is now world Y.
-        // But the model itself is a child of spinPivot — we spin spinPivot on its local Y,
-        // which — after the model's Z rotation — corresponds to rotating around the chisel's shaft axis.
-        // To spin around the chisel's vertical axis we rotate spinPivot on world Y.
-        // Use a slightly different rate so the two rotations don't sync.
-        spinPivot.rotation.y = t * 0.9;
+        spinPivot.rotation.y = t * 0.35;
       } else {
         outerPivot.rotation.y = 0.3;
       }
     }
 
-    // ── Spark update ─────────────────────────────────────────────
+    // ── Particle updates ─────────────────────────────────────────
+    const DT = 0.016;
+
+    // Sparks: quick, burn out fast
     for (let i = 0; i < SPARK_COUNT; i++) {
       if (sparkLife[i] > 0) {
-        sparkPos[i * 3 + 0] += sparkVel[i * 3 + 0] * 0.016;
-        sparkPos[i * 3 + 1] += sparkVel[i * 3 + 1] * 0.016;
-        sparkPos[i * 3 + 2] += sparkVel[i * 3 + 2] * 0.016;
-        sparkVel[i * 3 + 1] -= 0.15; // gravity
-        sparkVel[i * 3 + 0] *= 0.98;
-        sparkVel[i * 3 + 2] *= 0.98;
-        sparkLife[i] -= 0.016 * 1.2;
+        sparkPos[i * 3 + 0] += sparkVel[i * 3 + 0] * DT;
+        sparkPos[i * 3 + 1] += sparkVel[i * 3 + 1] * DT;
+        sparkPos[i * 3 + 2] += sparkVel[i * 3 + 2] * DT;
+        sparkVel[i * 3 + 1] -= 0.18;  // gravity
+        sparkVel[i * 3 + 0] *= 0.97;
+        sparkVel[i * 3 + 2] *= 0.97;
+        sparkLife[i] -= DT * 1.4;
       } else {
-        sparkPos[i * 3 + 1] = -1000; // hide
+        sparkPos[i * 3 + 1] = -1000;
       }
     }
     sparkGeo.attributes.position.needsUpdate = true;
-    sparkMat.opacity = 0.9;
+
+    // Debris: heavier, longer tumble, strong gravity
+    for (let i = 0; i < DEBRIS_COUNT; i++) {
+      if (debrisLife[i] > 0) {
+        debrisPos[i * 3 + 0] += debrisVel[i * 3 + 0] * DT;
+        debrisPos[i * 3 + 1] += debrisVel[i * 3 + 1] * DT;
+        debrisPos[i * 3 + 2] += debrisVel[i * 3 + 2] * DT;
+        debrisVel[i * 3 + 1] -= 0.22;  // gravity
+        debrisVel[i * 3 + 0] *= 0.985;
+        debrisVel[i * 3 + 2] *= 0.985;
+        debrisLife[i] -= DT * 0.6;
+      } else {
+        debrisPos[i * 3 + 1] = -1000;
+      }
+    }
+    debrisGeo.attributes.position.needsUpdate = true;
+
+    // Dust: drifts up, slow, fades
+    for (let i = 0; i < DUST_COUNT; i++) {
+      if (dustLife[i] > 0) {
+        dustPos[i * 3 + 0] += dustVel[i * 3 + 0] * DT;
+        dustPos[i * 3 + 1] += dustVel[i * 3 + 1] * DT;
+        dustPos[i * 3 + 2] += dustVel[i * 3 + 2] * DT;
+        dustVel[i * 3 + 1] += 0.04;   // slight buoyancy
+        dustVel[i * 3 + 0] *= 0.99;
+        dustVel[i * 3 + 2] *= 0.99;
+        dustLife[i] -= DT * 0.5;
+      } else {
+        dustPos[i * 3 + 1] = -1000;
+      }
+    }
+    dustGeo.attributes.position.needsUpdate = true;
 
     // ── Subtle scroll parallax (no fade — sticky) ───────────────
     const parallax = Math.min(scrollY * 0.0008, 0.6);
