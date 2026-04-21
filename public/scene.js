@@ -9,6 +9,7 @@
 
 (async function() {
   const THREE = await import('three');
+  const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
 
   const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const isMobile = window.matchMedia('(max-width: 720px)').matches;
@@ -134,6 +135,63 @@
 
   const heroGroup = new THREE.Group();
   scene.add(heroGroup);
+
+  // ─── Real GLB chisel — loaded asynchronously ──────────────────────
+  // This replaces the proxy parts for billet/morph/assemble/strike stages.
+  // During exploded view (55-75%), we hide the GLB and show the proxy parts instead.
+  let realChisel = null;
+  let realChiselSize = null;
+  const gltfLoader = new GLTFLoader();
+  gltfLoader.load(
+    '/kirici-uc.glb',
+    (gltf) => {
+      const model = gltf.scene;
+
+      // Normalize scale — fit into ~4 units tall in scene space
+      const box = new THREE.Box3().setFromObject(model);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const targetHeight = 4.2;
+      const scale = targetHeight / maxDim;
+      model.scale.setScalar(scale);
+
+      // Recenter so origin is at geometric center
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+      model.position.sub(center.multiplyScalar(scale));
+
+      // Swap all materials to our heatMat so we can drive emissive glow
+      model.traverse((o) => {
+        if (o.isMesh) {
+          const oldMat = o.material;
+          const newMat = new THREE.MeshStandardMaterial({
+            color: 0x5a6270,
+            metalness: 0.82,
+            roughness: 0.38,
+            emissive: 0x000000,
+            emissiveIntensity: 0,
+          });
+          // Preserve map if GLB had one
+          if (oldMat && oldMat.map) newMat.map = oldMat.map;
+          o.material = newMat;
+          o.castShadow = false;
+          o.receiveShadow = false;
+        }
+      });
+
+      realChisel = model;
+      realChiselSize = targetHeight;
+      realChisel.visible = false; // starts hidden; tick() decides when to show
+      heroGroup.add(realChisel);
+
+      console.log('[scene] Real chisel GLB loaded', { scale, size });
+    },
+    undefined,
+    (err) => {
+      console.warn('[scene] Failed to load kirici-uc.glb, falling back to proxy geometry', err);
+    }
+  );
 
   // Create a custom "heat material" — MeshStandardMaterial with tunable emissive
   function heatMat(baseColor = 0x5a6270) {
@@ -498,6 +556,7 @@
       const k = p / 0.15;
       setHUD('Forge · Heated Billet', `+${Math.round(1080 + Math.sin(t*2)*30)}°C`);
       for (const key in parts) showPart(key, key === 'billet');
+      if (realChisel) realChisel.visible = false;
       // Start hot — temp 0.85 (orange-yellow)
       const tempK = 0.85 + Math.sin(t * 1.8) * 0.05;
       setHeroHeat(tempK);
@@ -512,24 +571,23 @@
       // STAGE 2: Billet peaks then starts cooling as it shapes
       const k = (p - 0.15) / 0.20;
       const kk = smooth(k);
-      // Peaks at k=0.3 (white-hot), then cools toward 0.6
       const tempK = kk < 0.3 ? lerp(0.85, 1.0, kk / 0.3) : lerp(1.0, 0.7, (kk - 0.3) / 0.7);
       const tempC = Math.round(1080 + tempK * 200);
       if (kk < 0.3)      setHUD('Austenitizing · Peak', `+${tempC}°C`);
       else if (kk < 0.7) setHUD('White Hot · Forging', `+${tempC}°C`);
       else               setHUD('Shaping · Cooling', `+${tempC}°C`);
       for (const key in parts) showPart(key, key === 'billet');
+      if (realChisel) realChisel.visible = false;
       setHeroHeat(tempK);
       heroGroup.rotation.y = t * 0.35;
       heroGroup.rotation.x = Math.sin(t * 0.5) * 0.1;
       heroGroup.position.set(0, 0, 0);
       const pulse = 1 + Math.sin(t * 2.5) * 0.02 * tempK;
-      // Billet stays big, starts to compress slightly
       const sc = lerp(1.4, 1.2, kk) * pulse;
       parts.billet.scale.set(sc, sc, sc);
     }
     else if (p < 0.55) {
-      // STAGE 3: Morph billet → chisel, still warm
+      // STAGE 3: Billet SHRINKS while real GLB chisel FADES IN — morph
       const k = (p - 0.35) / 0.20;
       const kk = smooth(k);
       const tempK = lerp(0.7, 0.2, kk);
@@ -539,12 +597,24 @@
       parts.billet.scale.set(billetScale, billetScale, billetScale);
       parts.billet.visible = kk < 0.9;
 
+      // Hide all proxy chisel parts in this stage — real GLB takes over
       const chiselParts = ['head','ringA','ringB','shank','flatL','flatR','neck','tip'];
-      for (const name of chiselParts) {
-        const pt = parts[name];
-        pt.visible = kk > 0.15;
-        pt.position.copy(pt.userData.rest);
-        pt.scale.setScalar(kk * 1.1); // slightly larger than before
+      for (const name of chiselParts) parts[name].visible = false;
+
+      if (realChisel) {
+        realChisel.visible = kk > 0.1;
+        const chiselScale = lerp(0.05, 1.0, Math.min(1, kk * 1.4));
+        realChisel.scale.setScalar(chiselScale);
+        realChisel.position.set(0, 0, 0);
+        // Apply heat to GLB too
+        realChisel.traverse((o) => {
+          if (o.isMesh && o.material && o.material.emissive) {
+            const col = heatColor(tempK);
+            const hexColor = (col.r << 16) | (col.g << 8) | col.b;
+            o.material.emissive.setHex(hexColor);
+            o.material.emissiveIntensity = tempK * 1.8;
+          }
+        });
       }
 
       setHeroHeat(tempK);
@@ -553,13 +623,14 @@
       heroGroup.position.set(0, 0, 0);
     }
     else if (p < 0.72) {
-      // STAGE 4: Cool + EXPLODE outward
+      // STAGE 4: Cool + EXPLODE — hide GLB, show proxy parts flying apart
       const k = (p - 0.55) / 0.17;
       const kk = ease(k);
       const tempK = Math.max(0, 0.2 - kk * 0.2);
       setHUD(kk < 0.4 ? 'Quench · Temper' : 'Exploded View', kk < 0.4 ? `+${Math.round(200 - kk*400)}°C` : '42CrMo · HRC 48–52');
 
       parts.billet.visible = false;
+      if (realChisel) realChisel.visible = false;
       const chiselParts = ['head','ringA','ringB','shank','flatL','flatR','neck','tip'];
       for (const name of chiselParts) {
         const pt = parts[name];
@@ -585,7 +656,7 @@
       heroGroup.position.set(0, 0, 0);
     }
     else if (p < 0.90) {
-      // STAGE 5: Parts RUSH back
+      // STAGE 5: Parts RUSH back — proxy parts converge, GLB takes over at end
       const k = (p - 0.72) / 0.18;
       const kk = ease(k);
       const assembleK = kk;
@@ -593,9 +664,11 @@
 
       parts.billet.visible = false;
       const chiselParts = ['head','ringA','ringB','shank','flatL','flatR','neck','tip'];
+      // Proxy parts visible through first 70% of stage, then fade as GLB replaces them
+      const proxyVisible = assembleK < 0.7;
       for (const name of chiselParts) {
         const pt = parts[name];
-        pt.visible = true;
+        pt.visible = proxyVisible;
         pt.scale.setScalar(1.1);
         const rest = pt.userData.rest;
         const expl = pt.userData.expl;
@@ -610,31 +683,45 @@
         if (name === 'flatR') pt.rotation.y = -(1 - assembleK) * 0.6;
         if (name === 'ringA' || name === 'ringB') pt.rotation.y = 0;
       }
+      // Real GLB fades in at the end — "parts became one real chisel"
+      if (realChisel) {
+        realChisel.visible = assembleK > 0.55;
+        const glbFade = Math.max(0, (assembleK - 0.55) / 0.45);
+        realChisel.scale.setScalar(glbFade);
+        realChisel.position.set(0, 0, 0);
+        realChisel.traverse((o) => {
+          if (o.isMesh && o.material && o.material.emissive) {
+            o.material.emissive.setHex(0x000000);
+            o.material.emissiveIntensity = 0;
+          }
+        });
+      }
       setHeroHeat(0);
       heroGroup.rotation.y = t * 0.2 + assembleK * Math.PI * 0.3;
       heroGroup.rotation.x = -0.15 + assembleK * 0.05;
       heroGroup.position.set(0, assembleK * -0.3, assembleK * 1.5);
     }
     else {
-      // STAGE 6: IMPACT
+      // STAGE 6: IMPACT — real GLB strikes rock
       const k = (p - 0.90) / 0.10;
       const kk = ease(k);
       setHUD('Strike · Impact', '~4.8 Hz');
 
       parts.billet.visible = false;
       const chiselParts = ['head','ringA','ringB','shank','flatL','flatR','neck','tip'];
-      for (const name of chiselParts) {
-        const pt = parts[name];
-        pt.visible = true;
-        pt.scale.setScalar(1.1);
-        pt.position.copy(pt.userData.rest);
+      for (const name of chiselParts) parts[name].visible = false;
+
+      if (realChisel) {
+        realChisel.visible = true;
+        realChisel.scale.setScalar(1);
+        realChisel.position.set(0, 0, 0);
+        realChisel.traverse((o) => {
+          if (o.isMesh && o.material && o.material.emissive) {
+            o.material.emissive.setHex(0x000000);
+            o.material.emissiveIntensity = 0;
+          }
+        });
       }
-      parts.tip.rotation.z = 0;
-      parts.neck.rotation.z = 0;
-      parts.flatL.rotation.y = 0;
-      parts.flatR.rotation.y = 0;
-      parts.ringA.rotation.y = 0;
-      parts.ringB.rotation.y = 0;
 
       setHeroHeat(0);
       heroGroup.rotation.y = t * 0.15;
@@ -657,59 +744,34 @@
     scrollProgress += (targetProgress - scrollProgress) * 0.085;
     const p = scrollProgress;
 
-    // ─── Dynamic background: white at top → black at bottom ────────
-    // Keep it bright early so the white hero section flows into the scene,
-    // then fade to black through the forge sequence.
-    // 0.00-0.12:  pure white (hero)
-    // 0.12-0.25:  white → warm orange (forge arrival)
-    // 0.25-0.55:  orange → deep ember red
-    // 0.55-1.00:  ember → black (cooling, strike)
+    // ─── Dynamic background: dark industrial throughout ────────────
+    // Black base with warm ember glow during forge stages.
     let bgColor;
-    if (p < 0.12) {
-      bgColor = '#ffffff';
-    } else if (p < 0.25) {
-      const k = (p - 0.12) / 0.13;
-      // white → warm cream → amber
-      const r = Math.round(lerp(255, 255, k));
-      const g = Math.round(lerp(255, 200, k));
-      const b = Math.round(lerp(255, 140, k));
-      bgColor = `rgb(${r},${g},${b})`;
+    if (p < 0.15) {
+      bgColor = '#0A0B0F';
     } else if (p < 0.55) {
-      const k = (p - 0.25) / 0.30;
-      // amber → deep ember
-      const r = Math.round(lerp(255, 90, k));
-      const g = Math.round(lerp(200, 30, k));
-      const b = Math.round(lerp(140, 20, k));
+      const k = (p - 0.15) / 0.40;
+      // dark → warm ember glow → back to dark
+      const warmth = Math.sin(k * Math.PI); // peaks in the middle
+      const r = Math.round(lerp(10, 60, warmth));
+      const g = Math.round(lerp(11, 22, warmth));
+      const b = Math.round(lerp(15, 14, warmth));
       bgColor = `rgb(${r},${g},${b})`;
     } else {
-      const k = (p - 0.55) / 0.45;
-      // ember → near black
-      const r = Math.round(lerp(90, 10, k));
-      const g = Math.round(lerp(30, 11, k));
-      const b = Math.round(lerp(20, 15, k));
-      bgColor = `rgb(${r},${g},${b})`;
+      bgColor = '#05060A';
     }
     root.style.background = bgColor;
 
-    // Toggle light theme for nav/scroll-hint when background is bright
-    const shouldBeLight = p < 0.18;
-    if (shouldBeLight && !document.body.classList.contains('scene-light')) {
-      document.body.classList.add('scene-light');
-    } else if (!shouldBeLight && document.body.classList.contains('scene-light')) {
+    // Remove any prior light-mode class
+    if (document.body.classList.contains('scene-light')) {
       document.body.classList.remove('scene-light');
     }
 
-    // Adjust fog color and hemispheric light to match background — keeps
-    // the chisel grounded in the environment rather than floating awkwardly.
-    if (p < 0.12) {
-      scene.fog.color = new THREE.Color(0xffffff);
-      scene.fog.density = 0.015;
-      hemi.intensity = 1.2;
-      hemi.color.setHex(0xffffff);
-    } else if (p < 0.55) {
-      scene.fog.color = new THREE.Color(0x2a1408);
-      scene.fog.density = 0.022;
-      hemi.intensity = 0.5;
+    // Fog + hemispheric light match dark environment
+    if (p < 0.55) {
+      scene.fog.color = new THREE.Color(0x1a0a04);
+      scene.fog.density = 0.024;
+      hemi.intensity = 0.4;
       hemi.color.setHex(0xff9a4a);
     } else {
       scene.fog.color = new THREE.Color(0x000000);

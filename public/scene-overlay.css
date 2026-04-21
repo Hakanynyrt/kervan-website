@@ -1,13 +1,13 @@
 /* scene-overlay.css — makes content sections work over the fixed 3D canvas */
 
-/* Hero: transparent, so 3D chisel shows through white bg */
+/* Hero: transparent, so 3D chisel shows through dark bg */
 .hero {
   background: transparent !important;
-  border-bottom: none !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   min-height: 92vh !important;
   padding: 84px 0 40px !important;
 }
-.hero__grid-bg { opacity: 0 !important; }
+.hero__grid-bg { opacity: 0.25; }
 .hero__glow    { opacity: 0; }
 
 /* Hide the SVG chisel drawing — 3D one replaces it */
@@ -18,71 +18,7 @@
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) !important;
   align-items: center;
 }
-.hero__copy {
-  max-width: 680px;
-  /* Dark text on white background — invert the hero copy */
-  color: #0A0B0F;
-}
-.hero__copy h1,
-.hero__copy h2,
-.hero__copy p,
-.hero__copy span:not(.chip) {
-  color: #0A0B0F !important;
-}
-.hero__copy .eyebrow,
-.hero__copy .kicker,
-.hero__copy [class*="eyebrow"] {
-  color: #E8791A !important;
-}
-.hero__copy .btn-primary,
-.hero__copy a[class*="primary"] {
-  background: #0A0B0F !important;
-  color: #fff !important;
-  border-color: #0A0B0F !important;
-}
-.hero__copy .btn-secondary,
-.hero__copy a[class*="secondary"],
-.hero__copy a.btn:not([class*="primary"]) {
-  background: transparent !important;
-  color: #0A0B0F !important;
-  border-color: #0A0B0F !important;
-}
-.hero__copy .chip,
-.hero__copy [class*="chip"],
-.hero__copy [class*="badge"] {
-  background: rgba(10,11,15,0.06) !important;
-  color: #0A0B0F !important;
-  border-color: rgba(10,11,15,0.18) !important;
-}
-
-/* Nav becomes transparent with dark text while over white bg */
-body.scene-light .nav {
-  background: rgba(255,255,255,0.72) !important;
-  backdrop-filter: blur(12px) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(140%) !important;
-}
-body.scene-light .nav,
-body.scene-light .nav a,
-body.scene-light .nav button {
-  color: #0A0B0F !important;
-}
-body.scene-light .nav a[class*="primary"] {
-  background: #0A0B0F !important;
-  color: #fff !important;
-}
-
-/* Scroll hint dark on white */
-body.scene-light .scroll-hint {
-  color: rgba(10,11,15,.65) !important;
-}
-body.scene-light .scroll-hint::after {
-  background: linear-gradient(to bottom, rgba(10,11,15,.65), transparent) !important;
-}
-
-/* Stage HUD dark on white */
-body.scene-light #scene-hud {
-  color: rgba(10,11,15,0.55) !important;
-}
+.hero__copy { max-width: 680px; }
 
 /* Sections: transparent — 3D shows through everywhere.
    Only text blocks get local dark backdrops via inner containers. */

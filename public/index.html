@@ -1,16 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html lang="tr">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Kervan Heat — Breaker Parts, Direct from the Factory</title>
-<meta name="description" content="Chisels, pistons, bushings, bolts and repair kits for 40+ breaker brands. 42CrMo steel, HRC 48–52, heat-treated in-house. Kartepe, Kocaeli — since 1999."/>
+<title>Kervan Heat — Hidrolik Kırıcı Parçaları</title>
+<meta name="description" content="Hidrolik kırıcı keski, piston, burç, cıvata ve tamir kitleri. 40+ marka uyumlu. EN 10204 3.1 sertifikalı. Kartepe, Kocaeli — 1999'dan beri."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="kit.css"/>
-<link rel="stylesheet" href="intro.css"/>
-<link rel="stylesheet" href="scene-overlay.css"/>
+<!-- Geist from Vercel — precise, industrial, zero AI-feel -->
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <script type="importmap">
 {
   "imports": {
@@ -19,81 +17,1001 @@
   }
 }
 </script>
-<style>
-  /* 3D scene sits fixed behind content */
-  #scene-root { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-  #root { position: relative; z-index: 1; }
-  body { background: #000; }
-  section, .nav, footer { position: relative; }
-</style>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"/>
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://kervanheat.com/"/>
 <meta property="og:title" content="Kervan Heat — Hidrolik kırıcı parçaları"/>
-<meta property="og:description" content="Keski, piston, burç, cıvata. 40+ marka uyumlu. EN 10204 3.1 sertifikalı. Kartepe, Kocaeli."/>
+<meta property="og:description" content="Keski, piston, burç, cıvata. 40+ marka uyumlu. EN 10204 3.1 sertifikalı."/>
 <meta property="og:image" content="https://kervanheat.com/og.png"/>
-<meta property="og:image:width" content="1200"/>
-<meta property="og:image:height" content="630"/>
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://kervanheat.com/og.png"/>
 <link rel="canonical" href="https://kervanheat.com/"/>
-<link rel="alternate" hreflang="tr" href="https://kervanheat.com/?lang=tr"/>
-<link rel="alternate" hreflang="en" href="https://kervanheat.com/?lang=en"/>
-<link rel="alternate" hreflang="de" href="https://kervanheat.com/?lang=de"/>
-<link rel="alternate" hreflang="ru" href="https://kervanheat.com/?lang=ru"/>
-<link rel="alternate" hreflang="x-default" href="https://kervanheat.com/"/>
+
+<style>
+  :root {
+    --bg:        #0A0B0F;
+    --bg-soft:   #111216;
+    --paper:     #F5F3EE;
+    --paper-dim: #D9D6CF;
+    --text:      #F5F3EE;
+    --text-dim:  rgba(245,243,238,.62);
+    --text-muted:rgba(245,243,238,.40);
+    --line:      rgba(245,243,238,.10);
+    --line-soft: rgba(245,243,238,.06);
+    --accent:    #D94A1A;   /* hot-iron red */
+    --radius:    14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); }
+  body {
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  button { font: inherit; border: 0; background: none; color: inherit; cursor: pointer; }
+
+  /* ─── 3D scene stays behind everything ─── */
+  #scene-root { position: fixed !important; inset: 0; z-index: 0; pointer-events: none; }
+  #app { position: relative; z-index: 1; }
+
+  /* ─── Nav ─── */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 18px 32px;
+    background: rgba(10,11,15,0.72);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border-bottom: 1px solid var(--line-soft);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 24px;
+  }
+  .nav__brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 600; font-size: 15px; letter-spacing: -0.01em;
+  }
+  .nav__brand img { width: 28px; height: 28px; }
+  .nav__links { display: flex; gap: 28px; }
+  .nav__links a {
+    font-size: 14px; color: var(--text-dim);
+    transition: color .15s;
+  }
+  .nav__links a:hover { color: var(--text); }
+  .nav__right { display: flex; align-items: center; gap: 14px; }
+  .nav__lang {
+    display: flex; gap: 2px;
+    background: rgba(245,243,238,.05);
+    border-radius: 999px;
+    padding: 3px;
+  }
+  .nav__lang button {
+    padding: 5px 10px; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--text-muted);
+    border-radius: 999px;
+    transition: all .15s;
+  }
+  .nav__lang button.active {
+    background: var(--text); color: var(--bg);
+  }
+  .nav__cta {
+    padding: 9px 18px; border-radius: 999px;
+    background: var(--text); color: var(--bg);
+    font-weight: 500; font-size: 14px;
+    transition: background .15s, transform .15s;
+  }
+  .nav__cta:hover { background: var(--accent); color: var(--text); }
+  .nav__burger { display: none; }
+  @media (max-width: 900px) {
+    .nav { padding: 14px 20px; }
+    .nav__links { display: none; }
+    .nav__lang { display: none; }
+    .nav__burger {
+      display: flex; flex-direction: column; gap: 4px;
+      padding: 8px;
+    }
+    .nav__burger span {
+      width: 18px; height: 1.5px; background: var(--text);
+    }
+  }
+
+  /* ─── Hero ─── */
+  .hero {
+    min-height: 100vh;
+    padding: 120px 32px 80px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    align-items: center;
+    gap: 40px;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+  .hero__copy {
+    text-align: left;
+  }
+  .hero__eyebrow {
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .hero__eyebrow::before {
+    content: ''; width: 28px; height: 1px;
+    background: var(--accent);
+  }
+  .hero h1 {
+    font-size: clamp(44px, 6vw, 88px);
+    font-weight: 600;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    margin-bottom: 28px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+  .hero__sub {
+    font-size: clamp(16px, 1.3vw, 19px);
+    color: var(--text-dim);
+    line-height: 1.55;
+    max-width: 540px;
+    margin-bottom: 40px;
+  }
+  .hero__ctas {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .btn {
+    padding: 14px 24px; border-radius: 999px;
+    font-weight: 500; font-size: 15px;
+    transition: all .15s ease;
+    display: inline-flex; align-items: center; gap: 10px;
+    cursor: pointer;
+  }
+  .btn--primary {
+    background: var(--text); color: var(--bg);
+  }
+  .btn--primary:hover { background: var(--accent); color: var(--text); }
+  .btn--ghost {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--line);
+  }
+  .btn--ghost:hover { border-color: var(--text); }
+  .btn svg { width: 14px; height: 14px; }
+
+  .hero__3d-anchor {
+    /* This is just an empty column to reserve space for the 3D canvas
+       which lives behind everything. No actual content here. */
+    min-height: 480px;
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 100px 22px 40px;
+      min-height: auto;
+      gap: 0;
+    }
+    .hero__copy {
+      text-align: center;
+      order: 1;
+    }
+    .hero__eyebrow::before { display: none; }
+    .hero__sub { margin-left: auto; margin-right: auto; }
+    .hero__ctas { justify-content: center; }
+    .hero__3d-anchor {
+      order: 2;
+      min-height: 56vh;
+    }
+  }
+
+  /* ─── Section primitives ─── */
+  section { padding: 120px 32px; max-width: 1440px; margin: 0 auto; }
+  @media (max-width: 700px) {
+    section { padding: 80px 22px; }
+  }
+  .section__head {
+    display: flex; flex-direction: column; gap: 12px;
+    max-width: 640px; margin-bottom: 56px;
+  }
+  .section__kicker {
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent);
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .section__kicker::before {
+    content: ''; width: 20px; height: 1px; background: var(--accent);
+  }
+  .section__title {
+    font-size: clamp(32px, 3.6vw, 52px);
+    font-weight: 600; line-height: 1.05;
+    letter-spacing: -0.025em;
+  }
+  .section__title em {
+    font-style: normal; color: var(--text-dim); font-weight: 400;
+  }
+  .section__lead {
+    font-size: 17px; color: var(--text-dim); max-width: 560px;
+    line-height: 1.55;
+  }
+
+  /* ─── Products grid ─── */
+  .products {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 900px) { .products { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .products { grid-template-columns: 1fr; } }
+
+  .product {
+    position: relative;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: transform .3s ease, border-color .3s ease;
+  }
+  .product:hover {
+    transform: translateY(-3px);
+    border-color: rgba(245,243,238,.2);
+  }
+  .product__photo {
+    aspect-ratio: 4 / 3;
+    background: linear-gradient(135deg, #18191d 0%, #0f1014 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .product__photo img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .7s cubic-bezier(.2,.7,.2,1);
+  }
+  .product:hover .product__photo img { transform: scale(1.04); }
+  .product__photo--placeholder::after {
+    content: attr(data-caption);
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 20px;
+  }
+  .product__body {
+    padding: 22px 22px 24px;
+  }
+  .product__title {
+    font-size: 18px; font-weight: 600; letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .product__desc {
+    font-size: 14px; color: var(--text-dim); line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  .product__meta {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .product__chip {
+    padding: 4px 9px; font-size: 11px;
+    background: rgba(217,74,26,.12); color: var(--accent);
+    border-radius: 999px;
+    font-weight: 500; letter-spacing: 0.02em;
+  }
+
+  /* ─── Services strip ─── */
+  .services {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  @media (max-width: 900px) { .services { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .services { grid-template-columns: 1fr; } }
+  .service {
+    background: var(--bg);
+    padding: 36px 28px;
+    display: flex; flex-direction: column; gap: 14px;
+    transition: background .3s;
+  }
+  .service:hover { background: var(--bg-soft); }
+  .service__num {
+    font-size: 12px; font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+  .service__title {
+    font-size: 20px; font-weight: 600;
+    letter-spacing: -0.015em; line-height: 1.2;
+  }
+  .service__desc {
+    font-size: 14px; color: var(--text-dim); line-height: 1.55;
+  }
+
+  /* ─── Brands (compatibility) ─── */
+  .brands {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  @media (max-width: 900px) { .brands { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 500px) { .brands { grid-template-columns: repeat(3, 1fr); } }
+  .brand {
+    background: var(--bg);
+    aspect-ratio: 1 / 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 12px;
+    font-size: 13px; font-weight: 500;
+    color: var(--text-dim);
+    text-align: center;
+    letter-spacing: -0.01em;
+    transition: color .3s, background .3s;
+  }
+  .brand:hover { color: var(--text); background: var(--bg-soft); }
+
+  /* ─── Gallery ─── */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 180px;
+    gap: 10px;
+  }
+  @media (max-width: 900px) { .gallery { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 160px; } }
+  .gallery__tile {
+    background: linear-gradient(135deg, #18191d 0%, #0f1014 100%);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+    font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .gallery__tile img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .8s cubic-bezier(.2,.7,.2,1), filter .4s;
+    filter: saturate(.92);
+  }
+  .gallery__tile:hover img { transform: scale(1.05); filter: saturate(1.05); }
+  .gallery__tile--placeholder::after {
+    content: attr(data-caption);
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; text-align: center;
+  }
+  .gallery__tile--wide { grid-column: span 2; }
+  .gallery__tile--tall { grid-row: span 2; }
+  @media (max-width: 900px) {
+    .gallery__tile--wide { grid-column: span 2; }
+    .gallery__tile--tall { grid-row: span 1; }
+  }
+
+  /* ─── Stats ─── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  @media (max-width: 700px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat {
+    background: var(--bg);
+    padding: 48px 28px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .stat__num {
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .stat__num sup {
+    font-size: 0.45em; color: var(--accent); vertical-align: top;
+    font-weight: 500; margin-left: 4px;
+  }
+  .stat__label {
+    font-size: 13px; color: var(--text-dim);
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── Contact / RFQ ─── */
+  .rfq {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: 56px;
+    align-items: start;
+  }
+  @media (max-width: 900px) { .rfq { grid-template-columns: 1fr; gap: 40px; } }
+  .rfq__info h2 { font-size: clamp(32px, 3.6vw, 48px); font-weight: 600; letter-spacing: -0.025em; line-height: 1.05; margin-bottom: 24px; }
+  .rfq__info h2 em { font-style: normal; color: var(--text-dim); font-weight: 400; }
+  .rfq__info p { color: var(--text-dim); margin-bottom: 28px; max-width: 440px; }
+  .rfq__contacts {
+    display: flex; flex-direction: column; gap: 14px;
+    padding-top: 24px; border-top: 1px solid var(--line);
+  }
+  .rfq__line {
+    display: flex; gap: 16px; align-items: baseline;
+    font-size: 14px;
+  }
+  .rfq__line span:first-child {
+    color: var(--text-muted); width: 92px;
+    font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .rfq__line a { color: var(--text); }
+  .rfq__line a:hover { color: var(--accent); }
+  .rfq__form {
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 32px;
+  }
+  .field {
+    display: flex; flex-direction: column; gap: 8px;
+    margin-bottom: 18px;
+  }
+  .field label {
+    font-size: 12px; color: var(--text-dim);
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .field input, .field textarea, .field select {
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font: inherit; font-size: 15px;
+    transition: border-color .2s;
+    font-family: inherit;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none; border-color: var(--text);
+  }
+  .field textarea { resize: vertical; min-height: 100px; }
+  .field--row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field--row .field { margin: 0; }
+  @media (max-width: 500px) { .field--row { grid-template-columns: 1fr; } }
+  .rfq__submit {
+    width: 100%;
+    padding: 15px 24px; border-radius: 10px;
+    background: var(--accent); color: var(--text);
+    font-weight: 500; font-size: 15px;
+    letter-spacing: 0.01em;
+    transition: background .15s;
+  }
+  .rfq__submit:hover { background: #e85d2f; }
+  .rfq__success {
+    padding: 28px; text-align: center;
+    border: 1px solid var(--accent);
+    background: rgba(217,74,26,.08);
+    border-radius: 10px;
+    color: var(--text);
+  }
+
+  /* ─── Footer ─── */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 60px 32px 40px;
+    max-width: 1440px; margin: 0 auto;
+  }
+  .footer__grid {
+    display: grid;
+    grid-template-columns: 1.4fr repeat(3, 1fr);
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+  @media (max-width: 800px) { .footer__grid { grid-template-columns: 1fr 1fr; gap: 32px; } }
+  .footer__col h4 {
+    font-size: 12px; color: var(--text-muted);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 18px; font-weight: 500;
+  }
+  .footer__col a, .footer__col p {
+    display: block; padding: 5px 0;
+    font-size: 14px; color: var(--text-dim);
+    transition: color .15s;
+  }
+  .footer__col a:hover { color: var(--text); }
+  .footer__brand p { max-width: 320px; line-height: 1.5; }
+  .footer__bot {
+    display: flex; justify-content: space-between; gap: 20px;
+    padding-top: 24px; border-top: 1px solid var(--line);
+    font-size: 12px; color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+
+  /* ─── Reveal animation ─── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1);
+  }
+  .reveal.in {
+    opacity: 1; transform: none;
+  }
+  .reveal-stagger > * {
+    opacity: 0; transform: translateY(20px);
+    transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1);
+  }
+  .reveal-stagger.in > * { opacity: 1; transform: none; }
+  .reveal-stagger.in > *:nth-child(1) { transition-delay: 0ms; }
+  .reveal-stagger.in > *:nth-child(2) { transition-delay: 80ms; }
+  .reveal-stagger.in > *:nth-child(3) { transition-delay: 160ms; }
+  .reveal-stagger.in > *:nth-child(4) { transition-delay: 240ms; }
+  .reveal-stagger.in > *:nth-child(5) { transition-delay: 320ms; }
+  .reveal-stagger.in > *:nth-child(6) { transition-delay: 400ms; }
+  .reveal-stagger.in > *:nth-child(7) { transition-delay: 480ms; }
+  .reveal-stagger.in > *:nth-child(8) { transition-delay: 560ms; }
+  .reveal-stagger.in > *:nth-child(9) { transition-delay: 640ms; }
+  .reveal-stagger.in > *:nth-child(10) { transition-delay: 720ms; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal-stagger > * { opacity: 1 !important; transform: none !important; transition: none !important; }
+  }
+
+  /* ─── Scroll hint ─── */
+  .scroll-hint {
+    position: fixed; right: 28px; bottom: 28px;
+    z-index: 50;
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim);
+    pointer-events: none;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    transition: opacity .4s;
+  }
+  .scroll-hint::after {
+    content: ''; width: 1px; height: 32px;
+    background: linear-gradient(to bottom, var(--text-dim), transparent);
+    animation: sp 1.8s ease-in-out infinite;
+    transform-origin: top;
+  }
+  .scroll-hint.hide { opacity: 0; }
+  @keyframes sp {
+    0%,100% { transform: scaleY(.3); opacity: .2; }
+    50%     { transform: scaleY(1);  opacity: 1; }
+  }
+  @media (max-width: 700px) { .scroll-hint { display: none; } }
+</style>
 </head>
 <body>
-<script src="intro.js"></script>
+
+<!-- 3D scene lives behind everything -->
 <script type="module" src="scene.js"></script>
-<div class="scroll-hint" id="scrollHint">Scroll</div>
+
+<div class="scroll-hint" id="scrollHint" data-tr="Kaydır" data-en="Scroll" data-de="Scrollen" data-ru="Листать">Kaydır</div>
+
+<div id="app">
+
+<!-- ─── NAV ─── -->
+<nav class="nav">
+  <a class="nav__brand" href="/">
+    <img src="logo-krv.png" alt="Kervan Heat"/>
+    <span>Kervan Heat</span>
+  </a>
+  <div class="nav__links">
+    <a href="#products" data-tr="Ürünler" data-en="Products" data-de="Produkte" data-ru="Продукция">Ürünler</a>
+    <a href="#services" data-tr="Hizmetler" data-en="Services" data-de="Leistungen" data-ru="Услуги">Hizmetler</a>
+    <a href="#brands" data-tr="Uyumluluk" data-en="Compatibility" data-de="Kompatibilität" data-ru="Совместимость">Uyumluluk</a>
+    <a href="about.html" data-tr="Hakkımızda" data-en="About" data-de="Über uns" data-ru="О нас">Hakkımızda</a>
+  </div>
+  <div class="nav__right">
+    <div class="nav__lang" id="langSwitch">
+      <button data-lang="tr" class="active">TR</button>
+      <button data-lang="en">EN</button>
+      <button data-lang="de">DE</button>
+      <button data-lang="ru">RU</button>
+    </div>
+    <a class="nav__cta" href="#contact" data-tr="Teklif Al" data-en="Get a Quote" data-de="Angebot" data-ru="Запрос">Teklif Al</a>
+    <button class="nav__burger" aria-label="menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero__copy reveal in">
+    <div class="hero__eyebrow" data-tr="Kartepe · Kocaeli · 1999'dan beri" data-en="Kartepe · Kocaeli · since 1999" data-de="Kartepe · Kocaeli · seit 1999" data-ru="Kartepe · Kocaeli · с 1999">Kartepe · Kocaeli · 1999'dan beri</div>
+    <h1>
+      <span data-tr="Hidrolik kırıcı parçaları." data-en="Hydraulic breaker parts." data-de="Hammerteile." data-ru="Запчасти для молотов.">Hidrolik kırıcı parçaları.</span><br/>
+      <em data-tr="Doğrudan fabrikadan." data-en="Direct from the factory." data-de="Direkt vom Werk." data-ru="Напрямую с завода.">Doğrudan fabrikadan.</em>
+    </h1>
+    <p class="hero__sub" data-tr="Furukawa, Rammer, Soosan, Atlas Copco ve 40+ marka için keski, piston, burç, cıvata ve tamir kiti üretiyoruz. Tamamı kendi atölyemizde — ısıl işlem dahil." data-en="We make chisels, pistons, bushings, bolts and repair kits for Furukawa, Rammer, Soosan, Atlas Copco and 40+ brands. All produced — and heat-treated — under one roof." data-de="Wir fertigen Meißel, Kolben, Buchsen, Bolzen und Reparatursätze für Furukawa, Rammer, Soosan, Atlas Copco und 40+ Marken — inklusive Wärmebehandlung." data-ru="Производим пики, поршни, втулки, болты и ремкомплекты для Furukawa, Rammer, Soosan, Atlas Copco и 40+ марок. Всё под одной крышей — включая термообработку.">
+      Furukawa, Rammer, Soosan, Atlas Copco ve 40+ marka için keski, piston, burç, cıvata ve tamir kiti üretiyoruz. Tamamı kendi atölyemizde — ısıl işlem dahil.
+    </p>
+    <div class="hero__ctas">
+      <a class="btn btn--primary" href="#contact">
+        <span data-tr="Teklif Al" data-en="Get a Quote" data-de="Angebot erhalten" data-ru="Запросить цену">Teklif Al</span>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+      <a class="btn btn--ghost" href="#products">
+        <span data-tr="Ürünleri Gör" data-en="View Products" data-de="Produkte ansehen" data-ru="Смотреть продукцию">Ürünleri Gör</span>
+      </a>
+    </div>
+  </div>
+  <div class="hero__3d-anchor"></div>
+</section>
+
+<!-- ─── STATS ─── -->
+<div class="stats reveal">
+  <div class="stat">
+    <div class="stat__num">40<sup>+</sup></div>
+    <div class="stat__label" data-tr="Uyumlu marka" data-en="Brands fit" data-de="Kompatible Marken" data-ru="Совместимых марок">Uyumlu marka</div>
+  </div>
+  <div class="stat">
+    <div class="stat__num">25<sup>+</sup></div>
+    <div class="stat__label" data-tr="Yıldır üretim" data-en="Years in production" data-de="Jahre Fertigung" data-ru="Лет в производстве">Yıldır üretim</div>
+  </div>
+  <div class="stat">
+    <div class="stat__num">500<sup>t</sup></div>
+    <div class="stat__label" data-tr="Aylık kapasite" data-en="Monthly capacity" data-de="Monatskapazität" data-ru="Месячная мощность">Aylık kapasite</div>
+  </div>
+  <div class="stat">
+    <div class="stat__num">3.1</div>
+    <div class="stat__label" data-tr="EN 10204 sertifika" data-en="EN 10204 certificate" data-de="EN 10204 Zertifikat" data-ru="Сертификат EN 10204">EN 10204 sertifika</div>
+  </div>
+</div>
+
+<!-- ─── PRODUCTS ─── -->
+<section id="products">
+  <div class="section__head reveal">
+    <div class="section__kicker" data-tr="Ürünler" data-en="Products" data-de="Produkte" data-ru="Продукция">Ürünler</div>
+    <h2 class="section__title">
+      <span data-tr="Kırıcıyı çalıştıran her parça." data-en="Every part that keeps a breaker running." data-de="Jedes Teil, das einen Hammer am Laufen hält." data-ru="Всё, что нужно вашему молоту.">Kırıcıyı çalıştıran her parça.</span><br/>
+      <em data-tr="Tek atölyeden." data-en="From one workshop." data-de="Aus einer Werkstatt." data-ru="Из одной мастерской.">Tek atölyeden.</em>
+    </h2>
+  </div>
+
+  <div class="products reveal-stagger">
+    <article class="product">
+      <div class="product__photo"><img src="photos/chisel-stock.jpeg" alt="Keski stoku" loading="lazy"/></div>
+      <div class="product__body">
+        <h3 class="product__title" data-tr="Keskiler" data-en="Chisels" data-de="Meißel" data-ru="Пики">Keskiler</h3>
+        <p class="product__desc" data-tr="Moil, konik, düz ve kama tip. Ø45–Ø210 mm." data-en="Moil, conical, flat and blunt types. Ø45–Ø210 mm." data-de="Moil, konisch, flach und stumpf. Ø45–Ø210 mm." data-ru="Пика, конус, плоский и тупой. Ø45–Ø210 мм.">Moil, konik, düz ve kama tip. Ø45–Ø210 mm.</p>
+        <div class="product__meta">
+          <span class="product__chip">42CrMo</span>
+          <span class="product__chip">HRC 48–52</span>
+        </div>
+      </div>
+    </article>
+    <article class="product">
+      <div class="product__photo"><img src="photos/workshop-overview.jpeg" alt="Üretim alanı" loading="lazy"/></div>
+      <div class="product__body">
+        <h3 class="product__title" data-tr="Pistonlar" data-en="Pistons" data-de="Kolben" data-ru="Поршни">Pistonlar</h3>
+        <p class="product__desc" data-tr="Nitrasyonlu. Parlatılmış yüzey, sıkı tolerans." data-en="Nitrided. Polished surface, tight tolerance." data-de="Nitriert. Polierte Oberfläche, enge Toleranz." data-ru="Азотированные. Полированная поверхность, точный допуск.">Nitrasyonlu. Parlatılmış yüzey, sıkı tolerans.</p>
+        <div class="product__meta">
+          <span class="product__chip" data-tr="Nitrasyon" data-en="Nitrided" data-de="Nitriert" data-ru="Азотирование">Nitrasyon</span>
+        </div>
+      </div>
+    </article>
+    <article class="product">
+      <div class="product__photo product__photo--placeholder" data-caption="Fotoğraf: Burç"></div>
+      <div class="product__body">
+        <h3 class="product__title" data-tr="Burçlar" data-en="Bushings" data-de="Buchsen" data-ru="Втулки">Burçlar</h3>
+        <p class="product__desc" data-tr="Üst ve alt burçlar. Sıkı geçme, uzun ömür." data-en="Upper and lower bushings. Press-fit, long life." data-de="Ober- und Unterbuchsen. Presspassung, lange Lebensdauer." data-ru="Верхние и нижние втулки. Плотная посадка, долгий ресурс.">Üst ve alt burçlar. Sıkı geçme, uzun ömür.</p>
+        <div class="product__meta">
+          <span class="product__chip">34CrNiMo6</span>
+        </div>
+      </div>
+    </article>
+    <article class="product">
+      <div class="product__photo product__photo--placeholder" data-caption="Fotoğraf: Cıvata seti"></div>
+      <div class="product__body">
+        <h3 class="product__title" data-tr="Cıvatalar" data-en="Bolts" data-de="Bolzen" data-ru="Болты">Cıvatalar</h3>
+        <p class="product__desc" data-tr="Uzun gövde cıvatalar. 12.9 kalite." data-en="Through bolts. Grade 12.9." data-de="Durchgangsschrauben. Güte 12.9." data-ru="Болты с полной длиной. Класс 12.9.">Uzun gövde cıvatalar. 12.9 kalite.</p>
+        <div class="product__meta">
+          <span class="product__chip">12.9</span>
+        </div>
+      </div>
+    </article>
+    <article class="product">
+      <div class="product__photo product__photo--placeholder" data-caption="Fotoğraf: Ön kafa"></div>
+      <div class="product__body">
+        <h3 class="product__title" data-tr="Ön kafalar" data-en="Front heads" data-de="Vorderköpfe" data-ru="Передние головки">Ön kafalar</h3>
+        <p class="product__desc" data-tr="Döküm ve işlenmiş tam set. Orijinal ölçüler." data-en="Cast and machined full assembly. OEM dimensions." data-de="Gegossen und bearbeitet. OEM-Maße." data-ru="Литьё и обработка. OEM размеры.">Döküm ve işlenmiş tam set. Orijinal ölçüler.</p>
+        <div class="product__meta">
+          <span class="product__chip">OEM</span>
+        </div>
+      </div>
+    </article>
+    <article class="product">
+      <div class="product__photo product__photo--placeholder" data-caption="Fotoğraf: Tamir kiti"></div>
+      <div class="product__body">
+        <h3 class="product__title" data-tr="Tamir kitleri" data-en="Repair kits" data-de="Reparatursätze" data-ru="Ремкомплекты">Tamir kitleri</h3>
+        <p class="product__desc" data-tr="Conta, halka ve sızdırmazlık elemanları." data-en="Seals, rings and sealing elements." data-de="Dichtungen, Ringe und Dichtelemente." data-ru="Уплотнения, кольца и сальники.">Conta, halka ve sızdırmazlık elemanları.</p>
+        <div class="product__meta">
+          <span class="product__chip" data-tr="Tam set" data-en="Full set" data-de="Komplett" data-ru="Полный">Tam set</span>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ─── SERVICES ─── -->
+<section id="services">
+  <div class="section__head reveal">
+    <div class="section__kicker" data-tr="Hizmetler" data-en="Services" data-de="Leistungen" data-ru="Услуги">Hizmetler</div>
+    <h2 class="section__title">
+      <span data-tr="Ham çelikten sevkiyata." data-en="From raw steel to shipping." data-de="Vom Rohstahl zum Versand." data-ru="От стали до отгрузки.">Ham çelikten sevkiyata.</span><br/>
+      <em data-tr="Dört süreç, tek çatı." data-en="Four processes, one roof." data-de="Vier Prozesse, ein Dach." data-ru="Четыре процесса, одна крыша.">Dört süreç, tek çatı.</em>
+    </h2>
+  </div>
+
+  <div class="services reveal-stagger">
+    <div class="service">
+      <div class="service__num">01</div>
+      <h3 class="service__title" data-tr="Isıl İşlem" data-en="Heat Treatment" data-de="Wärmebehandlung" data-ru="Термообработка">Isıl İşlem</h3>
+      <p class="service__desc" data-tr="Kendi fırınlarımızda su verme ve temperleme. 850 °C'de kontrollü çevrim." data-en="Quench and temper in our own furnaces. 850 °C controlled cycle." data-de="Härten und Anlassen in eigener Härterei. 850 °C kontrollierter Zyklus." data-ru="Закалка и отпуск в собственных печах. Контролируемый цикл 850 °C.">Kendi fırınlarımızda su verme ve temperleme. 850 °C'de kontrollü çevrim.</p>
+    </div>
+    <div class="service">
+      <div class="service__num">02</div>
+      <h3 class="service__title" data-tr="CNC İşleme" data-en="CNC Machining" data-de="CNC-Bearbeitung" data-ru="ЧПУ обработка">CNC İşleme</h3>
+      <p class="service__desc" data-tr="Tornalama, frezeleme, taşlama. ±0.02 mm tolerans." data-en="Turning, milling, grinding. ±0.02 mm tolerance." data-de="Drehen, Fräsen, Schleifen. ±0,02 mm." data-ru="Токарная, фрезерная, шлифовка. ±0.02 мм.">Tornalama, frezeleme, taşlama. ±0.02 mm tolerans.</p>
+    </div>
+    <div class="service">
+      <div class="service__num">03</div>
+      <h3 class="service__title" data-tr="Kalite Kontrol" data-en="Quality Control" data-de="Qualitätskontrolle" data-ru="Контроль качества">Kalite Kontrol</h3>
+      <p class="service__desc" data-tr="Sertlik, metalografi, ultrasonik. EN 10204 3.1 sertifikası." data-en="Hardness, metallography, ultrasonic. EN 10204 3.1 certificate." data-de="Härte, Metallographie, Ultraschall. EN 10204 3.1 Zertifikat." data-ru="Твёрдость, металлография, УЗК. Сертификат EN 10204 3.1.">Sertlik, metalografi, ultrasonik. EN 10204 3.1 sertifikası.</p>
+    </div>
+    <div class="service">
+      <div class="service__num">04</div>
+      <h3 class="service__title" data-tr="Sevkiyat" data-en="Shipping" data-de="Versand" data-ru="Отгрузка">Sevkiyat</h3>
+      <p class="service__desc" data-tr="5–10 iş günü teslimat. Türkiye ve dünya geneli sevkiyat." data-en="5–10 business days lead. Turkey and worldwide shipping." data-de="5–10 Werktage Lieferzeit. Türkei und weltweit." data-ru="Срок 5–10 рабочих дней. Турция и по всему миру.">5–10 iş günü teslimat. Türkiye ve dünya geneli sevkiyat.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── GALLERY ─── -->
+<section id="gallery">
+  <div class="section__head reveal">
+    <div class="section__kicker" data-tr="Atölye" data-en="Workshop" data-de="Werkstatt" data-ru="Цех">Atölye</div>
+    <h2 class="section__title">
+      <span data-tr="Nerede, nasıl üretildiği." data-en="Where, and how, it's made." data-de="Wo und wie wir fertigen." data-ru="Где и как производится.">Nerede, nasıl üretildiği.</span>
+    </h2>
+  </div>
+  <div class="gallery reveal-stagger">
+    <div class="gallery__tile gallery__tile--wide gallery__tile--tall"><img src="photos/workshop-overview.jpeg" alt="Atölye genel görünüm" loading="lazy"/></div>
+    <div class="gallery__tile"><img src="photos/cnc-machining.jpeg" alt="CNC işleme" loading="lazy"/></div>
+    <div class="gallery__tile"><img src="photos/saw-machine.jpeg" alt="Metal kesim" loading="lazy"/></div>
+    <div class="gallery__tile"><img src="photos/chisel-stock.jpeg" alt="Keski serisi" loading="lazy"/></div>
+    <div class="gallery__tile gallery__tile--placeholder" data-tr="Fotoğraf: Paketleme" data-en="Photo: Packaging" data-de="Foto: Verpackung" data-ru="Фото: Упаковка">Fotoğraf: Paketleme</div>
+    <div class="gallery__tile gallery__tile--wide gallery__tile--placeholder" data-tr="Fotoğraf: Tesis genel görünüm" data-en="Photo: Facility wide view" data-de="Foto: Werksübersicht" data-ru="Фото: Общий вид цеха">Fotoğraf: Tesis genel görünüm</div>
+  </div>
+</section>
+
+<!-- ─── BRANDS ─── -->
+<section id="brands">
+  <div class="section__head reveal">
+    <div class="section__kicker" data-tr="Uyumluluk" data-en="Compatibility" data-de="Kompatibilität" data-ru="Совместимость">Uyumluluk</div>
+    <h2 class="section__title">
+      <span data-tr="40+ marka." data-en="40+ brands." data-de="40+ Marken." data-ru="40+ марок.">40+ marka.</span> <em data-tr="Yüzlerce model." data-en="Hundreds of models." data-de="Hunderte Modelle." data-ru="Сотни моделей.">Yüzlerce model.</em>
+    </h2>
+    <p class="section__lead" data-tr="Modeli listede bulamadıysanız, yazın — üretiriz." data-en="If your model isn't listed, just ask — we'll make it." data-de="Nicht gelistet? Fragen Sie an — wir fertigen." data-ru="Нет в списке? Напишите — изготовим.">Modeli listede bulamadıysanız, yazın — üretiriz.</p>
+  </div>
+
+  <div class="brands reveal-stagger">
+    <div class="brand">Furukawa</div>
+    <div class="brand">Rammer</div>
+    <div class="brand">Soosan</div>
+    <div class="brand">Atlas Copco</div>
+    <div class="brand">Krupp</div>
+    <div class="brand">Montabert</div>
+    <div class="brand">Indeco</div>
+    <div class="brand">NPK</div>
+    <div class="brand">Rock Ram</div>
+    <div class="brand">Okada</div>
+    <div class="brand">Daemo</div>
+    <div class="brand">MSB</div>
+  </div>
+</section>
+
+<!-- ─── RFQ / CONTACT ─── -->
+<section id="contact">
+  <div class="rfq reveal">
+    <div class="rfq__info">
+      <h2>
+        <span data-tr="Model numaranızı gönderin." data-en="Send us your model number." data-de="Schicken Sie Ihre Modellnummer." data-ru="Пришлите номер модели.">Model numaranızı gönderin.</span><br/>
+        <em data-tr="24 saat içinde cevap." data-en="We reply within 24 hours." data-de="Antwort innerhalb 24 Stunden." data-ru="Ответим в течение 24 часов.">24 saat içinde cevap.</em>
+      </h2>
+      <p data-tr="Parça numarası, adet ve kırıcı modelinizi yazın. Fiyat, teslim süresi ve sertifikayı hazırlayıp dönelim." data-en="Share the part number, quantity and your breaker model. We'll come back with pricing, lead time and certification." data-de="Teilen Sie uns Artikelnummer, Menge und Hammermodell mit. Wir melden uns mit Preis, Lieferzeit und Zertifikat." data-ru="Укажите артикул, количество и модель молота. Пришлём цену, срок и сертификат.">Parça numarası, adet ve kırıcı modelinizi yazın. Fiyat, teslim süresi ve sertifikayı hazırlayıp dönelim.</p>
+
+      <div class="rfq__contacts">
+        <div class="rfq__line">
+          <span data-tr="Telefon" data-en="Phone" data-de="Telefon" data-ru="Телефон">Telefon</span>
+          <a href="tel:+905316693734">+90 531 669 37 34</a>
+        </div>
+        <div class="rfq__line">
+          <span data-tr="E-posta" data-en="Email" data-de="E-Mail" data-ru="E-mail">E-posta</span>
+          <a href="mailto:info@kervanheat.com">info@kervanheat.com</a>
+        </div>
+        <div class="rfq__line">
+          <span data-tr="Adres" data-en="Address" data-de="Adresse" data-ru="Адрес">Adres</span>
+          <span>Uzunçiftlik Mah. Sadun Atığ Cad. No:112/A, Kartepe / Kocaeli</span>
+        </div>
+      </div>
+    </div>
+
+    <form class="rfq__form" id="rfqForm" action="https://formspree.io/f/xvgbgjyr" method="POST">
+      <div class="field--row">
+        <div class="field">
+          <label data-tr="Ad Soyad" data-en="Full name" data-de="Name" data-ru="Имя">Ad Soyad</label>
+          <input type="text" name="name" required/>
+        </div>
+        <div class="field">
+          <label data-tr="Şirket" data-en="Company" data-de="Firma" data-ru="Компания">Şirket</label>
+          <input type="text" name="company"/>
+        </div>
+      </div>
+      <div class="field--row">
+        <div class="field">
+          <label data-tr="E-posta" data-en="Email" data-de="E-Mail" data-ru="E-mail">E-posta</label>
+          <input type="email" name="email" required/>
+        </div>
+        <div class="field">
+          <label data-tr="Ülke" data-en="Country" data-de="Land" data-ru="Страна">Ülke</label>
+          <input type="text" name="country"/>
+        </div>
+      </div>
+      <div class="field">
+        <label data-tr="Kırıcı markası ve modeli" data-en="Breaker brand & model" data-de="Hammermarke & Modell" data-ru="Марка и модель молота">Kırıcı markası ve modeli</label>
+        <input type="text" name="breaker" placeholder="Örn: Furukawa HB20G" required/>
+      </div>
+      <div class="field">
+        <label data-tr="İhtiyacınız" data-en="What you need" data-de="Bedarf" data-ru="Что нужно">İhtiyacınız</label>
+        <textarea name="message" rows="4" placeholder="Parça, adet, teslimat yeri..." required></textarea>
+      </div>
+      <button type="submit" class="rfq__submit" data-tr="Teklif Al" data-en="Request Quote" data-de="Angebot anfordern" data-ru="Запросить">Teklif Al</button>
+    </form>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer__grid">
+    <div class="footer__col footer__brand">
+      <a class="nav__brand" href="/" style="margin-bottom:18px;">
+        <img src="logo-krv.png" alt="Kervan Heat" width="28" height="28"/>
+        <span>Kervan Heat</span>
+      </a>
+      <p data-tr="Kartepe, Kocaeli'de 1999'dan beri hidrolik kırıcı yedek parçaları ve ısıl işlem. Kendi fırınımız, kendi CNC'miz, kendi laboratuvarımız." data-en="Making breaker spare parts and heat-treating in Kartepe, Kocaeli since 1999. Our furnaces, our CNC, our lab." data-de="Seit 1999 fertigen wir Hammer-Ersatzteile und härten im Haus in Kartepe, Kocaeli." data-ru="С 1999 года производим запчасти для молотов и ведём термообработку в Kartepe, Kocaeli.">Kartepe, Kocaeli'de 1999'dan beri hidrolik kırıcı yedek parçaları ve ısıl işlem.</p>
+    </div>
+    <div class="footer__col">
+      <h4 data-tr="Ürünler" data-en="Products" data-de="Produkte" data-ru="Продукция">Ürünler</h4>
+      <a href="#products" data-tr="Keskiler" data-en="Chisels" data-de="Meißel" data-ru="Пики">Keskiler</a>
+      <a href="#products" data-tr="Pistonlar" data-en="Pistons" data-de="Kolben" data-ru="Поршни">Pistonlar</a>
+      <a href="#products" data-tr="Burçlar" data-en="Bushings" data-de="Buchsen" data-ru="Втулки">Burçlar</a>
+      <a href="#products" data-tr="Cıvatalar" data-en="Bolts" data-de="Bolzen" data-ru="Болты">Cıvatalar</a>
+      <a href="catalog.html" data-tr="Tüm katalog" data-en="Full catalog" data-de="Gesamtkatalog" data-ru="Полный каталог">Tüm katalog</a>
+    </div>
+    <div class="footer__col">
+      <h4 data-tr="Şirket" data-en="Company" data-de="Firma" data-ru="Компания">Şirket</h4>
+      <a href="about.html" data-tr="Hakkımızda" data-en="About" data-de="Über uns" data-ru="О нас">Hakkımızda</a>
+      <a href="gallery.html" data-tr="Galeri" data-en="Gallery" data-de="Galerie" data-ru="Галерея">Galeri</a>
+      <a href="certs.html" data-tr="Sertifikalar" data-en="Certificates" data-de="Zertifikate" data-ru="Сертификаты">Sertifikalar</a>
+      <a href="cases.html" data-tr="Referanslar" data-en="Cases" data-de="Referenzen" data-ru="Кейсы">Referanslar</a>
+      <a href="blog.html" data-tr="Bilgi" data-en="Knowledge" data-de="Wissen" data-ru="Блог">Bilgi</a>
+    </div>
+    <div class="footer__col">
+      <h4 data-tr="İletişim" data-en="Contact" data-de="Kontakt" data-ru="Контакт">İletişim</h4>
+      <a href="tel:+905316693734">+90 531 669 37 34</a>
+      <a href="mailto:info@kervanheat.com">info@kervanheat.com</a>
+      <p>Kartepe · Kocaeli · TR</p>
+      <a href="kvkk.html" data-tr="KVKK" data-en="Privacy" data-de="Datenschutz" data-ru="Конфиденциальность">KVKK</a>
+    </div>
+  </div>
+  <div class="footer__bot">
+    <span>© 2026 Kervan Heat Treatment · Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti.</span>
+    <span data-tr="Türkiye'de üretildi · Dünyaya sevkiyat" data-en="Made in Turkey · Shipped worldwide" data-de="Hergestellt in der Türkei · Weltweit versandt" data-ru="Сделано в Турции · Отгрузка по всему миру">Türkiye'de üretildi · Dünyaya sevkiyat</span>
+  </div>
+</footer>
+
+</div><!-- /#app -->
+
+<!-- ─── Scripts ─── -->
 <script>
+  // ───── Language switcher ─────
+  (function() {
+    const supported = ['tr','en','de','ru'];
+    const saved = localStorage.getItem('kv_lang');
+    const browser = (navigator.language || 'tr').slice(0,2).toLowerCase();
+    const initial = saved || (supported.includes(browser) ? browser : 'tr');
+    setLang(initial);
+
+    document.querySelectorAll('#langSwitch button').forEach(b => {
+      b.addEventListener('click', () => setLang(b.dataset.lang));
+    });
+
+    function setLang(lang) {
+      if (!supported.includes(lang)) lang = 'tr';
+      localStorage.setItem('kv_lang', lang);
+      document.documentElement.lang = lang;
+
+      document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+        const val = el.getAttribute('data-' + lang);
+        if (val) {
+          // If element has child nodes that are only text, replace text
+          if (el.children.length === 0) {
+            el.textContent = val;
+          } else {
+            // Otherwise just update innerHTML if it's a leaf-ish span
+            el.textContent = val;
+          }
+        }
+      });
+
+      document.querySelectorAll('#langSwitch button').forEach(b => {
+        b.classList.toggle('active', b.dataset.lang === lang);
+      });
+    }
+  })();
+
+  // ───── Scroll hint hides after scrolling ─────
   addEventListener('scroll', () => {
     const h = document.getElementById('scrollHint');
     if (h && window.scrollY > 120) h.classList.add('hide');
   }, { passive: true });
-</script>
-<div id="root"></div>
 
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  // ───── IntersectionObserver for reveal animations ─────
+  (function() {
+    const opts = { threshold: 0.12, rootMargin: '0px 0px -60px 0px' };
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, opts);
+    document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => io.observe(el));
+  })();
 
-<script>
-(async function(){
-  const [dict, comps] = await Promise.all([
-    fetch('dict.jsx').then(r => r.text()),
-    fetch('components.jsx').then(r => r.text()),
-  ]);
-  const app = `
-    function App() {
-      const [lang, setLang] = window.useLang();
-      const t = window.DICT[lang] || window.DICT.en;
-      return (
-        <>
-          <Nav lang={lang} setLang={setLang} t={t}/>
-          <Hero t={t}/>
-          <Ticker t={t}/>
-          <Parts t={t}/>
-          <OrbitSection t={t}/>
-          <Furnace t={t}/>
-          <Process t={t}/>
-          <Meters t={t}/>
-          <RFQ t={t}/>
-          <Footer t={t}/>
-          <WAFloat lang={lang}/>
-        </>
-      );
+  // ───── RFQ form submission ─────
+  document.getElementById('rfqForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const btn = form.querySelector('button[type="submit"]');
+    const originalText = btn.textContent;
+    btn.textContent = '...';
+    btn.disabled = true;
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+      });
+      if (res.ok) {
+        const lang = localStorage.getItem('kv_lang') || 'tr';
+        const msg = {
+          tr: '✓ Teşekkürler. 24 saat içinde döneriz.',
+          en: '✓ Thank you. We will reply within 24 hours.',
+          de: '✓ Vielen Dank. Wir melden uns innerhalb 24 Stunden.',
+          ru: '✓ Спасибо. Ответим в течение 24 часов.',
+        };
+        form.outerHTML = '<div class="rfq__success">' + msg[lang] + '</div>';
+      } else {
+        throw new Error('submit failed');
+      }
+    } catch (err) {
+      btn.textContent = originalText;
+      btn.disabled = false;
+      alert('Hata oluştu, lütfen tekrar deneyin veya e-posta gönderin: info@kervanheat.com');
     }
-    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
-  `;
-  const bundle = dict + '\n' + comps + '\n' + app;
-  const out = Babel.transform(bundle, { presets: ['react'] }).code;
-  const s = document.createElement('script');
-  s.textContent = out;
-  document.body.appendChild(s);
-})();
+  });
 </script>
+
 </body>
 </html>
