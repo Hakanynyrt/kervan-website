@@ -296,16 +296,16 @@
     if (!chisel) return;
 
     if (innerWidth <= 900) {
-      // Mobile: centered, slightly below middle
-      idleBase.set(0, -1.4, 0);
+      // Mobile: centered, well below middle
+      idleBase.set(0, -3.0, 0);
       outerPivot.scale.setScalar(0.85);
     } else {
-      // Desktop: LEFT side (text is on the right)
+      // Desktop: LEFT side, lower than center
       const fovY = cam.fov * Math.PI / 180;
       const viewH = 2 * cam.position.z * Math.tan(fovY / 2);
       const viewW = viewH * aspect;
       const xOffset = Math.min(viewW * 0.22, 3.4);
-      idleBase.set(-xOffset, -0.4, 0);
+      idleBase.set(-xOffset, -2.0, 0);
       outerPivot.scale.setScalar(1.15);
     }
     outerPivot.position.copy(idleBase);
@@ -360,6 +360,9 @@
   // Initial
   requestAnimationFrame(() => { collectSections(); computeSectionFactors(); });
 
+  // Smoothed scroll progress (very slow follow — cinematic)
+  let smoothedProgress = 0;
+
   // ═══════════════════════════════════════════════════════════════════
   // ANIMATION LOOP
   // ═══════════════════════════════════════════════════════════════════
@@ -372,10 +375,10 @@
     const t = clock.getElapsedTime();
     const dt = Math.min(clock.getDelta(), 0.05);
 
-    // Smooth section factors toward targets
-    const LERP = 1 - Math.pow(0.001, dt); // ~ 0.05 at 60fps
+    // Smooth section factors toward targets — VERY slow (cinematic)
+    const LERP = 1 - Math.pow(0.001, dt);
     sectionIds.forEach(id => {
-      sectionLerped[id] += (sectionFactor[id] - sectionLerped[id]) * Math.min(1, LERP * 3.2);
+      sectionLerped[id] += (sectionFactor[id] - sectionLerped[id]) * Math.min(1, LERP * 0.8);
     });
 
     // ── Breath cycle (ember base level) ─────────────────────────
@@ -472,9 +475,8 @@
     // Target scale: bigger in services (forge zoom-in), smaller in brands (technical distance)
     const scaleBoost = 1 + fServices * 0.25 + fContact * 0.08 - fBrands * 0.18;
 
-    // Target rotation Y: one full turn across the whole page
-    // (on top of the slow idle spin, so effect is cumulative — we drive the outerPivot instead)
-    const targetRotY = progress * Math.PI * 2;
+    // Smooth scroll progress (very slow follow)
+    smoothedProgress += (progress - smoothedProgress) * Math.min(1, dt * 0.5);
 
     // Drift (EVA) — scaled down during contact (chisel settles)
     const driftAmount = 1 - fContact * 0.85;
@@ -489,8 +491,8 @@
       outerPivot.position.y = idleBase.y + targetYOffset;
     }
 
-    // Scroll-driven Y rotation on the outer pivot (one full turn total)
-    outerPivot.rotation.y = targetRotY;
+    // Scroll-driven Y rotation (smoothed — one slow turn across the page)
+    outerPivot.rotation.y = smoothedProgress * Math.PI * 2;
 
     // ── Drift rotation (X/Z) — fades to zero in contact ────────
     if (!reduce) {
