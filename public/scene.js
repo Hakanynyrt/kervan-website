@@ -65,17 +65,20 @@
   //   s        : uniform scale multiplier
   //   o        : opacity (0..1) — driven into material
   // ─────────────────────────────────────────────────────────────────────
+  // Small-badge keyframes: chisel stays centered in its 380px canvas; only
+  // rotation and small sub-pixel drift change per section. Opacity eases
+  // on sections that already have heavy content so the badge recedes.
   const KF = [
-    // 0 — Hero: diagonal attack, centered right
-    { sel: '.hero',       rx: -0.06, ry:  0.22, rz: -Math.PI / 5.5, px:  0.0, py:  0.0, s: 1.00, o: 1.00 },
-    // 1 — Products: tilt & drift right, smaller, backs off behind cards
-    { sel: '#products',   rx:  0.18, ry: -0.55, rz: -Math.PI / 2.6, px:  2.6, py: -0.6, s: 0.78, o: 0.75 },
-    // 2 — Craft: stands vertical, tip upward, gentle swing
-    { sel: '#craft',      rx: -0.05, ry:  0.95, rz:  Math.PI * 0.04, px:  1.0, py:  0.3, s: 0.95, o: 0.85 },
-    // 3 — Industries: lying horizontal, drifts left a touch
-    { sel: '#industries', rx: -0.12, ry:  0.30, rz:  Math.PI / 2,    px: -0.6, py: -1.0, s: 0.82, o: 0.70 },
-    // 4 — Contact: tucked to top-right corner, small, faint
-    { sel: '#contact',    rx:  0.25, ry: -0.70, rz: -Math.PI / 3.2,  px:  4.8, py:  2.2, s: 0.55, o: 0.45 },
+    // 0 — Hero: diagonal attack
+    { sel: '.hero',       rx: -0.06, ry:  0.22, rz: -Math.PI / 5.5,  px:  0.0, py:  0.0, s: 1.00, o: 1.00 },
+    // 1 — Products: turned 3/4, slight tilt; cards are busy so fade a bit
+    { sel: '#products',   rx:  0.10, ry: -0.60, rz: -Math.PI / 3.5,  px:  0.0, py:  0.0, s: 1.00, o: 0.55 },
+    // 2 — Craft: vertical, tip up, stands on its axis
+    { sel: '#craft',      rx: -0.02, ry:  0.85, rz:  Math.PI * 0.02, px:  0.0, py:  0.2, s: 1.00, o: 0.85 },
+    // 3 — Industries: lying horizontal, as if resting
+    { sel: '#industries', rx: -0.08, ry:  0.30, rz:  Math.PI / 2,    px:  0.0, py:  0.0, s: 0.95, o: 0.65 },
+    // 4 — Contact: soft diagonal, faint — form is the hero here
+    { sel: '#contact',    rx:  0.12, ry: -0.40, rz: -Math.PI / 4,    px:  0.0, py:  0.0, s: 0.90, o: 0.40 },
   ];
 
   let needsCompute = true;

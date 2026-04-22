@@ -2,7 +2,7 @@
 // useState / useEffect / useRef come from dict.jsx (loaded first).
 
 // ═══════════════════════════════════════════════════════════════════════
-// NAV — minimal, lang switch, CTA
+// NAV
 // ═══════════════════════════════════════════════════════════════════════
 function Nav({ lang, setLang, t }) {
   const [open, setOpen]   = useState(false);
@@ -16,55 +16,68 @@ function Nav({ lang, setLang, t }) {
 
   return (
     <header className={"nav" + (stuck ? ' nav--stuck' : '')}>
-      <a className="nav__brand" href="/">
-        <span className="nav__mark">Krv</span>
-        <span className="nav__name">Kervan Heat</span>
-      </a>
+      <div className="nav__inner">
+        <a className="nav__brand" href="/">
+          <span className="nav__mark">K</span>
+          <span className="nav__name">Kervan Heat</span>
+        </a>
 
-      <nav className={"nav__links" + (open ? ' nav__links--open' : '')}>
-        <a href="#products" onClick={() => setOpen(false)}>{t.nav.products}</a>
-        <a href="#craft"    onClick={() => setOpen(false)}>{t.nav.craft}</a>
-        <a href="#industries" onClick={() => setOpen(false)}>{t.nav.industries}</a>
-        <a href="#contact"  onClick={() => setOpen(false)}>{t.nav.contact}</a>
-      </nav>
+        <nav className={"nav__links" + (open ? ' nav__links--open' : '')}>
+          <a href="#products" onClick={() => setOpen(false)}>{t.nav.products}</a>
+          <a href="#craft"    onClick={() => setOpen(false)}>{t.nav.craft}</a>
+          <a href="#industries" onClick={() => setOpen(false)}>{t.nav.industries}</a>
+          <a href="#contact"  onClick={() => setOpen(false)}>{t.nav.contact}</a>
+        </nav>
 
-      <div className="nav__right">
-        <button
-          className={"nav__lang" + (lang === 'tr' ? ' is-active' : '')}
-          onClick={() => setLang(lang === 'tr' ? 'en' : 'tr')}
-          aria-label="Language"
-        >
-          {lang === 'tr' ? 'EN' : 'TR'}
-        </button>
-        <a href="#contact" className="btn btn--primary btn--sm">{t.nav.cta}</a>
-        <button
-          className="nav__burger"
-          onClick={() => setOpen(o => !o)}
-          aria-label="Menu"
-        >
-          <span></span><span></span><span></span>
-        </button>
+        <div className="nav__right">
+          <button
+            className="nav__lang"
+            onClick={() => setLang(lang === 'tr' ? 'en' : 'tr')}
+            aria-label="Language"
+          >
+            {lang === 'tr' ? 'EN' : 'TR'}
+          </button>
+          <a href="#contact" className="btn btn--primary btn--sm">{t.nav.cta}</a>
+          <button
+            className="nav__burger"
+            onClick={() => setOpen(o => !o)}
+            aria-label="Menu"
+          >
+            <span></span><span></span><span></span>
+          </button>
+        </div>
       </div>
     </header>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// HERO
+// HERO — 8-col display headline + 4-col stats grid
 // ═══════════════════════════════════════════════════════════════════════
 function Hero({ t }) {
   return (
     <section className="hero">
-      <div className="hero__copy reveal-stagger">
-        <div className="eyebrow">{t.hero.eyebrow}</div>
-        <h1 className="hero__title">
-          <span className="hero__line">{t.hero.title1}</span>
-          <span className="hero__line hero__line--accent">{t.hero.title2}</span>
-        </h1>
-        <p className="hero__sub">{t.hero.sub}</p>
-        <div className="hero__actions">
-          <a href="#contact" className="btn btn--primary">{t.hero.cta}</a>
-          <a href="#products" className="btn btn--ghost">{t.hero.ctaSecondary} →</a>
+      <div className="hero__grid">
+        <div className="hero__copy reveal-stagger">
+          <div className="eyebrow">{t.hero.eyebrow}</div>
+          <h1 className="display">
+            <span>{t.hero.title1}</span>{' '}
+            <span className="ital">{t.hero.title2}</span>
+          </h1>
+          <p className="hero__sub">{t.hero.sub}</p>
+          <div className="hero__actions">
+            <a href="#contact"  className="btn btn--primary">{t.hero.cta}</a>
+            <a href="#products" className="btn btn--ghost">{t.hero.ctaSecondary} →</a>
+          </div>
+        </div>
+
+        <div className="hero__stats reveal-stagger">
+          {t.hero.stats.map((s, i) => (
+            <div className="stat" key={i}>
+              <div className="stat__num">{s.n}</div>
+              <div className="stat__label">{s.l}</div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -72,43 +85,48 @@ function Hero({ t }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// PRODUCTS — four cards, photo + name + blurb
+// PRODUCTS
 // ═══════════════════════════════════════════════════════════════════════
 function Products({ t }) {
   return (
     <section className="sec" id="products">
-      <div className="sec__head reveal">
-        <div className="eyebrow">{t.products.eyebrow}</div>
-        <h2 className="sec__title">{t.products.title.split('\n').map((l, i) => <span key={i}>{l}</span>)}</h2>
+      <div className="sec__head">
+        <div className="sec__head-main reveal">
+          <div className="eyebrow">{t.products.eyebrow}</div>
+          <h2 className="h2">{t.products.title.split('\n').map((l, i) => <span key={i} style={{ display: 'block' }}>{l}</span>)}</h2>
+        </div>
+        <aside className="sec__head-aside reveal">{t.products.aside}</aside>
       </div>
 
-      <div className="products reveal-stagger">
-        {t.products.items.map((p, i) => (
-          <article className="prod" key={i}>
-            <div className="prod__img" style={{ backgroundImage: `url(${p.img})` }}>
-              <span className="prod__num">0{i + 1}</span>
-            </div>
-            <div className="prod__body">
-              <h3 className="prod__name">{p.name}</h3>
-              <p className="prod__desc">{p.desc}</p>
-            </div>
-          </article>
-        ))}
+      <div className="products-wrap">
+        <div className="products reveal-stagger">
+          {t.products.items.map((p, i) => (
+            <article className="prod" key={i}>
+              <div className="prod__img" style={{ backgroundImage: `url(${p.img})` }}>
+                <span className="prod__num">0{i + 1}</span>
+              </div>
+              <div className="prod__body">
+                <h3 className="prod__name">{p.name}</h3>
+                <p className="prod__desc">{p.desc}</p>
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// CRAFT — single wide image + narrative
+// CRAFT — 5 + 7 (copy + photo)
 // ═══════════════════════════════════════════════════════════════════════
 function Craft({ t }) {
   return (
-    <section className="sec craft" id="craft">
+    <section className="craft" id="craft">
       <div className="craft__grid">
         <div className="craft__copy reveal-stagger">
           <div className="eyebrow">{t.craft.eyebrow}</div>
-          <h2 className="sec__title">{t.craft.title}</h2>
+          <h2 className="h2">{t.craft.title}</h2>
           <p className="craft__body">{t.craft.body}</p>
         </div>
         <div className="craft__img reveal" style={{ backgroundImage: 'url(photos/workshop-overview.jpeg)' }}></div>
@@ -118,34 +136,40 @@ function Craft({ t }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// INDUSTRIES — 4 simple rows
+// INDUSTRIES
 // ═══════════════════════════════════════════════════════════════════════
 function Industries({ t }) {
   return (
-    <section className="sec industries" id="industries">
-      <div className="sec__head reveal">
-        <div className="eyebrow">{t.industries.eyebrow}</div>
-        <h2 className="sec__title">{t.industries.title}</h2>
+    <section className="sec" id="industries">
+      <div className="sec__head">
+        <div className="sec__head-main reveal">
+          <div className="eyebrow">{t.industries.eyebrow}</div>
+          <h2 className="h2">{t.industries.title}</h2>
+        </div>
+        <aside className="sec__head-aside reveal">{t.industries.aside}</aside>
       </div>
 
-      <ul className="ind reveal-stagger">
-        {t.industries.items.map((it, i) => (
-          <li className="ind__row" key={i}>
-            <span className="ind__num">0{i + 1}</span>
-            <span className="ind__name">{it.name}</span>
-            <span className="ind__desc">{it.desc}</span>
-          </li>
-        ))}
-      </ul>
+      <div className="ind-wrap">
+        <ul className="ind reveal-stagger">
+          {t.industries.items.map((it, i) => (
+            <li className="ind__row" key={i}>
+              <span className="ind__num">0{i + 1}</span>
+              <span className="ind__name">{it.name}</span>
+              <span className="ind__desc">{it.desc}</span>
+              <span className="ind__arrow">→</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// CONTACT — info + RFQ form
+// CONTACT
 // ═══════════════════════════════════════════════════════════════════════
 function Contact({ t }) {
-  const [state, setState] = useState('idle'); // idle | sending | success | error
+  const [state, setState] = useState('idle');
   const [kvkk, setKvkk]   = useState(false);
   const formRef = useRef(null);
 
@@ -166,11 +190,11 @@ function Contact({ t }) {
   }
 
   return (
-    <section className="sec contact" id="contact">
+    <section className="contact" id="contact">
       <div className="contact__grid">
         <div className="contact__info reveal">
           <div className="eyebrow">{t.contact.eyebrow}</div>
-          <h2 className="sec__title">{t.contact.title}</h2>
+          <h2 className="h2">{t.contact.title}</h2>
           <p className="contact__sub">{t.contact.sub}</p>
 
           <dl className="contact__list">
@@ -240,20 +264,22 @@ function Contact({ t }) {
 function Footer({ t }) {
   return (
     <footer className="foot">
-      <div className="foot__row">
-        <div className="foot__brand">
-          <span className="nav__mark">Krv</span>
-          <span className="foot__name">
-            <b>{t.footer.brand}</b>
-            <em>{t.footer.tag}</em>
-          </span>
+      <div className="foot__inner">
+        <div className="foot__row">
+          <div className="foot__brand">
+            <span className="nav__mark">K</span>
+            <span className="foot__name">
+              <b>{t.footer.brand}</b>
+              <em>{t.footer.tag}</em>
+            </span>
+          </div>
+          <nav className="foot__links">
+            <a href="/kvkk.html">{t.footer.kvkk}</a>
+            <a href="mailto:info@kervanheat.com">info@kervanheat.com</a>
+          </nav>
         </div>
-        <nav className="foot__links">
-          <a href="/kvkk.html">{t.footer.kvkk}</a>
-          <a href="mailto:info@kervanheat.com">info@kervanheat.com</a>
-        </nav>
+        <div className="foot__rights">{t.footer.rights}</div>
       </div>
-      <div className="foot__rights">{t.footer.rights}</div>
     </footer>
   );
 }

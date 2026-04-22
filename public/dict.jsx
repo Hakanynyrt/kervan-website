@@ -21,10 +21,17 @@ window.DICT = {
       sub: 'Keski, piston, burç, sızdırmazlık. Her biri kendi atölyemizde, kendi ellerimizle.',
       cta: 'Teklif Al',
       ctaSecondary: 'Ürünlere bak',
+      stats: [
+        { n: '26',   l: 'Yıl deneyim' },
+        { n: '40+',  l: 'Marka uyumu' },
+        { n: '1000+',l: 'Parça çeşidi' },
+        { n: '24s',  l: 'Teklif süresi' },
+      ],
     },
     products: {
       eyebrow: 'Ürün Aileleri',
       title: 'Basit dört kalem.\nHer kırıcının ihtiyacı.',
+      aside: 'Her parça kendi tezgâhında, kendi malzemesiyle. Değiştirilemeyen tek şey: özen.',
       items: [
         { name: 'Keski', desc: 'Kırıcının ucu. Toprakla, taşla, betonla ilk temas noktası.', img: 'photos/chisel-stock.jpeg' },
         { name: 'Piston', desc: 'Darbenin kaynağı. Yüksek frekansla çalışır, yılmaz durur.', img: 'photos/cnc-machining.jpeg' },
@@ -40,6 +47,7 @@ window.DICT = {
     industries: {
       eyebrow: 'Kimler İçin',
       title: 'İşini yapanın yanında.',
+      aside: 'Türkiye\'nin her köşesinde, kazıdan ocağa, yoldan yıkıma — sahada çalışan her kırıcıya.',
       items: [
         { name: 'İnşaat', desc: 'Temel kazıdan yıkıma' },
         { name: 'Madencilik', desc: 'Ocağın derininde' },
@@ -92,10 +100,17 @@ window.DICT = {
       sub: 'Chisels, pistons, bushings, seals. Each one made in our workshop, by hand.',
       cta: 'Get a Quote',
       ctaSecondary: 'See products',
+      stats: [
+        { n: '26',   l: 'Years of craft' },
+        { n: '40+',  l: 'Hammer brands' },
+        { n: '1000+',l: 'Parts shipped' },
+        { n: '24h',  l: 'Quote turnaround' },
+      ],
     },
     products: {
       eyebrow: 'Product Families',
       title: 'Four simple things.\nWhat every hammer needs.',
+      aside: 'Every part on its own bench, with its own steel. The one thing that never changes: care.',
       items: [
         { name: 'Chisel', desc: 'The point of the hammer. First contact with earth, rock, concrete.', img: 'photos/chisel-stock.jpeg' },
         { name: 'Piston', desc: 'The source of the strike. High frequency. Doesn\'t flinch.', img: 'photos/cnc-machining.jpeg' },
@@ -111,6 +126,7 @@ window.DICT = {
     industries: {
       eyebrow: 'Who We Serve',
       title: 'Beside the people doing the work.',
+      aside: 'Across Turkey — from trench to pit, from roadwork to demolition — with every crew running a breaker.',
       items: [
         { name: 'Construction', desc: 'From foundation to demolition' },
         { name: 'Mining', desc: 'Deep in the pit' },
