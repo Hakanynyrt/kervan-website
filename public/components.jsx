@@ -231,7 +231,7 @@ function Nav({ lang, setLang, t }) {
         <a className="logo" href="#">
           <span className="logo__mark">Krv<span className="logo__mark__sub">Carbon</span></span>
           <span className="logo__word">KERVAN <b>HEAT</b></span>
-          <span className="logo__sup">EST·1999</span>
+          <span className="logo__sup">KARTEPE</span>
         </a>
         <div className="nav__links">
           <a className="nav__link" href="index.html#parts"><span className="num">01 /</span>{t.nav.parts}</a>

@@ -8,7 +8,7 @@ const DICT = {
   tr: {
     nav: { parts:'Parçalar', compat:'Uyumluluk', furnace:'Fırın', process:'Süreç', contact:'İletişim', quote:'Teklif Al', about:'Hakkımızda', cases:'Referans', blog:'Bilgi' },
     hero: {
-      eyebrow: 'MFG · KARTEPE · SINCE 1999',
+      eyebrow: 'MFG · KARTEPE',
       h1a: 'Kırıcı parçaları.', h1b: 'Doğrudan fabrikadan.',
       sub: 'Furukawa, Rammer, Soosan, Atlas Copco ve 40+ marka için keskiler, pistonlar, burçlar, cıvatalar ve tamir kitleri üretiyoruz. Hepsi kendi atölyemizde.',
       cta1:'Teklif Al', cta2:'Parçaları Gör',
@@ -17,7 +17,7 @@ const DICT = {
       topL:'DWG · KVN · HOMEPAGE', topR:'SHEET 01 / 08',
       botL:'LAT 40.766 N · LON 30.210 E', botR:'KARTEPE · KOCAELI · TR',
     },
-    ticker: ['42CrMo ÇELİK', 'HRC 48–52 SERTLİK', '500 t/AY KAPASİTE', '25+ YIL ÜRETİM', '40+ MARKA UYUMLU', '5–10 GÜN TESLİMAT', 'KENDİ FIRINIMIZ', 'DÜNYAYA SEVKİYAT'],
+    ticker: ['42CrMo ÇELİK', 'HRC 48–52 SERTLİK', '500 t/AY KAPASİTE', '40+ MARKA UYUMLU', '5–10 GÜN TESLİMAT', 'KENDİ FIRINIMIZ', 'DÜNYAYA SEVKİYAT'],
     parts: {
       label:'01 / ÜRÜN GRUBU', h2a:'Her parça. ', h2b:'Tek çatı.',
       sub:'Kırıcınız için ihtiyacınız olan her şey. Hiçbir aracı yok, hiçbir gecikme yok.',
@@ -58,7 +58,7 @@ const DICT = {
     meters: {
       label:'05 / RAKAMLAR', h2a:'Sayılar ', h2b:'konuşur.', sub:'Her iddianın arkasında bir ölçüm var.',
       items: [
-        { v:'25', u:'+ YIL', l:'ÜRETİMDE', fill:0.62, hint:'KURULUŞ 1999' },
+        { v:'5–10', u:'GÜN', l:'TESLİMAT', fill:0.72, hint:'DÜNYAYA' },
         { v:'40', u:'+ MARKA', l:'UYUMLU', fill:0.9, hint:'OEM-EŞDEĞER' },
         { v:'500', u:'t / AY', l:'KAPASİTE', fill:0.78, hint:'ÇELİK İŞLEME' },
         { v:'HRC 48–52', u:'', l:'SERTLİK', fill:0.88, hint:'ROCKWELL · C' },
@@ -97,7 +97,7 @@ const DICT = {
   en: {
     nav: { parts:'Parts', compat:'Compatibility', furnace:'Heat Shop', process:'Process', contact:'Contact', quote:'Get a Quote', about:'About', cases:'Cases', blog:'Knowledge' },
     hero: {
-      eyebrow: 'MFG · KARTEPE · SINCE 1999',
+      eyebrow: 'MFG · KARTEPE',
       h1a: 'Breaker parts.', h1b: 'Direct from the factory.',
       sub: 'We make chisels, pistons, bushings, bolts and repair kits for Furukawa, Rammer, Soosan, Atlas Copco and 40 more brands. All made under one roof.',
       cta1:'Get a Quote', cta2:'See the Parts',
@@ -106,7 +106,7 @@ const DICT = {
       topL:'DWG · KVN · HOMEPAGE', topR:'SHEET 01 / 08',
       botL:'LAT 40.766 N · LON 30.210 E', botR:'KARTEPE · KOCAELI · TR',
     },
-    ticker: ['42CrMo STEEL', 'HRC 48–52 HARDNESS', '500 t/MO CAPACITY', '25+ YEARS MAKING', '40+ BRANDS MATCHED', '5–10 DAY LEAD', 'OUR OWN FURNACE', 'SHIPPED WORLDWIDE'],
+    ticker: ['42CrMo STEEL', 'HRC 48–52 HARDNESS', '500 t/MO CAPACITY', '40+ BRANDS MATCHED', '5–10 DAY LEAD', 'OUR OWN FURNACE', 'SHIPPED WORLDWIDE'],
     parts: {
       label:'01 / PRODUCT CLASS', h2a:'Every part. ', h2b:'One roof.',
       sub:'Everything your breaker needs. No middlemen, no delays.',
@@ -147,7 +147,7 @@ const DICT = {
     meters: {
       label:'05 / NUMBERS', h2a:'Numbers ', h2b:'speak.', sub:'Every claim backed by a measurement.',
       items: [
-        { v:'25', u:'+ YEARS', l:'MAKING', fill:0.62, hint:'FOUNDED 1999' },
+        { v:'5–10', u:'DAYS', l:'LEAD TIME', fill:0.72, hint:'WORLDWIDE' },
         { v:'40', u:'+ BRANDS', l:'MATCHED', fill:0.9, hint:'OEM-EQUIVALENT' },
         { v:'500', u:'t / MO', l:'CAPACITY', fill:0.78, hint:'STEEL PROCESSED' },
         { v:'HRC 48–52', u:'', l:'HARDNESS', fill:0.88, hint:'ROCKWELL · C' },
@@ -186,7 +186,7 @@ const DICT = {
   de: {
     nav: { parts:'Teile', compat:'Kompatibilität', furnace:'Härterei', process:'Prozess', contact:'Kontakt', quote:'Angebot', about:'Über uns', cases:'Cases', blog:'Wissen' },
     hero: {
-      eyebrow: 'FERTIGUNG · KARTEPE · SEIT 1999',
+      eyebrow: 'FERTIGUNG · KARTEPE',
       h1a: 'Hammerteile.', h1b: 'Direkt vom Werk.',
       sub: 'Wir fertigen Meißel, Kolben, Buchsen, Bolzen und Reparatursätze für Furukawa, Rammer, Soosan, Atlas Copco und 40 weitere Marken. Alles im eigenen Werk.',
       cta1:'Angebot anfordern', cta2:'Teile ansehen',
@@ -195,7 +195,7 @@ const DICT = {
       topL:'DWG · KVN · HOMEPAGE', topR:'BLATT 01 / 08',
       botL:'LAT 40.766 N · LON 30.210 E', botR:'KARTEPE · KOCAELI · TR',
     },
-    ticker: ['42CrMo STAHL','HRC 48–52 HÄRTE','500 t/MONAT','25+ JAHRE','40+ MARKEN','5–10 TAGE','EIGENER OFEN','WELTWEIT'],
+    ticker: ['42CrMo STAHL','HRC 48–52 HÄRTE','500 t/MONAT','40+ MARKEN','5–10 TAGE','EIGENER OFEN','WELTWEIT'],
     parts: {
       label:'01 / PRODUKTKLASSE', h2a:'Jedes Teil. ', h2b:'Ein Dach.',
       sub:'Alles, was Ihr Hammer braucht. Kein Zwischenhändler, keine Verzögerung.',
@@ -236,7 +236,7 @@ const DICT = {
     meters: {
       label:'05 / ZAHLEN', h2a:'Zahlen ', h2b:'sprechen.', sub:'Jede Behauptung belegt durch eine Messung.',
       items: [
-        { v:'25', u:'+ JAHRE', l:'FERTIGUNG', fill:0.62, hint:'GEGRÜNDET 1999' },
+        { v:'5–10', u:'TAGE', l:'LIEFERUNG', fill:0.72, hint:'WELTWEIT' },
         { v:'40', u:'+ MARKEN', l:'PASSEND', fill:0.9, hint:'OEM-GLEICH' },
         { v:'500', u:'t / MO', l:'KAPAZITÄT', fill:0.78, hint:'STAHL' },
         { v:'HRC 48–52', u:'', l:'HÄRTE', fill:0.88, hint:'ROCKWELL · C' },
@@ -275,7 +275,7 @@ const DICT = {
   ru: {
     nav: { parts:'Запчасти', compat:'Совместимость', furnace:'Печь', process:'Процесс', contact:'Контакт', quote:'Запросить', about:'О нас', cases:'Проекты', blog:'База' },
     hero: {
-      eyebrow: 'ПРОИЗВОДСТВО · KARTEPE · С 1999',
+      eyebrow: 'ПРОИЗВОДСТВО · KARTEPE',
       h1a: 'Запчасти для молотов.', h1b: 'Напрямую с завода.',
       sub: 'Мы производим пики, поршни, втулки, болты и ремкомплекты для Furukawa, Rammer, Soosan, Atlas Copco и 40+ марок. Всё под одной крышей.',
       cta1:'Запросить', cta2:'Посмотреть',
@@ -284,7 +284,7 @@ const DICT = {
       topL:'DWG · KVN · HOMEPAGE', topR:'ЛИСТ 01 / 08',
       botL:'LAT 40.766 N · LON 30.210 E', botR:'KARTEPE · KOCAELI · TR',
     },
-    ticker: ['42CrMo СТАЛЬ','HRC 48–52','500 т/МЕС','25+ ЛЕТ','40+ МАРОК','5–10 ДНЕЙ','СВОЯ ПЕЧЬ','ПО ВСЕМУ МИРУ'],
+    ticker: ['42CrMo СТАЛЬ','HRC 48–52','500 т/МЕС','40+ МАРОК','5–10 ДНЕЙ','СВОЯ ПЕЧЬ','ПО ВСЕМУ МИРУ'],
     parts: {
       label:'01 / ГРУППА', h2a:'Любая деталь. ', h2b:'Одна крыша.',
       sub:'Всё, что нужно вашему молоту. Без посредников.',
@@ -325,7 +325,7 @@ const DICT = {
     meters: {
       label:'05 / ЦИФРЫ', h2a:'Цифры ', h2b:'говорят.', sub:'Каждое заявление — измерением.',
       items: [
-        { v:'25', u:'+ ЛЕТ', l:'ОПЫТ', fill:0.62, hint:'С 1999' },
+        { v:'5–10', u:'ДНЕЙ', l:'СРОК', fill:0.72, hint:'ПО МИРУ' },
         { v:'40', u:'+ МАРОК', l:'ПОДБОР', fill:0.9, hint:'OEM-ЭКВ.' },
         { v:'500', u:'т / МЕС', l:'ОБЪЁМ', fill:0.78, hint:'СТАЛЬ' },
         { v:'HRC 48–52', u:'', l:'ТВЁРДОСТЬ', fill:0.88, hint:'ROCKWELL · C' },

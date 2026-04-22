@@ -8,7 +8,7 @@ const DICT = {
   tr: {
     nav: { parts:'Parçalar', compat:'Uyumluluk', furnace:'Fırın', process:'Süreç', contact:'İletişim', quote:'Teklif Al' },
     hero: {
-      eyebrow: 'MFG · KARTEPE · SINCE 1999',
+      eyebrow: 'MFG · KARTEPE',
       h1a: 'Kırıcı parçaları.', h1b: 'Doğrudan fabrikadan.',
       sub: 'Furukawa, Rammer, Soosan, Atlas Copco ve 40+ marka için keskiler, pistonlar, burçlar, cıvatalar ve tamir kitleri üretiyoruz. 42CrMo çelik, HRC 48–52, kendi atölyemizde üretilir ve ısıl işlemi yapılır.',
       cta1:'Teklif Al', cta2:'Parçaları Gör',
@@ -17,7 +17,7 @@ const DICT = {
       topL:'DWG · KVN · HOMEPAGE', topR:'SHEET 01 / 08',
       botL:'LAT 40.766 N · LON 30.210 E', botR:'KARTEPE · KOCAELI · TR',
     },
-    ticker: ['42CrMo ÇELİK', 'HRC 48–52 SERTLİK', '500 t/AY KAPASİTE', '25+ YIL ÜRETİM', '40+ MARKA UYUMLU', '5–10 GÜN TESLİMAT', 'EN 10204 3.1 SERTİFİKA', 'DÜNYAYA SEVKİYAT'],
+    ticker: ['42CrMo ÇELİK', 'HRC 48–52 SERTLİK', '500 t/AY KAPASİTE', '40+ MARKA UYUMLU', '5–10 GÜN TESLİMAT', 'DÜNYAYA SEVKİYAT'],
     parts: {
       label:'01 / ÜRÜN GRUBU', h2a:'Her parça. ', h2b:'Tek çatı.',
       sub:'Kırıcınız için ihtiyacınız olan her şey. Hiçbir aracı yok, hiçbir gecikme yok.',
@@ -51,17 +51,17 @@ const DICT = {
         { n:'02', name:'CNC İşleme', desc:'4-eksen torna + freze. Tolerans h6.', tag:'CNC · ±0.01' },
         { n:'03', name:'Isıl İşlem', desc:'Kendi fırınımız. Sertleştir → tempera.', tag:'HRC 48–52' },
         { n:'04', name:'Taşlama', desc:'Silindirik taşlama. Lapatılı yüzey.', tag:'Ra · 0.4' },
-        { n:'05', name:'QC', desc:'Sertlik + boyut + yüzey. Her parça.', tag:'EN 10204 3.1' },
+        { n:'05', name:'QC', desc:'Sertlik + boyut + yüzey. Her parça.', tag:'HRC + BOYUT' },
         { n:'06', name:'Sevkiyat', desc:'Paletli. Aynı gün fatura.', tag:'WORLDWIDE' },
       ],
     },
     meters: {
       label:'05 / RAKAMLAR', h2a:'Sayılar ', h2b:'konuşur.', sub:'Her iddianın arkasında bir ölçüm var.',
       items: [
-        { v:'25', u:'+ YIL', l:'ÜRETİMDE', fill:0.62, hint:'KURULUŞ 1999' },
         { v:'40', u:'+ MARKA', l:'UYUMLU', fill:0.9, hint:'OEM-EŞDEĞER' },
         { v:'500', u:'t / AY', l:'KAPASİTE', fill:0.78, hint:'ÇELİK İŞLEME' },
         { v:'HRC 48–52', u:'', l:'SERTLİK', fill:0.88, hint:'ROCKWELL · C' },
+        { v:'5–10', u:'GÜN', l:'TESLİMAT', fill:0.72, hint:'DÜNYAYA' },
       ],
     },
     rfq: {
@@ -75,16 +75,16 @@ const DICT = {
         qty:'Adet', message:'Mesaj / parça no.',
         messagePh:'HB20G · Ø80 × 1650 — 20 adet. Fotoğraf eklerseniz daha iyi.',
       },
-      submit:'Gönder', note:'24 saat içinde yanıt · EN 10204 3.1 sertifikası dahil',
+      submit:'Gönder', note:'24 saat içinde yanıt · Fiyat + termin',
       success:'Aldık. 24 saat içinde dönüş yapacağız.',
     },
     foot: {
       h1:'Ürünler', h2:'Şirket', h3:'İletişim',
-      about:'Kartepe, Kocaeli\'de 25+ yıldır kırıcı yedek parçaları ve ısıl işlem üretiyoruz. Kendi fırınımız, kendi CNC\'miz, kendi laboratuvarımız.',
+      about:'Kartepe, Kocaeli\'de kırıcı yedek parçaları ve ısıl işlem üretiyoruz. Kendi fırınımız, kendi CNC\'miz, kendi laboratuvarımız.',
       p:['Keskiler','Pistonlar','Burçlar','Cıvatalar','Ön kafalar','Tamir kitleri'],
-      c:['Hakkımızda','Fırın','Galeri','Sertifikalar','İK'],
+      c:['Hakkımızda','Fırın','Galeri','İK'],
       cc:['+90 531 669 37 34','hakan@kervanheat.com','Kartepe · Kocaeli · TR'],
-      certs:['EN 10204 3.1','ISO 9001','CE'],
+      certs:[],
       block:[['PROJE','KERVAN HEAT'],['DWG','KVN-LP-001'],['REV','00'],['DATE','2026'],['SCALE','1:1'],['SHEET','08/08']],
       bot:'Türkiye\'de üretildi · İçeride ısıl işlem · Dünyaya sevkiyat',
     },
@@ -92,7 +92,7 @@ const DICT = {
   en: {
     nav: { parts:'Parts', compat:'Compatibility', furnace:'Heat Shop', process:'Process', contact:'Contact', quote:'Get a Quote' },
     hero: {
-      eyebrow: 'MFG · KARTEPE · SINCE 1999',
+      eyebrow: 'MFG · KARTEPE',
       h1a: 'Breaker parts.', h1b: 'Direct from the factory.',
       sub: 'We make chisels, pistons, bushings, bolts and repair kits for Furukawa, Rammer, Soosan, Atlas Copco and 40 more brands. 42CrMo steel, HRC 48–52, made and heat-treated in our own shop.',
       cta1:'Get a Quote', cta2:'See the Parts',
@@ -101,7 +101,7 @@ const DICT = {
       topL:'DWG · KVN · HOMEPAGE', topR:'SHEET 01 / 08',
       botL:'LAT 40.766 N · LON 30.210 E', botR:'KARTEPE · KOCAELI · TR',
     },
-    ticker: ['42CrMo STEEL', 'HRC 48–52 HARDNESS', '500 t/MO CAPACITY', '25+ YEARS MAKING', '40+ BRANDS MATCHED', '5–10 DAY LEAD', 'EN 10204 3.1 CERT', 'SHIPPED WORLDWIDE'],
+    ticker: ['42CrMo STEEL', 'HRC 48–52 HARDNESS', '500 t/MO CAPACITY', '40+ BRANDS MATCHED', '5–10 DAY LEAD', 'SHIPPED WORLDWIDE'],
     parts: {
       label:'01 / PRODUCT CLASS', h2a:'Every part. ', h2b:'One roof.',
       sub:'Everything your breaker needs. No middlemen, no delays.',
@@ -135,17 +135,17 @@ const DICT = {
         { n:'02', name:'CNC', desc:'4-axis lathe + mill. Tolerance h6.', tag:'CNC · ±0.01' },
         { n:'03', name:'Heat Treat', desc:'In-house furnace. Harden → temper.', tag:'HRC 48–52' },
         { n:'04', name:'Grinding', desc:'Cylindrical grind. Lapped surface.', tag:'Ra · 0.4' },
-        { n:'05', name:'QC', desc:'Hardness + dim + surface. Every piece.', tag:'EN 10204 3.1' },
+        { n:'05', name:'QC', desc:'Hardness + dim + surface. Every piece.', tag:'HRC + DIM' },
         { n:'06', name:'Ship', desc:'Palletized. Invoice same day.', tag:'WORLDWIDE' },
       ],
     },
     meters: {
       label:'05 / NUMBERS', h2a:'Numbers ', h2b:'speak.', sub:'Every claim backed by a measurement.',
       items: [
-        { v:'25', u:'+ YEARS', l:'MAKING', fill:0.62, hint:'FOUNDED 1999' },
         { v:'40', u:'+ BRANDS', l:'MATCHED', fill:0.9, hint:'OEM-EQUIVALENT' },
         { v:'500', u:'t / MO', l:'CAPACITY', fill:0.78, hint:'STEEL PROCESSED' },
         { v:'HRC 48–52', u:'', l:'HARDNESS', fill:0.88, hint:'ROCKWELL · C' },
+        { v:'5–10', u:'DAYS', l:'LEAD TIME', fill:0.72, hint:'WORLDWIDE' },
       ],
     },
     rfq: {
@@ -159,16 +159,16 @@ const DICT = {
         qty:'Quantity', message:'Message / part no.',
         messagePh:'HB20G · Ø80 × 1650 — 20 pcs. A photo helps.',
       },
-      submit:'Send It', note:'Reply within 24h · EN 10204 3.1 cert included',
+      submit:'Send It', note:'Reply within 24h · Price + lead time',
       success:'Got it. We\'ll get back to you within 24 hours.',
     },
     foot: {
       h1:'Products', h2:'Company', h3:'Contact',
-      about:'We\'ve been making breaker parts and heat-treating in Kartepe, Kocaeli for 25+ years. Our furnaces, our CNC, our lab.',
+      about:'We make breaker parts and heat-treat them in Kartepe, Kocaeli. Our furnaces, our CNC, our lab.',
       p:['Chisels','Pistons','Bushings','Bolts','Front heads','Repair kits'],
-      c:['About','Heat shop','Gallery','Certificates','Careers'],
+      c:['About','Heat shop','Gallery','Careers'],
       cc:['+90 531 669 37 34','hakan@kervanheat.com','Kartepe · Kocaeli · TR'],
-      certs:['EN 10204 3.1','ISO 9001','CE'],
+      certs:[],
       block:[['PROJECT','KERVAN HEAT'],['DWG','KVN-LP-001'],['REV','00'],['DATE','2026'],['SCALE','1:1'],['SHEET','08/08']],
       bot:'Made in Turkey · Heat-treated in-house · Shipped worldwide',
     },
@@ -176,7 +176,7 @@ const DICT = {
   de: {
     nav: { parts:'Teile', compat:'Kompatibilität', furnace:'Härterei', process:'Prozess', contact:'Kontakt', quote:'Angebot' },
     hero: {
-      eyebrow: 'FERTIGUNG · KARTEPE · SEIT 1999',
+      eyebrow: 'FERTIGUNG · KARTEPE',
       h1a: 'Hammerteile.', h1b: 'Direkt vom Werk.',
       sub: 'Wir fertigen Meißel, Kolben, Buchsen, Bolzen und Reparatursätze für Furukawa, Rammer, Soosan, Atlas Copco und 40 weitere Marken. 42CrMo-Stahl, HRC 48–52, gefertigt und gehärtet im eigenen Werk.',
       cta1:'Angebot anfordern', cta2:'Teile ansehen',
@@ -185,7 +185,7 @@ const DICT = {
       topL:'DWG · KVN · HOMEPAGE', topR:'BLATT 01 / 08',
       botL:'LAT 40.766 N · LON 30.210 E', botR:'KARTEPE · KOCAELI · TR',
     },
-    ticker: ['42CrMo STAHL','HRC 48–52 HÄRTE','500 t/MONAT','25+ JAHRE','40+ MARKEN','5–10 TAGE','EN 10204 3.1','WELTWEIT'],
+    ticker: ['42CrMo STAHL','HRC 48–52 HÄRTE','500 t/MONAT','40+ MARKEN','5–10 TAGE','WELTWEIT'],
     parts: {
       label:'01 / PRODUKTKLASSE', h2a:'Jedes Teil. ', h2b:'Ein Dach.',
       sub:'Alles, was Ihr Hammer braucht. Kein Zwischenhändler, keine Verzögerung.',
@@ -219,17 +219,17 @@ const DICT = {
         { n:'02', name:'CNC', desc:'4-Achs-Drehen + Fräsen. Toleranz h6.', tag:'CNC · ±0.01' },
         { n:'03', name:'Wärmebeh.', desc:'Eigener Ofen. Härten → Anlassen.', tag:'HRC 48–52' },
         { n:'04', name:'Schleifen', desc:'Rundschleifen. Geläppte Oberfläche.', tag:'Ra · 0.4' },
-        { n:'05', name:'QS', desc:'Härte + Maß + Oberfläche. Jedes Stück.', tag:'EN 10204 3.1' },
+        { n:'05', name:'QS', desc:'Härte + Maß + Oberfläche. Jedes Stück.', tag:'HRC + MASS' },
         { n:'06', name:'Versand', desc:'Palettiert. Rechnung am selben Tag.', tag:'WELTWEIT' },
       ],
     },
     meters: {
       label:'05 / ZAHLEN', h2a:'Zahlen ', h2b:'sprechen.', sub:'Jede Behauptung belegt durch eine Messung.',
       items: [
-        { v:'25', u:'+ JAHRE', l:'FERTIGUNG', fill:0.62, hint:'GEGRÜNDET 1999' },
         { v:'40', u:'+ MARKEN', l:'PASSEND', fill:0.9, hint:'OEM-GLEICH' },
         { v:'500', u:'t / MO', l:'KAPAZITÄT', fill:0.78, hint:'STAHL' },
         { v:'HRC 48–52', u:'', l:'HÄRTE', fill:0.88, hint:'ROCKWELL · C' },
+        { v:'5–10', u:'TAGE', l:'LIEFERUNG', fill:0.72, hint:'WELTWEIT' },
       ],
     },
     rfq: {
@@ -243,16 +243,16 @@ const DICT = {
         qty:'Menge', message:'Nachricht / Teil-Nr.',
         messagePh:'HB20G · Ø80 × 1650 — 20 Stück. Foto hilft.',
       },
-      submit:'Senden', note:'Antwort < 24 h · EN 10204 3.1 inklusive',
+      submit:'Senden', note:'Antwort < 24 h · Preis + Lieferzeit',
       success:'Erhalten. Antwort innerhalb 24 Stunden.',
     },
     foot: {
       h1:'Produkte', h2:'Firma', h3:'Kontakt',
-      about:'Seit 25+ Jahren fertigen wir in Kartepe, Kocaeli Hammerteile und härten im Haus.',
+      about:'Wir fertigen in Kartepe, Kocaeli Hammerteile und härten im Haus.',
       p:['Meißel','Kolben','Buchsen','Bolzen','Vorderköpfe','Reparatursätze'],
-      c:['Über uns','Härterei','Galerie','Zertifikate','Karriere'],
+      c:['Über uns','Härterei','Galerie','Karriere'],
       cc:['+90 531 669 37 34','hakan@kervanheat.com','Kartepe · Kocaeli · TR'],
-      certs:['EN 10204 3.1','ISO 9001','CE'],
+      certs:[],
       block:[['PROJEKT','KERVAN HEAT'],['DWG','KVN-LP-001'],['REV','00'],['DATUM','2026'],['SCALE','1:1'],['BLATT','08/08']],
       bot:'Hergestellt in der Türkei · Im Haus gehärtet · Weltweit versandt',
     },
@@ -260,7 +260,7 @@ const DICT = {
   ru: {
     nav: { parts:'Запчасти', compat:'Совместимость', furnace:'Печь', process:'Процесс', contact:'Контакт', quote:'Запросить' },
     hero: {
-      eyebrow: 'ПРОИЗВОДСТВО · KARTEPE · С 1999',
+      eyebrow: 'ПРОИЗВОДСТВО · KARTEPE',
       h1a: 'Запчасти для молотов.', h1b: 'Напрямую с завода.',
       sub: 'Мы производим пики, поршни, втулки, болты и ремкомплекты для Furukawa, Rammer, Soosan, Atlas Copco и 40+ марок. Сталь 42CrMo, HRC 48–52, термообработка в собственном цеху.',
       cta1:'Запросить', cta2:'Посмотреть',
@@ -269,7 +269,7 @@ const DICT = {
       topL:'DWG · KVN · HOMEPAGE', topR:'ЛИСТ 01 / 08',
       botL:'LAT 40.766 N · LON 30.210 E', botR:'KARTEPE · KOCAELI · TR',
     },
-    ticker: ['42CrMo СТАЛЬ','HRC 48–52','500 т/МЕС','25+ ЛЕТ','40+ МАРОК','5–10 ДНЕЙ','EN 10204 3.1','ПО ВСЕМУ МИРУ'],
+    ticker: ['42CrMo СТАЛЬ','HRC 48–52','500 т/МЕС','40+ МАРОК','5–10 ДНЕЙ','ПО ВСЕМУ МИРУ'],
     parts: {
       label:'01 / ГРУППА', h2a:'Любая деталь. ', h2b:'Одна крыша.',
       sub:'Всё, что нужно вашему молоту. Без посредников.',
@@ -303,17 +303,17 @@ const DICT = {
         { n:'02', name:'ЧПУ', desc:'Токар. + фрез., 4-оси. Доп. h6.', tag:'CNC · ±0.01' },
         { n:'03', name:'Термо', desc:'Своя печь. Закалка → отпуск.', tag:'HRC 48–52' },
         { n:'04', name:'Шлифовка', desc:'Кругл. шлиф. Притирка.', tag:'Ra · 0.4' },
-        { n:'05', name:'ОТК', desc:'Твёрд. + размеры. Каждая.', tag:'EN 10204 3.1' },
+        { n:'05', name:'ОТК', desc:'Твёрд. + размеры. Каждая.', tag:'HRC + РАЗМ' },
         { n:'06', name:'Отгрузка', desc:'На паллетах. Инвойс в день.', tag:'ПО МИРУ' },
       ],
     },
     meters: {
       label:'05 / ЦИФРЫ', h2a:'Цифры ', h2b:'говорят.', sub:'Каждое заявление — измерением.',
       items: [
-        { v:'25', u:'+ ЛЕТ', l:'ОПЫТ', fill:0.62, hint:'С 1999' },
         { v:'40', u:'+ МАРОК', l:'ПОДБОР', fill:0.9, hint:'OEM-ЭКВ.' },
         { v:'500', u:'т / МЕС', l:'ОБЪЁМ', fill:0.78, hint:'СТАЛЬ' },
         { v:'HRC 48–52', u:'', l:'ТВЁРДОСТЬ', fill:0.88, hint:'ROCKWELL · C' },
+        { v:'5–10', u:'ДНЕЙ', l:'СРОК', fill:0.72, hint:'ПО МИРУ' },
       ],
     },
     rfq: {
@@ -327,16 +327,16 @@ const DICT = {
         qty:'Кол-во', message:'Сообщение / номер',
         messagePh:'HB20G · Ø80 × 1650 — 20 шт. Фото приветствуется.',
       },
-      submit:'Отправить', note:'Ответ < 24 ч · EN 10204 3.1 в комплекте',
+      submit:'Отправить', note:'Ответ < 24 ч · Цена + срок',
       success:'Получили. Ответим в течение 24 часов.',
     },
     foot: {
       h1:'Продукция', h2:'Компания', h3:'Контакт',
-      about:'25+ лет мы производим запчасти для молотов и ведём термообработку в Kartepe.',
+      about:'Мы производим запчасти для молотов и ведём термообработку в Kartepe.',
       p:['Пики','Поршни','Втулки','Болты','Головки','Ремкомплекты'],
-      c:['О нас','Печь','Галерея','Сертификаты','Вакансии'],
+      c:['О нас','Печь','Галерея','Вакансии'],
       cc:['+90 531 669 37 34','hakan@kervanheat.com','Kartepe · Kocaeli · TR'],
-      certs:['EN 10204 3.1','ISO 9001','CE'],
+      certs:[],
       block:[['ПРОЕКТ','KERVAN HEAT'],['DWG','KVN-LP-001'],['REV','00'],['ДАТА','2026'],['МАСШТ','1:1'],['ЛИСТ','08/08']],
       bot:'Сделано в Турции · Термообработка в цеху · Доставка по миру',
     },
@@ -622,7 +622,7 @@ function Nav({ lang, setLang, t }) {
         <a className="logo" href="#">
           <span className="logo__mark">K</span>
           <span className="logo__word">KERVAN <b>HEAT</b></span>
-          <span className="logo__sup">EST·1999</span>
+          <span className="logo__sup">KARTEPE</span>
         </a>
         <div className="nav__links">
           <a className="nav__link" href="#parts"><span className="num">01 /</span>{t.nav.parts}</a>

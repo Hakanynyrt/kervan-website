@@ -39,7 +39,7 @@
     </div>
 
     <div class="kv-intro__top">
-      <span class="kv-intro__tag">▲ KVN-HEAT · EST. 1999</span>
+      <span class="kv-intro__tag">▲ KVN-HEAT</span>
       <span class="kv-intro__tag kv-intro__tag--right">KARTEPE · KOCAELİ · TR</span>
     </div>
 
