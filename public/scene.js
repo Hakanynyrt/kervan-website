@@ -96,6 +96,49 @@
   scene.add(glow);
 
   // ═══════════════════════════════════════════════════════════════════
+  // HORIZON LINE — thin hot line across the scene (industrial floor)
+  // ═══════════════════════════════════════════════════════════════════
+  const horizonGeo = new THREE.PlaneGeometry(80, 0.6);
+  const horizonMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false,
+    uniforms: {
+      uTime:  { value: 0 },
+      uEmber: { value: 0 },
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      uniform float uTime;
+      uniform float uEmber;
+
+      void main() {
+        float yFade = 1.0 - abs(vUv.y - 0.5) * 2.0;
+        yFade = pow(max(yFade, 0.0), 2.2);
+        float xFade = smoothstep(0.0, 0.15, vUv.x) * smoothstep(1.0, 0.85, vUv.x);
+
+        float core = smoothstep(0.35, 0.5, yFade);
+        float halo = pow(yFade, 1.6) * 0.6;
+
+        vec3 hot  = vec3(1.00, 0.55, 0.20);
+        vec3 deep = vec3(0.70, 0.18, 0.06);
+        vec3 col  = mix(deep, hot, core);
+
+        float a = (core + halo) * xFade * (0.55 + uEmber * 0.8);
+        gl_FragColor = vec4(col * a * 1.3, a);
+      }
+    `
+  });
+  const horizon = new THREE.Mesh(horizonGeo, horizonMat);
+  horizon.position.set(0, -6.5, -6);
+  scene.add(horizon);
+
+  // ═══════════════════════════════════════════════════════════════════
   // VIGNETTE — subtle dark corners for premium feel
   // ═══════════════════════════════════════════════════════════════════
   const vigGeo = new THREE.PlaneGeometry(2, 2);
@@ -362,6 +405,9 @@
     glowMat.uniforms.uTime.value = t;
     glowMat.uniforms.uEmber.value = breath * emberScrollBoost;
     glowMat.uniforms.uHeat.value = heatAmount;
+
+    horizonMat.uniforms.uTime.value = t;
+    horizonMat.uniforms.uEmber.value = breath * (0.5 + emberScrollBoost * 0.5);
 
     // ── Apply to chisel emissive (so metal itself glows subtly) ─
     if (chisel) {
