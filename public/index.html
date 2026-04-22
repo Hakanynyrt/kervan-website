@@ -3,18 +3,16 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Kervan Heat — Hidrolik Kırıcı Yedek Parçaları | Keski, Piston, Burç</title>
-<meta name="description" content="42CrMo çelik, HRC 48–52. Furukawa, Rammer, Soosan, Atlas Copco ve 40+ marka için keski, piston, burç, cıvata. Kendi fırınımızda ısıl işlem. Kartepe, Kocaeli — 1999'dan beri."/>
+<title>Kervan Heat — Hidrolik kırıcı parçaları</title>
+<meta name="description" content="Kırıcıyı ayakta tutan parçalar. 1999'dan beri Kocaeli'de üretiliyor."/>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
 
 <!-- Styles -->
 <link rel="stylesheet" href="kit.css"/>
-<link rel="stylesheet" href="intro.css"/>
-<link rel="stylesheet" href="scene-overlay.css"/>
 
 <!-- Three.js import map for scene.js -->
 <script type="importmap">
@@ -27,10 +25,12 @@
 </script>
 
 <style>
-  /* 3D scene fixed behind all content */
-  #scene-root { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  #scene-root { position: fixed; top: 0; right: 0; width: 52%; height: 100vh; z-index: 0; pointer-events: none; }
   #root { position: relative; z-index: 1; }
-  body { background: #08090B; }
+  body { background: #FAF7F2; }
+  @media (max-width: 900px) {
+    #scene-root { width: 100%; height: 46vh; }
+  }
 </style>
 
 <!-- Favicons -->
@@ -40,30 +40,23 @@
 <!-- SEO / Social -->
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://kervanheat.com/"/>
-<meta property="og:title" content="Kervan Heat — Hidrolik Kırıcı Yedek Parçaları"/>
-<meta property="og:description" content="Keski, piston, burç, cıvata. 40+ marka uyumlu. Kendi fırınımızda ısıl işlem. Kartepe, Kocaeli."/>
+<meta property="og:title" content="Kervan Heat — Hidrolik kırıcı parçaları"/>
+<meta property="og:description" content="Kırıcıyı ayakta tutan parçalar. 1999'dan beri Kocaeli'de."/>
 <meta property="og:image" content="https://kervanheat.com/og.png"/>
-<meta property="og:image:width" content="1200"/>
-<meta property="og:image:height" content="630"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://kervanheat.com/og.png"/>
 <link rel="canonical" href="https://kervanheat.com/"/>
 <link rel="alternate" hreflang="tr" href="https://kervanheat.com/?lang=tr"/>
 <link rel="alternate" hreflang="en" href="https://kervanheat.com/?lang=en"/>
-<link rel="alternate" hreflang="de" href="https://kervanheat.com/?lang=de"/>
-<link rel="alternate" hreflang="ru" href="https://kervanheat.com/?lang=ru"/>
 <link rel="alternate" hreflang="x-default" href="https://kervanheat.com/"/>
 
-<!-- Schema.org -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "Kervan Heat Treatment",
-  "alternateName": "Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti.",
   "url": "https://kervanheat.com",
   "logo": "https://kervanheat.com/logo-krv.png",
-  "foundingDate": "1999",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "Uzunçiftlik Mah. Sadun Atığ Cad. No:112/A",
@@ -82,30 +75,14 @@
 </head>
 <body>
 
-<!-- Cinematic intro — runs immediately, no React dependency -->
-<script src="intro.js"></script>
-
-<!-- Three.js scene — fixed behind all content -->
 <script type="module" src="scene.js"></script>
 
-<!-- Scroll hint -->
-<div class="scroll-hint" id="scrollHint">Scroll</div>
-<script>
-  addEventListener('scroll', () => {
-    const h = document.getElementById('scrollHint');
-    if (h && window.scrollY > 120) h.classList.add('hide');
-  }, { passive: true });
-</script>
-
-<!-- React app mount point -->
 <div id="root"></div>
 
-<!-- React 18 + Babel -->
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
 
-<!-- Fetch + compile JSX, then mount -->
 <script>
 (async function () {
   try {
@@ -122,15 +99,11 @@
           <>
             <Nav lang={lang} setLang={setLang} t={t}/>
             <Hero t={t}/>
-            <Ticker t={t}/>
-            <Parts t={t}/>
-            <OrbitSection t={t}/>
-            <Furnace t={t}/>
-            <Process t={t}/>
-            <Meters t={t}/>
-            <RFQ t={t}/>
+            <Products t={t}/>
+            <Craft t={t}/>
+            <Industries t={t}/>
+            <Contact t={t}/>
             <Footer t={t}/>
-            <WAFloat lang={lang}/>
           </>
         );
       }
@@ -144,9 +117,8 @@
     document.body.appendChild(s);
   } catch (err) {
     console.error('[kervanheat] Failed to load app:', err);
-    // Minimal fallback: show contact info
     document.getElementById('root').innerHTML =
-      '<div style="padding:40px;color:#F5F6F8;font-family:system-ui">' +
+      '<div style="padding:40px;font-family:system-ui">' +
       '<h1 style="margin:0 0 16px">Kervan Heat</h1>' +
       '<p>+90 531 669 37 34 · <a href="mailto:info@kervanheat.com" style="color:#E8781A">info@kervanheat.com</a></p>' +
       '</div>';
