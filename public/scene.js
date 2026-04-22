@@ -170,7 +170,7 @@
   let chiselReady = false;
 
   new GLTFLoader().load(
-    'https://kervanheat.com/kirici-uc.glb',
+    '/kirici-uc.glb',
     (gltf) => {
       const m = gltf.scene;
       const box = new THREE.Box3().setFromObject(m);
