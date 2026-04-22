@@ -225,7 +225,7 @@
       const center = box.getCenter(new THREE.Vector3());
       chisel.position.sub(center);
 
-      const targetH = 4.0;
+      const targetH = 8.0;
       // Use the model's longest dimension as its "length"
       const longest = Math.max(size.x, size.y, size.z);
       const s = targetH / longest;
@@ -297,12 +297,12 @@
       idleBase.set(0, -1.4, 0);
       outerPivot.scale.setScalar(0.85);
     } else {
-      // Desktop: right side, centered vertically
+      // Desktop: LEFT side (text is on the right)
       const fovY = cam.fov * Math.PI / 180;
       const viewH = 2 * cam.position.z * Math.tan(fovY / 2);
       const viewW = viewH * aspect;
       const xOffset = Math.min(viewW * 0.22, 3.4);
-      idleBase.set(xOffset, -0.6, 0);
+      idleBase.set(-xOffset, -0.4, 0);
       outerPivot.scale.setScalar(1.15);
     }
     outerPivot.position.copy(idleBase);
@@ -440,30 +440,70 @@
       });
     }
 
-    // ── EVA drift (position) ────────────────────────────────────
-    if (!reduce) {
-      const floatX = Math.sin(t * 0.25) * 0.22 + Math.sin(t * 0.11) * 0.14;
-      const floatY = Math.cos(t * 0.19) * 0.18 + Math.sin(t * 0.33) * 0.09;
-      outerPivot.position.x = idleBase.x + floatX;
-      outerPivot.position.y = idleBase.y + floatY;
+    // ── Scroll-driven choreography (cinematic, slow lerp) ──────
+    // Compute overall scroll progress 0..1 (0 = top, 1 = near bottom)
+    const docH = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    const progress = Math.min(1, Math.max(0, window.scrollY / docH));
+
+    // Mobile uses simpler choreography (no left/right flip, smaller moves)
+    const mobile = innerWidth <= 900;
+
+    // Target X: hero left → drift toward center in middle → stay centered in contact
+    // Desktop: starts at -xOffset (left), sweeps to +0.4 in services/gallery, settles at 0 in contact
+    const baseX = idleBase.x;
+    let targetX;
+    if (mobile) {
+      targetX = 0 + (fContact * 0); // always centered on mobile
+    } else {
+      // Arc: left → slight right in middle (while forge happens) → center at contact
+      const midSwing = (fServices * 0.6 + fGallery * 0.4) * 1.0; // +1 unit swing toward right
+      const contactCenter = fContact; // pulls x toward 0
+      targetX = baseX * (1 - contactCenter) + midSwing * (1 - contactCenter);
     }
 
-    // ── Drift rotation (weightless tumble, subtle) ─────────────
+    // Target Y: subtle rise toward middle of page, drops in contact
+    const targetYOffset = mobile
+      ? 0
+      : (fProducts * 0.3 + fServices * 0.5 + fGallery * 0.3 - fContact * 0.1);
+
+    // Target scale: bigger in services (forge zoom-in), smaller in brands (technical distance)
+    const scaleBoost = 1 + fServices * 0.25 + fContact * 0.08 - fBrands * 0.18;
+
+    // Target rotation Y: one full turn across the whole page
+    // (on top of the slow idle spin, so effect is cumulative — we drive the outerPivot instead)
+    const targetRotY = progress * Math.PI * 2;
+
+    // Drift (EVA) — scaled down during contact (chisel settles)
+    const driftAmount = 1 - fContact * 0.85;
+
     if (!reduce) {
-      driftPivot.rotation.y = Math.sin(t * 0.07) * 0.35 + Math.sin(t * 0.13) * 0.12;
-      driftPivot.rotation.x = Math.sin(t * 0.09) * 0.14 + Math.cos(t * 0.15) * 0.06;
-      driftPivot.rotation.z = Math.sin(t * 0.05) * 0.10;
+      const floatX = (Math.sin(t * 0.25) * 0.22 + Math.sin(t * 0.11) * 0.14) * driftAmount;
+      const floatY = (Math.cos(t * 0.19) * 0.18 + Math.sin(t * 0.33) * 0.09) * driftAmount;
+      outerPivot.position.x = targetX + floatX;
+      outerPivot.position.y = idleBase.y + targetYOffset + floatY;
+    } else {
+      outerPivot.position.x = targetX;
+      outerPivot.position.y = idleBase.y + targetYOffset;
     }
 
-    // ── Very slow self-spin ─────────────────────────────────────
+    // Scroll-driven Y rotation on the outer pivot (one full turn total)
+    outerPivot.rotation.y = targetRotY;
+
+    // ── Drift rotation (X/Z) — fades to zero in contact ────────
+    if (!reduce) {
+      driftPivot.rotation.y = (Math.sin(t * 0.07) * 0.35 + Math.sin(t * 0.13) * 0.12) * driftAmount;
+      driftPivot.rotation.x = (Math.sin(t * 0.09) * 0.14 + Math.cos(t * 0.15) * 0.06) * driftAmount;
+      driftPivot.rotation.z = (Math.sin(t * 0.05) * 0.10) * driftAmount;
+    }
+
+    // ── Very slow self-spin (always on, even in contact — gentle life) ──
     if (!reduce && chisel) {
-      spinPivot.rotation.y = t * 0.08;
+      spinPivot.rotation.y = t * 0.06;
     }
 
-    // ── Scroll-driven scale & depth shift (subtle parallax) ────
-    // Chisel pulls slightly closer during services, recedes during brands
-    const scrollScale = 1 + fServices * 0.06 - fBrands * 0.05;
-    outerPivot.scale.setScalar((innerWidth <= 900 ? 0.85 : 1.15) * scrollScale);
+    // ── Scale (mobile uses fixed base; desktop scroll-boosted) ─
+    const baseScale = mobile ? 0.85 : 1.15;
+    outerPivot.scale.setScalar(baseScale * scaleBoost);
 
     renderer.render(scene, cam);
     requestAnimationFrame(tick);

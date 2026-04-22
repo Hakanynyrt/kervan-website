@@ -10,7 +10,7 @@ const DICT = {
     hero: {
       eyebrow: 'MFG · KARTEPE · SINCE 1999',
       h1a: 'Kırıcı parçaları.', h1b: 'Doğrudan fabrikadan.',
-      sub: 'Furukawa, Rammer, Soosan, Atlas Copco ve 40+ marka için keskiler, pistonlar, burçlar, cıvatalar ve tamir kitleri üretiyoruz. Hepsi kendi atölyemizde — ısıl işlem dahil.',
+      sub: 'Furukawa, Rammer, Soosan, Atlas Copco ve 40+ marka için keskiler, pistonlar, burçlar, cıvatalar ve tamir kitleri üretiyoruz. Hepsi kendi atölyemizde.',
       cta1:'Teklif Al', cta2:'Parçaları Gör',
       s:[ {l:'MARKA UYUMU', v:'40+'}, {l:'TESLİMAT', v:'5–10 GÜN'}, {l:'KAPASİTE', v:'500 t/AY'} ],
       drawA:'KESKI', drawB:'HB20G · Ø80 × 1650 mm', drawC:'REV 00 · KVN-LP-001', drawD:'SCALE 1:8',
@@ -99,7 +99,7 @@ const DICT = {
     hero: {
       eyebrow: 'MFG · KARTEPE · SINCE 1999',
       h1a: 'Breaker parts.', h1b: 'Direct from the factory.',
-      sub: 'We make chisels, pistons, bushings, bolts and repair kits for Furukawa, Rammer, Soosan, Atlas Copco and 40 more brands. All made — and heat-treated — under one roof.',
+      sub: 'We make chisels, pistons, bushings, bolts and repair kits for Furukawa, Rammer, Soosan, Atlas Copco and 40 more brands. All made under one roof.',
       cta1:'Get a Quote', cta2:'See the Parts',
       s:[ {l:'BRANDS FIT', v:'40+'}, {l:'LEAD TIME', v:'5–10 DAYS'}, {l:'CAPACITY', v:'500 t/MO'} ],
       drawA:'CHISEL', drawB:'HB20G · Ø80 × 1650 mm', drawC:'REV 00 · KVN-LP-001', drawD:'SCALE 1:8',
@@ -188,7 +188,7 @@ const DICT = {
     hero: {
       eyebrow: 'FERTIGUNG · KARTEPE · SEIT 1999',
       h1a: 'Hammerteile.', h1b: 'Direkt vom Werk.',
-      sub: 'Wir fertigen Meißel, Kolben, Buchsen, Bolzen und Reparatursätze für Furukawa, Rammer, Soosan, Atlas Copco und 40 weitere Marken. Alles im eigenen Werk — Wärmebehandlung inklusive.',
+      sub: 'Wir fertigen Meißel, Kolben, Buchsen, Bolzen und Reparatursätze für Furukawa, Rammer, Soosan, Atlas Copco und 40 weitere Marken. Alles im eigenen Werk.',
       cta1:'Angebot anfordern', cta2:'Teile ansehen',
       s:[ {l:'MARKEN', v:'40+'}, {l:'LIEFERUNG', v:'5–10 TAGE'}, {l:'KAPAZITÄT', v:'500 t/MT'} ],
       drawA:'MEISSEL', drawB:'HB20G · Ø80 × 1650 mm', drawC:'REV 00 · KVN-LP-001', drawD:'SCALE 1:8',
@@ -277,7 +277,7 @@ const DICT = {
     hero: {
       eyebrow: 'ПРОИЗВОДСТВО · KARTEPE · С 1999',
       h1a: 'Запчасти для молотов.', h1b: 'Напрямую с завода.',
-      sub: 'Мы производим пики, поршни, втулки, болты и ремкомплекты для Furukawa, Rammer, Soosan, Atlas Copco и 40+ марок. Всё под одной крышей — включая термообработку',
+      sub: 'Мы производим пики, поршни, втулки, болты и ремкомплекты для Furukawa, Rammer, Soosan, Atlas Copco и 40+ марок. Всё под одной крышей.',
       cta1:'Запросить', cta2:'Посмотреть',
       s:[ {l:'МАРОК', v:'40+'}, {l:'СРОК', v:'5–10 ДНЕЙ'}, {l:'ОБЪЁМ', v:'500 т/МЕС'} ],
       drawA:'ПИКА', drawB:'HB20G · Ø80 × 1650 mm', drawC:'REV 00 · KVN-LP-001', drawD:'SCALE 1:8',
