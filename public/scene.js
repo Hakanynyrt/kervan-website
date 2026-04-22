@@ -73,8 +73,11 @@
       const m = gltf.scene;
       const box = new THREE.Box3().setFromObject(m);
       const sz = box.getSize(new THREE.Vector3());
-      m.position.sub(box.getCenter(new THREE.Vector3()));
-      m.scale.setScalar(11 / Math.max(sz.x, sz.y, sz.z));
+      const center = box.getCenter(new THREE.Vector3());
+      const s = 11 / Math.max(sz.x, sz.y, sz.z);
+      m.scale.setScalar(s);
+      // Offset must be scaled — scale applies to geometry before translation
+      m.position.copy(center).multiplyScalar(-s);
       m.traverse(o => {
         if (o.isMesh && o.material) {
           o.material.color = new THREE.Color(0x2a2a2e);
