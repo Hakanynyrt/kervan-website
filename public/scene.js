@@ -1,6 +1,7 @@
 // Kervan Heat — scene.js
-// "Keski okuyor": chisel tip aims at the heading currently in view; lighting
-// shifts per section like the time of day moving across the workshop.
+// Parts still-life: chisel + piston + bushing + kit arranged as a sculptural
+// composition. No scroll coupling, no turntable spin. Cursor parallax only:
+// when the user moves the mouse, the whole stage tilts gently toward it.
 
 (async function () {
   const THREE = await import('three');
@@ -8,10 +9,8 @@
   const { DRACOLoader }     = await import('three/addons/loaders/DRACOLoader.js');
   const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js');
 
-  const isMobile = window.matchMedia('(max-width: 1100px)').matches;
-  const reduced  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (isMobile) return; // badge is hidden under 1100px
+  if (window.matchMedia('(max-width: 1100px)').matches) return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const root = document.getElementById('scene-root') || (() => {
     const d = document.createElement('div');
@@ -21,8 +20,8 @@
   })();
 
   const scene = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 200);
-  cam.position.set(0, 0, 22);
+  const cam = new THREE.PerspectiveCamera(34, 1, 0.1, 200);
+  cam.position.set(0, 0, 18);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -44,190 +43,91 @@
   resize();
   addEventListener('resize', resize);
 
-  // Three lights we lerp per section: key (main), rim (accent), fill (sky).
-  const key  = new THREE.DirectionalLight(0xFFFFFF, 2.6); key.position.set(3, 5, 6);   scene.add(key);
-  const rim  = new THREE.DirectionalLight(0xE8781A, 1.8); rim.position.set(-5, -1, -4); scene.add(rim);
-  const fill = new THREE.DirectionalLight(0x9DB4D8, 0.6); fill.position.set(-4, 3, 2);  scene.add(fill);
+  // Product-photo lighting: warm key from upper-right, cool fill from left,
+  // orange rim behind. Static — composition is the point, not motion.
+  const key = new THREE.DirectionalLight(0xFFE6BE, 3.0);
+  key.position.set(4, 5, 6);
+  scene.add(key);
 
-  const pose = new THREE.Group();
-  scene.add(pose);
+  const fill = new THREE.DirectionalLight(0x9DB4D8, 0.7);
+  fill.position.set(-4, 2, 3);
+  scene.add(fill);
 
-  // ─────────────────────────────────────────────────────────────────────
-  // Sections: each has a heading the chisel will aim at, plus a light
-  // palette that becomes active as the heading nears viewport center.
-  // ─────────────────────────────────────────────────────────────────────
-  const SECTIONS = [
-    {
-      sel: '.hero', headSel: '.hero .display',
-      // Morning — warm key from upper right, gentle blue fill
-      lights: {
-        key:  { color: 0xFFE6BE, dir: [ 4,  5,  5], intensity: 2.8 },
-        rim:  { color: 0xE8781A, dir: [-5, -1, -4], intensity: 1.6 },
-        fill: { color: 0x9DB4D8, dir: [-4,  3,  2], intensity: 0.6 },
-        exposure: 1.05,
-      },
-      opacity: 1.0,
-    },
-    {
-      sel: '#products', headSel: '#products .h2',
-      // Noon — clean top-down, low contrast
-      lights: {
-        key:  { color: 0xFFFFFF, dir: [ 0,  8,  4], intensity: 3.4 },
-        rim:  { color: 0xCCCCCC, dir: [ 0, -3, -2], intensity: 0.5 },
-        fill: { color: 0xF5F2EC, dir: [-3,  4,  5], intensity: 0.9 },
-        exposure: 1.10,
-      },
-      opacity: 0.85,
-    },
-    {
-      sel: '#craft', headSel: '#craft .h2',
-      // Forge — strong orange rim, dim ambient
-      lights: {
-        key:  { color: 0xFFB070, dir: [ 4,  2,  3], intensity: 2.2 },
-        rim:  { color: 0xFF7A14, dir: [-3, -2, -3], intensity: 3.2 },
-        fill: { color: 0x4A3520, dir: [-2,  1,  1], intensity: 0.4 },
-        exposure: 1.00,
-      },
-      opacity: 0.95,
-    },
-    {
-      sel: '#industries', headSel: '#industries .h2',
-      // Worksite — cool hard side light, deep shadow
-      lights: {
-        key:  { color: 0xE0E8F2, dir: [ 6,  1,  2], intensity: 3.6 },
-        rim:  { color: 0x2E2A26, dir: [-6, -3, -2], intensity: 1.0 },
-        fill: { color: 0xB8C0CA, dir: [-2,  4,  4], intensity: 0.3 },
-        exposure: 0.92,
-      },
-      opacity: 0.75,
-    },
-    {
-      sel: '#contact', headSel: '#contact .h2',
-      // Dusk — low warm key, dark frame
-      lights: {
-        key:  { color: 0xFFCFA0, dir: [ 2,  3,  5], intensity: 1.5 },
-        rim:  { color: 0x6A4A6A, dir: [-3, -1, -3], intensity: 1.4 },
-        fill: { color: 0xA89A88, dir: [-3,  2,  2], intensity: 0.5 },
-        exposure: 0.85,
-      },
-      opacity: 0.45,
-    },
-  ];
+  const rim = new THREE.DirectionalLight(0xE8781A, 1.4);
+  rim.position.set(-3, -2, -4);
+  scene.add(rim);
 
-  // Lazy-resolve section + heading elements (React mounts asynchronously).
-  let resolved = false;
-  function resolveSections() {
-    let ok = true;
-    for (const s of SECTIONS) {
-      if (!s.el) s.el = document.querySelector(s.sel) || null;
-      if (!s.headEl) s.headEl = document.querySelector(s.headSel) || null;
-      if (!s.el || !s.headEl) ok = false;
-    }
-    if (ok) resolved = true;
-    return ok;
-  }
-  if (!resolveSections()) {
-    const iv = setInterval(() => { if (resolveSections()) clearInterval(iv); }, 120);
-    setTimeout(() => clearInterval(iv), 15000);
-  }
+  // The "stage" is the parent group that holds all four parts. Cursor tilt
+  // applies here, so parts move together as one composition.
+  const stage = new THREE.Group();
+  scene.add(stage);
 
-  function lerp(a, b, t) { return a + (b - a) * t; }
-  function lerpColor(out, a, b, t) {
-    out.r = lerp(a.r, b.r, t);
-    out.g = lerp(a.g, b.g, t);
-    out.b = lerp(a.b, b.b, t);
-    return out;
-  }
-
-  // Pre-build Color objects for palettes so we don't allocate every frame.
-  for (const s of SECTIONS) {
-    s._kColor = new THREE.Color(s.lights.key.color);
-    s._rColor = new THREE.Color(s.lights.rim.color);
-    s._fColor = new THREE.Color(s.lights.fill.color);
-  }
-  const tmpCol = new THREE.Color();
-
-  // Pick the section whose heading center is closest to viewport center,
-  // and a blend factor toward the neighbor we are heading toward.
-  function activeBlend() {
-    if (!SECTIONS.some(s => s.headEl)) return null;
-    const vhc = innerHeight * 0.5;
-    const centers = SECTIONS.map(s => {
-      if (!s.headEl) return Infinity;
-      const r = s.headEl.getBoundingClientRect();
-      return r.top + r.height * 0.5;
+  function makeMetal(hex, roughness, metalness) {
+    return new THREE.MeshStandardMaterial({
+      color:           new THREE.Color(hex),
+      metalness:       metalness ?? 0.92,
+      roughness:       roughness ?? 0.30,
+      envMapIntensity: 1.25,
     });
-    let active = 0, minD = Infinity;
-    for (let i = 0; i < centers.length; i++) {
-      const d = Math.abs(centers[i] - vhc);
-      if (d < minD) { minD = d; active = i; }
-    }
-    let neighbor = active;
-    if (active < SECTIONS.length - 1 && centers[active] < vhc) neighbor = active + 1;
-    else if (active > 0 && centers[active] > vhc) neighbor = active - 1;
-    let t = 0;
-    if (neighbor !== active) {
-      const span = Math.abs(centers[neighbor] - centers[active]);
-      const prog = Math.abs(centers[active] - vhc) / (span || 1);
-      t = Math.max(0, Math.min(1, prog));
-      // smoothstep
-      t = t * t * (3 - 2 * t);
-    }
-    return { a: SECTIONS[active], b: SECTIONS[neighbor], t };
   }
 
-  // The chisel "tip" should aim at the heading currently most in view.
-  // We weight each heading by how close it is to viewport center (linear
-  // falloff over one viewport height) so the target moves continuously
-  // rather than snapping at section boundaries.
-  function pointerTargetScreen() {
-    if (!resolved && !SECTIONS.some(s => s.headEl)) return null;
-    const vh = innerHeight, c = vh * 0.5;
-    let totalW = 0, tx = 0, ty = 0;
-    for (const s of SECTIONS) {
-      if (!s.headEl) continue;
-      const r = s.headEl.getBoundingClientRect();
-      const hx = r.left + r.width * 0.5;
-      const hy = r.top + r.height * 0.5;
-      const w = Math.max(0, 1 - Math.abs(hy - c) / vh);
-      if (w > 0) {
-        totalW += w;
-        tx += hx * w;
-        ty += hy * w;
-      }
-    }
-    if (totalW === 0) return null;
-    return { x: tx / totalW, y: ty / totalW };
-  }
+  // ─── 1. Chisel (loaded async from GLB) ────────────────────────────────
+  // Sits center-left, slightly tilted, the largest piece.
+  const chiselSlot = new THREE.Group();
+  chiselSlot.position.set(-1.0, 1.0, 0);
+  chiselSlot.rotation.set(-0.08, 0.2, -Math.PI / 6.5);
+  stage.add(chiselSlot);
 
-  // Tip-axis calibration: after the model loads at default orientation, we
-  // pick the world-space direction that the visible "tip" points along.
-  // Most chisel GLBs export with the long axis on Y; the tip is one end.
-  // This is a single Z rotation offset that makes "rz=0 → tip points up".
-  // Tweak if the tip ends up pointing the wrong way after first deploy.
-  const TIP_OFFSET_Z = -Math.PI / 2; // tip points along screen +X (right) at rz=0
+  // ─── 2. Piston — tall cylinder, upper right ──────────────────────────
+  const piston = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.6, 0.6, 4.0, 48),
+    makeMetal(0x3a3a42, 0.22)
+  );
+  piston.position.set(2.8, 1.2, -0.4);
+  piston.rotation.z = 0.18;
+  // Cap rings to suggest a real piston (top and bottom collars)
+  const collarMat = makeMetal(0x2a2a2e, 0.28);
+  const collarTop = new THREE.Mesh(new THREE.TorusGeometry(0.66, 0.10, 12, 32), collarMat);
+  collarTop.position.y = 1.7;
+  collarTop.rotation.x = Math.PI / 2;
+  piston.add(collarTop);
+  const collarBot = collarTop.clone();
+  collarBot.position.y = -1.7;
+  piston.add(collarBot);
+  stage.add(piston);
 
-  // Convert a screen-space point to a desired pose.rotation.z so that the
-  // chisel's tip aims toward that point from the chisel canvas center.
-  function screenToTipAngle(px, py) {
-    const r = root.getBoundingClientRect();
-    const cx = r.left + r.width * 0.5;
-    const cy = r.top  + r.height * 0.5;
-    const dx = px - cx;
-    const dy = py - cy;
-    // Three.js +Y is up; screen +Y is down. Flip Y for world angle.
-    const worldAngle = Math.atan2(-dy, dx);
-    return worldAngle + TIP_OFFSET_Z;
-  }
+  // ─── 3. Bushing — flat torus, lower left ─────────────────────────────
+  const bushing = new THREE.Mesh(
+    new THREE.TorusGeometry(1.15, 0.42, 24, 56),
+    makeMetal(0x4a3a2a, 0.36) // warm bronze tint, hints at a different alloy
+  );
+  bushing.position.set(-2.6, -2.4, 0.4);
+  bushing.rotation.x = Math.PI / 2.2;
+  bushing.rotation.y = 0.4;
+  stage.add(bushing);
 
+  // ─── 4. Kit — small faceted shape, lower right ───────────────────────
+  // Stand-in for "seal/fastener kit" — a clustered geometric form.
+  const kitGroup = new THREE.Group();
+  kitGroup.position.set(2.4, -2.5, 0.6);
+  kitGroup.rotation.set(0.3, 0.8, 0.2);
+  const kitMat = makeMetal(0x252528, 0.40);
+  const kitCore = new THREE.Mesh(new THREE.IcosahedronGeometry(0.7, 1), kitMat);
+  kitGroup.add(kitCore);
+  const kitRing = new THREE.Mesh(
+    new THREE.TorusGeometry(0.95, 0.08, 10, 28),
+    makeMetal(0xE8781A, 0.45, 0.7) // brand-colored ring, pop of orange
+  );
+  kitRing.rotation.x = Math.PI / 2.5;
+  kitGroup.add(kitRing);
+  stage.add(kitGroup);
+
+  // ─── Load the chisel GLB into chiselSlot ─────────────────────────────
   const draco = new DRACOLoader();
   draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/');
   draco.setDecoderConfig({ type: 'js' });
   const loader = new GLTFLoader();
   loader.setDRACOLoader(draco);
-
-  const materials = [];
-  let modelLoaded = false;
 
   loader.load(
     '/kirici-uc.glb',
@@ -236,88 +136,45 @@
       const box = new THREE.Box3().setFromObject(m);
       const sz = box.getSize(new THREE.Vector3());
       const center = box.getCenter(new THREE.Vector3());
-      const s = 11 / Math.max(sz.x, sz.y, sz.z);
+      const s = 6.5 / Math.max(sz.x, sz.y, sz.z); // scaled smaller now
       m.scale.setScalar(s);
       m.position.copy(center).multiplyScalar(-s);
       m.traverse(o => {
         if (o.isMesh && o.material) {
-          o.material.color = new THREE.Color(0x2a2a2e);
-          o.material.metalness = 0.92;
-          o.material.roughness = 0.28;
+          o.material.color           = new THREE.Color(0x2a2a2e);
+          o.material.metalness       = 0.92;
+          o.material.roughness       = 0.28;
           o.material.envMapIntensity = 1.3;
-          o.material.transparent = true;
-          o.material.needsUpdate = true;
-          materials.push(o.material);
+          o.material.needsUpdate     = true;
         }
       });
-      pose.add(m);
-      modelLoaded = true;
+      chiselSlot.add(m);
     },
     undefined,
     err => console.error('[scene] /kirici-uc.glb load failed', err)
   );
 
-  // Animated state
-  const cur = {
-    rz: -Math.PI / 5.5,
-    opacity: 1.0,
-    keyColor: new THREE.Color(SECTIONS[0].lights.key.color),
-    keyInt:  SECTIONS[0].lights.key.intensity,
-    rimColor: new THREE.Color(SECTIONS[0].lights.rim.color),
-    rimInt:  SECTIONS[0].lights.rim.intensity,
-    fillColor: new THREE.Color(SECTIONS[0].lights.fill.color),
-    fillInt: SECTIONS[0].lights.fill.intensity,
-    exposure: 1.0,
-  };
-
-  const EASE_ROT  = reduced ? 1.0 : 0.10;
-  const EASE_LIGHT = reduced ? 1.0 : 0.06;
+  // ─── Cursor parallax ─────────────────────────────────────────────────
+  // The stage tilts gently toward the cursor (max ±9°). When the cursor
+  // leaves the window or the page is loaded with no input, tilt is zero
+  // — composition is perfectly still.
+  let tgtX = 0, tgtY = 0, curX = 0, curY = 0;
+  if (!reduced) {
+    addEventListener('mousemove', (e) => {
+      const nx = (e.clientX / innerWidth)  * 2 - 1;   // -1..1
+      const ny = (e.clientY / innerHeight) * 2 - 1;   // -1..1
+      tgtY = nx * 0.16;   // yaw  follows cursor X
+      tgtX = -ny * 0.10;  // pitch follows cursor Y (inverted)
+    }, { passive: true });
+    addEventListener('mouseleave', () => { tgtX = 0; tgtY = 0; });
+  }
 
   function tick() {
-    // Pointer
-    const tgt = pointerTargetScreen();
-    if (tgt) {
-      const desiredZ = screenToTipAngle(tgt.x, tgt.y);
-      // Wrap-aware lerp: pick the shorter angular path.
-      let delta = desiredZ - cur.rz;
-      while (delta >  Math.PI) delta -= Math.PI * 2;
-      while (delta < -Math.PI) delta += Math.PI * 2;
-      cur.rz += delta * EASE_ROT;
-      pose.rotation.set(0, 0, cur.rz);
-    }
-
-    // Lighting
-    const blend = activeBlend();
-    if (blend) {
-      const A = blend.a, B = blend.b, t = blend.t;
-      // Target colors / intensities / opacity / exposure
-      lerpColor(tmpCol, A._kColor, B._kColor, t);
-      cur.keyColor.lerp(tmpCol, EASE_LIGHT);
-      key.color.copy(cur.keyColor);
-      cur.keyInt = lerp(cur.keyInt, lerp(A.lights.key.intensity, B.lights.key.intensity, t), EASE_LIGHT);
-      key.intensity = cur.keyInt;
-
-      lerpColor(tmpCol, A._rColor, B._rColor, t);
-      cur.rimColor.lerp(tmpCol, EASE_LIGHT);
-      rim.color.copy(cur.rimColor);
-      cur.rimInt = lerp(cur.rimInt, lerp(A.lights.rim.intensity, B.lights.rim.intensity, t), EASE_LIGHT);
-      rim.intensity = cur.rimInt;
-
-      lerpColor(tmpCol, A._fColor, B._fColor, t);
-      cur.fillColor.lerp(tmpCol, EASE_LIGHT);
-      fill.color.copy(cur.fillColor);
-      cur.fillInt = lerp(cur.fillInt, lerp(A.lights.fill.intensity, B.lights.fill.intensity, t), EASE_LIGHT);
-      fill.intensity = cur.fillInt;
-
-      cur.exposure = lerp(cur.exposure, lerp(A.lights.exposure, B.lights.exposure, t), EASE_LIGHT);
-      renderer.toneMappingExposure = cur.exposure;
-
-      cur.opacity = lerp(cur.opacity, lerp(A.opacity, B.opacity, t), EASE_LIGHT);
-      if (modelLoaded) {
-        for (let i = 0; i < materials.length; i++) materials[i].opacity = cur.opacity;
-      }
-    }
-
+    const ease = reduced ? 1.0 : 0.06;
+    curX += (tgtX - curX) * ease;
+    curY += (tgtY - curY) * ease;
+    stage.rotation.x = curX;
+    stage.rotation.y = curY;
     renderer.render(scene, cam);
     requestAnimationFrame(tick);
   }
