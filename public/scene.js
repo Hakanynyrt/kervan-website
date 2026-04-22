@@ -1,384 +1,475 @@
 // Kervan Heat — scene.js
-// Kırma simülasyonu: chisel drops, rock shatters, resets. Auto-loop.
+// Minimal hot-metal chisel. Breath cycle + slow scroll choreography + EVA drift.
+// No jackhammer, no debris, no decorative rings/grids. Just the object.
 
-(async function () {
+(async function() {
   const THREE = await import('three');
   const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+  const { DRACOLoader } = await import('three/addons/loaders/DRACOLoader.js');
 
+  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
-  const reduce   = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-  // ── Root ──────────────────────────────────────────────────────────────
+  // ─── Root container ─────────────────────────────────────────────
   const root = document.createElement('div');
   root.id = 'scene-root';
-  root.style.cssText = 'position:fixed;inset:0;z-index:0;pointer-events:none;background:#050608;';
+  root.style.cssText = `
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: #0A0B0F;
+  `;
   document.body.insertBefore(root, document.body.firstChild);
 
-  // ── Renderer ──────────────────────────────────────────────────────────
+  // ─── Three basics ───────────────────────────────────────────────
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x050608, 0.026);
+  const cam = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 200);
+  cam.position.set(0, 0, 10);
 
-  const cam = new THREE.PerspectiveCamera(36, innerWidth / innerHeight, 0.1, 200);
-  const CAM_BASE = new THREE.Vector3(0, 1.5, 14);
-  cam.position.copy(CAM_BASE);
-  cam.lookAt(0, -1, 0);
-
-  const renderer = new THREE.WebGLRenderer({ antialias: !isMobile, alpha: true, powerPreference: 'high-performance' });
+  const renderer = new THREE.WebGLRenderer({
+    antialias: !isMobile, alpha: true, powerPreference: 'high-performance'
+  });
   renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1.5 : 2));
   renderer.setSize(innerWidth, innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.4;
+  renderer.toneMappingExposure = 1.15;
   root.appendChild(renderer.domElement);
 
-  addEventListener('resize', () => {
-    cam.aspect = innerWidth / innerHeight;
-    cam.updateProjectionMatrix();
-    renderer.setSize(innerWidth, innerHeight);
-  });
-
-  // ══════════════════════════════════════════════════════════════════════
-  // LIGHTS
-  // ══════════════════════════════════════════════════════════════════════
-  scene.add(new THREE.AmbientLight(0x050608, 0.18));
-
-  const forge = new THREE.PointLight(0xFF5500, 9, 36, 1.8);
-  forge.position.set(4, -5, 4);
-  scene.add(forge);
-
-  const rim = new THREE.DirectionalLight(0xB0C8FF, 2.2);
-  rim.position.set(-6, 8, -2);
-  scene.add(rim);
-
-  const fill = new THREE.PointLight(0x304080, 0.55, 22);
-  fill.position.set(-5, 2, 5);
-  scene.add(fill);
-
-  // Impact flash — positioned at rock top, animated on strike
-  const flash = new THREE.PointLight(0xFF6600, 0, 14, 1.6);
-  flash.position.set(0, -1.4, 0);
-  scene.add(flash);
-
-  // ══════════════════════════════════════════════════════════════════════
-  // ROCK
-  // ══════════════════════════════════════════════════════════════════════
-  const ROCK_Y = -3.4;
-  const ROCK_R = 1.9;
-
-  function makeRockGeo(r, detail) {
-    const geo = new THREE.IcosahedronGeometry(r, detail);
-    const pos = geo.attributes.position;
-    for (let i = 0; i < pos.count; i++) {
-      const f = 0.70 + Math.random() * 0.58;
-      pos.setXYZ(i, pos.getX(i) * f, pos.getY(i) * f, pos.getZ(i) * f);
-    }
-    pos.needsUpdate = true;
-    geo.computeVertexNormals();
-    return geo;
-  }
-
-  const rockMat = new THREE.MeshStandardMaterial({ color: 0x6E7276, metalness: 0.04, roughness: 0.94 });
-  const rock = new THREE.Mesh(makeRockGeo(ROCK_R, 2), rockMat);
-  rock.position.y = ROCK_Y;
-  scene.add(rock);
-
-  // Ground shadow
-  const gndMat = new THREE.ShaderMaterial({
+  // ═══════════════════════════════════════════════════════════════════
+  // EMBER GLOW — breathing halo behind the chisel
+  // The emotional core. Waxes and wanes on a 14s cycle.
+  // Stronger during "services" (forge) section.
+  // ═══════════════════════════════════════════════════════════════════
+  const glowGeo = new THREE.PlaneGeometry(36, 36);
+  const glowMat = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false,
-    uniforms: { uOp: { value: 0.7 } },
-    vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader: `varying vec2 vUv;uniform float uOp;void main(){vec2 c=vUv-.5;float a=smoothstep(.5,0.,length(vec2(c.x*.55,c.y*2.0)));gl_FragColor=vec4(0.,0.,0.,a*uOp);}`,
+    uniforms: {
+      uTime:  { value: 0 },
+      uEmber: { value: 0 },   // 0..1.5 — breath × section modulation
+      uHeat:  { value: 0 },   // 0..1   — shimmer intensity (services boost)
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      uniform float uTime;
+      uniform float uEmber;
+      uniform float uHeat;
+
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float noise(vec2 p) {
+        vec2 i = floor(p); vec2 f = fract(p);
+        float a = hash(i);
+        float b = hash(i + vec2(1,0));
+        float c = hash(i + vec2(0,1));
+        float d = hash(i + vec2(1,1));
+        vec2 u = f*f*(3.0-2.0*f);
+        return mix(a,b,u.x) + (c-a)*u.y*(1.0-u.x) + (d-b)*u.x*u.y;
+      }
+
+      void main() {
+        vec2 c = vUv - 0.5;
+        float d = length(c);
+
+        // Soft radial core
+        float core = smoothstep(0.48, 0.0, d);
+
+        // Heat shimmer — animated noise, only strong during forge
+        float shim = noise(vUv * 7.0 + uTime * 0.25) * 0.14 * uHeat;
+
+        // Color: deep red → orange gradient
+        vec3 inner  = vec3(1.00, 0.42, 0.14);
+        vec3 outer  = vec3(0.55, 0.12, 0.04);
+        vec3 ember  = mix(outer, inner, core);
+
+        float amt = core * (uEmber + shim);
+        gl_FragColor = vec4(ember * amt * 1.6, amt);
+      }
+    `
   });
-  const gnd = new THREE.Mesh(new THREE.PlaneGeometry(9, 4), gndMat);
-  gnd.rotation.x = -Math.PI / 2;
-  gnd.position.y = ROCK_Y - ROCK_R + 0.15;
-  scene.add(gnd);
+  const glow = new THREE.Mesh(glowGeo, glowMat);
+  glow.position.set(0, -0.5, -8);
+  scene.add(glow);
 
-  // ══════════════════════════════════════════════════════════════════════
-  // ROCK FRAGMENTS
-  // ══════════════════════════════════════════════════════════════════════
-  const FRAG_N  = 13;
-  const fragGrp = new THREE.Group();
-  fragGrp.position.y = ROCK_Y;
-  scene.add(fragGrp);
+  // ═══════════════════════════════════════════════════════════════════
+  // HORIZON LINE — thin hot line across the scene (industrial floor)
+  // ═══════════════════════════════════════════════════════════════════
+  const horizonGeo = new THREE.PlaneGeometry(80, 0.6);
+  const horizonMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false,
+    uniforms: {
+      uTime:  { value: 0 },
+      uEmber: { value: 0 },
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      uniform float uTime;
+      uniform float uEmber;
 
-  const fMats = [
-    new THREE.MeshStandardMaterial({ color: 0x606367, metalness: 0.04, roughness: 0.96 }),
-    new THREE.MeshStandardMaterial({ color: 0x6E7276, metalness: 0.04, roughness: 0.92 }),
-    new THREE.MeshStandardMaterial({ color: 0x79797C, metalness: 0.04, roughness: 0.89 }),
-  ];
+      void main() {
+        float yFade = 1.0 - abs(vUv.y - 0.5) * 2.0;
+        yFade = pow(max(yFade, 0.0), 2.2);
+        float xFade = smoothstep(0.0, 0.15, vUv.x) * smoothstep(1.0, 0.85, vUv.x);
 
-  const frags = [];
-  for (let i = 0; i < FRAG_N; i++) {
-    const sz  = 0.32 + Math.random() * 0.68;
-    const geo = makeRockGeo(sz, Math.random() > 0.55 ? 1 : 0);
-    const mat = fMats[i % fMats.length].clone();
-    const mesh = new THREE.Mesh(geo, mat);
+        float core = smoothstep(0.35, 0.5, yFade);
+        float halo = pow(yFade, 1.6) * 0.6;
 
-    const theta = (i / FRAG_N) * Math.PI * 2 + Math.random() * 0.6;
-    const phi   = Math.acos(2 * (i / FRAG_N) - 1);
-    const r     = Math.random() * ROCK_R * 0.88;
-    mesh.position.set(r * Math.sin(phi) * Math.cos(theta), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
-    mesh.rotation.set(Math.random() * 6, Math.random() * 6, Math.random() * 6);
-    mesh.visible = false;
-    fragGrp.add(mesh);
+        vec3 hot  = vec3(1.00, 0.55, 0.20);
+        vec3 deep = vec3(0.70, 0.18, 0.06);
+        vec3 col  = mix(deep, hot, core);
 
-    frags.push({
-      mesh, mat,
-      restPos: mesh.position.clone(),
-      restRot: new THREE.Euler().copy(mesh.rotation),
-      vel: new THREE.Vector3(),
-      angVel: new THREE.Vector3((Math.random() - 0.5) * 14, (Math.random() - 0.5) * 14, (Math.random() - 0.5) * 14),
-      life: 0,
-    });
-  }
+        float a = (core + halo) * xFade * (0.55 + uEmber * 0.8);
+        gl_FragColor = vec4(col * a * 1.3, a);
+      }
+    `
+  });
+  const horizon = new THREE.Mesh(horizonGeo, horizonMat);
+  horizon.position.set(0, -6.5, -6);
+  scene.add(horizon);
 
-  // ══════════════════════════════════════════════════════════════════════
-  // SPARKS
-  // ══════════════════════════════════════════════════════════════════════
-  const SP_N   = isMobile ? 0 : 50;
-  const spPos  = new Float32Array(Math.max(SP_N, 1) * 3);
-  const spVel  = Array.from({ length: SP_N }, () => new THREE.Vector3());
-  const spLife = new Float32Array(SP_N);
-  for (let i = 0; i < SP_N; i++) spPos[i * 3] = spPos[i * 3 + 1] = spPos[i * 3 + 2] = 1000;
+  // ═══════════════════════════════════════════════════════════════════
+  // VIGNETTE — subtle dark corners for premium feel
+  // ═══════════════════════════════════════════════════════════════════
+  const vigGeo = new THREE.PlaneGeometry(2, 2);
+  const vigMat = new THREE.ShaderMaterial({
+    transparent: true, depthTest: false, depthWrite: false,
+    uniforms: {},
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position.xy, 0.0, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      void main() {
+        vec2 c = vUv - 0.5;
+        float v = smoothstep(0.3, 0.85, length(c));
+        gl_FragColor = vec4(0.0, 0.0, 0.0, v * 0.55);
+      }
+    `
+  });
+  const vignette = new THREE.Mesh(vigGeo, vigMat);
+  vignette.frustumCulled = false;
+  vignette.renderOrder = 999;
+  // Use a separate ortho scene so vignette is always full-screen
+  const vigScene = new THREE.Scene();
+  vigScene.add(vignette);
+  const vigCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-  const spGeo = new THREE.BufferGeometry();
-  spGeo.setAttribute('position', new THREE.BufferAttribute(spPos, 3));
-  const spMesh = new THREE.Points(spGeo, new THREE.PointsMaterial({
-    color: 0xFFAA22, size: 0.13, transparent: true, opacity: 0.9,
-    sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false,
-  }));
-  scene.add(spMesh);
+  // ═══════════════════════════════════════════════════════════════════
+  // LIGHTING
+  // ═══════════════════════════════════════════════════════════════════
+  scene.add(new THREE.HemisphereLight(0xb8c2d4, 0x14151a, 0.5));
 
-  // ══════════════════════════════════════════════════════════════════════
-  // CHISEL (GLB)
-  // ══════════════════════════════════════════════════════════════════════
-  const CHISEL_LEN    = 13.5;
-  const CHISEL_REST_Y = 7.2;   // pivot Y at rest  → tip at 7.2 - 6.75 ≈ 0.45
-  const CHISEL_HIGH_Y = 8.5;   // wind-up raise
-  const CHISEL_HIT_Y  = 4.9;   // pivot Y on impact → tip at 4.9 - 6.75 ≈ -1.85 ≈ rock top
+  const keyLight = new THREE.DirectionalLight(0xfff3dc, 2.8);
+  keyLight.position.set(5, 6, 4);
+  scene.add(keyLight);
 
-  const cPivot = new THREE.Group(); // Y-animated
-  const cTilt  = new THREE.Group(); // cosmetic tilt
-  const cSpin  = new THREE.Group(); // idle slow rotation
-  cPivot.add(cTilt); cTilt.add(cSpin);
-  cTilt.rotation.z = 0.06;
-  cPivot.position.set(-0.4, CHISEL_REST_Y, 0);
-  cPivot.visible = false;
-  scene.add(cPivot);
+  const rimLight = new THREE.DirectionalLight(0xff6a28, 2.2);
+  rimLight.position.set(-6, -2, -3);
+  scene.add(rimLight);
 
-  let chiselReady = false;
+  const fillLight = new THREE.PointLight(0x6a8aff, 0.9, 25);
+  fillLight.position.set(-4, 3, 6);
+  scene.add(fillLight);
 
-  new GLTFLoader().load(
+  const topRim = new THREE.DirectionalLight(0xffffff, 1.0);
+  topRim.position.set(2, 8, 2);
+  scene.add(topRim);
+
+  // ═══════════════════════════════════════════════════════════════════
+  // CHISEL MODEL
+  // ═══════════════════════════════════════════════════════════════════
+  const outerPivot = new THREE.Group(); // scroll-driven position + rotation
+  const driftPivot = new THREE.Group(); // EVA weightless drift
+  const spinPivot  = new THREE.Group(); // very slow self-spin
+
+  outerPivot.add(driftPivot);
+  driftPivot.add(spinPivot);
+  scene.add(outerPivot);
+
+  let chisel = null;
+
+  const draco = new DRACOLoader();
+  draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
+
+  const loader = new GLTFLoader();
+  loader.setDRACOLoader(draco);
+
+  const TARGET_LENGTH = 24.0; // world-units along the chisel's long axis
+
+  loader.load(
     '/kirici-uc.glb',
     (gltf) => {
-      const m = gltf.scene;
-      const box = new THREE.Box3().setFromObject(m);
-      const sz  = box.getSize(new THREE.Vector3());
-      m.position.sub(box.getCenter(new THREE.Vector3()));
-      m.scale.setScalar(CHISEL_LEN / Math.max(sz.x, sz.y, sz.z));
-      if (sz.z >= sz.y && sz.z >= sz.x) m.rotation.x = Math.PI / 2;
-      else if (sz.x >= sz.y) m.rotation.z = -Math.PI / 2;
-      m.traverse(o => {
+      chisel = gltf.scene;
+
+      // Center + scale to normalize
+      const box = new THREE.Box3().setFromObject(chisel);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      chisel.position.sub(center);
+
+      // Use longest dimension as the chisel's "length"
+      const longest = Math.max(size.x, size.y, size.z);
+      const s = TARGET_LENGTH / longest;
+      chisel.scale.setScalar(s);
+
+      // Orient: long axis vertical (Y), tip pointing DOWN
+      if (size.z >= size.y && size.z >= size.x) {
+        chisel.rotation.x = Math.PI / 2;
+      } else if (size.x > size.y) {
+        chisel.rotation.z = -Math.PI / 2;
+      } else {
+        chisel.rotation.z = Math.PI; // flip to tip-down
+      }
+
+      // Enhance material response
+      chisel.traverse((o) => {
         if (o.isMesh && o.material) {
-          o.material.metalness = Math.max(o.material.metalness ?? 0, 0.88);
-          o.material.roughness = Math.min(o.material.roughness ?? 1, 0.38);
+          const m = o.material;
+          if ('metalness' in m) m.metalness = 0.85;
+          if ('roughness' in m) m.roughness = 0.40;
+          if ('envMapIntensity' in m) m.envMapIntensity = 1.4;
+          if (m.emissive) m.userData._origEmissive = m.emissive.clone();
         }
       });
-      cSpin.add(m);
-      chiselReady = true;
-      cPivot.visible = true;
+
+      spinPivot.add(chisel);
+      layout();
     },
     undefined,
-    () => {
-      // Fallback geometry
-      const mat  = new THREE.MeshStandardMaterial({ color: 0x58626E, metalness: 0.92, roughness: 0.3 });
-      const hMat = new THREE.MeshStandardMaterial({ color: 0xFF5500, metalness: 0.85, roughness: 0.3, emissive: 0xFF2000, emissiveIntensity: 0.5 });
-      const g = new THREE.Group();
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.78, 8, 32), mat); body.position.y = 2; g.add(body);
-      const taper = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.38, 3, 32), mat); taper.position.y = -3; g.add(taper);
-      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.38, 2.5, 32), hMat); tip.position.y = -5.5; g.add(tip);
-      cSpin.add(g);
-      chiselReady = true;
-      cPivot.visible = true;
+    (err) => {
+      console.warn('[scene] chisel load failed, using primitive fallback', err);
+      const fg = new THREE.Group();
+      const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.9, 0.9, 16, 28),
+        new THREE.MeshStandardMaterial({ color: 0x555a62, metalness: 0.9, roughness: 0.38 })
+      );
+      body.position.y = 2;
+      const tip = new THREE.Mesh(
+        new THREE.ConeGeometry(0.9, 5, 28),
+        new THREE.MeshStandardMaterial({ color: 0x444951, metalness: 0.9, roughness: 0.42 })
+      );
+      tip.position.y = -8.5;
+      fg.add(body); fg.add(tip);
+      chisel = fg;
+      spinPivot.add(chisel);
+      layout();
     }
   );
 
-  // ══════════════════════════════════════════════════════════════════════
-  // STATE MACHINE
-  // ══════════════════════════════════════════════════════════════════════
-  const S = { IDLE: 0, WINDUP: 1, STRIKE: 2, SHATTER: 3, RESET: 4 };
-  const DUR = reduce
-    ? { idle: 0.6, windup: 0.08, strike: 0.04, shatter: 0.5, reset: 0.25 }
-    : { idle: 3.6, windup: 0.55, strike: 0.17, shatter: 2.9, reset: 1.05 };
+  // ═══════════════════════════════════════════════════════════════════
+  // LAYOUT — idle base position (scroll offsets layered on top)
+  // ═══════════════════════════════════════════════════════════════════
+  const idleBase = new THREE.Vector3(0, 0, 0);
 
-  let state = S.IDLE;
-  let stateT = 0;
-  let shake = 0;
+  function layout() {
+    const w = innerWidth, h = innerHeight;
+    const aspect = w / h;
+    cam.aspect = aspect;
+    cam.updateProjectionMatrix();
+    renderer.setSize(w, h);
 
-  function easeOut3(x) { return 1 - Math.pow(1 - x, 3); }
-  function easeIn3(x)  { return x * x * x; }
-  function sm(x)       { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
-
-  function impact() {
-    rock.visible = false;
-    for (const f of frags) {
-      f.mesh.visible = true;
-      f.life = 0;
-      f.mesh.position.copy(f.restPos);
-      f.mesh.rotation.copy(f.restRot);
-      f.mat.opacity = 1; f.mat.transparent = false;
-      const dir = f.restPos.clone().normalize();
-      dir.y = Math.abs(dir.y) + 0.6;
-      f.vel.copy(dir).multiplyScalar(3.5 + Math.random() * 5.5);
-      f.vel.x += (Math.random() - 0.5) * 2.5;
-      f.vel.z += (Math.random() - 0.5) * 2.5;
+    if (innerWidth <= 900) {
+      // Mobile: centered, low
+      idleBase.set(0, -3.0, 0);
+      outerPivot.scale.setScalar(0.85);
+    } else {
+      // Desktop: LEFT side (text is on the right), low
+      const fovY = cam.fov * Math.PI / 180;
+      const viewH = 2 * cam.position.z * Math.tan(fovY / 2);
+      const viewW = viewH * aspect;
+      const xOffset = Math.min(viewW * 0.22, 3.4);
+      idleBase.set(-xOffset, -2.0, 0);
+      outerPivot.scale.setScalar(1.15);
     }
-    for (let i = 0; i < SP_N; i++) {
-      spPos[i*3]   = cPivot.position.x + (Math.random()-0.5) * 1.4;
-      spPos[i*3+1] = ROCK_Y + ROCK_R * 0.15 + Math.random() * 0.6;
-      spPos[i*3+2] = (Math.random()-0.5) * 1.4;
-      const a = Math.random() * Math.PI * 2;
-      const sp = 2.5 + Math.random() * 7;
-      spVel[i].set(Math.cos(a)*sp*0.8, 1.5 + Math.random()*6, Math.sin(a)*sp*0.55);
-      spLife[i] = 1.0;
-    }
-    if (SP_N > 0) spGeo.attributes.position.needsUpdate = true;
-    flash.intensity = 18;
-    shake = 0.4;
+    outerPivot.position.copy(idleBase);
   }
 
-  // ══════════════════════════════════════════════════════════════════════
-  // MOUSE PARALLAX
-  // ══════════════════════════════════════════════════════════════════════
-  const mouse = { x: 0, sx: 0, y: 0, sy: 0 };
-  if (!isMobile) {
-    addEventListener('pointermove', e => {
-      mouse.x = (e.clientX / innerWidth) * 2 - 1;
-      mouse.y = (e.clientY / innerHeight) * 2 - 1;
-    }, { passive: true });
-  }
+  // ═══════════════════════════════════════════════════════════════════
+  // SCROLL PROGRESS (smoothed — very slow follow for cinematic feel)
+  // ═══════════════════════════════════════════════════════════════════
+  let rawProgress = 0;
+  let smoothedProgress = 0;
 
-  // ══════════════════════════════════════════════════════════════════════
-  // LOOP
-  // ══════════════════════════════════════════════════════════════════════
-  let prevT = performance.now() / 1000;
-  let elapsed = 0;
+  function updateRawProgress() {
+    const docH = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    rawProgress = Math.min(1, Math.max(0, window.scrollY / docH));
+  }
+  addEventListener('scroll', updateRawProgress, { passive: true });
+  addEventListener('resize', () => { layout(); updateRawProgress(); });
+  requestAnimationFrame(updateRawProgress);
+
+  // ═══════════════════════════════════════════════════════════════════
+  // ANIMATION LOOP
+  // ═══════════════════════════════════════════════════════════════════
+  const clock = new THREE.Clock();
+  const BREATH_PERIOD = 16.0; // seconds for full ember breath cycle
+
+  // Helper: smoothstep 0..1
+  function smooth(x) { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); }
+
+  // Keyframe interpolation — maps progress (0..1) to a piecewise target
+  // Returns target value at this progress point
+  function keyframes(p, frames) {
+    // frames: [[p, value], [p, value], ...] sorted by p
+    if (p <= frames[0][0]) return frames[0][1];
+    if (p >= frames[frames.length - 1][0]) return frames[frames.length - 1][1];
+    for (let i = 0; i < frames.length - 1; i++) {
+      const [p0, v0] = frames[i];
+      const [p1, v1] = frames[i + 1];
+      if (p >= p0 && p <= p1) {
+        const k = smooth((p - p0) / (p1 - p0));
+        return v0 + (v1 - v0) * k;
+      }
+    }
+    return frames[frames.length - 1][1];
+  }
 
   function tick() {
-    const now = performance.now() / 1000;
-    const dt  = Math.min(now - prevT, 0.05);
-    prevT = now;
-    elapsed += dt;
-    const t = elapsed;
+    const t = clock.getElapsedTime();
+    const dt = Math.min(clock.getDelta(), 0.05);
 
-    mouse.sx += (mouse.x - mouse.sx) * Math.min(1, dt * 2.4);
-    mouse.sy += (mouse.y - mouse.sy) * Math.min(1, dt * 2.4);
+    // Very slow scroll smoothing (cinematic)
+    smoothedProgress += (rawProgress - smoothedProgress) * Math.min(1, dt * 0.6);
+    const p = smoothedProgress;
 
-    // ── Forge breath ────────────────────────────────────────────────
-    const br = 0.5 + 0.5 * Math.sin(t * Math.PI * 2 / 8.5);
-    forge.intensity = 7 + br * 7;
-    rim.intensity   = 1.5 + (1 - br) * 1.2;
-    flash.intensity *= Math.max(0, 1 - dt * 9);
+    // ── Breath cycle ────────────────────────────────────────────
+    const breath = reduce ? 0.3 : 0.35 + 0.3 * Math.sin(t * (Math.PI * 2 / BREATH_PERIOD));
 
-    if (!chiselReady) { renderer.render(scene, cam); requestAnimationFrame(tick); return; }
+    // ── Scroll keyframes ────────────────────────────────────────
+    // 0.0 hero, ~0.2 products, ~0.4 services, ~0.6 gallery, ~0.8 brands, 1.0 contact
+    // X (desktop): starts at idleBase.x (left negative), sweeps right, centers at end
+    const desktopX = keyframes(p, [
+      [0.00, idleBase.x],       // hero: left
+      [0.35, idleBase.x * 0.4], // partial right
+      [0.55, 0.6],              // slight right (gallery)
+      [0.80, 0.2],              // brands
+      [1.00, 0.0],              // contact: center
+    ]);
+    const mobileX = 0; // stays centered on mobile
 
-    stateT += dt;
+    // Y offset
+    const yOffset = keyframes(p, [
+      [0.00, 0.0],
+      [0.40, 0.4],   // rise slightly in services (forge lift)
+      [0.70, 0.2],
+      [1.00, -0.3],  // settle low in contact
+    ]);
 
-    switch (state) {
-      case S.IDLE: {
-        cPivot.position.y = CHISEL_REST_Y + Math.sin(t * 0.88) * 0.14;
-        cSpin.rotation.y  = t * 0.24;
-        cTilt.rotation.z  = 0.06 + Math.sin(t * 0.55) * 0.035;
-        if (stateT > DUR.idle) { state = S.WINDUP; stateT = 0; }
-        break;
-      }
-      case S.WINDUP: {
-        const p = Math.min(1, stateT / DUR.windup);
-        cPivot.position.y = CHISEL_REST_Y + easeOut3(p) * 1.3;
-        cSpin.rotation.y  = t * 0.24;
-        if (stateT > DUR.windup) { state = S.STRIKE; stateT = 0; }
-        break;
-      }
-      case S.STRIKE: {
-        const p = Math.min(1, stateT / DUR.strike);
-        cPivot.position.y = THREE.MathUtils.lerp(CHISEL_REST_Y + 1.3, CHISEL_HIT_Y, easeIn3(p));
-        if (stateT > DUR.strike) { impact(); state = S.SHATTER; stateT = 0; }
-        break;
-      }
-      case S.SHATTER: {
-        // Chisel bounce-back
-        const cb = Math.min(1, stateT / 0.45);
-        cPivot.position.y = THREE.MathUtils.lerp(CHISEL_HIT_Y, CHISEL_REST_Y + 0.4, easeOut3(cb));
-        cSpin.rotation.y  = t * 0.24;
+    // Scale multiplier
+    const scaleMul = keyframes(p, [
+      [0.00, 1.00],
+      [0.40, 1.18],  // zoom in at forge moment
+      [0.70, 0.92],  // pull back during brands
+      [1.00, 1.05],  // slight emphasis on contact
+    ]);
 
-        // Fragment physics
-        const fadeStart = DUR.shatter * 0.52;
-        for (const f of frags) {
-          if (!f.mesh.visible) continue;
-          f.vel.y   -= 9.4 * dt;
-          f.mesh.position.addScaledVector(f.vel, dt);
-          f.mesh.rotation.x += f.angVel.x * dt;
-          f.mesh.rotation.y += f.angVel.y * dt;
-          f.mesh.rotation.z += f.angVel.z * dt;
-          f.life += dt;
-          if (f.life > fadeStart) {
-            f.mat.transparent = true;
-            f.mat.opacity = Math.max(0, 1 - (f.life - fadeStart) / (DUR.shatter - fadeStart));
-          }
+    // Ember intensity driven by scroll (layered on breath)
+    const emberScrollBoost = keyframes(p, [
+      [0.00, 0.2],
+      [0.40, 1.3],   // peak at services
+      [0.60, 0.5],
+      [1.00, 0.45],
+    ]);
+
+    // Heat shimmer — strong only around services
+    const heatAmount = keyframes(p, [
+      [0.25, 0.0],
+      [0.40, 1.0],
+      [0.55, 0.0],
+      [1.00, 0.0],
+    ]);
+
+    // Drift damping — chisel settles in contact
+    const driftAmount = keyframes(p, [
+      [0.00, 1.0],
+      [0.90, 0.8],
+      [1.00, 0.15],  // heavily damped at bottom
+    ]);
+
+    // ── Apply to glow shader ───────────────────────────────────
+    glowMat.uniforms.uTime.value = t;
+    glowMat.uniforms.uEmber.value = breath * emberScrollBoost;
+    glowMat.uniforms.uHeat.value = heatAmount;
+
+    horizonMat.uniforms.uTime.value = t;
+    horizonMat.uniforms.uEmber.value = breath * (0.5 + emberScrollBoost * 0.5);
+
+    // ── Apply to chisel emissive (so metal itself glows subtly) ─
+    if (chisel) {
+      const emissiveLevel = breath * (0.15 + heatAmount * 0.8);
+      chisel.traverse((o) => {
+        if (o.isMesh && o.material && o.material.emissive) {
+          const m = o.material;
+          const orig = m.userData._origEmissive || new THREE.Color(0, 0, 0);
+          m.emissive.copy(orig);
+          m.emissive.r += 0.55 * emissiveLevel;
+          m.emissive.g += 0.16 * emissiveLevel;
+          m.emissive.b += 0.03 * emissiveLevel;
         }
-
-        // Spark physics
-        let spDirty = false;
-        for (let i = 0; i < SP_N; i++) {
-          if (spLife[i] <= 0) continue;
-          spPos[i*3]   += spVel[i].x * dt;
-          spPos[i*3+1] += spVel[i].y * dt;
-          spPos[i*3+2] += spVel[i].z * dt;
-          spVel[i].y   -= 9.4 * dt;
-          spLife[i]    -= dt * 1.1;
-          if (spLife[i] <= 0) { spPos[i*3] = spPos[i*3+1] = spPos[i*3+2] = 1000; }
-          spDirty = true;
-        }
-        if (spDirty) spGeo.attributes.position.needsUpdate = true;
-
-        if (stateT > DUR.shatter) { state = S.RESET; stateT = 0; }
-        break;
-      }
-      case S.RESET: {
-        const p = Math.min(1, stateT / DUR.reset);
-        cPivot.position.y = THREE.MathUtils.lerp(CHISEL_REST_Y + 0.4, CHISEL_REST_Y, sm(p));
-        cSpin.rotation.y  = t * 0.24;
-
-        if (stateT < 0.05) {
-          for (const f of frags) f.mesh.visible = false;
-          rock.visible = true;
-          rock.scale.setScalar(0.01);
-        }
-        rock.scale.setScalar(sm(p));
-
-        if (stateT > DUR.reset) {
-          rock.scale.setScalar(1);
-          state = S.IDLE;
-          stateT = 0;
-        }
-        break;
-      }
+      });
     }
 
-    // Camera shake + mouse parallax
-    shake = Math.max(0, shake - dt * 5);
-    const sx = shake > 0 ? (Math.random() - 0.5) * shake * 0.3 : 0;
-    const sy = shake > 0 ? (Math.random() - 0.5) * shake * 0.2 : 0;
-    cam.position.set(
-      CAM_BASE.x + sx + (reduce ? 0 : mouse.sx * 0.55),
-      CAM_BASE.y + sy - (reduce ? 0 : mouse.sy * 0.32),
-      CAM_BASE.z,
-    );
+    // Rim light warms with heat
+    rimLight.intensity = 1.8 + heatAmount * 2.8 + breath * 0.5;
 
+    // ── Position (scroll target + EVA drift) ───────────────────
+    const targetX = innerWidth <= 900 ? mobileX : desktopX;
+    const targetY = idleBase.y + yOffset;
+
+    if (!reduce) {
+      const floatX = (Math.sin(t * 0.23) * 0.22 + Math.sin(t * 0.11) * 0.14) * driftAmount;
+      const floatY = (Math.cos(t * 0.19) * 0.18 + Math.sin(t * 0.33) * 0.09) * driftAmount;
+      outerPivot.position.x = targetX + floatX;
+      outerPivot.position.y = targetY + floatY;
+    } else {
+      outerPivot.position.x = targetX;
+      outerPivot.position.y = targetY;
+    }
+
+    // ── Drift rotation (weightless tumble) ─────────────────────
+    if (!reduce) {
+      driftPivot.rotation.y = (Math.sin(t * 0.07) * 0.35 + Math.sin(t * 0.13) * 0.12) * driftAmount;
+      driftPivot.rotation.x = (Math.sin(t * 0.09) * 0.14 + Math.cos(t * 0.15) * 0.06) * driftAmount;
+      driftPivot.rotation.z = (Math.sin(t * 0.05) * 0.10) * driftAmount;
+    } else {
+      driftPivot.rotation.set(0, 0, 0);
+    }
+
+    // ── Scroll-driven outer Y rotation (one slow turn across page) ─
+    outerPivot.rotation.y = p * Math.PI * 2;
+
+    // ── Very slow self-spin (always on) ────────────────────────
+    if (!reduce && chisel) {
+      spinPivot.rotation.y = t * 0.05;
+    }
+
+    // ── Scale ──────────────────────────────────────────────────
+    const baseScale = innerWidth <= 900 ? 0.85 : 1.15;
+    outerPivot.scale.setScalar(baseScale * scaleMul);
+
+    // ── Render ─────────────────────────────────────────────────
+    renderer.autoClear = true;
     renderer.render(scene, cam);
+    renderer.autoClear = false;
+    renderer.render(vigScene, vigCam);
+    renderer.autoClear = true;
+
     requestAnimationFrame(tick);
   }
-
   requestAnimationFrame(tick);
 })();
