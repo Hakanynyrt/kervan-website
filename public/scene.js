@@ -1,470 +1,277 @@
 // Kervan Heat — scene.js
-// Minimal hot-metal chisel. Breath cycle + slow scroll choreography + EVA drift.
-// No jackhammer, no debris, no decorative rings/grids. Just the object.
+// Keski yağmuru: scroll ilerledikçe keski'ler yukarıdan düşer,
+// birbirini iter, zemine yığılır. Repodaki /kirici-uc.glb kullanılır.
 
-(async function() {
+(async function () {
   const THREE = await import('three');
   const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
 
-  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
+  const reduce   = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-  // ─── Root container ─────────────────────────────────────────────
+  // ── Root ──────────────────────────────────────────────────────────────
   const root = document.createElement('div');
   root.id = 'scene-root';
-  root.style.cssText = `
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background: #0A0B0F;
-  `;
+  root.style.cssText = 'position:fixed;inset:0;z-index:0;pointer-events:none;background:#050608;';
   document.body.insertBefore(root, document.body.firstChild);
 
-  // ─── Three basics ───────────────────────────────────────────────
+  // ── Renderer ──────────────────────────────────────────────────────────
   const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x050608, 0.024);
+
   const cam = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 200);
-  cam.position.set(0, 0, 10);
+  cam.position.set(0, 2, 17);
+  cam.lookAt(0, -2, 0);
 
   const renderer = new THREE.WebGLRenderer({
-    antialias: !isMobile, alpha: true, powerPreference: 'high-performance'
+    antialias: !isMobile, alpha: true, powerPreference: 'high-performance',
   });
   renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1.5 : 2));
   renderer.setSize(innerWidth, innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.15;
+  renderer.toneMappingExposure = 1.3;
   root.appendChild(renderer.domElement);
 
-  // ═══════════════════════════════════════════════════════════════════
-  // EMBER GLOW — breathing halo behind the chisel
-  // The emotional core. Waxes and wanes on a 14s cycle.
-  // Stronger during "services" (forge) section.
-  // ═══════════════════════════════════════════════════════════════════
-  const glowGeo = new THREE.PlaneGeometry(36, 36);
+  addEventListener('resize', () => {
+    cam.aspect = innerWidth / innerHeight;
+    cam.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+
+  // ── Lights ────────────────────────────────────────────────────────────
+  scene.add(new THREE.AmbientLight(0x07080F, 0.14));
+
+  const forge = new THREE.PointLight(0xFF5500, 10, 45, 1.7);
+  forge.position.set(0, -14, 5);
+  scene.add(forge);
+
+  const forgeB = new THREE.PointLight(0xFF7020, 5, 30, 2);
+  forgeB.position.set(-5, -10, 3);
+  scene.add(forgeB);
+
+  const rim = new THREE.DirectionalLight(0x90B0FF, 2.2);
+  rim.position.set(-7, 10, -3);
+  scene.add(rim);
+
+  // ── Background ember glow (shader plane) ──────────────────────────────
   const glowMat = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false,
-    uniforms: {
-      uTime:  { value: 0 },
-      uEmber: { value: 0 },   // 0..1.5 — breath × section modulation
-      uHeat:  { value: 0 },   // 0..1   — shimmer intensity (services boost)
-    },
-    vertexShader: `
-      varying vec2 vUv;
-      void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    uniforms: { uEmber: { value: 0.3 } },
+    vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader: `
+      varying vec2 vUv; uniform float uEmber;
+      void main(){
+        float d=length(vUv-.5);
+        float c=smoothstep(.48,0.,d);
+        vec3 col=mix(vec3(.55,.12,.04),vec3(1.,.42,.14),c);
+        gl_FragColor=vec4(col*c*uEmber*1.8, c*uEmber);
       }
     `,
-    fragmentShader: `
-      varying vec2 vUv;
-      uniform float uTime;
-      uniform float uEmber;
-      uniform float uHeat;
-
-      float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-      float noise(vec2 p) {
-        vec2 i = floor(p); vec2 f = fract(p);
-        float a = hash(i);
-        float b = hash(i + vec2(1,0));
-        float c = hash(i + vec2(0,1));
-        float d = hash(i + vec2(1,1));
-        vec2 u = f*f*(3.0-2.0*f);
-        return mix(a,b,u.x) + (c-a)*u.y*(1.0-u.x) + (d-b)*u.x*u.y;
-      }
-
-      void main() {
-        vec2 c = vUv - 0.5;
-        float d = length(c);
-
-        // Soft radial core
-        float core = smoothstep(0.48, 0.0, d);
-
-        // Heat shimmer — animated noise, only strong during forge
-        float shim = noise(vUv * 7.0 + uTime * 0.25) * 0.14 * uHeat;
-
-        // Color: deep red → orange gradient
-        vec3 inner  = vec3(1.00, 0.42, 0.14);
-        vec3 outer  = vec3(0.55, 0.12, 0.04);
-        vec3 ember  = mix(outer, inner, core);
-
-        float amt = core * (uEmber + shim);
-        gl_FragColor = vec4(ember * amt * 1.6, amt);
-      }
-    `
   });
-  const glow = new THREE.Mesh(glowGeo, glowMat);
-  glow.position.set(0, -0.5, -8);
-  scene.add(glow);
+  const glowMesh = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), glowMat);
+  glowMesh.position.set(0, -6, -12);
+  scene.add(glowMesh);
 
-  // ═══════════════════════════════════════════════════════════════════
-  // HORIZON LINE — thin hot line across the scene (industrial floor)
-  // ═══════════════════════════════════════════════════════════════════
-  const horizonGeo = new THREE.PlaneGeometry(80, 0.6);
-  const horizonMat = new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false,
-    uniforms: {
-      uTime:  { value: 0 },
-      uEmber: { value: 0 },
-    },
-    vertexShader: `
-      varying vec2 vUv;
-      void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      varying vec2 vUv;
-      uniform float uTime;
-      uniform float uEmber;
+  // ── Physics constants ─────────────────────────────────────────────────
+  const GRAVITY     = -16.0;
+  const RESTITUTION =  0.28;
+  const FRICTION    =  0.70;
+  const ANG_DAMP    =  0.86;   // per-frame factor (applied as Math.pow per dt)
+  const GROUND_Y    = -7.0;
+  const WALL_X      =  8.5;
+  const COL_R       =  1.25;   // collision sphere radius per chisel
+  const N_MAX       = isMobile ? 9 : 22;
+  const CHISEL_LEN  = isMobile ? 7 : 9;
 
-      void main() {
-        float yFade = 1.0 - abs(vUv.y - 0.5) * 2.0;
-        yFade = pow(max(yFade, 0.0), 2.2);
-        float xFade = smoothstep(0.0, 0.15, vUv.x) * smoothstep(1.0, 0.85, vUv.x);
+  // ── Chisel pool ───────────────────────────────────────────────────────
+  const pool = [];   // { group, pos, vel, quat, angVel, active, settled }
+  let   lastSpawn = -99;
+  const SPAWN_GAP = reduce ? 0 : 0.28; // seconds between each drop
 
-        float core = smoothstep(0.35, 0.5, yFade);
-        float halo = pow(yFade, 1.6) * 0.6;
+  const _axis = new THREE.Vector3();
+  const _dq   = new THREE.Quaternion();
+  const _sep  = new THREE.Vector3();
 
-        vec3 hot  = vec3(1.00, 0.55, 0.20);
-        vec3 deep = vec3(0.70, 0.18, 0.06);
-        vec3 col  = mix(deep, hot, core);
+  function spawnOne(idx) {
+    const c = pool[idx];
+    c.active  = true;
+    c.settled = false;
+    c.pos.set((Math.random() - 0.5) * 11, 13 + Math.random() * 5, (Math.random() - 0.5) * 3.5);
+    c.vel.set((Math.random() - 0.5) * 2.5, -(0.5 + Math.random() * 1.5), (Math.random() - 0.5) * 1.5);
+    c.quat.set(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+    c.angVel.set((Math.random()-0.5)*9, (Math.random()-0.5)*9, (Math.random()-0.5)*7);
+    c.group.visible  = true;
+    c.group.position.copy(c.pos);
+    c.group.quaternion.copy(c.quat);
+  }
 
-        float a = (core + halo) * xFade * (0.55 + uEmber * 0.8);
-        gl_FragColor = vec4(col * a * 1.3, a);
-      }
-    `
-  });
-  const horizon = new THREE.Mesh(horizonGeo, horizonMat);
-  horizon.position.set(0, -6.5, -6);
-  scene.add(horizon);
-
-  // ═══════════════════════════════════════════════════════════════════
-  // VIGNETTE — subtle dark corners for premium feel
-  // ═══════════════════════════════════════════════════════════════════
-  const vigGeo = new THREE.PlaneGeometry(2, 2);
-  const vigMat = new THREE.ShaderMaterial({
-    transparent: true, depthTest: false, depthWrite: false,
-    uniforms: {},
-    vertexShader: `
-      varying vec2 vUv;
-      void main() {
-        vUv = uv;
-        gl_Position = vec4(position.xy, 0.0, 1.0);
-      }
-    `,
-    fragmentShader: `
-      varying vec2 vUv;
-      void main() {
-        vec2 c = vUv - 0.5;
-        float v = smoothstep(0.3, 0.85, length(c));
-        gl_FragColor = vec4(0.0, 0.0, 0.0, v * 0.55);
-      }
-    `
-  });
-  const vignette = new THREE.Mesh(vigGeo, vigMat);
-  vignette.frustumCulled = false;
-  vignette.renderOrder = 999;
-  // Use a separate ortho scene so vignette is always full-screen
-  const vigScene = new THREE.Scene();
-  vigScene.add(vignette);
-  const vigCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-
-  // ═══════════════════════════════════════════════════════════════════
-  // LIGHTING
-  // ═══════════════════════════════════════════════════════════════════
-  scene.add(new THREE.HemisphereLight(0xb8c2d4, 0x14151a, 0.5));
-
-  const keyLight = new THREE.DirectionalLight(0xfff3dc, 2.8);
-  keyLight.position.set(5, 6, 4);
-  scene.add(keyLight);
-
-  const rimLight = new THREE.DirectionalLight(0xff6a28, 2.2);
-  rimLight.position.set(-6, -2, -3);
-  scene.add(rimLight);
-
-  const fillLight = new THREE.PointLight(0x6a8aff, 0.9, 25);
-  fillLight.position.set(-4, 3, 6);
-  scene.add(fillLight);
-
-  const topRim = new THREE.DirectionalLight(0xffffff, 1.0);
-  topRim.position.set(2, 8, 2);
-  scene.add(topRim);
-
-  // ═══════════════════════════════════════════════════════════════════
-  // CHISEL MODEL
-  // ═══════════════════════════════════════════════════════════════════
-  const outerPivot = new THREE.Group(); // scroll-driven position + rotation
-  const driftPivot = new THREE.Group(); // EVA weightless drift
-  const spinPivot  = new THREE.Group(); // very slow self-spin
-
-  outerPivot.add(driftPivot);
-  driftPivot.add(spinPivot);
-  scene.add(outerPivot);
-
-  let chisel = null;
-
-  const loader = new GLTFLoader();
-
-  const TARGET_LENGTH = 24.0; // world-units along the chisel's long axis
-
-  loader.load(
+  // Load GLB, build pool once loaded
+  new GLTFLoader().load(
     '/kirici-uc.glb',
     (gltf) => {
-      chisel = gltf.scene;
-
-      // Center + scale to normalize
-      const box = new THREE.Box3().setFromObject(chisel);
-      const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-      chisel.position.sub(center);
-
-      // Use longest dimension as the chisel's "length"
-      const longest = Math.max(size.x, size.y, size.z);
-      const s = TARGET_LENGTH / longest;
-      chisel.scale.setScalar(s);
-
-      // Orient: long axis vertical (Y), tip pointing DOWN
-      if (size.z >= size.y && size.z >= size.x) {
-        chisel.rotation.x = Math.PI / 2;
-      } else if (size.x > size.y) {
-        chisel.rotation.z = -Math.PI / 2;
-      } else {
-        chisel.rotation.z = Math.PI; // flip to tip-down
-      }
-
-      // Enhance material response
-      chisel.traverse((o) => {
+      // Orient template: center + scale + longest axis = Y
+      const tmpl = gltf.scene;
+      const box  = new THREE.Box3().setFromObject(tmpl);
+      const sz   = box.getSize(new THREE.Vector3());
+      tmpl.position.sub(box.getCenter(new THREE.Vector3()));
+      const longest = Math.max(sz.x, sz.y, sz.z);
+      tmpl.scale.setScalar(CHISEL_LEN / longest);
+      if (sz.z >= sz.y && sz.z >= sz.x) tmpl.rotation.x =  Math.PI / 2;
+      else if (sz.x > sz.y)             tmpl.rotation.z = -Math.PI / 2;
+      // Boost metal look
+      tmpl.traverse(o => {
         if (o.isMesh && o.material) {
-          const m = o.material;
-          if ('metalness' in m) m.metalness = 0.85;
-          if ('roughness' in m) m.roughness = 0.40;
-          if ('envMapIntensity' in m) m.envMapIntensity = 1.4;
-          if (m.emissive) m.userData._origEmissive = m.emissive.clone();
+          o.material.metalness = Math.max(o.material.metalness ?? 0, 0.88);
+          o.material.roughness = Math.min(o.material.roughness ?? 1, 0.38);
         }
       });
 
-      spinPivot.add(chisel);
-      layout();
+      // Populate pool
+      for (let i = 0; i < N_MAX; i++) {
+        const grp = new THREE.Group();
+        grp.add(tmpl.clone(true));
+        grp.visible = false;
+        scene.add(grp);
+        pool.push({
+          group:  grp,
+          pos:    new THREE.Vector3(0, 30, 0), // park off-screen
+          vel:    new THREE.Vector3(),
+          quat:   new THREE.Quaternion(),
+          angVel: new THREE.Vector3(),
+          active:  false,
+          settled: false,
+        });
+      }
     },
     undefined,
-    (err) => {
-      console.warn('[scene] chisel load failed, using primitive fallback', err);
-      const fg = new THREE.Group();
-      const body = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.9, 0.9, 16, 28),
-        new THREE.MeshStandardMaterial({ color: 0x555a62, metalness: 0.9, roughness: 0.38 })
-      );
-      body.position.y = 2;
-      const tip = new THREE.Mesh(
-        new THREE.ConeGeometry(0.9, 5, 28),
-        new THREE.MeshStandardMaterial({ color: 0x444951, metalness: 0.9, roughness: 0.42 })
-      );
-      tip.position.y = -8.5;
-      fg.add(body); fg.add(tip);
-      chisel = fg;
-      spinPivot.add(chisel);
-      layout();
-    }
+    err => console.warn('[scene] GLB load error', err)
   );
 
-  // ═══════════════════════════════════════════════════════════════════
-  // LAYOUT — idle base position (scroll offsets layered on top)
-  // ═══════════════════════════════════════════════════════════════════
-  const idleBase = new THREE.Vector3(0, 0, 0);
+  // ── Scroll ────────────────────────────────────────────────────────────
+  let rawScroll = 0, smoothScroll = 0;
+  function updateScroll() {
+    const d = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    rawScroll = Math.min(1, Math.max(0, window.scrollY / d));
+  }
+  addEventListener('scroll', updateScroll, { passive: true });
+  requestAnimationFrame(updateScroll);
 
-  function layout() {
-    const w = innerWidth, h = innerHeight;
-    const aspect = w / h;
-    cam.aspect = aspect;
-    cam.updateProjectionMatrix();
-    renderer.setSize(w, h);
+  // ── Physics ───────────────────────────────────────────────────────────
+  function physicsStep(dt) {
+    const live = pool.filter(c => c.active);
 
-    if (innerWidth <= 900) {
-      // Mobile: centered, low
-      idleBase.set(0, -3.0, 0);
-      outerPivot.scale.setScalar(0.85);
-    } else {
-      // Desktop: LEFT side (text is on the right), low
-      const fovY = cam.fov * Math.PI / 180;
-      const viewH = 2 * cam.position.z * Math.tan(fovY / 2);
-      const viewW = viewH * aspect;
-      const xOffset = Math.min(viewW * 0.22, 3.4);
-      idleBase.set(-xOffset, -2.0, 0);
-      outerPivot.scale.setScalar(1.15);
+    for (const c of live) {
+      if (c.settled) continue;
+
+      // Gravity
+      c.vel.y += GRAVITY * dt;
+
+      // Integrate
+      c.pos.addScaledVector(c.vel, dt);
+
+      // Rotate
+      const spd = c.angVel.length();
+      if (spd > 0.001) {
+        _axis.copy(c.angVel).divideScalar(spd);
+        _dq.setFromAxisAngle(_axis, spd * dt);
+        c.quat.premultiply(_dq).normalize();
+      }
+
+      // Ground
+      if (c.pos.y < GROUND_Y + COL_R) {
+        c.pos.y = GROUND_Y + COL_R;
+        if (c.vel.y < 0) {
+          c.vel.y  *= -RESTITUTION;
+          c.vel.x  *= FRICTION;
+          c.vel.z  *= FRICTION;
+          c.angVel.multiplyScalar(0.62);
+        }
+      }
+
+      // Side walls
+      for (const [axis, limit] of [['x', WALL_X], ['z', 5.5]]) {
+        if (Math.abs(c.pos[axis]) > limit - COL_R) {
+          c.pos[axis] = Math.sign(c.pos[axis]) * (limit - COL_R);
+          c.vel[axis] *= -RESTITUTION * 0.7;
+        }
+      }
+
+      // Angular damping
+      c.angVel.multiplyScalar(Math.pow(ANG_DAMP, dt * 60));
+
+      // Settled?
+      if (c.vel.lengthSq() < 0.006 && c.angVel.lengthSq() < 0.015 && c.pos.y < GROUND_Y + COL_R + 0.25) {
+        c.settled = true;
+        c.vel.set(0, 0, 0);
+        c.angVel.set(0, 0, 0);
+      }
+
+      c.group.position.copy(c.pos);
+      c.group.quaternion.copy(c.quat);
     }
-    outerPivot.position.copy(idleBase);
-  }
 
-  // ═══════════════════════════════════════════════════════════════════
-  // SCROLL PROGRESS (smoothed — very slow follow for cinematic feel)
-  // ═══════════════════════════════════════════════════════════════════
-  let rawProgress = 0;
-  let smoothedProgress = 0;
+    // Chisel ↔ chisel collisions (sphere approximation, O(n²))
+    const minD = COL_R * 2;
+    for (let i = 0; i < live.length - 1; i++) {
+      for (let j = i + 1; j < live.length; j++) {
+        const a = live[i], b = live[j];
+        _sep.subVectors(b.pos, a.pos);
+        const dist = _sep.length();
+        if (dist < minD && dist > 0.001) {
+          _sep.divideScalar(dist); // normalize
+          const overlap = (minD - dist) * 0.51;
+          if (!a.settled) a.pos.addScaledVector(_sep, -overlap);
+          if (!b.settled) b.pos.addScaledVector(_sep,  overlap);
 
-  function updateRawProgress() {
-    const docH = Math.max(1, document.documentElement.scrollHeight - innerHeight);
-    rawProgress = Math.min(1, Math.max(0, window.scrollY / docH));
-  }
-  addEventListener('scroll', updateRawProgress, { passive: true });
-  addEventListener('resize', () => { layout(); updateRawProgress(); });
-  requestAnimationFrame(updateRawProgress);
+          const relV = a.vel.dot(_sep) - b.vel.dot(_sep);
+          if (relV >= 0) continue; // separating
 
-  // ═══════════════════════════════════════════════════════════════════
-  // ANIMATION LOOP
-  // ═══════════════════════════════════════════════════════════════════
-  const clock = new THREE.Clock();
-  const BREATH_PERIOD = 16.0; // seconds for full ember breath cycle
+          const imp = -(1 + RESTITUTION) * relV * 0.5;
+          if (!a.settled) { a.vel.addScaledVector(_sep, -imp); a.angVel.addScaledVector(_sep, imp * 0.35); }
+          if (!b.settled) { b.vel.addScaledVector(_sep,  imp); b.angVel.addScaledVector(_sep, imp * 0.35); }
 
-  // Helper: smoothstep 0..1
-  function smooth(x) { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); }
-
-  // Keyframe interpolation — maps progress (0..1) to a piecewise target
-  // Returns target value at this progress point
-  function keyframes(p, frames) {
-    // frames: [[p, value], [p, value], ...] sorted by p
-    if (p <= frames[0][0]) return frames[0][1];
-    if (p >= frames[frames.length - 1][0]) return frames[frames.length - 1][1];
-    for (let i = 0; i < frames.length - 1; i++) {
-      const [p0, v0] = frames[i];
-      const [p1, v1] = frames[i + 1];
-      if (p >= p0 && p <= p1) {
-        const k = smooth((p - p0) / (p1 - p0));
-        return v0 + (v1 - v0) * k;
+          a.settled = false;
+          b.settled = false;
+        }
       }
     }
-    return frames[frames.length - 1][1];
   }
+
+  // ── Loop ──────────────────────────────────────────────────────────────
+  let prevT   = performance.now() / 1000;
+  let elapsed = 0;
 
   function tick() {
-    const t = clock.getElapsedTime();
-    const dt = Math.min(clock.getDelta(), 0.05);
+    const now = performance.now() / 1000;
+    const dt  = Math.min(now - prevT, 0.033);
+    prevT = now; elapsed += dt;
 
-    // Very slow scroll smoothing (cinematic)
-    smoothedProgress += (rawProgress - smoothedProgress) * Math.min(1, dt * 0.6);
-    const p = smoothedProgress;
+    smoothScroll += (rawScroll - smoothScroll) * Math.min(1, dt * 1.4);
+    const p = smoothScroll;
 
-    // ── Breath cycle ────────────────────────────────────────────
-    const breath = reduce ? 0.3 : 0.35 + 0.3 * Math.sin(t * (Math.PI * 2 / BREATH_PERIOD));
+    // Forge breath
+    const br = 0.5 + 0.5 * Math.sin(elapsed * 0.68);
+    forge.intensity  = 8  + br * 8;
+    forgeB.intensity = 3  + br * 4;
+    rim.intensity    = 1.8 + (1 - br) * 1.2;
+    glowMat.uniforms.uEmber.value = 0.22 + br * 0.28 + p * 0.55;
 
-    // ── Scroll keyframes ────────────────────────────────────────
-    // 0.0 hero, ~0.2 products, ~0.4 services, ~0.6 gallery, ~0.8 brands, 1.0 contact
-    // X (desktop): starts at idleBase.x (left negative), sweeps right, centers at end
-    const desktopX = keyframes(p, [
-      [0.00, idleBase.x],       // hero: left
-      [0.35, idleBase.x * 0.4], // partial right
-      [0.55, 0.6],              // slight right (gallery)
-      [0.80, 0.2],              // brands
-      [1.00, 0.0],              // contact: center
-    ]);
-    const mobileX = 0; // stays centered on mobile
-
-    // Y offset
-    const yOffset = keyframes(p, [
-      [0.00, 0.0],
-      [0.40, 0.4],   // rise slightly in services (forge lift)
-      [0.70, 0.2],
-      [1.00, -0.3],  // settle low in contact
-    ]);
-
-    // Scale multiplier
-    const scaleMul = keyframes(p, [
-      [0.00, 1.00],
-      [0.40, 1.18],  // zoom in at forge moment
-      [0.70, 0.92],  // pull back during brands
-      [1.00, 1.05],  // slight emphasis on contact
-    ]);
-
-    // Ember intensity driven by scroll (layered on breath)
-    const emberScrollBoost = keyframes(p, [
-      [0.00, 0.2],
-      [0.40, 1.3],   // peak at services
-      [0.60, 0.5],
-      [1.00, 0.45],
-    ]);
-
-    // Heat shimmer — strong only around services
-    const heatAmount = keyframes(p, [
-      [0.25, 0.0],
-      [0.40, 1.0],
-      [0.55, 0.0],
-      [1.00, 0.0],
-    ]);
-
-    // Drift damping — chisel settles in contact
-    const driftAmount = keyframes(p, [
-      [0.00, 1.0],
-      [0.90, 0.8],
-      [1.00, 0.15],  // heavily damped at bottom
-    ]);
-
-    // ── Apply to glow shader ───────────────────────────────────
-    glowMat.uniforms.uTime.value = t;
-    glowMat.uniforms.uEmber.value = breath * emberScrollBoost;
-    glowMat.uniforms.uHeat.value = heatAmount;
-
-    horizonMat.uniforms.uTime.value = t;
-    horizonMat.uniforms.uEmber.value = breath * (0.5 + emberScrollBoost * 0.5);
-
-    // ── Apply to chisel emissive (so metal itself glows subtly) ─
-    if (chisel) {
-      const emissiveLevel = breath * (0.15 + heatAmount * 0.8);
-      chisel.traverse((o) => {
-        if (o.isMesh && o.material && o.material.emissive) {
-          const m = o.material;
-          const orig = m.userData._origEmissive || new THREE.Color(0, 0, 0);
-          m.emissive.copy(orig);
-          m.emissive.r += 0.55 * emissiveLevel;
-          m.emissive.g += 0.16 * emissiveLevel;
-          m.emissive.b += 0.03 * emissiveLevel;
-        }
-      });
+    // Spawn chisels as scroll increases
+    if (pool.length > 0) {
+      const want   = reduce ? Math.min(3, pool.length) : Math.round(p * N_MAX);
+      const active = pool.filter(c => c.active).length;
+      if (active < want && elapsed - lastSpawn > SPAWN_GAP) {
+        const idle = pool.find(c => !c.active);
+        if (idle) { spawnOne(pool.indexOf(idle)); lastSpawn = elapsed; }
+      }
     }
 
-    // Rim light warms with heat
-    rimLight.intensity = 1.8 + heatAmount * 2.8 + breath * 0.5;
+    if (!reduce) physicsStep(dt);
 
-    // ── Position (scroll target + EVA drift) ───────────────────
-    const targetX = innerWidth <= 900 ? mobileX : desktopX;
-    const targetY = idleBase.y + yOffset;
-
-    if (!reduce) {
-      const floatX = (Math.sin(t * 0.23) * 0.22 + Math.sin(t * 0.11) * 0.14) * driftAmount;
-      const floatY = (Math.cos(t * 0.19) * 0.18 + Math.sin(t * 0.33) * 0.09) * driftAmount;
-      outerPivot.position.x = targetX + floatX;
-      outerPivot.position.y = targetY + floatY;
-    } else {
-      outerPivot.position.x = targetX;
-      outerPivot.position.y = targetY;
-    }
-
-    // ── Drift rotation (weightless tumble) ─────────────────────
-    if (!reduce) {
-      driftPivot.rotation.y = (Math.sin(t * 0.07) * 0.35 + Math.sin(t * 0.13) * 0.12) * driftAmount;
-      driftPivot.rotation.x = (Math.sin(t * 0.09) * 0.14 + Math.cos(t * 0.15) * 0.06) * driftAmount;
-      driftPivot.rotation.z = (Math.sin(t * 0.05) * 0.10) * driftAmount;
-    } else {
-      driftPivot.rotation.set(0, 0, 0);
-    }
-
-    // ── Scroll-driven outer Y rotation (one slow turn across page) ─
-    outerPivot.rotation.y = p * Math.PI * 2;
-
-    // ── Very slow self-spin (always on) ────────────────────────
-    if (!reduce && chisel) {
-      spinPivot.rotation.y = t * 0.05;
-    }
-
-    // ── Scale ──────────────────────────────────────────────────
-    const baseScale = innerWidth <= 900 ? 0.85 : 1.15;
-    outerPivot.scale.setScalar(baseScale * scaleMul);
-
-    // ── Render ─────────────────────────────────────────────────
-    renderer.autoClear = true;
     renderer.render(scene, cam);
-    renderer.autoClear = false;
-    renderer.render(vigScene, vigCam);
-    renderer.autoClear = true;
-
     requestAnimationFrame(tick);
   }
+
   requestAnimationFrame(tick);
 })();
