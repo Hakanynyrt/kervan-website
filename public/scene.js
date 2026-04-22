@@ -252,6 +252,9 @@
   );
 
   // ─── Layout ────────────────────────────────────────────────────
+  // Base position (without idle float) — idle animation adds a small offset
+  const idleBase = new THREE.Vector3(0, 0, 0);
+
   function layout() {
     const w = innerWidth, h = innerHeight;
     const aspect = w / h;
@@ -262,18 +265,19 @@
     if (!chisel) return;
 
     if (innerWidth <= 900) {
-      // Mobile: centered, lower — tip reaches into view
-      outerPivot.position.set(0, -2.0, 0);
-      outerPivot.scale.setScalar(0.85);
+      // Mobile: tip lands at bottom of hero (the "blue line"), body extends below
+      idleBase.set(0, -3.2, 0);
+      outerPivot.scale.setScalar(0.9);
     } else {
       // Desktop: right side, vertically centered in viewport
       const fovY = cam.fov * Math.PI / 180;
       const viewH = 2 * cam.position.z * Math.tan(fovY / 2);
       const viewW = viewH * aspect;
       const xOffset = Math.min(viewW * 0.22, 3.4);
-      outerPivot.position.set(xOffset, -1.6, 0);
+      idleBase.set(xOffset, -1.6, 0);
       outerPivot.scale.setScalar(1.2);
     }
+    outerPivot.position.copy(idleBase);
   }
 
   // ─── Scroll (sticky — no fade-out) ─────────────────────────────
@@ -356,9 +360,15 @@
     flashLight.intensity = impactIntensity * 3.5;
     glowMat.uniforms.uImpact.value = impactIntensity;
 
-    // Camera shake
-    cam.position.x = (Math.random() - 0.5) * shake;
-    cam.position.y = (Math.random() - 0.5) * shake;
+    // Idle float — x/y drift while chisel stays vertical (layered on top of shake)
+    const floatX = Math.sin(t * 0.7) * 0.09 + Math.sin(t * 1.3) * 0.04;
+    const floatY = Math.cos(t * 0.55) * 0.07 + Math.sin(t * 1.1) * 0.03;
+    outerPivot.position.x = idleBase.x + floatX + (Math.random() - 0.5) * shake;
+    outerPivot.position.y = idleBase.y + floatY + (Math.random() - 0.5) * shake * 0.5;
+
+    // Camera shake (separate from float)
+    cam.position.x = (Math.random() - 0.5) * shake * 0.5;
+    cam.position.y = (Math.random() - 0.5) * shake * 0.5;
 
     // ── Rotation: outer orbit + self-axis spin ──────────────────
     if (chisel) {
