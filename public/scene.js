@@ -1,7 +1,7 @@
 // Kervan Heat — scene.js
-// Parts still-life: chisel + piston + bushing + kit arranged as a sculptural
-// composition. No scroll coupling, no turntable spin. Cursor parallax only:
-// when the user moves the mouse, the whole stage tilts gently toward it.
+// Single chisel, oriented vertically, slid by scroll progress: at the top of
+// the page the chisel's TOP fills the badge; as you scroll down the page the
+// camera tour reveals progressively lower parts, ending on the tip.
 
 (async function () {
   const THREE = await import('three');
@@ -20,8 +20,14 @@
   })();
 
   const scene = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(34, 1, 0.1, 200);
-  cam.position.set(0, 0, 18);
+  // Fixed camera looking at origin; the chisel slides up/down past it.
+  const FOV = 34;
+  const CAM_Z = 18;
+  const cam = new THREE.PerspectiveCamera(FOV, 1, 0.1, 200);
+  cam.position.set(0, 0, CAM_Z);
+
+  // Vertical extent visible at the origin plane (z=0).
+  const VISIBLE_H = 2 * Math.tan((FOV * Math.PI / 180) / 2) * CAM_Z;
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -43,8 +49,7 @@
   resize();
   addEventListener('resize', resize);
 
-  // Product-photo lighting: warm key from upper-right, cool fill from left,
-  // orange rim behind. Static — composition is the point, not motion.
+  // Static product-photo lighting.
   const key = new THREE.DirectionalLight(0xFFE6BE, 3.0);
   key.position.set(4, 5, 6);
   scene.add(key);
@@ -57,72 +62,14 @@
   rim.position.set(-3, -2, -4);
   scene.add(rim);
 
-  // The "stage" is the parent group that holds all four parts. Cursor tilt
-  // applies here, so parts move together as one composition.
-  const stage = new THREE.Group();
-  scene.add(stage);
+  // chiselGroup: parent that we slide vertically. The model is centered and
+  // re-oriented inside it so its longest axis is +Y (vertical, head at top).
+  const chiselGroup = new THREE.Group();
+  scene.add(chiselGroup);
 
-  function makeMetal(hex, roughness, metalness) {
-    return new THREE.MeshStandardMaterial({
-      color:           new THREE.Color(hex),
-      metalness:       metalness ?? 0.92,
-      roughness:       roughness ?? 0.30,
-      envMapIntensity: 1.25,
-    });
-  }
+  let chiselHeight = 0;     // world-space vertical extent after scaling
+  let modelLoaded  = false;
 
-  // ─── 1. Chisel (loaded async from GLB) ────────────────────────────────
-  // Sits center-left, slightly tilted, the largest piece.
-  const chiselSlot = new THREE.Group();
-  chiselSlot.position.set(-1.0, 1.0, 0);
-  chiselSlot.rotation.set(-0.08, 0.2, -Math.PI / 6.5);
-  stage.add(chiselSlot);
-
-  // ─── 2. Piston — tall cylinder, upper right ──────────────────────────
-  const piston = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.6, 0.6, 4.0, 48),
-    makeMetal(0x3a3a42, 0.22)
-  );
-  piston.position.set(2.8, 1.2, -0.4);
-  piston.rotation.z = 0.18;
-  // Cap rings to suggest a real piston (top and bottom collars)
-  const collarMat = makeMetal(0x2a2a2e, 0.28);
-  const collarTop = new THREE.Mesh(new THREE.TorusGeometry(0.66, 0.10, 12, 32), collarMat);
-  collarTop.position.y = 1.7;
-  collarTop.rotation.x = Math.PI / 2;
-  piston.add(collarTop);
-  const collarBot = collarTop.clone();
-  collarBot.position.y = -1.7;
-  piston.add(collarBot);
-  stage.add(piston);
-
-  // ─── 3. Bushing — flat torus, lower left ─────────────────────────────
-  const bushing = new THREE.Mesh(
-    new THREE.TorusGeometry(1.15, 0.42, 24, 56),
-    makeMetal(0x4a3a2a, 0.36) // warm bronze tint, hints at a different alloy
-  );
-  bushing.position.set(-2.6, -2.4, 0.4);
-  bushing.rotation.x = Math.PI / 2.2;
-  bushing.rotation.y = 0.4;
-  stage.add(bushing);
-
-  // ─── 4. Kit — small faceted shape, lower right ───────────────────────
-  // Stand-in for "seal/fastener kit" — a clustered geometric form.
-  const kitGroup = new THREE.Group();
-  kitGroup.position.set(2.4, -2.5, 0.6);
-  kitGroup.rotation.set(0.3, 0.8, 0.2);
-  const kitMat = makeMetal(0x252528, 0.40);
-  const kitCore = new THREE.Mesh(new THREE.IcosahedronGeometry(0.7, 1), kitMat);
-  kitGroup.add(kitCore);
-  const kitRing = new THREE.Mesh(
-    new THREE.TorusGeometry(0.95, 0.08, 10, 28),
-    makeMetal(0xE8781A, 0.45, 0.7) // brand-colored ring, pop of orange
-  );
-  kitRing.rotation.x = Math.PI / 2.5;
-  kitGroup.add(kitRing);
-  stage.add(kitGroup);
-
-  // ─── Load the chisel GLB into chiselSlot ─────────────────────────────
   const draco = new DRACOLoader();
   draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/');
   draco.setDecoderConfig({ type: 'js' });
@@ -133,12 +80,39 @@
     '/kirici-uc.glb',
     (gltf) => {
       const m = gltf.scene;
-      const box = new THREE.Box3().setFromObject(m);
-      const sz = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-      const s = 6.5 / Math.max(sz.x, sz.y, sz.z); // scaled smaller now
-      m.scale.setScalar(s);
-      m.position.copy(center).multiplyScalar(-s);
+
+      // 1. Center on origin in object space.
+      const box0   = new THREE.Box3().setFromObject(m);
+      const center = box0.getCenter(new THREE.Vector3());
+      m.position.sub(center);
+
+      // 2. Find longest axis in object space and rotate so it aligns with +Y.
+      const sz0 = box0.getSize(new THREE.Vector3());
+      const longest = Math.max(sz0.x, sz0.y, sz0.z);
+      let widthA, widthB;
+      if (sz0.x === longest) {
+        chiselGroup.rotation.z = -Math.PI / 2; // X → Y
+        widthA = sz0.y; widthB = sz0.z;
+      } else if (sz0.z === longest) {
+        chiselGroup.rotation.x =  Math.PI / 2; // Z → Y
+        widthA = sz0.x; widthB = sz0.y;
+      } else {
+        widthA = sz0.x; widthB = sz0.z;
+      }
+
+      // 3. Scale so the cross-axis (width) fills ~65% of the visible canvas.
+      //    The vertical axis becomes much taller than the canvas — that's
+      //    the point: scrolling slides the chisel past the window.
+      const targetWidth = VISIBLE_H * 0.55; // a bit narrower than visible
+      const scale       = targetWidth / Math.max(widthA, widthB);
+      chiselGroup.scale.setScalar(scale);
+      chiselHeight = longest * scale;
+
+      // 4. Slight depth: rotate the inner model around its long axis so
+      //    we don't see a perfectly flat silhouette.
+      m.rotation.y = 0.35;
+
+      // 5. Material — same dark steel as before.
       m.traverse(o => {
         if (o.isMesh && o.material) {
           o.material.color           = new THREE.Color(0x2a2a2e);
@@ -148,33 +122,34 @@
           o.material.needsUpdate     = true;
         }
       });
-      chiselSlot.add(m);
+
+      chiselGroup.add(m);
+      modelLoaded = true;
     },
     undefined,
     err => console.error('[scene] /kirici-uc.glb load failed', err)
   );
 
-  // ─── Cursor parallax ─────────────────────────────────────────────────
-  // The stage tilts gently toward the cursor (max ±9°). When the cursor
-  // leaves the window or the page is loaded with no input, tilt is zero
-  // — composition is perfectly still.
-  let tgtX = 0, tgtY = 0, curX = 0, curY = 0;
-  if (!reduced) {
-    addEventListener('mousemove', (e) => {
-      const nx = (e.clientX / innerWidth)  * 2 - 1;   // -1..1
-      const ny = (e.clientY / innerHeight) * 2 - 1;   // -1..1
-      tgtY = nx * 0.16;   // yaw  follows cursor X
-      tgtX = -ny * 0.10;  // pitch follows cursor Y (inverted)
-    }, { passive: true });
-    addEventListener('mouseleave', () => { tgtX = 0; tgtY = 0; });
+  // ─── Scroll → vertical slide ──────────────────────────────────────────
+  // scroll01 = 0  → top of chisel sits at top of badge
+  // scroll01 = 1  → bottom (tip) sits at bottom of badge
+  function scroll01() {
+    const docH = document.documentElement.scrollHeight - innerHeight;
+    if (docH <= 0) return 0;
+    return Math.max(0, Math.min(1, scrollY / docH));
   }
 
+  let curY = 0;
+  const EASE = reduced ? 1.0 : 0.10;
+
   function tick() {
-    const ease = reduced ? 1.0 : 0.06;
-    curX += (tgtX - curX) * ease;
-    curY += (tgtY - curY) * ease;
-    stage.rotation.x = curX;
-    stage.rotation.y = curY;
+    if (modelLoaded) {
+      const slideRange = Math.max(0, chiselHeight - VISIBLE_H);
+      // (scroll01 - 0.5) maps 0→-0.5, 1→+0.5
+      const targetY = (scroll01() - 0.5) * slideRange;
+      curY += (targetY - curY) * EASE;
+      chiselGroup.position.y = curY;
+    }
     renderer.render(scene, cam);
     requestAnimationFrame(tick);
   }
