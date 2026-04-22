@@ -4,6 +4,7 @@
 (async function () {
   const THREE = await import('three');
   const { GLTFLoader }       = await import('three/addons/loaders/GLTFLoader.js');
+  const { DRACOLoader }      = await import('three/addons/loaders/DRACOLoader.js');
   const { RoomEnvironment }  = await import('three/addons/environments/RoomEnvironment.js');
 
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
@@ -61,7 +62,13 @@
   tilt.rotation.z = 0.14;
   scene.add(tilt);
 
-  new GLTFLoader().load(
+  const draco = new DRACOLoader();
+  draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/');
+  draco.setDecoderConfig({ type: 'js' });
+  const loader = new GLTFLoader();
+  loader.setDRACOLoader(draco);
+
+  loader.load(
     '/kirici-uc.glb',
     (gltf) => {
       const m = gltf.scene;
