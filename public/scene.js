@@ -1,14 +1,13 @@
 // Kervan Heat — scene.js
-// Sakin tek keski: hafifçe döner, nefes alır gibi.
+// Sabit çapraz poz, koyu çelik. Hareket yok, temiz zemin.
 
 (async function () {
   const THREE = await import('three');
-  const { GLTFLoader }       = await import('three/addons/loaders/GLTFLoader.js');
-  const { DRACOLoader }      = await import('three/addons/loaders/DRACOLoader.js');
-  const { RoomEnvironment }  = await import('three/addons/environments/RoomEnvironment.js');
+  const { GLTFLoader }      = await import('three/addons/loaders/GLTFLoader.js');
+  const { DRACOLoader }     = await import('three/addons/loaders/DRACOLoader.js');
+  const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js');
 
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
-  const reduce   = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   const root = document.getElementById('scene-root') || (() => {
     const d = document.createElement('div');
@@ -19,7 +18,7 @@
 
   const scene = new THREE.Scene();
   const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 200);
-  cam.position.set(0, 0.5, 16);
+  cam.position.set(0, 0, 16);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1.5 : 2));
@@ -28,7 +27,7 @@
   renderer.toneMappingExposure = 1.0;
   root.appendChild(renderer.domElement);
 
-  // ── Environment (procedural room) for metallic reflections ──
+  // Environment for metallic reflections
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
@@ -42,7 +41,7 @@
   resize();
   addEventListener('resize', resize);
 
-  // ── Lights — darker key for contrast on light bg ──
+  // Lights
   const key = new THREE.DirectionalLight(0xFFFFFF, 2.8);
   key.position.set(3, 6, 6);
   scene.add(key);
@@ -55,12 +54,12 @@
   fill.position.set(-4, 3, 2);
   scene.add(fill);
 
-  // ── Chisel pivot ──
-  const spin = new THREE.Group();
-  const tilt = new THREE.Group();
-  tilt.add(spin);
-  tilt.rotation.z = 0.14;
-  scene.add(tilt);
+  // Pivot — statically posed diagonal
+  const pose = new THREE.Group();
+  pose.rotation.z = -Math.PI / 3;     // ~-60°  → tip up-right
+  pose.rotation.y =  0.28;            // slight turn toward viewer
+  pose.rotation.x = -0.08;            // tiny forward tilt
+  scene.add(pose);
 
   const draco = new DRACOLoader();
   draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/');
@@ -76,8 +75,6 @@
       const sz = box.getSize(new THREE.Vector3());
       m.position.sub(box.getCenter(new THREE.Vector3()));
       m.scale.setScalar(9 / Math.max(sz.x, sz.y, sz.z));
-      if (sz.z >= sz.y && sz.z >= sz.x) m.rotation.x = Math.PI / 2;
-      else if (sz.x > sz.y) m.rotation.z = -Math.PI / 2;
       m.traverse(o => {
         if (o.isMesh && o.material) {
           o.material.color = new THREE.Color(0x2a2a2e);
@@ -87,28 +84,13 @@
           o.material.needsUpdate = true;
         }
       });
-      spin.add(m);
+      pose.add(m);
     },
     undefined,
     err => console.error('[scene] /kirici-uc.glb load failed', err)
   );
 
-  // ── Loop ──
-  let prevT = performance.now() / 1000;
-  let elapsed = 0;
-
   function tick() {
-    const now = performance.now() / 1000;
-    const dt = Math.min(now - prevT, 0.05);
-    prevT = now;
-    elapsed += dt;
-
-    if (!reduce) {
-      spin.rotation.y = elapsed * 0.22;
-      tilt.position.y = Math.sin(elapsed * 0.35) * 0.22;
-      tilt.rotation.x = Math.sin(elapsed * 0.22) * 0.06;
-    }
-
     renderer.render(scene, cam);
     requestAnimationFrame(tick);
   }
