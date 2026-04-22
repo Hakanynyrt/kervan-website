@@ -97,7 +97,7 @@ function HeroDrawing({ t }) {
           <circle cx="200" cy="360" r="34" fill="none" stroke="#E8781A" strokeDasharray="3 3" strokeWidth="1"/>
           <line x1="214" y1="350" x2="320" y2="310" stroke="#E8781A" strokeWidth="1"/>
           <text x="324" y="308" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="#E8781A" letterSpacing="1">DETAIL A</text>
-          <text x="324" y="322" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="#A8ADB8" letterSpacing="1">HRC 52–54</text>
+          <text x="324" y="322" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="#A8ADB8" letterSpacing="1">ISIL İŞLEMLİ</text>
 
           {/* Center line */}
           <line x1="200" y1="20" x2="200" y2="390" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" strokeDasharray="8 4 2 4"/>
@@ -112,7 +112,7 @@ function HeroDrawing({ t }) {
       </div>
       <div className="hero__drawing__bot">
         <span>{t.drawC}</span>
-        <span>42CrMoA · FORGED · HEAT-TREATED</span>
+        <span>FORGED · HEAT-TREATED</span>
       </div>
     </div>
   );

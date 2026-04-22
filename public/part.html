@@ -54,12 +54,12 @@
 
       // Build part data from ref
       const parts = {
-        'CHS-42':  { name:'Keski 42mm', dia:'42 mm', len:'520 mm', mat:'42CrMo', hrd:'52-56 HRC', life:'3-6 ay', desc:'Beton ve granit kırıcılar için standart keski.' },
-        'CHS-50':  { name:'Keski 50mm', dia:'50 mm', len:'580 mm', mat:'42CrMo', hrd:'52-56 HRC', life:'3-6 ay', desc:'Orta boy kırıcılar için en popüler keski.' },
-        'CHS-68':  { name:'Keski 68mm', dia:'68 mm', len:'720 mm', mat:'42CrMo', hrd:'54-58 HRC', life:'4-7 ay', desc:'Büyük kırıcılar için yüksek dayanımlı keski.' },
-        'PST-A120':{ name:'Piston HB3000', dia:'120 mm', len:'720 mm', mat:'42CrMo', hrd:'54-58 HRC', life:'8-12 ay', desc:'Atlas Copco HB3000 için OEM eşdeğer piston.' },
-        'BSH-09':  { name:'Burç', dia:'İç: 50 / Dış: 78', len:'200 mm', mat:'Bronz + çelik', hrd:'H7', life:'6-10 ay', desc:'Keskinin hareket ettiği yatak.' },
-        'BLT-23':  { name:'Yan cıvata M23', dia:'M23', len:'85 mm', mat:'Sertleştirilmiş 10.9', hrd:'32 HRC', life:'12 ay', desc:'Gövde yan plakalarını birleştiren cıvata.' },
+        'CHS-42':  { name:'Keski 42mm', dia:'42 mm', len:'520 mm', life:'3-6 ay', desc:'Beton ve granit kırıcılar için standart keski.' },
+        'CHS-50':  { name:'Keski 50mm', dia:'50 mm', len:'580 mm', life:'3-6 ay', desc:'Orta boy kırıcılar için en popüler keski.' },
+        'CHS-68':  { name:'Keski 68mm', dia:'68 mm', len:'720 mm', life:'4-7 ay', desc:'Büyük kırıcılar için yüksek dayanımlı keski.' },
+        'PST-A120':{ name:'Piston HB3000', dia:'120 mm', len:'720 mm', life:'8-12 ay', desc:'Atlas Copco HB3000 için OEM eşdeğer piston.' },
+        'BSH-09':  { name:'Burç', dia:'İç: 50 / Dış: 78', len:'200 mm', life:'6-10 ay', desc:'Keskinin hareket ettiği yatak.' },
+        'BLT-23':  { name:'Yan cıvata M23', dia:'M23', len:'85 mm', life:'12 ay', desc:'Gövde yan plakalarını birleştiren cıvata.' },
       };
       const part = parts[ref] || parts['CHS-42'];
 
@@ -77,8 +77,6 @@
               React.createElement('div', { className:'part-specs' },
                 React.createElement('div', null, React.createElement('b', null, 'ÇAP'), React.createElement('span', null, part.dia)),
                 React.createElement('div', null, React.createElement('b', null, 'UZUNLUK'), React.createElement('span', null, part.len)),
-                React.createElement('div', null, React.createElement('b', null, 'MALZEME'), React.createElement('span', null, part.mat)),
-                React.createElement('div', null, React.createElement('b', null, 'SERTLIK'), React.createElement('span', null, part.hrd)),
                 React.createElement('div', null, React.createElement('b', null, 'ÖMÜR'), React.createElement('span', null, part.life))
               ),
               React.createElement('a', { className:'btn-primary', href:'index.html#contact' },
