@@ -225,18 +225,21 @@
       const center = box.getCenter(new THREE.Vector3());
       chisel.position.sub(center);
 
-      const targetH = 8.0;
+      const targetH = 24.0;
       // Use the model's longest dimension as its "length"
       const longest = Math.max(size.x, size.y, size.z);
       const s = targetH / longest;
       chisel.scale.setScalar(s);
 
       // Orient upright: model's long axis may come toward the camera (Z).
-      // Rotate so the long axis is vertical (Y).
+      // Rotate so the long axis is vertical (Y), with the TIP pointing DOWN.
       if (size.z > size.y && size.z > size.x) {
-        chisel.rotation.x = -Math.PI / 2;
+        chisel.rotation.x = Math.PI / 2;   // flipped so tip points down
       } else if (size.x > size.y) {
-        chisel.rotation.z = Math.PI / 2;
+        chisel.rotation.z = -Math.PI / 2;  // flipped so tip points down
+      } else {
+        // Already vertical — but may be upside down; flip it
+        chisel.rotation.z = Math.PI;
       }
 
       // Enhance material response to lighting
