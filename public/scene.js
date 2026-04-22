@@ -1,5 +1,6 @@
-// Kervan Heat — Hero 3D scene
-// Vertical chisel, always visible (sticky), slow spin + self-axis rotation, periodic impact.
+// Kervan Heat — scene.js
+// Scroll-choreographed hot-metal chisel. No jackhammer. No debris.
+// Breathing ember cycle at the core; scene CHARACTER changes with scroll section.
 
 (async function() {
   const THREE = await import('three');
@@ -34,11 +35,18 @@
   renderer.toneMappingExposure = 1.15;
   root.appendChild(renderer.domElement);
 
-  // ─── Ember glow behind the chisel (hot-forge atmosphere) ───────
-  const glowGeo = new THREE.PlaneGeometry(30, 30);
+  // ═══════════════════════════════════════════════════════════════════
+  // EMBER GLOW — breathing halo behind the chisel
+  // Intensity driven by (breath cycle + services-section scrollFactor)
+  // ═══════════════════════════════════════════════════════════════════
+  const glowGeo = new THREE.PlaneGeometry(32, 32);
   const glowMat = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false,
-    uniforms: { uTime: { value: 0 }, uImpact: { value: 0 } },
+    uniforms: {
+      uTime:   { value: 0 },
+      uEmber:  { value: 0 },     // 0..1 — overall ember intensity (breath × services)
+      uHeat:   { value: 0 },     // 0..1 — services section boost (forge moment)
+    },
     vertexShader: `
       varying vec2 vUv;
       void main() {
@@ -49,14 +57,36 @@
     fragmentShader: `
       varying vec2 vUv;
       uniform float uTime;
-      uniform float uImpact;
+      uniform float uEmber;
+      uniform float uHeat;
+
+      // simple 2d noise for heat shimmer
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float noise(vec2 p) {
+        vec2 i = floor(p); vec2 f = fract(p);
+        float a = hash(i);
+        float b = hash(i + vec2(1,0));
+        float c = hash(i + vec2(0,1));
+        float d = hash(i + vec2(1,1));
+        vec2 u = f*f*(3.0-2.0*f);
+        return mix(a,b,u.x) + (c-a)*u.y*(1.0-u.x) + (d-b)*u.x*u.y;
+      }
+
       void main() {
         vec2 c = vUv - 0.5;
         float d = length(c);
-        float glow = smoothstep(0.5, 0.0, d) * (0.18 + uImpact * 0.35);
-        float flicker = 0.94 + 0.06 * sin(uTime * 0.7);
-        vec3 color = vec3(0.85, 0.29, 0.10) * glow * flicker;
-        gl_FragColor = vec4(color, glow * flicker);
+
+        // Core ember — warm red/orange, soft radial
+        float core = smoothstep(0.45, 0.0, d);
+        vec3 ember = vec3(0.85, 0.28, 0.08);
+
+        // Heat shimmer (strong during forge moment)
+        float shim = noise(vUv * 8.0 + uTime * 0.3) * 0.12 * uHeat;
+
+        float intensity = core * (uEmber + shim);
+        float alpha = core * uEmber * (1.0 + shim);
+
+        gl_FragColor = vec4(ember * intensity * 1.8, alpha);
       }
     `
   });
@@ -64,195 +94,183 @@
   glow.position.set(0, -0.5, -8);
   scene.add(glow);
 
-  // ─── Lighting ──────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════
+  // LIGHTING
+  // ═══════════════════════════════════════════════════════════════════
   scene.add(new THREE.HemisphereLight(0xb8c2d4, 0x14151a, 0.55));
 
-  const keyLight = new THREE.DirectionalLight(0xfff3dc, 3.4);
+  const keyLight = new THREE.DirectionalLight(0xfff3dc, 3.0);
   keyLight.position.set(5, 6, 4);
   scene.add(keyLight);
 
-  const rimLight = new THREE.DirectionalLight(0xff6a28, 2.6);
+  // Rim light warms up during "forge" section
+  const rimLight = new THREE.DirectionalLight(0xff6a28, 2.4);
   rimLight.position.set(-6, -2, -3);
   scene.add(rimLight);
 
-  const fillLight = new THREE.PointLight(0x6a8aff, 1.2, 25);
+  const fillLight = new THREE.PointLight(0x6a8aff, 1.0, 25);
   fillLight.position.set(-4, 3, 6);
   scene.add(fillLight);
 
-  const topRim = new THREE.DirectionalLight(0xffffff, 1.2);
+  const topRim = new THREE.DirectionalLight(0xffffff, 1.1);
   topRim.position.set(2, 8, 2);
   scene.add(topRim);
 
-  // Impact flash light — briefly bright orange on each strike
-  const flashLight = new THREE.PointLight(0xff5a1a, 0, 14);
-  flashLight.position.set(0, -3, 2);
-  scene.add(flashLight);
+  // Forge light — turns on strongly in services section
+  const forgeLight = new THREE.PointLight(0xff4a12, 0, 16);
+  forgeLight.position.set(0, -2, 3);
+  scene.add(forgeLight);
 
-  // ─── Spark particles (bright, short-lived) ─────────────────────
-  const SPARK_COUNT = 120;
-  const sparkGeo = new THREE.BufferGeometry();
-  const sparkPos = new Float32Array(SPARK_COUNT * 3);
-  const sparkVel = new Float32Array(SPARK_COUNT * 3);
-  const sparkLife = new Float32Array(SPARK_COUNT);
-  for (let i = 0; i < SPARK_COUNT; i++) sparkLife[i] = 0;
-  sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
-  const sparkMat = new THREE.PointsMaterial({
-    color: 0xffb060, size: 0.09, transparent: true, opacity: 0.95,
-    blending: THREE.AdditiveBlending, depthWrite: false,
+  // ═══════════════════════════════════════════════════════════════════
+  // TECHNICAL GRID (appears during "brands" section)
+  // ═══════════════════════════════════════════════════════════════════
+  const gridMat = new THREE.LineBasicMaterial({
+    color: 0x4a5568, transparent: true, opacity: 0, depthWrite: false
   });
-  const sparks = new THREE.Points(sparkGeo, sparkMat);
-  scene.add(sparks);
+  const gridGroup = new THREE.Group();
+  const GRID_RANGE = 12;
+  const GRID_STEP = 1;
+  const gridPts = [];
+  for (let i = -GRID_RANGE; i <= GRID_RANGE; i += GRID_STEP) {
+    gridPts.push(new THREE.Vector3(i, -GRID_RANGE, -6), new THREE.Vector3(i, GRID_RANGE, -6));
+    gridPts.push(new THREE.Vector3(-GRID_RANGE, i, -6), new THREE.Vector3(GRID_RANGE, i, -6));
+  }
+  const gridGeo = new THREE.BufferGeometry().setFromPoints(gridPts);
+  const gridLines = new THREE.LineSegments(gridGeo, gridMat);
+  gridGroup.add(gridLines);
+  scene.add(gridGroup);
 
-  // ─── Debris particles (gray/dark, gravity-affected, longer life) ─
-  const DEBRIS_COUNT = 80;
-  const debrisGeo = new THREE.BufferGeometry();
-  const debrisPos = new Float32Array(DEBRIS_COUNT * 3);
-  const debrisVel = new Float32Array(DEBRIS_COUNT * 3);
-  const debrisLife = new Float32Array(DEBRIS_COUNT);
-  for (let i = 0; i < DEBRIS_COUNT; i++) debrisLife[i] = 0;
-  debrisGeo.setAttribute('position', new THREE.BufferAttribute(debrisPos, 3));
-  const debrisMat = new THREE.PointsMaterial({
-    color: 0xc8a878, size: 0.28, transparent: true, opacity: 0.95,
-    depthWrite: false,
+  // ═══════════════════════════════════════════════════════════════════
+  // ORBIT RINGS (appear during "products" section — diversity metaphor)
+  // 3 wireframe tori circling the chisel at different radii/speeds
+  // ═══════════════════════════════════════════════════════════════════
+  const orbitGroup = new THREE.Group();
+  const orbits = [];
+  for (let i = 0; i < 3; i++) {
+    const radius = 2.3 + i * 0.55;
+    const geo = new THREE.TorusGeometry(radius, 0.012, 8, 120);
+    const mat = new THREE.MeshBasicMaterial({
+      color: 0x7a8598, transparent: true, opacity: 0, depthWrite: false
+    });
+    const torus = new THREE.Mesh(geo, mat);
+    torus.rotation.x = Math.PI / 2 + (i - 1) * 0.22;
+    torus.rotation.z = i * 0.31;
+    orbitGroup.add(torus);
+    orbits.push({ mesh: torus, mat, speedX: 0.04 + i * 0.02, speedY: 0.03 - i * 0.008 });
+  }
+  scene.add(orbitGroup);
+
+  // ═══════════════════════════════════════════════════════════════════
+  // CNC SPARK DRIFT (appears during "gallery" section — small, constant, falling)
+  // ═══════════════════════════════════════════════════════════════════
+  const CNC_COUNT = 140;
+  const cncGeo = new THREE.BufferGeometry();
+  const cncPos = new Float32Array(CNC_COUNT * 3);
+  const cncVel = new Float32Array(CNC_COUNT * 3);
+  const cncLife = new Float32Array(CNC_COUNT);
+  const cncSeed = new Float32Array(CNC_COUNT);
+  for (let i = 0; i < CNC_COUNT; i++) {
+    cncSeed[i] = Math.random();
+    resetCncParticle(i, true);
+  }
+  function resetCncParticle(i, randomY) {
+    cncPos[i * 3 + 0] = (Math.random() - 0.5) * 10;
+    cncPos[i * 3 + 1] = randomY ? (Math.random() - 0.5) * 8 : 5 + Math.random() * 2;
+    cncPos[i * 3 + 2] = (Math.random() - 0.5) * 4;
+    cncVel[i * 3 + 0] = (Math.random() - 0.5) * 0.08;
+    cncVel[i * 3 + 1] = -0.35 - Math.random() * 0.3;
+    cncVel[i * 3 + 2] = (Math.random() - 0.5) * 0.04;
+    cncLife[i] = 1.5 + Math.random() * 2;
+  }
+  cncGeo.setAttribute('position', new THREE.BufferAttribute(cncPos, 3));
+  const cncMat = new THREE.PointsMaterial({
+    size: 0.05,
+    color: 0xffb080,
+    transparent: true,
+    opacity: 0,
     blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    sizeAttenuation: true,
   });
-  const debris = new THREE.Points(debrisGeo, debrisMat);
-  scene.add(debris);
+  const cncPoints = new THREE.Points(cncGeo, cncMat);
+  scene.add(cncPoints);
 
-  // ─── Dust cloud (large, fading) ────────────────────────────────
-  const DUST_COUNT = 40;
-  const dustGeo = new THREE.BufferGeometry();
-  const dustPos = new Float32Array(DUST_COUNT * 3);
-  const dustVel = new Float32Array(DUST_COUNT * 3);
-  const dustLife = new Float32Array(DUST_COUNT);
-  for (let i = 0; i < DUST_COUNT; i++) dustLife[i] = 0;
-  dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
-  const dustMat = new THREE.PointsMaterial({
-    color: 0xe8d4a8, size: 0.85, transparent: true, opacity: 0.55,
-    depthWrite: false, blending: THREE.AdditiveBlending,
-  });
-  const dust = new THREE.Points(dustGeo, dustMat);
-  scene.add(dust);
+  // ═══════════════════════════════════════════════════════════════════
+  // CHISEL MODEL
+  // ═══════════════════════════════════════════════════════════════════
+  const outerPivot = new THREE.Group(); // scroll-position + drift
+  const driftPivot = new THREE.Group(); // EVA multi-axis drift
+  const spinPivot  = new THREE.Group(); // very slow self-axis rotation
 
-  function emitSparks(originX, originY) {
-    // Emit ~35 sparks per strike (overwriting oldest)
-    let emitted = 0;
-    for (let i = 0; i < SPARK_COUNT && emitted < 35; i++) {
-      if (sparkLife[i] > 0.1) continue;
-      const ang = Math.random() * Math.PI * 2;
-      const spd = 2.5 + Math.random() * 5;
-      sparkPos[i * 3 + 0] = originX + (Math.random() - 0.5) * 0.3;
-      sparkPos[i * 3 + 1] = originY;
-      sparkPos[i * 3 + 2] = (Math.random() - 0.5) * 0.3;
-      sparkVel[i * 3 + 0] = Math.cos(ang) * spd;
-      sparkVel[i * 3 + 1] = Math.abs(Math.sin(ang)) * spd * 0.4 + Math.random() * 1.2;
-      sparkVel[i * 3 + 2] = (Math.random() - 0.5) * 2.5;
-      sparkLife[i] = 0.8 + Math.random() * 0.4;
-      emitted++;
-    }
-  }
-
-  function emitDebris(originX, originY) {
-    // Chunks of rock — tumble out with gravity
-    let emitted = 0;
-    for (let i = 0; i < DEBRIS_COUNT && emitted < 20; i++) {
-      if (debrisLife[i] > 0.1) continue;
-      const ang = Math.random() * Math.PI * 2;
-      const spd = 1.5 + Math.random() * 3;
-      debrisPos[i * 3 + 0] = originX + (Math.random() - 0.5) * 0.4;
-      debrisPos[i * 3 + 1] = originY - 0.2;
-      debrisPos[i * 3 + 2] = (Math.random() - 0.5) * 0.4;
-      debrisVel[i * 3 + 0] = Math.cos(ang) * spd;
-      debrisVel[i * 3 + 1] = Math.random() * 2.5 + 1;  // mostly upward initial
-      debrisVel[i * 3 + 2] = (Math.random() - 0.5) * 2;
-      debrisLife[i] = 1.5 + Math.random() * 0.8;
-      emitted++;
-    }
-  }
-
-  function emitDust(originX, originY) {
-    let emitted = 0;
-    for (let i = 0; i < DUST_COUNT && emitted < 10; i++) {
-      if (dustLife[i] > 0.1) continue;
-      const ang = Math.random() * Math.PI * 2;
-      const spd = 0.6 + Math.random() * 1.2;
-      dustPos[i * 3 + 0] = originX + (Math.random() - 0.5) * 0.6;
-      dustPos[i * 3 + 1] = originY;
-      dustPos[i * 3 + 2] = (Math.random() - 0.5) * 0.6;
-      dustVel[i * 3 + 0] = Math.cos(ang) * spd;
-      dustVel[i * 3 + 1] = Math.random() * 0.8 + 0.2;
-      dustVel[i * 3 + 2] = (Math.random() - 0.5) * 1;
-      dustLife[i] = 2.0 + Math.random();
-      emitted++;
-    }
-  }
-
-  // ─── Chisel ────────────────────────────────────────────────────
-  // Outer pivot = orbital position on screen
-  // Inner pivot = self-axis spin + impact animation
-  const outerPivot = new THREE.Group();
-  const spinPivot = new THREE.Group();  // rotates on chisel's long axis
-  const impactPivot = new THREE.Group(); // translates during impact
-
-  outerPivot.position.set(0, 0, 0);
+  outerPivot.add(driftPivot);
+  driftPivot.add(spinPivot);
   scene.add(outerPivot);
-  outerPivot.add(impactPivot);
-  impactPivot.add(spinPivot);
 
   let chisel = null;
+
+  const draco = new DRACOLoader();
+  draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
+
   const loader = new GLTFLoader();
-  const dracoLoader = new DRACOLoader();
-  dracoLoader.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
-  loader.setDRACOLoader(dracoLoader);
+  loader.setDRACOLoader(draco);
+
   loader.load(
-    '/kirici-uc.glb',
+    'chisel.glb',
     (gltf) => {
-      const model = gltf.scene;
+      chisel = gltf.scene;
 
-      // Normalize scale
-      const box = new THREE.Box3().setFromObject(model);
-      const size = new THREE.Vector3(); box.getSize(size);
-      const maxDim = Math.max(size.x, size.y, size.z);
-      const targetHeight = 4.2;
-      model.scale.setScalar(targetHeight / maxDim);
+      // Normalize: center + scale so the chisel is ~4 units tall, pointing down
+      const box = new THREE.Box3().setFromObject(chisel);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      chisel.position.sub(center);
 
-      // Center on origin
-      box.setFromObject(model);
-      const center = new THREE.Vector3(); box.getCenter(center);
-      model.position.sub(center);
+      const targetH = 4.0;
+      const s = targetH / size.y;
+      chisel.scale.setScalar(s);
 
-      // Rotate to vertical: tip down, shank up
-      model.rotation.z = -Math.PI / 2;
-
-      // Industrial steel material
-      model.traverse((o) => {
-        if (o.isMesh) {
-          o.material = new THREE.MeshStandardMaterial({
-            color: 0x8a929e,
-            metalness: 0.78,
-            roughness: 0.28,
-            envMapIntensity: 1.2,
-          });
-          o.castShadow = false;
-          o.receiveShadow = false;
+      // Enhance material response to lighting
+      chisel.traverse((o) => {
+        if (o.isMesh && o.material) {
+          const m = o.material;
+          if ('metalness' in m) m.metalness = 0.85;
+          if ('roughness' in m) m.roughness = 0.42;
+          if ('envMapIntensity' in m) m.envMapIntensity = 1.4;
+          // Store original emissive so we can animate it
+          if (m.emissive) {
+            m.userData._origEmissive = m.emissive.clone();
+          }
         }
       });
 
-      chisel = model;
       spinPivot.add(chisel);
-      console.log('[scene] Chisel loaded');
       layout();
     },
-    (xhr) => {
-      if (xhr.total) console.log('[scene] Loading GLB...', Math.round((xhr.loaded / xhr.total) * 100) + '%');
-    },
+    undefined,
     (err) => {
-      console.error('[scene] GLB load failed', err);
+      console.warn('[scene] chisel load failed, using fallback primitive', err);
+      // Fallback: simple stylized chisel
+      const fg = new THREE.Group();
+      const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.35, 0.35, 3.0, 24),
+        new THREE.MeshStandardMaterial({ color: 0x555a62, metalness: 0.9, roughness: 0.38 })
+      );
+      body.position.y = 0.5;
+      const tip = new THREE.Mesh(
+        new THREE.ConeGeometry(0.35, 1.0, 24),
+        new THREE.MeshStandardMaterial({ color: 0x444951, metalness: 0.9, roughness: 0.42 })
+      );
+      tip.position.y = -1.5;
+      fg.add(body); fg.add(tip);
+      chisel = fg;
+      spinPivot.add(chisel);
+      layout();
     }
   );
 
-  // ─── Layout ────────────────────────────────────────────────────
-  // Base position (without idle float) — idle animation adds a small offset
+  // ═══════════════════════════════════════════════════════════════════
+  // LAYOUT
+  // ═══════════════════════════════════════════════════════════════════
   const idleBase = new THREE.Vector3(0, 0, 0);
 
   function layout() {
@@ -265,188 +283,180 @@
     if (!chisel) return;
 
     if (innerWidth <= 900) {
-      // Mobile: tip lands at bottom of hero (the "blue line"), body extends below
-      idleBase.set(0, -3.2, 0);
-      outerPivot.scale.setScalar(0.9);
+      // Mobile: centered, slightly below middle
+      idleBase.set(0, -1.4, 0);
+      outerPivot.scale.setScalar(0.85);
     } else {
-      // Desktop: right side, vertically centered in viewport
+      // Desktop: right side, centered vertically
       const fovY = cam.fov * Math.PI / 180;
       const viewH = 2 * cam.position.z * Math.tan(fovY / 2);
       const viewW = viewH * aspect;
       const xOffset = Math.min(viewW * 0.22, 3.4);
-      idleBase.set(xOffset, -1.6, 0);
-      outerPivot.scale.setScalar(1.2);
+      idleBase.set(xOffset, -0.6, 0);
+      outerPivot.scale.setScalar(1.15);
     }
     outerPivot.position.copy(idleBase);
   }
 
-  // ─── Scroll (sticky — no fade-out) ─────────────────────────────
-  let scrollY = 0;
-  addEventListener('scroll', () => { scrollY = window.scrollY; }, { passive: true });
-  addEventListener('resize', layout);
+  // ═══════════════════════════════════════════════════════════════════
+  // SCROLL SECTION FACTORS
+  // Reads section positions once layout is stable; computes a 0..1 factor
+  // per named section based on viewport center overlap.
+  // ═══════════════════════════════════════════════════════════════════
+  const sectionIds = ['hero', 'products', 'services', 'gallery', 'brands', 'contact'];
+  // The hero doesn't have an id — use the first <section class="hero"> instead.
+  const sections = {};
+  function collectSections() {
+    sections.hero = document.querySelector('section.hero');
+    sectionIds.forEach(id => {
+      if (id !== 'hero') sections[id] = document.getElementById(id);
+    });
+  }
+  collectSections();
 
-  // ─── Animation loop ────────────────────────────────────────────
+  const sectionFactor = {
+    hero: 1, products: 0, services: 0, gallery: 0, brands: 0, contact: 0
+  };
+  // Smoothed version (lerped toward raw each frame)
+  const sectionLerped = { ...sectionFactor };
+
+  function computeSectionFactors() {
+    const vpMid = window.scrollY + innerHeight / 2;
+    sectionIds.forEach(id => {
+      const el = sections[id];
+      if (!el) { sectionFactor[id] = 0; return; }
+      const rect = el.getBoundingClientRect();
+      const top = rect.top + window.scrollY;
+      const bot = top + rect.height;
+      // Triangular falloff: 1 when viewport midpoint is inside the section,
+      // decays linearly for one viewport beyond either edge.
+      if (vpMid >= top && vpMid <= bot) {
+        sectionFactor[id] = 1;
+      } else if (vpMid < top) {
+        const d = (top - vpMid) / innerHeight;
+        sectionFactor[id] = Math.max(0, 1 - d);
+      } else {
+        const d = (vpMid - bot) / innerHeight;
+        sectionFactor[id] = Math.max(0, 1 - d);
+      }
+    });
+  }
+
+  addEventListener('resize', () => { layout(); collectSections(); computeSectionFactors(); });
+  addEventListener('scroll', computeSectionFactors, { passive: true });
+  // Initial
+  requestAnimationFrame(() => { collectSections(); computeSectionFactors(); });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // ANIMATION LOOP
+  // ═══════════════════════════════════════════════════════════════════
   const clock = new THREE.Clock();
 
-  // Burst pattern: 6s total cycle.
-  // 0.0–1.0s: burst of 7 rapid strikes (every ~0.143s — jackhammer rate)
-  // 1.0–6.0s: quiet (no strikes, chisel idle)
-  const BURST_CYCLE = 6.0;
-  const BURST_WINDOW = 1.0;
-  const STRIKE_COUNT = 7;
-  const STRIKE_INTERVAL = BURST_WINDOW / STRIKE_COUNT;  // ~0.143s
-  const STRIKE_DUR = 0.12;     // each strike very short to fit the cadence
-  let lastStrikeIndex = -1;    // tracks which strike in current cycle has already emitted sparks
-  let lastCycle = -1;
+  // Breath cycle: 14s — ember waxes and wanes
+  const BREATH_PERIOD = 14.0;
 
   function tick() {
     const t = clock.getElapsedTime();
+    const dt = Math.min(clock.getDelta(), 0.05);
+
+    // Smooth section factors toward targets
+    const LERP = 1 - Math.pow(0.001, dt); // ~ 0.05 at 60fps
+    sectionIds.forEach(id => {
+      sectionLerped[id] += (sectionFactor[id] - sectionLerped[id]) * Math.min(1, LERP * 3.2);
+    });
+
+    // ── Breath cycle (ember base level) ─────────────────────────
+    // Slow sin from 0.08 up to 0.55 over the breath period
+    const breath = reduce ? 0.18 : 0.30 + 0.25 * Math.sin(t * (Math.PI * 2 / BREATH_PERIOD));
+
+    // ── Section-driven intensities ──────────────────────────────
+    const fHero     = sectionLerped.hero;
+    const fProducts = sectionLerped.products;
+    const fServices = sectionLerped.services;
+    const fGallery  = sectionLerped.gallery;
+    const fBrands   = sectionLerped.brands;
+    const fContact  = sectionLerped.contact;
+
+    // Ember: breath × (base + services boost + contact calm glow)
+    const emberTarget = breath * (0.55 + fServices * 1.4 + fContact * 0.35 + fHero * 0.2);
     glowMat.uniforms.uTime.value = t;
+    glowMat.uniforms.uEmber.value = Math.min(1.6, emberTarget);
+    glowMat.uniforms.uHeat.value = fServices;
 
-    // ── Burst timing ─────────────────────────────────────────────
-    const cycleTime = t % BURST_CYCLE;
-    const cycleIdx = Math.floor(t / BURST_CYCLE);
-    if (cycleIdx !== lastCycle) { lastCycle = cycleIdx; lastStrikeIndex = -1; }
+    // Forge light: only in services
+    forgeLight.intensity = fServices * (1.8 + breath * 0.8);
+    rimLight.intensity = 2.0 + fServices * 2.5 + breath * 0.6;
 
-    let impactY = 0;
-    let impactIntensity = 0;
-    let shake = 0;
+    // ── Orbit rings: fade in during products section ───────────
+    orbits.forEach((o, i) => {
+      o.mat.opacity = fProducts * 0.42;
+      o.mesh.rotation.z += o.speedX * dt;
+      o.mesh.rotation.x += o.speedY * dt;
+    });
+    // Rings also tilt slightly with scroll
+    orbitGroup.rotation.y = t * 0.04;
 
-    if (!reduce && cycleTime < BURST_WINDOW) {
-      // Which strike are we in? 0..4
-      const strikeIdx = Math.floor(cycleTime / STRIKE_INTERVAL);
-      const strikeT = cycleTime - strikeIdx * STRIKE_INTERVAL;
-      const sp = strikeT / STRIKE_DUR;  // 0..1 within this strike, then idle
-
-      if (sp <= 1) {
-        // Tight jackhammer motion — small anticipation, sharp down, quick recoil
-        // 0..0.15: up a little
-        // 0.15..0.40: slam down
-        // 0.40..1.0: bounce back
-        if (sp < 0.15) {
-          const k = sp / 0.15;
-          impactY = easeOut(k) * 0.18;
-        } else if (sp < 0.40) {
-          const k = (sp - 0.15) / 0.25;
-          impactY = 0.18 - easeIn(k) * 0.80;
-        } else {
-          const k = (sp - 0.40) / 0.60;
-          impactY = -0.62 * Math.exp(-k * 8) * Math.cos(k * 18);
-        }
-
-        if (sp >= 0.35 && sp < 0.70) {
-          const k = (sp - 0.35) / 0.35;
-          impactIntensity = 1 - k;
-        }
-
-        if (sp >= 0.38 && sp < 0.80) {
-          const k = (sp - 0.38) / 0.42;
-          shake = (1 - k) * 0.09;
-        }
-
-        // Emit particles once per strike at slam moment
-        if (sp >= 0.38 && strikeIdx > lastStrikeIndex) {
-          lastStrikeIndex = strikeIdx;
-          const tipWorldY = outerPivot.position.y - 2.0 * outerPivot.scale.y;
-          const ox = outerPivot.position.x;
-          emitSparks(ox, tipWorldY);
-          emitDebris(ox, tipWorldY);
-          emitDust(ox, tipWorldY);
-        }
+    // ── CNC sparks: fade in during gallery section ─────────────
+    cncMat.opacity = fGallery * 0.75;
+    if (fGallery > 0.03) {
+      for (let i = 0; i < CNC_COUNT; i++) {
+        cncPos[i * 3 + 0] += cncVel[i * 3 + 0] * dt;
+        cncPos[i * 3 + 1] += cncVel[i * 3 + 1] * dt;
+        cncPos[i * 3 + 2] += cncVel[i * 3 + 2] * dt;
+        // tiny gravity-drift
+        cncVel[i * 3 + 1] -= 0.08 * dt;
+        cncLife[i] -= dt;
+        if (cncLife[i] < 0 || cncPos[i * 3 + 1] < -6) resetCncParticle(i, false);
       }
+      cncGeo.attributes.position.needsUpdate = true;
     }
 
-    impactPivot.position.y = impactY;
-    flashLight.intensity = impactIntensity * 3.5;
-    glowMat.uniforms.uImpact.value = impactIntensity;
+    // ── Technical grid: fade in during brands section ──────────
+    gridMat.opacity = fBrands * 0.22;
+    gridGroup.rotation.z = Math.sin(t * 0.05) * 0.02;
 
-    // Idle float — x/y drift while chisel stays vertical (layered on top of shake)
-    const floatX = Math.sin(t * 0.7) * 0.09 + Math.sin(t * 1.3) * 0.04;
-    const floatY = Math.cos(t * 0.55) * 0.07 + Math.sin(t * 1.1) * 0.03;
-    outerPivot.position.x = idleBase.x + floatX + (Math.random() - 0.5) * shake;
-    outerPivot.position.y = idleBase.y + floatY + (Math.random() - 0.5) * shake * 0.5;
-
-    // Camera shake (separate from float)
-    cam.position.x = (Math.random() - 0.5) * shake * 0.5;
-    cam.position.y = (Math.random() - 0.5) * shake * 0.5;
-
-    // ── Rotation: slow drift, like floating in space ────────────
+    // ── Chisel emissive: glow hotter during services ───────────
     if (chisel) {
-      if (!reduce) {
-        // Very slow multi-axis drift — no fixed orbit, no self-spin
-        outerPivot.rotation.y = Math.sin(t * 0.08) * 0.35 + t * 0.015;
-        outerPivot.rotation.x = Math.sin(t * 0.11) * 0.08;
-        outerPivot.rotation.z = Math.sin(t * 0.06) * 0.05;
-        spinPivot.rotation.y = 0;
-      } else {
-        outerPivot.rotation.y = 0.3;
-      }
+      const emissiveLevel = breath * (0.2 + fServices * 0.9);
+      chisel.traverse((o) => {
+        if (o.isMesh && o.material && o.material.emissive) {
+          const m = o.material;
+          const orig = m.userData._origEmissive || new THREE.Color(0, 0, 0);
+          m.emissive.copy(orig);
+          m.emissive.r += 0.55 * emissiveLevel;
+          m.emissive.g += 0.18 * emissiveLevel;
+          m.emissive.b += 0.04 * emissiveLevel;
+        }
+      });
     }
 
-    // ── Particle updates ─────────────────────────────────────────
-    const DT = 0.016;
-
-    // Sparks: quick, burn out fast
-    for (let i = 0; i < SPARK_COUNT; i++) {
-      if (sparkLife[i] > 0) {
-        sparkPos[i * 3 + 0] += sparkVel[i * 3 + 0] * DT;
-        sparkPos[i * 3 + 1] += sparkVel[i * 3 + 1] * DT;
-        sparkPos[i * 3 + 2] += sparkVel[i * 3 + 2] * DT;
-        sparkVel[i * 3 + 1] -= 0.18;  // gravity
-        sparkVel[i * 3 + 0] *= 0.97;
-        sparkVel[i * 3 + 2] *= 0.97;
-        sparkLife[i] -= DT * 1.4;
-      } else {
-        sparkPos[i * 3 + 1] = -1000;
-      }
+    // ── EVA drift (position) ────────────────────────────────────
+    if (!reduce) {
+      const floatX = Math.sin(t * 0.25) * 0.22 + Math.sin(t * 0.11) * 0.14;
+      const floatY = Math.cos(t * 0.19) * 0.18 + Math.sin(t * 0.33) * 0.09;
+      outerPivot.position.x = idleBase.x + floatX;
+      outerPivot.position.y = idleBase.y + floatY;
     }
-    sparkGeo.attributes.position.needsUpdate = true;
 
-    // Debris: heavier, longer tumble, strong gravity
-    for (let i = 0; i < DEBRIS_COUNT; i++) {
-      if (debrisLife[i] > 0) {
-        debrisPos[i * 3 + 0] += debrisVel[i * 3 + 0] * DT;
-        debrisPos[i * 3 + 1] += debrisVel[i * 3 + 1] * DT;
-        debrisPos[i * 3 + 2] += debrisVel[i * 3 + 2] * DT;
-        debrisVel[i * 3 + 1] -= 0.22;  // gravity
-        debrisVel[i * 3 + 0] *= 0.985;
-        debrisVel[i * 3 + 2] *= 0.985;
-        debrisLife[i] -= DT * 0.6;
-      } else {
-        debrisPos[i * 3 + 1] = -1000;
-      }
+    // ── Drift rotation (weightless tumble, subtle) ─────────────
+    if (!reduce) {
+      driftPivot.rotation.y = Math.sin(t * 0.07) * 0.35 + Math.sin(t * 0.13) * 0.12;
+      driftPivot.rotation.x = Math.sin(t * 0.09) * 0.14 + Math.cos(t * 0.15) * 0.06;
+      driftPivot.rotation.z = Math.sin(t * 0.05) * 0.10;
     }
-    debrisGeo.attributes.position.needsUpdate = true;
 
-    // Dust: drifts up, slow, fades
-    for (let i = 0; i < DUST_COUNT; i++) {
-      if (dustLife[i] > 0) {
-        dustPos[i * 3 + 0] += dustVel[i * 3 + 0] * DT;
-        dustPos[i * 3 + 1] += dustVel[i * 3 + 1] * DT;
-        dustPos[i * 3 + 2] += dustVel[i * 3 + 2] * DT;
-        dustVel[i * 3 + 1] += 0.04;   // slight buoyancy
-        dustVel[i * 3 + 0] *= 0.99;
-        dustVel[i * 3 + 2] *= 0.99;
-        dustLife[i] -= DT * 0.5;
-      } else {
-        dustPos[i * 3 + 1] = -1000;
-      }
+    // ── Very slow self-spin ─────────────────────────────────────
+    if (!reduce && chisel) {
+      spinPivot.rotation.y = t * 0.08;
     }
-    dustGeo.attributes.position.needsUpdate = true;
 
-    // ── Subtle scroll parallax (no fade — sticky) ───────────────
-    const parallax = Math.min(scrollY * 0.0008, 0.6);
-    outerPivot.rotation.z = -parallax;
-    // Always visible
-    root.style.opacity = 1;
+    // ── Scroll-driven scale & depth shift (subtle parallax) ────
+    // Chisel pulls slightly closer during services, recedes during brands
+    const scrollScale = 1 + fServices * 0.06 - fBrands * 0.05;
+    outerPivot.scale.setScalar((innerWidth <= 900 ? 0.85 : 1.15) * scrollScale);
 
     renderer.render(scene, cam);
     requestAnimationFrame(tick);
   }
-
-  function easeIn(k) { return k * k; }
-  function easeOut(k) { return 1 - (1 - k) * (1 - k); }
-
-  layout();
-  tick();
+  requestAnimationFrame(tick);
 })();
