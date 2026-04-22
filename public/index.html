@@ -78,7 +78,7 @@
 </head>
 <body>
 
-<script type="module" src="scene.js?v=6"></script>
+<script type="module" src="scene.js?v=7"></script>
 
 <div id="root"></div>
 
@@ -120,18 +120,25 @@
     document.body.appendChild(s);
 
     // Scroll reveal — observe everything tagged .reveal or .reveal-stagger.
-    // React has rendered synchronously above, so queries find the nodes.
-    requestAnimationFrame(() => {
-      const io = new IntersectionObserver((entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            e.target.classList.add('in');
-            io.unobserve(e.target);
-          }
+    // React renders asynchronously, so re-sweep until all nodes are picked up.
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
         }
-      }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
-      document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => io.observe(el));
-    });
+      }
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+
+    const SEEN = new WeakSet();
+    function sweep() {
+      document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => {
+        if (!SEEN.has(el)) { SEEN.add(el); io.observe(el); }
+      });
+    }
+    sweep();
+    const revIv = setInterval(sweep, 150);
+    setTimeout(() => clearInterval(revIv), 8000);
   } catch (err) {
     console.error('[kervanheat] Failed to load app:', err);
     document.getElementById('root').innerHTML =

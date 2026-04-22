@@ -78,10 +78,26 @@
     { sel: '#contact',    rx:  0.25, ry: -0.70, rz: -Math.PI / 3.2,  px:  4.8, py:  2.2, s: 0.55, o: 0.45 },
   ];
 
-  // Resolve actual section elements (skip any not on the page)
-  const sections = KF
-    .map(k => ({ ...k, el: document.querySelector(k.sel) }))
-    .filter(k => k.el);
+  let needsCompute = true;
+
+  // Resolve actual section elements. React mounts asynchronously, so the
+  // sections may not exist when this module first runs. Re-poll until they
+  // show up, then stop.
+  let sections = [];
+  function resolveSections() {
+    const next = KF
+      .map(k => ({ ...k, el: document.querySelector(k.sel) }))
+      .filter(k => k.el);
+    if (next.length > sections.length) {
+      sections = next;
+      needsCompute = true;
+    }
+    return sections.length === KF.length;
+  }
+  if (!resolveSections()) {
+    const iv = setInterval(() => { if (resolveSections()) clearInterval(iv); }, 120);
+    setTimeout(() => clearInterval(iv), 15000);
+  }
 
   // Current animated state (lerp target). Start at KF[0].
   const cur = { rx: KF[0].rx, ry: KF[0].ry, rz: KF[0].rz, px: 0, py: 0, s: 1, o: 1 };
@@ -136,7 +152,6 @@
     tgt.o  = lerp(a.o,  b.o,  t);
   }
 
-  let needsCompute = true;
   addEventListener('scroll',  () => { needsCompute = true; }, { passive: true });
   addEventListener('resize',  () => { needsCompute = true; });
 
