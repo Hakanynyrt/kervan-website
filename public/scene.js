@@ -17,8 +17,8 @@
   })();
 
   const scene = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 200);
-  cam.position.set(0, 0, 16);
+  const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 200);
+  cam.position.set(0, 0, 22);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1.5 : 2));
@@ -56,9 +56,9 @@
 
   // Pivot — statically posed diagonal
   const pose = new THREE.Group();
-  pose.rotation.z = -Math.PI / 3;     // ~-60°  → tip up-right
-  pose.rotation.y =  0.28;            // slight turn toward viewer
-  pose.rotation.x = -0.08;            // tiny forward tilt
+  pose.rotation.z = -Math.PI / 5.5;   // ~-33°  → gentle diagonal
+  pose.rotation.y =  0.22;            // slight turn toward viewer
+  pose.rotation.x = -0.06;            // tiny forward tilt
   scene.add(pose);
 
   const draco = new DRACOLoader();
@@ -74,7 +74,7 @@
       const box = new THREE.Box3().setFromObject(m);
       const sz = box.getSize(new THREE.Vector3());
       m.position.sub(box.getCenter(new THREE.Vector3()));
-      m.scale.setScalar(9 / Math.max(sz.x, sz.y, sz.z));
+      m.scale.setScalar(11 / Math.max(sz.x, sz.y, sz.z));
       m.traverse(o => {
         if (o.isMesh && o.material) {
           o.material.color = new THREE.Color(0x2a2a2e);
