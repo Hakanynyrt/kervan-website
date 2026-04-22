@@ -1,5 +1,5 @@
 // Kervan Heat — scene.js
-// Sabit çapraz poz, koyu çelik. Hareket yok, temiz zemin.
+// Scroll-driven chisel: different pose per section, smoothly lerped.
 
 (async function () {
   const THREE = await import('three');
@@ -8,6 +8,7 @@
   const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js');
 
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
+  const reduced  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const root = document.getElementById('scene-root') || (() => {
     const d = document.createElement('div');
@@ -27,7 +28,6 @@
   renderer.toneMappingExposure = 1.0;
   root.appendChild(renderer.domElement);
 
-  // Environment for metallic reflections
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
@@ -41,7 +41,6 @@
   resize();
   addEventListener('resize', resize);
 
-  // Lights
   const key = new THREE.DirectionalLight(0xFFFFFF, 2.8);
   key.position.set(3, 6, 6);
   scene.add(key);
@@ -54,18 +53,101 @@
   fill.position.set(-4, 3, 2);
   scene.add(fill);
 
-  // Pivot — statically posed diagonal
+  // Pose group — all keyframe targets apply here. Rest pose is identity.
   const pose = new THREE.Group();
-  pose.rotation.z = -Math.PI / 5.5;   // ~-33°  → gentle diagonal
-  pose.rotation.y =  0.22;            // slight turn toward viewer
-  pose.rotation.x = -0.06;            // tiny forward tilt
   scene.add(pose);
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Keyframes per section. Each entry: the selector for that section +
+  // the pose the chisel should settle into while that section is centered.
+  //   rx,ry,rz : rotation in radians
+  //   px,py    : offset in world units (z kept at 0)
+  //   s        : uniform scale multiplier
+  //   o        : opacity (0..1) — driven into material
+  // ─────────────────────────────────────────────────────────────────────
+  const KF = [
+    // 0 — Hero: diagonal attack, centered right
+    { sel: '.hero',       rx: -0.06, ry:  0.22, rz: -Math.PI / 5.5, px:  0.0, py:  0.0, s: 1.00, o: 1.00 },
+    // 1 — Products: tilt & drift right, smaller, backs off behind cards
+    { sel: '#products',   rx:  0.18, ry: -0.55, rz: -Math.PI / 2.6, px:  2.6, py: -0.6, s: 0.78, o: 0.75 },
+    // 2 — Craft: stands vertical, tip upward, gentle swing
+    { sel: '#craft',      rx: -0.05, ry:  0.95, rz:  Math.PI * 0.04, px:  1.0, py:  0.3, s: 0.95, o: 0.85 },
+    // 3 — Industries: lying horizontal, drifts left a touch
+    { sel: '#industries', rx: -0.12, ry:  0.30, rz:  Math.PI / 2,    px: -0.6, py: -1.0, s: 0.82, o: 0.70 },
+    // 4 — Contact: tucked to top-right corner, small, faint
+    { sel: '#contact',    rx:  0.25, ry: -0.70, rz: -Math.PI / 3.2,  px:  4.8, py:  2.2, s: 0.55, o: 0.45 },
+  ];
+
+  // Resolve actual section elements (skip any not on the page)
+  const sections = KF
+    .map(k => ({ ...k, el: document.querySelector(k.sel) }))
+    .filter(k => k.el);
+
+  // Current animated state (lerp target). Start at KF[0].
+  const cur = { rx: KF[0].rx, ry: KF[0].ry, rz: KF[0].rz, px: 0, py: 0, s: 1, o: 1 };
+  const tgt = { ...cur };
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function smooth(t) { return t * t * (3 - 2 * t); } // smoothstep
+
+  // Decide which two keyframes to blend between based on viewport center.
+  function computeTarget() {
+    if (sections.length === 0) return;
+    const vhHalf = innerHeight * 0.5;
+    // For each section, find its center's distance from viewport center,
+    // normalized. We blend between the section we're currently "in" and
+    // the neighbor we're heading toward.
+    const centers = sections.map(s => {
+      const r = s.el.getBoundingClientRect();
+      return r.top + r.height * 0.5;
+    });
+
+    // Find the section whose center is closest — that's the "active" one.
+    let active = 0;
+    let minD = Infinity;
+    for (let i = 0; i < centers.length; i++) {
+      const d = Math.abs(centers[i] - vhHalf);
+      if (d < minD) { minD = d; active = i; }
+    }
+
+    // Determine the neighbor we're heading toward (above or below).
+    let neighbor = active;
+    if (active < sections.length - 1 && centers[active] < vhHalf) neighbor = active + 1;
+    else if (active > 0 && centers[active] > vhHalf) neighbor = active - 1;
+
+    const a = sections[active];
+    const b = sections[neighbor];
+
+    // Blend factor: 0 at active center, 1 at neighbor center.
+    let t = 0;
+    if (neighbor !== active) {
+      const span = Math.abs(centers[neighbor] - centers[active]);
+      const prog = Math.abs(centers[active] - vhHalf) / (span || 1);
+      t = Math.max(0, Math.min(1, prog));
+    }
+    t = smooth(t);
+
+    tgt.rx = lerp(a.rx, b.rx, t);
+    tgt.ry = lerp(a.ry, b.ry, t);
+    tgt.rz = lerp(a.rz, b.rz, t);
+    tgt.px = lerp(a.px, b.px, t);
+    tgt.py = lerp(a.py, b.py, t);
+    tgt.s  = lerp(a.s,  b.s,  t);
+    tgt.o  = lerp(a.o,  b.o,  t);
+  }
+
+  let needsCompute = true;
+  addEventListener('scroll',  () => { needsCompute = true; }, { passive: true });
+  addEventListener('resize',  () => { needsCompute = true; });
 
   const draco = new DRACOLoader();
   draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/');
   draco.setDecoderConfig({ type: 'js' });
   const loader = new GLTFLoader();
   loader.setDRACOLoader(draco);
+
+  const materials = [];
+  let modelLoaded = false;
 
   loader.load(
     '/kirici-uc.glb',
@@ -76,7 +158,6 @@
       const center = box.getCenter(new THREE.Vector3());
       const s = 11 / Math.max(sz.x, sz.y, sz.z);
       m.scale.setScalar(s);
-      // Offset must be scaled — scale applies to geometry before translation
       m.position.copy(center).multiplyScalar(-s);
       m.traverse(o => {
         if (o.isMesh && o.material) {
@@ -84,16 +165,41 @@
           o.material.metalness = 0.92;
           o.material.roughness = 0.28;
           o.material.envMapIntensity = 1.3;
+          o.material.transparent = true;
           o.material.needsUpdate = true;
+          materials.push(o.material);
         }
       });
       pose.add(m);
+      modelLoaded = true;
+      computeTarget();
     },
     undefined,
     err => console.error('[scene] /kirici-uc.glb load failed', err)
   );
 
+  // Ease factor — higher = snappier. reduced-motion jumps instantly.
+  const EASE = reduced ? 1.0 : 0.08;
+
   function tick() {
+    if (needsCompute) { computeTarget(); needsCompute = false; }
+
+    cur.rx = lerp(cur.rx, tgt.rx, EASE);
+    cur.ry = lerp(cur.ry, tgt.ry, EASE);
+    cur.rz = lerp(cur.rz, tgt.rz, EASE);
+    cur.px = lerp(cur.px, tgt.px, EASE);
+    cur.py = lerp(cur.py, tgt.py, EASE);
+    cur.s  = lerp(cur.s,  tgt.s,  EASE);
+    cur.o  = lerp(cur.o,  tgt.o,  EASE);
+
+    pose.rotation.set(cur.rx, cur.ry, cur.rz);
+    pose.position.set(cur.px, cur.py, 0);
+    pose.scale.setScalar(cur.s);
+
+    if (modelLoaded) {
+      for (let i = 0; i < materials.length; i++) materials[i].opacity = cur.o;
+    }
+
     renderer.render(scene, cam);
     requestAnimationFrame(tick);
   }

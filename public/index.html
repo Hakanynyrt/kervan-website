@@ -78,7 +78,7 @@
 </head>
 <body>
 
-<script type="module" src="scene.js?v=5"></script>
+<script type="module" src="scene.js?v=6"></script>
 
 <div id="root"></div>
 
@@ -118,6 +118,20 @@
     const s = document.createElement('script');
     s.textContent = compiled;
     document.body.appendChild(s);
+
+    // Scroll reveal — observe everything tagged .reveal or .reveal-stagger.
+    // React has rendered synchronously above, so queries find the nodes.
+    requestAnimationFrame(() => {
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('in');
+            io.unobserve(e.target);
+          }
+        }
+      }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+      document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => io.observe(el));
+    });
   } catch (err) {
     console.error('[kervanheat] Failed to load app:', err);
     document.getElementById('root').innerHTML =

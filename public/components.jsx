@@ -55,7 +55,7 @@ function Nav({ lang, setLang, t }) {
 function Hero({ t }) {
   return (
     <section className="hero">
-      <div className="hero__copy">
+      <div className="hero__copy reveal-stagger">
         <div className="eyebrow">{t.hero.eyebrow}</div>
         <h1 className="hero__title">
           <span className="hero__line">{t.hero.title1}</span>
@@ -77,12 +77,12 @@ function Hero({ t }) {
 function Products({ t }) {
   return (
     <section className="sec" id="products">
-      <div className="sec__head">
+      <div className="sec__head reveal">
         <div className="eyebrow">{t.products.eyebrow}</div>
         <h2 className="sec__title">{t.products.title.split('\n').map((l, i) => <span key={i}>{l}</span>)}</h2>
       </div>
 
-      <div className="products">
+      <div className="products reveal-stagger">
         {t.products.items.map((p, i) => (
           <article className="prod" key={i}>
             <div className="prod__img" style={{ backgroundImage: `url(${p.img})` }}>
@@ -106,12 +106,12 @@ function Craft({ t }) {
   return (
     <section className="sec craft" id="craft">
       <div className="craft__grid">
-        <div className="craft__copy">
+        <div className="craft__copy reveal-stagger">
           <div className="eyebrow">{t.craft.eyebrow}</div>
           <h2 className="sec__title">{t.craft.title}</h2>
           <p className="craft__body">{t.craft.body}</p>
         </div>
-        <div className="craft__img" style={{ backgroundImage: 'url(photos/workshop-overview.jpeg)' }}></div>
+        <div className="craft__img reveal" style={{ backgroundImage: 'url(photos/workshop-overview.jpeg)' }}></div>
       </div>
     </section>
   );
@@ -123,12 +123,12 @@ function Craft({ t }) {
 function Industries({ t }) {
   return (
     <section className="sec industries" id="industries">
-      <div className="sec__head">
+      <div className="sec__head reveal">
         <div className="eyebrow">{t.industries.eyebrow}</div>
         <h2 className="sec__title">{t.industries.title}</h2>
       </div>
 
-      <ul className="ind">
+      <ul className="ind reveal-stagger">
         {t.industries.items.map((it, i) => (
           <li className="ind__row" key={i}>
             <span className="ind__num">0{i + 1}</span>
@@ -168,7 +168,7 @@ function Contact({ t }) {
   return (
     <section className="sec contact" id="contact">
       <div className="contact__grid">
-        <div className="contact__info">
+        <div className="contact__info reveal">
           <div className="eyebrow">{t.contact.eyebrow}</div>
           <h2 className="sec__title">{t.contact.title}</h2>
           <p className="contact__sub">{t.contact.sub}</p>
@@ -193,7 +193,7 @@ function Contact({ t }) {
           </dl>
         </div>
 
-        <form className="rfq" ref={formRef} onSubmit={onSubmit}>
+        <form className="rfq reveal" ref={formRef} onSubmit={onSubmit}>
           <input type="text" name="website" tabIndex={-1} autoComplete="off" style={{ position: 'absolute', left: '-9999px' }} aria-hidden="true"/>
 
           <label className="fld">
