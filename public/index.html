@@ -25,11 +25,17 @@
 </script>
 
 <style>
-  #scene-root { position: fixed; top: 0; right: 0; width: 52%; height: 100vh; z-index: 0; pointer-events: none; }
+  #scene-root {
+    position: fixed; top: 0; right: 0; width: 52%; height: 100vh;
+    z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 55% at 55% 45%, rgba(232,120,26,0.12) 0%, rgba(232,120,26,0.05) 35%, rgba(250,247,242,0) 68%),
+      radial-gradient(ellipse 45% 40% at 55% 45%, rgba(18,18,18,0.08) 0%, rgba(18,18,18,0) 60%);
+  }
   #root { position: relative; z-index: 1; }
   body { background: #FAF7F2; }
   @media (max-width: 900px) {
-    #scene-root { width: 100%; height: 46vh; }
+    #scene-root { width: 100%; height: 46vh; opacity: .7; }
   }
 </style>
 
