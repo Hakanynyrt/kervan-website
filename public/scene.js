@@ -370,12 +370,14 @@
     cam.position.x = (Math.random() - 0.5) * shake * 0.5;
     cam.position.y = (Math.random() - 0.5) * shake * 0.5;
 
-    // ── Rotation: outer orbit + self-axis spin ──────────────────
+    // ── Rotation: slow drift, like floating in space ────────────
     if (chisel) {
       if (!reduce) {
-        outerPivot.rotation.y = t * 0.08;
-        outerPivot.rotation.x = Math.sin(t * 0.3) * 0.04;
-        spinPivot.rotation.y = t * 0.35;
+        // Very slow multi-axis drift — no fixed orbit, no self-spin
+        outerPivot.rotation.y = Math.sin(t * 0.08) * 0.35 + t * 0.015;
+        outerPivot.rotation.x = Math.sin(t * 0.11) * 0.08;
+        outerPivot.rotation.z = Math.sin(t * 0.06) * 0.05;
+        spinPivot.rotation.y = 0;
       } else {
         outerPivot.rotation.y = 0.3;
       }
