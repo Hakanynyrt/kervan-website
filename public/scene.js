@@ -215,7 +215,7 @@
   loader.setDRACOLoader(draco);
 
   loader.load(
-    'chisel.glb',
+    'https://kervanheat.com/kirici-uc.glb',
     (gltf) => {
       chisel = gltf.scene;
 
