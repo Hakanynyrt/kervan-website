@@ -1,6 +1,6 @@
 // Kervan Heat — scene.js
-// Scroll-choreographed hot-metal chisel. No jackhammer. No debris.
-// Breathing ember cycle at the core; scene CHARACTER changes with scroll section.
+// Minimal hot-metal chisel. Breath cycle + slow scroll choreography + EVA drift.
+// No jackhammer, no debris, no decorative rings/grids. Just the object.
 
 (async function() {
   const THREE = await import('three');
@@ -21,7 +21,6 @@
 
   // ─── Three basics ───────────────────────────────────────────────
   const scene = new THREE.Scene();
-
   const cam = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 200);
   cam.position.set(0, 0, 10);
 
@@ -37,15 +36,16 @@
 
   // ═══════════════════════════════════════════════════════════════════
   // EMBER GLOW — breathing halo behind the chisel
-  // Intensity driven by (breath cycle + services-section scrollFactor)
+  // The emotional core. Waxes and wanes on a 14s cycle.
+  // Stronger during "services" (forge) section.
   // ═══════════════════════════════════════════════════════════════════
-  const glowGeo = new THREE.PlaneGeometry(32, 32);
+  const glowGeo = new THREE.PlaneGeometry(36, 36);
   const glowMat = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false,
     uniforms: {
-      uTime:   { value: 0 },
-      uEmber:  { value: 0 },     // 0..1 — overall ember intensity (breath × services)
-      uHeat:   { value: 0 },     // 0..1 — services section boost (forge moment)
+      uTime:  { value: 0 },
+      uEmber: { value: 0 },   // 0..1.5 — breath × section modulation
+      uHeat:  { value: 0 },   // 0..1   — shimmer intensity (services boost)
     },
     vertexShader: `
       varying vec2 vUv;
@@ -60,7 +60,6 @@
       uniform float uEmber;
       uniform float uHeat;
 
-      // simple 2d noise for heat shimmer
       float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
       float noise(vec2 p) {
         vec2 i = floor(p); vec2 f = fract(p);
@@ -76,17 +75,19 @@
         vec2 c = vUv - 0.5;
         float d = length(c);
 
-        // Core ember — warm red/orange, soft radial
-        float core = smoothstep(0.45, 0.0, d);
-        vec3 ember = vec3(0.85, 0.28, 0.08);
+        // Soft radial core
+        float core = smoothstep(0.48, 0.0, d);
 
-        // Heat shimmer (strong during forge moment)
-        float shim = noise(vUv * 8.0 + uTime * 0.3) * 0.12 * uHeat;
+        // Heat shimmer — animated noise, only strong during forge
+        float shim = noise(vUv * 7.0 + uTime * 0.25) * 0.14 * uHeat;
 
-        float intensity = core * (uEmber + shim);
-        float alpha = core * uEmber * (1.0 + shim);
+        // Color: deep red → orange gradient
+        vec3 inner  = vec3(1.00, 0.42, 0.14);
+        vec3 outer  = vec3(0.55, 0.12, 0.04);
+        vec3 ember  = mix(outer, inner, core);
 
-        gl_FragColor = vec4(ember * intensity * 1.8, alpha);
+        float amt = core * (uEmber + shim);
+        gl_FragColor = vec4(ember * amt * 1.6, amt);
       }
     `
   });
@@ -95,112 +96,63 @@
   scene.add(glow);
 
   // ═══════════════════════════════════════════════════════════════════
+  // VIGNETTE — subtle dark corners for premium feel
+  // ═══════════════════════════════════════════════════════════════════
+  const vigGeo = new THREE.PlaneGeometry(2, 2);
+  const vigMat = new THREE.ShaderMaterial({
+    transparent: true, depthTest: false, depthWrite: false,
+    uniforms: {},
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position.xy, 0.0, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      void main() {
+        vec2 c = vUv - 0.5;
+        float v = smoothstep(0.3, 0.85, length(c));
+        gl_FragColor = vec4(0.0, 0.0, 0.0, v * 0.55);
+      }
+    `
+  });
+  const vignette = new THREE.Mesh(vigGeo, vigMat);
+  vignette.frustumCulled = false;
+  vignette.renderOrder = 999;
+  // Use a separate ortho scene so vignette is always full-screen
+  const vigScene = new THREE.Scene();
+  vigScene.add(vignette);
+  const vigCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+  // ═══════════════════════════════════════════════════════════════════
   // LIGHTING
   // ═══════════════════════════════════════════════════════════════════
-  scene.add(new THREE.HemisphereLight(0xb8c2d4, 0x14151a, 0.55));
+  scene.add(new THREE.HemisphereLight(0xb8c2d4, 0x14151a, 0.5));
 
-  const keyLight = new THREE.DirectionalLight(0xfff3dc, 3.0);
+  const keyLight = new THREE.DirectionalLight(0xfff3dc, 2.8);
   keyLight.position.set(5, 6, 4);
   scene.add(keyLight);
 
-  // Rim light warms up during "forge" section
-  const rimLight = new THREE.DirectionalLight(0xff6a28, 2.4);
+  const rimLight = new THREE.DirectionalLight(0xff6a28, 2.2);
   rimLight.position.set(-6, -2, -3);
   scene.add(rimLight);
 
-  const fillLight = new THREE.PointLight(0x6a8aff, 1.0, 25);
+  const fillLight = new THREE.PointLight(0x6a8aff, 0.9, 25);
   fillLight.position.set(-4, 3, 6);
   scene.add(fillLight);
 
-  const topRim = new THREE.DirectionalLight(0xffffff, 1.1);
+  const topRim = new THREE.DirectionalLight(0xffffff, 1.0);
   topRim.position.set(2, 8, 2);
   scene.add(topRim);
-
-  // Forge light — turns on strongly in services section
-  const forgeLight = new THREE.PointLight(0xff4a12, 0, 16);
-  forgeLight.position.set(0, -2, 3);
-  scene.add(forgeLight);
-
-  // ═══════════════════════════════════════════════════════════════════
-  // TECHNICAL GRID (appears during "brands" section)
-  // ═══════════════════════════════════════════════════════════════════
-  const gridMat = new THREE.LineBasicMaterial({
-    color: 0x4a5568, transparent: true, opacity: 0, depthWrite: false
-  });
-  const gridGroup = new THREE.Group();
-  const GRID_RANGE = 12;
-  const GRID_STEP = 1;
-  const gridPts = [];
-  for (let i = -GRID_RANGE; i <= GRID_RANGE; i += GRID_STEP) {
-    gridPts.push(new THREE.Vector3(i, -GRID_RANGE, -6), new THREE.Vector3(i, GRID_RANGE, -6));
-    gridPts.push(new THREE.Vector3(-GRID_RANGE, i, -6), new THREE.Vector3(GRID_RANGE, i, -6));
-  }
-  const gridGeo = new THREE.BufferGeometry().setFromPoints(gridPts);
-  const gridLines = new THREE.LineSegments(gridGeo, gridMat);
-  gridGroup.add(gridLines);
-  scene.add(gridGroup);
-
-  // ═══════════════════════════════════════════════════════════════════
-  // ORBIT RINGS (appear during "products" section — diversity metaphor)
-  // 3 wireframe tori circling the chisel at different radii/speeds
-  // ═══════════════════════════════════════════════════════════════════
-  const orbitGroup = new THREE.Group();
-  const orbits = [];
-  for (let i = 0; i < 3; i++) {
-    const radius = 2.3 + i * 0.55;
-    const geo = new THREE.TorusGeometry(radius, 0.012, 8, 120);
-    const mat = new THREE.MeshBasicMaterial({
-      color: 0x7a8598, transparent: true, opacity: 0, depthWrite: false
-    });
-    const torus = new THREE.Mesh(geo, mat);
-    torus.rotation.x = Math.PI / 2 + (i - 1) * 0.22;
-    torus.rotation.z = i * 0.31;
-    orbitGroup.add(torus);
-    orbits.push({ mesh: torus, mat, speedX: 0.04 + i * 0.02, speedY: 0.03 - i * 0.008 });
-  }
-  scene.add(orbitGroup);
-
-  // ═══════════════════════════════════════════════════════════════════
-  // CNC SPARK DRIFT (appears during "gallery" section — small, constant, falling)
-  // ═══════════════════════════════════════════════════════════════════
-  const CNC_COUNT = 140;
-  const cncGeo = new THREE.BufferGeometry();
-  const cncPos = new Float32Array(CNC_COUNT * 3);
-  const cncVel = new Float32Array(CNC_COUNT * 3);
-  const cncLife = new Float32Array(CNC_COUNT);
-  const cncSeed = new Float32Array(CNC_COUNT);
-  for (let i = 0; i < CNC_COUNT; i++) {
-    cncSeed[i] = Math.random();
-    resetCncParticle(i, true);
-  }
-  function resetCncParticle(i, randomY) {
-    cncPos[i * 3 + 0] = (Math.random() - 0.5) * 10;
-    cncPos[i * 3 + 1] = randomY ? (Math.random() - 0.5) * 8 : 5 + Math.random() * 2;
-    cncPos[i * 3 + 2] = (Math.random() - 0.5) * 4;
-    cncVel[i * 3 + 0] = (Math.random() - 0.5) * 0.08;
-    cncVel[i * 3 + 1] = -0.35 - Math.random() * 0.3;
-    cncVel[i * 3 + 2] = (Math.random() - 0.5) * 0.04;
-    cncLife[i] = 1.5 + Math.random() * 2;
-  }
-  cncGeo.setAttribute('position', new THREE.BufferAttribute(cncPos, 3));
-  const cncMat = new THREE.PointsMaterial({
-    size: 0.05,
-    color: 0xffb080,
-    transparent: true,
-    opacity: 0,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    sizeAttenuation: true,
-  });
-  const cncPoints = new THREE.Points(cncGeo, cncMat);
-  scene.add(cncPoints);
 
   // ═══════════════════════════════════════════════════════════════════
   // CHISEL MODEL
   // ═══════════════════════════════════════════════════════════════════
-  const outerPivot = new THREE.Group(); // scroll-position + drift
-  const driftPivot = new THREE.Group(); // EVA multi-axis drift
-  const spinPivot  = new THREE.Group(); // very slow self-axis rotation
+  const outerPivot = new THREE.Group(); // scroll-driven position + rotation
+  const driftPivot = new THREE.Group(); // EVA weightless drift
+  const spinPivot  = new THREE.Group(); // very slow self-spin
 
   outerPivot.add(driftPivot);
   driftPivot.add(spinPivot);
@@ -214,45 +166,41 @@
   const loader = new GLTFLoader();
   loader.setDRACOLoader(draco);
 
+  const TARGET_LENGTH = 24.0; // world-units along the chisel's long axis
+
   loader.load(
     'https://kervanheat.com/kirici-uc.glb',
     (gltf) => {
       chisel = gltf.scene;
 
-      // Normalize: center + scale so the chisel is ~4 units tall, pointing down
+      // Center + scale to normalize
       const box = new THREE.Box3().setFromObject(chisel);
       const size = box.getSize(new THREE.Vector3());
       const center = box.getCenter(new THREE.Vector3());
       chisel.position.sub(center);
 
-      const targetH = 24.0;
-      // Use the model's longest dimension as its "length"
+      // Use longest dimension as the chisel's "length"
       const longest = Math.max(size.x, size.y, size.z);
-      const s = targetH / longest;
+      const s = TARGET_LENGTH / longest;
       chisel.scale.setScalar(s);
 
-      // Orient upright: model's long axis may come toward the camera (Z).
-      // Rotate so the long axis is vertical (Y), with the TIP pointing DOWN.
-      if (size.z > size.y && size.z > size.x) {
-        chisel.rotation.x = Math.PI / 2;   // flipped so tip points down
+      // Orient: long axis vertical (Y), tip pointing DOWN
+      if (size.z >= size.y && size.z >= size.x) {
+        chisel.rotation.x = Math.PI / 2;
       } else if (size.x > size.y) {
-        chisel.rotation.z = -Math.PI / 2;  // flipped so tip points down
+        chisel.rotation.z = -Math.PI / 2;
       } else {
-        // Already vertical — but may be upside down; flip it
-        chisel.rotation.z = Math.PI;
+        chisel.rotation.z = Math.PI; // flip to tip-down
       }
 
-      // Enhance material response to lighting
+      // Enhance material response
       chisel.traverse((o) => {
         if (o.isMesh && o.material) {
           const m = o.material;
           if ('metalness' in m) m.metalness = 0.85;
-          if ('roughness' in m) m.roughness = 0.42;
+          if ('roughness' in m) m.roughness = 0.40;
           if ('envMapIntensity' in m) m.envMapIntensity = 1.4;
-          // Store original emissive so we can animate it
-          if (m.emissive) {
-            m.userData._origEmissive = m.emissive.clone();
-          }
+          if (m.emissive) m.userData._origEmissive = m.emissive.clone();
         }
       });
 
@@ -261,19 +209,18 @@
     },
     undefined,
     (err) => {
-      console.warn('[scene] chisel load failed, using fallback primitive', err);
-      // Fallback: simple stylized chisel
+      console.warn('[scene] chisel load failed, using primitive fallback', err);
       const fg = new THREE.Group();
       const body = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.35, 0.35, 3.0, 24),
+        new THREE.CylinderGeometry(0.9, 0.9, 16, 28),
         new THREE.MeshStandardMaterial({ color: 0x555a62, metalness: 0.9, roughness: 0.38 })
       );
-      body.position.y = 0.5;
+      body.position.y = 2;
       const tip = new THREE.Mesh(
-        new THREE.ConeGeometry(0.35, 1.0, 24),
+        new THREE.ConeGeometry(0.9, 5, 28),
         new THREE.MeshStandardMaterial({ color: 0x444951, metalness: 0.9, roughness: 0.42 })
       );
-      tip.position.y = -1.5;
+      tip.position.y = -8.5;
       fg.add(body); fg.add(tip);
       chisel = fg;
       spinPivot.add(chisel);
@@ -282,7 +229,7 @@
   );
 
   // ═══════════════════════════════════════════════════════════════════
-  // LAYOUT
+  // LAYOUT — idle base position (scroll offsets layered on top)
   // ═══════════════════════════════════════════════════════════════════
   const idleBase = new THREE.Vector3(0, 0, 0);
 
@@ -293,14 +240,12 @@
     cam.updateProjectionMatrix();
     renderer.setSize(w, h);
 
-    if (!chisel) return;
-
     if (innerWidth <= 900) {
-      // Mobile: centered, well below middle
+      // Mobile: centered, low
       idleBase.set(0, -3.0, 0);
       outerPivot.scale.setScalar(0.85);
     } else {
-      // Desktop: LEFT side, lower than center
+      // Desktop: LEFT side (text is on the right), low
       const fovY = cam.fov * Math.PI / 180;
       const viewH = 2 * cam.position.z * Math.tan(fovY / 2);
       const viewW = viewH * aspect;
@@ -312,205 +257,172 @@
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // SCROLL SECTION FACTORS
-  // Reads section positions once layout is stable; computes a 0..1 factor
-  // per named section based on viewport center overlap.
+  // SCROLL PROGRESS (smoothed — very slow follow for cinematic feel)
   // ═══════════════════════════════════════════════════════════════════
-  const sectionIds = ['hero', 'products', 'services', 'gallery', 'brands', 'contact'];
-  // The hero doesn't have an id — use the first <section class="hero"> instead.
-  const sections = {};
-  function collectSections() {
-    sections.hero = document.querySelector('section.hero');
-    sectionIds.forEach(id => {
-      if (id !== 'hero') sections[id] = document.getElementById(id);
-    });
-  }
-  collectSections();
-
-  const sectionFactor = {
-    hero: 1, products: 0, services: 0, gallery: 0, brands: 0, contact: 0
-  };
-  // Smoothed version (lerped toward raw each frame)
-  const sectionLerped = { ...sectionFactor };
-
-  function computeSectionFactors() {
-    const vpMid = window.scrollY + innerHeight / 2;
-    sectionIds.forEach(id => {
-      const el = sections[id];
-      if (!el) { sectionFactor[id] = 0; return; }
-      const rect = el.getBoundingClientRect();
-      const top = rect.top + window.scrollY;
-      const bot = top + rect.height;
-      // Triangular falloff: 1 when viewport midpoint is inside the section,
-      // decays linearly for one viewport beyond either edge.
-      if (vpMid >= top && vpMid <= bot) {
-        sectionFactor[id] = 1;
-      } else if (vpMid < top) {
-        const d = (top - vpMid) / innerHeight;
-        sectionFactor[id] = Math.max(0, 1 - d);
-      } else {
-        const d = (vpMid - bot) / innerHeight;
-        sectionFactor[id] = Math.max(0, 1 - d);
-      }
-    });
-  }
-
-  addEventListener('resize', () => { layout(); collectSections(); computeSectionFactors(); });
-  addEventListener('scroll', computeSectionFactors, { passive: true });
-  // Initial
-  requestAnimationFrame(() => { collectSections(); computeSectionFactors(); });
-
-  // Smoothed scroll progress (very slow follow — cinematic)
+  let rawProgress = 0;
   let smoothedProgress = 0;
+
+  function updateRawProgress() {
+    const docH = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    rawProgress = Math.min(1, Math.max(0, window.scrollY / docH));
+  }
+  addEventListener('scroll', updateRawProgress, { passive: true });
+  addEventListener('resize', () => { layout(); updateRawProgress(); });
+  requestAnimationFrame(updateRawProgress);
 
   // ═══════════════════════════════════════════════════════════════════
   // ANIMATION LOOP
   // ═══════════════════════════════════════════════════════════════════
   const clock = new THREE.Clock();
+  const BREATH_PERIOD = 16.0; // seconds for full ember breath cycle
 
-  // Breath cycle: 14s — ember waxes and wanes
-  const BREATH_PERIOD = 14.0;
+  // Helper: smoothstep 0..1
+  function smooth(x) { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); }
+
+  // Keyframe interpolation — maps progress (0..1) to a piecewise target
+  // Returns target value at this progress point
+  function keyframes(p, frames) {
+    // frames: [[p, value], [p, value], ...] sorted by p
+    if (p <= frames[0][0]) return frames[0][1];
+    if (p >= frames[frames.length - 1][0]) return frames[frames.length - 1][1];
+    for (let i = 0; i < frames.length - 1; i++) {
+      const [p0, v0] = frames[i];
+      const [p1, v1] = frames[i + 1];
+      if (p >= p0 && p <= p1) {
+        const k = smooth((p - p0) / (p1 - p0));
+        return v0 + (v1 - v0) * k;
+      }
+    }
+    return frames[frames.length - 1][1];
+  }
 
   function tick() {
     const t = clock.getElapsedTime();
     const dt = Math.min(clock.getDelta(), 0.05);
 
-    // Smooth section factors toward targets — VERY slow (cinematic)
-    const LERP = 1 - Math.pow(0.001, dt);
-    sectionIds.forEach(id => {
-      sectionLerped[id] += (sectionFactor[id] - sectionLerped[id]) * Math.min(1, LERP * 0.8);
-    });
+    // Very slow scroll smoothing (cinematic)
+    smoothedProgress += (rawProgress - smoothedProgress) * Math.min(1, dt * 0.6);
+    const p = smoothedProgress;
 
-    // ── Breath cycle (ember base level) ─────────────────────────
-    // Slow sin from 0.08 up to 0.55 over the breath period
-    const breath = reduce ? 0.18 : 0.30 + 0.25 * Math.sin(t * (Math.PI * 2 / BREATH_PERIOD));
+    // ── Breath cycle ────────────────────────────────────────────
+    const breath = reduce ? 0.3 : 0.35 + 0.3 * Math.sin(t * (Math.PI * 2 / BREATH_PERIOD));
 
-    // ── Section-driven intensities ──────────────────────────────
-    const fHero     = sectionLerped.hero;
-    const fProducts = sectionLerped.products;
-    const fServices = sectionLerped.services;
-    const fGallery  = sectionLerped.gallery;
-    const fBrands   = sectionLerped.brands;
-    const fContact  = sectionLerped.contact;
+    // ── Scroll keyframes ────────────────────────────────────────
+    // 0.0 hero, ~0.2 products, ~0.4 services, ~0.6 gallery, ~0.8 brands, 1.0 contact
+    // X (desktop): starts at idleBase.x (left negative), sweeps right, centers at end
+    const desktopX = keyframes(p, [
+      [0.00, idleBase.x],       // hero: left
+      [0.35, idleBase.x * 0.4], // partial right
+      [0.55, 0.6],              // slight right (gallery)
+      [0.80, 0.2],              // brands
+      [1.00, 0.0],              // contact: center
+    ]);
+    const mobileX = 0; // stays centered on mobile
 
-    // Ember: breath × (base + services boost + contact calm glow)
-    const emberTarget = breath * (0.55 + fServices * 1.4 + fContact * 0.35 + fHero * 0.2);
+    // Y offset
+    const yOffset = keyframes(p, [
+      [0.00, 0.0],
+      [0.40, 0.4],   // rise slightly in services (forge lift)
+      [0.70, 0.2],
+      [1.00, -0.3],  // settle low in contact
+    ]);
+
+    // Scale multiplier
+    const scaleMul = keyframes(p, [
+      [0.00, 1.00],
+      [0.40, 1.18],  // zoom in at forge moment
+      [0.70, 0.92],  // pull back during brands
+      [1.00, 1.05],  // slight emphasis on contact
+    ]);
+
+    // Ember intensity driven by scroll (layered on breath)
+    const emberScrollBoost = keyframes(p, [
+      [0.00, 0.2],
+      [0.40, 1.3],   // peak at services
+      [0.60, 0.5],
+      [1.00, 0.45],
+    ]);
+
+    // Heat shimmer — strong only around services
+    const heatAmount = keyframes(p, [
+      [0.25, 0.0],
+      [0.40, 1.0],
+      [0.55, 0.0],
+      [1.00, 0.0],
+    ]);
+
+    // Drift damping — chisel settles in contact
+    const driftAmount = keyframes(p, [
+      [0.00, 1.0],
+      [0.90, 0.8],
+      [1.00, 0.15],  // heavily damped at bottom
+    ]);
+
+    // ── Apply to glow shader ───────────────────────────────────
     glowMat.uniforms.uTime.value = t;
-    glowMat.uniforms.uEmber.value = Math.min(1.6, emberTarget);
-    glowMat.uniforms.uHeat.value = fServices;
+    glowMat.uniforms.uEmber.value = breath * emberScrollBoost;
+    glowMat.uniforms.uHeat.value = heatAmount;
 
-    // Forge light: only in services
-    forgeLight.intensity = fServices * (1.8 + breath * 0.8);
-    rimLight.intensity = 2.0 + fServices * 2.5 + breath * 0.6;
-
-    // ── Orbit rings: fade in during products section ───────────
-    orbits.forEach((o, i) => {
-      o.mat.opacity = fProducts * 0.42;
-      o.mesh.rotation.z += o.speedX * dt;
-      o.mesh.rotation.x += o.speedY * dt;
-    });
-    // Rings also tilt slightly with scroll
-    orbitGroup.rotation.y = t * 0.04;
-
-    // ── CNC sparks: fade in during gallery section ─────────────
-    cncMat.opacity = fGallery * 0.75;
-    if (fGallery > 0.03) {
-      for (let i = 0; i < CNC_COUNT; i++) {
-        cncPos[i * 3 + 0] += cncVel[i * 3 + 0] * dt;
-        cncPos[i * 3 + 1] += cncVel[i * 3 + 1] * dt;
-        cncPos[i * 3 + 2] += cncVel[i * 3 + 2] * dt;
-        // tiny gravity-drift
-        cncVel[i * 3 + 1] -= 0.08 * dt;
-        cncLife[i] -= dt;
-        if (cncLife[i] < 0 || cncPos[i * 3 + 1] < -6) resetCncParticle(i, false);
-      }
-      cncGeo.attributes.position.needsUpdate = true;
-    }
-
-    // ── Technical grid: fade in during brands section ──────────
-    gridMat.opacity = fBrands * 0.22;
-    gridGroup.rotation.z = Math.sin(t * 0.05) * 0.02;
-
-    // ── Chisel emissive: glow hotter during services ───────────
+    // ── Apply to chisel emissive (so metal itself glows subtly) ─
     if (chisel) {
-      const emissiveLevel = breath * (0.2 + fServices * 0.9);
+      const emissiveLevel = breath * (0.15 + heatAmount * 0.8);
       chisel.traverse((o) => {
         if (o.isMesh && o.material && o.material.emissive) {
           const m = o.material;
           const orig = m.userData._origEmissive || new THREE.Color(0, 0, 0);
           m.emissive.copy(orig);
           m.emissive.r += 0.55 * emissiveLevel;
-          m.emissive.g += 0.18 * emissiveLevel;
-          m.emissive.b += 0.04 * emissiveLevel;
+          m.emissive.g += 0.16 * emissiveLevel;
+          m.emissive.b += 0.03 * emissiveLevel;
         }
       });
     }
 
-    // ── Scroll-driven choreography (cinematic, slow lerp) ──────
-    // Compute overall scroll progress 0..1 (0 = top, 1 = near bottom)
-    const docH = Math.max(1, document.documentElement.scrollHeight - innerHeight);
-    const progress = Math.min(1, Math.max(0, window.scrollY / docH));
+    // Rim light warms with heat
+    rimLight.intensity = 1.8 + heatAmount * 2.8 + breath * 0.5;
 
-    // Mobile uses simpler choreography (no left/right flip, smaller moves)
-    const mobile = innerWidth <= 900;
-
-    // Target X: hero left → drift toward center in middle → stay centered in contact
-    // Desktop: starts at -xOffset (left), sweeps to +0.4 in services/gallery, settles at 0 in contact
-    const baseX = idleBase.x;
-    let targetX;
-    if (mobile) {
-      targetX = 0 + (fContact * 0); // always centered on mobile
-    } else {
-      // Arc: left → slight right in middle (while forge happens) → center at contact
-      const midSwing = (fServices * 0.6 + fGallery * 0.4) * 1.0; // +1 unit swing toward right
-      const contactCenter = fContact; // pulls x toward 0
-      targetX = baseX * (1 - contactCenter) + midSwing * (1 - contactCenter);
-    }
-
-    // Target Y: subtle rise toward middle of page, drops in contact
-    const targetYOffset = mobile
-      ? 0
-      : (fProducts * 0.3 + fServices * 0.5 + fGallery * 0.3 - fContact * 0.1);
-
-    // Target scale: bigger in services (forge zoom-in), smaller in brands (technical distance)
-    const scaleBoost = 1 + fServices * 0.25 + fContact * 0.08 - fBrands * 0.18;
-
-    // Smooth scroll progress (very slow follow)
-    smoothedProgress += (progress - smoothedProgress) * Math.min(1, dt * 0.5);
-
-    // Drift (EVA) — scaled down during contact (chisel settles)
-    const driftAmount = 1 - fContact * 0.85;
+    // ── Position (scroll target + EVA drift) ───────────────────
+    const targetX = innerWidth <= 900 ? mobileX : desktopX;
+    const targetY = idleBase.y + yOffset;
 
     if (!reduce) {
-      const floatX = (Math.sin(t * 0.25) * 0.22 + Math.sin(t * 0.11) * 0.14) * driftAmount;
+      const floatX = (Math.sin(t * 0.23) * 0.22 + Math.sin(t * 0.11) * 0.14) * driftAmount;
       const floatY = (Math.cos(t * 0.19) * 0.18 + Math.sin(t * 0.33) * 0.09) * driftAmount;
       outerPivot.position.x = targetX + floatX;
-      outerPivot.position.y = idleBase.y + targetYOffset + floatY;
+      outerPivot.position.y = targetY + floatY;
     } else {
       outerPivot.position.x = targetX;
-      outerPivot.position.y = idleBase.y + targetYOffset;
+      outerPivot.position.y = targetY;
     }
 
-    // Scroll-driven Y rotation (smoothed — one slow turn across the page)
-    outerPivot.rotation.y = smoothedProgress * Math.PI * 2;
-
-    // ── Drift rotation (X/Z) — fades to zero in contact ────────
+    // ── Drift rotation (weightless tumble) ─────────────────────
     if (!reduce) {
       driftPivot.rotation.y = (Math.sin(t * 0.07) * 0.35 + Math.sin(t * 0.13) * 0.12) * driftAmount;
       driftPivot.rotation.x = (Math.sin(t * 0.09) * 0.14 + Math.cos(t * 0.15) * 0.06) * driftAmount;
       driftPivot.rotation.z = (Math.sin(t * 0.05) * 0.10) * driftAmount;
+    } else {
+      driftPivot.rotation.set(0, 0, 0);
     }
 
-    // ── Very slow self-spin (always on, even in contact — gentle life) ──
+    // ── Scroll-driven outer Y rotation (one slow turn across page) ─
+    outerPivot.rotation.y = p * Math.PI * 2;
+
+    // ── Very slow self-spin (always on) ────────────────────────
     if (!reduce && chisel) {
-      spinPivot.rotation.y = t * 0.06;
+      spinPivot.rotation.y = t * 0.05;
     }
 
-    // ── Scale (mobile uses fixed base; desktop scroll-boosted) ─
-    const baseScale = mobile ? 0.85 : 1.15;
-    outerPivot.scale.setScalar(baseScale * scaleBoost);
+    // ── Scale ──────────────────────────────────────────────────
+    const baseScale = innerWidth <= 900 ? 0.85 : 1.15;
+    outerPivot.scale.setScalar(baseScale * scaleMul);
 
+    // ── Render ─────────────────────────────────────────────────
+    renderer.autoClear = true;
     renderer.render(scene, cam);
+    renderer.autoClear = false;
+    renderer.render(vigScene, vigCam);
+    renderer.autoClear = true;
+
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
