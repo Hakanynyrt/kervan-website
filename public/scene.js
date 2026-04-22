@@ -226,8 +226,18 @@
       chisel.position.sub(center);
 
       const targetH = 4.0;
-      const s = targetH / size.y;
+      // Use the model's longest dimension as its "length"
+      const longest = Math.max(size.x, size.y, size.z);
+      const s = targetH / longest;
       chisel.scale.setScalar(s);
+
+      // Orient upright: model's long axis may come toward the camera (Z).
+      // Rotate so the long axis is vertical (Y).
+      if (size.z > size.y && size.z > size.x) {
+        chisel.rotation.x = -Math.PI / 2;
+      } else if (size.x > size.y) {
+        chisel.rotation.z = Math.PI / 2;
+      }
 
       // Enhance material response to lighting
       chisel.traverse((o) => {
