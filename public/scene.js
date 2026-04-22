@@ -1,5 +1,6 @@
 // Kervan Heat — scene.js
-// Scroll-driven chisel: different pose per section, smoothly lerped.
+// "Keski okuyor": chisel tip aims at the heading currently in view; lighting
+// shifts per section like the time of day moving across the workshop.
 
 (async function () {
   const THREE = await import('three');
@@ -7,8 +8,10 @@
   const { DRACOLoader }     = await import('three/addons/loaders/DRACOLoader.js');
   const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js');
 
-  const isMobile = window.matchMedia('(max-width: 900px)').matches;
+  const isMobile = window.matchMedia('(max-width: 1100px)').matches;
   const reduced  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (isMobile) return; // badge is hidden under 1100px
 
   const root = document.getElementById('scene-root') || (() => {
     const d = document.createElement('div');
@@ -22,7 +25,7 @@
   cam.position.set(0, 0, 22);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1.5 : 2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
@@ -41,122 +44,181 @@
   resize();
   addEventListener('resize', resize);
 
-  const key = new THREE.DirectionalLight(0xFFFFFF, 2.8);
-  key.position.set(3, 6, 6);
-  scene.add(key);
+  // Three lights we lerp per section: key (main), rim (accent), fill (sky).
+  const key  = new THREE.DirectionalLight(0xFFFFFF, 2.6); key.position.set(3, 5, 6);   scene.add(key);
+  const rim  = new THREE.DirectionalLight(0xE8781A, 1.8); rim.position.set(-5, -1, -4); scene.add(rim);
+  const fill = new THREE.DirectionalLight(0x9DB4D8, 0.6); fill.position.set(-4, 3, 2);  scene.add(fill);
 
-  const rim = new THREE.DirectionalLight(0xE8781A, 2.0);
-  rim.position.set(-5, -1, -4);
-  scene.add(rim);
-
-  const fill = new THREE.DirectionalLight(0x9DB4D8, 0.6);
-  fill.position.set(-4, 3, 2);
-  scene.add(fill);
-
-  // Pose group — all keyframe targets apply here. Rest pose is identity.
   const pose = new THREE.Group();
   scene.add(pose);
 
   // ─────────────────────────────────────────────────────────────────────
-  // Keyframes per section. Each entry: the selector for that section +
-  // the pose the chisel should settle into while that section is centered.
-  //   rx,ry,rz : rotation in radians
-  //   px,py    : offset in world units (z kept at 0)
-  //   s        : uniform scale multiplier
-  //   o        : opacity (0..1) — driven into material
+  // Sections: each has a heading the chisel will aim at, plus a light
+  // palette that becomes active as the heading nears viewport center.
   // ─────────────────────────────────────────────────────────────────────
-  // Small-badge keyframes: chisel stays centered in its 380px canvas; only
-  // rotation and small sub-pixel drift change per section. Opacity eases
-  // on sections that already have heavy content so the badge recedes.
-  const KF = [
-    // 0 — Hero: diagonal attack
-    { sel: '.hero',       rx: -0.06, ry:  0.22, rz: -Math.PI / 5.5,  px:  0.0, py:  0.0, s: 1.00, o: 1.00 },
-    // 1 — Products: turned 3/4, slight tilt; cards are busy so fade a bit
-    { sel: '#products',   rx:  0.10, ry: -0.60, rz: -Math.PI / 3.5,  px:  0.0, py:  0.0, s: 1.00, o: 0.55 },
-    // 2 — Craft: vertical, tip up, stands on its axis
-    { sel: '#craft',      rx: -0.02, ry:  0.85, rz:  Math.PI * 0.02, px:  0.0, py:  0.2, s: 1.00, o: 0.85 },
-    // 3 — Industries: lying horizontal, as if resting
-    { sel: '#industries', rx: -0.08, ry:  0.30, rz:  Math.PI / 2,    px:  0.0, py:  0.0, s: 0.95, o: 0.65 },
-    // 4 — Contact: soft diagonal, faint — form is the hero here
-    { sel: '#contact',    rx:  0.12, ry: -0.40, rz: -Math.PI / 4,    px:  0.0, py:  0.0, s: 0.90, o: 0.40 },
+  const SECTIONS = [
+    {
+      sel: '.hero', headSel: '.hero .display',
+      // Morning — warm key from upper right, gentle blue fill
+      lights: {
+        key:  { color: 0xFFE6BE, dir: [ 4,  5,  5], intensity: 2.8 },
+        rim:  { color: 0xE8781A, dir: [-5, -1, -4], intensity: 1.6 },
+        fill: { color: 0x9DB4D8, dir: [-4,  3,  2], intensity: 0.6 },
+        exposure: 1.05,
+      },
+      opacity: 1.0,
+    },
+    {
+      sel: '#products', headSel: '#products .h2',
+      // Noon — clean top-down, low contrast
+      lights: {
+        key:  { color: 0xFFFFFF, dir: [ 0,  8,  4], intensity: 3.4 },
+        rim:  { color: 0xCCCCCC, dir: [ 0, -3, -2], intensity: 0.5 },
+        fill: { color: 0xF5F2EC, dir: [-3,  4,  5], intensity: 0.9 },
+        exposure: 1.10,
+      },
+      opacity: 0.85,
+    },
+    {
+      sel: '#craft', headSel: '#craft .h2',
+      // Forge — strong orange rim, dim ambient
+      lights: {
+        key:  { color: 0xFFB070, dir: [ 4,  2,  3], intensity: 2.2 },
+        rim:  { color: 0xFF7A14, dir: [-3, -2, -3], intensity: 3.2 },
+        fill: { color: 0x4A3520, dir: [-2,  1,  1], intensity: 0.4 },
+        exposure: 1.00,
+      },
+      opacity: 0.95,
+    },
+    {
+      sel: '#industries', headSel: '#industries .h2',
+      // Worksite — cool hard side light, deep shadow
+      lights: {
+        key:  { color: 0xE0E8F2, dir: [ 6,  1,  2], intensity: 3.6 },
+        rim:  { color: 0x2E2A26, dir: [-6, -3, -2], intensity: 1.0 },
+        fill: { color: 0xB8C0CA, dir: [-2,  4,  4], intensity: 0.3 },
+        exposure: 0.92,
+      },
+      opacity: 0.75,
+    },
+    {
+      sel: '#contact', headSel: '#contact .h2',
+      // Dusk — low warm key, dark frame
+      lights: {
+        key:  { color: 0xFFCFA0, dir: [ 2,  3,  5], intensity: 1.5 },
+        rim:  { color: 0x6A4A6A, dir: [-3, -1, -3], intensity: 1.4 },
+        fill: { color: 0xA89A88, dir: [-3,  2,  2], intensity: 0.5 },
+        exposure: 0.85,
+      },
+      opacity: 0.45,
+    },
   ];
 
-  let needsCompute = true;
-
-  // Resolve actual section elements. React mounts asynchronously, so the
-  // sections may not exist when this module first runs. Re-poll until they
-  // show up, then stop.
-  let sections = [];
+  // Lazy-resolve section + heading elements (React mounts asynchronously).
+  let resolved = false;
   function resolveSections() {
-    const next = KF
-      .map(k => ({ ...k, el: document.querySelector(k.sel) }))
-      .filter(k => k.el);
-    if (next.length > sections.length) {
-      sections = next;
-      needsCompute = true;
+    let ok = true;
+    for (const s of SECTIONS) {
+      if (!s.el) s.el = document.querySelector(s.sel) || null;
+      if (!s.headEl) s.headEl = document.querySelector(s.headSel) || null;
+      if (!s.el || !s.headEl) ok = false;
     }
-    return sections.length === KF.length;
+    if (ok) resolved = true;
+    return ok;
   }
   if (!resolveSections()) {
     const iv = setInterval(() => { if (resolveSections()) clearInterval(iv); }, 120);
     setTimeout(() => clearInterval(iv), 15000);
   }
 
-  // Current animated state (lerp target). Start at KF[0].
-  const cur = { rx: KF[0].rx, ry: KF[0].ry, rz: KF[0].rz, px: 0, py: 0, s: 1, o: 1 };
-  const tgt = { ...cur };
-
   function lerp(a, b, t) { return a + (b - a) * t; }
-  function smooth(t) { return t * t * (3 - 2 * t); } // smoothstep
+  function lerpColor(out, a, b, t) {
+    out.r = lerp(a.r, b.r, t);
+    out.g = lerp(a.g, b.g, t);
+    out.b = lerp(a.b, b.b, t);
+    return out;
+  }
 
-  // Decide which two keyframes to blend between based on viewport center.
-  function computeTarget() {
-    if (sections.length === 0) return;
-    const vhHalf = innerHeight * 0.5;
-    // For each section, find its center's distance from viewport center,
-    // normalized. We blend between the section we're currently "in" and
-    // the neighbor we're heading toward.
-    const centers = sections.map(s => {
-      const r = s.el.getBoundingClientRect();
+  // Pre-build Color objects for palettes so we don't allocate every frame.
+  for (const s of SECTIONS) {
+    s._kColor = new THREE.Color(s.lights.key.color);
+    s._rColor = new THREE.Color(s.lights.rim.color);
+    s._fColor = new THREE.Color(s.lights.fill.color);
+  }
+  const tmpCol = new THREE.Color();
+
+  // Pick the section whose heading center is closest to viewport center,
+  // and a blend factor toward the neighbor we are heading toward.
+  function activeBlend() {
+    if (!SECTIONS.some(s => s.headEl)) return null;
+    const vhc = innerHeight * 0.5;
+    const centers = SECTIONS.map(s => {
+      if (!s.headEl) return Infinity;
+      const r = s.headEl.getBoundingClientRect();
       return r.top + r.height * 0.5;
     });
-
-    // Find the section whose center is closest — that's the "active" one.
-    let active = 0;
-    let minD = Infinity;
+    let active = 0, minD = Infinity;
     for (let i = 0; i < centers.length; i++) {
-      const d = Math.abs(centers[i] - vhHalf);
+      const d = Math.abs(centers[i] - vhc);
       if (d < minD) { minD = d; active = i; }
     }
-
-    // Determine the neighbor we're heading toward (above or below).
     let neighbor = active;
-    if (active < sections.length - 1 && centers[active] < vhHalf) neighbor = active + 1;
-    else if (active > 0 && centers[active] > vhHalf) neighbor = active - 1;
-
-    const a = sections[active];
-    const b = sections[neighbor];
-
-    // Blend factor: 0 at active center, 1 at neighbor center.
+    if (active < SECTIONS.length - 1 && centers[active] < vhc) neighbor = active + 1;
+    else if (active > 0 && centers[active] > vhc) neighbor = active - 1;
     let t = 0;
     if (neighbor !== active) {
       const span = Math.abs(centers[neighbor] - centers[active]);
-      const prog = Math.abs(centers[active] - vhHalf) / (span || 1);
+      const prog = Math.abs(centers[active] - vhc) / (span || 1);
       t = Math.max(0, Math.min(1, prog));
+      // smoothstep
+      t = t * t * (3 - 2 * t);
     }
-    t = smooth(t);
-
-    tgt.rx = lerp(a.rx, b.rx, t);
-    tgt.ry = lerp(a.ry, b.ry, t);
-    tgt.rz = lerp(a.rz, b.rz, t);
-    tgt.px = lerp(a.px, b.px, t);
-    tgt.py = lerp(a.py, b.py, t);
-    tgt.s  = lerp(a.s,  b.s,  t);
-    tgt.o  = lerp(a.o,  b.o,  t);
+    return { a: SECTIONS[active], b: SECTIONS[neighbor], t };
   }
 
-  addEventListener('scroll',  () => { needsCompute = true; }, { passive: true });
-  addEventListener('resize',  () => { needsCompute = true; });
+  // The chisel "tip" should aim at the heading currently most in view.
+  // We weight each heading by how close it is to viewport center (linear
+  // falloff over one viewport height) so the target moves continuously
+  // rather than snapping at section boundaries.
+  function pointerTargetScreen() {
+    if (!resolved && !SECTIONS.some(s => s.headEl)) return null;
+    const vh = innerHeight, c = vh * 0.5;
+    let totalW = 0, tx = 0, ty = 0;
+    for (const s of SECTIONS) {
+      if (!s.headEl) continue;
+      const r = s.headEl.getBoundingClientRect();
+      const hx = r.left + r.width * 0.5;
+      const hy = r.top + r.height * 0.5;
+      const w = Math.max(0, 1 - Math.abs(hy - c) / vh);
+      if (w > 0) {
+        totalW += w;
+        tx += hx * w;
+        ty += hy * w;
+      }
+    }
+    if (totalW === 0) return null;
+    return { x: tx / totalW, y: ty / totalW };
+  }
+
+  // Tip-axis calibration: after the model loads at default orientation, we
+  // pick the world-space direction that the visible "tip" points along.
+  // Most chisel GLBs export with the long axis on Y; the tip is one end.
+  // This is a single Z rotation offset that makes "rz=0 → tip points up".
+  // Tweak if the tip ends up pointing the wrong way after first deploy.
+  const TIP_OFFSET_Z = -Math.PI / 2; // tip points along screen +X (right) at rz=0
+
+  // Convert a screen-space point to a desired pose.rotation.z so that the
+  // chisel's tip aims toward that point from the chisel canvas center.
+  function screenToTipAngle(px, py) {
+    const r = root.getBoundingClientRect();
+    const cx = r.left + r.width * 0.5;
+    const cy = r.top  + r.height * 0.5;
+    const dx = px - cx;
+    const dy = py - cy;
+    // Three.js +Y is up; screen +Y is down. Flip Y for world angle.
+    const worldAngle = Math.atan2(-dy, dx);
+    return worldAngle + TIP_OFFSET_Z;
+  }
 
   const draco = new DRACOLoader();
   draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/');
@@ -190,32 +252,70 @@
       });
       pose.add(m);
       modelLoaded = true;
-      computeTarget();
     },
     undefined,
     err => console.error('[scene] /kirici-uc.glb load failed', err)
   );
 
-  // Ease factor — higher = snappier. reduced-motion jumps instantly.
-  const EASE = reduced ? 1.0 : 0.08;
+  // Animated state
+  const cur = {
+    rz: -Math.PI / 5.5,
+    opacity: 1.0,
+    keyColor: new THREE.Color(SECTIONS[0].lights.key.color),
+    keyInt:  SECTIONS[0].lights.key.intensity,
+    rimColor: new THREE.Color(SECTIONS[0].lights.rim.color),
+    rimInt:  SECTIONS[0].lights.rim.intensity,
+    fillColor: new THREE.Color(SECTIONS[0].lights.fill.color),
+    fillInt: SECTIONS[0].lights.fill.intensity,
+    exposure: 1.0,
+  };
+
+  const EASE_ROT  = reduced ? 1.0 : 0.10;
+  const EASE_LIGHT = reduced ? 1.0 : 0.06;
 
   function tick() {
-    if (needsCompute) { computeTarget(); needsCompute = false; }
+    // Pointer
+    const tgt = pointerTargetScreen();
+    if (tgt) {
+      const desiredZ = screenToTipAngle(tgt.x, tgt.y);
+      // Wrap-aware lerp: pick the shorter angular path.
+      let delta = desiredZ - cur.rz;
+      while (delta >  Math.PI) delta -= Math.PI * 2;
+      while (delta < -Math.PI) delta += Math.PI * 2;
+      cur.rz += delta * EASE_ROT;
+      pose.rotation.set(0, 0, cur.rz);
+    }
 
-    cur.rx = lerp(cur.rx, tgt.rx, EASE);
-    cur.ry = lerp(cur.ry, tgt.ry, EASE);
-    cur.rz = lerp(cur.rz, tgt.rz, EASE);
-    cur.px = lerp(cur.px, tgt.px, EASE);
-    cur.py = lerp(cur.py, tgt.py, EASE);
-    cur.s  = lerp(cur.s,  tgt.s,  EASE);
-    cur.o  = lerp(cur.o,  tgt.o,  EASE);
+    // Lighting
+    const blend = activeBlend();
+    if (blend) {
+      const A = blend.a, B = blend.b, t = blend.t;
+      // Target colors / intensities / opacity / exposure
+      lerpColor(tmpCol, A._kColor, B._kColor, t);
+      cur.keyColor.lerp(tmpCol, EASE_LIGHT);
+      key.color.copy(cur.keyColor);
+      cur.keyInt = lerp(cur.keyInt, lerp(A.lights.key.intensity, B.lights.key.intensity, t), EASE_LIGHT);
+      key.intensity = cur.keyInt;
 
-    pose.rotation.set(cur.rx, cur.ry, cur.rz);
-    pose.position.set(cur.px, cur.py, 0);
-    pose.scale.setScalar(cur.s);
+      lerpColor(tmpCol, A._rColor, B._rColor, t);
+      cur.rimColor.lerp(tmpCol, EASE_LIGHT);
+      rim.color.copy(cur.rimColor);
+      cur.rimInt = lerp(cur.rimInt, lerp(A.lights.rim.intensity, B.lights.rim.intensity, t), EASE_LIGHT);
+      rim.intensity = cur.rimInt;
 
-    if (modelLoaded) {
-      for (let i = 0; i < materials.length; i++) materials[i].opacity = cur.o;
+      lerpColor(tmpCol, A._fColor, B._fColor, t);
+      cur.fillColor.lerp(tmpCol, EASE_LIGHT);
+      fill.color.copy(cur.fillColor);
+      cur.fillInt = lerp(cur.fillInt, lerp(A.lights.fill.intensity, B.lights.fill.intensity, t), EASE_LIGHT);
+      fill.intensity = cur.fillInt;
+
+      cur.exposure = lerp(cur.exposure, lerp(A.lights.exposure, B.lights.exposure, t), EASE_LIGHT);
+      renderer.toneMappingExposure = cur.exposure;
+
+      cur.opacity = lerp(cur.opacity, lerp(A.opacity, B.opacity, t), EASE_LIGHT);
+      if (modelLoaded) {
+        for (let i = 0; i < materials.length; i++) materials[i].opacity = cur.opacity;
+      }
     }
 
     renderer.render(scene, cam);
