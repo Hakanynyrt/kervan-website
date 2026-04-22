@@ -61,7 +61,6 @@
   tilt.rotation.z = 0.14;
   scene.add(tilt);
 
-  let loaded = false;
   new GLTFLoader().load(
     '/kirici-uc.glb',
     (gltf) => {
@@ -74,7 +73,6 @@
       else if (sz.x > sz.y) m.rotation.z = -Math.PI / 2;
       m.traverse(o => {
         if (o.isMesh && o.material) {
-          // Darker steel so it's readable on cream bg
           o.material.color = new THREE.Color(0x2a2a2e);
           o.material.metalness = 0.92;
           o.material.roughness = 0.28;
@@ -83,24 +81,9 @@
         }
       });
       spin.add(m);
-      loaded = true;
     },
     undefined,
-    err => {
-      console.warn('[scene] GLB load failed, using fallback', err);
-      // Fallback — simple cylinder + cone to represent a chisel
-      const mat = new THREE.MeshStandardMaterial({ color: 0x2a2a2e, metalness: 0.92, roughness: 0.28, envMapIntensity: 1.3 });
-      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 6.5, 48), mat);
-      const tip   = new THREE.Mesh(new THREE.ConeGeometry(1.1, 2.2, 48), mat);
-      tip.position.y = 4.35;
-      const head  = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.25, 0.7, 48), mat);
-      head.position.y = -3.6;
-      const grp = new THREE.Group();
-      grp.add(shaft); grp.add(tip); grp.add(head);
-      grp.rotation.z = Math.PI / 2;
-      spin.add(grp);
-      loaded = true;
-    }
+    err => console.error('[scene] /kirici-uc.glb load failed', err)
   );
 
   // ── Loop ──
