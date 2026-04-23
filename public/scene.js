@@ -65,12 +65,15 @@
   rim.position.set(-3, -2, -5);
   scene.add(rim);
 
-  // spinGroup: spins on Y. orientGroup: holds the centred, tip-down model
-  // so scale doesn't affect the spin pivot.
+  // tiltGroup: scroll-position lean (outside spin so it doesn't wobble with Y).
+  // spinGroup: base Y-spin + scroll-velocity boost.
+  // orientGroup: holds the centred, tip-down, scaled model.
+  const tiltGroup   = new THREE.Group();
   const spinGroup   = new THREE.Group();
   const orientGroup = new THREE.Group();
   spinGroup.add(orientGroup);
-  scene.add(spinGroup);
+  tiltGroup.add(spinGroup);
+  scene.add(tiltGroup);
 
   let modelLoaded = false;
 
@@ -132,15 +135,43 @@
     err => console.error('[scene] /kirici-uc.glb load failed', err)
   );
 
-  // ─── Museum rotation ─────────────────────────────────────────────────
-  // Very slow Y-axis spin. A full turn takes ~40s. Reduced-motion → still.
-  const SPIN_PER_SEC = reduced ? 0 : (Math.PI * 2) / 40;
+  // ─── Motion ──────────────────────────────────────────────────────────
+  // Base museum rotation: ~40s per full Y turn. Scroll adds two layers on
+  // top — a velocity-driven spin boost (flick-to-spin-faster) and a
+  // position-driven lean (chisel leans forward as the hero scrolls past).
+  const SPIN_PER_SEC = reduced ? 0       : (Math.PI * 2) / 40;
+  const SPIN_BOOST   = reduced ? 0       : 0.0018;   // rad per px of scroll
+  const MAX_TILT     = reduced ? 0       : 0.09;     // rad, ~5°
+  const DECAY        = 0.90;                         // scrollVel decay/frame
+
+  let scrollVel   = 0;
+  let lastScrollY = window.scrollY;
+
+  addEventListener('scroll', () => {
+    const y = window.scrollY;
+    scrollVel += (y - lastScrollY);
+    lastScrollY = y;
+  }, { passive: true });
 
   let lastT = performance.now();
   function tick(now) {
     const dt = Math.min(0.05, (now - lastT) / 1000);
     lastT = now;
-    if (modelLoaded) spinGroup.rotation.y += SPIN_PER_SEC * dt;
+
+    if (modelLoaded) {
+      // Base slow spin.
+      spinGroup.rotation.y += SPIN_PER_SEC * dt;
+      // Scroll-velocity boost — normalised to ~60fps so frame-rate doesn't
+      // change how much a given scroll moves the object.
+      spinGroup.rotation.y += scrollVel * SPIN_BOOST * dt * 60;
+      scrollVel *= DECAY;
+
+      // Scroll-position lean: smoothstep 0→1 over one viewport of scroll.
+      const t = Math.min(window.scrollY / innerHeight, 1);
+      const eased = t * t * (3 - 2 * t);
+      tiltGroup.rotation.x = eased * MAX_TILT;
+    }
+
     renderer.render(scene, cam);
     requestAnimationFrame(tick);
   }
