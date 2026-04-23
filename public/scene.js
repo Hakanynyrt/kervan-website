@@ -1,7 +1,8 @@
 // Kervan Heat — scene.js
-// Single chisel, oriented vertically, slid by scroll progress: at the top of
-// the page the chisel's TOP fills the badge; as you scroll down the page the
-// camera tour reveals progressively lower parts, ending on the tip.
+// Museum display. Single chisel, tip pointing DOWN, fully visible and
+// centred in the badge. Rotates slowly on its own vertical (Y) axis so
+// every face gets shown. No scroll coupling, no cursor coupling —
+// the object lives on its own time.
 
 (async function () {
   const THREE = await import('three');
@@ -20,13 +21,11 @@
   })();
 
   const scene = new THREE.Scene();
-  // Fixed camera looking at origin; the chisel slides up/down past it.
   const FOV = 34;
   const CAM_Z = 18;
   const cam = new THREE.PerspectiveCamera(FOV, 1, 0.1, 200);
   cam.position.set(0, 0, CAM_Z);
 
-  // Vertical extent visible at the origin plane (z=0).
   const VISIBLE_H = 2 * Math.tan((FOV * Math.PI / 180) / 2) * CAM_Z;
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -34,6 +33,7 @@
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
+  renderer.setClearAlpha(0);
   root.appendChild(renderer.domElement);
 
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -49,7 +49,7 @@
   resize();
   addEventListener('resize', resize);
 
-  // Static product-photo lighting.
+  // Three-point lighting — warm key, cool fill, orange rim for forge accent.
   const key = new THREE.DirectionalLight(0xFFE6BE, 3.0);
   key.position.set(4, 5, 6);
   scene.add(key);
@@ -62,13 +62,14 @@
   rim.position.set(-3, -2, -4);
   scene.add(rim);
 
-  // chiselGroup: parent that we slide vertically. The model is centered and
-  // re-oriented inside it so its longest axis is +Y (vertical, head at top).
-  const chiselGroup = new THREE.Group();
-  scene.add(chiselGroup);
+  // spinGroup: spins on Y. orientGroup: holds the centred, tip-down model
+  // so scale doesn't affect the spin pivot.
+  const spinGroup   = new THREE.Group();
+  const orientGroup = new THREE.Group();
+  spinGroup.add(orientGroup);
+  scene.add(spinGroup);
 
-  let chiselHeight = 0;     // world-space vertical extent after scaling
-  let modelLoaded  = false;
+  let modelLoaded = false;
 
   const draco = new DRACOLoader();
   draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/');
@@ -81,38 +82,35 @@
     (gltf) => {
       const m = gltf.scene;
 
-      // 1. Center on origin in object space.
+      // 1. Centre on origin in object space.
       const box0   = new THREE.Box3().setFromObject(m);
       const center = box0.getCenter(new THREE.Vector3());
       m.position.sub(center);
 
-      // 2. Find longest axis in object space and rotate so it aligns with +Y.
+      // 2. Align longest axis with +Y. Previous build used -π/2 and the tip
+      //    ended up UP — so use +π/2 instead (flips the long axis by 180°).
       const sz0 = box0.getSize(new THREE.Vector3());
-      const longest = Math.max(sz0.x, sz0.y, sz0.z);
-      let widthA, widthB;
-      if (sz0.x === longest) {
-        chiselGroup.rotation.z = -Math.PI / 2; // X → Y
-        widthA = sz0.y; widthB = sz0.z;
-      } else if (sz0.z === longest) {
-        chiselGroup.rotation.x =  Math.PI / 2; // Z → Y
-        widthA = sz0.x; widthB = sz0.y;
-      } else {
-        widthA = sz0.x; widthB = sz0.z;
-      }
+      const longestVal = Math.max(sz0.x, sz0.y, sz0.z);
+      if (sz0.x === longestVal)        m.rotation.z =  Math.PI / 2; // X-long → tip down
+      else if (sz0.z === longestVal)   m.rotation.x = -Math.PI / 2; // Z-long → tip down
+      else                             m.rotation.z =  Math.PI;     // Y-long → flip so tip is at -Y
 
-      // 3. Scale so the cross-axis (width) fills ~65% of the visible canvas.
-      //    The vertical axis becomes much taller than the canvas — that's
-      //    the point: scrolling slides the chisel past the window.
-      const targetWidth = VISIBLE_H * 0.55; // a bit narrower than visible
-      const scale       = targetWidth / Math.max(widthA, widthB);
-      chiselGroup.scale.setScalar(scale);
-      chiselHeight = longest * scale;
+      // 3. Re-centre after rotation (AABB centre shifts for asymmetric shapes).
+      m.updateMatrixWorld(true);
+      const box1   = new THREE.Box3().setFromObject(m);
+      const center1 = box1.getCenter(new THREE.Vector3());
+      m.position.sub(center1);
+      m.updateMatrixWorld(true);
 
-      // 4. Slight depth: rotate the inner model around its long axis so
-      //    we don't see a perfectly flat silhouette.
-      m.rotation.y = 0.35;
+      // 4. Scale so the long (Y) dimension fills ~72% of the visible height,
+      //    leaving breathing room top and bottom.
+      const box2   = new THREE.Box3().setFromObject(m);
+      const sz2    = box2.getSize(new THREE.Vector3());
+      const targetH = VISIBLE_H * 0.72;
+      const scale = targetH / sz2.y;
+      orientGroup.scale.setScalar(scale);
 
-      // 5. Material — same dark steel as before.
+      // 5. Dark-steel material.
       m.traverse(o => {
         if (o.isMesh && o.material) {
           o.material.color           = new THREE.Color(0x2a2a2e);
@@ -123,33 +121,22 @@
         }
       });
 
-      chiselGroup.add(m);
+      orientGroup.add(m);
       modelLoaded = true;
     },
     undefined,
     err => console.error('[scene] /kirici-uc.glb load failed', err)
   );
 
-  // ─── Scroll → vertical slide ──────────────────────────────────────────
-  // scroll01 = 0  → top of chisel sits at top of badge
-  // scroll01 = 1  → bottom (tip) sits at bottom of badge
-  function scroll01() {
-    const docH = document.documentElement.scrollHeight - innerHeight;
-    if (docH <= 0) return 0;
-    return Math.max(0, Math.min(1, scrollY / docH));
-  }
+  // ─── Museum rotation ─────────────────────────────────────────────────
+  // Very slow Y-axis spin. A full turn takes ~40s. Reduced-motion → still.
+  const SPIN_PER_SEC = reduced ? 0 : (Math.PI * 2) / 40;
 
-  let curY = 0;
-  const EASE = reduced ? 1.0 : 0.10;
-
-  function tick() {
-    if (modelLoaded) {
-      const slideRange = Math.max(0, chiselHeight - VISIBLE_H);
-      // (scroll01 - 0.5) maps 0→-0.5, 1→+0.5
-      const targetY = (scroll01() - 0.5) * slideRange;
-      curY += (targetY - curY) * EASE;
-      chiselGroup.position.y = curY;
-    }
+  let lastT = performance.now();
+  function tick(now) {
+    const dt = Math.min(0.05, (now - lastT) / 1000);
+    lastT = now;
+    if (modelLoaded) spinGroup.rotation.y += SPIN_PER_SEC * dt;
     renderer.render(scene, cam);
     requestAnimationFrame(tick);
   }
