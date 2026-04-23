@@ -118,7 +118,75 @@ function Products({ t }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// CRAFT — 5 + 7 (copy + photo)
+// GALLERY — reusable horizontal scroll-snap slider for chisels / pistons
+// Placeholder-friendly: items with no `img` render a named empty slot.
+// ═══════════════════════════════════════════════════════════════════════
+function Gallery({ eyebrow, title, aside, items, idAttr }) {
+  const scroller = useRef(null);
+  const scroll = (dir) => {
+    const el = scroller.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * el.clientWidth * 0.9, behavior: 'smooth' });
+  };
+  return (
+    <section className="sec" id={idAttr}>
+      <div className="sec__head">
+        <div className="sec__head-main reveal">
+          <div className="eyebrow">{eyebrow}</div>
+          <h2 className="h2">{title}</h2>
+        </div>
+        <aside className="sec__head-aside reveal">
+          {aside}
+          <div className="gal__ctrls">
+            <button className="gal__btn" type="button" onClick={() => scroll(-1)} aria-label="Önceki">←</button>
+            <button className="gal__btn" type="button" onClick={() => scroll( 1)} aria-label="Sonraki">→</button>
+          </div>
+        </aside>
+      </div>
+
+      <div className="gal" ref={scroller}>
+        {items.map((it, i) => (
+          <article className="gal__card reveal" key={i}>
+            <div
+              className={"gal__img" + (it.img ? '' : ' gal__img--empty')}
+              style={it.img ? { backgroundImage: `url(${it.img})` } : null}
+            >
+              {!it.img && <span className="gal__placeholder">{it.name}</span>}
+            </div>
+            <div className="gal__name">{it.name}</div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Chisels({ t }) {
+  return (
+    <Gallery
+      idAttr="chisels"
+      eyebrow={t.chisels.eyebrow}
+      title={t.chisels.title}
+      aside={t.chisels.aside}
+      items={t.chisels.items}
+    />
+  );
+}
+
+function Pistons({ t }) {
+  return (
+    <Gallery
+      idAttr="pistons"
+      eyebrow={t.pistons.eyebrow}
+      title={t.pistons.title}
+      aside={t.pistons.aside}
+      items={t.pistons.items}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// CRAFT — "İmalathanemiz": copy + photo, with a CNC sub-grid underneath
 // ═══════════════════════════════════════════════════════════════════════
 function Craft({ t }) {
   return (
@@ -130,6 +198,27 @@ function Craft({ t }) {
           <p className="craft__body">{t.craft.body}</p>
         </div>
         <div className="craft__img reveal" style={{ backgroundImage: 'url(photos/workshop-overview.jpeg)' }}></div>
+      </div>
+
+      <div className="craft__cnc">
+        <div className="craft__cnc-head reveal">
+          <div className="eyebrow">{t.craft.cnc.eyebrow}</div>
+          <h3 className="h3">{t.craft.cnc.title}</h3>
+          <p className="craft__cnc-body">{t.craft.cnc.body}</p>
+        </div>
+        <div className="craft__cnc-grid reveal-stagger">
+          {t.craft.cnc.items.map((it, i) => (
+            <div className="craft__cnc-tile" key={i}>
+              <div
+                className={"craft__cnc-tile-img" + (it.img ? '' : ' craft__cnc-tile-img--empty')}
+                style={it.img ? { backgroundImage: `url(${it.img})` } : null}
+              >
+                {!it.img && <span className="craft__cnc-ph">{it.name}</span>}
+              </div>
+              <div className="craft__cnc-tile-name">{it.name}</div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

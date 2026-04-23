@@ -9,7 +9,7 @@ window.DICT = {
   tr: {
     nav: {
       products: 'Ürünler',
-      craft: 'Atölye',
+      craft: 'İmalathanemiz',
       industries: 'Sektörler',
       contact: 'İletişim',
       cta: 'Teklif Al',
@@ -39,10 +39,46 @@ window.DICT = {
         { name: 'Kit', desc: 'Sızdırmazlık ve bağlantı parçaları. Ayrıntıların tümü.', img: 'photos/workshop-overview.jpeg' },
       ],
     },
+    chisels: {
+      eyebrow: 'Uçlar',
+      title: 'Her zemin için bir keski.',
+      aside: 'Sivriden yassıya, asfalttan kayaya. İmalatımızdan çıkan uçların bir seçkisi.',
+      items: [
+        { name: 'Sivri uç',      img: '' },
+        { name: 'Yassı keski',   img: '' },
+        { name: 'Konik keski',   img: '' },
+        { name: 'Piramit uç',    img: '' },
+        { name: 'Asfalt keskisi',img: '' },
+        { name: 'Özel ölçü',     img: '' },
+      ],
+    },
+    pistons: {
+      eyebrow: 'Pistonlar',
+      title: 'Darbenin kaynağı.',
+      aside: 'Farklı kırıcı modelleri için işlediğimiz pistonlardan seçmeler.',
+      items: [
+        { name: 'Piston 01', img: '' },
+        { name: 'Piston 02', img: '' },
+        { name: 'Piston 03', img: '' },
+        { name: 'Piston 04', img: '' },
+        { name: 'Piston 05', img: '' },
+      ],
+    },
     craft: {
-      eyebrow: 'Atölye',
+      eyebrow: 'İmalathanemiz',
       title: 'Zanaat ellerde yaşar.',
-      body: 'Yirmi altı yıl önce bir hayalle başladık. Bugün aynı çatı altında, aynı özenle, aynı titizlikle devam ediyoruz. Üretim hattımız değil — atölyemiz.',
+      body: 'Yirmi altı yıl önce bir hayalle başladık. Bugün aynı çatı altında, aynı özenle, aynı titizlikle devam ediyoruz. Üretim hattımız değil — imalathanemiz.',
+      cnc: {
+        eyebrow: 'CNC',
+        title: 'CNC\'de işlenen parçalar.',
+        body: 'Hassas tolerans gerektiren parçaları kendi CNC tezgâhlarımızda işliyoruz.',
+        items: [
+          { name: 'Burç grubu',       img: '' },
+          { name: 'Çalışma silindiri',img: '' },
+          { name: 'Valf gövdesi',     img: '' },
+          { name: 'Özel parça',       img: '' },
+        ],
+      },
     },
     industries: {
       eyebrow: 'Kimler İçin',
@@ -88,7 +124,7 @@ window.DICT = {
   en: {
     nav: {
       products: 'Products',
-      craft: 'Workshop',
+      craft: 'Our Workshop',
       industries: 'Industries',
       contact: 'Contact',
       cta: 'Get a Quote',
@@ -118,10 +154,46 @@ window.DICT = {
         { name: 'Kit', desc: 'Seals and fasteners. All the small things.', img: 'photos/workshop-overview.jpeg' },
       ],
     },
+    chisels: {
+      eyebrow: 'Chisels',
+      title: 'A tip for every ground.',
+      aside: 'From moil to flat, asphalt to rock. A selection from our shop floor.',
+      items: [
+        { name: 'Moil point',     img: '' },
+        { name: 'Flat chisel',    img: '' },
+        { name: 'Tapered',        img: '' },
+        { name: 'Pyramid',        img: '' },
+        { name: 'Asphalt cutter', img: '' },
+        { name: 'Custom size',    img: '' },
+      ],
+    },
+    pistons: {
+      eyebrow: 'Pistons',
+      title: 'The source of the strike.',
+      aside: 'A selection of pistons we machine for different hammer models.',
+      items: [
+        { name: 'Piston 01', img: '' },
+        { name: 'Piston 02', img: '' },
+        { name: 'Piston 03', img: '' },
+        { name: 'Piston 04', img: '' },
+        { name: 'Piston 05', img: '' },
+      ],
+    },
     craft: {
-      eyebrow: 'Workshop',
+      eyebrow: 'Our Workshop',
       title: 'Craft lives in hands.',
-      body: 'We started twenty-six years ago with one idea. Today we keep going under the same roof, with the same care, the same attention. It is not a production line — it is a workshop.',
+      body: 'We started twenty-six years ago with one idea. Today we keep going under the same roof, with the same care, the same attention. It is not a production line — it is our workshop.',
+      cnc: {
+        eyebrow: 'CNC',
+        title: 'Parts machined on our CNC.',
+        body: 'Tight-tolerance parts are machined on our own CNC.',
+        items: [
+          { name: 'Bushing group',   img: '' },
+          { name: 'Working cylinder',img: '' },
+          { name: 'Valve body',      img: '' },
+          { name: 'Custom part',     img: '' },
+        ],
+      },
     },
     industries: {
       eyebrow: 'Who We Serve',

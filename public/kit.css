@@ -414,6 +414,140 @@ h1, h2, h3, h4 {
   background-color: var(--bg-card);
 }
 
+/* CNC sub-section inside the Workshop ("İmalathanemiz") */
+.craft__cnc {
+  max-width: var(--container);
+  margin: 80px auto 0;
+  padding: 0 var(--pad-x);
+}
+.craft__cnc-head {
+  margin-bottom: 32px;
+  max-width: 680px;
+}
+.craft__cnc .h3,
+.craft__cnc h3 {
+  font-size: clamp(22px, 2.2vw, 30px);
+  font-weight: 500;
+  letter-spacing: -.015em;
+  line-height: 1.15;
+  margin: 8px 0 12px;
+}
+.craft__cnc-body {
+  margin: 0;
+  color: var(--ink-mid);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.craft__cnc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.craft__cnc-tile {
+  background: var(--bg-card);
+  border: 1px solid var(--hair);
+}
+.craft__cnc-tile-img {
+  aspect-ratio: 4 / 3;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.craft__cnc-tile-img--empty {
+  background-color: var(--bg);
+  border-bottom: 1px dashed var(--hair-2);
+}
+.craft__cnc-ph {
+  font-family: var(--f-sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--ink-soft);
+  padding: 6px 10px;
+  border: 1px dashed var(--hair-2);
+}
+.craft__cnc-tile-name {
+  padding: 14px 18px;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   GALLERY — horizontal scroll-snap slider (Chisels / Pistons)
+═══════════════════════════════════════════════════════════════════════ */
+.gal {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 320px;
+  gap: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 var(--pad-x);
+  padding: 6px max(var(--pad-x), calc((100vw - var(--container)) / 2 + var(--pad-x))) 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.gal::-webkit-scrollbar { display: none; }
+
+.gal__card {
+  scroll-snap-align: start;
+  background: var(--bg-card);
+  border: 1px solid var(--hair);
+  display: flex;
+  flex-direction: column;
+}
+.gal__img {
+  aspect-ratio: 4 / 5;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gal__img--empty {
+  background-color: var(--bg);
+  border-bottom: 1px dashed var(--hair-2);
+}
+.gal__placeholder {
+  font-family: var(--f-sans);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--ink-soft);
+  padding: 8px 14px;
+  border: 1px dashed var(--hair-2);
+}
+.gal__name {
+  padding: 16px 20px;
+  font-weight: 600;
+  font-size: 16px;
+}
+.gal__ctrls {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.gal__btn {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--hair-2);
+  background: var(--bg);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--ink);
+  transition: background .2s, border-color .2s;
+}
+.gal__btn:hover {
+  background: var(--bg-soft);
+  border-color: var(--ink-mid);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    INDUSTRIES — clean divided list
 ═══════════════════════════════════════════════════════════════════════ */
@@ -648,6 +782,8 @@ h1, h2, h3, h4 {
   .sec__head-main  { grid-column: 1 / span 12; }
   .sec__head-aside { grid-column: 1 / span 12; justify-self: start; }
   .prod { grid-column: span 6; }
+  .craft__cnc-grid { grid-template-columns: repeat(2, 1fr); }
+  .gal { grid-auto-columns: 300px; padding: 6px var(--pad-x) 8px; }
 }
 
 @media (max-width: 760px) {
@@ -681,6 +817,13 @@ h1, h2, h3, h4 {
   .prod__name { font-size: 21px; }
 
   .craft { padding: 60px 0; }
+  .craft__cnc { margin-top: 48px; }
+  .craft__cnc-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .craft__cnc-tile-name { padding: 12px 14px; font-size: 14px; }
+
+  .gal { grid-auto-columns: 78vw; gap: 12px; padding: 6px var(--pad-x) 8px; }
+  .gal__name { padding: 14px 16px; font-size: 15px; }
+  .gal__ctrls { display: none; }
 
   .ind__row { grid-template-columns: 40px 1fr; gap: 14px; padding: 22px 0; }
   .ind__row:hover { padding-left: 0; }
