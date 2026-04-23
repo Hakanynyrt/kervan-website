@@ -38,6 +38,57 @@ Required for the RFQ form to deliver email + Telegram:
 | `MAIL_TO` | Destination inbox (default: info@kervanheat.com) |
 | `MAIL_FROM` | Sender address (default: noreply@kervanheat.com) |
 
+## Medya ekleme (galerilere foto/video koymak)
+
+Ana sayfada üç galeri var — **Uçlar**, **Stok**, **Atölye**. Her slot `public/dict.jsx` içinde `{ name, desc, img, video }` formatında. `img` veya `video` alanı boşsa, kart isimli placeholder olarak çıkar. Doldurmak için:
+
+### 1. Dosyayı koy
+
+```
+public/photos/uclar/   # keski foto’ları
+public/photos/stok/    # stok/işlenmiş parça foto’ları
+public/photos/atolye/  # atölye sahneleri
+public/videos/         # video loop’ları
+```
+
+### 2. Dosya adlandırma
+
+- **Foto**: `kategori-kisa-aciklama-NN.jpg` (ör. `sivri-uc-granit-01.jpg`, `forj-01.jpg`)
+- **Video**: `kategori-kisa-NN.mp4` (ör. `cnc-01.mp4`)
+- Türkçe karakter yok, hepsi küçük harf, boşluk yerine tire
+
+### 3. Tavsiye edilen ölçüler / limitler
+
+| Tip | Boyut | Format | Dosya | Not |
+|---|---|---|---|---|
+| Foto | 1600×2000 px (4:5) | JPEG veya WebP | < 400 KB | Web için sıkıştırılmış — ham kamera dosyası koymayın |
+| Video | 1080×1350 (4:5) | MP4, H.264 + AAC | < 10 MB | 5–10 sn seamless loop, **ses yok (muted)** |
+
+### 4. `dict.jsx`’e bağla
+
+İlgili item’ın `img` veya `video` alanını doldur:
+
+```jsx
+{ name: 'Sivri uç', desc: '…', img: 'photos/uclar/sivri-uc-granit-01.jpg', video: '' },
+```
+
+Video varsa `img` poster olarak kullanılır (yüklenirken thumbnail). TR ve EN blokları ayrı — aynı dosyayı iki yere de yaz.
+
+### 5. Commit
+
+```
+git add public/photos/uclar/sivri-uc-granit-01.jpg public/dict.jsx
+git commit -m "media: add sivri-uc-granit-01"
+git push
+```
+
+Cloudflare deploy otomatik — push’tan 30–60 saniye sonra canlıda.
+
+### Sınırlar
+
+- GitHub tek dosya **100 MB** sert limit. Video için **ham/4K/HDR yüklemeyin** — sıkıştırılmış halde koyun.
+- `_headers` `public/photos/` için 1 yıllık cache header’ı yollar. Aynı dosya adıyla güncelleme yaparsan eski sürüm CDN’de kalır → yeni sürüm için yeni dosya adı (`-02`, `-v2` vs.) kullan.
+
 ## Pages
 
 - `/` — homepage (TR/EN/DE/RU)

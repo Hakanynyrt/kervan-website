@@ -414,69 +414,8 @@ h1, h2, h3, h4 {
   background-color: var(--bg-card);
 }
 
-/* CNC sub-section inside the Workshop ("İmalathanemiz") */
-.craft__cnc {
-  max-width: var(--container);
-  margin: 80px auto 0;
-  padding: 0 var(--pad-x);
-}
-.craft__cnc-head {
-  margin-bottom: 32px;
-  max-width: 680px;
-}
-.craft__cnc .h3,
-.craft__cnc h3 {
-  font-size: clamp(22px, 2.2vw, 30px);
-  font-weight: 500;
-  letter-spacing: -.015em;
-  line-height: 1.15;
-  margin: 8px 0 12px;
-}
-.craft__cnc-body {
-  margin: 0;
-  color: var(--ink-mid);
-  font-size: 16px;
-  line-height: 1.55;
-}
-.craft__cnc-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-.craft__cnc-tile {
-  background: var(--bg-card);
-  border: 1px solid var(--hair);
-}
-.craft__cnc-tile-img {
-  aspect-ratio: 4 / 3;
-  background-size: cover;
-  background-position: center;
-  background-color: var(--bg-soft);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.craft__cnc-tile-img--empty {
-  background-color: var(--bg);
-  border-bottom: 1px dashed var(--hair-2);
-}
-.craft__cnc-ph {
-  font-family: var(--f-sans);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .14em;
-  color: var(--ink-soft);
-  padding: 6px 10px;
-  border: 1px dashed var(--hair-2);
-}
-.craft__cnc-tile-name {
-  padding: 14px 18px;
-  font-weight: 600;
-  font-size: 15px;
-}
-
 /* ═══════════════════════════════════════════════════════════════════════
-   GALLERY — horizontal scroll-snap slider (Chisels / Pistons)
+   GALLERY — horizontal scroll-snap slider (Chisels / Stock / Atölye)
 ═══════════════════════════════════════════════════════════════════════ */
 .gal {
   display: grid;
@@ -513,6 +452,13 @@ h1, h2, h3, h4 {
   background-color: var(--bg);
   border-bottom: 1px dashed var(--hair-2);
 }
+.gal__media {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background-color: var(--bg-soft);
+}
 .gal__placeholder {
   font-family: var(--f-sans);
   font-size: 13px;
@@ -522,10 +468,18 @@ h1, h2, h3, h4 {
   padding: 8px 14px;
   border: 1px dashed var(--hair-2);
 }
+.gal__meta {
+  padding: 16px 20px 18px;
+}
 .gal__name {
-  padding: 16px 20px;
   font-weight: 600;
   font-size: 16px;
+}
+.gal__desc {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.45;
 }
 .gal__ctrls {
   display: flex;
@@ -782,7 +736,6 @@ h1, h2, h3, h4 {
   .sec__head-main  { grid-column: 1 / span 12; }
   .sec__head-aside { grid-column: 1 / span 12; justify-self: start; }
   .prod { grid-column: span 6; }
-  .craft__cnc-grid { grid-template-columns: repeat(2, 1fr); }
   .gal { grid-auto-columns: 300px; padding: 6px var(--pad-x) 8px; }
 }
 
@@ -817,12 +770,11 @@ h1, h2, h3, h4 {
   .prod__name { font-size: 21px; }
 
   .craft { padding: 60px 0; }
-  .craft__cnc { margin-top: 48px; }
-  .craft__cnc-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-  .craft__cnc-tile-name { padding: 12px 14px; font-size: 14px; }
 
   .gal { grid-auto-columns: 78vw; gap: 12px; padding: 6px var(--pad-x) 8px; }
-  .gal__name { padding: 14px 16px; font-size: 15px; }
+  .gal__meta { padding: 14px 16px 16px; }
+  .gal__name { font-size: 15px; }
+  .gal__desc { font-size: 12.5px; }
   .gal__ctrls { display: none; }
 
   .ind__row { grid-template-columns: 40px 1fr; gap: 14px; padding: 22px 0; }

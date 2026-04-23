@@ -147,13 +147,28 @@ function Gallery({ eyebrow, title, aside, items, idAttr }) {
       <div className="gal" ref={scroller}>
         {items.map((it, i) => (
           <article className="gal__card reveal" key={i}>
-            <div
-              className={"gal__img" + (it.img ? '' : ' gal__img--empty')}
-              style={it.img ? { backgroundImage: `url(${it.img})` } : null}
-            >
-              {!it.img && <span className="gal__placeholder">{it.name}</span>}
+            {it.video ? (
+              <video
+                className="gal__media"
+                src={it.video}
+                poster={it.img || undefined}
+                muted
+                autoPlay
+                loop
+                playsInline
+                preload="metadata"
+              />
+            ) : it.img ? (
+              <div className="gal__img" style={{ backgroundImage: `url(${it.img})` }} />
+            ) : (
+              <div className="gal__img gal__img--empty">
+                <span className="gal__placeholder">{it.name}</span>
+              </div>
+            )}
+            <div className="gal__meta">
+              <div className="gal__name">{it.name}</div>
+              {it.desc && <div className="gal__desc">{it.desc}</div>}
             </div>
-            <div className="gal__name">{it.name}</div>
           </article>
         ))}
       </div>
@@ -173,20 +188,32 @@ function Chisels({ t }) {
   );
 }
 
-function Pistons({ t }) {
+function Stock({ t }) {
   return (
     <Gallery
-      idAttr="pistons"
-      eyebrow={t.pistons.eyebrow}
-      title={t.pistons.title}
-      aside={t.pistons.aside}
-      items={t.pistons.items}
+      idAttr="stock"
+      eyebrow={t.stock.eyebrow}
+      title={t.stock.title}
+      aside={t.stock.aside}
+      items={t.stock.items}
+    />
+  );
+}
+
+function Atolye({ t }) {
+  return (
+    <Gallery
+      idAttr="atolye"
+      eyebrow={t.atolye.eyebrow}
+      title={t.atolye.title}
+      aside={t.atolye.aside}
+      items={t.atolye.items}
     />
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// CRAFT — "İmalathanemiz": copy + photo, with a CNC sub-grid underneath
+// CRAFT — "İmalathanemiz": copy + workshop photo
 // ═══════════════════════════════════════════════════════════════════════
 function Craft({ t }) {
   return (
@@ -198,27 +225,6 @@ function Craft({ t }) {
           <p className="craft__body">{t.craft.body}</p>
         </div>
         <div className="craft__img reveal" style={{ backgroundImage: 'url(photos/workshop-overview.jpeg)' }}></div>
-      </div>
-
-      <div className="craft__cnc">
-        <div className="craft__cnc-head reveal">
-          <div className="eyebrow">{t.craft.cnc.eyebrow}</div>
-          <h3 className="h3">{t.craft.cnc.title}</h3>
-          <p className="craft__cnc-body">{t.craft.cnc.body}</p>
-        </div>
-        <div className="craft__cnc-grid reveal-stagger">
-          {t.craft.cnc.items.map((it, i) => (
-            <div className="craft__cnc-tile" key={i}>
-              <div
-                className={"craft__cnc-tile-img" + (it.img ? '' : ' craft__cnc-tile-img--empty')}
-                style={it.img ? { backgroundImage: `url(${it.img})` } : null}
-              >
-                {!it.img && <span className="craft__cnc-ph">{it.name}</span>}
-              </div>
-              <div className="craft__cnc-tile-name">{it.name}</div>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );
