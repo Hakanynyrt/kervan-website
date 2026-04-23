@@ -21,10 +21,12 @@
   })();
 
   const scene = new THREE.Scene();
-  const FOV = 34;
-  const CAM_Z = 18;
+  const FOV = 26;
+  const CAM_Z = 22;
   const cam = new THREE.PerspectiveCamera(FOV, 1, 0.1, 200);
-  cam.position.set(0, 0, CAM_Z);
+  // Slightly below eye-line, looking up — classic monument / hero framing.
+  cam.position.set(0, -1.1, CAM_Z);
+  cam.lookAt(0, 0.8, 0);
 
   const VISIBLE_H = 2 * Math.tan((FOV * Math.PI / 180) / 2) * CAM_Z;
 
@@ -49,17 +51,18 @@
   resize();
   addEventListener('resize', resize);
 
-  // Three-point lighting — warm key, cool fill, orange rim for forge accent.
-  const key = new THREE.DirectionalLight(0xFFE6BE, 3.0);
+  // Dramatic three-point lighting. Strong warm key, dim cool fill, punchy
+  // orange rim from behind-right → forge-accent highlight on the silhouette.
+  const key = new THREE.DirectionalLight(0xFFE6BE, 3.4);
   key.position.set(4, 5, 6);
   scene.add(key);
 
-  const fill = new THREE.DirectionalLight(0x9DB4D8, 0.7);
+  const fill = new THREE.DirectionalLight(0x9DB4D8, 0.45);
   fill.position.set(-4, 2, 3);
   scene.add(fill);
 
-  const rim = new THREE.DirectionalLight(0xE8781A, 1.4);
-  rim.position.set(-3, -2, -4);
+  const rim = new THREE.DirectionalLight(0xE8781A, 2.2);
+  rim.position.set(-3, -2, -5);
   scene.add(rim);
 
   // spinGroup: spins on Y. orientGroup: holds the centred, tip-down model
@@ -104,11 +107,10 @@
       m.position.sub(center1);
       m.updateMatrixWorld(true);
 
-      // 4. Scale so the long (Y) dimension fills ~72% of the visible height,
-      //    leaving breathing room top and bottom.
+      // 4. Scale to fill ~92% of visible height — close-in, monumental.
       const box2   = new THREE.Box3().setFromObject(m);
       const sz2    = box2.getSize(new THREE.Vector3());
-      const targetH = VISIBLE_H * 0.72;
+      const targetH = VISIBLE_H * 0.92;
       const scale = targetH / sz2.y;
       orientGroup.scale.setScalar(scale);
 
