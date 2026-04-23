@@ -87,13 +87,15 @@
       const center = box0.getCenter(new THREE.Vector3());
       m.position.sub(center);
 
-      // 2. Align longest axis with +Y. Previous build used -π/2 and the tip
-      //    ended up UP — so use +π/2 instead (flips the long axis by 180°).
+      // 2. Align longest axis with Y. Empirically: the sharp cutting edge
+      //    of kirici-uc.glb is at the +X end (small positive X) and the
+      //    shank extends to -X. We want the tip at -Y, so map +X → -Y.
+      //    Rotation -π/2 around Z does that: (x,y,z) → (y, -x, z), so +X → -Y.
       const sz0 = box0.getSize(new THREE.Vector3());
       const longestVal = Math.max(sz0.x, sz0.y, sz0.z);
-      if (sz0.x === longestVal)        m.rotation.z =  Math.PI / 2; // X-long → tip down
-      else if (sz0.z === longestVal)   m.rotation.x = -Math.PI / 2; // Z-long → tip down
-      else                             m.rotation.z =  Math.PI;     // Y-long → flip so tip is at -Y
+      if (sz0.x === longestVal)        m.rotation.z = -Math.PI / 2; // +X → -Y (tip down)
+      else if (sz0.z === longestVal)   m.rotation.x =  Math.PI / 2; // +Z → -Y (tip down)
+      else                             m.rotation.z =  Math.PI;     // Y-long: flip
 
       // 3. Re-centre after rotation (AABB centre shifts for asymmetric shapes).
       m.updateMatrixWorld(true);
