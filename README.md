@@ -42,7 +42,21 @@ Required for the RFQ form to deliver email + Telegram:
 
 Ana sayfada üç galeri var — **Uçlar**, **Stok**, **Atölye**. Her slot `public/dict.jsx` içinde `{ name, desc, img, video }` formatında. `img` veya `video` alanı boşsa, kart isimli placeholder olarak çıkar. Doldurmak için:
 
-### 1. Dosyayı koy
+### Hızlı yol — Inbox (önerilen)
+
+Ham dosyaları **tek bir yere** at, ismi ne olursa olsun:
+
+```
+public/photos/_inbox/
+```
+
+GitHub web upload veya `git push` fark etmez. Sonra Claude'a "yükledim, bakar mısın?" de → içeriklere bakar, doğru isme çevirir, doğru kategoriye (`uclar/`, `stok/`, `atolye/`) taşır, `dict.jsx`'e bağlar, commit eder.
+
+**Video için**: Claude video içeriğini göremez — ya dosya adında bir ipucu olsun (`forj.mp4`, `cnc-kesim.mp4`) ya da mesajında kısaca söyle (*"1.mp4 forj, 2.mp4 CNC, 3.mp4 paketleme"*).
+
+### Manuel yol
+
+Eğer yerleri ve isimleri kendin vermek istersen:
 
 ```
 public/photos/uclar/   # keski foto’ları
@@ -51,20 +65,20 @@ public/photos/atolye/  # atölye sahneleri
 public/videos/         # video loop’ları
 ```
 
-### 2. Dosya adlandırma
+### Dosya adlandırma (manuel yoldaysan)
 
 - **Foto**: `kategori-kisa-aciklama-NN.jpg` (ör. `sivri-uc-granit-01.jpg`, `forj-01.jpg`)
 - **Video**: `kategori-kisa-NN.mp4` (ör. `cnc-01.mp4`)
 - Türkçe karakter yok, hepsi küçük harf, boşluk yerine tire
 
-### 3. Tavsiye edilen ölçüler / limitler
+### Tavsiye edilen ölçüler / limitler
 
 | Tip | Boyut | Format | Dosya | Not |
 |---|---|---|---|---|
 | Foto | 1600×2000 px (4:5) | JPEG veya WebP | < 400 KB | Web için sıkıştırılmış — ham kamera dosyası koymayın |
 | Video | 1080×1350 (4:5) | MP4, H.264 + AAC | < 10 MB | 5–10 sn seamless loop, **ses yok (muted)** |
 
-### 4. `dict.jsx`’e bağla
+### `dict.jsx`’e bağla (manuel yoldaysan)
 
 İlgili item’ın `img` veya `video` alanını doldur:
 
@@ -74,7 +88,7 @@ public/videos/         # video loop’ları
 
 Video varsa `img` poster olarak kullanılır (yüklenirken thumbnail). TR ve EN blokları ayrı — aynı dosyayı iki yere de yaz.
 
-### 5. Commit
+### Commit
 
 ```
 git add public/photos/uclar/sivri-uc-granit-01.jpg public/dict.jsx
