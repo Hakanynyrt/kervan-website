@@ -60,17 +60,88 @@ function Nav({ lang, setLang, t }) {
 
 // ═══════════════════════════════════════════════════════════════════════
 // HERO — 8-col display headline + 4-col stats grid
+//
+// Display title animates word-by-word on first paint. Coordinates with
+// intro.js: if the intro overlay is showing (first visit, kv_intro_seen
+// unset), wait until it has faded (~2.7s) so the animation isn't wasted
+// behind the veil. On subsequent visits the intro is skipped, so we start
+// almost immediately.
 // ═══════════════════════════════════════════════════════════════════════
 function Hero({ t }) {
+  const prefersReducedMotion = useReducedMotion();
+  // Read sessionStorage once at mount — the intro decides what to do at the
+  // same moment, so the value is stable for this render.
+  const introSeen = (() => {
+    try { return sessionStorage.getItem('kv_intro_seen') === '1'; }
+    catch (_) { return true; }  // fail open: skip the wait, never block hero
+  })();
+  const startDelay = prefersReducedMotion ? 0 : (introSeen ? 0.2 : 2.7);
+
+  const wordContainer = {
+    hidden: {},
+    show: {
+      transition: {
+        delayChildren: startDelay,
+        staggerChildren: prefersReducedMotion ? 0 : 0.07,
+      },
+    },
+  };
+  const word = {
+    hidden: prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: '0.5em' },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: prefersReducedMotion ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] },
+    },
+  };
+
+  // Whitespace-split preserves the natural line break between title1 and title2.
+  const words1 = t.hero.title1.split(/\s+/).filter(Boolean);
+  const words2 = t.hero.title2.split(/\s+/).filter(Boolean);
+
+  // Each word ships in its own clipping wrapper so the rise is masked at the
+  // baseline — the letters appear to lift out of the line, not slide in from
+  // outside the box. The italic/brand-color treatment lives on the inner
+  // motion.span via the existing `.display .ital` kit.css rule.
+  const Word = ({ children, italic }) => (
+    <span
+      className="hero__word"
+      style={{ display: 'inline-block', overflow: 'hidden', verticalAlign: 'baseline' }}
+    >
+      <motion.span
+        className={italic ? 'ital' : undefined}
+        variants={word}
+        style={{ display: 'inline-block', willChange: 'transform, opacity' }}
+      >
+        {children}
+      </motion.span>
+    </span>
+  );
+
   return (
     <section className="hero">
       <div className="hero__grid">
         <div className="hero__copy reveal-stagger">
           <div className="eyebrow">{t.hero.eyebrow}</div>
-          <h1 className="display">
-            <span>{t.hero.title1}</span>{' '}
-            <span className="ital">{t.hero.title2}</span>
-          </h1>
+          <motion.h1
+            className="display"
+            variants={wordContainer}
+            initial="hidden"
+            animate="show"
+            aria-label={`${t.hero.title1} ${t.hero.title2}`}
+          >
+            {words1.map((w, i) => (
+              <React.Fragment key={`a-${i}`}>
+                <Word>{w}</Word>{i < words1.length - 1 && ' '}
+              </React.Fragment>
+            ))}
+            {' '}
+            {words2.map((w, i) => (
+              <React.Fragment key={`b-${i}`}>
+                <Word italic>{w}</Word>{i < words2.length - 1 && ' '}
+              </React.Fragment>
+            ))}
+          </motion.h1>
           <p className="hero__sub">{t.hero.sub}</p>
           <div className="hero__actions">
             <a href="#contact"  className="btn btn--primary">{t.hero.cta}</a>
@@ -380,16 +451,7 @@ function Footer({ t }) {
             <a href="mailto:info@kervanheat.com">info@kervanheat.com</a>
           </nav>
         </div>
-        <div className="foot__rights">
-          {t.footer.rights}
-          <motion.span
-            aria-hidden="true"
-            style={{ display: 'inline-block', marginLeft: 8, color: 'var(--brand)' }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
-          >•</motion.span>
-        </div>
+        <div className="foot__rights">{t.footer.rights}</div>
       </div>
     </footer>
   );
