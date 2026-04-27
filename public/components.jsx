@@ -1,6 +1,13 @@
 /* global React */
 // useState / useEffect / useRef come from dict.jsx (loaded first).
 
+// Motion globals come from motion-shim.js (loaded before this file). Proxy
+// fallback returns string tags so the page renders static HTML if the shim
+// failed (CDN down, network error). Animation props become unknown DOM attrs
+// in that case — acceptable trade-off vs. a white screen.
+const motion = window.motion || new Proxy({}, { get: (_, tag) => tag });
+const useReducedMotion = window.useReducedMotion || (() => false);
+
 // ═══════════════════════════════════════════════════════════════════════
 // NAV
 // ═══════════════════════════════════════════════════════════════════════
@@ -373,7 +380,16 @@ function Footer({ t }) {
             <a href="mailto:info@kervanheat.com">info@kervanheat.com</a>
           </nav>
         </div>
-        <div className="foot__rights">{t.footer.rights}</div>
+        <div className="foot__rights">
+          {t.footer.rights}
+          <motion.span
+            aria-hidden="true"
+            style={{ display: 'inline-block', marginLeft: 8, color: 'var(--brand)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+          >•</motion.span>
+        </div>
       </div>
     </footer>
   );

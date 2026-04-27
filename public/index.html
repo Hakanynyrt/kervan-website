@@ -14,12 +14,28 @@
 <!-- Styles -->
 <link rel="stylesheet" href="kit.css"/>
 
-<!-- Three.js import map for scene.js -->
+<!-- Import map.
+     - three.js powers scene.js.
+     - motion@12 powers the React UI animation layer (consumed via window globals;
+       see motion-shim.js).
+     - "react" / "react-dom" entries point to local shim modules that re-export
+       window.React / window.ReactDOM (loaded via UMD below). The ?external=
+       flag tells esm.sh NOT to bundle React into motion — instead motion's
+       `import 'react'` resolves through the importmap to the shim, so the page
+       has exactly ONE React instance shared by Babel's React.createElement and
+       Framer Motion's hooks. Without this, esm.sh ships its own /es2022/react.mjs
+       and the duplicate React causes useContext to return null at render time. -->
 <script type="importmap">
 {
   "imports": {
     "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+    "react":                 "/react-shim.js",
+    "react-dom":             "/react-dom-shim.js",
+    "react/jsx-runtime":     "https://esm.sh/react@18.3.1/jsx-runtime?external=react",
+    "react/jsx-dev-runtime": "https://esm.sh/react@18.3.1/jsx-dev-runtime?external=react",
+    "motion":                "https://esm.sh/motion@12.38.0?external=react,react-dom",
+    "motion/react":          "https://esm.sh/motion@12.38.0/react?external=react,react-dom"
   }
 }
 </script>
@@ -99,9 +115,28 @@
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
 
+<!-- Motion shim: imports motion@12 from the importmap and exposes it on window
+     so components.jsx (Babel-transformed in-browser, no module system) can use
+     motion.div / useReducedMotion / AnimatePresence as globals. Loads after
+     React UMDs (motion/react needs React in scope) and before the IIFE below
+     (which awaits window.motion before transforming components.jsx). -->
+<script type="module" src="motion-shim.js?v=1"></script>
+
 <script>
 (async function () {
   try {
+    // motion-shim.js is a module script — load order is async. Gate the IIFE
+    // until window.motion is populated so components.jsx can rely on it.
+    // Max wait: 50 × 20ms = 1s. After that we proceed anyway: components.jsx
+    // has a Proxy fallback that degrades motion.* to plain string tags, so the
+    // page renders static HTML instead of crashing.
+    await (async function waitForMotion() {
+      for (let i = 0; i < 50; i++) {
+        if (window.__motionReady) return;
+        await new Promise(r => setTimeout(r, 20));
+      }
+      console.warn('[kervanheat] motion shim did not load in 1s — falling back to static markup');
+    })();
     const [dict, comps] = await Promise.all([
       fetch('dict.jsx').then(r => { if (!r.ok) throw new Error('dict'); return r.text(); }),
       fetch('components.jsx').then(r => { if (!r.ok) throw new Error('comps'); return r.text(); }),
