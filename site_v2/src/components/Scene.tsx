@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 
 /**
  * Scene — vanilla Three.js (R3F yerine). v1 pattern'i: direkt DOM mount,
@@ -81,14 +80,9 @@ export default function Scene() {
     let modelLoaded = false;
 
     // ─── Load GLB asynchronously, replace fallback ───────────────────
-    // GLB KHR_draco_mesh_compression kullanıyor → DRACOLoader şart.
-    // Decoder self-host: site_v2/public/draco/* (same-origin, iOS Safari
-    // ITP/CORS restrictions'dan etkilenmez). WASM tercih, JS fallback.
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('/draco/');
-
+    // GLB plain glTF (DRACO compression decompressed via gltf-transform).
+    // Standart GLTFLoader natively handle eder, ekstra loader gerekmez.
     const loader = new GLTFLoader();
-    loader.setDRACOLoader(dracoLoader);
     loader.load(
       '/kirici-uc.glb',
       (gltf) => {
@@ -237,7 +231,6 @@ export default function Scene() {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', onResize);
-      dracoLoader.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
