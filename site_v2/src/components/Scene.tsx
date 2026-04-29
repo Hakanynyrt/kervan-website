@@ -5,17 +5,24 @@ import { useReducedMotion } from 'framer-motion';
 import * as THREE from 'three';
 
 /**
- * Scene — fixed full-viewport 3D background of the chisel head.
+ * Scene — Sayfa = Dünya, chisel = Ay.
  *
- * Default animation set ("Atelier Spin"):
- *   - Slow Y-axis museum rotation (~50s/turn)
- *   - Subtle vertical bob (sine wave, ±0.06m, 6s period)
- *   - Mouse parallax tilt (max ±5°)
- *   - Scroll-driven slow forward lean (max 6°)
- *   - prefers-reduced-motion → static, no rotation
+ * Chisel sayfanın etrafında elips bir yörüngede süzülür.
+ * Konum eksenleri (kamera bakış açısından):
+ *   x ekseni: yatay ±3.5  (uzun süpürme)
+ *   y ekseni: dikey  ±1.4 (kısa kavis — moon-arc gibi)
+ *   z ekseni: derinlik ±0.5 (close ↔ far drift)
  *
- * Lighting: warm ember key + cool dim fill + bright orange rim.
- * Camera: FOV 30 telephoto, looking up slightly (heroic framing).
+ * Yörünge ilerleyişi:
+ *   - Baseline drift: kullanıcı hiç scroll etmese bile ~120 sn'de bir tam tur
+ *   - Scroll boost: tam sayfa scroll = +1 tam tur (yan yana eklenir)
+ *   - Toplam = baseline + scroll → asla durmaz
+ *
+ * Chisel kendi eksenleri etrafında da yavaş döner (tidal-lock'ed ay gibi
+ * değil, canlı bir gök cismi gibi). Mouse parallax tüm yörüngenin
+ * pivotunu hafifçe eğer (±5°).
+ *
+ * prefers-reduced-motion → hareket yok, statik göz hizasında.
  */
 export default function Scene() {
   return (
@@ -27,7 +34,7 @@ export default function Scene() {
       >
         <Lights />
         <Suspense fallback={null}>
-          <ChiselModel />
+          <Moon />
         </Suspense>
       </Canvas>
     </div>
@@ -37,44 +44,25 @@ export default function Scene() {
 function Lights() {
   return (
     <>
-      {/* Ambient: very dim, just enough to pull form out of pure shadow */}
       <ambientLight intensity={0.18} />
-
-      {/* Key — warm ember from upper-left, soft */}
-      <directionalLight
-        position={[-3, 4, 4]}
-        intensity={2.4}
-        color="#FFCFA0"
-        castShadow={false}
-      />
-
-      {/* Fill — cool dim, opposite side, moonlit */}
-      <directionalLight
-        position={[4, 2, 3]}
-        intensity={0.35}
-        color="#9CA8B8"
-      />
-
-      {/* Rim — saturated ember, behind, kicks the silhouette edge */}
-      <directionalLight
-        position={[2, 1, -5]}
-        intensity={3.2}
-        color="#FF6A1A"
-      />
+      <directionalLight position={[-3, 4, 4]} intensity={2.4} color="#FFCFA0" />
+      <directionalLight position={[4, 2, 3]} intensity={0.35} color="#9CA8B8" />
+      <directionalLight position={[2, 1, -5]} intensity={3.2} color="#FF6A1A" />
     </>
   );
 }
 
-function ChiselModel() {
+function Moon() {
   const gltf = useLoader(GLTFLoader, '/kirici-uc.glb');
   const tiltGroup = useRef<THREE.Group>(null!);
+  const orbitGroup = useRef<THREE.Group>(null!);
   const spinGroup = useRef<THREE.Group>(null!);
   const reduced = useReducedMotion();
 
   const mouse = useRef({ x: 0, y: 0 });
   const scroll = useRef(0);
 
-  // Listeners — mounted once
+  // Listeners — tek seferde mount
   if (typeof window !== 'undefined' && !(window as unknown as { __scenebound?: boolean }).__scenebound) {
     (window as unknown as { __scenebound?: boolean }).__scenebound = true;
     window.addEventListener('mousemove', (e) => {
@@ -87,41 +75,35 @@ function ChiselModel() {
     }, { passive: true });
   }
 
-  // Auto-orient + center the model — GLB tip orientation isn't standardised,
-  // so we compute its bounds and rotate so the long axis aligns with -Y
-  // (tip pointing down). Same approach as v1 scene.js.
+  // Auto-orient + center model. Tip -Y'ye bak (sarkıyor gibi).
+  // Boyutu kameraya göre ~%38'e küçült — yörüngede gezecek alan kalsın.
   const oriented = (() => {
     const scene = gltf.scene.clone(true);
-    // Compute bounding box BEFORE rotation
     const box = new THREE.Box3().setFromObject(scene);
     const size = new THREE.Vector3();
     box.getSize(size);
 
-    // Find longest axis
     const longest = Math.max(size.x, size.y, size.z);
     if (size.x === longest) {
-      scene.rotation.z = -Math.PI / 2; // X → -Y
+      scene.rotation.z = -Math.PI / 2;
     } else if (size.z === longest) {
-      scene.rotation.x = Math.PI / 2;  // Z → -Y
+      scene.rotation.x = Math.PI / 2;
     }
-    // else: already on Y axis
 
-    // Re-center after rotation
     const box2 = new THREE.Box3().setFromObject(scene);
     const center = new THREE.Vector3();
     box2.getCenter(center);
     scene.position.sub(center);
 
-    // Scale to ~70% of camera-visible height @ z=9, fov=30
-    // visibleH ≈ 2 * 9 * tan(15°) ≈ 4.82
-    const targetH = 4.82 * 0.72;
+    // Görünür yükseklik @ z=9 fov=30 ≈ 4.82m. Chisel yüksekliği = %38 → ~1.83m.
+    const targetH = 4.82 * 0.38;
     const box3 = new THREE.Box3().setFromObject(scene);
     const size3 = new THREE.Vector3();
     box3.getSize(size3);
     const scale = targetH / size3.y;
     scene.scale.setScalar(scale);
 
-    // Material — dark warm steel, polished but not mirror
+    // Material — koyu sıcak çelik
     scene.traverse((o) => {
       const mesh = o as THREE.Mesh;
       if (mesh.isMesh) {
@@ -136,31 +118,59 @@ function ChiselModel() {
     return scene;
   })();
 
-  useFrame((_, delta) => {
-    if (reduced) return;
+  useFrame((state, delta) => {
+    if (reduced) {
+      // Reduced motion: statik, üst-sağda asılı dur — tek sefer set et
+      if (orbitGroup.current && orbitGroup.current.position.x === 0) {
+        orbitGroup.current.position.set(2.4, 1.0, 0);
+      }
+      return;
+    }
+    const t = state.clock.elapsedTime;
 
-    // Slow Y-axis spin: 2π / 50s
-    if (spinGroup.current) {
-      spinGroup.current.rotation.y += delta * (Math.PI * 2) / 50;
+    // Baseline drift — kullanıcı scroll etmese bile sürekli orbit
+    // 120 sn'de bir tam tur (2π / 120)
+    const baselineAngle = t * (Math.PI * 2 / 120);
+
+    // Scroll boost — tam sayfa scroll = +1 tam tur
+    const scrollAngle = scroll.current * Math.PI * 2;
+
+    const angle = baselineAngle + scrollAngle;
+
+    // Elliptical orbit — yatay sweep dominant (moon-arc), dikey daha kısa
+    const rx = 3.5;   // yatay radius (geniş)
+    const ry = 1.4;   // dikey radius (kısa kavis)
+    const rz = 0.5;   // derinlik modülasyonu (perspektif close↔far)
+
+    const x = Math.cos(angle) * rx;
+    const y = Math.sin(angle) * ry + 0.2;     // hafif baseline yukarı offset
+    const z = Math.cos(angle * 0.5) * rz;     // yarım frekans → daha smooth
+
+    if (orbitGroup.current) {
+      orbitGroup.current.position.set(x, y, z);
     }
 
-    // Tilt: blend mouse parallax (±5°) + scroll lean (max 6° forward)
+    // Self-rotation — moon kendi etrafında dönüyor
+    if (spinGroup.current) {
+      spinGroup.current.rotation.y += delta * 0.22;
+      spinGroup.current.rotation.x += delta * 0.05;  // hafif tumble
+    }
+
+    // Mouse parallax — tüm yörünge pivotunu eğ
     if (tiltGroup.current) {
-      const targetX = scroll.current * 0.105 + mouse.current.y * -0.06;
-      const targetZ = mouse.current.x * 0.06;
-      // Lerp toward target — smooth, never snaps
+      const targetX = mouse.current.y * -0.05;
+      const targetZ = mouse.current.x * 0.05;
       tiltGroup.current.rotation.x += (targetX - tiltGroup.current.rotation.x) * 0.04;
       tiltGroup.current.rotation.z += (targetZ - tiltGroup.current.rotation.z) * 0.04;
-
-      // Vertical bob — sine wave, gentle
-      tiltGroup.current.position.y = Math.sin(performance.now() * 0.001) * 0.06;
     }
   });
 
   return (
     <group ref={tiltGroup}>
-      <group ref={spinGroup}>
-        <primitive object={oriented} />
+      <group ref={orbitGroup}>
+        <group ref={spinGroup}>
+          <primitive object={oriented} />
+        </group>
       </group>
     </group>
   );
