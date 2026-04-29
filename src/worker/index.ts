@@ -21,8 +21,27 @@ interface Env {
 const ALLOWED_ORIGINS = [
   'https://kervanheat.com',
   'https://www.kervanheat.com',
+  'https://v2.kervanheat.com',
   'https://kervan-website.hakanynyrt.workers.dev',
+  'https://kervan-website-v2.hakanynyrt.workers.dev',
 ];
+
+/** Determine which origin to echo back in CORS Allow-Origin. */
+function corsOrigin(request: Request): string | null {
+  const origin = request.headers.get('Origin');
+  if (!origin) return null;
+  if (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.workers.dev')) return origin;
+  return null;
+}
+
+function withCors(res: Response, request: Request): Response {
+  const allow = corsOrigin(request);
+  if (!allow) return res;
+  const h = new Headers(res.headers);
+  h.set('Access-Control-Allow-Origin', allow);
+  h.set('Vary', 'Origin');
+  return new Response(res.body, { status: res.status, headers: h });
+}
 
 const clean = (v: FormDataEntryValue | null, max = 500): string =>
   String(v ?? '').trim().slice(0, max);
@@ -156,8 +175,25 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === '/api/rfq') {
+      // CORS preflight (browsers send OPTIONS for cross-origin POSTs that
+      // upload form-data → no preflight; but if the form ever sends JSON
+      // we still want this handled cleanly).
+      if (request.method === 'OPTIONS') {
+        const allow = corsOrigin(request);
+        if (!allow) return new Response(null, { status: 204 });
+        return new Response(null, {
+          status: 204,
+          headers: {
+            'Access-Control-Allow-Origin': allow,
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Max-Age': '600',
+            Vary: 'Origin',
+          },
+        });
+      }
       if (request.method !== 'POST') return Response.json({ ok: false, error: 'method' }, { status: 405 });
-      return withSecurityHeaders(await handleRfq(request, env));
+      return withCors(withSecurityHeaders(await handleRfq(request, env)), request);
     }
 
     if (url.pathname.startsWith('/api/')) {

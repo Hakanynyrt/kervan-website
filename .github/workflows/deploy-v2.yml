@@ -1,17 +1,15 @@
-name: Deploy Worker
+name: Deploy site_v2
 
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'legacy-astro/**'
+    paths:
       - 'site_v2/**'
-      - 'README.md'
-      - '.gitignore'
+      - '.github/workflows/deploy-v2.yml'
   workflow_dispatch:
 
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: deploy-v2-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -28,12 +26,18 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install
+      - name: Install (site_v2)
         run: npm install --no-audit --no-fund --prefer-offline
+        working-directory: site_v2
+
+      - name: Build (Vite)
+        run: npm run build
+        working-directory: site_v2
 
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: site_v2
           command: deploy

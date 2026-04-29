@@ -103,9 +103,9 @@ Cloudflare deploy otomatik — push’tan 30–60 saniye sonra canlıda.
 - GitHub tek dosya **100 MB** sert limit. Video için **ham/4K/HDR yüklemeyin** — sıkıştırılmış halde koyun.
 - `_headers` `public/photos/` için 1 yıllık cache header’ı yollar. Aynı dosya adıyla güncelleme yaparsan eski sürüm CDN’de kalır → yeni sürüm için yeni dosya adı (`-02`, `-v2` vs.) kullan.
 
-## site_v2 — Atelier Editorial rebuild (in progress)
+## site_v2 — Atelier Editorial rebuild
 
-Paralel `site_v2/` klasöründe modern stack ile yeniden yazılıyor: Vite 5 + React 18 + TypeScript + Tailwind v4 + Framer Motion. Mevcut site `kervanheat.com` üzerinde dokunulmadan canlıda. site_v2 hazır olunca `v2.kervanheat.com` subdomain'inde önce karşılaştırma için yayında.
+Paralel `site_v2/` klasörü, modern stack ile yeniden yazılmış v2 sitesi: Vite 5 + React 18 + TypeScript + Tailwind v4 + Framer Motion. Mevcut site `kervanheat.com` üzerinde dokunulmadan canlıda. site_v2 ayrı Worker (`kervan-website-v2`) olarak `v2.kervanheat.com` üzerinde yayınlanır.
 
 ```
 cd site_v2
@@ -116,6 +116,27 @@ npm run typecheck
 ```
 
 `site_v2/public/photos` ve `site_v2/public/videos` mevcut `public/` klasörüne symlink — galeri medyası tek yerde, iki site de aynı dosyayı kullanır.
+
+### v2 deploy
+
+`site_v2/**` altında her push GitHub Actions'da `Deploy site_v2` workflow'unu tetikler:
+1. `npm install` (site_v2)
+2. `npm run build` (Vite → site_v2/dist)
+3. `wrangler deploy` (kervan-website-v2 Worker)
+
+### v2 için DNS — kullanıcı yapması gereken (bir kerelik)
+
+1. Cloudflare dashboard → **Workers & Pages → kervan-website-v2 → Custom Domains → Add Custom Domain**
+2. `v2.kervanheat.com` gir, kaydet
+3. CF otomatik `kervanheat.com` zone'una CNAME ekler (`v2 → kervan-website-v2.workers.dev`)
+4. ~30 sn sonra `https://v2.kervanheat.com/` çalışır
+
+### Cross-origin RFQ
+
+site_v2'deki form `https://kervanheat.com/api/rfq` adresine POST atar (cross-origin). Mevcut Worker (`src/worker/index.ts`):
+- `ALLOWED_ORIGINS` içinde `https://v2.kervanheat.com` var
+- Yanıt header'ında `Access-Control-Allow-Origin` echo back ediliyor
+- OPTIONS preflight desteği var (form-data POST'u için gerek yok ama gelecekteki JSON için hazır)
 
 ## Pages
 

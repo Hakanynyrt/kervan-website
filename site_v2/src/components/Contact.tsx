@@ -11,10 +11,14 @@ interface Props {
 type State = 'idle' | 'sending' | 'success' | 'error';
 
 /** RFQ endpoint — mevcut Cloudflare Worker'ın yaşadığı yer.
- *  v2 kervanheat.com'da apex'te servis edilirse same-origin POST.
- *  v2.kervanheat.com'da servis edilirse cross-origin → Worker'da
- *  ALLOWED_ORIGINS güncelleniyor. */
-const RFQ_ENDPOINT = '/api/rfq';
+ *  Production'da v2.kervanheat.com'dan kervanheat.com'a cross-origin POST.
+ *  Mevcut Worker (src/worker/index.ts) v2.kervanheat.com'u ALLOWED_ORIGINS'e
+ *  ekliyor ve Access-Control-Allow-Origin yanıt header'ı dönüyor.
+ *  Dev'de Vite same-origin proxy yok — submit `error` durumuna düşer,
+ *  beklenen davranış. */
+const RFQ_ENDPOINT = import.meta.env.PROD
+  ? 'https://kervanheat.com/api/rfq'
+  : '/api/rfq';
 
 export default function Contact({ t }: Props) {
   const [state, setState] = useState<State>('idle');
