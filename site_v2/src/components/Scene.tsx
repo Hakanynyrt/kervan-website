@@ -94,7 +94,7 @@ export default function Scene() {
       (gltf) => {
         const model = gltf.scene;
 
-        // Auto-orient: en uzun aksı -Y'ye çevir (tip aşağı)
+        // ─── Step 1: longest axis → world Y ──────────────────────
         const box1 = new THREE.Box3().setFromObject(model);
         const size1 = new THREE.Vector3();
         box1.getSize(size1);
@@ -104,14 +104,48 @@ export default function Scene() {
         } else if (size1.z === longest) {
           model.rotation.x = Math.PI / 2;
         }
+        // size1.y == longest → no rotation needed
 
-        // Center
+        // ─── Step 2: AABB centerla origin'e ──────────────────────
         const box2 = new THREE.Box3().setFromObject(model);
         const center = new THREE.Vector3();
         box2.getCenter(center);
         model.position.sub(center);
 
-        // Scale to ~58% visible height
+        // ─── Step 3: tip-down doğrulama (centroid heuristic) ─────
+        // Chisel asimetrik: butt (kafa) bulk, tip (uç) ince. Vertex
+        // centroid (kütle merkezi yaklaşımı) bulk'a doğru kayar.
+        // bbox center origin'de → centroid_y > 0 ise bulk yukarıda
+        // (yani tip aşağıda, doğru). centroid_y < 0 ise bulk aşağıda
+        // → tip yukarıda → 180° X flip ile düzelt.
+        let sumY = 0;
+        let count = 0;
+        const v = new THREE.Vector3();
+        model.updateWorldMatrix(true, true);
+        model.traverse((o) => {
+          const mesh = o as THREE.Mesh;
+          if (!mesh.isMesh || !mesh.geometry?.attributes?.position) return;
+          const pos = mesh.geometry.attributes.position;
+          // World-space Y'yi sample et (rotate edilmiş geometri için doğru)
+          for (let i = 0; i < pos.count; i += 1) {
+            v.set(pos.getX(i), pos.getY(i), pos.getZ(i));
+            v.applyMatrix4(mesh.matrixWorld);
+            sumY += v.y;
+            count += 1;
+          }
+        });
+        const meanY = count > 0 ? sumY / count : 0;
+        if (meanY < 0) {
+          // Bulk aşağıda → tip yukarıda. Flip et.
+          model.rotation.x += Math.PI;
+          // Re-center (rotation sonrası bbox değişir)
+          const box2b = new THREE.Box3().setFromObject(model);
+          const center2 = new THREE.Vector3();
+          box2b.getCenter(center2);
+          model.position.sub(center2);
+        }
+
+        // ─── Step 4: scale to ~58% visible height ────────────────
         const targetH = 4.82 * 0.58;
         const box3 = new THREE.Box3().setFromObject(model);
         const size3 = new THREE.Vector3();
@@ -178,8 +212,9 @@ export default function Scene() {
         );
 
         spinGroup.rotation.y = t * 0.08;
-        spinGroup.rotation.x = Math.sin(t * 0.05) * 0.25;
-        spinGroup.rotation.z = Math.sin(t * 0.07 + 1.5) * 0.18;
+        // Hafif wobble — chisel'i stabil göstermek için amplitude küçük
+        spinGroup.rotation.x = Math.sin(t * 0.05) * 0.10;
+        spinGroup.rotation.z = Math.sin(t * 0.07 + 1.5) * 0.07;
       } else {
         // Reduced motion: statik
         const restX = isPortrait ? 0 : 1.0;
