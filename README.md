@@ -62,14 +62,20 @@ Eğer yerleri ve isimleri kendin vermek istersen:
 public/photos/uclar/   # keski foto’ları
 public/photos/stok/    # stok/işlenmiş parça foto’ları
 public/photos/atolye/  # atölye sahneleri
-public/videos/         # video loop’ları
+public/videos/uclar/   # keski videoları
+public/videos/stok/    # stok video loop’ları
+public/videos/atolye/  # atölye sahnesi videoları
 ```
 
 ### Dosya adlandırma (manuel yoldaysan)
 
-- **Foto**: `kategori-kisa-aciklama-NN.jpg` (ör. `sivri-uc-granit-01.jpg`, `forj-01.jpg`)
-- **Video**: `kategori-kisa-NN.mp4` (ör. `cnc-01.mp4`)
+- **Foto**: `slot-kisa-aciklama-NN.jpg` (ör. `piston-01.jpg`, `burc-detay-01.jpg`)
+- **Video**: `slot-kisa-NN.mp4` (ör. `piston-01.mp4`, `silindir-cnc-01.mp4`)
 - Türkçe karakter yok, hepsi küçük harf, boşluk yerine tire
+
+**Stok slot'ları** (referans için): piston, burc, sizdirmazlik, silindir, tamir-kiti, ozel  
+**Uçlar slot'ları**: sivri-uc, yassi, konik, piramit, asfalt, ozel-olcu  
+**Atölye slot'ları**: cnc, forj, isil-islem, taslama, kalite, paketleme
 
 ### Tavsiye edilen ölçüler / limitler
 
@@ -82,11 +88,12 @@ public/videos/         # video loop’ları
 
 İlgili item’ın `img` veya `video` alanını doldur:
 
-```jsx
-{ name: 'Sivri uç', desc: '…', img: 'photos/uclar/sivri-uc-granit-01.jpg', video: '' },
+```ts
+// site_v2/src/lib/dict.ts içinde, stock.items array'i:
+{ name: 'Piston', desc: '...', img: '/photos/stok/piston-01.jpg', video: '/videos/stok/piston-01.mp4' },
 ```
 
-Video varsa `img` poster olarak kullanılır (yüklenirken thumbnail). TR ve EN blokları ayrı — aynı dosyayı iki yere de yaz.
+Video varsa `img` poster olarak kullanılır (yüklenirken thumbnail). TR ve EN blokları ayrı — aynı dosyayı iki yere de yaz. Path'ler **kök-relatif**: `/photos/...` ve `/videos/...` (Vite root'tan servis ediyor).
 
 ### Commit
 
