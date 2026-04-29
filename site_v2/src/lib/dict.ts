@@ -34,10 +34,10 @@ export const DICT: Dict = {
       title: 'Basit dört kalem.\nHer kırıcının ihtiyacı.',
       aside: 'Her parça kendi tezgâhında, kendi malzemesiyle. Değiştirilemeyen tek şey: özen.',
       items: [
-        { name: 'Keski',  desc: 'Kırıcının ucu. Toprakla, taşla, betonla ilk temas noktası.', img: '/photos/chisel-stock.jpeg' },
-        { name: 'Piston', desc: 'Darbenin kaynağı. Yüksek frekansla çalışır, yılmaz durur.', img: '/photos/cnc-machining.jpeg' },
-        { name: 'Burç',   desc: 'Sessiz kahraman. Piston ile keski arasında dengeyi kurar.', img: '/photos/saw-machine.jpeg' },
-        { name: 'Kit',    desc: 'Sızdırmazlık ve bağlantı parçaları. Ayrıntıların tümü.', img: '/photos/workshop-overview.jpeg' },
+        { name: 'Keski',  desc: 'Kırıcının ucu. Toprakla, taşla, betonla ilk temas noktası.', img: '/photos/uclar/uclar-yard.jpeg' },
+        { name: 'Piston', desc: 'Darbenin kaynağı. Yüksek frekansla çalışır, yılmaz durur.', img: '' },
+        { name: 'Burç',   desc: 'Sessiz kahraman. Piston ile keski arasında dengeyi kurar.', img: '' },
+        { name: 'Kit',    desc: 'Sızdırmazlık ve bağlantı parçaları. Ayrıntıların tümü.', img: '' },
       ],
     },
     chisels: {
@@ -72,7 +72,9 @@ export const DICT: Dict = {
       aside: 'Bir tezgâhtan diğerine, bir elden diğerine. Her parça buradan geçer.',
       items: [
         { name: 'Atölye',      desc: 'Aynı çatı altında, aynı eller',          img: '/videos/atolye/workshop-01.jpg', video: '/videos/atolye/workshop-01.mp4' },
+        { name: 'CNC işleme',  desc: 'Hassas tolerans, kıvılcım altında',      img: '/photos/atolye/cnc-machining.jpeg' },
         { name: 'Isıl işlem',  desc: 'Sertleştirme fırını, lot kontrolü',      img: '/videos/atolye/furnace-01.jpg',  video: '/videos/atolye/furnace-01.mp4' },
+        { name: 'Bant testere', desc: 'Çubuk kesim, ölçü hassasiyeti',         img: '/photos/atolye/saw-machine.jpeg' },
         { name: 'Stok',        desc: 'İşlenmiş, kontrol edilmiş, sevkiyata hazır', img: '/videos/stok/pistons-01.jpg',    video: '/videos/stok/pistons-01.mp4' },
       ],
     },
@@ -131,6 +133,15 @@ export const DICT: Dict = {
             ['KIT-STD', 'Standart bakım kiti',  '2 keski + 1 burç + cıvatalar'],
           ],
         },
+      ],
+    },
+    brands: {
+      eyebrow: 'Uyumlu Markalar',
+      title: 'Kırk üzeri kırıcı markası — kendi parçamızı eşleriz.',
+      items: [
+        'Atlas Copco', 'Furukawa', 'Soosan', 'Montabert', 'Indeco',
+        'Rammer', 'Epiroc', 'Sandvik', 'NPK', 'Toku',
+        'Kobelco', 'Hanwoo', 'Krupp', 'D&A',
       ],
     },
     industries: {
@@ -211,10 +222,10 @@ export const DICT: Dict = {
       title: 'Four simple things.\nWhat every hammer needs.',
       aside: 'Every part on its own bench, with its own steel. The one thing that never changes: care.',
       items: [
-        { name: 'Chisel',  desc: 'The point of the hammer. First contact with earth, rock, concrete.', img: '/photos/chisel-stock.jpeg' },
-        { name: 'Piston',  desc: 'The source of the strike. High frequency. Doesn\'t flinch.', img: '/photos/cnc-machining.jpeg' },
-        { name: 'Bushing', desc: 'The quiet hero. Holds the balance between piston and chisel.', img: '/photos/saw-machine.jpeg' },
-        { name: 'Kit',     desc: 'Seals and fasteners. All the small things.', img: '/photos/workshop-overview.jpeg' },
+        { name: 'Chisel',  desc: 'The point of the hammer. First contact with earth, rock, concrete.', img: '/photos/uclar/uclar-yard.jpeg' },
+        { name: 'Piston',  desc: 'The source of the strike. High frequency. Doesn\'t flinch.', img: '' },
+        { name: 'Bushing', desc: 'The quiet hero. Holds the balance between piston and chisel.', img: '' },
+        { name: 'Kit',     desc: 'Seals and fasteners. All the small things.', img: '' },
       ],
     },
     chisels: {
@@ -248,9 +259,11 @@ export const DICT: Dict = {
       title: 'Where production breathes.',
       aside: 'From one bench to the next, one hand to the next. Every part passes through here.',
       items: [
-        { name: 'Workshop',      desc: 'Under the same roof, by the same hands',     img: '/videos/atolye/workshop-01.jpg', video: '/videos/atolye/workshop-01.mp4' },
-        { name: 'Heat treatment', desc: 'Hardening furnace, lot inspection',         img: '/videos/atolye/furnace-01.jpg',  video: '/videos/atolye/furnace-01.mp4' },
-        { name: 'In stock',      desc: 'Machined, inspected, ready to ship',         img: '/videos/stok/pistons-01.jpg',    video: '/videos/stok/pistons-01.mp4' },
+        { name: 'Workshop',       desc: 'Under the same roof, by the same hands', img: '/videos/atolye/workshop-01.jpg', video: '/videos/atolye/workshop-01.mp4' },
+        { name: 'CNC machining',  desc: 'Tight tolerance, in a shower of sparks', img: '/photos/atolye/cnc-machining.jpeg' },
+        { name: 'Heat treatment', desc: 'Hardening furnace, lot inspection',      img: '/videos/atolye/furnace-01.jpg',  video: '/videos/atolye/furnace-01.mp4' },
+        { name: 'Band saw',       desc: 'Bar cutting, dimensional precision',     img: '/photos/atolye/saw-machine.jpeg' },
+        { name: 'In stock',       desc: 'Machined, inspected, ready to ship',     img: '/videos/stok/pistons-01.jpg',    video: '/videos/stok/pistons-01.mp4' },
       ],
     },
     craft: {
@@ -308,6 +321,15 @@ export const DICT: Dict = {
             ['KIT-STD', 'Standard maintenance kit', '2 chisels + 1 bushing + bolts'],
           ],
         },
+      ],
+    },
+    brands: {
+      eyebrow: 'Compatible Brands',
+      title: 'Forty-plus hammer brands — we match the part.',
+      items: [
+        'Atlas Copco', 'Furukawa', 'Soosan', 'Montabert', 'Indeco',
+        'Rammer', 'Epiroc', 'Sandvik', 'NPK', 'Toku',
+        'Kobelco', 'Hanwoo', 'Krupp', 'D&A',
       ],
     },
     industries: {

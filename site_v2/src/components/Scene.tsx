@@ -40,9 +40,14 @@ function Lights() {
   return (
     <>
       <ambientLight intensity={0.22} />
+      {/* Key — warm ember from upper-left */}
       <directionalLight position={[-3, 4, 4]} intensity={3.0} color="#FFCFA0" />
+      {/* Fill — cool dim, opposite */}
       <directionalLight position={[4, 2, 3]} intensity={0.45} color="#9CA8B8" />
+      {/* Rim — saturated ember, behind */}
       <directionalLight position={[2, 1, -5]} intensity={4.2} color="#FF6A1A" />
+      {/* Side sun reflection — yandan parlak güneş, metale çarpan keskin specular */}
+      <directionalLight position={[7, 0.8, 1.5]} intensity={4.8} color="#FFE8B0" />
     </>
   );
 }

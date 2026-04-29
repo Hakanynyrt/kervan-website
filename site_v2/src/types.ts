@@ -95,6 +95,11 @@ export interface DictBlock {
     items: IndustryItem[];
     marquee: string[];
   };
+  brands: {
+    eyebrow: string;
+    title: string;
+    items: string[];
+  };
   contact: {
     eyebrow: string;
     title: string;
