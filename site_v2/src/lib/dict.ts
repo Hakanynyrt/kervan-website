@@ -9,7 +9,7 @@ export const DICT: Dict = {
   tr: {
     nav: {
       products: 'Ürünler',
-      catalog: 'Katalog',
+      atolye: 'Atölye',
       craft: 'İmalathanemiz',
       industries: 'Sektörler',
       contact: 'İletişim',
@@ -85,58 +85,6 @@ export const DICT: Dict = {
       title: 'Zanaat ellerde yaşar.',
       body: 'Kartepe\'de küçük bir tezgâhla başladık. Bugün hâlâ aynı çatı altındayız — aynı eller, aynı özen, aynı titizlik. Burası bir üretim hattı değil; bu bir imalathane.',
     },
-    catalog: {
-      eyebrow: 'Katalog',
-      title: 'Kırıcı parçaları — tek sayfa.',
-      sub: 'Yazdır → PDF olarak kaydet. Ofis masanda açık tut.',
-      printBtn: 'Yazdır / PDF',
-      backToHome: '← Ana sayfa',
-      groups: [
-        {
-          name: 'Keskiler',
-          headers: ['REF', 'Ad', 'Çap', 'Uzunluk', 'Uyumlu marka'],
-          rows: [
-            ['CHS-42',  'Keski 42mm',     '42 mm', '520 mm', 'Atlas Copco · Furukawa · Rammer'],
-            ['CHS-50',  'Keski 50mm',     '50 mm', '580 mm', 'Soosan · Epiroc · Indeco'],
-            ['CHS-68',  'Keski 68mm',     '68 mm', '720 mm', 'NPK · Krupp · Hanwoo'],
-            ['CHS-80',  'Keski 80mm',     '80 mm', '880 mm', 'Montabert · Toku'],
-            ['CHS-95',  'Keski 95mm',     '95 mm', '980 mm', 'Atlas Copco HB5000+'],
-            ['CHS-50B', 'Keski 50mm (B)', '50 mm', '580 mm', '15-25 ton kırıcılar'],
-          ],
-        },
-        {
-          name: 'Pistonlar',
-          headers: ['REF', 'Ad', 'Çap', 'Uzunluk'],
-          rows: [
-            ['PST-A120', 'Piston HB3000', '120 mm', '720 mm'],
-            ['PST-A140', 'Piston HB4100', '140 mm', '850 mm'],
-            ['PST-F110', 'Piston HB30G',  '110 mm', '680 mm'],
-            ['PST-R130', 'Piston G120',   '130 mm', '780 mm'],
-            ['PST-S95',  'Piston SB81',    '95 mm', '620 mm'],
-          ],
-        },
-        {
-          name: 'Burçlar',
-          headers: ['REF', 'Ad', 'İç çap', 'Dış çap', 'Uzunluk'],
-          rows: [
-            ['BSH-42', 'Burç 42mm', '42 mm', '68 mm',  '180 mm'],
-            ['BSH-50', 'Burç 50mm', '50 mm', '78 mm',  '200 mm'],
-            ['BSH-68', 'Burç 68mm', '68 mm', '100 mm', '240 mm'],
-            ['BSH-80', 'Burç 80mm', '80 mm', '120 mm', '280 mm'],
-          ],
-        },
-        {
-          name: 'Bağlantı elemanları',
-          headers: ['REF', 'Ad', 'Açıklama'],
-          rows: [
-            ['BLT-23',  'Yan cıvata M23',       'Kırıcı gövdesi yan cıvatası'],
-            ['BLT-M30', 'Uzun cıvata M30',      'Üst kapak cıvatası'],
-            ['RNG-42',  'Sızdırmazlık halkası', 'Piston alt yüzey'],
-            ['KIT-STD', 'Standart bakım kiti',  '2 keski + 1 burç + cıvatalar'],
-          ],
-        },
-      ],
-    },
     brands: {
       eyebrow: 'Uyumlu Markalar',
       title: 'Kırk üzeri kırıcı markası — kendi parçamızı eşleriz.',
@@ -199,8 +147,8 @@ export const DICT: Dict = {
   en: {
     nav: {
       products: 'Products',
-      catalog: 'Catalog',
-      craft: 'Our Workshop',
+      atolye: 'Workshop',
+      craft: 'Our Story',
       industries: 'Industries',
       contact: 'Contact',
       cta: 'Get a Quote',
@@ -274,58 +222,6 @@ export const DICT: Dict = {
       eyebrow: 'Our Workshop',
       title: 'Craft lives in hands.',
       body: 'We started in Kartepe with a single bench. Today we are still under the same roof — same hands, same care, same attention. This is not a production line; this is a workshop.',
-    },
-    catalog: {
-      eyebrow: 'Catalog',
-      title: 'Breaker parts — one page.',
-      sub: 'Print → save as PDF. Keep open on your desk.',
-      printBtn: 'Print / PDF',
-      backToHome: '← Home',
-      groups: [
-        {
-          name: 'Chisels',
-          headers: ['REF', 'Name', 'Diameter', 'Length', 'Compatible brands'],
-          rows: [
-            ['CHS-42',  'Chisel 42mm',     '42 mm', '520 mm', 'Atlas Copco · Furukawa · Rammer'],
-            ['CHS-50',  'Chisel 50mm',     '50 mm', '580 mm', 'Soosan · Epiroc · Indeco'],
-            ['CHS-68',  'Chisel 68mm',     '68 mm', '720 mm', 'NPK · Krupp · Hanwoo'],
-            ['CHS-80',  'Chisel 80mm',     '80 mm', '880 mm', 'Montabert · Toku'],
-            ['CHS-95',  'Chisel 95mm',     '95 mm', '980 mm', 'Atlas Copco HB5000+'],
-            ['CHS-50B', 'Chisel 50mm (B)', '50 mm', '580 mm', '15-25 ton breakers'],
-          ],
-        },
-        {
-          name: 'Pistons',
-          headers: ['REF', 'Name', 'Diameter', 'Length'],
-          rows: [
-            ['PST-A120', 'Piston HB3000', '120 mm', '720 mm'],
-            ['PST-A140', 'Piston HB4100', '140 mm', '850 mm'],
-            ['PST-F110', 'Piston HB30G',  '110 mm', '680 mm'],
-            ['PST-R130', 'Piston G120',   '130 mm', '780 mm'],
-            ['PST-S95',  'Piston SB81',    '95 mm', '620 mm'],
-          ],
-        },
-        {
-          name: 'Bushings',
-          headers: ['REF', 'Name', 'ID', 'OD', 'Length'],
-          rows: [
-            ['BSH-42', 'Bushing 42mm', '42 mm', '68 mm',  '180 mm'],
-            ['BSH-50', 'Bushing 50mm', '50 mm', '78 mm',  '200 mm'],
-            ['BSH-68', 'Bushing 68mm', '68 mm', '100 mm', '240 mm'],
-            ['BSH-80', 'Bushing 80mm', '80 mm', '120 mm', '280 mm'],
-          ],
-        },
-        {
-          name: 'Fasteners',
-          headers: ['REF', 'Name', 'Description'],
-          rows: [
-            ['BLT-23',  'Side bolt M23',          'Breaker body side bolt'],
-            ['BLT-M30', 'Long bolt M30',          'Top cap bolt'],
-            ['RNG-42',  'Seal ring',              'Piston lower face'],
-            ['KIT-STD', 'Standard maintenance kit', '2 chisels + 1 bushing + bolts'],
-          ],
-        },
-      ],
     },
     brands: {
       eyebrow: 'Compatible Brands',

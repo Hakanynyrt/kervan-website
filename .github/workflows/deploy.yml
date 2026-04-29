@@ -53,6 +53,9 @@ jobs:
             --exclude videos \
             --exclude '_*' \
             public/ site_v2/dist/
+          # Catalog v2'den de v1'den de servis edilmiyor — kullanıcı kaldırdı.
+          # public/catalog.html dist'e dahil edilmesin (rsync excludeluyor zaten),
+          # ama emin olmak için.
 
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v3

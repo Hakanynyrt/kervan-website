@@ -40,7 +40,7 @@ export default function Nav({ lang, setLang, t }: Props) {
 
         <nav className="hidden md:flex items-center gap-10 font-sans text-sm">
           <a href="#products" className="text-ink-mid hover:text-ink transition-colors">{t.nav.products}</a>
-          <a href="/catalog" className="text-ink-mid hover:text-ink transition-colors">{t.nav.catalog}</a>
+          <a href="#atolye" className="text-ink-mid hover:text-ink transition-colors">{t.nav.atolye}</a>
           <a href="#craft" className="text-ink-mid hover:text-ink transition-colors">{t.nav.craft}</a>
           <a href="#industries" className="text-ink-mid hover:text-ink transition-colors">{t.nav.industries}</a>
           <a href="#contact" className="text-ink-mid hover:text-ink transition-colors">{t.nav.contact}</a>
@@ -83,7 +83,7 @@ export default function Nav({ lang, setLang, t }: Props) {
             <div className="px-8 py-4 flex flex-col gap-4 font-serif text-2xl">
               {[
                 { href: '#products', label: t.nav.products },
-                { href: '/catalog', label: t.nav.catalog },
+                { href: '#atolye', label: t.nav.atolye },
                 { href: '#craft', label: t.nav.craft },
                 { href: '#industries', label: t.nav.industries },
                 { href: '#contact', label: t.nav.contact },

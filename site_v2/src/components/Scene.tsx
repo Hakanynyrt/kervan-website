@@ -79,7 +79,7 @@ function Moon() {
     box2.getCenter(center);
     scene.position.sub(center);
 
-    const targetH = 4.82 * 0.50;
+    const targetH = 4.82 * 0.58;
     const box3 = new THREE.Box3().setFromObject(scene);
     const size3 = new THREE.Vector3();
     box3.getSize(size3);
@@ -89,10 +89,14 @@ function Moon() {
     scene.traverse((o) => {
       const mesh = o as THREE.Mesh;
       if (mesh.isMesh) {
+        // Daha açık warm steel + hafif emissive ember glow → dark bg
+        // üzerinde her zaman görünür (lighting angle'a bakmadan).
         mesh.material = new THREE.MeshStandardMaterial({
-          color: '#3a342e',
-          metalness: 0.94,
-          roughness: 0.32,
+          color: '#7a6a5a',
+          metalness: 0.85,
+          roughness: 0.38,
+          emissive: '#3a1c0a',
+          emissiveIntensity: 0.18,
         });
       }
     });
