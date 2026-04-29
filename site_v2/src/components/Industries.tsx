@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
 import { staggerContainer, fadeUp, inViewOnce } from '../lib/motion';
 import SectionHead from './SectionHead';
+import Marquee from './ui/Marquee';
 
 interface Props {
   t: DictBlock;
@@ -42,6 +43,11 @@ export default function Industries({ t }: Props) {
           </motion.li>
         ))}
       </motion.ul>
+
+      {/* Manifesto marquee — atelier signal strip */}
+      <div className="mt-24 md:mt-32 border-t border-b border-hair">
+        <Marquee items={t.industries.marquee} duration={70} />
+      </div>
     </section>
   );
 }

@@ -78,6 +78,7 @@ export interface DictBlock {
     title: string;
     aside: string;
     items: IndustryItem[];
+    marquee: string[];
   };
   contact: {
     eyebrow: string;

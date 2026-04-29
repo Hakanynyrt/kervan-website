@@ -93,6 +93,15 @@ export const DICT: Dict = {
         { name: 'Kariyer',    desc: 'Kayayla iş görenler' },
         { name: 'Yol',        desc: 'Altyapı ve yenileme' },
       ],
+      marquee: [
+        '1999\'dan beri Kocaeli\'de',
+        'Yirmi altı yıllık zanaat',
+        'Kendi atölyemizde, kendi ellerimizle',
+        'Kırk üzeri kırıcı markası',
+        'Bin üzeri parça çeşidi',
+        'Yirmi dört saat içinde teklif',
+        'Sahanın yanında',
+      ],
     },
     contact: {
       eyebrow: 'İletişim',
@@ -210,6 +219,15 @@ export const DICT: Dict = {
         { name: 'Mining',       desc: 'Deep in the pit' },
         { name: 'Quarry',       desc: 'Working with stone' },
         { name: 'Roads',        desc: 'Infrastructure & renewal' },
+      ],
+      marquee: [
+        'In Kocaeli since 1999',
+        'Twenty-six years of craft',
+        'In our own workshop, by our own hands',
+        'Forty-plus hammer brands',
+        'A thousand-plus part variants',
+        'Quotes within twenty-four hours',
+        'Beside the field',
       ],
     },
     contact: {

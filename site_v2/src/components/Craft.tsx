@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
-import { fadeUp, slowFade, kenBurns, inViewOnce } from '../lib/motion';
+import { fadeUp, kenBurns, inViewOnce } from '../lib/motion';
+import ScrollReveal from './ui/ScrollReveal';
 
 interface Props {
   t: DictBlock;
@@ -20,15 +21,9 @@ export default function Craft({ t }: Props) {
         >
           <div className="font-eyebrow">{t.craft.eyebrow}</div>
           <h2 className="font-h2 italic text-ink">{t.craft.title}</h2>
-          <motion.p
-            className="font-serif italic text-xl text-ink-mid leading-relaxed max-w-[40ch]"
-            variants={slowFade}
-            initial="hidden"
-            whileInView="show"
-            viewport={inViewOnce}
-          >
+          <ScrollReveal className="text-ink-mid max-w-[44ch]">
             {t.craft.body}
-          </motion.p>
+          </ScrollReveal>
           <div className="font-sans text-xs tracking-widest uppercase text-ink-soft mt-4">
             Hakan Yünyurt · Kurucu
           </div>
