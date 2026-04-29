@@ -5,6 +5,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
 import Products from './components/Products';
+import WorkshopShowcase from './components/WorkshopShowcase';
 import Craft from './components/Craft';
 import Industries from './components/Industries';
 import Contact from './components/Contact';
@@ -39,6 +40,7 @@ export default function App() {
         <Nav lang={lang} setLang={setLang} t={t} />
         <Hero t={t} />
         <Products t={t} />
+        <WorkshopShowcase t={t} />
         <Craft t={t} />
         <Industries t={t} />
         <Contact t={t} />

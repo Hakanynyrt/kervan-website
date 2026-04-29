@@ -67,16 +67,13 @@ export const DICT: Dict = {
       ],
     },
     atolye: {
-      eyebrow: 'Atölye',
+      eyebrow: 'Atölyeden',
       title: 'Üretimin nefes aldığı yer.',
       aside: 'Bir tezgâhtan diğerine, bir elden diğerine. Her parça buradan geçer.',
       items: [
-        { name: 'CNC tezgâhı',    desc: 'Hassas tolerans işçiliği',        img: '', video: '' },
-        { name: 'Forj',           desc: 'Sıcak şekillendirme',             img: '', video: '' },
-        { name: 'Isıl işlem',     desc: 'Sertleştirme fırını',             img: '', video: '' },
-        { name: 'Taşlama',        desc: 'Yüzey ve silindirik taşlama',     img: '', video: '' },
-        { name: 'Kalite kontrol', desc: 'Her parça elle denetimden geçer', img: '', video: '' },
-        { name: 'Paketleme',      desc: 'Sevkiyat öncesi son adım',        img: '', video: '' },
+        { name: 'Atölye',      desc: 'Aynı çatı altında, aynı eller',          img: '/videos/atolye/workshop-01.jpg', video: '/videos/atolye/workshop-01.mp4' },
+        { name: 'Isıl işlem',  desc: 'Sertleştirme fırını, lot kontrolü',      img: '/videos/atolye/furnace-01.jpg',  video: '/videos/atolye/furnace-01.mp4' },
+        { name: 'Stok',        desc: 'İşlenmiş, kontrol edilmiş, sevkiyata hazır', img: '/videos/stok/pistons-01.jpg',    video: '/videos/stok/pistons-01.mp4' },
       ],
     },
     craft: {
@@ -247,16 +244,13 @@ export const DICT: Dict = {
       ],
     },
     atolye: {
-      eyebrow: 'Workshop',
+      eyebrow: 'From the workshop',
       title: 'Where production breathes.',
       aside: 'From one bench to the next, one hand to the next. Every part passes through here.',
       items: [
-        { name: 'CNC machining',   desc: 'Tight-tolerance work',        img: '', video: '' },
-        { name: 'Forge',           desc: 'Hot forming',                 img: '', video: '' },
-        { name: 'Heat treatment',  desc: 'Hardening furnace',           img: '', video: '' },
-        { name: 'Grinding',        desc: 'Surface & cylindrical grind', img: '', video: '' },
-        { name: 'Quality control', desc: 'Every part hand-inspected',   img: '', video: '' },
-        { name: 'Packaging',       desc: 'Final step before shipping',  img: '', video: '' },
+        { name: 'Workshop',      desc: 'Under the same roof, by the same hands',     img: '/videos/atolye/workshop-01.jpg', video: '/videos/atolye/workshop-01.mp4' },
+        { name: 'Heat treatment', desc: 'Hardening furnace, lot inspection',         img: '/videos/atolye/furnace-01.jpg',  video: '/videos/atolye/furnace-01.mp4' },
+        { name: 'In stock',      desc: 'Machined, inspected, ready to ship',         img: '/videos/stok/pistons-01.jpg',    video: '/videos/stok/pistons-01.mp4' },
       ],
     },
     craft: {
