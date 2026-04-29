@@ -101,34 +101,38 @@ function Moon() {
   }, [gltf]);
 
   // Pure ambient drift — kullanıcı input'u yok, scroll/mouse listener yok.
+  // Aspect-aware: mobil portrait'te chisel daima görünür alan içinde dolaşsın
+  // (mevcut sola eğimli geniş orbit ekrandan taşıyor), desktop'ta serbest.
   useFrame((state, delta) => {
+    const aspect = state.size.width / state.size.height;
+    const isPortrait = aspect < 0.85;
+
     if (reduced) {
       if (orbitGroup.current && orbitGroup.current.position.x === 0) {
-        orbitGroup.current.position.set(-1.0, 0.0, 0);
+        const restX = isPortrait ? 0 : 1.0;
+        orbitGroup.current.position.set(restX, 0.5, 0);
       }
       return;
     }
 
     const t = state.clock.elapsedTime;
 
-    // Yörünge merkezi sola kaymış — chisel zamanın çoğunu ekranın
-    // solunda geçirir, soldan kayıp sağdan geri girer.
-    const cx = -0.4;
+    // Frequency oranları irrasyonel: pozisyonlar asla repeat etmez
+    // (Lissajous-style). Ana yörünge ~350 sn.
+    const orbitT = t * 0.018;
+
+    // Adaptive orbit:
+    //  Mobile portrait → tight + centered (chisel her zaman görünür)
+    //  Desktop landscape → sola eğimli geniş (mevcut davranış)
+    const cx = isPortrait ?  0    : -0.4;
     const cy = 0.0;
-
-    // Frequency oranları irrasyonel: hiçbir periyot başka bir periyodun
-    // tam katı değil — pozisyonlar asla repeat etmez (Lissajous-style)
-    // Ana yörünge ~350 sn, modülasyonlar farklı oranlarda
-    const orbitT = t * 0.018;       // ~350 sn'lik tam tur (yavaş)
-
-    // Sola doğru eğimli ellipse: rx 1.4 yatay, ry 0.7 dikey
-    const rx = 1.4;
-    const ry = 0.7;
-    const rz = 0.4;
+    const rx = isPortrait ?  0.55 :  1.4;
+    const ry = isPortrait ?  0.45 :  0.7;
+    const rz = isPortrait ?  0.3  :  0.4;
 
     const x = cx + Math.cos(orbitT) * rx;
-    const y = cy + Math.sin(orbitT * 1.13) * ry;     // farklı freq → drift'iyor
-    const z = Math.sin(orbitT * 0.71 + 1.2) * rz;    // derinlik wobble
+    const y = cy + Math.sin(orbitT * 1.13) * ry;
+    const z = Math.sin(orbitT * 0.71 + 1.2) * rz;
 
     if (orbitGroup.current) {
       orbitGroup.current.position.set(x, y, z);
