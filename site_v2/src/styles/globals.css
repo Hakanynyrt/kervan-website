@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+/* Mood C — Atelier Editorial design tokens are added in Faz 2. */
+:root {
+  --bg: #F4F1EB;
+  --ink: #2D1F15;
+}
+
+@theme {
+  --color-bg: #F4F1EB;
+  --color-ink: #2D1F15;
+  --font-serif: "Fraunces", "Times New Roman", serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --text-display: clamp(56px, 9vw, 128px);
+}
+
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--font-sans); margin: 0; }

@@ -103,6 +103,20 @@ Cloudflare deploy otomatik — push’tan 30–60 saniye sonra canlıda.
 - GitHub tek dosya **100 MB** sert limit. Video için **ham/4K/HDR yüklemeyin** — sıkıştırılmış halde koyun.
 - `_headers` `public/photos/` için 1 yıllık cache header’ı yollar. Aynı dosya adıyla güncelleme yaparsan eski sürüm CDN’de kalır → yeni sürüm için yeni dosya adı (`-02`, `-v2` vs.) kullan.
 
+## site_v2 — Atelier Editorial rebuild (in progress)
+
+Paralel `site_v2/` klasöründe modern stack ile yeniden yazılıyor: Vite 5 + React 18 + TypeScript + Tailwind v4 + Framer Motion. Mevcut site `kervanheat.com` üzerinde dokunulmadan canlıda. site_v2 hazır olunca `v2.kervanheat.com` subdomain'inde önce karşılaştırma için yayında.
+
+```
+cd site_v2
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # → site_v2/dist
+npm run typecheck
+```
+
+`site_v2/public/photos` ve `site_v2/public/videos` mevcut `public/` klasörüne symlink — galeri medyası tek yerde, iki site de aynı dosyayı kullanır.
+
 ## Pages
 
 - `/` — homepage (TR/EN/DE/RU)
