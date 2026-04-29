@@ -1,20 +1,23 @@
-import { Suspense, useEffect, useMemo, useRef } from 'react';
+import { Suspense, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { useReducedMotion } from 'framer-motion';
 import * as THREE from 'three';
 
 /**
- * Scene — Sayfa = Dünya, chisel = Ay.
+ * Scene — uzayda süzülen chisel.
  *
- * Daha sıkı yörünge, daha büyük chisel — mobilde ekrandan kaybolmasın diye.
- *   yatay ±1.2 · dikey ±0.6 · derinlik ±0.4
+ * Pure ambient drift. Kullanıcı input'u (scroll, mouse) yok.
+ * Yavaş, sürekli, sola eğimli orbital bir hareket + üç-eksen
+ * non-commensurate gentle rotation = "zero gravity" hissi.
  *
- * Yörünge ilerleyişi:
- *   - Baseline drift: 90 sn'de bir tam tur (scroll yok bile)
- *   - Scroll boost: tam sayfa scroll = +1 ek tur
+ *   - Yörünge merkezi sola kaymış (cx -0.4)
+ *   - Yatay radius ±1.4, dikey ±0.7, derinlik ±0.4
+ *   - Frequency oranları irrational → asla aynı pozisyon iki kez
+ *   - Y spin 0.08 rad/s + X/Z wobble (sin, ±14°/±10°)
+ *   - Tam tur ~6 dakika, baktıkça farklı görünür
  *
- * prefers-reduced-motion → statik üst-sağda asılı.
+ * prefers-reduced-motion → solda statik dur.
  */
 export default function Scene() {
   return (
@@ -46,17 +49,12 @@ function Lights() {
 
 function Moon() {
   const gltf = useLoader(GLTFLoader, '/kirici-uc.glb');
-  const tiltGroup = useRef<THREE.Group>(null!);
   const orbitGroup = useRef<THREE.Group>(null!);
   const spinGroup = useRef<THREE.Group>(null!);
   const reduced = useReducedMotion();
 
-  // Mouse + scroll proxy state — bağlanması mount'a kadar ertelenir.
-  const mouse = useRef({ x: 0, y: 0 });
-  const scroll = useRef(0);
-
-  // Auto-orient + center model — yalnızca GLB değişince yeniden hesapla.
-  // Tip -Y'ye baksın, AABB merkezde, scale ~%38 görünür yükseklik.
+  // Auto-orient + center model.
+  // Tip -Y'ye baksın, AABB merkezde, scale ~%50 görünür yükseklik.
   const oriented = useMemo(() => {
     const scene = gltf.scene.clone(true);
 
@@ -97,74 +95,54 @@ function Moon() {
     return scene;
   }, [gltf]);
 
-  // Window listener'ları React standart pattern'inde — useEffect + cleanup.
-  useEffect(() => {
-    const onMouse = (e: MouseEvent) => {
-      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.current.y = (e.clientY / window.innerHeight) * 2 - 1;
-    };
-    const onScroll = () => {
-      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      scroll.current = Math.min(1, window.scrollY / max);
-    };
-
-    window.addEventListener('mousemove', onMouse, { passive: true });
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll(); // initial value
-
-    return () => {
-      window.removeEventListener('mousemove', onMouse);
-      window.removeEventListener('scroll', onScroll);
-    };
-  }, []);
-
-  // Reduced motion için ilk frame'de pozisyonu sabitleyip animasyondan çık.
-  // Hooks-rule respected: useFrame her zaman çağrılır, sadece içeriği koşullu.
+  // Pure ambient drift — kullanıcı input'u yok, scroll/mouse listener yok.
   useFrame((state, delta) => {
     if (reduced) {
       if (orbitGroup.current && orbitGroup.current.position.x === 0) {
-        orbitGroup.current.position.set(1.0, 0.5, 0);
+        orbitGroup.current.position.set(-1.0, 0.0, 0);
       }
       return;
     }
 
     const t = state.clock.elapsedTime;
 
-    const baselineAngle = t * (Math.PI * 2 / 90);
-    const scrollAngle = scroll.current * Math.PI * 2;
-    const angle = baselineAngle + scrollAngle;
+    // Yörünge merkezi sola kaymış — chisel zamanın çoğunu ekranın
+    // solunda geçirir, soldan kayıp sağdan geri girer.
+    const cx = -0.4;
+    const cy = 0.0;
 
-    const rx = 1.2;
-    const ry = 0.6;
+    // Frequency oranları irrasyonel: hiçbir periyot başka bir periyodun
+    // tam katı değil — pozisyonlar asla repeat etmez (Lissajous-style)
+    // Ana yörünge ~350 sn, modülasyonlar farklı oranlarda
+    const orbitT = t * 0.018;       // ~350 sn'lik tam tur (yavaş)
+
+    // Sola doğru eğimli ellipse: rx 1.4 yatay, ry 0.7 dikey
+    const rx = 1.4;
+    const ry = 0.7;
     const rz = 0.4;
 
-    const x = Math.cos(angle) * rx;
-    const y = Math.sin(angle) * ry + 0.1;
-    const z = Math.cos(angle * 0.5) * rz;
+    const x = cx + Math.cos(orbitT) * rx;
+    const y = cy + Math.sin(orbitT * 1.13) * ry;     // farklı freq → drift'iyor
+    const z = Math.sin(orbitT * 0.71 + 1.2) * rz;    // derinlik wobble
 
     if (orbitGroup.current) {
       orbitGroup.current.position.set(x, y, z);
     }
 
+    // Üç-eksen yavaş rotation — uzayda dönüyormuş gibi tumble.
     if (spinGroup.current) {
-      spinGroup.current.rotation.y += delta * 0.22;
-      spinGroup.current.rotation.x += delta * 0.05;
-    }
-
-    if (tiltGroup.current) {
-      const targetX = mouse.current.y * -0.05;
-      const targetZ = mouse.current.x * 0.05;
-      tiltGroup.current.rotation.x += (targetX - tiltGroup.current.rotation.x) * 0.04;
-      tiltGroup.current.rotation.z += (targetZ - tiltGroup.current.rotation.z) * 0.04;
+      // Y: sürekli yavaş baseline spin (0.08 rad/s ≈ 78s/tur)
+      spinGroup.current.rotation.y += delta * 0.08;
+      // X ve Z: sin wave, ±0.25/0.18 rad (~14°/10°), farklı frekanslar
+      spinGroup.current.rotation.x = Math.sin(t * 0.05) * 0.25;
+      spinGroup.current.rotation.z = Math.sin(t * 0.07 + 1.5) * 0.18;
     }
   });
 
   return (
-    <group ref={tiltGroup}>
-      <group ref={orbitGroup}>
-        <group ref={spinGroup}>
-          <primitive object={oriented} />
-        </group>
+    <group ref={orbitGroup}>
+      <group ref={spinGroup}>
+        <primitive object={oriented} />
       </group>
     </group>
   );
