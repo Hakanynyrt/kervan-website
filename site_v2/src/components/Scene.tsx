@@ -86,86 +86,59 @@ export default function Scene() {
     loader.load(
       '/kirici-uc.glb',
       (gltf) => {
-        const model = gltf.scene;
+        try {
+          const model = gltf.scene;
 
-        // ─── Step 1: longest axis → world Y ──────────────────────
-        const box1 = new THREE.Box3().setFromObject(model);
-        const size1 = new THREE.Vector3();
-        box1.getSize(size1);
-        const longest = Math.max(size1.x, size1.y, size1.z);
-        if (size1.x === longest) {
-          model.rotation.z = -Math.PI / 2;
-        } else if (size1.z === longest) {
-          model.rotation.x = Math.PI / 2;
-        }
-        // size1.y == longest → no rotation needed
-
-        // ─── Step 2: AABB centerla origin'e ──────────────────────
-        const box2 = new THREE.Box3().setFromObject(model);
-        const center = new THREE.Vector3();
-        box2.getCenter(center);
-        model.position.sub(center);
-
-        // ─── Step 3: tip-down doğrulama (centroid heuristic) ─────
-        // Chisel asimetrik: butt (kafa) bulk, tip (uç) ince. Vertex
-        // centroid (kütle merkezi yaklaşımı) bulk'a doğru kayar.
-        // bbox center origin'de → centroid_y > 0 ise bulk yukarıda
-        // (yani tip aşağıda, doğru). centroid_y < 0 ise bulk aşağıda
-        // → tip yukarıda → 180° X flip ile düzelt.
-        let sumY = 0;
-        let count = 0;
-        const v = new THREE.Vector3();
-        model.updateWorldMatrix(true, true);
-        model.traverse((o) => {
-          const mesh = o as THREE.Mesh;
-          if (!mesh.isMesh || !mesh.geometry?.attributes?.position) return;
-          const pos = mesh.geometry.attributes.position;
-          // World-space Y'yi sample et (rotate edilmiş geometri için doğru)
-          for (let i = 0; i < pos.count; i += 1) {
-            v.set(pos.getX(i), pos.getY(i), pos.getZ(i));
-            v.applyMatrix4(mesh.matrixWorld);
-            sumY += v.y;
-            count += 1;
+          // Minimal orient: longest axis → world Y. v1 hard-coded
+          // -π/2 around Z worked for tip-down (commit bc23cf30).
+          // Fancy centroid heuristic kaldırıldı — sessizce throw etmek
+          // riskli, simple yaklaşım daha güvenilir.
+          const box1 = new THREE.Box3().setFromObject(model);
+          const size1 = new THREE.Vector3();
+          box1.getSize(size1);
+          const longest = Math.max(size1.x, size1.y, size1.z);
+          if (size1.x === longest) {
+            model.rotation.z = -Math.PI / 2;
+          } else if (size1.z === longest) {
+            model.rotation.x = Math.PI / 2;
           }
-        });
-        const meanY = count > 0 ? sumY / count : 0;
-        if (meanY < 0) {
-          // Bulk aşağıda → tip yukarıda. Flip et.
-          model.rotation.x += Math.PI;
-          // Re-center (rotation sonrası bbox değişir)
-          const box2b = new THREE.Box3().setFromObject(model);
-          const center2 = new THREE.Vector3();
-          box2b.getCenter(center2);
-          model.position.sub(center2);
+
+          // Center bbox at origin
+          const box2 = new THREE.Box3().setFromObject(model);
+          const center = new THREE.Vector3();
+          box2.getCenter(center);
+          model.position.sub(center);
+
+          // Scale to ~58% visible height
+          const targetH = 4.82 * 0.58;
+          const box3 = new THREE.Box3().setFromObject(model);
+          const size3 = new THREE.Vector3();
+          box3.getSize(size3);
+          const s = targetH / Math.max(0.01, size3.y);
+          model.scale.setScalar(s);
+
+          // Material — warm steel + ember emissive
+          model.traverse((o) => {
+            const mesh = o as THREE.Mesh;
+            if (mesh.isMesh) {
+              mesh.material = new THREE.MeshStandardMaterial({
+                color: 0x7a6a5a,
+                metalness: 0.85,
+                roughness: 0.38,
+                emissive: 0x3a1c0a,
+                emissiveIntensity: 0.18,
+              });
+            }
+          });
+
+          spinGroup.remove(fallback);
+          fallback.geometry.dispose();
+          fallback.material.dispose();
+          spinGroup.add(model);
+          modelLoaded = true;
+        } catch (err) {
+          console.error('[scene] post-load processing failed, fallback stays', err);
         }
-
-        // ─── Step 4: scale to ~58% visible height ────────────────
-        const targetH = 4.82 * 0.58;
-        const box3 = new THREE.Box3().setFromObject(model);
-        const size3 = new THREE.Vector3();
-        box3.getSize(size3);
-        const s = targetH / Math.max(0.01, size3.y);
-        model.scale.setScalar(s);
-
-        // Material
-        model.traverse((o) => {
-          const mesh = o as THREE.Mesh;
-          if (mesh.isMesh) {
-            mesh.material = new THREE.MeshStandardMaterial({
-              color: 0x7a6a5a,
-              metalness: 0.85,
-              roughness: 0.38,
-              emissive: 0x3a1c0a,
-              emissiveIntensity: 0.18,
-            });
-          }
-        });
-
-        spinGroup.remove(fallback);
-        fallback.geometry.dispose();
-        fallback.material.dispose();
-        spinGroup.add(model);
-        modelLoaded = true;
       },
       undefined,
       (err) => {
