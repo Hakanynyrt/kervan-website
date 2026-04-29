@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths-ignore:
       - 'legacy-astro/**'
-      - 'site_v2/**'
       - 'README.md'
       - '.gitignore'
   workflow_dispatch:
@@ -28,8 +27,31 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install
+      - name: Install (root)
         run: npm install --no-audit --no-fund --prefer-offline
+
+      - name: Install (site_v2)
+        run: npm install --no-audit --no-fund --prefer-offline
+        working-directory: site_v2
+
+      - name: Build site_v2 (Vite)
+        run: npm run build
+        working-directory: site_v2
+
+      # Merge v1 inner pages (kvkk, about, blog, vs.) + their static deps
+      # (kit.css, dict.jsx, etc.) into the Vite dist directory.
+      # Excluded: index.html (v2 owns root), assets/ (Vite chunks), photos/
+      # and videos/ (already symlinked through site_v2/public/), and any
+      # files prefixed with `_` like `_headers` (CF reserved).
+      - name: Merge v1 inner pages into dist
+        run: |
+          rsync -av \
+            --exclude index.html \
+            --exclude assets \
+            --exclude photos \
+            --exclude videos \
+            --exclude '_*' \
+            public/ site_v2/dist/
 
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v3

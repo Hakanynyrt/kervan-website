@@ -5,7 +5,7 @@
   "compatibility_date": "2026-04-17",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
-    "directory": "./public",
+    "directory": "./site_v2/dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page"
   },
