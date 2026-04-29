@@ -27,8 +27,8 @@ export default function WorkshopShowcase({ t }: Props) {
       />
 
       <motion.div
-        className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
-        variants={staggerContainer(0, 0.1)}
+        className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        variants={staggerContainer(0, 0.08)}
         initial="hidden"
         whileInView="show"
         viewport={inViewOnce}

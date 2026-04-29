@@ -8,3 +8,5 @@ dist/
 .claude-flow/
 .claude-analysis.md
 package-lock.json
+*.mov
+*.MOV
