@@ -82,10 +82,10 @@ export default function Scene() {
 
     // ─── Load GLB asynchronously, replace fallback ───────────────────
     // GLB KHR_draco_mesh_compression kullanıyor → DRACOLoader şart.
-    // Decoder gstatic CDN'den (Google barındırır, WASM ~200KB).
+    // Decoder self-host: site_v2/public/draco/* (same-origin, iOS Safari
+    // ITP/CORS restrictions'dan etkilenmez). WASM tercih, JS fallback.
     const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
-    dracoLoader.setDecoderConfig({ type: 'js' }); // WASM unsupported fallback
+    dracoLoader.setDecoderPath('/draco/');
 
     const loader = new GLTFLoader();
     loader.setDRACOLoader(dracoLoader);
