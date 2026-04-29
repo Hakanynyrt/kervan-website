@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import path from 'node:path';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -10,11 +9,12 @@ export default defineConfig({
     emptyOutDir: true,
     target: 'es2020',
     // Multi-Page App: ana sayfa + katalog ayrı bundle'lar.
-    // Vite her HTML için kendi React tree'si, kendi chunk'ı oluşturur.
+    // Vite relative path'leri proje root'una göre çözer — node:path /
+    // __dirname'e gerek yok (CI'da @types/node yüklü değil).
     rollupOptions: {
       input: {
-        main:    path.resolve(__dirname, 'index.html'),
-        catalog: path.resolve(__dirname, 'catalog.html'),
+        main:    'index.html',
+        catalog: 'catalog.html',
       },
     },
   },
