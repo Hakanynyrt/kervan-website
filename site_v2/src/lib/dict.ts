@@ -9,6 +9,7 @@ export const DICT: Dict = {
   tr: {
     nav: {
       products: 'Ürünler',
+      catalog: 'Katalog',
       craft: 'İmalathanemiz',
       industries: 'Sektörler',
       contact: 'İletişim',
@@ -136,6 +137,7 @@ export const DICT: Dict = {
   en: {
     nav: {
       products: 'Products',
+      catalog: 'Catalog',
       craft: 'Our Workshop',
       industries: 'Industries',
       contact: 'Contact',

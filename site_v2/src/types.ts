@@ -30,6 +30,7 @@ export interface IndustryItem {
 export interface DictBlock {
   nav: {
     products: string;
+    catalog: string;
     craft: string;
     industries: string;
     contact: string;

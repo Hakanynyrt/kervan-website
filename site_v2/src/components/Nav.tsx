@@ -26,14 +26,21 @@ export default function Nav({ lang, setLang, t }: Props) {
         (stuck ? 'bg-bg/85 backdrop-blur-md border-b border-hair' : 'bg-transparent')
       }
     >
-      <div className="max-w-[1280px] mx-auto px-8 py-5 flex items-center justify-between">
-        <a href="/" className="flex items-center gap-2">
-          <span className="font-serif italic text-2xl text-ink leading-none">K</span>
-          <span className="font-sans text-sm tracking-wider uppercase text-ink">Kervan Heat</span>
+      <div className="max-w-[1280px] mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
+        <a href="/" className="flex items-center" aria-label="Kervan Heat — ana sayfa">
+          <img
+            src="/logo-krv-128.png"
+            alt="Kervan Heat"
+            width={40}
+            height={40}
+            className="h-10 w-10 md:h-11 md:w-11 select-none"
+            draggable={false}
+          />
         </a>
 
         <nav className="hidden md:flex items-center gap-10 font-sans text-sm">
           <a href="#products" className="text-ink-mid hover:text-ink transition-colors">{t.nav.products}</a>
+          <a href="/catalog" className="text-ink-mid hover:text-ink transition-colors">{t.nav.catalog}</a>
           <a href="#craft" className="text-ink-mid hover:text-ink transition-colors">{t.nav.craft}</a>
           <a href="#industries" className="text-ink-mid hover:text-ink transition-colors">{t.nav.industries}</a>
           <a href="#contact" className="text-ink-mid hover:text-ink transition-colors">{t.nav.contact}</a>
@@ -76,6 +83,7 @@ export default function Nav({ lang, setLang, t }: Props) {
             <div className="px-8 py-4 flex flex-col gap-4 font-serif text-2xl">
               {[
                 { href: '#products', label: t.nav.products },
+                { href: '/catalog', label: t.nav.catalog },
                 { href: '#craft', label: t.nav.craft },
                 { href: '#industries', label: t.nav.industries },
                 { href: '#contact', label: t.nav.contact },
