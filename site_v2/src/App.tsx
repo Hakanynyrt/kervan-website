@@ -1,8 +1,7 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
 import { useLang } from './lib/use-lang';
 import { DICT } from './lib/dict';
-import ErrorBoundary from './components/ErrorBoundary';
 import IntroOverlay from './components/IntroOverlay';
+import Scene from './components/Scene';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
 import Products from './components/Products';
@@ -13,30 +12,14 @@ import Industries from './components/Industries';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 
-const Scene = lazy(() => import('./components/Scene'));
-
 export default function App() {
   const [lang, setLang] = useLang();
   const t = DICT[lang];
 
-  // Scene'i ilk paint sonrası mount et — content görünür kalsın bile 3D
-  // başarısız olsa. ErrorBoundary + Suspense iki katlı savunma.
-  const [sceneReady, setSceneReady] = useState(false);
-  useEffect(() => {
-    const id = setTimeout(() => setSceneReady(true), 150);
-    return () => clearTimeout(id);
-  }, []);
-
   return (
     <>
-      {/* 3D BG önce mount olur — perde açıldığında chisel zaten orbit'te */}
-      {sceneReady && (
-        <ErrorBoundary label="scene-bg" fallback={null}>
-          <Suspense fallback={null}>
-            <Scene />
-          </Suspense>
-        </ErrorBoundary>
-      )}
+      {/* 3D BG — vanilla Three.js, direct mount, lazy/Suspense yok */}
+      <Scene />
 
       {/* Intro perdesi — z-100, content'in üstünde, ~2.4s sonra unmount */}
       <IntroOverlay />

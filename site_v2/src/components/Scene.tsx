@@ -1,162 +1,205 @@
-import { Suspense, useMemo, useRef } from 'react';
-import { Canvas, useFrame, useLoader } from '@react-three/fiber';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { useReducedMotion } from 'framer-motion';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 /**
- * Scene — uzayda süzülen chisel.
+ * Scene — vanilla Three.js (R3F yerine). v1 pattern'i: direkt DOM mount,
+ * kendi animation loop'u, kendi resize listener'ı. iOS Safari + lazy import
+ * + Suspense + ErrorBoundary chain'inde tıkandığı için R3F'ten ayrıldık.
  *
- * Pure ambient drift. Kullanıcı input'u (scroll, mouse) yok.
- * Yavaş, sürekli, sola eğimli orbital bir hareket + üç-eksen
- * non-commensurate gentle rotation = "zero gravity" hissi.
- *
- *   - Yörünge merkezi sola kaymış (cx -0.4)
- *   - Yatay radius ±1.4, dikey ±0.7, derinlik ±0.4
- *   - Frequency oranları irrational → asla aynı pozisyon iki kez
- *   - Y spin 0.08 rad/s + X/Z wobble (sin, ±14°/±10°)
- *   - Tam tur ~6 dakika, baktıkça farklı görünür
- *
- * prefers-reduced-motion → solda statik dur.
+ * Chisel arkaplanda eliptik orbital drift'te, görünür alana sığar.
  */
 export default function Scene() {
-  return (
-    <div className="scene-bg" aria-hidden="true">
-      <Canvas
-        dpr={[1, 2]}
-        camera={{ position: [0, 0, 9], fov: 30 }}
-        gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
-      >
-        <Lights />
-        <Suspense fallback={null}>
-          <Moon />
-        </Suspense>
-      </Canvas>
-    </div>
-  );
-}
+  const containerRef = useRef<HTMLDivElement>(null);
 
-function Lights() {
-  return (
-    <>
-      <ambientLight intensity={0.22} />
-      {/* Key — warm ember from upper-left */}
-      <directionalLight position={[-3, 4, 4]} intensity={3.0} color="#FFCFA0" />
-      {/* Fill — cool dim, opposite */}
-      <directionalLight position={[4, 2, 3]} intensity={0.45} color="#9CA8B8" />
-      {/* Rim — saturated ember, behind */}
-      <directionalLight position={[2, 1, -5]} intensity={4.2} color="#FF6A1A" />
-      {/* Side sun reflection — yandan parlak güneş, metale çarpan keskin specular */}
-      <directionalLight position={[7, 0.8, 1.5]} intensity={4.8} color="#FFE8B0" />
-    </>
-  );
-}
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-function Moon() {
-  const gltf = useLoader(GLTFLoader, '/kirici-uc.glb');
-  const orbitGroup = useRef<THREE.Group>(null!);
-  const spinGroup = useRef<THREE.Group>(null!);
-  const reduced = useReducedMotion();
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
-  // Auto-orient + center model.
-  // Tip -Y'ye baksın, AABB merkezde, scale ~%50 görünür yükseklik.
-  const oriented = useMemo(() => {
-    const scene = gltf.scene.clone(true);
-
-    const box = new THREE.Box3().setFromObject(scene);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-
-    const longest = Math.max(size.x, size.y, size.z);
-    if (size.x === longest) {
-      scene.rotation.z = -Math.PI / 2;
-    } else if (size.z === longest) {
-      scene.rotation.x = Math.PI / 2;
-    }
-
-    const box2 = new THREE.Box3().setFromObject(scene);
-    const center = new THREE.Vector3();
-    box2.getCenter(center);
-    scene.position.sub(center);
-
-    const targetH = 4.82 * 0.58;
-    const box3 = new THREE.Box3().setFromObject(scene);
-    const size3 = new THREE.Vector3();
-    box3.getSize(size3);
-    const scale = targetH / size3.y;
-    scene.scale.setScalar(scale);
-
-    scene.traverse((o) => {
-      const mesh = o as THREE.Mesh;
-      if (mesh.isMesh) {
-        // Daha açık warm steel + hafif emissive ember glow → dark bg
-        // üzerinde her zaman görünür (lighting angle'a bakmadan).
-        mesh.material = new THREE.MeshStandardMaterial({
-          color: '#7a6a5a',
-          metalness: 0.85,
-          roughness: 0.38,
-          emissive: '#3a1c0a',
-          emissiveIntensity: 0.18,
-        });
-      }
+    // ─── Renderer ────────────────────────────────────────────────────
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+      powerPreference: 'low-power',
     });
+    renderer.setClearAlpha(0);
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
 
-    return scene;
-  }, [gltf]);
+    const w = () => container.clientWidth || window.innerWidth;
+    const h = () => container.clientHeight || window.innerHeight;
+    renderer.setSize(w(), h(), false);
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.display = 'block';
+    container.appendChild(renderer.domElement);
 
-  // Pure ambient drift — kullanıcı input'u yok, scroll/mouse listener yok.
-  // Aspect-aware: mobil portrait'te chisel daima görünür alan içinde dolaşsın
-  // (mevcut sola eğimli geniş orbit ekrandan taşıyor), desktop'ta serbest.
-  useFrame((state, delta) => {
-    const aspect = state.size.width / state.size.height;
-    const isPortrait = aspect < 0.85;
+    // ─── Scene + Camera ──────────────────────────────────────────────
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(30, w() / h(), 0.1, 100);
+    camera.position.set(0, 0, 9);
 
-    if (reduced) {
-      if (orbitGroup.current && orbitGroup.current.position.x === 0) {
+    // ─── Lights ──────────────────────────────────────────────────────
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+    const key = new THREE.DirectionalLight(0xffcfa0, 3.4);
+    key.position.set(-3, 4, 4);
+    scene.add(key);
+
+    const fill = new THREE.DirectionalLight(0x9ca8b8, 0.5);
+    fill.position.set(4, 2, 3);
+    scene.add(fill);
+
+    const rim = new THREE.DirectionalLight(0xff6a1a, 4.6);
+    rim.position.set(2, 1, -5);
+    scene.add(rim);
+
+    const sun = new THREE.DirectionalLight(0xffe8b0, 5.0);
+    sun.position.set(7, 0.8, 1.5);
+    scene.add(sun);
+
+    // ─── Group hierarchy: orbit > spin > model ───────────────────────
+    const orbitGroup = new THREE.Group();
+    const spinGroup = new THREE.Group();
+    orbitGroup.add(spinGroup);
+    scene.add(orbitGroup);
+
+    // ─── Fallback ember sphere — GLB yüklenene/yüklenmezse görünür ───
+    const fallbackGeo = new THREE.IcosahedronGeometry(1.2, 1);
+    const fallbackMat = new THREE.MeshStandardMaterial({
+      color: 0x7a6a5a,
+      metalness: 0.85,
+      roughness: 0.42,
+      emissive: 0xff6a1a,
+      emissiveIntensity: 0.25,
+    });
+    const fallback = new THREE.Mesh(fallbackGeo, fallbackMat);
+    spinGroup.add(fallback);
+
+    let modelLoaded = false;
+
+    // ─── Load GLB asynchronously, replace fallback ───────────────────
+    const loader = new GLTFLoader();
+    loader.load(
+      '/kirici-uc.glb',
+      (gltf) => {
+        const model = gltf.scene;
+
+        // Auto-orient: en uzun aksı -Y'ye çevir (tip aşağı)
+        const box1 = new THREE.Box3().setFromObject(model);
+        const size1 = new THREE.Vector3();
+        box1.getSize(size1);
+        const longest = Math.max(size1.x, size1.y, size1.z);
+        if (size1.x === longest) {
+          model.rotation.z = -Math.PI / 2;
+        } else if (size1.z === longest) {
+          model.rotation.x = Math.PI / 2;
+        }
+
+        // Center
+        const box2 = new THREE.Box3().setFromObject(model);
+        const center = new THREE.Vector3();
+        box2.getCenter(center);
+        model.position.sub(center);
+
+        // Scale to ~58% visible height
+        const targetH = 4.82 * 0.58;
+        const box3 = new THREE.Box3().setFromObject(model);
+        const size3 = new THREE.Vector3();
+        box3.getSize(size3);
+        const s = targetH / Math.max(0.01, size3.y);
+        model.scale.setScalar(s);
+
+        // Material
+        model.traverse((o) => {
+          const mesh = o as THREE.Mesh;
+          if (mesh.isMesh) {
+            mesh.material = new THREE.MeshStandardMaterial({
+              color: 0x7a6a5a,
+              metalness: 0.85,
+              roughness: 0.38,
+              emissive: 0x3a1c0a,
+              emissiveIntensity: 0.18,
+            });
+          }
+        });
+
+        spinGroup.remove(fallback);
+        fallback.geometry.dispose();
+        fallback.material.dispose();
+        spinGroup.add(model);
+        modelLoaded = true;
+      },
+      undefined,
+      (err) => {
+        console.warn('[scene] GLB load failed, fallback ember stays', err);
+      },
+    );
+
+    // ─── Resize listener ─────────────────────────────────────────────
+    const onResize = () => {
+      camera.aspect = w() / h();
+      camera.updateProjectionMatrix();
+      renderer.setSize(w(), h(), false);
+    };
+    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('orientationchange', onResize, { passive: true });
+
+    // ─── Animation loop ──────────────────────────────────────────────
+    const startTime = performance.now();
+    let raf = 0;
+
+    const tick = () => {
+      const t = (performance.now() - startTime) / 1000;
+      const aspect = w() / h();
+      const isPortrait = aspect < 0.85;
+
+      if (!reduced) {
+        const orbitT = t * 0.018;
+        const cx = isPortrait ? 0 : -0.4;
+        const cy = 0.0;
+        const rx = isPortrait ? 0.55 : 1.4;
+        const ry = isPortrait ? 0.45 : 0.7;
+        const rz = isPortrait ? 0.3 : 0.4;
+
+        orbitGroup.position.set(
+          cx + Math.cos(orbitT) * rx,
+          cy + Math.sin(orbitT * 1.13) * ry,
+          Math.sin(orbitT * 0.71 + 1.2) * rz,
+        );
+
+        spinGroup.rotation.y = t * 0.08;
+        spinGroup.rotation.x = Math.sin(t * 0.05) * 0.25;
+        spinGroup.rotation.z = Math.sin(t * 0.07 + 1.5) * 0.18;
+      } else {
+        // Reduced motion: statik
         const restX = isPortrait ? 0 : 1.0;
-        orbitGroup.current.position.set(restX, 0.5, 0);
+        orbitGroup.position.set(restX, 0.5, 0);
       }
-      return;
-    }
 
-    const t = state.clock.elapsedTime;
+      // Fallback ember pulse — model yüklenene kadar
+      if (!modelLoaded) {
+        const pulse = 0.18 + Math.sin(t * 1.6) * 0.08;
+        fallbackMat.emissiveIntensity = pulse;
+      }
 
-    // Frequency oranları irrasyonel: pozisyonlar asla repeat etmez
-    // (Lissajous-style). Ana yörünge ~350 sn.
-    const orbitT = t * 0.018;
+      renderer.render(scene, camera);
+      raf = requestAnimationFrame(tick);
+    };
+    tick();
 
-    // Adaptive orbit:
-    //  Mobile portrait → tight + centered (chisel her zaman görünür)
-    //  Desktop landscape → sola eğimli geniş (mevcut davranış)
-    const cx = isPortrait ?  0    : -0.4;
-    const cy = 0.0;
-    const rx = isPortrait ?  0.55 :  1.4;
-    const ry = isPortrait ?  0.45 :  0.7;
-    const rz = isPortrait ?  0.3  :  0.4;
+    // ─── Cleanup ─────────────────────────────────────────────────────
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+      renderer.dispose();
+      if (renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
+    };
+  }, []);
 
-    const x = cx + Math.cos(orbitT) * rx;
-    const y = cy + Math.sin(orbitT * 1.13) * ry;
-    const z = Math.sin(orbitT * 0.71 + 1.2) * rz;
-
-    if (orbitGroup.current) {
-      orbitGroup.current.position.set(x, y, z);
-    }
-
-    // Üç-eksen yavaş rotation — uzayda dönüyormuş gibi tumble.
-    if (spinGroup.current) {
-      // Y: sürekli yavaş baseline spin (0.08 rad/s ≈ 78s/tur)
-      spinGroup.current.rotation.y += delta * 0.08;
-      // X ve Z: sin wave, ±0.25/0.18 rad (~14°/10°), farklı frekanslar
-      spinGroup.current.rotation.x = Math.sin(t * 0.05) * 0.25;
-      spinGroup.current.rotation.z = Math.sin(t * 0.07 + 1.5) * 0.18;
-    }
-  });
-
-  return (
-    <group ref={orbitGroup}>
-      <group ref={spinGroup}>
-        <primitive object={oriented} />
-      </group>
-    </group>
-  );
+  return <div ref={containerRef} className="scene-bg" aria-hidden="true" />;
 }
