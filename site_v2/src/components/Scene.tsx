@@ -1,4 +1,4 @@
-import { Suspense, useRef } from 'react';
+import { Suspense, useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { useReducedMotion } from 'framer-motion';
@@ -8,21 +8,13 @@ import * as THREE from 'three';
  * Scene — Sayfa = Dünya, chisel = Ay.
  *
  * Chisel sayfanın etrafında elips bir yörüngede süzülür.
- * Konum eksenleri (kamera bakış açısından):
- *   x ekseni: yatay ±3.5  (uzun süpürme)
- *   y ekseni: dikey  ±1.4 (kısa kavis — moon-arc gibi)
- *   z ekseni: derinlik ±0.5 (close ↔ far drift)
+ *   yatay  ±3.5  · dikey  ±1.4  · derinlik ±0.5
  *
  * Yörünge ilerleyişi:
- *   - Baseline drift: kullanıcı hiç scroll etmese bile ~120 sn'de bir tam tur
- *   - Scroll boost: tam sayfa scroll = +1 tam tur (yan yana eklenir)
- *   - Toplam = baseline + scroll → asla durmaz
+ *   - Baseline drift: 120 sn'de bir tam tur (scroll yok bile)
+ *   - Scroll boost: tam sayfa scroll = +1 ek tur
  *
- * Chisel kendi eksenleri etrafında da yavaş döner (tidal-lock'ed ay gibi
- * değil, canlı bir gök cismi gibi). Mouse parallax tüm yörüngenin
- * pivotunu hafifçe eğer (±5°).
- *
- * prefers-reduced-motion → hareket yok, statik göz hizasında.
+ * prefers-reduced-motion → statik üst-sağda asılı.
  */
 export default function Scene() {
   return (
@@ -30,7 +22,7 @@ export default function Scene() {
       <Canvas
         dpr={[1, 2]}
         camera={{ position: [0, 0.4, 9], fov: 30 }}
-        gl={{ alpha: true, antialias: true }}
+        gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
       >
         <Lights />
         <Suspense fallback={null}>
@@ -59,26 +51,15 @@ function Moon() {
   const spinGroup = useRef<THREE.Group>(null!);
   const reduced = useReducedMotion();
 
+  // Mouse + scroll proxy state — bağlanması mount'a kadar ertelenir.
   const mouse = useRef({ x: 0, y: 0 });
   const scroll = useRef(0);
 
-  // Listeners — tek seferde mount
-  if (typeof window !== 'undefined' && !(window as unknown as { __scenebound?: boolean }).__scenebound) {
-    (window as unknown as { __scenebound?: boolean }).__scenebound = true;
-    window.addEventListener('mousemove', (e) => {
-      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.current.y = (e.clientY / window.innerHeight) * 2 - 1;
-    }, { passive: true });
-    window.addEventListener('scroll', () => {
-      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      scroll.current = Math.min(1, window.scrollY / max);
-    }, { passive: true });
-  }
-
-  // Auto-orient + center model. Tip -Y'ye bak (sarkıyor gibi).
-  // Boyutu kameraya göre ~%38'e küçült — yörüngede gezecek alan kalsın.
-  const oriented = (() => {
+  // Auto-orient + center model — yalnızca GLB değişince yeniden hesapla.
+  // Tip -Y'ye baksın, AABB merkezde, scale ~%38 görünür yükseklik.
+  const oriented = useMemo(() => {
     const scene = gltf.scene.clone(true);
+
     const box = new THREE.Box3().setFromObject(scene);
     const size = new THREE.Vector3();
     box.getSize(size);
@@ -95,7 +76,6 @@ function Moon() {
     box2.getCenter(center);
     scene.position.sub(center);
 
-    // Görünür yükseklik @ z=9 fov=30 ≈ 4.82m. Chisel yüksekliği = %38 → ~1.83m.
     const targetH = 4.82 * 0.38;
     const box3 = new THREE.Box3().setFromObject(scene);
     const size3 = new THREE.Vector3();
@@ -103,7 +83,6 @@ function Moon() {
     const scale = targetH / size3.y;
     scene.scale.setScalar(scale);
 
-    // Material — koyu sıcak çelik
     scene.traverse((o) => {
       const mesh = o as THREE.Mesh;
       if (mesh.isMesh) {
@@ -116,47 +95,62 @@ function Moon() {
     });
 
     return scene;
-  })();
+  }, [gltf]);
 
+  // Window listener'ları React standart pattern'inde — useEffect + cleanup.
+  useEffect(() => {
+    const onMouse = (e: MouseEvent) => {
+      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.current.y = (e.clientY / window.innerHeight) * 2 - 1;
+    };
+    const onScroll = () => {
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      scroll.current = Math.min(1, window.scrollY / max);
+    };
+
+    window.addEventListener('mousemove', onMouse, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // initial value
+
+    return () => {
+      window.removeEventListener('mousemove', onMouse);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
+  // Reduced motion için ilk frame'de pozisyonu sabitleyip animasyondan çık.
+  // Hooks-rule respected: useFrame her zaman çağrılır, sadece içeriği koşullu.
   useFrame((state, delta) => {
     if (reduced) {
-      // Reduced motion: statik, üst-sağda asılı dur — tek sefer set et
       if (orbitGroup.current && orbitGroup.current.position.x === 0) {
         orbitGroup.current.position.set(2.4, 1.0, 0);
       }
       return;
     }
+
     const t = state.clock.elapsedTime;
 
-    // Baseline drift — kullanıcı scroll etmese bile sürekli orbit
-    // 120 sn'de bir tam tur (2π / 120)
     const baselineAngle = t * (Math.PI * 2 / 120);
-
-    // Scroll boost — tam sayfa scroll = +1 tam tur
     const scrollAngle = scroll.current * Math.PI * 2;
-
     const angle = baselineAngle + scrollAngle;
 
-    // Elliptical orbit — yatay sweep dominant (moon-arc), dikey daha kısa
-    const rx = 3.5;   // yatay radius (geniş)
-    const ry = 1.4;   // dikey radius (kısa kavis)
-    const rz = 0.5;   // derinlik modülasyonu (perspektif close↔far)
+    const rx = 3.5;
+    const ry = 1.4;
+    const rz = 0.5;
 
     const x = Math.cos(angle) * rx;
-    const y = Math.sin(angle) * ry + 0.2;     // hafif baseline yukarı offset
-    const z = Math.cos(angle * 0.5) * rz;     // yarım frekans → daha smooth
+    const y = Math.sin(angle) * ry + 0.2;
+    const z = Math.cos(angle * 0.5) * rz;
 
     if (orbitGroup.current) {
       orbitGroup.current.position.set(x, y, z);
     }
 
-    // Self-rotation — moon kendi etrafında dönüyor
     if (spinGroup.current) {
       spinGroup.current.rotation.y += delta * 0.22;
-      spinGroup.current.rotation.x += delta * 0.05;  // hafif tumble
+      spinGroup.current.rotation.x += delta * 0.05;
     }
 
-    // Mouse parallax — tüm yörünge pivotunu eğ
     if (tiltGroup.current) {
       const targetX = mouse.current.y * -0.05;
       const targetZ = mouse.current.x * 0.05;
