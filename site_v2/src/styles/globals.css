@@ -140,3 +140,51 @@ button { font: inherit; cursor: pointer; }
   position: relative;
   z-index: 1;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Print — catalog yazdırma için light bg + black ink. Nav/footer/scene gizli.
+═══════════════════════════════════════════════════════════════════════ */
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .scene-bg,
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+  .catalog {
+    padding-top: 0 !important;
+    padding-bottom: 24px !important;
+  }
+  .catalog h1,
+  .catalog h2,
+  .catalog h3 {
+    color: #000;
+  }
+  .catalog p,
+  .catalog td,
+  .catalog th,
+  .catalog .text-ink,
+  .catalog .text-ink-mid,
+  .catalog .text-ink-soft {
+    color: #000 !important;
+  }
+  .catalog table {
+    page-break-inside: auto;
+  }
+  .catalog tr {
+    page-break-inside: avoid;
+  }
+  .catalog th,
+  .catalog td {
+    border-color: #ddd !important;
+  }
+  /* Hyperlinks: kaldır underline (yazdırırken hâlâ siyah görünür) */
+  a {
+    color: #000 !important;
+    text-decoration: none;
+  }
+}

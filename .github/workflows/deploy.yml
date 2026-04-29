@@ -47,6 +47,7 @@ jobs:
         run: |
           rsync -av \
             --exclude index.html \
+            --exclude catalog.html \
             --exclude assets \
             --exclude photos \
             --exclude videos \

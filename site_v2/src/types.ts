@@ -27,6 +27,12 @@ export interface IndustryItem {
   desc: string;
 }
 
+export interface CatalogGroup {
+  name: string;
+  headers: string[];
+  rows: string[][];
+}
+
 export interface DictBlock {
   nav: {
     products: string;
@@ -73,6 +79,14 @@ export interface DictBlock {
     eyebrow: string;
     title: string;
     body: string;
+  };
+  catalog: {
+    eyebrow: string;
+    title: string;
+    sub: string;
+    printBtn: string;
+    backToHome: string;
+    groups: CatalogGroup[];
   };
   industries: {
     eyebrow: string;
