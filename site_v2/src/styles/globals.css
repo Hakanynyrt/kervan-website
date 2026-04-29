@@ -1,18 +1,119 @@
 @import "tailwindcss";
 
-/* Mood C — Atelier Editorial design tokens are added in Faz 2. */
-:root {
-  --bg: #F4F1EB;
-  --ink: #2D1F15;
-}
+/* ═══════════════════════════════════════════════════════════════════════
+   MOOD C — Atelier Editorial
+   Off-white kremvari + koyu kahve + taze turuncu.
+   Sotheby's auction catalog, Wallpaper magazine.
+═══════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  --color-bg: #F4F1EB;
-  --color-ink: #2D1F15;
-  --font-serif: "Fraunces", "Times New Roman", serif;
-  --font-sans: "Inter", system-ui, sans-serif;
-  --text-display: clamp(56px, 9vw, 128px);
+  /* Palet */
+  --color-bg:        #F4F1EB;
+  --color-bg-soft:   #ECE6DC;
+  --color-bg-warm:   #E8E0D0;
+  --color-ink:       #2D1F15;
+  --color-ink-mid:   #5C4A3A;
+  --color-ink-soft:  #8A7A68;
+  --color-brand:     #B8460E;
+  --color-brand-dim: #8E3408;
+  --color-hair:      #DDD3C2;
+
+  /* Typography */
+  --font-serif: "Fraunces", "Times New Roman", Georgia, serif;
+  --font-sans:  "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Display scale (clamp = fluid sizing) */
+  --text-display:  clamp(56px, 9vw, 128px);
+  --text-h1:       clamp(48px, 7vw, 96px);
+  --text-h2:       clamp(36px, 5vw, 64px);
+  --text-h3:       clamp(24px, 3vw, 36px);
+  --text-eyebrow:  12px;
+
+  /* Motion easings */
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft:      cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-html, body { background: var(--bg); color: var(--ink); }
-body { font-family: var(--font-sans); margin: 0; }
+/* ═══════════════════════════════════════════════════════════════════════
+   Base reset + body defaults
+═══════════════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; }
+
+/* Honor user preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Typography utilities
+═══════════════════════════════════════════════════════════════════════ */
+.font-display {
+  font-family: var(--font-serif);
+  font-size: var(--text-display);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  /* Fraunces optical sizing for large display */
+  font-variation-settings: "opsz" 144;
+}
+
+.font-h1 {
+  font-family: var(--font-serif);
+  font-size: var(--text-h1);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 144;
+}
+
+.font-h2 {
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  font-variation-settings: "opsz" 72;
+}
+
+.font-h3 {
+  font-family: var(--font-serif);
+  font-size: var(--text-h3);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.font-eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-eyebrow);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+.font-italic-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-variation-settings: "opsz" 72;
+}
