@@ -7,11 +7,11 @@ import * as THREE from 'three';
 /**
  * Scene — Sayfa = Dünya, chisel = Ay.
  *
- * Chisel sayfanın etrafında elips bir yörüngede süzülür.
- *   yatay  ±3.5  · dikey  ±1.4  · derinlik ±0.5
+ * Daha sıkı yörünge, daha büyük chisel — mobilde ekrandan kaybolmasın diye.
+ *   yatay ±1.2 · dikey ±0.6 · derinlik ±0.4
  *
  * Yörünge ilerleyişi:
- *   - Baseline drift: 120 sn'de bir tam tur (scroll yok bile)
+ *   - Baseline drift: 90 sn'de bir tam tur (scroll yok bile)
  *   - Scroll boost: tam sayfa scroll = +1 ek tur
  *
  * prefers-reduced-motion → statik üst-sağda asılı.
@@ -21,7 +21,7 @@ export default function Scene() {
     <div className="scene-bg" aria-hidden="true">
       <Canvas
         dpr={[1, 2]}
-        camera={{ position: [0, 0.4, 9], fov: 30 }}
+        camera={{ position: [0, 0, 9], fov: 30 }}
         gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
       >
         <Lights />
@@ -36,10 +36,10 @@ export default function Scene() {
 function Lights() {
   return (
     <>
-      <ambientLight intensity={0.18} />
-      <directionalLight position={[-3, 4, 4]} intensity={2.4} color="#FFCFA0" />
-      <directionalLight position={[4, 2, 3]} intensity={0.35} color="#9CA8B8" />
-      <directionalLight position={[2, 1, -5]} intensity={3.2} color="#FF6A1A" />
+      <ambientLight intensity={0.22} />
+      <directionalLight position={[-3, 4, 4]} intensity={3.0} color="#FFCFA0" />
+      <directionalLight position={[4, 2, 3]} intensity={0.45} color="#9CA8B8" />
+      <directionalLight position={[2, 1, -5]} intensity={4.2} color="#FF6A1A" />
     </>
   );
 }
@@ -76,7 +76,7 @@ function Moon() {
     box2.getCenter(center);
     scene.position.sub(center);
 
-    const targetH = 4.82 * 0.38;
+    const targetH = 4.82 * 0.50;
     const box3 = new THREE.Box3().setFromObject(scene);
     const size3 = new THREE.Vector3();
     box3.getSize(size3);
@@ -123,23 +123,23 @@ function Moon() {
   useFrame((state, delta) => {
     if (reduced) {
       if (orbitGroup.current && orbitGroup.current.position.x === 0) {
-        orbitGroup.current.position.set(2.4, 1.0, 0);
+        orbitGroup.current.position.set(1.0, 0.5, 0);
       }
       return;
     }
 
     const t = state.clock.elapsedTime;
 
-    const baselineAngle = t * (Math.PI * 2 / 120);
+    const baselineAngle = t * (Math.PI * 2 / 90);
     const scrollAngle = scroll.current * Math.PI * 2;
     const angle = baselineAngle + scrollAngle;
 
-    const rx = 3.5;
-    const ry = 1.4;
-    const rz = 0.5;
+    const rx = 1.2;
+    const ry = 0.6;
+    const rz = 0.4;
 
     const x = Math.cos(angle) * rx;
-    const y = Math.sin(angle) * ry + 0.2;
+    const y = Math.sin(angle) * ry + 0.1;
     const z = Math.cos(angle * 0.5) * rz;
 
     if (orbitGroup.current) {

@@ -15,14 +15,14 @@ export const DICT: Dict = {
       cta: 'Teklif Al',
     },
     hero: {
-      eyebrow: 'Kocaeli · 1999',
+      eyebrow: 'Kocaeli · 2004',
       title1: 'Kırıcıyı ayakta',
       title2: 'tutan parçalar.',
       sub: 'Keski, piston, burç, sızdırmazlık. Her biri kendi atölyemizde, kendi ellerimizle.',
       cta: 'Teklif Al',
       ctaSecondary: 'Ürünlere bak',
       stats: [
-        { n: '26',    l: 'Yıl deneyim' },
+        { n: '22',    l: 'Yıl deneyim' },
         { n: '40+',   l: 'Marka uyumu' },
         { n: '1000+', l: 'Parça çeşidi' },
         { n: '24s',   l: 'Teklif süresi' },
@@ -81,7 +81,7 @@ export const DICT: Dict = {
     craft: {
       eyebrow: 'İmalathanemiz',
       title: 'Zanaat ellerde yaşar.',
-      body: 'Yirmi altı yıl önce bir hayalle başladık. Bugün aynı çatı altında, aynı özenle, aynı titizlikle devam ediyoruz. Üretim hattımız değil — imalathanemiz.',
+      body: 'Kartepe\'de küçük bir tezgâhla başladık. Bugün hâlâ aynı çatı altındayız — aynı eller, aynı özen, aynı titizlik. Burası bir üretim hattı değil; bu bir imalathane.',
     },
     industries: {
       eyebrow: 'Kimler İçin',
@@ -94,8 +94,8 @@ export const DICT: Dict = {
         { name: 'Yol',        desc: 'Altyapı ve yenileme' },
       ],
       marquee: [
-        '1999\'dan beri Kocaeli\'de',
-        'Yirmi altı yıllık zanaat',
+        '2004\'ten beri Kocaeli\'de',
+        'Yirmi iki yıllık zanaat',
         'Kendi atölyemizde, kendi ellerimizle',
         'Kırk üzeri kırıcı markası',
         'Bin üzeri parça çeşidi',
@@ -127,7 +127,7 @@ export const DICT: Dict = {
     },
     footer: {
       brand: 'Kervan Heat',
-      tag: 'Kocaeli · 1999',
+      tag: 'Kocaeli · 2004',
       rights: '© 2026 Kervan Isıl İşlem. Tüm hakları saklıdır.',
       kvkk: 'KVKK',
     },
@@ -142,14 +142,14 @@ export const DICT: Dict = {
       cta: 'Get a Quote',
     },
     hero: {
-      eyebrow: 'Kocaeli · Since 1999',
+      eyebrow: 'Kocaeli · Since 2004',
       title1: 'Parts that keep',
       title2: 'the hammer running.',
       sub: 'Chisels, pistons, bushings, seals. Each one made in our workshop, by hand.',
       cta: 'Get a Quote',
       ctaSecondary: 'See products',
       stats: [
-        { n: '26',    l: 'Years of craft' },
+        { n: '22',    l: 'Years of craft' },
         { n: '40+',   l: 'Hammer brands' },
         { n: '1000+', l: 'Parts shipped' },
         { n: '24h',   l: 'Quote turnaround' },
@@ -208,7 +208,7 @@ export const DICT: Dict = {
     craft: {
       eyebrow: 'Our Workshop',
       title: 'Craft lives in hands.',
-      body: 'We started twenty-six years ago with one idea. Today we keep going under the same roof, with the same care, the same attention. It is not a production line — it is our workshop.',
+      body: 'We started in Kartepe with a single bench. Today we are still under the same roof — same hands, same care, same attention. This is not a production line; this is a workshop.',
     },
     industries: {
       eyebrow: 'Who We Serve',
@@ -221,8 +221,8 @@ export const DICT: Dict = {
         { name: 'Roads',        desc: 'Infrastructure & renewal' },
       ],
       marquee: [
-        'In Kocaeli since 1999',
-        'Twenty-six years of craft',
+        'In Kocaeli since 2004',
+        'Twenty-two years of craft',
         'In our own workshop, by our own hands',
         'Forty-plus hammer brands',
         'A thousand-plus part variants',
@@ -254,7 +254,7 @@ export const DICT: Dict = {
     },
     footer: {
       brand: 'Kervan Heat',
-      tag: 'Kocaeli · Since 1999',
+      tag: 'Kocaeli · Since 2004',
       rights: '© 2026 Kervan Heat Treatment. All rights reserved.',
       kvkk: 'Privacy',
     },

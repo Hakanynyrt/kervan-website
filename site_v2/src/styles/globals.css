@@ -126,15 +126,13 @@ button { font: inherit; cursor: pointer; }
   display: none;
 }
 
-/* 3D scene container — fixed full-viewport behind everything */
+/* 3D scene container — fixed full-viewport behind everything.
+   No mask — chisel her zaman tam görünür kalır, ekrandan kaybolmaz. */
 .scene-bg {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  /* Subtle radial vignette so edges fade into pure black */
-  -webkit-mask-image: radial-gradient(ellipse at center, black 50%, transparent 92%);
-          mask-image: radial-gradient(ellipse at center, black 50%, transparent 92%);
 }
 
 /* Content sits on top of the scene */

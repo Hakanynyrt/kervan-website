@@ -26,9 +26,6 @@ export default function Craft({ t }: Props) {
         <ScrollReveal className="text-ink-mid max-w-[44ch]">
           {t.craft.body}
         </ScrollReveal>
-        <div className="font-sans text-xs tracking-widest uppercase text-ink-soft mt-4">
-          Hakan Yünyurt · Kurucu
-        </div>
       </motion.div>
     </section>
   );
