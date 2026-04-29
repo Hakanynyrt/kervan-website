@@ -38,7 +38,7 @@ export default function Products({ t }: Props) {
                 whileHover={{ scale: 1.04 }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               />
-              <span className="absolute top-4 left-4 font-sans text-xs tracking-widest text-bg/90 z-10">
+              <span className="absolute top-4 left-4 font-sans text-xs tracking-widest text-ink/90 z-10">
                 0{i + 1}
               </span>
             </div>

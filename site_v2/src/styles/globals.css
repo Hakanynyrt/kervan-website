@@ -1,22 +1,22 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MOOD C — Atelier Editorial
-   Off-white kremvari + koyu kahve + taze turuncu.
-   Sotheby's auction catalog, Wallpaper magazine.
+   MOOD C — Atelier Editorial · Dark variant
+   Near-black bg + ember orange accent + warm cream typography.
+   Forj ateşinde Sotheby's auction katalogu.
 ═══════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* Palet */
-  --color-bg:        #F4F1EB;
-  --color-bg-soft:   #ECE6DC;
-  --color-bg-warm:   #E8E0D0;
-  --color-ink:       #2D1F15;
-  --color-ink-mid:   #5C4A3A;
-  --color-ink-soft:  #8A7A68;
-  --color-brand:     #B8460E;
-  --color-brand-dim: #8E3408;
-  --color-hair:      #DDD3C2;
+  /* Palet — dark */
+  --color-bg:        #0A0A0B;   /* near-black, hafif warm */
+  --color-bg-soft:   #14130E;   /* raised surface (kart) */
+  --color-bg-warm:   #1C1813;   /* hover surface */
+  --color-ink:       #E8E2D6;   /* warm cream display */
+  --color-ink-mid:   #B8AFA0;   /* body */
+  --color-ink-soft:  #7A7066;   /* muted */
+  --color-brand:     #FF6A1A;   /* taze ember orange (dark'ta parlasın) */
+  --color-brand-dim: #C65A0C;   /* hover */
+  --color-hair:      #2D2820;   /* dim warm divider */
 
   /* Typography */
   --font-serif: "Fraunces", "Times New Roman", Georgia, serif;
@@ -72,7 +72,6 @@ button { font: inherit; cursor: pointer; }
   font-weight: 400;
   line-height: 0.95;
   letter-spacing: -0.025em;
-  /* Fraunces optical sizing for large display */
   font-variation-settings: "opsz" 144;
 }
 
@@ -118,11 +117,28 @@ button { font: inherit; cursor: pointer; }
   font-variation-settings: "opsz" 72;
 }
 
-/* Hide scrollbar but keep scroll behavior — used by horizontal galleries. */
+/* Hide scrollbar but keep scroll behavior */
 .scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* 3D scene container — fixed full-viewport behind everything */
+.scene-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* Subtle radial vignette so edges fade into pure black */
+  -webkit-mask-image: radial-gradient(ellipse at center, black 50%, transparent 92%);
+          mask-image: radial-gradient(ellipse at center, black 50%, transparent 92%);
+}
+
+/* Content sits on top of the scene */
+.app-root {
+  position: relative;
+  z-index: 1;
 }

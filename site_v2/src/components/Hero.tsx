@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import type { DictBlock } from '../types';
-import { staggerContainer, lineReveal, fadeUp, kenBurns } from '../lib/motion';
+import { staggerContainer, lineReveal, fadeUp } from '../lib/motion';
 
 interface Props {
   t: DictBlock;
@@ -16,7 +16,7 @@ export default function Hero({ t }: Props) {
   return (
     <section className="relative pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden">
       <div className="max-w-[1280px] mx-auto px-8 grid grid-cols-12 gap-8 md:gap-12 items-center">
-        {/* Copy — 60% */}
+        {/* Copy — sol yarı */}
         <div className="col-span-12 lg:col-span-7 flex flex-col gap-8">
           <motion.div
             className="font-eyebrow"
@@ -72,7 +72,7 @@ export default function Hero({ t }: Props) {
           >
             <a
               href="#contact"
-              className="bg-ink text-bg px-7 py-3 font-sans text-sm tracking-wide hover:bg-brand transition-colors"
+              className="bg-brand text-bg px-7 py-3 font-sans text-sm tracking-wide hover:bg-brand-dim transition-colors"
             >
               {t.hero.cta}
             </a>
@@ -85,7 +85,7 @@ export default function Hero({ t }: Props) {
           </motion.div>
         </div>
 
-        {/* Stats — 40% */}
+        {/* Stats — sağ yarı, chisel arka planda görünüyor */}
         <motion.div
           className="col-span-12 lg:col-span-5 grid grid-cols-2 gap-8"
           variants={staggerContainer(1.6, 0.12)}
@@ -100,19 +100,6 @@ export default function Hero({ t }: Props) {
           ))}
         </motion.div>
       </div>
-
-      {/* Hero photo — bottom right, asymmetric, slow Ken Burns idle */}
-      <motion.div
-        className="hidden lg:block absolute right-0 -bottom-20 w-[40vw] max-w-[600px] aspect-[4/5] overflow-hidden"
-        initial="hidden"
-        animate={['show', 'idle']}
-        variants={kenBurns}
-      >
-        <div
-          className="w-full h-full bg-cover bg-center"
-          style={{ backgroundImage: 'url(/photos/workshop-overview.jpeg)' }}
-        />
-      </motion.div>
     </section>
   );
 }
