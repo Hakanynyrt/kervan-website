@@ -6,6 +6,10 @@ import Products from './components/Products';
 import Chisels from './components/Chisels';
 import Stock from './components/Stock';
 import Atolye from './components/Atolye';
+import Craft from './components/Craft';
+import Industries from './components/Industries';
+import Contact from './components/Contact';
+import Footer from './components/Footer';
 
 export default function App() {
   const [lang, setLang] = useLang();
@@ -19,6 +23,10 @@ export default function App() {
       <Chisels t={t} />
       <Stock t={t} />
       <Atolye t={t} />
+      <Craft t={t} />
+      <Industries t={t} />
+      <Contact t={t} />
+      <Footer t={t} />
     </>
   );
 }
