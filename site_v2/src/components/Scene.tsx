@@ -7,6 +7,97 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 
+/** Round soft-edged star sprite. 64×64 radial gradient drawn once. */
+function makeStarSprite(): THREE.CanvasTexture {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  if (g) {
+    const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.4, 'rgba(255,255,255,0.45)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 64, 64);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+interface StarLayerSpec {
+  count: number;
+  /** [width, height, depth] — half-widths used for placement */
+  box: [number, number, number];
+  /** Z-near (closest to camera, more negative pushes back) */
+  zNear: number;
+  /** Z-far (deeper into the scene) */
+  zFar: number;
+  sizeMin: number;
+  sizeMax: number;
+  brightnessMin: number;
+  brightnessMax: number;
+  sprite: THREE.CanvasTexture;
+}
+
+/** Realistic spectral mix — mostly cream, with warm whites, cool
+ *  blues, ember accents and a few far-redshift dim reds. */
+const STAR_PALETTE: Array<{ weight: number; color: THREE.Color }> = [
+  { weight: 0.60, color: new THREE.Color(0xE8E2D6) }, // brand cream
+  { weight: 0.18, color: new THREE.Color(0xFFF1D8) }, // warm white
+  { weight: 0.10, color: new THREE.Color(0xC8D8FF) }, // cool blue
+  { weight: 0.07, color: new THREE.Color(0xFF6A1A) }, // ember accent
+  { weight: 0.05, color: new THREE.Color(0xC07060) }, // dim red
+];
+
+function pickStarColor(): THREE.Color {
+  const r = Math.random();
+  let acc = 0;
+  for (const p of STAR_PALETTE) {
+    acc += p.weight;
+    if (r <= acc) return p.color;
+  }
+  return STAR_PALETTE[0].color;
+}
+
+/** Build one parallax layer of stars. Per-vertex colors + per-vertex
+ *  sizes (via an `aSize` attribute interpreted by PointsMaterial.size
+ *  scaled by sizeAttenuation — Three.js doesn't accept per-vertex size
+ *  on the standard PointsMaterial, so we stagger sizes by splitting
+ *  into a few size buckets isn't worth it; instead we vary the *color*
+ *  brightness which reads as size variance under bloom). */
+function makeStarLayer(spec: StarLayerSpec): { points: THREE.Points } {
+  const { count, box, zNear, zFar, sizeMin, sizeMax, brightnessMin, brightnessMax, sprite } = spec;
+  const geom = new THREE.BufferGeometry();
+  const pos = new Float32Array(count * 3);
+  const col = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    pos[i * 3 + 0] = (Math.random() - 0.5) * box[0];
+    pos[i * 3 + 1] = (Math.random() - 0.5) * box[1];
+    pos[i * 3 + 2] = zNear + Math.random() * (zFar - zNear);
+    const c = pickStarColor();
+    const b = brightnessMin + Math.random() * (brightnessMax - brightnessMin);
+    col[i * 3 + 0] = c.r * b;
+    col[i * 3 + 1] = c.g * b;
+    col[i * 3 + 2] = c.b * b;
+  }
+  geom.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geom.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const mat = new THREE.PointsMaterial({
+    size: (sizeMin + sizeMax) / 2,
+    sizeAttenuation: true,
+    transparent: true,
+    opacity: 0.95,
+    vertexColors: true,
+    map: sprite,
+    alphaMap: sprite,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const points = new THREE.Points(geom, mat);
+  return { points };
+}
+
 /**
  * Scene — vanilla Three.js (R3F yerine). v1 pattern'i: direkt DOM mount,
  * kendi animation loop'u, kendi resize listener'ı. iOS Safari + lazy import
@@ -110,43 +201,47 @@ export default function Scene() {
     sun.position.set(7, 0.8, 1.5);
     scene.add(sun);
 
-    // ─── Starfield: cosmic ambiance behind the chisel ────────────────
-    // 1000 procedural points in a 120×80×60 box positioned strictly
-    // behind z=-10 so the chisel always reads in front of them. 90%
-    // ink-cream, 10% ember-orange — same brand palette, just scattered.
-    // Random brightness 0.3–1.0; bloom pass naturally twinkles the
-    // brightest ones (above 0.85 threshold) without us doing anything.
-    // AdditiveBlending so stars sit on top of the dark body bg without
-    // a hard cutoff, depthWrite false so they never occlude the chisel.
-    const STAR_COUNT = 1000;
-    const starGeom = new THREE.BufferGeometry();
-    const starPos = new Float32Array(STAR_COUNT * 3);
-    const starCol = new Float32Array(STAR_COUNT * 3);
-    const cream = new THREE.Color(0xE8E2D6);
-    const ember = new THREE.Color(0xFF6A1A);
-    for (let i = 0; i < STAR_COUNT; i++) {
-      starPos[i * 3 + 0] = (Math.random() - 0.5) * 120;
-      starPos[i * 3 + 1] = (Math.random() - 0.5) * 80;
-      starPos[i * 3 + 2] = -10 - Math.random() * 60;
-      const c = Math.random() > 0.9 ? ember : cream;
-      const b = 0.3 + Math.random() * 0.7;
-      starCol[i * 3 + 0] = c.r * b;
-      starCol[i * 3 + 1] = c.g * b;
-      starCol[i * 3 + 2] = c.b * b;
-    }
-    starGeom.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-    starGeom.setAttribute('color', new THREE.BufferAttribute(starCol, 3));
-    const starMat = new THREE.PointsMaterial({
-      size: 0.4,
-      sizeAttenuation: true,
-      transparent: true,
-      opacity: 0.9,
-      vertexColors: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
+    // ─── Starfield: layered cosmic ambiance behind the chisel ────────
+    // Two parallax layers + a soft round sprite for each star.
+    //
+    // - Far (1800 stars, 220×160×100 box, z ∈ [-130, -30]): tiny dim
+    //   stars that drift slowly, anchor the depth.
+    // - Near (700 stars, 100×70×50 box, z ∈ [-62, -12]): brighter,
+    //   chunkier stars that drift faster — parallax against the far
+    //   layer reads as 3D depth, not wallpaper.
+    //
+    // Color mix is realistic spectral-ish (mostly cream, with warm
+    // whites, cool blues, ember accents and a few far-redshift dim
+    // reds) so the field feels varied without drifting from Mood C.
+    //
+    // The sprite is a 64-px radial gradient drawn once on a canvas —
+    // round soft stars, not square pixels. Bloom (already at 0.85
+    // threshold) twinkles the brightest near-layer stars naturally.
+    const starSprite = makeStarSprite();
+    const FAR = makeStarLayer({
+      count: 1800,
+      box: [220, 160, 100],
+      zNear: -30,
+      zFar: -130,
+      sizeMin: 0.18,
+      sizeMax: 0.28,
+      brightnessMin: 0.18,
+      brightnessMax: 0.55,
+      sprite: starSprite,
     });
-    const starfield = new THREE.Points(starGeom, starMat);
-    scene.add(starfield);
+    const NEAR = makeStarLayer({
+      count: 700,
+      box: [100, 70, 50],
+      zNear: -12,
+      zFar: -62,
+      sizeMin: 0.45,
+      sizeMax: 0.65,
+      brightnessMin: 0.55,
+      brightnessMax: 1.0,
+      sprite: starSprite,
+    });
+    scene.add(FAR.points);
+    scene.add(NEAR.points);
 
     // ─── Postprocessing: bloom for cinematic rim glow ────────────────
     // RenderPass → UnrealBloomPass → OutputPass (does the final colour
@@ -328,12 +423,13 @@ export default function Scene() {
         orbitGroup.position.set(restX, 0.5, 0);
       }
 
-      // Slow starfield drift — Y rotation creates lateral parallax,
-      // tiny X rotation gives a barely-there vertical drift. Speeds
-      // chosen so a full revolution takes ~21 minutes; you read it as
-      // "the camera is gently floating in space" not "things spinning".
-      starfield.rotation.y = t * 0.005;
-      starfield.rotation.x = Math.sin(t * 0.001) * 0.02;
+      // Layered parallax drift — far layer slower (anchors depth),
+      // near layer faster (foreground). The relative speed is the
+      // visual cue; absolute speeds are still imperceptible per-frame.
+      FAR.points.rotation.y = t * 0.003;
+      FAR.points.rotation.x = Math.sin(t * 0.0008) * 0.015;
+      NEAR.points.rotation.y = t * 0.008;
+      NEAR.points.rotation.x = Math.sin(t * 0.0014) * 0.025;
 
       // Fallback ember pulse — model yüklenene kadar
       if (!modelLoaded) {
@@ -354,8 +450,11 @@ export default function Scene() {
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', onResize);
       window.visualViewport?.removeEventListener('resize', onResize);
-      starGeom.dispose();
-      starMat.dispose();
+      FAR.points.geometry.dispose();
+      (FAR.points.material as THREE.PointsMaterial).dispose();
+      NEAR.points.geometry.dispose();
+      (NEAR.points.material as THREE.PointsMaterial).dispose();
+      starSprite.dispose();
       bloom.dispose();
       composer.dispose();
       pmrem.dispose();
