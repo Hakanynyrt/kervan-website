@@ -14,6 +14,7 @@ import Craft from './components/Craft';
 import Industries from './components/Industries';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
+import WhatsAppFAB from './components/WhatsAppFAB';
 
 export default function App() {
   const [lang, setLang] = useLang();
@@ -41,6 +42,11 @@ export default function App() {
         <Contact t={t} />
         <Footer t={t} />
       </div>
+
+      {/* Floating WhatsApp button — z-40, sits above app-root content
+          and below the intro overlay. Single dedicated affordance for
+          chat — replaces the inline rows in Contact + Footer. */}
+      <WhatsAppFAB />
     </>
   );
 }
