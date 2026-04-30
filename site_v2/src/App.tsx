@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useLang } from './lib/use-lang';
 import { DICT } from './lib/dict';
@@ -54,9 +55,66 @@ interface OpeningHoldProps {
  * fades in after the intro perdesi closes (≈2.6s) so the affordance
  * isn't visible during the cinematic moment but appears just before
  * the user would otherwise wonder if there's anything to do.
+ *
+ * Scroll-snap: any down-direction gesture (wheel, touch, Space/PageDown
+ * /ArrowDown/End) while still inside the opening triggers a one-shot
+ * smooth scroll to the hero (`scrollY = innerHeight`). Reduced-motion
+ * preference uses an instant jump instead of the smooth animation.
  */
 function OpeningHold({ t }: OpeningHoldProps) {
   const reduced = useReducedMotion();
+
+  useEffect(() => {
+    // Capture-phase listeners so we beat React's bubble-phase handlers
+    // and the browser's native scroll. `passive: false` is required on
+    // wheel + touchmove because we need `preventDefault` to swallow the
+    // initial gesture before it scrolls a few pixels organically.
+    const isInOpening = () => window.scrollY < window.innerHeight - 4;
+    const snapToHero = () => {
+      window.scrollTo({
+        top: window.innerHeight,
+        behavior: reduced ? 'auto' : 'smooth',
+      });
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      if (!isInOpening()) return;
+      if (e.deltaY <= 0) return; // upward wheel — let it through
+      e.preventDefault();
+      snapToHero();
+    };
+
+    let touchStartY = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0]?.clientY ?? 0;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!isInOpening()) return;
+      const dy = touchStartY - (e.touches[0]?.clientY ?? touchStartY);
+      if (dy <= 6) return; // ignore tiny jitter and upward pulls
+      e.preventDefault();
+      snapToHero();
+    };
+
+    const downKeys = new Set([' ', 'PageDown', 'ArrowDown', 'End']);
+    const onKey = (e: KeyboardEvent) => {
+      if (!isInOpening()) return;
+      if (!downKeys.has(e.key)) return;
+      e.preventDefault();
+      snapToHero();
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [reduced]);
 
   return (
     <section
