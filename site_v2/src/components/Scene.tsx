@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 /**
  * Scene — vanilla Three.js (R3F yerine). v1 pattern'i: direkt DOM mount,
@@ -8,25 +9,15 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
  * + Suspense + ErrorBoundary chain'inde tıkandığı için R3F'ten ayrıldık.
  *
  * Chisel arkaplanda eliptik orbital drift'te, görünür alana sığar.
- *
- * NOTE: temporary diagnostic panel (top-left fixed). Remove once root cause
- * of "chisel not visible in production" is identified.
  */
 export default function Scene() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState<string[]>(['mount']);
-  const log = (s: string) => setStatus((prev) => [...prev, s]);
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) {
-      log('FAIL: containerRef null');
-      return;
-    }
-    log(`container ${container.clientWidth}x${container.clientHeight}`);
+    if (!container) return;
 
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
-    log(`reduced=${reduced}`);
 
     // ─── Renderer ────────────────────────────────────────────────────
     let renderer: THREE.WebGLRenderer;
@@ -36,9 +27,8 @@ export default function Scene() {
         antialias: true,
         powerPreference: 'low-power',
       });
-      log('WebGL ok');
     } catch (e) {
-      log(`WebGL FAIL: ${(e as Error).message?.slice(0, 60)}`);
+      console.error('[scene] WebGLRenderer init failed', e);
       return;
     }
     renderer.setClearAlpha(0);
@@ -51,12 +41,19 @@ export default function Scene() {
     renderer.domElement.style.height = '100%';
     renderer.domElement.style.display = 'block';
     container.appendChild(renderer.domElement);
-    log(`canvas ${w()}x${h()} dpr=${window.devicePixelRatio}`);
 
     // ─── Scene + Camera ──────────────────────────────────────────────
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(30, w() / h(), 0.1, 100);
     camera.position.set(0, 0, 9);
+
+    // MeshStandardMaterial with high metalness reflects the environment;
+    // without one, metallic surfaces render nearly black (only direct-light
+    // specular highlights are visible) and the chisel disappears against
+    // body bg #0A0A0B. v1 had this (public/scene.js:41) — restored here.
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    pmrem.compileEquirectangularShader();
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
     // ─── Lights ──────────────────────────────────────────────────────
     scene.add(new THREE.AmbientLight(0xffffff, 0.4));
@@ -100,14 +97,12 @@ export default function Scene() {
     // ─── Load GLB asynchronously, replace fallback ───────────────────
     // GLB plain glTF (DRACO compression decompressed via gltf-transform).
     // Standart GLTFLoader natively handle eder, ekstra loader gerekmez.
-    log('GLB loading…');
     const loader = new GLTFLoader();
     loader.load(
       '/kirici-uc.glb',
       (gltf) => {
         try {
           const model = gltf.scene;
-          log('GLB loaded');
 
           // Minimal orient: longest axis → world Y. v1 hard-coded
           // -π/2 around Z worked for tip-down (commit bc23cf30).
@@ -136,7 +131,6 @@ export default function Scene() {
           box3.getSize(size3);
           const s = targetH / Math.max(0.01, size3.y);
           model.scale.setScalar(s);
-          log(`model ${size3.x.toFixed(2)}×${size3.y.toFixed(2)}×${size3.z.toFixed(2)} s=${s.toFixed(3)}`);
 
           // Material — warm steel + ember emissive
           model.traverse((o) => {
@@ -163,7 +157,6 @@ export default function Scene() {
       },
       undefined,
       (err) => {
-        log(`GLB FAIL: ${(err as Error)?.message?.slice(0, 60) ?? 'unknown'}`);
         console.warn('[scene] GLB load failed, fallback ember stays', err);
       },
     );
@@ -226,6 +219,7 @@ export default function Scene() {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', onResize);
+      pmrem.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
@@ -233,29 +227,5 @@ export default function Scene() {
     };
   }, []);
 
-  return (
-    <>
-      <div ref={containerRef} className="scene-bg" aria-hidden="true" />
-      {/* TEMP diagnostic — remove once chisel-not-visible root cause is found. */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 8,
-          left: 8,
-          zIndex: 200,
-          padding: '6px 10px',
-          background: 'rgba(0,0,0,0.78)',
-          color: '#FF6A1A',
-          font: '11px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace',
-          maxWidth: '60vw',
-          pointerEvents: 'none',
-          whiteSpace: 'pre',
-          borderRadius: 4,
-        }}
-      >
-        scene:{'\n'}
-        {status.map((s, i) => `  ${i + 1}. ${s}`).join('\n')}
-      </div>
-    </>
-  );
+  return <div ref={containerRef} className="scene-bg" aria-hidden="true" />;
 }
