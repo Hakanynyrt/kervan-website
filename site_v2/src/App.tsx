@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useLang } from './lib/use-lang';
 import { DICT } from './lib/dict';
@@ -63,12 +63,34 @@ interface OpeningHoldProps {
  */
 function OpeningHold({ t }: OpeningHoldProps) {
   const reduced = useReducedMotion();
+  const [passed, setPassed] = useState(false);
 
+  // Watch scroll position and flip `passed` once the user crosses the
+  // opening band. The flag is one-way — there is no setter to undo it,
+  // and the listener cleans up on unmount, which happens immediately
+  // after the flag flips.
   useEffect(() => {
-    // Capture-phase listeners so we beat React's bubble-phase handlers
-    // and the browser's native scroll. `passive: false` is required on
-    // wheel + touchmove because we need `preventDefault` to swallow the
-    // initial gesture before it scrolls a few pixels organically.
+    if (passed) return;
+    const onScroll = () => {
+      if (window.scrollY >= window.innerHeight - 1) setPassed(true);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [passed]);
+
+  // After unmount, the layout reflows so Hero is at the top — but the
+  // browser was at scrollY = innerHeight (the snap target). Without
+  // this synchronous correction it'd land mid-Products. Runs in the
+  // same frame as the unmount, so no flicker.
+  useLayoutEffect(() => {
+    if (passed) window.scrollTo(0, 0);
+  }, [passed]);
+
+  // Snap-to-hero gesture trap (wheel/touch/keys). Only relevant before
+  // the unmount; once `passed` is true the early return below removes
+  // the listeners and the section from the DOM.
+  useEffect(() => {
+    if (passed) return;
     const isInOpening = () => window.scrollY < window.innerHeight - 4;
     const snapToHero = () => {
       window.scrollTo({
@@ -79,7 +101,7 @@ function OpeningHold({ t }: OpeningHoldProps) {
 
     const onWheel = (e: WheelEvent) => {
       if (!isInOpening()) return;
-      if (e.deltaY <= 0) return; // upward wheel — let it through
+      if (e.deltaY <= 0) return;
       e.preventDefault();
       snapToHero();
     };
@@ -91,7 +113,7 @@ function OpeningHold({ t }: OpeningHoldProps) {
     const onTouchMove = (e: TouchEvent) => {
       if (!isInOpening()) return;
       const dy = touchStartY - (e.touches[0]?.clientY ?? touchStartY);
-      if (dy <= 6) return; // ignore tiny jitter and upward pulls
+      if (dy <= 6) return;
       e.preventDefault();
       snapToHero();
     };
@@ -114,7 +136,9 @@ function OpeningHold({ t }: OpeningHoldProps) {
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('keydown', onKey);
     };
-  }, [reduced]);
+  }, [reduced, passed]);
+
+  if (passed) return null;
 
   return (
     <section
