@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
@@ -8,22 +8,39 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
  * + Suspense + ErrorBoundary chain'inde tıkandığı için R3F'ten ayrıldık.
  *
  * Chisel arkaplanda eliptik orbital drift'te, görünür alana sığar.
+ *
+ * NOTE: temporary diagnostic panel (top-left fixed). Remove once root cause
+ * of "chisel not visible in production" is identified.
  */
 export default function Scene() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [status, setStatus] = useState<string[]>(['mount']);
+  const log = (s: string) => setStatus((prev) => [...prev, s]);
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      log('FAIL: containerRef null');
+      return;
+    }
+    log(`container ${container.clientWidth}x${container.clientHeight}`);
 
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    log(`reduced=${reduced}`);
 
     // ─── Renderer ────────────────────────────────────────────────────
-    const renderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true,
-      powerPreference: 'low-power',
-    });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: 'low-power',
+      });
+      log('WebGL ok');
+    } catch (e) {
+      log(`WebGL FAIL: ${(e as Error).message?.slice(0, 60)}`);
+      return;
+    }
     renderer.setClearAlpha(0);
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
 
@@ -34,6 +51,7 @@ export default function Scene() {
     renderer.domElement.style.height = '100%';
     renderer.domElement.style.display = 'block';
     container.appendChild(renderer.domElement);
+    log(`canvas ${w()}x${h()} dpr=${window.devicePixelRatio}`);
 
     // ─── Scene + Camera ──────────────────────────────────────────────
     const scene = new THREE.Scene();
@@ -82,12 +100,14 @@ export default function Scene() {
     // ─── Load GLB asynchronously, replace fallback ───────────────────
     // GLB plain glTF (DRACO compression decompressed via gltf-transform).
     // Standart GLTFLoader natively handle eder, ekstra loader gerekmez.
+    log('GLB loading…');
     const loader = new GLTFLoader();
     loader.load(
       '/kirici-uc.glb',
       (gltf) => {
         try {
           const model = gltf.scene;
+          log('GLB loaded');
 
           // Minimal orient: longest axis → world Y. v1 hard-coded
           // -π/2 around Z worked for tip-down (commit bc23cf30).
@@ -116,6 +136,7 @@ export default function Scene() {
           box3.getSize(size3);
           const s = targetH / Math.max(0.01, size3.y);
           model.scale.setScalar(s);
+          log(`model ${size3.x.toFixed(2)}×${size3.y.toFixed(2)}×${size3.z.toFixed(2)} s=${s.toFixed(3)}`);
 
           // Material — warm steel + ember emissive
           model.traverse((o) => {
@@ -142,6 +163,7 @@ export default function Scene() {
       },
       undefined,
       (err) => {
+        log(`GLB FAIL: ${(err as Error)?.message?.slice(0, 60) ?? 'unknown'}`);
         console.warn('[scene] GLB load failed, fallback ember stays', err);
       },
     );
@@ -211,5 +233,29 @@ export default function Scene() {
     };
   }, []);
 
-  return <div ref={containerRef} className="scene-bg" aria-hidden="true" />;
+  return (
+    <>
+      <div ref={containerRef} className="scene-bg" aria-hidden="true" />
+      {/* TEMP diagnostic — remove once chisel-not-visible root cause is found. */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 8,
+          left: 8,
+          zIndex: 200,
+          padding: '6px 10px',
+          background: 'rgba(0,0,0,0.78)',
+          color: '#FF6A1A',
+          font: '11px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace',
+          maxWidth: '60vw',
+          pointerEvents: 'none',
+          whiteSpace: 'pre',
+          borderRadius: 4,
+        }}
+      >
+        scene:{'\n'}
+        {status.map((s, i) => `  ${i + 1}. ${s}`).join('\n')}
+      </div>
+    </>
+  );
 }
