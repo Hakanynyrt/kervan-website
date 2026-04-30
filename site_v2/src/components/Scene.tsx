@@ -23,6 +23,15 @@ export default function Scene() {
 
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
+    // ─── Camera framing constants ────────────────────────────────────
+    // Single source of truth — `targetH` and the orbit clamp both
+    // derive from these. Bring CAM_Z in to dolly the camera closer;
+    // bump CHISEL_H_RATIO to fill more of the frame vertically.
+    const CAM_Z = 7;
+    const FOV_DEG = 28;
+    const VISIBLE_H = 2 * Math.tan(THREE.MathUtils.degToRad(FOV_DEG / 2)) * CAM_Z;
+    const CHISEL_H_RATIO = 0.85;
+
     // ─── Renderer ────────────────────────────────────────────────────
     let renderer: THREE.WebGLRenderer;
     try {
@@ -65,9 +74,10 @@ export default function Scene() {
     // FOV 28 + camera dropped slightly below eye-line, looking up at the
     // model — classic monument/hero framing. Tighter FOV compresses
     // perspective slightly, makes the chisel feel longer and weightier.
-    const camera = new THREE.PerspectiveCamera(28, w() / h(), 0.1, 100);
-    camera.position.set(0, -0.7, 9);
-    camera.lookAt(0, 0.6, 0);
+    // CAM_Z 7 (was 9) brings the model closer for a cinematic close-up.
+    const camera = new THREE.PerspectiveCamera(FOV_DEG, w() / h(), 0.1, 100);
+    camera.position.set(0, -0.55, CAM_Z);
+    camera.lookAt(0, 0.45, 0);
 
     // MeshStandardMaterial with high metalness reflects the environment;
     // without one, metallic surfaces render nearly black (only direct-light
@@ -206,7 +216,10 @@ export default function Scene() {
           // (Three.js doesn't scale `position` itself; it scales children's
           // vertices. Centering pre-scale leaves a huge offset that survives
           // scaling and parks the model far below the camera frustum.)
-          const targetH = 4.82 * 0.58;
+          // Fill ~85% of visible viewport height — close-up hero framing.
+          // Derived from CAM_Z/FOV constants above so a single edit
+          // there re-proportions the whole composition.
+          const targetH = VISIBLE_H * CHISEL_H_RATIO;
           const box2 = new THREE.Box3().setFromObject(model);
           const size2 = new THREE.Vector3();
           box2.getSize(size2);
@@ -284,21 +297,21 @@ export default function Scene() {
         // weighty/deliberate (cinematic), not jittery.
         const orbitT = t * 0.012;
 
-        // Visible half-width @ z=0 is `tan(FOV/2) * camZ * aspect`. With
-        // FOV=28°, camZ=9 the constant is 2.24. Subtract the chisel's
-        // own scaled half-width plus breathing room and you get the
-        // largest safe orbit radius for the current viewport. Mobile
-        // portrait (aspect ~0.46) stays well clear of the edges; desktop
-        // keeps the wide ambient drift it had.
-        const halfW = 2.24 * aspect;
+        // Frustum-safe orbit clamp. Visible half-width at the chisel's
+        // depth = (VISIBLE_H / 2) * aspect. Subtract chisel half-width
+        // plus breathing room to get the largest safe horizontal radius;
+        // ditto vertically (the chisel now fills 85% of frame height,
+        // so ry must stay under ~0.26 to avoid clipping the tip).
+        const halfW = (VISIBLE_H / 2) * aspect;
         const safetyMargin = 0.49; // chisel half-width + breathing room
         const rxMax = Math.max(0.1, halfW - safetyMargin);
+        const ryMax = (VISIBLE_H / 2) * (1 - CHISEL_H_RATIO) - 0.02;
 
         const cx = isPortrait ? 0 : -0.4;
         const cy = 0.0;
-        const rx = Math.min(isPortrait ? 0.25 : 1.4, rxMax);
-        const ry = isPortrait ? 0.30 : 0.7;
-        const rz = isPortrait ? 0.20 : 0.4;
+        const rx = Math.min(isPortrait ? 0.18 : 0.9, rxMax);
+        const ry = Math.min(isPortrait ? 0.10 : 0.20, ryMax);
+        const rz = isPortrait ? 0.10 : 0.25;
 
         orbitGroup.position.set(
           cx + Math.cos(orbitT) * rx,
