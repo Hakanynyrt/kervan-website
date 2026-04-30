@@ -105,6 +105,7 @@ export interface DictBlock {
     address: string;
     phoneLabel: string;
     emailLabel: string;
+    instagramLabel: string;
     hoursLabel: string;
     hours: string;
   };
