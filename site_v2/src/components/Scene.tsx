@@ -117,20 +117,25 @@ export default function Scene() {
           } else if (size1.z === longest) {
             model.rotation.x = Math.PI / 2;
           }
+          model.updateMatrixWorld(true);
 
-          // Center bbox at origin
-          const box2 = new THREE.Box3().setFromObject(model);
-          const center = new THREE.Vector3();
-          box2.getCenter(center);
-          model.position.sub(center);
-
-          // Scale to ~58% visible height
+          // Scale FIRST so model.position is computed in scaled units below.
+          // (Three.js doesn't scale `position` itself; it scales children's
+          // vertices. Centering pre-scale leaves a huge offset that survives
+          // scaling and parks the model far below the camera frustum.)
           const targetH = 4.82 * 0.58;
-          const box3 = new THREE.Box3().setFromObject(model);
-          const size3 = new THREE.Vector3();
-          box3.getSize(size3);
-          const s = targetH / Math.max(0.01, size3.y);
+          const box2 = new THREE.Box3().setFromObject(model);
+          const size2 = new THREE.Vector3();
+          box2.getSize(size2);
+          const s = targetH / Math.max(0.01, size2.y);
           model.scale.setScalar(s);
+          model.updateMatrixWorld(true);
+
+          // Center bbox at origin (after scale, in scaled-world units)
+          const box3 = new THREE.Box3().setFromObject(model);
+          const center = new THREE.Vector3();
+          box3.getCenter(center);
+          model.position.sub(center);
 
           // Material — warm steel + ember emissive
           model.traverse((o) => {
