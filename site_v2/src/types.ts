@@ -104,6 +104,7 @@ export interface DictBlock {
     error: string;
     address: string;
     phoneLabel: string;
+    whatsappLabel: string;
     emailLabel: string;
     instagramLabel: string;
     hoursLabel: string;
