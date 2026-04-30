@@ -34,8 +34,15 @@ export default function Scene() {
     renderer.setClearAlpha(0);
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
 
-    const w = () => container.clientWidth || window.innerWidth;
-    const h = () => container.clientHeight || window.innerHeight;
+    // Visual viewport — iOS Safari URL-bar collapse cycles change layout
+    // height while content (and a fixed `inset:0` element) re-flow late.
+    // `visualViewport` always reflects the *visible* area; fall back to
+    // `innerWidth/Height`, then `container.clientWidth/Height` as a last
+    // resort for environments without either (very old WebViews).
+    const w = () =>
+      window.visualViewport?.width ?? window.innerWidth ?? container.clientWidth;
+    const h = () =>
+      window.visualViewport?.height ?? window.innerHeight ?? container.clientHeight;
     renderer.setSize(w(), h(), false);
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
@@ -175,6 +182,11 @@ export default function Scene() {
     };
     window.addEventListener('resize', onResize, { passive: true });
     window.addEventListener('orientationchange', onResize, { passive: true });
+    // visualViewport: iOS Safari URL-bar collapse fires resize *only* here,
+    // not on `window`. Without this, the canvas keeps the URL-bar-expanded
+    // height after the bar collapses, projecting the chisel into a buffer
+    // taller than the visible area.
+    window.visualViewport?.addEventListener('resize', onResize);
 
     // ─── Animation loop ──────────────────────────────────────────────
     const startTime = performance.now();
@@ -187,11 +199,22 @@ export default function Scene() {
 
       if (!reduced) {
         const orbitT = t * 0.018;
+
+        // Visible half-width @ z=0 is `tan(FOV/2) * camZ * aspect`. With
+        // FOV=30°, camZ=9 the constant is 2.41. Subtract the chisel's
+        // own scaled half-width plus breathing room and you get the
+        // largest safe orbit radius for the current viewport. Mobile
+        // portrait (aspect ~0.46) stays well clear of the edges; desktop
+        // keeps the wide ambient drift it had.
+        const halfW = 2.41 * aspect;
+        const safetyMargin = 0.49; // chisel half-width + breathing room
+        const rxMax = Math.max(0.1, halfW - safetyMargin);
+
         const cx = isPortrait ? 0 : -0.4;
         const cy = 0.0;
-        const rx = isPortrait ? 0.55 : 1.4;
-        const ry = isPortrait ? 0.45 : 0.7;
-        const rz = isPortrait ? 0.3 : 0.4;
+        const rx = Math.min(isPortrait ? 0.25 : 1.4, rxMax);
+        const ry = isPortrait ? 0.30 : 0.7;
+        const rz = isPortrait ? 0.20 : 0.4;
 
         orbitGroup.position.set(
           cx + Math.cos(orbitT) * rx,
@@ -225,6 +248,7 @@ export default function Scene() {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', onResize);
+      window.visualViewport?.removeEventListener('resize', onResize);
       pmrem.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode) {
