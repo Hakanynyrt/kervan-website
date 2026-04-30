@@ -1,0 +1,5 @@
+node_modules/
+.astro/
+.wrangler/
+.claude-analysis.md
+site_v2/
