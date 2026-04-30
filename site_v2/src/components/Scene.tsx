@@ -414,9 +414,13 @@ export default function Scene() {
           Math.sin(orbitT * 0.71 + 1.2) * rz,
         );
 
-        spinGroup.rotation.y = t * 0.05;
-        spinGroup.rotation.x = Math.sin(t * 0.04) * 0.07;
-        spinGroup.rotation.z = Math.sin(t * 0.05 + 1.5) * 0.05;
+        // Cinematic angled pose: chisel leans diagonally on Z (~-16°)
+        // and tips back slightly on X (~-4°) — never bolt-upright.
+        // Y is a slow oscillation rather than a full spin so the eye
+        // reads it as breathing/hovering, not rotating.
+        spinGroup.rotation.z = -0.28 + Math.sin(t * 0.04 + 1.5) * 0.035;
+        spinGroup.rotation.x = -0.07 + Math.sin(t * 0.03) * 0.03;
+        spinGroup.rotation.y = Math.sin(t * 0.05) * 0.32;
       } else {
         // Reduced motion: statik
         const restX = isPortrait ? 0 : 1.0;
