@@ -61,6 +61,7 @@ export default function Contact({ t }: Props) {
         >
           {[
             { label: t.contact.phoneLabel, value: <a href="tel:+905316693734" className="hover:text-brand transition-colors">+90 531 669 37 34</a> },
+            { label: t.contact.whatsappLabel, value: <a href="https://wa.me/905316693734" target="_blank" rel="noopener noreferrer" className="hover:text-brand transition-colors">+90 531 669 37 34</a> },
             { label: t.contact.emailLabel, value: <a href="mailto:info@kervanheat.com" className="hover:text-brand transition-colors">info@kervanheat.com</a> },
             { label: t.contact.instagramLabel, value: <a href="https://www.instagram.com/kervanmakina/" target="_blank" rel="noopener noreferrer" className="hover:text-brand transition-colors">@kervanmakina</a> },
             { label: 'Adres', value: <span className="whitespace-pre-line">{t.contact.address}</span> },
