@@ -15,6 +15,9 @@ export const DICT: Dict = {
       contact: 'İletişim',
       cta: 'Teklif Al',
     },
+    opening: {
+      scroll: 'kaydır',
+    },
     hero: {
       eyebrow: 'Kocaeli · 2004',
       title1: 'Kırıcıyı ayakta',
@@ -154,6 +157,9 @@ export const DICT: Dict = {
       industries: 'Industries',
       contact: 'Contact',
       cta: 'Get a Quote',
+    },
+    opening: {
+      scroll: 'scroll',
     },
     hero: {
       eyebrow: 'Kocaeli · Since 2004',
