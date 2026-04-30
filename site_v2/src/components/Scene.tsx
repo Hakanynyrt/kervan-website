@@ -137,16 +137,17 @@ export default function Scene() {
           box3.getCenter(center);
           model.position.sub(center);
 
-          // Material — warm steel + ember emissive
+          // Material — forged tool steel. Dark base + high metalness +
+          // smooth surface lets the warm key/sun lights and ember rim
+          // light do the colour work. v1 reference (public/scene.js:121).
           model.traverse((o) => {
             const mesh = o as THREE.Mesh;
             if (mesh.isMesh) {
               mesh.material = new THREE.MeshStandardMaterial({
-                color: 0x7a6a5a,
-                metalness: 0.85,
-                roughness: 0.38,
-                emissive: 0x3a1c0a,
-                emissiveIntensity: 0.18,
+                color: 0x2a2a2e,
+                metalness: 0.92,
+                roughness: 0.28,
+                envMapIntensity: 1.3,
               });
             }
           });
