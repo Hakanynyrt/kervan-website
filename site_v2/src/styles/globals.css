@@ -39,6 +39,13 @@
 ═══════════════════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
+/* Section pagination — each top-level <section class="snap-start">
+   below `.app-root` is a snap target. `mandatory` forces the browser
+   to land on a section after every scroll-end; combined with
+   `min-h-dvh` per section the user reads them as discrete screens. */
+html {
+  scroll-snap-type: y mandatory;
+}
 body {
   background: var(--color-bg);
   color: var(--color-ink);

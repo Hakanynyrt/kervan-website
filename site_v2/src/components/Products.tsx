@@ -9,7 +9,7 @@ interface Props {
 
 export default function Products({ t }: Props) {
   return (
-    <section id="products" className="py-24 md:py-32">
+    <section id="products" className="min-h-dvh snap-start flex flex-col justify-center py-16 md:py-24">
       <SectionHead
         eyebrow={t.products.eyebrow}
         title={t.products.title}
