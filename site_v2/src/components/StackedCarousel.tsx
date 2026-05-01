@@ -16,7 +16,21 @@ interface Props {
  */
 export default function StackedCarousel({ items }: Props) {
   const [active, setActive] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const N = items.length;
+
+  // Mobile portrait: drop the stack effect entirely. The rotateZ +
+  // translate stack reads as "tilted shards" on a narrow viewport,
+  // especially with the angled chisel rendering through it. Below
+  // md (<768 px) we show only the active card, navigation via the
+  // prev/next buttons.
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   const next = () => setActive((a) => (a + 1) % N);
   const prev = () => setActive((a) => (a - 1 + N) % N);
@@ -36,8 +50,8 @@ export default function StackedCarousel({ items }: Props) {
     <div className="max-w-2xl mx-auto px-4">
       {/* Stack area */}
       <div
-        className="relative h-[520px] md:h-[640px]"
-        style={{ perspective: '1400px' }}
+        className="relative h-[460px] md:h-[640px]"
+        style={{ perspective: isMobile ? 'none' : '1400px' }}
       >
         {/* Counter — top right of card stack */}
         <div className="absolute top-4 right-4 z-30 font-sans text-xs tracking-widest uppercase text-ink-soft tabular-nums pointer-events-none">
@@ -45,7 +59,7 @@ export default function StackedCarousel({ items }: Props) {
         </div>
 
         {items.map((item, i) => (
-          <Card key={i} item={item} index={i} active={active} N={N} />
+          <Card key={i} item={item} index={i} active={active} N={N} isMobile={isMobile} />
         ))}
       </div>
 
@@ -77,23 +91,27 @@ interface CardProps {
   index: number;
   active: number;
   N: number;
+  isMobile: boolean;
 }
 
 /** Single card; computes its 3D transform based on offset from active. */
-function Card({ item, index, active, N }: CardProps) {
+function Card({ item, index, active, N, isMobile }: CardProps) {
   // Signed offset, wrapped to [-N/2, N/2] for symmetric stacking
   const raw = index - active;
   const wrapped = raw > N / 2 ? raw - N : raw < -N / 2 ? raw + N : raw;
   const abs = Math.abs(wrapped);
   const visible = abs <= 2;
 
-  // Stacking transforms
-  const rotate = wrapped * 7;        // ±7° per offset
-  const scale = 1 - abs * 0.075;     // shrinks behind
-  const xPx = wrapped * 36;          // shifts to side
-  const yPx = abs * 12;              // sinks down slightly
-  const opacity = visible ? 1 - abs * 0.32 : 0;
-  const zIndex = 20 - abs;
+  // Mobile: completely flat — only the active card is shown, no rotation,
+  // no scale, no offset. Non-active cards fade to opacity 0 and step out
+  // of the z-stack so they can't intercept clicks.
+  // Desktop: keep the testimonials-style 3D rack.
+  const rotate = isMobile ? 0 : wrapped * 7;
+  const scale = isMobile ? 1 : 1 - abs * 0.075;
+  const xPx = isMobile ? 0 : wrapped * 36;
+  const yPx = isMobile ? 0 : abs * 12;
+  const opacity = isMobile ? (abs === 0 ? 1 : 0) : visible ? 1 - abs * 0.32 : 0;
+  const zIndex = isMobile ? (abs === 0 ? 20 : 0) : 20 - abs;
 
   return (
     <motion.article
