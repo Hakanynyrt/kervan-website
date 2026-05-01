@@ -121,7 +121,7 @@ export default function Scene() {
     const CAM_Z = 7;
     const FOV_DEG = 28;
     const VISIBLE_H = 2 * Math.tan(THREE.MathUtils.degToRad(FOV_DEG / 2)) * CAM_Z;
-    const CHISEL_H_RATIO = 0.85;
+    const CHISEL_H_RATIO = 0.62;
 
     // ─── Renderer ────────────────────────────────────────────────────
     let renderer: THREE.WebGLRenderer;
@@ -372,6 +372,26 @@ export default function Scene() {
     };
     window.addEventListener('resize', onResize, { passive: true });
     window.addEventListener('orientationchange', onResize, { passive: true });
+
+    // Fade scene-bg opacity as the user leaves the opening hold so the
+    // chisel + starfield don't compete with content sections. Mapping:
+    //   scrollY ∈ [0, innerHeight]               → opacity 1
+    //   scrollY ∈ [innerHeight, 1.5×innerHeight] → linear fade 1 → 0.18
+    //   scrollY > 1.5×innerHeight                → opacity 0.18
+    // Container CSS opacity (not renderer.opacity) so postprocessing
+    // pipeline runs unchanged; we just dim the composited canvas.
+    const onScrollFade = () => {
+      const y = window.scrollY;
+      const vh = window.innerHeight;
+      let opacity = 1;
+      if (y > vh) {
+        const t = Math.min(1, (y - vh) / (vh * 0.5));
+        opacity = 1 - t * 0.82; // 1 → 0.18
+      }
+      container.style.opacity = String(opacity);
+    };
+    window.addEventListener('scroll', onScrollFade, { passive: true });
+    onScrollFade(); // capture refresh-mid-page
     // visualViewport: iOS Safari URL-bar collapse fires resize *only* here,
     // not on `window`. Without this, the canvas keeps the URL-bar-expanded
     // height after the bar collapses, projecting the chisel into a buffer
@@ -453,6 +473,7 @@ export default function Scene() {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', onResize);
+      window.removeEventListener('scroll', onScrollFade);
       window.visualViewport?.removeEventListener('resize', onResize);
       FAR.points.geometry.dispose();
       (FAR.points.material as THREE.PointsMaterial).dispose();
