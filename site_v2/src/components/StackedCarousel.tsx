@@ -47,10 +47,10 @@ export default function StackedCarousel({ items }: Props) {
   }, [N]);
 
   return (
-    <div className="max-w-2xl mx-auto px-4">
+    <div className="max-w-2xl mx-auto px-2 md:px-4">
       {/* Stack area */}
       <div
-        className="relative h-[460px] md:h-[640px]"
+        className="relative h-[380px] md:h-[640px]"
         style={{ perspective: isMobile ? 'none' : '1400px' }}
       >
         {/* Counter — top right of card stack */}
@@ -144,12 +144,12 @@ function Card({ item, index, active, N, isMobile }: CardProps) {
         )}
 
         {/* Bottom gradient + text overlay */}
-        <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 pointer-events-none">
+        <div className="absolute inset-x-0 bottom-0 p-4 md:p-8 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/85 to-transparent" />
           <div className="relative flex flex-col gap-1.5">
             <h3 className="font-h3 italic text-ink leading-tight">{item.name}</h3>
             {item.desc && (
-              <p className="font-serif italic text-sm md:text-base text-ink-mid leading-relaxed">
+              <p className="font-serif italic text-sm md:text-base text-ink-mid leading-snug">
                 {item.desc}
               </p>
             )}
