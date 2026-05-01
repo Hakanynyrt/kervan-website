@@ -33,8 +33,16 @@ export default function Contact({ t }: Props) {
       const fd = new FormData(formRef.current);
       fd.set('kvkk_consent', '1');
       const r = await fetch(RFQ_ENDPOINT, { method: 'POST', body: fd });
-      const j = (await r.json().catch(() => ({}))) as { ok?: boolean };
-      const ok = r.ok && j.ok === true;
+      const j = (await r.json().catch(() => ({}))) as {
+        ok?: boolean;
+        emailSent?: boolean;
+      };
+      // The worker returns `ok: true` even when neither Resend nor
+      // MailChannels delivered (it still tries Telegram and the form
+      // succeeded structurally). Treat a missing/false `emailSent` as
+      // an error so the user gets the phone-fallback copy instead of
+      // a misleading success.
+      const ok = r.ok && j.ok === true && j.emailSent === true;
       setState(ok ? 'success' : 'error');
       if (ok) formRef.current.reset();
     } catch {
