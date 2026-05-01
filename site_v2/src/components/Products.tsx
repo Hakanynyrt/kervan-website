@@ -9,7 +9,7 @@ interface Props {
 
 export default function Products({ t }: Props) {
   return (
-    <section id="products" className="min-h-dvh snap-start flex flex-col justify-center py-16 md:py-24">
+    <section id="products" className="min-h-dvh snap-start snap-always flex flex-col justify-center py-8 md:py-16">
       <SectionHead
         eyebrow={t.products.eyebrow}
         title={t.products.title}
@@ -17,7 +17,7 @@ export default function Products({ t }: Props) {
       />
 
       <motion.div
-        className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8"
+        className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8"
         variants={staggerContainer(0, 0.12)}
         initial="hidden"
         whileInView="show"
@@ -29,11 +29,12 @@ export default function Products({ t }: Props) {
             variants={fadeUp}
             whileHover={{ y: -6 }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="group flex flex-col gap-3 md:gap-5"
+            className="group flex flex-col gap-2 md:gap-5"
           >
-            {/* Square on mobile so the 2x2 grid fits one viewport;
-                portrait crop on tablet+ where there's room. */}
-            <div className="relative overflow-hidden aspect-square md:aspect-[4/5] bg-bg-soft">
+            {/* Slightly wider-than-square on mobile so the 2x2 grid +
+                section head fits one viewport; portrait crop on tablet+
+                where there's room. */}
+            <div className="relative overflow-hidden aspect-[5/4] md:aspect-[4/5] bg-bg-soft">
               <motion.div
                 className="absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: `url(${p.img})` }}
@@ -44,9 +45,9 @@ export default function Products({ t }: Props) {
                 0{i + 1}
               </span>
             </div>
-            <div className="flex flex-col gap-2">
-              <h3 className="font-h3 text-ink">{p.name}</h3>
-              <p className="font-sans text-sm text-ink-mid leading-relaxed">{p.desc}</p>
+            <div className="flex flex-col gap-1 md:gap-2">
+              <h3 className="font-serif italic text-xl md:text-3xl text-ink leading-tight">{p.name}</h3>
+              <p className="font-sans text-xs md:text-sm text-ink-mid leading-snug md:leading-relaxed">{p.desc}</p>
             </div>
           </motion.article>
         ))}

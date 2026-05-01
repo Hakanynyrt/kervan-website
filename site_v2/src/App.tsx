@@ -149,7 +149,7 @@ function OpeningHold({ t }: OpeningHoldProps) {
   return (
     <section
       aria-hidden="true"
-      className="relative h-dvh w-full pointer-events-none snap-start"
+      className="relative h-dvh w-full pointer-events-none snap-start snap-always"
     >
       <motion.div
         className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-sans text-[11px] tracking-[0.32em] uppercase text-ink-soft"
