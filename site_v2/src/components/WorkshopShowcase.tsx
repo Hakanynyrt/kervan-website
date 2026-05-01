@@ -15,7 +15,7 @@ interface Props {
  */
 export default function WorkshopShowcase({ t }: Props) {
   return (
-    <section id="atolye" className="py-24 md:py-32">
+    <section id="atolye" className="min-h-dvh snap-start flex flex-col justify-center py-16 md:py-24">
       <SectionHead
         eyebrow={t.atolye.eyebrow}
         title={t.atolye.title}

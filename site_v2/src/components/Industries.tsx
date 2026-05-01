@@ -10,7 +10,7 @@ interface Props {
 
 export default function Industries({ t }: Props) {
   return (
-    <section id="industries" className="py-24 md:py-32">
+    <section id="industries" className="min-h-dvh snap-start flex flex-col justify-center py-16 md:py-24">
       <SectionHead
         eyebrow={t.industries.eyebrow}
         title={t.industries.title}
