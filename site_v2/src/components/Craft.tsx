@@ -13,7 +13,7 @@ interface Props {
  */
 export default function Craft({ t }: Props) {
   return (
-    <section id="craft" className="min-h-dvh snap-start flex flex-col justify-center py-20 md:py-32 border-y border-hair">
+    <section id="craft" className="min-h-dvh snap-start snap-always flex flex-col justify-center py-20 md:py-32 border-y border-hair">
       <motion.div
         className="max-w-[820px] mx-auto px-8 flex flex-col gap-10 items-start"
         variants={fadeUp}

@@ -422,7 +422,18 @@ export default function Scene() {
         const rxMax = Math.max(0.1, halfW - safetyMargin);
         const ryMax = (VISIBLE_H / 2) * (1 - CHISEL_H_RATIO) - 0.02;
 
-        const cx = isPortrait ? 0 : -0.4;
+        // Phase: 0 at opening (scrollY=0), 1 once user passes Hero
+        // boundary. Smoothly lerps the chisel between two distinct
+        // poses without any per-frame branch — no jump when crossing.
+        // Smoothstep so the transition eases at both ends.
+        const rawPhase = Math.min(1, Math.max(0, window.scrollY / Math.max(1, h())));
+        const phase = rawPhase * rawPhase * (3 - 2 * rawPhase);
+
+        // cx lerps from 0 (centred showcase) → -0.4 (slight left bias).
+        // Portrait keeps cx=0 in both poses so we just lerp 0→0.
+        const cxOpening = 0;
+        const cxHero = isPortrait ? 0 : -0.4;
+        const cx = cxOpening + (cxHero - cxOpening) * phase;
         const cy = 0.0;
         const rx = Math.min(isPortrait ? 0.18 : 0.9, rxMax);
         const ry = Math.min(isPortrait ? 0.10 : 0.20, ryMax);
@@ -434,13 +445,25 @@ export default function Scene() {
           Math.sin(orbitT * 0.71 + 1.2) * rz,
         );
 
-        // Cinematic angled pose: chisel leans diagonally on Z (~-16°)
-        // and tips back slightly on X (~-4°) — never bolt-upright.
-        // Y is a slow oscillation rather than a full spin so the eye
-        // reads it as breathing/hovering, not rotating.
-        spinGroup.rotation.z = -0.28 + Math.sin(t * 0.04 + 1.5) * 0.035;
-        spinGroup.rotation.x = -0.07 + Math.sin(t * 0.03) * 0.03;
-        spinGroup.rotation.y = Math.sin(t * 0.05) * 0.32;
+        // Two pose modes blended by `phase`:
+        //
+        //  Opening (phase=0): vertical chisel, slow continuous Y spin —
+        //  reads like a museum/showcase pedestal. No baseline lean.
+        //
+        //  Hero+ (phase=1): -16° Z lean, -4° X tip-back, oscillating Y
+        //  (the cinematic "hover" pose).
+        //
+        // Y blends two functions linearly. Z and X scale to zero at
+        // phase=0 so opening is bolt-upright; at phase=1 the full lean
+        // (with its inner sine wobble) is in effect.
+        const yShowcase = t * 0.04;                          // continuous slow spin
+        const yHero = Math.sin(t * 0.05) * 0.32;             // oscillating
+        spinGroup.rotation.y = yShowcase * (1 - phase) + yHero * phase;
+
+        const zHero = -0.28 + Math.sin(t * 0.04 + 1.5) * 0.035;
+        const xHero = -0.07 + Math.sin(t * 0.03) * 0.03;
+        spinGroup.rotation.z = zHero * phase;
+        spinGroup.rotation.x = xHero * phase;
       } else {
         // Reduced motion: statik
         const restX = isPortrait ? 0 : 1.0;
