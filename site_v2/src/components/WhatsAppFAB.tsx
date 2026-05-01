@@ -1,16 +1,26 @@
+import { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 /**
- * Floating WhatsApp button — fixed bottom-right, brand green, always
- * accessible. Replaces the inline WhatsApp link/row in Contact + Footer
- * with a single discoverable affordance.
+ * Floating WhatsApp button — fixed bottom-right, brand green.
  *
- * Hides itself during the cinematic opening (scrollY < innerHeight/2)
- * so it doesn't compete with the chisel-only intro composition; fades
- * in once the user starts engaging with the page.
+ * Hidden during the cinematic opening so it doesn't compete with the
+ * chisel-only intro; fades in once the user has scrolled past ~half
+ * of the first viewport (i.e. is engaging with Hero or beyond).
+ * `pointer-events: none` while hidden so it can't be tapped by mistake.
  */
 export default function WhatsAppFAB() {
   const reduced = useReducedMotion();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setVisible(window.scrollY >= window.innerHeight * 0.5);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // capture initial position (e.g. after refresh mid-page)
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
     <motion.a
@@ -18,11 +28,16 @@ export default function WhatsAppFAB() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="WhatsApp +90 531 669 37 34"
+      aria-hidden={!visible}
+      tabIndex={visible ? 0 : -1}
       className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-40 inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full text-white shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
-      style={{ backgroundColor: '#25D366' }}
+      style={{
+        backgroundColor: '#25D366',
+        pointerEvents: visible ? 'auto' : 'none',
+      }}
       initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 3.4, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      animate={visible ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       whileHover={reduced ? undefined : { scale: 1.06 }}
       whileTap={reduced ? undefined : { scale: 0.95 }}
     >
