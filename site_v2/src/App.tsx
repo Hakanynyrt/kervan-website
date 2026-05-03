@@ -148,6 +148,7 @@ function OpeningHold({ t }: OpeningHoldProps) {
 
   return (
     <section
+      data-scene-pose="opening"
       aria-hidden="true"
       className="relative h-dvh w-full pointer-events-none snap-start snap-always"
     >

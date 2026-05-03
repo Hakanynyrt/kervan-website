@@ -24,7 +24,7 @@ export default function BrandMarquee({ t }: Props) {
   const items = [...t.brands.items, ...t.brands.items]; // seamless loop
 
   return (
-    <section
+    <section data-scene-pose="brands"
       className="min-h-dvh snap-start snap-always flex flex-col justify-center py-16 md:py-24 border-y border-hair overflow-hidden"
       style={{ perspective: '1500px' }}
     >
