@@ -35,6 +35,32 @@ export default function StackedCarousel({ items }: Props) {
   const next = () => setActive((a) => (a + 1) % N);
   const prev = () => setActive((a) => (a - 1 + N) % N);
 
+  // Touch swipe — left = next, right = prev. Threshold 50 px to ignore
+  // jitter; horizontal-dominant check (|dx| > |dy|) so vertical scrolls
+  // (page snap-pagination) aren't hijacked. `touchAction: pan-y` on the
+  // stack area lets the browser keep handling vertical pan while we
+  // claim horizontal gestures.
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (t) touchStartRef.current = { x: t.clientX, y: t.clientY };
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start) return;
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) < 50) return;
+    if (Math.abs(dx) < Math.abs(dy)) return;
+    if (dx < 0) next();
+    else prev();
+  };
+
   // Klavye navigasyonu — accessibility
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -50,8 +76,10 @@ export default function StackedCarousel({ items }: Props) {
     <div className="w-full max-w-2xl mx-auto px-2 md:px-4">
       {/* Stack area */}
       <div
-        className="relative h-[380px] md:h-[640px]"
+        className="relative h-[380px] md:h-[640px] touch-pan-y select-none"
         style={{ perspective: isMobile ? 'none' : '1400px' }}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
       >
         {/* Counter — top right of card stack */}
         <div className="absolute top-4 right-4 z-30 font-sans text-xs tracking-widest uppercase text-ink-soft tabular-nums pointer-events-none">
