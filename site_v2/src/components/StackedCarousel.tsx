@@ -47,7 +47,7 @@ export default function StackedCarousel({ items }: Props) {
   }, [N]);
 
   return (
-    <div className="max-w-2xl mx-auto px-2 md:px-4">
+    <div className="w-full max-w-2xl mx-auto px-2 md:px-4">
       {/* Stack area */}
       <div
         className="relative h-[380px] md:h-[640px]"
