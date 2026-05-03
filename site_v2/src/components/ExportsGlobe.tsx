@@ -171,9 +171,11 @@ export default function ExportsGlobe({ lang }: Props) {
         bordersGroup = new THREE.LineSegments(
           geom,
           new THREE.LineBasicMaterial({
-            color: 0x6a6055,
+            color: 0xd8c8a8,
             transparent: true,
-            opacity: 0.55,
+            opacity: 0.95,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
           }),
         );
         world.add(bordersGroup);
@@ -185,13 +187,18 @@ export default function ExportsGlobe({ lang }: Props) {
       });
 
     // ──── Origin + destination dots ──────────────────────────────
+    // Each dot has a visible mesh + an invisible larger hit-sphere.
+    // The hit-sphere is what the raycaster intersects so taps land
+    // on a comfortable ~44 px target on mobile, even though the
+    // visible dot stays small.
     const points = buildPoints(); // [origin, ...destinations]
     const dotMeshes: THREE.Mesh[] = [];
+    const hitMeshes: THREE.Mesh[] = [];
     points.forEach((pt, i) => {
       const isOrigin = i === 0;
       const pos = latLonToVec3(pt.lat, pt.lon, 1.012);
       const dot = new THREE.Mesh(
-        new THREE.SphereGeometry(isOrigin ? 0.024 : 0.018, 14, 14),
+        new THREE.SphereGeometry(isOrigin ? 0.026 : 0.02, 14, 14),
         new THREE.MeshBasicMaterial({
           color: isOrigin ? 0xff6a1a : 0xe8e2d6,
         }),
@@ -200,6 +207,15 @@ export default function ExportsGlobe({ lang }: Props) {
       dot.userData = { ...pt, index: i, isOrigin };
       world.add(dot);
       dotMeshes.push(dot);
+
+      const hit = new THREE.Mesh(
+        new THREE.SphereGeometry(0.06, 8, 8),
+        new THREE.MeshBasicMaterial({ visible: false }),
+      );
+      hit.position.copy(pos);
+      hit.userData = { ...pt, index: i, isOrigin };
+      world.add(hit);
+      hitMeshes.push(hit);
     });
 
     // Origin halo (pulsing).
@@ -287,17 +303,18 @@ export default function ExportsGlobe({ lang }: Props) {
         box3.getCenter(center);
         model.position.sub(center);
 
-        // Material — warm steel + bright ember rim. Lighter than the
-        // main chisel since the globe lights are dimmer.
+        // Material — bright warm steel so it pops on the dark globe.
+        // Higher emissive than Scene.tsx's chisel because there's no
+        // PMREM env map here to give metallic highlights to bite into.
         model.traverse((o) => {
           const mesh = o as THREE.Mesh;
           if (mesh.isMesh) {
             mesh.material = new THREE.MeshStandardMaterial({
-              color: 0x4a443e,
-              metalness: 0.85,
-              roughness: 0.32,
-              emissive: 0x2a1a08,
-              emissiveIntensity: 0.45,
+              color: 0xc8b89c,
+              metalness: 0.6,
+              roughness: 0.45,
+              emissive: 0xff6a1a,
+              emissiveIntensity: 0.6,
             });
           }
         });
@@ -371,7 +388,7 @@ export default function ExportsGlobe({ lang }: Props) {
       ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       ndc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(ndc, camera);
-      const hits = raycaster.intersectObjects(dotMeshes);
+      const hits = raycaster.intersectObjects(hitMeshes);
       if (hits.length > 0) {
         const data = hits[0].object.userData as ExportPoint;
         setHover(data);
@@ -395,7 +412,7 @@ export default function ExportsGlobe({ lang }: Props) {
       ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       ndc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(ndc, camera);
-      const hits = raycaster.intersectObjects(dotMeshes);
+      const hits = raycaster.intersectObjects(hitMeshes);
       if (hits.length > 0) {
         const userData = hits[0].object.userData as { index: number };
         selectedRef.current = userData.index;
@@ -404,10 +421,17 @@ export default function ExportsGlobe({ lang }: Props) {
     };
     renderer.domElement.style.cursor = 'grab';
     renderer.domElement.style.touchAction = 'pan-y';
+    const onPointerCancel = (e: PointerEvent) => {
+      isDragging = false;
+      try {
+        renderer.domElement.releasePointerCapture(e.pointerId);
+      } catch { /* ignore */ }
+      renderer.domElement.style.cursor = 'grab';
+    };
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
-    window.addEventListener('pointercancel', onPointerUp);
+    window.addEventListener('pointercancel', onPointerCancel);
 
     // ──── Resize ─────────────────────────────────────────────────
     const onResize = () => {
@@ -476,7 +500,7 @@ export default function ExportsGlobe({ lang }: Props) {
       abortCtrl.abort();
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
-      window.removeEventListener('pointercancel', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerCancel);
       window.removeEventListener('resize', onResize);
       ro.disconnect();
       renderer.dispose();
