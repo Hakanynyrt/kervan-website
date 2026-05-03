@@ -84,12 +84,17 @@ function OpeningHold({ t }: OpeningHoldProps) {
     return () => window.removeEventListener('scroll', onScroll);
   }, [passed]);
 
-  // After unmount, the layout reflows so Hero is at the top — but the
-  // browser was at scrollY = innerHeight (the snap target). Without
-  // this synchronous correction it'd land mid-Products. Runs in the
-  // same frame as the unmount, so no flicker.
+  // After unmount, the layout reflows: every section below shifts up
+  // by `innerHeight`. Subtract that from the current scroll position
+  // so the user stays at the *same visual element* they were on —
+  // landing on hero if they crossed the boundary normally, but also
+  // preserving deep scrolls (e.g. anchor links / scroll-to-footer)
+  // that happen to also flip `passed` true. Runs before paint, no
+  // visible jump.
   useLayoutEffect(() => {
-    if (passed) window.scrollTo(0, 0);
+    if (!passed) return;
+    const adjusted = Math.max(0, window.scrollY - window.innerHeight);
+    window.scrollTo(0, adjusted);
   }, [passed]);
 
   // Snap-to-hero gesture trap (wheel/touch/keys). Only relevant before

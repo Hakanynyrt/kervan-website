@@ -6,7 +6,7 @@ interface Props {
 
 export default function Footer({ t }: Props) {
   return (
-    <footer className="border-t border-hair">
+    <footer className="snap-start border-t border-hair">
       <div className="max-w-[1280px] mx-auto px-8 py-12 flex flex-col md:flex-row gap-6 md:gap-12 items-start md:items-center justify-between">
         <div className="flex items-baseline gap-3">
           <span className="font-serif italic text-3xl text-ink leading-none">K</span>
