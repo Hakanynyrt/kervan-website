@@ -12,6 +12,7 @@ import WorkshopShowcase from './components/WorkshopShowcase';
 import BrandMarquee from './components/BrandMarquee';
 import Craft from './components/Craft';
 import Industries from './components/Industries';
+import Exports from './components/Exports';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import WhatsAppFAB from './components/WhatsAppFAB';
@@ -39,6 +40,7 @@ export default function App() {
         <BrandMarquee t={t} />
         <Craft t={t} />
         <Industries t={t} />
+        <Exports t={t} lang={lang} />
         <Contact t={t} />
         <Footer t={t} />
       </div>

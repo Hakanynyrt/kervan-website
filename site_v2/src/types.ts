@@ -84,6 +84,13 @@ export interface DictBlock {
     items: IndustryItem[];
     marquee: string[];
   };
+  exports: {
+    eyebrow: string;
+    /** `{count}` placeholder is replaced at render time with the
+     *  destination count from `lib/exports.ts`. */
+    title: string;
+    aside: string;
+  };
   brands: {
     eyebrow: string;
     title: string;
