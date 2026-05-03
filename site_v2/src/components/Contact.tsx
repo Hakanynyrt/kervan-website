@@ -51,7 +51,7 @@ export default function Contact({ t }: Props) {
   }
 
   return (
-    <section id="contact" className="min-h-dvh snap-start flex flex-col justify-center py-16 md:py-24 bg-bg-soft/40">
+    <section id="contact" data-scene-pose="contact" className="min-h-dvh snap-start flex flex-col justify-center py-16 md:py-24 bg-bg-soft/40">
       <SectionHead
         eyebrow={t.contact.eyebrow}
         title={t.contact.title}
