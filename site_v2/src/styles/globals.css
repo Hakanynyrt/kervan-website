@@ -42,9 +42,17 @@ html, body { margin: 0; padding: 0; }
 /* Section pagination — each top-level <section class="snap-start">
    below `.app-root` is a snap target. `mandatory` forces the browser
    to land on a section after every scroll-end; combined with
-   `min-h-dvh` per section the user reads them as discrete screens. */
+   `min-h-dvh` per section the user reads them as discrete screens.
+
+   `overscroll-behavior-y: contain` kills rubber-band at the top/bottom
+   of the document. iOS Safari, when at the topmost snap target (Hero
+   after OpeningHold unmount), interprets a rubber-band-triggered
+   scroll-end as "no valid prev target → snap forward" and pushes the
+   user *down* to the next section. With overscroll-behavior contained
+   that bounce never happens, so snap can't misfire. */
 html {
   scroll-snap-type: y mandatory;
+  overscroll-behavior-y: contain;
 }
 body {
   background: var(--color-bg);
