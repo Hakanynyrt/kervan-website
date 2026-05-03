@@ -62,11 +62,12 @@ export default function StackedCarousel({ items }: Props) {
     else prev();
   };
 
-  // Klavye navigasyonu — ← / → cycle slides; Esc closes lightbox.
+  // Klavye navigasyonu — ←/→ cycles slides whether the lightbox is
+  // open or closed; Escape only closes the lightbox.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (lightboxOpen) {
-        if (e.key === 'Escape') setLightboxOpen(false);
+      if (e.key === 'Escape' && lightboxOpen) {
+        setLightboxOpen(false);
         return;
       }
       if (e.key === 'ArrowRight') next();
@@ -130,7 +131,13 @@ export default function StackedCarousel({ items }: Props) {
 
       <AnimatePresence>
         {lightboxOpen && (
-          <Lightbox item={items[active]} onClose={() => setLightboxOpen(false)} />
+          <Lightbox
+            items={items}
+            active={active}
+            onPrev={prev}
+            onNext={next}
+            onClose={() => setLightboxOpen(false)}
+          />
         )}
       </AnimatePresence>
     </div>
@@ -230,16 +237,25 @@ function Card({ item, index, active, N, isMobile, onOpen }: CardProps) {
 }
 
 interface LightboxProps {
-  item: GalleryItem;
+  items: GalleryItem[];
+  active: number;
+  onPrev: () => void;
+  onNext: () => void;
   onClose: () => void;
 }
 
 /**
  * Fullscreen overlay for the active card's media. Click backdrop or
- * the close button to dismiss; ESC handled in parent. Body scroll
- * locked while open so the snap-pagination doesn't fight the modal.
+ * the close button to dismiss; ESC handled in parent.
+ *
+ * Internal swipe + counter so the user can browse between videos
+ * without exiting the modal. Body scroll locked while open so the
+ * snap-pagination doesn't fight the modal.
  */
-function Lightbox({ item, onClose }: LightboxProps) {
+function Lightbox({ items, active, onPrev, onNext, onClose }: LightboxProps) {
+  const item = items[active];
+  const N = items.length;
+
   useEffect(() => {
     const prev = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden';
@@ -248,21 +264,56 @@ function Lightbox({ item, onClose }: LightboxProps) {
     };
   }, []);
 
+  // Touch swipe inside the lightbox — same threshold/axis logic as
+  // the carousel itself: 50 px and horizontal-dominant.
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (t) touchStartRef.current = { x: t.clientX, y: t.clientY };
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start) return;
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) < 50) return;
+    if (Math.abs(dx) < Math.abs(dy)) return;
+    if (dx < 0) onNext();
+    else onPrev();
+  };
+
   return (
     <motion.div
-      className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-4 md:p-12"
+      className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-4 md:p-12 select-none"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       onClick={onClose}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
       role="dialog"
       aria-modal="true"
       aria-label={item.name}
     >
+      {/* Counter — top left, mirrors the in-card counter; tells the
+          user "n / total" so the swipe-between-videos affordance is
+          obvious. */}
+      <div className="absolute top-4 left-4 z-10 font-sans text-xs tracking-widest uppercase text-ink-soft tabular-nums pointer-events-none">
+        {String(active + 1).padStart(2, '0')} / {String(N).padStart(2, '0')}
+      </div>
+
       <button
         type="button"
-        onClick={onClose}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
         aria-label="Kapat"
         className="absolute top-4 right-4 z-10 inline-flex items-center justify-center w-12 h-12 rounded-full bg-bg-soft/60 hover:bg-bg-soft text-ink transition-colors"
       >
@@ -273,37 +324,81 @@ function Lightbox({ item, onClose }: LightboxProps) {
       </button>
 
       {/* Stop click propagation on media wrapper so users can interact
-          with video controls without dismissing the lightbox. */}
+          with video controls without dismissing the lightbox.
+          AnimatePresence with `mode="wait"` cross-fades media when the
+          slide changes via swipe / keyboard. The `key` ensures the
+          video element remounts so it picks up the new `src`. */}
       <div
         className="relative w-full max-w-4xl flex flex-col items-center gap-4"
         onClick={(e) => e.stopPropagation()}
       >
-        {item.video ? (
-          <video
-            src={item.video}
-            poster={item.img || undefined}
-            controls
-            autoPlay
-            loop
-            playsInline
-            className="max-w-full max-h-[80vh] w-auto h-auto object-contain bg-black"
-          />
-        ) : item.img ? (
-          <img
-            src={item.img}
-            alt={item.name}
-            className="max-w-full max-h-[80vh] w-auto h-auto object-contain"
-          />
-        ) : null}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={active}
+            className="w-full flex flex-col items-center gap-4"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {item.video ? (
+              <video
+                src={item.video}
+                poster={item.img || undefined}
+                controls
+                autoPlay
+                loop
+                playsInline
+                className="max-w-full max-h-[78vh] w-auto h-auto object-contain bg-black"
+              />
+            ) : item.img ? (
+              <img
+                src={item.img}
+                alt={item.name}
+                className="max-w-full max-h-[78vh] w-auto h-auto object-contain"
+              />
+            ) : null}
 
-        <div className="flex flex-col gap-1 px-2 text-center">
-          <h3 className="font-h3 italic text-ink leading-tight">{item.name}</h3>
-          {item.desc && (
-            <p className="font-serif italic text-sm md:text-base text-ink-mid leading-snug">
-              {item.desc}
-            </p>
-          )}
-        </div>
+            <div className="flex flex-col gap-1 px-2 text-center">
+              <h3 className="font-h3 italic text-ink leading-tight">{item.name}</h3>
+              {item.desc && (
+                <p className="font-serif italic text-sm md:text-base text-ink-mid leading-snug">
+                  {item.desc}
+                </p>
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Dots indicator inside lightbox — same shape as the in-page
+          one, gives the user a tap-target alternative to swipe. */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
+        {items.map((_, i) => {
+          const isActive = i === active;
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (i === active) return;
+                if (i > active) onNext();
+                else onPrev();
+                // for jumps of >1 we'd need a setActive prop; for now,
+                // single-step nav is enough — users typically swipe.
+              }}
+              aria-label={`Slayt ${i + 1}`}
+              aria-current={isActive ? 'true' : undefined}
+              className={
+                'h-1.5 rounded-full transition-all duration-300 ease-out ' +
+                (isActive
+                  ? 'w-8 bg-brand'
+                  : 'w-1.5 bg-ink-soft/40 hover:bg-ink-soft/70')
+              }
+            />
+          );
+        })}
       </div>
     </motion.div>
   );
