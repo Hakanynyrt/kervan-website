@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type { GalleryItem } from '../types';
 
 interface Props {
@@ -9,21 +9,24 @@ interface Props {
 /**
  * StackedCarousel — 3D yığın kart efekti (testimonials-card pattern).
  * Aktif kart önde merkezde, ±1/±2 kartlar arka planda hafif rotation +
- * scale + offset ile yığılı. Prev/next nav. Counter top-right.
+ * scale + offset ile yığılı.
  *
- * Cards: video varsa <video> (in-view autoplay), yoksa img background.
- * Mood C: bg-bg-soft, hairline border, italic Fraunces overlay text.
+ * Navigation:
+ *   - Touch swipe: sola/sağa (50 px threshold, horizontal-dominant)
+ *   - Klavye: ← / →
+ *   - Tıklanabilir dots indicator: aktif kart belli, atlamak için tap
+ *
+ * Aktif karta tap → fullscreen Lightbox (video controls + close).
  */
 export default function StackedCarousel({ items }: Props) {
   const [active, setActive] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const N = items.length;
 
   // Mobile portrait: drop the stack effect entirely. The rotateZ +
-  // translate stack reads as "tilted shards" on a narrow viewport,
-  // especially with the angled chisel rendering through it. Below
-  // md (<768 px) we show only the active card, navigation via the
-  // prev/next buttons.
+  // translate stack reads as "tilted shards" on a narrow viewport.
+  // Below md (<768 px) we show only the active card.
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)');
     const update = () => setIsMobile(mq.matches);
@@ -37,9 +40,7 @@ export default function StackedCarousel({ items }: Props) {
 
   // Touch swipe — left = next, right = prev. Threshold 50 px to ignore
   // jitter; horizontal-dominant check (|dx| > |dy|) so vertical scrolls
-  // (page snap-pagination) aren't hijacked. `touchAction: pan-y` on the
-  // stack area lets the browser keep handling vertical pan while we
-  // claim horizontal gestures.
+  // (page snap-pagination) aren't hijacked.
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -61,16 +62,20 @@ export default function StackedCarousel({ items }: Props) {
     else prev();
   };
 
-  // Klavye navigasyonu — accessibility
+  // Klavye navigasyonu — ← / → cycle slides; Esc closes lightbox.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (lightboxOpen) {
+        if (e.key === 'Escape') setLightboxOpen(false);
+        return;
+      }
       if (e.key === 'ArrowRight') next();
       else if (e.key === 'ArrowLeft') prev();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [N]);
+  }, [N, lightboxOpen]);
 
   return (
     <div className="w-full max-w-2xl mx-auto px-2 md:px-4">
@@ -87,29 +92,47 @@ export default function StackedCarousel({ items }: Props) {
         </div>
 
         {items.map((item, i) => (
-          <Card key={i} item={item} index={i} active={active} N={N} isMobile={isMobile} />
+          <Card
+            key={i}
+            item={item}
+            index={i}
+            active={active}
+            N={N}
+            isMobile={isMobile}
+            onOpen={() => setLightboxOpen(true)}
+          />
         ))}
       </div>
 
-      {/* Nav buttons */}
-      <div className="flex justify-center items-center gap-3 mt-8">
-        <button
-          type="button"
-          onClick={prev}
-          aria-label="Önceki"
-          className="w-12 h-12 border border-hair text-ink-mid hover:bg-bg-soft hover:border-ink-mid hover:text-ink transition-all flex items-center justify-center font-serif text-xl"
-        >
-          ←
-        </button>
-        <button
-          type="button"
-          onClick={next}
-          aria-label="Sonraki"
-          className="w-12 h-12 border border-hair text-ink-mid hover:bg-bg-soft hover:border-ink-mid hover:text-ink transition-all flex items-center justify-center font-serif text-xl"
-        >
-          →
-        </button>
+      {/* Dots indicator — replaces the ←/→ buttons. Active dot is a
+          longer brand-coloured bar; tap any dot to jump. The shape of
+          this strip reads as "this slides" without needing words. */}
+      <div className="mt-6 md:mt-8 flex justify-center items-center gap-2">
+        {items.map((_, i) => {
+          const isActive = i === active;
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setActive(i)}
+              aria-label={`Slayt ${i + 1}`}
+              aria-current={isActive ? 'true' : undefined}
+              className={
+                'h-1.5 rounded-full transition-all duration-300 ease-out ' +
+                (isActive
+                  ? 'w-8 bg-brand'
+                  : 'w-1.5 bg-ink-soft/40 hover:bg-ink-soft/70')
+              }
+            />
+          );
+        })}
       </div>
+
+      <AnimatePresence>
+        {lightboxOpen && (
+          <Lightbox item={items[active]} onClose={() => setLightboxOpen(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -120,30 +143,31 @@ interface CardProps {
   active: number;
   N: number;
   isMobile: boolean;
+  onOpen: () => void;
 }
 
 /** Single card; computes its 3D transform based on offset from active. */
-function Card({ item, index, active, N, isMobile }: CardProps) {
+function Card({ item, index, active, N, isMobile, onOpen }: CardProps) {
   // Signed offset, wrapped to [-N/2, N/2] for symmetric stacking
   const raw = index - active;
   const wrapped = raw > N / 2 ? raw - N : raw < -N / 2 ? raw + N : raw;
   const abs = Math.abs(wrapped);
   const visible = abs <= 2;
+  const isActive = abs === 0;
 
-  // Mobile: completely flat — only the active card is shown, no rotation,
-  // no scale, no offset. Non-active cards fade to opacity 0 and step out
-  // of the z-stack so they can't intercept clicks.
-  // Desktop: keep the testimonials-style 3D rack.
+  // Mobile: completely flat — only the active card is shown.
+  // Desktop: testimonials-style 3D rack.
   const rotate = isMobile ? 0 : wrapped * 7;
   const scale = isMobile ? 1 : 1 - abs * 0.075;
   const xPx = isMobile ? 0 : wrapped * 36;
   const yPx = isMobile ? 0 : abs * 12;
-  const opacity = isMobile ? (abs === 0 ? 1 : 0) : visible ? 1 - abs * 0.32 : 0;
-  const zIndex = isMobile ? (abs === 0 ? 20 : 0) : 20 - abs;
+  const opacity = isMobile ? (isActive ? 1 : 0) : visible ? 1 - abs * 0.32 : 0;
+  const zIndex = isMobile ? (isActive ? 20 : 0) : 20 - abs;
 
   return (
     <motion.article
-      className="absolute inset-0 origin-center"
+      className={'absolute inset-0 origin-center ' + (isActive ? 'cursor-pointer' : '')}
+      onClick={isActive ? onOpen : undefined}
       animate={{
         rotateZ: rotate,
         scale,
@@ -171,6 +195,23 @@ function Card({ item, index, active, N, isMobile }: CardProps) {
           </div>
         )}
 
+        {/* Expand affordance — only on active card. Communicates that
+            tapping opens a fullscreen view. Top-left, balances the
+            "01 / 07" counter top-right. */}
+        {isActive && (
+          <span
+            aria-hidden="true"
+            className="absolute top-4 left-4 z-20 inline-flex items-center justify-center w-9 h-9 rounded-full bg-bg/55 backdrop-blur-sm pointer-events-none"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ink">
+              <polyline points="15 3 21 3 21 9" />
+              <polyline points="9 21 3 21 3 15" />
+              <line x1="21" y1="3" x2="14" y2="10" />
+              <line x1="3" y1="21" x2="10" y2="14" />
+            </svg>
+          </span>
+        )}
+
         {/* Bottom gradient + text overlay */}
         <div className="absolute inset-x-0 bottom-0 p-4 md:p-8 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/85 to-transparent" />
@@ -185,6 +226,86 @@ function Card({ item, index, active, N, isMobile }: CardProps) {
         </div>
       </div>
     </motion.article>
+  );
+}
+
+interface LightboxProps {
+  item: GalleryItem;
+  onClose: () => void;
+}
+
+/**
+ * Fullscreen overlay for the active card's media. Click backdrop or
+ * the close button to dismiss; ESC handled in parent. Body scroll
+ * locked while open so the snap-pagination doesn't fight the modal.
+ */
+function Lightbox({ item, onClose }: LightboxProps) {
+  useEffect(() => {
+    const prev = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.documentElement.style.overflow = prev;
+    };
+  }, []);
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-4 md:p-12"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={item.name}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Kapat"
+        className="absolute top-4 right-4 z-10 inline-flex items-center justify-center w-12 h-12 rounded-full bg-bg-soft/60 hover:bg-bg-soft text-ink transition-colors"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      {/* Stop click propagation on media wrapper so users can interact
+          with video controls without dismissing the lightbox. */}
+      <div
+        className="relative w-full max-w-4xl flex flex-col items-center gap-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {item.video ? (
+          <video
+            src={item.video}
+            poster={item.img || undefined}
+            controls
+            autoPlay
+            loop
+            playsInline
+            className="max-w-full max-h-[80vh] w-auto h-auto object-contain bg-black"
+          />
+        ) : item.img ? (
+          <img
+            src={item.img}
+            alt={item.name}
+            className="max-w-full max-h-[80vh] w-auto h-auto object-contain"
+          />
+        ) : null}
+
+        <div className="flex flex-col gap-1 px-2 text-center">
+          <h3 className="font-h3 italic text-ink leading-tight">{item.name}</h3>
+          {item.desc && (
+            <p className="font-serif italic text-sm md:text-base text-ink-mid leading-snug">
+              {item.desc}
+            </p>
+          )}
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
