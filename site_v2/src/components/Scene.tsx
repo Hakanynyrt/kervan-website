@@ -48,6 +48,10 @@ const POSES: Record<string, ScenePose> = {
   // sits like a counterweight up there.
   industries: { px:  1.1,  py:  0.5,  pz:  0.2,  rx:  0,     rz: -0.10,  s: 0.40, o: 0.35 },
 
+  // Exports — globe owns the centre. Chisel goes nearly invisible
+  // off in a corner so the interactive 3D earth carries the moment.
+  exports:    { px:  1.5,  py:  0.7,  pz:  0.6,  rx:  0,     rz: -0.05,  s: 0.22, o: 0.08 },
+
   // Contact — top-left, smallest. Reads as a quiet signature in the
   // form's opposite corner.
   contact:    { px: -1.2,  py:  0.6,  pz:  0.4,  rx:  0,     rz: -0.08,  s: 0.35, o: 0.25 },

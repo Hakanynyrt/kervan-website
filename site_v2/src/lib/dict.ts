@@ -117,6 +117,11 @@ export const DICT: Dict = {
         'Sahanın yanında',
       ],
     },
+    exports: {
+      eyebrow: 'İhracat Ağı',
+      title: '{count} ülke. Bir tezgâh.',
+      aside: 'Kocaeli\'den çıkıp Avrupa, MENA, Orta Asya ve Amerika\'ya yol alan parçalar. Sürükle, döndür — noktaya dokun, hangi şehir olduğunu gör.',
+    },
     contact: {
       eyebrow: 'İletişim',
       title: 'Bir mesaj, bir cevap.',
@@ -259,6 +264,11 @@ export const DICT: Dict = {
         'Quotes within twenty-four hours',
         'Beside the field',
       ],
+    },
+    exports: {
+      eyebrow: 'Export Reach',
+      title: '{count} countries. One workshop.',
+      aside: 'Parts shipped from Kocaeli to Europe, MENA, Central Asia and the Americas. Drag to spin — tap a marker for the city.',
     },
     contact: {
       eyebrow: 'Contact',
