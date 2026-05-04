@@ -51,8 +51,8 @@ html, body { margin: 0; padding: 0; }
    user *down* to the next section. With overscroll-behavior contained
    that bounce never happens, so snap can't misfire. */
 html {
-  scroll-snap-type: y mandatory;
-  overscroll-behavior-y: contain;
+  scroll-snap-type: y proximity;
+  overscroll-behavior: none;
   overflow-x: clip;
 }
 body {
@@ -132,6 +132,12 @@ button { font: inherit; cursor: pointer; }
   font-style: italic;
   font-weight: 400;
   font-variation-settings: "opsz" 72;
+}
+
+/* Selected-city panel fade-in keyframe (used by ExportsGlobe). */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Hide scrollbar but keep scroll behavior */
