@@ -7,55 +7,24 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 
-/** Section-tied chisel poses. The active section's pose is the lerp
- *  target; current pose eases toward it over a few frames. Y rotation
- *  is independent (continuous slow revolution); these only set the
- *  baseline X/Z lean, the world position of the orbit centre, the
- *  scale multiplier on top of the GLB-fitted size, and the canvas
- *  opacity (so content sections don't drown under the chisel).
+/** Scroll-driven chisel animation, single rail.
+ *
+ *  Phases (continuous, no section detection, no pose table):
+ *    OPENING (scrollY 0 → heroTop)        — center, full size, full alpha
+ *    HERO    (heroTop → heroBottom)       — slides right, tilts -Z, scales to 0.85
+ *    POST    (heroBottom → heroBottom+½ih)— alpha fades to 0; chisel disappears
+ *    BELOW   (any further)                — invisible. Editorial sections own the page.
+ *
+ *  Y rotation is always-on (slow continuous revolution). Tiny breath
+ *  so the chisel doesn't read as frozen. Reduced-motion: snap to
+ *  computed pose, no breath, no continuous rotation.
+ *
+ *  Anchor: only the hero element matters here. We read its position
+ *  every frame so the rail stays in sync even if layout shifts (e.g.
+ *  OpeningHold unmount).
  */
-interface ScenePose {
-  px: number; py: number; pz: number;
-  rx: number; rz: number;
-  s: number;
-  o: number;
-}
-
-const POSES: Record<string, ScenePose> = {
-  // Opening — bolt-upright at centre, full size, full opacity.
-  // The dedicated cinematic moment.
-  opening:    { px:  0,    py:  0,    pz:  0,    rx:  0,     rz:  0,     s: 1.00, o: 1.00 },
-
-  // Hero — diagonal lean, slight left bias, near-full size.
-  hero:       { px: -0.4,  py:  0.0,  pz:  0,    rx: -0.05,  rz: -0.20,  s: 0.95, o: 1.00 },
-
-  // Products — far right corner, small (chisel as a "signature" off
-  // to the side so the 4-card grid owns the centre).
-  products:   { px:  1.2,  py: -0.4,  pz:  0.4,  rx:  0,     rz: -0.12,  s: 0.50, o: 0.45 },
-
-  // Atölye — far left, tucked behind, even smaller (carousel + dots
-  // claim the visual focus; chisel as ambient framing).
-  atolye:     { px: -1.4,  py:  0.2,  pz:  0.3,  rx:  0,     rz: -0.18,  s: 0.40, o: 0.35 },
-
-  // Brand marquee — top-right; dim so the marquee row reads cleanly.
-  brands:     { px:  1.3,  py:  0.4,  pz:  0,    rx:  0,     rz: -0.10,  s: 0.45, o: 0.40 },
-
-  // Craft — left, medium scale, slight forward tilt. Story section
-  // can carry a stronger chisel presence (atelier mood).
-  craft:      { px: -1.0,  py: -0.2,  pz: -0.2,  rx: -0.04,  rz: -0.15,  s: 0.60, o: 0.55 },
-
-  // Industries — top-right, small. The list reads top-down; chisel
-  // sits like a counterweight up there.
-  industries: { px:  1.1,  py:  0.5,  pz:  0.2,  rx:  0,     rz: -0.10,  s: 0.40, o: 0.35 },
-
-  // Exports — globe owns the centre. Chisel goes nearly invisible
-  // off in a corner so the interactive 3D earth carries the moment.
-  exports:    { px:  1.5,  py:  0.7,  pz:  0.6,  rx:  0,     rz: -0.05,  s: 0.22, o: 0.08 },
-
-  // Contact — top-left, smallest. Reads as a quiet signature in the
-  // form's opposite corner.
-  contact:    { px: -1.2,  py:  0.6,  pz:  0.4,  rx:  0,     rz: -0.08,  s: 0.35, o: 0.25 },
-};
+const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 /** Round soft-edged star sprite. 64×64 radial gradient drawn once. */
 function makeStarSprite(): THREE.CanvasTexture {
@@ -423,33 +392,6 @@ export default function Scene() {
     window.addEventListener('resize', onResize, { passive: true });
     window.addEventListener('orientationchange', onResize, { passive: true });
 
-    // Section-tied pose target. As the user scrolls (or snap-paginates)
-    // between sections, the section whose centre is closest to the
-    // viewport centre wins; its key (data-scene-pose) drives the lerp
-    // target each frame. Plain mutable object — no React state, no
-    // re-renders, just a pointer the rAF loop reads.
-    const targetPoseKey: { current: keyof typeof POSES } = { current: 'opening' };
-    const updateActiveSection = () => {
-      const sections = document.querySelectorAll<HTMLElement>('[data-scene-pose]');
-      if (!sections.length) return;
-      const vpCenter = window.scrollY + window.innerHeight / 2;
-      let bestKey = targetPoseKey.current;
-      let bestDist = Infinity;
-      sections.forEach((s) => {
-        const key = s.dataset.scenePose;
-        if (!key || !(key in POSES)) return;
-        const top = s.getBoundingClientRect().top + window.scrollY;
-        const center = top + s.offsetHeight / 2;
-        const dist = Math.abs(vpCenter - center);
-        if (dist < bestDist) {
-          bestDist = dist;
-          bestKey = key as keyof typeof POSES;
-        }
-      });
-      targetPoseKey.current = bestKey;
-    };
-    window.addEventListener('scroll', updateActiveSection, { passive: true });
-    updateActiveSection(); // capture refresh-mid-page
     // visualViewport: iOS Safari URL-bar collapse fires resize *only* here,
     // not on `window`. Without this, the canvas keeps the URL-bar-expanded
     // height after the bar collapses, projecting the chisel into a buffer
@@ -460,13 +402,41 @@ export default function Scene() {
     const startTime = performance.now();
     let raf = 0;
 
-    // Mutable current-pose accumulator. Each frame we exponentially
-    // ease toward POSES[targetPoseKey.current] using a time-constant
-    // (frame-rate independent — converges to ~95% of the gap in
-    // ~3 × TC ≈ 750 ms regardless of 30/60/120 fps). Initial values
-    // match the opening pose.
-    const cur: ScenePose = { ...POSES.opening };
-    const POSE_TC = 0.25; // seconds — feels like a slow spring without overshoot
+    // Single-rail scroll-driven phase. Phase 0..3:
+    //   0..1  OPENING    (chisel center, full size)
+    //   1..2  HERO       (slides right, tilts, scales 1 → 0.85)
+    //   2..3  POST-HERO  (alpha 1 → 0; chisel disappears)
+    // Past 3 the chisel is completely transparent — all body sections
+    // render as clean editorial without the chisel competing.
+    let phase = 0;
+    const updatePhase = () => {
+      const sy = window.scrollY;
+      const ih = window.innerHeight;
+      const hero = document.querySelector<HTMLElement>('[data-scene-pose="hero"]');
+      const heroTop = hero
+        ? hero.getBoundingClientRect().top + window.scrollY
+        : 0;
+      const heroBot = hero
+        ? hero.getBoundingClientRect().bottom + window.scrollY
+        : ih;
+      const heroSpan = Math.max(1, heroBot - heroTop);
+      if (sy < heroTop) {
+        // OPENING — 0 at top of doc, → 1 as scroll hits hero start
+        phase = heroTop > 0 ? sy / heroTop : 1;
+      } else if (sy < heroBot) {
+        phase = 1 + (sy - heroTop) / heroSpan;
+      } else {
+        // Past hero → quick fade. By the time Products is fully in
+        // view (scrollY ≈ heroBot + ih) the chisel must be invisible.
+        // Fade across 20% of a viewport feels snappy without flicker.
+        phase = 2 + Math.min(1, (sy - heroBot) / (ih * 0.2));
+      }
+    };
+    window.addEventListener('scroll', updatePhase, { passive: true });
+    updatePhase();
+
+    // Mutable pose accumulator — eased toward the per-frame target.
+    const cur = { px: 0, py: 0, pz: 0, rx: 0, rz: 0, s: 1, o: 1 };
     let lastTickT = performance.now();
 
     const tick = () => {
@@ -477,49 +447,58 @@ export default function Scene() {
       const aspect = w() / h();
       const isPortrait = aspect < 0.85;
 
-      // Resolve target. Mobile portrait scales lateral offsets down
-      // so the chisel stays inside the narrow frame; pz, rotations,
-      // scale, opacity are kept as-is.
-      const target = POSES[targetPoseKey.current] ?? POSES.opening;
-      const lateral = isPortrait ? 0.4 : 1;
-      const targetPx = target.px * lateral;
-      const targetPy = target.py * lateral;
+      // Phase mapped to per-frame target pose.
+      // heroProgress 0..1 across the hero section. The chisel position/
+      // rotation rail uses an "early-cap" curve — it reaches its final
+      // hero pose by heroProgress 0.7, then the last 30% is dedicated
+      // to opacity fade-out. Past hero (phase ≥ 2) it stays at 0.
+      const heroProgress = clamp01(phase - 1);
+      const poseProgress = clamp01(heroProgress / 0.7);  // pose done by 70% of hero
+      const fadeProgress = clamp01((heroProgress - 0.7) / 0.3 + Math.max(0, phase - 2));
+
+      // Position rail: center → right side (or "off-frame" on portrait)
+      const lateral = isPortrait ? 0.5 : 1;
+      const targetPx = lerp(0, 0.7, poseProgress) * lateral;
+      const targetPy = lerp(0, -0.05, poseProgress);
+      const targetPz = lerp(0, 0.1, poseProgress);
+      const targetRx = lerp(0, -0.04, poseProgress);
+      const targetRz = lerp(0, -0.16, poseProgress);
+      const targetS = lerp(1.0, 0.85, poseProgress);
+      const targetO = 1 - fadeProgress;
 
       if (!reduced) {
-        // Frame-rate independent exp decay — `a` is fraction of gap
-        // closed this frame given dt and time-constant POSE_TC.
-        const a = 1 - Math.exp(-dt / POSE_TC);
+        // Smooth current-pose accumulator with frame-rate-independent
+        // exp decay. Time constant 0.18s feels responsive without
+        // jitter for position/rotation. Opacity is set directly — it's
+        // a "visibility" value tied to scroll progress and the scroll
+        // itself is already smooth, so an extra lerp just leaves a
+        // ghost of the chisel hanging when the phase clears.
+        const a = 1 - Math.exp(-dt / 0.18);
         cur.px += (targetPx - cur.px) * a;
         cur.py += (targetPy - cur.py) * a;
-        cur.pz += (target.pz - cur.pz) * a;
-        cur.rx += (target.rx - cur.rx) * a;
-        cur.rz += (target.rz - cur.rz) * a;
-        cur.s  += (target.s  - cur.s ) * a;
-        cur.o  += (target.o  - cur.o ) * a;
+        cur.pz += (targetPz - cur.pz) * a;
+        cur.rx += (targetRx - cur.rx) * a;
+        cur.rz += (targetRz - cur.rz) * a;
+        cur.s  += (targetS  - cur.s ) * a;
+        cur.o = targetO;
 
-        // Tiny breath on top of the baseline lean so the chisel reads
-        // as alive even at rest. Y rotation is independent — a slow
-        // continuous revolution at ~250 s / full turn.
+        // Tiny breath so the chisel reads as alive at rest. Y rotation
+        // is a slow continuous revolution (~250 s / full turn).
         const breathX = Math.sin(t * 0.03) * 0.012;
         const breathZ = Math.sin(t * 0.04 + 1.5) * 0.012;
-        // Sub-perceptible drift around the target position so the
-        // chisel doesn't read as "frozen between sections".
-        const driftX = Math.cos(t * 0.04) * 0.10;
-        const driftY = Math.sin(t * 0.05) * 0.06;
 
-        orbitGroup.position.set(cur.px + driftX, cur.py + driftY, cur.pz);
+        orbitGroup.position.set(cur.px, cur.py, cur.pz);
         spinGroup.rotation.x = cur.rx + breathX;
         spinGroup.rotation.y = t * 0.025;
         spinGroup.rotation.z = cur.rz + breathZ;
         spinGroup.scale.setScalar(cur.s);
         container.style.opacity = String(cur.o);
       } else {
-        // Reduced motion: snap to target instantly, no breath, no
-        // drift, no continuous Y rotation.
-        orbitGroup.position.set(targetPx, targetPy, target.pz);
-        spinGroup.rotation.set(target.rx, 0, target.rz);
-        spinGroup.scale.setScalar(target.s);
-        container.style.opacity = String(target.o);
+        // Reduced motion: snap to computed pose, no breath, no rotation.
+        orbitGroup.position.set(targetPx, targetPy, targetPz);
+        spinGroup.rotation.set(targetRx, 0, targetRz);
+        spinGroup.scale.setScalar(targetS);
+        container.style.opacity = String(targetO);
       }
 
       // Layered parallax drift — far layer slower (anchors depth),
@@ -548,7 +527,7 @@ export default function Scene() {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', onResize);
-      window.removeEventListener('scroll', updateActiveSection);
+      window.removeEventListener('scroll', updatePhase);
       window.visualViewport?.removeEventListener('resize', onResize);
       FAR.points.geometry.dispose();
       (FAR.points.material as THREE.PointsMaterial).dispose();
