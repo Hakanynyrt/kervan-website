@@ -56,7 +56,7 @@ export default function Nav({ lang, setLang, t }: Props) {
           </button>
           <a
             href="#contact"
-            className="hidden sm:inline-block bg-ink text-bg px-5 py-2 font-sans text-sm hover:bg-brand transition-colors"
+            className="hidden sm:inline-block bg-brand text-bg px-5 py-2 font-sans text-sm hover:bg-brand-dim transition-colors"
           >
             {t.nav.cta}
           </a>
