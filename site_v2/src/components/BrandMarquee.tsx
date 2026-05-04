@@ -25,7 +25,7 @@ export default function BrandMarquee({ t }: Props) {
 
   return (
     <section data-scene-pose="brands"
-      className="min-h-dvh snap-start flex flex-col justify-center py-16 md:py-24 border-y border-hair overflow-hidden"
+      className="min-h-dvh flex flex-col justify-center py-16 md:py-24 border-y border-hair overflow-hidden"
       style={{ perspective: '1500px' }}
     >
       <motion.div

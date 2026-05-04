@@ -75,13 +75,12 @@ function OpeningHold({ t }: OpeningHoldProps) {
 
   // Opening sahne fonu siyah olsun — chisel + starfield "uzayda" hissi
   // versin. Hold geçildiğinde unmount olur ve body bg'ı tema lacivertine
-  // (--color-bg) düşer. useLayoutEffect → ilk paint öncesinde ayarlanır,
-  // navy → black flash olmaz.
+  // (--color-bg) düşer. Class toggle, inline-style'a göre daha
+  // dayanıklı: closure captured `prev` problemleri yok.
   useLayoutEffect(() => {
     if (passed) return;
-    const prev = document.body.style.background;
-    document.body.style.background = '#000';
-    return () => { document.body.style.background = prev; };
+    document.documentElement.classList.add('opening-active');
+    return () => document.documentElement.classList.remove('opening-active');
   }, [passed]);
 
   // Watch scroll position and flip `passed` once the user crosses the
@@ -168,7 +167,7 @@ function OpeningHold({ t }: OpeningHoldProps) {
     <section
       data-scene-pose="opening"
       aria-hidden="true"
-      className="relative h-dvh w-full pointer-events-none snap-start snap-always"
+      className="relative h-dvh w-full pointer-events-none"
     >
       <motion.div
         className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-sans text-[11px] tracking-[0.32em] uppercase text-ink-soft"

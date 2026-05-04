@@ -15,7 +15,7 @@ interface Props {
  */
 export default function WorkshopShowcase({ t }: Props) {
   return (
-    <section id="atolye" data-scene-pose="atolye" className="min-h-dvh snap-start flex flex-col justify-start pt-24 pb-12 md:justify-center md:pt-24 md:pb-16">
+    <section id="atolye" data-scene-pose="atolye" className="min-h-dvh flex flex-col justify-start pt-24 pb-12 md:justify-center md:pt-24 md:pb-16">
       <SectionHead
         eyebrow={t.atolye.eyebrow}
         title={t.atolye.title}
