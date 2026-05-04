@@ -39,27 +39,18 @@
 ═══════════════════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
-/* Section pagination — each top-level <section class="snap-start">
-   below `.app-root` is a snap target. `mandatory` forces the browser
-   to land on a section after every scroll-end; combined with
-   `min-h-dvh` per section the user reads them as discrete screens.
-
-   `overscroll-behavior-y: contain` kills rubber-band at the top/bottom
-   of the document. iOS Safari, when at the topmost snap target (Hero
-   after OpeningHold unmount), interprets a rubber-band-triggered
-   scroll-end as "no valid prev target → snap forward" and pushes the
-   user *down* to the next section. With overscroll-behavior contained
-   that bounce never happens, so snap can't misfire. */
+/* Section pagination is purely visual: each <section> is min-h-dvh,
+   so the user reads them as discrete screens. No scroll-snap — it
+   was sticky on iOS Safari. */
+/* Long-scroll site, no snap. Scroll-snap with min-h-dvh sections felt
+   sticky on iOS Safari — users reported "aşağı inmiyor" mid-page.
+   Going natural: let the browser scroll freely; sections remain
+   visually discrete via min-h-dvh.
+   Anchor links still animate (smooth) and account for the fixed nav
+   via scroll-padding-top. */
 html {
-  scroll-snap-type: y proximity;
-  overscroll-behavior: none;
   overflow-x: clip;
-  /* Anchor links (e.g. Hero "Teklif Al" → #contact) animate so the
-     user can see the navigation; jumps felt broken instantly. */
   scroll-behavior: smooth;
-  /* Fixed nav (~72 px tall) overlaps the top of any anchored
-     section. Pull the snap-/anchor-landing point down so the
-     section header doesn't hide behind the nav. */
   scroll-padding-top: 80px;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -75,6 +66,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
+}
+/* OpeningHold component flips this class on while the cinematic
+   intro is mounted; body bg falls back to navy on cleanup. */
+html.opening-active body {
+  background: #000;
 }
 
 a { color: inherit; text-decoration: none; }
