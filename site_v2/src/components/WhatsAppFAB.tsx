@@ -7,6 +7,8 @@ import { motion, useReducedMotion } from 'framer-motion';
  * Hidden during the cinematic opening so it doesn't compete with the
  * chisel-only intro; fades in once the user has scrolled past ~half
  * of the first viewport (i.e. is engaging with Hero or beyond).
+ * Hidden again when the footer is in view so it doesn't sit on top of
+ * the copyright / contact links at the bottom of the page.
  * `pointer-events: none` while hidden so it can't be tapped by mistake.
  */
 export default function WhatsAppFAB() {
@@ -14,12 +16,21 @@ export default function WhatsAppFAB() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => {
-      setVisible(window.scrollY >= window.innerHeight * 0.5);
+    const computeVisible = () => {
+      const passedOpening = window.scrollY >= window.innerHeight * 0.5;
+      const footer = document.querySelector('footer');
+      const footerInView = footer
+        ? footer.getBoundingClientRect().top < window.innerHeight
+        : false;
+      setVisible(passedOpening && !footerInView);
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll(); // capture initial position (e.g. after refresh mid-page)
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('scroll', computeVisible, { passive: true });
+    window.addEventListener('resize', computeVisible, { passive: true });
+    computeVisible();
+    return () => {
+      window.removeEventListener('scroll', computeVisible);
+      window.removeEventListener('resize', computeVisible);
+    };
   }, []);
 
   return (

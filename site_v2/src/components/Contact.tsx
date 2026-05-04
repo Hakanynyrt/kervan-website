@@ -130,7 +130,7 @@ export default function Contact({ t }: Props) {
           <button
             type="submit"
             disabled={!kvkk || state === 'sending'}
-            className="md:col-span-2 mt-4 bg-ink text-bg py-4 font-sans text-sm tracking-widest uppercase hover:bg-brand disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="md:col-span-2 mt-4 bg-brand text-bg py-4 font-sans text-sm tracking-widest uppercase hover:bg-brand-dim disabled:bg-bg-soft disabled:text-ink-soft disabled:cursor-not-allowed transition-colors"
           >
             {state === 'sending' ? t.contact.sending : t.contact.submit}
           </button>
