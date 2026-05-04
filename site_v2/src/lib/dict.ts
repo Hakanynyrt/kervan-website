@@ -38,7 +38,7 @@ export const DICT: Dict = {
       aside: 'Her parça kendi tezgâhında, kendi malzemesiyle. Değiştirilemeyen tek şey: özen.',
       items: [
         { name: 'Keski',  desc: 'Kırıcının ucu. Toprakla, taşla, betonla ilk temas noktası.', img: '/photos/uclar/uclar-yard.jpeg' },
-        { name: 'Piston', desc: 'Darbenin kaynağı. Yüksek frekansla çalışır, yılmaz durur.', img: '' },
+        { name: 'Piston', desc: 'Darbenin kaynağı. Yüksek frekansla çalışır, yılmaz durur.', img: '/photos/pistonlar/pistons-stack.jpeg' },
         { name: 'Burç',   desc: 'Sessiz kahraman. Piston ile keski arasında dengeyi kurar.', img: '' },
         { name: 'Kit',    desc: 'Sızdırmazlık ve bağlantı parçaları. Ayrıntıların tümü.', img: '' },
       ],
@@ -186,7 +186,7 @@ export const DICT: Dict = {
       aside: 'Every part on its own bench, with its own steel. The one thing that never changes: care.',
       items: [
         { name: 'Chisel',  desc: 'The point of the hammer. First contact with earth, rock, concrete.', img: '/photos/uclar/uclar-yard.jpeg' },
-        { name: 'Piston',  desc: 'The source of the strike. High frequency. Doesn\'t flinch.', img: '' },
+        { name: 'Piston',  desc: 'The source of the strike. High frequency. Doesn\'t flinch.', img: '/photos/pistonlar/pistons-stack.jpeg' },
         { name: 'Bushing', desc: 'The quiet hero. Holds the balance between piston and chisel.', img: '' },
         { name: 'Kit',     desc: 'Seals and fasteners. All the small things.', img: '' },
       ],
