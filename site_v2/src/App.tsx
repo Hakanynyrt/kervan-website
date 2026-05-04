@@ -116,9 +116,18 @@ function OpeningHold({ t }: OpeningHoldProps) {
     if (passed) return;
     const isInOpening = () => window.scrollY < window.innerHeight - 4;
     const snapToHero = () => {
+      // Instant — a smooth scroll here lasts ~400 ms, during which
+      // OpeningHold sees scrollY hit innerHeight, sets passed=true,
+      // unmounts, and the layout shifts up. The smooth scroll keeps
+      // animating after the shift, so for a frame or two the user
+      // sees the Products section drift through the middle of the
+      // viewport before the useLayoutEffect adjustment lands them on
+      // Hero. The body bg has its own 600 ms CSS transition (black
+      // → navy) so the cinematic fade still happens; the *scroll*
+      // itself is now a single instantaneous beat.
       window.scrollTo({
         top: window.innerHeight,
-        behavior: reduced ? 'auto' : 'smooth',
+        behavior: 'instant' as ScrollBehavior,
       });
     };
 
