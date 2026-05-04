@@ -54,6 +54,16 @@ html {
   scroll-snap-type: y proximity;
   overscroll-behavior: none;
   overflow-x: clip;
+  /* Anchor links (e.g. Hero "Teklif Al" → #contact) animate so the
+     user can see the navigation; jumps felt broken instantly. */
+  scroll-behavior: smooth;
+  /* Fixed nav (~72 px tall) overlaps the top of any anchored
+     section. Pull the snap-/anchor-landing point down so the
+     section header doesn't hide behind the nav. */
+  scroll-padding-top: 80px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
 }
 body {
   background: var(--color-bg);
