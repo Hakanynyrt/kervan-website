@@ -73,6 +73,17 @@ function OpeningHold({ t }: OpeningHoldProps) {
   const reduced = useReducedMotion();
   const [passed, setPassed] = useState(false);
 
+  // Opening sahne fonu siyah olsun — chisel + starfield "uzayda" hissi
+  // versin. Hold geçildiğinde unmount olur ve body bg'ı tema lacivertine
+  // (--color-bg) düşer. useLayoutEffect → ilk paint öncesinde ayarlanır,
+  // navy → black flash olmaz.
+  useLayoutEffect(() => {
+    if (passed) return;
+    const prev = document.body.style.background;
+    document.body.style.background = '#000';
+    return () => { document.body.style.background = prev; };
+  }, [passed]);
+
   // Watch scroll position and flip `passed` once the user crosses the
   // opening band. The flag is one-way — there is no setter to undo it,
   // and the listener cleans up on unmount, which happens immediately
