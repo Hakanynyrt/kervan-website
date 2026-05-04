@@ -345,11 +345,11 @@ function Lightbox({ items, active, onPrev, onNext, onClose }: LightboxProps) {
               <video
                 src={item.video}
                 poster={item.img || undefined}
-                controls
                 autoPlay
                 loop
+                muted
                 playsInline
-                className="max-w-full max-h-[78vh] w-auto h-auto object-contain bg-black"
+                className="max-w-full max-h-[78vh] w-auto h-auto object-contain bg-black pointer-events-none"
               />
             ) : item.img ? (
               <img
