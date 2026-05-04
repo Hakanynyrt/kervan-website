@@ -40,7 +40,7 @@ export const DICT: Dict = {
         { name: 'Keski',  desc: 'Kırıcının ucu. Toprakla, taşla, betonla ilk temas noktası.', img: '/photos/uclar/uclar-yard.jpeg' },
         { name: 'Piston', desc: 'Darbenin kaynağı. Yüksek frekansla çalışır, yılmaz durur.', img: '/photos/pistonlar/pistons-stack.jpeg' },
         { name: 'Burç',   desc: 'Sessiz kahraman. Piston ile keski arasında dengeyi kurar.', img: '/photos/burclar/burclar-raf.jpeg' },
-        { name: 'Kit',    desc: 'Sızdırmazlık ve bağlantı parçaları. Ayrıntıların tümü.', img: '' },
+        { name: 'Kit',    desc: 'Sızdırmazlık ve bağlantı parçaları. Ayrıntıların tümü.', img: '/photos/kit/seal-kit.jpeg' },
       ],
     },
     chisels: {
@@ -188,7 +188,7 @@ export const DICT: Dict = {
         { name: 'Chisel',  desc: 'The point of the hammer. First contact with earth, rock, concrete.', img: '/photos/uclar/uclar-yard.jpeg' },
         { name: 'Piston',  desc: 'The source of the strike. High frequency. Doesn\'t flinch.', img: '/photos/pistonlar/pistons-stack.jpeg' },
         { name: 'Bushing', desc: 'The quiet hero. Holds the balance between piston and chisel.', img: '/photos/burclar/burclar-raf.jpeg' },
-        { name: 'Kit',     desc: 'Seals and fasteners. All the small things.', img: '' },
+        { name: 'Kit',     desc: 'Seals and fasteners. All the small things.', img: '/photos/kit/seal-kit.jpeg' },
       ],
     },
     chisels: {
