@@ -448,13 +448,18 @@ export default function Scene() {
       const isPortrait = aspect < 0.85;
 
       // Phase mapped to per-frame target pose.
-      // heroProgress 0..1 across the hero section. The chisel position/
-      // rotation rail uses an "early-cap" curve — it reaches its final
-      // hero pose by heroProgress 0.7, then the last 30% is dedicated
-      // to opacity fade-out. Past hero (phase ≥ 2) it stays at 0.
-      const heroProgress = clamp01(phase - 1);
-      const poseProgress = clamp01(heroProgress / 0.7);  // pose done by 70% of hero
-      const fadeProgress = clamp01((heroProgress - 0.7) / 0.3 + Math.max(0, phase - 2));
+      //   0..0.6  OPENING — chisel pinned centre, full size, full alpha
+      //   0.6..1  OPENING tail — chisel transitions to hero pose
+      //                          (slides right, tilts, scales 0.85)
+      //   1..1.7  HERO — chisel parked at hero pose, full alpha
+      //   1.7..2  HERO tail — opacity fades from 1 → 0
+      //   ≥ 2     POST — opacity 0; sections below are clean editorial.
+      // The pose transition ENDS at hero start (phase 1.0), so when the
+      // user lands on Hero the chisel is already at the right side and
+      // the title/copy is fully readable. No "chisel covers Hero text"
+      // moment at the opening→hero handoff.
+      const poseProgress = clamp01((phase - 0.6) / 0.4);
+      const fadeProgress = clamp01((phase - 1.7) / 0.3);
 
       // Position rail: center → right side (or "off-frame" on portrait)
       const lateral = isPortrait ? 0.5 : 1;
