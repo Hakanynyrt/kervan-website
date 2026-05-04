@@ -7,16 +7,16 @@
 ═══════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* Palet — dark */
-  --color-bg:        #0A0A0B;   /* near-black, hafif warm */
-  --color-bg-soft:   #14130E;   /* raised surface (kart) */
-  --color-bg-warm:   #1C1813;   /* hover surface */
-  --color-ink:       #E8E2D6;   /* warm cream display */
+  /* Palet — dark navy */
+  --color-bg:        #0B1226;   /* derin lacivert, gece göğü */
+  --color-bg-soft:   #131B33;   /* raised surface (kart) */
+  --color-bg-warm:   #1B2540;   /* hover surface */
+  --color-ink:       #E8E2D6;   /* warm cream display — sıcak kontrast */
   --color-ink-mid:   #B8AFA0;   /* body */
   --color-ink-soft:  #7A7066;   /* muted */
-  --color-brand:     #FF6A1A;   /* taze ember orange (dark'ta parlasın) */
+  --color-brand:     #FF6A1A;   /* taze ember orange (lacivertte parlasın) */
   --color-brand-dim: #C65A0C;   /* hover */
-  --color-hair:      #2D2820;   /* dim warm divider */
+  --color-hair:      #243054;   /* cool navy divider */
 
   /* Typography */
   --font-serif: "Fraunces", "Times New Roman", Georgia, serif;
