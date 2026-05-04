@@ -18,7 +18,7 @@ export default function Exports({ t, lang }: Props) {
     <section
       id="exports"
       data-scene-pose="exports"
-      className="min-h-dvh snap-start snap-always flex flex-col justify-center py-8 md:py-16"
+      className="min-h-dvh snap-start flex flex-col justify-center py-8 md:py-16"
     >
       <SectionHead
         eyebrow={t.exports.eyebrow}

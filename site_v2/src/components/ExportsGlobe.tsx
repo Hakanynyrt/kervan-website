@@ -82,9 +82,11 @@ export default function ExportsGlobe({ lang }: Props) {
   const [hover, setHover] = useState<ExportPoint | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
 
-  // Ref instead of state — the rAF tick reads it without forcing a
-  // re-render every selection change.
+  // Ref drives the rAF tick (no re-render per frame); state drives
+  // the React panel below the globe (re-render on selection change).
+  // Both stay in lockstep — tap handler updates them together.
   const selectedRef = useRef<number>(0); // 0 = origin (Kocaeli)
+  const [selected, setSelected] = useState<number>(0);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -416,6 +418,7 @@ export default function ExportsGlobe({ lang }: Props) {
       if (hits.length > 0) {
         const userData = hits[0].object.userData as { index: number };
         selectedRef.current = userData.index;
+        setSelected(userData.index);
         setTargetForIndex(userData.index);
       }
     };
@@ -517,30 +520,83 @@ export default function ExportsGlobe({ lang }: Props) {
       : hover.country
     : '';
 
+  // Selected city panel data — index 0 is origin (Kocaeli), all others
+  // are destinations from EXPORTS. Origin shows "Üretim merkezi"
+  // instead of sales numbers.
+  const selectedPoint: ExportPoint =
+    selected === 0 ? ORIGIN : EXPORTS[selected - 1] ?? ORIGIN;
+  const selCity = lang === 'tr' ? selectedPoint.cityTr : selectedPoint.city;
+  const selCountry = lang === 'tr' ? selectedPoint.countryTr : selectedPoint.country;
+  const isOrigin = selected === 0;
+
   return (
-    <div className="relative w-full max-w-[640px] mx-auto aspect-square">
-      <div
-        ref={containerRef}
-        className="w-full h-full"
-        aria-label="İhracat ağı, etkileşimli dünya"
-      />
-      {hover && hoverPos && (
+    <div className="w-full max-w-[640px] mx-auto flex flex-col gap-5">
+      <div className="relative w-full aspect-square">
         <div
-          className="absolute pointer-events-none px-3 py-2 bg-bg-soft/95 border border-hair text-ink shadow-[0_4px_12px_rgba(0,0,0,0.45)]"
-          style={{
-            left: Math.min(hoverPos.x + 14, (containerRef.current?.clientWidth ?? 999) - 180),
-            top: Math.max(hoverPos.y - 48, 8),
-            zIndex: 10,
-          }}
-        >
-          <div className="font-sans tracking-[0.18em] uppercase text-ink-soft text-[10px]">
-            {hoverCity}
+          ref={containerRef}
+          className="w-full h-full"
+          aria-label="İhracat ağı, etkileşimli dünya"
+        />
+        {hover && hoverPos && (
+          <div
+            className="absolute pointer-events-none px-3 py-2 bg-bg-soft/95 border border-hair text-ink shadow-[0_4px_12px_rgba(0,0,0,0.45)]"
+            style={{
+              left: Math.min(hoverPos.x + 14, (containerRef.current?.clientWidth ?? 999) - 180),
+              top: Math.max(hoverPos.y - 48, 8),
+              zIndex: 10,
+            }}
+          >
+            <div className="font-sans tracking-[0.18em] uppercase text-ink-soft text-[10px]">
+              {hoverCity}
+            </div>
+            <div className="font-serif italic text-base text-ink leading-tight">
+              {hoverCountry}
+            </div>
           </div>
-          <div className="font-serif italic text-base text-ink leading-tight">
-            {hoverCountry}
+        )}
+      </div>
+      {/* Selected-city panel — updates whenever a dot is tapped. */}
+      <div
+        key={selected}
+        className="border border-hair bg-bg-soft/60 px-5 py-4 flex flex-col gap-3 animate-[fadeIn_300ms_ease-out]"
+        aria-live="polite"
+      >
+        <div className="flex items-baseline justify-between gap-3 flex-wrap">
+          <div className="flex flex-col">
+            <div className="font-sans tracking-[0.2em] uppercase text-ink-soft text-[11px]">
+              {selCountry}
+            </div>
+            <div className="font-h3 italic text-ink leading-tight">{selCity}</div>
           </div>
+          {isOrigin && (
+            <div className="font-sans tracking-[0.18em] uppercase text-brand text-[11px]">
+              {lang === 'tr' ? 'Üretim Merkezi' : 'Origin'}
+            </div>
+          )}
         </div>
-      )}
+        {!isOrigin && (
+          <div className="grid grid-cols-2 gap-4 pt-2 border-t border-hair">
+            <div className="flex flex-col gap-0.5">
+              <div className="font-sans tracking-[0.16em] uppercase text-ink-soft text-[10px]">
+                2025
+              </div>
+              <div className="font-serif text-2xl text-ink leading-none">
+                {selectedPoint.y2025}
+                <span className="text-ink-soft text-base ml-1">t</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <div className="font-sans tracking-[0.16em] uppercase text-ink-soft text-[10px]">
+                2026 {lang === 'tr' ? 'YBG' : 'YTD'}
+              </div>
+              <div className="font-serif text-2xl text-ink leading-none">
+                {selectedPoint.y2026}
+                <span className="text-ink-soft text-base ml-1">t</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -14,7 +14,7 @@ export default function Hero({ t }: Props) {
   const words2 = t.hero.title2.split(/\s+/).filter(Boolean);
 
   return (
-    <section data-scene-pose="hero" className="relative min-h-dvh snap-start snap-always flex flex-col justify-center pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden">
+    <section data-scene-pose="hero" className="relative min-h-dvh snap-start flex flex-col justify-center pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden">
       <div className="max-w-[1280px] mx-auto px-8 grid grid-cols-12 gap-8 md:gap-12 items-center">
         {/* Copy — sol yarı */}
         <div className="col-span-12 lg:col-span-7 flex flex-col gap-8">
@@ -29,6 +29,7 @@ export default function Hero({ t }: Props) {
 
           <motion.h1
             className="font-display text-ink"
+            style={{ letterSpacing: '-0.005em' }}
             variants={staggerContainer(0.2, reduced ? 0 : 0.12)}
             initial="hidden"
             animate="show"
@@ -37,17 +38,18 @@ export default function Hero({ t }: Props) {
             {[words1, words2].map((line, li) => (
               <span key={li} className="block">
                 {line.map((w, wi) => (
-                  <span
-                    key={`${li}-${wi}`}
-                    style={{ display: 'inline-block', overflow: 'hidden', verticalAlign: 'baseline' }}
-                  >
-                    <motion.span
-                      variants={lineReveal}
-                      style={{ display: 'inline-block', willChange: 'transform' }}
+                  <span key={`${li}-${wi}`}>
+                    <span
+                      style={{ display: 'inline-block', overflow: 'hidden', verticalAlign: 'baseline' }}
                     >
-                      {w}
-                    </motion.span>
-                    {wi < line.length - 1 && ' '}
+                      <motion.span
+                        variants={lineReveal}
+                        style={{ display: 'inline-block', willChange: 'transform' }}
+                      >
+                        {w}
+                      </motion.span>
+                    </span>
+                    {wi < line.length - 1 && ' '}
                   </span>
                 ))}
               </span>
