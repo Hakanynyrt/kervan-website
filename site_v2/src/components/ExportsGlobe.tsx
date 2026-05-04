@@ -111,6 +111,9 @@ export default function ExportsGlobe({ lang }: Props) {
     renderer.setSize(cw(), ch(), false);
     renderer.setClearAlpha(0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.display = 'block';
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
@@ -531,10 +534,55 @@ export default function ExportsGlobe({ lang }: Props) {
 
   return (
     <div className="w-full max-w-[640px] mx-auto flex flex-col gap-5">
+      {/* Selected-city panel — placed ABOVE the globe so on mobile the
+          user immediately reads what's selected before scrolling, and
+          the panel never disappears under the canvas. Tap a dot to
+          update. */}
+      <div
+        key={selected}
+        className="relative z-10 border border-hair bg-bg-soft/85 backdrop-blur-sm px-5 py-4 flex flex-col gap-3 animate-[fadeIn_300ms_ease-out]"
+        aria-live="polite"
+      >
+        <div className="flex items-baseline justify-between gap-3 flex-wrap">
+          <div className="flex flex-col min-w-0">
+            <div className="font-sans tracking-[0.2em] uppercase text-ink-soft text-[11px]">
+              {selCountry}
+            </div>
+            <div className="font-h3 italic text-ink leading-tight truncate">{selCity}</div>
+          </div>
+          {isOrigin && (
+            <div className="font-sans tracking-[0.18em] uppercase text-brand text-[11px]">
+              {lang === 'tr' ? 'Üretim Merkezi' : 'Origin'}
+            </div>
+          )}
+        </div>
+        {!isOrigin && (
+          <div className="grid grid-cols-2 gap-4 pt-2 border-t border-hair">
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <div className="font-sans tracking-[0.16em] uppercase text-ink-soft text-[10px]">
+                2025
+              </div>
+              <div className="font-serif text-2xl text-ink leading-none">
+                {selectedPoint.y2025}
+                <span className="text-ink-soft text-base ml-1">t</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <div className="font-sans tracking-[0.16em] uppercase text-ink-soft text-[10px]">
+                2026 {lang === 'tr' ? 'YBG' : 'YTD'}
+              </div>
+              <div className="font-serif text-2xl text-ink leading-none">
+                {selectedPoint.y2026}
+                <span className="text-ink-soft text-base ml-1">t</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
       <div className="relative w-full aspect-square">
         <div
           ref={containerRef}
-          className="w-full h-full"
+          className="w-full h-full overflow-hidden"
           aria-label="İhracat ağı, etkileşimli dünya"
         />
         {hover && hoverPos && (
@@ -551,48 +599,6 @@ export default function ExportsGlobe({ lang }: Props) {
             </div>
             <div className="font-serif italic text-base text-ink leading-tight">
               {hoverCountry}
-            </div>
-          </div>
-        )}
-      </div>
-      {/* Selected-city panel — updates whenever a dot is tapped. */}
-      <div
-        key={selected}
-        className="border border-hair bg-bg-soft/60 px-5 py-4 flex flex-col gap-3 animate-[fadeIn_300ms_ease-out]"
-        aria-live="polite"
-      >
-        <div className="flex items-baseline justify-between gap-3 flex-wrap">
-          <div className="flex flex-col">
-            <div className="font-sans tracking-[0.2em] uppercase text-ink-soft text-[11px]">
-              {selCountry}
-            </div>
-            <div className="font-h3 italic text-ink leading-tight">{selCity}</div>
-          </div>
-          {isOrigin && (
-            <div className="font-sans tracking-[0.18em] uppercase text-brand text-[11px]">
-              {lang === 'tr' ? 'Üretim Merkezi' : 'Origin'}
-            </div>
-          )}
-        </div>
-        {!isOrigin && (
-          <div className="grid grid-cols-2 gap-4 pt-2 border-t border-hair">
-            <div className="flex flex-col gap-0.5">
-              <div className="font-sans tracking-[0.16em] uppercase text-ink-soft text-[10px]">
-                2025
-              </div>
-              <div className="font-serif text-2xl text-ink leading-none">
-                {selectedPoint.y2025}
-                <span className="text-ink-soft text-base ml-1">t</span>
-              </div>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <div className="font-sans tracking-[0.16em] uppercase text-ink-soft text-[10px]">
-                2026 {lang === 'tr' ? 'YBG' : 'YTD'}
-              </div>
-              <div className="font-serif text-2xl text-ink leading-none">
-                {selectedPoint.y2026}
-                <span className="text-ink-soft text-base ml-1">t</span>
-              </div>
             </div>
           </div>
         )}
