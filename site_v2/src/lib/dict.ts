@@ -100,12 +100,12 @@ export const DICT: Dict = {
     industries: {
       eyebrow: 'Kimler İçin',
       title: 'İşini yapanın yanında.',
-      aside: 'Türkiye\'nin her köşesinde, kazıdan ocağa, yoldan yıkıma — sahada çalışan her kırıcıya.',
+      aside: 'Bina yıkımından maden ocağına, taş kesiminden yol bakımına — sahada kırıcı çalıştıran herkes için.',
       items: [
-        { name: 'İnşaat',     desc: 'Temel kazıdan yıkıma' },
-        { name: 'Madencilik', desc: 'Ocağın derininde' },
-        { name: 'Kariyer',    desc: 'Kayayla iş görenler' },
-        { name: 'Yol',        desc: 'Altyapı ve yenileme' },
+        { name: 'İnşaat',     desc: 'Temel, yıkım, kentsel dönüşüm' },
+        { name: 'Madencilik', desc: 'Yer altı işletmeleri, sert kaya' },
+        { name: 'Taş Ocağı',  desc: 'Granit, mermer, agrega' },
+        { name: 'Altyapı',    desc: 'Yol bakımı, kanalizasyon, demiryolu' },
       ],
       marquee: [
         '2004\'ten beri Kocaeli\'de',
@@ -248,12 +248,12 @@ export const DICT: Dict = {
     industries: {
       eyebrow: 'Who We Serve',
       title: 'Beside the people doing the work.',
-      aside: 'Across Turkey — from trench to pit, from roadwork to demolition — with every crew running a breaker.',
+      aside: 'From building demolition to mine pit, stone quarry to roadworks — for every crew running a breaker on site.',
       items: [
-        { name: 'Construction', desc: 'From foundation to demolition' },
-        { name: 'Mining',       desc: 'Deep in the pit' },
-        { name: 'Quarry',       desc: 'Working with stone' },
-        { name: 'Roads',        desc: 'Infrastructure & renewal' },
+        { name: 'Construction',  desc: 'Foundations, demolition, urban renewal' },
+        { name: 'Mining',        desc: 'Underground operations, hard rock' },
+        { name: 'Quarry',        desc: 'Granite, marble, aggregate' },
+        { name: 'Infrastructure', desc: 'Road repair, sewer, rail' },
       ],
       marquee: [
         'In Kocaeli since 2004',
