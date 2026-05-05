@@ -17,17 +17,17 @@ interface State {
  * exception olursa fallback render eder, page çalışmaya devam eder.
  */
 export default class ErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false };
+  override state: State = { hasError: false };
 
   static getDerivedStateFromError(): State {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  override componentDidCatch(error: Error, info: ErrorInfo) {
     console.error(`[${this.props.label ?? 'errboundary'}]`, error, info.componentStack);
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) return this.props.fallback ?? null;
     return this.props.children;
   }

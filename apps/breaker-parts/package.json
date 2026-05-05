@@ -1,0 +1,12 @@
+{
+  "name": "@kervan/breaker-parts",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'breaker-parts: scaffold pending — Faz 3' && exit 0",
+    "build": "echo 'breaker-parts: scaffold pending — Faz 3' && exit 0",
+    "typecheck": "echo 'breaker-parts: scaffold pending — Faz 3' && exit 0",
+    "lint": "echo 'breaker-parts: scaffold pending — Faz 3' && exit 0"
+  }
+}
