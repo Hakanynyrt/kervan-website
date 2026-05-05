@@ -19,6 +19,14 @@ export default function Nav({ lang, setLang, t }: Props) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const links = [
+    { href: '#hizmetler', label: t.nav.services },
+    { href: '#teknik-kapasite', label: t.nav.capacity },
+    { href: '#imalathanemiz', label: t.nav.craft },
+    { href: '#hakkimizda', label: t.nav.about },
+    { href: '#contact', label: t.nav.contact },
+  ];
+
   return (
     <header
       className={
@@ -39,11 +47,15 @@ export default function Nav({ lang, setLang, t }: Props) {
         </a>
 
         <nav className="hidden md:flex items-center gap-10 font-sans text-sm">
-          <a href="#products" className="text-ink-mid hover:text-ink transition-colors">{t.nav.products}</a>
-          <a href="#atolye" className="text-ink-mid hover:text-ink transition-colors">{t.nav.atolye}</a>
-          <a href="#craft" className="text-ink-mid hover:text-ink transition-colors">{t.nav.craft}</a>
-          <a href="#industries" className="text-ink-mid hover:text-ink transition-colors">{t.nav.industries}</a>
-          <a href="#contact" className="text-ink-mid hover:text-ink transition-colors">{t.nav.contact}</a>
+          {links.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="text-ink-mid hover:text-ink transition-colors"
+            >
+              {l.label}
+            </a>
+          ))}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -80,15 +92,14 @@ export default function Nav({ lang, setLang, t }: Props) {
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="md:hidden overflow-hidden bg-bg border-b border-hair"
           >
-            <div className="px-8 py-4 flex flex-col gap-4 font-serif text-2xl">
-              {[
-                { href: '#products', label: t.nav.products },
-                { href: '#atolye', label: t.nav.atolye },
-                { href: '#craft', label: t.nav.craft },
-                { href: '#industries', label: t.nav.industries },
-                { href: '#contact', label: t.nav.contact },
-              ].map((l) => (
-                <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="text-ink">
+            <div className="px-6 py-4 flex flex-col gap-4 font-serif text-2xl">
+              {links.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="text-ink"
+                >
                   {l.label}
                 </a>
               ))}

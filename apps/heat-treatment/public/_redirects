@@ -1,0 +1,39 @@
+# Eski breaker URL'leri → kervanbreaker.com (301 permanent)
+# Faz 6 — kervanbreaker.com canlı olduğunda etkin olur.
+
+# Ürün ailesi sayfaları
+/keski                  https://kervanbreaker.com/keski            301
+/piston                 https://kervanbreaker.com/piston           301
+/burc                   https://kervanbreaker.com/burc             301
+/burç                   https://kervanbreaker.com/burc             301
+/kit                    https://kervanbreaker.com/kit              301
+/tie-rod                https://kervanbreaker.com/tie-rod          301
+/wedge                  https://kervanbreaker.com/wedge            301
+/lower-housing          https://kervanbreaker.com/lower-housing    301
+/stud                   https://kervanbreaker.com/stud             301
+
+# Eski legacy HTML sayfaları
+/catalog                https://kervanbreaker.com/urunler          301
+/catalog.html           https://kervanbreaker.com/urunler          301
+/cases                  https://kervanbreaker.com/cases            301
+/cases.html             https://kervanbreaker.com/cases            301
+/compat                 https://kervanbreaker.com/uyumluluk        301
+/compat.html            https://kervanbreaker.com/uyumluluk        301
+/diagram                https://kervanbreaker.com/diyagram         301
+/diagram.html           https://kervanbreaker.com/diyagram         301
+/gallery                https://kervanbreaker.com/galeri           301
+/gallery.html           https://kervanbreaker.com/galeri           301
+/part                   https://kervanbreaker.com/urunler          301
+/part.html              https://kervanbreaker.com/urunler          301
+/post                   https://kervanbreaker.com/blog             301
+/post.html              https://kervanbreaker.com/blog             301
+/blog                   https://kervanbreaker.com/blog             301
+/blog.html              https://kervanbreaker.com/blog             301
+
+# Wildcard'lar — alt path'ler
+/products/*             https://kervanbreaker.com/urunler/:splat   301
+/parts/*                https://kervanbreaker.com/urunler/:splat   301
+
+# Eski about → yeni anchor
+/about                  /#hakkimizda                                301
+/about.html             /#hakkimizda                                301

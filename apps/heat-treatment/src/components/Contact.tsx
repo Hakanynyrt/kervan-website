@@ -51,7 +51,7 @@ export default function Contact({ t }: Props) {
   }
 
   return (
-    <section id="contact" data-scene-pose="contact" className="min-h-dvh flex flex-col justify-center py-16 md:py-24 bg-bg-soft/40">
+    <section id="contact" className="min-h-dvh flex flex-col justify-center py-16 md:py-24 bg-bg-soft/40">
       <SectionHeading
         eyebrow={t.contact.eyebrow}
         title={t.contact.title}
@@ -69,7 +69,7 @@ export default function Contact({ t }: Props) {
         >
           {[
             { label: t.contact.phoneLabel, value: <a href="tel:+905316693734" className="hover:text-brand transition-colors">+90 531 669 37 34</a> },
-            { label: t.contact.emailLabel, value: <a href="mailto:info@kervanheat.com" className="hover:text-brand transition-colors">info@kervanheat.com</a> },
+            { label: t.contact.emailLabel, value: <a href="mailto:ahmet@kervanheat.com" className="hover:text-brand transition-colors">ahmet@kervanheat.com</a> },
             { label: 'Adres', value: <span className="whitespace-pre-line">{t.contact.address}</span> },
             { label: t.contact.hoursLabel, value: t.contact.hours },
           ].map((row, i) => (

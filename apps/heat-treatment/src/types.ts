@@ -1,43 +1,41 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   Dictionary types — mirrors public/dict.jsx structure.
+   Dictionary types — heat-treatment app surface.
 ═══════════════════════════════════════════════════════════════════════ */
 
 export type Lang = 'tr' | 'en';
 
 export interface Stat {
+  /** Big number/string (e.g. "1+2", "Ø1200", "42CrMo"). */
   n: string;
+  /** Small label below (e.g. "potası", "max çap"). */
   l: string;
 }
 
-export interface ProductItem {
+export interface ServiceItem {
+  /** Numeric prefix shown as eyebrow (e.g. "01"). */
+  index: string;
   name: string;
-  desc: string;
-  img: string;
+  body: string;
+  bullets: string[];
 }
 
-export interface GalleryItem {
-  name: string;
-  desc?: string;
-  img: string;
-  video?: string;
-}
-
-export interface IndustryItem {
-  name: string;
-  desc: string;
+export interface CapacityItem {
+  /** Big value (e.g. "Ø1200mm × 2.5t"). */
+  value: string;
+  /** Eyebrow / small label. */
+  label: string;
+  /** Optional one-line note. */
+  note?: string;
 }
 
 export interface DictBlock {
   nav: {
-    products: string;
-    atolye: string;
+    services: string;
+    capacity: string;
     craft: string;
-    industries: string;
+    about: string;
     contact: string;
     cta: string;
-  };
-  opening: {
-    scroll: string;
   };
   hero: {
     eyebrow: string;
@@ -48,53 +46,29 @@ export interface DictBlock {
     ctaSecondary: string;
     stats: Stat[];
   };
-  products: {
+  services: {
     eyebrow: string;
     title: string;
     aside: string;
-    items: ProductItem[];
+    items: ServiceItem[];
   };
-  chisels: {
+  capacity: {
     eyebrow: string;
     title: string;
     aside: string;
-    items: GalleryItem[];
-  };
-  stock: {
-    eyebrow: string;
-    title: string;
-    aside: string;
-    items: GalleryItem[];
-  };
-  atolye: {
-    eyebrow: string;
-    title: string;
-    aside: string;
-    items: GalleryItem[];
+    items: CapacityItem[];
   };
   craft: {
     eyebrow: string;
     title: string;
     body: string;
   };
-  industries: {
+  about: {
     eyebrow: string;
     title: string;
-    aside: string;
-    items: IndustryItem[];
-    marquee: string[];
-  };
-  exports: {
-    eyebrow: string;
-    /** `{count}` placeholder is replaced at render time with the
-     *  destination count from `lib/exports.ts`. */
-    title: string;
-    aside: string;
-  };
-  brands: {
-    eyebrow: string;
-    title: string;
-    items: string[];
+    body: string;
+    company: string;
+    location: string;
   };
   contact: {
     eyebrow: string;

@@ -33,7 +33,7 @@ export default function Footer({ t }: Props) {
             </svg>
           </a>
           <a href="/kvkk.html" className="hover:text-ink transition-colors">{t.footer.kvkk}</a>
-          <a href="mailto:info@kervanheat.com" className="hover:text-ink transition-colors">info@kervanheat.com</a>
+          <a href="mailto:ahmet@kervanheat.com" className="hover:text-ink transition-colors">ahmet@kervanheat.com</a>
           <a href="tel:+905316693734" className="hover:text-ink transition-colors">+90 531 669 37 34</a>
         </nav>
 
