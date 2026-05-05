@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import type { GalleryItem } from '../types';
 import { staggerContainer, fadeUp, inViewOnce } from '../lib/motion';
-import SectionHead from './SectionHead';
+import { SectionHeading } from '@kervan/ui';
 
 interface Props {
   idAttr: string;
@@ -46,7 +46,7 @@ export default function Gallery({ idAttr, eyebrow, title, aside, items }: Props)
 
   return (
     <section id={idAttr} className="py-24 md:py-32 bg-bg-soft/40">
-      <SectionHead eyebrow={eyebrow} title={title} aside={aside} controls={controls} />
+      <SectionHeading eyebrow={eyebrow} title={title} aside={aside} controls={controls} />
 
       <motion.div
         ref={scroller}

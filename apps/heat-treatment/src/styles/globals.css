@@ -1,38 +1,14 @@
 @import "tailwindcss";
+@import "@kervan/ui/tokens.css";
+
+/* Tailwind v4 — scan @kervan/ui sources so utility classes used inside
+   the package (e.g. `bg-brand`, `text-ink`) are emitted in the bundle. */
+@source "../../../../packages/ui/src/**/*.{ts,tsx}";
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MOOD C — Atelier Editorial · Dark variant
-   Near-black bg + ember orange accent + warm cream typography.
-   Forj ateşinde Sotheby's auction katalogu.
+   Heat-treatment app — Mood C tokens are sourced from @kervan/ui.
+   This file owns base reset, font-* utilities, scene/print rules.
 ═══════════════════════════════════════════════════════════════════════ */
-
-@theme {
-  /* Palet — dark navy */
-  --color-bg:        #0B1226;   /* derin lacivert, gece göğü */
-  --color-bg-soft:   #131B33;   /* raised surface (kart) */
-  --color-bg-warm:   #1B2540;   /* hover surface */
-  --color-ink:       #E8E2D6;   /* warm cream display — sıcak kontrast */
-  --color-ink-mid:   #B8AFA0;   /* body */
-  --color-ink-soft:  #7A7066;   /* muted */
-  --color-brand:     #FF6A1A;   /* taze ember orange (lacivertte parlasın) */
-  --color-brand-dim: #C65A0C;   /* hover */
-  --color-hair:      #243054;   /* cool navy divider */
-
-  /* Typography */
-  --font-serif: "Fraunces", "Times New Roman", Georgia, serif;
-  --font-sans:  "Inter", system-ui, -apple-system, sans-serif;
-
-  /* Display scale (clamp = fluid sizing) */
-  --text-display:  clamp(56px, 9vw, 128px);
-  --text-h1:       clamp(48px, 7vw, 96px);
-  --text-h2:       clamp(36px, 5vw, 64px);
-  --text-h3:       clamp(24px, 3vw, 36px);
-  --text-eyebrow:  12px;
-
-  /* Motion easings */
-  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-soft:      cubic-bezier(0.4, 0, 0.2, 1);
-}
 
 /* ═══════════════════════════════════════════════════════════════════════
    Base reset + body defaults

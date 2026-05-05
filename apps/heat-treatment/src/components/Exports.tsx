@@ -1,5 +1,5 @@
 import type { DictBlock, Lang } from '../types';
-import SectionHead from './SectionHead';
+import { SectionHeading } from '@kervan/ui';
 import ExportsGlobe from './ExportsGlobe';
 import { EXPORTS } from '../lib/exports';
 
@@ -20,7 +20,7 @@ export default function Exports({ t, lang }: Props) {
       data-scene-pose="exports"
       className="min-h-dvh flex flex-col justify-center py-8 md:py-16"
     >
-      <SectionHead
+      <SectionHeading
         eyebrow={t.exports.eyebrow}
         title={title}
         aside={t.exports.aside}

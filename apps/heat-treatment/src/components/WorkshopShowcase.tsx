@@ -1,5 +1,5 @@
 import type { DictBlock } from '../types';
-import SectionHead from './SectionHead';
+import { SectionHeading } from '@kervan/ui';
 import StackedCarousel from './StackedCarousel';
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
 export default function WorkshopShowcase({ t }: Props) {
   return (
     <section id="atolye" data-scene-pose="atolye" className="min-h-dvh flex flex-col justify-start pt-24 pb-12 md:justify-center md:pt-24 md:pb-16">
-      <SectionHead
+      <SectionHeading
         eyebrow={t.atolye.eyebrow}
         title={t.atolye.title}
         aside={t.atolye.aside}

@@ -1,3 +1,20 @@
-// @kervan/motion — paylaşılan Framer Motion variant'ları
-// Faz 1'de doldurulacak: fadeUp, staggerChildren, hoverLift, revealOnScroll, parallaxSlow
-export {};
+export {
+  editorialEase,
+  softEase,
+  durations,
+  staggerContainer,
+  lineReveal,
+  fadeUp,
+  slowFade,
+  kenBurns,
+  cardHover,
+  hoverLift,
+  inViewOnce,
+  revealOnScroll,
+} from './variants.js';
+
+export { useParallaxSlow } from './use-parallax-slow.js';
+export { ScrollReveal } from './scroll-reveal.js';
+
+// Re-export reduced-motion hook for convenient consumption.
+export { useReducedMotion } from 'framer-motion';

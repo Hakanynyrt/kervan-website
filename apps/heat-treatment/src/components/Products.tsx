@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
 import { staggerContainer, fadeUp, inViewOnce } from '../lib/motion';
-import SectionHead from './SectionHead';
+import { SectionHeading } from '@kervan/ui';
 
 interface Props {
   t: DictBlock;
@@ -10,7 +10,7 @@ interface Props {
 export default function Products({ t }: Props) {
   return (
     <section id="products" data-scene-pose="products" className="min-h-dvh flex flex-col justify-center py-8 md:py-16">
-      <SectionHead
+      <SectionHeading
         eyebrow={t.products.eyebrow}
         title={t.products.title}
         aside={t.products.aside}

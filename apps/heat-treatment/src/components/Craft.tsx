@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
 import { fadeUp, inViewOnce } from '../lib/motion';
-import ScrollReveal from './ui/ScrollReveal';
+import { ScrollReveal } from '@kervan/motion';
 
 interface Props {
   t: DictBlock;
@@ -23,7 +23,7 @@ export default function Craft({ t }: Props) {
       >
         <div className="font-eyebrow">{t.craft.eyebrow}</div>
         <h2 className="font-h2 italic text-ink">{t.craft.title}</h2>
-        <ScrollReveal className="text-ink-mid max-w-[44ch]">
+        <ScrollReveal className="font-serif italic text-xl md:text-2xl text-ink-mid leading-relaxed max-w-[44ch]">
           {t.craft.body}
         </ScrollReveal>
       </motion.div>

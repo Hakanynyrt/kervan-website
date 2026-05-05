@@ -2,7 +2,7 @@ import { useRef, useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
 import { fadeUp, inViewOnce } from '../lib/motion';
-import SectionHead from './SectionHead';
+import { SectionHeading } from '@kervan/ui';
 
 interface Props {
   t: DictBlock;
@@ -52,7 +52,7 @@ export default function Contact({ t }: Props) {
 
   return (
     <section id="contact" data-scene-pose="contact" className="min-h-dvh flex flex-col justify-center py-16 md:py-24 bg-bg-soft/40">
-      <SectionHead
+      <SectionHeading
         eyebrow={t.contact.eyebrow}
         title={t.contact.title}
         aside={t.contact.sub}
@@ -130,7 +130,7 @@ export default function Contact({ t }: Props) {
           <button
             type="submit"
             disabled={!kvkk || state === 'sending'}
-            className="md:col-span-2 mt-4 bg-brand text-bg py-4 font-sans text-sm tracking-widest uppercase hover:bg-brand-dim disabled:bg-bg-soft disabled:text-ink-soft disabled:cursor-not-allowed transition-colors"
+            className="md:col-span-2 mt-4 bg-brand text-bg py-4 font-sans text-sm tracking-widest uppercase hover:bg-brand-hi disabled:bg-bg-soft disabled:text-ink-soft disabled:cursor-not-allowed transition-colors"
           >
             {state === 'sending' ? t.contact.sending : t.contact.submit}
           </button>

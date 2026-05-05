@@ -74,7 +74,7 @@ export default function Hero({ t }: Props) {
           >
             <a
               href="#contact"
-              className="bg-brand text-bg px-7 py-3 font-sans text-sm tracking-wide hover:bg-brand-dim transition-colors"
+              className="bg-brand text-bg px-7 py-3 font-sans text-sm tracking-wide hover:bg-brand-hi transition-colors"
             >
               {t.hero.cta}
             </a>
