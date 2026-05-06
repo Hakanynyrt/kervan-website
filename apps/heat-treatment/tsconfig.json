@@ -4,5 +4,5 @@
     "moduleDetection": "force",
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src", "functions", "vite.config.ts"]
 }

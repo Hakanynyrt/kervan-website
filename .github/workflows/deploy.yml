@@ -1,20 +1,58 @@
-name: Deploy Worker
+name: Deploy
 
+# Push to main → production deploy.
+# PRs and other branches → preview deploy (Cloudflare Pages branch deploys).
+#
+# Each app deploys independently — `paths-filter` detects which app's source
+# (or shared package) changed. If only `apps/heat-treatment/**` changed,
+# only kervanheat.com redeploys; both deploy when `packages/**` changes.
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'legacy-astro/**'
-      - 'README.md'
-      - '.gitignore'
-  workflow_dispatch:
+  pull_request:
 
 concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  changes:
+    name: Detect changed apps
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      heat-treatment: ${{ steps.filter.outputs.heat-treatment }}
+      breaker-parts: ${{ steps.filter.outputs.breaker-parts }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            heat-treatment:
+              - 'apps/heat-treatment/**'
+              - 'packages/**'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'turbo.json'
+              - 'tsconfig.base.json'
+              - 'package.json'
+              - '.github/workflows/deploy.yml'
+            breaker-parts:
+              - 'apps/breaker-parts/**'
+              - 'packages/**'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'turbo.json'
+              - 'tsconfig.base.json'
+              - 'package.json'
+              - '.github/workflows/deploy.yml'
+
+  deploy-heat-treatment:
+    name: kervanheat.com
+    needs: changes
+    if: needs.changes.outputs.heat-treatment == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -23,43 +61,70 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'pnpm'
 
-      - name: Install (root)
-        run: npm install --no-audit --no-fund --prefer-offline
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Install (site_v2)
-        run: npm install --no-audit --no-fund --prefer-offline
-        working-directory: site_v2
+      - name: Build heat-treatment
+        run: pnpm turbo build --filter=@kervan/heat-treatment
 
-      - name: Build site_v2 (Vite)
-        run: npm run build
-        working-directory: site_v2
-
-      # Merge v1 inner pages (kvkk, about, blog, vs.) + their static deps
-      # (kit.css, dict.jsx, etc.) into the Vite dist directory.
-      # Excluded: index.html (v2 owns root), assets/ (Vite chunks), photos/
-      # and videos/ (already symlinked through site_v2/public/), and any
-      # files prefixed with `_` like `_headers` (CF reserved).
-      - name: Merge v1 inner pages into dist
-        run: |
-          rsync -av \
-            --exclude index.html \
-            --exclude catalog.html \
-            --exclude assets \
-            --exclude photos \
-            --exclude videos \
-            --exclude '_*' \
-            public/ site_v2/dist/
-          # Catalog v2'den de v1'den de servis edilmiyor — kullanıcı kaldırdı.
-          # public/catalog.html dist'e dahil edilmesin (rsync excludeluyor zaten),
-          # ama emin olmak için.
-
-      - name: Deploy to Cloudflare
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
+          # Run from the app directory so functions/ is auto-detected at
+          # apps/heat-treatment/functions (Pages Functions live next to dist).
+          workingDirectory: apps/heat-treatment
+          command: >-
+            pages deploy dist
+            --project-name=kervan-heat-treatment
+            --branch=${{ github.head_ref || github.ref_name }}
+            --commit-hash=${{ github.sha }}
+
+  deploy-breaker-parts:
+    name: kervanbreaker.com
+    needs: changes
+    if: needs.changes.outputs.breaker-parts == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build breaker-parts
+        run: pnpm turbo build --filter=@kervan/breaker-parts
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/breaker-parts
+          command: >-
+            pages deploy dist
+            --project-name=kervan-breaker-parts
+            --branch=${{ github.head_ref || github.ref_name }}
+            --commit-hash=${{ github.sha }}
