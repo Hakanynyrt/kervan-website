@@ -25,7 +25,7 @@ export default function Contact({ t, lang }: Props) {
   const partSlug = params.get('part');
   const prefilledPart = partSlug ? PRODUCT_BY_SLUG[partSlug] : undefined;
   const prefilledMessage = prefilledPart
-    ? `${t.contactPage.quotePrefix} ${prefilledPart[lang].name}\n\n`
+    ? `${t.contact.quotePrefix} ${prefilledPart[lang].name}\n\n`
     : '';
 
   const [state, setState] = useState<State>('idle');
@@ -75,14 +75,14 @@ export default function Contact({ t, lang }: Props) {
         >
           <div className="col-span-12 lg:col-span-7 flex flex-col gap-5">
             <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand font-medium">
-              {t.contactPage.eyebrow}
+              {t.contact.eyebrow}
             </span>
             <h1 className="font-serif italic text-h1 text-ink leading-[1.05] tracking-[-0.02em]">
-              {t.contactPage.title}
+              {t.contact.title}
             </h1>
           </div>
           <p className="col-span-12 lg:col-span-5 font-serif italic text-lg text-ink-mid leading-relaxed max-w-[40ch]">
-            {t.contactPage.sub}
+            {t.contact.sub}
           </p>
         </motion.div>
 
@@ -97,7 +97,7 @@ export default function Contact({ t, lang }: Props) {
           >
             {[
               {
-                label: t.contactPage.phoneLabel,
+                label: t.contact.phoneLabel,
                 value: (
                   <a href="tel:+905316693734" className="hover:text-brand transition-colors">
                     +90 531 669 37 34
@@ -105,7 +105,7 @@ export default function Contact({ t, lang }: Props) {
                 ),
               },
               {
-                label: t.contactPage.emailLabel,
+                label: t.contact.emailLabel,
                 value: (
                   <a href="mailto:ahmet@kervanheat.com" className="hover:text-brand transition-colors">
                     ahmet@kervanheat.com
@@ -114,9 +114,9 @@ export default function Contact({ t, lang }: Props) {
               },
               {
                 label: 'Adres',
-                value: <span className="whitespace-pre-line">{t.contactPage.address}</span>,
+                value: <span className="whitespace-pre-line">{t.contact.address}</span>,
               },
-              { label: t.contactPage.hoursLabel, value: t.contactPage.hours },
+              { label: t.contact.hoursLabel, value: t.contact.hours },
             ].map((row, i) => (
               <div key={i} className="flex flex-col gap-1.5">
                 <dt className="font-sans text-xs tracking-widest uppercase text-ink-soft">
@@ -146,14 +146,14 @@ export default function Contact({ t, lang }: Props) {
               className="absolute -left-[9999px]"
             />
 
-            <Field label={t.contactPage.fields.name} name="name" required maxLength={100} />
-            <Field label={t.contactPage.fields.company} name="company" maxLength={150} />
-            <Field label={t.contactPage.fields.email} name="email" type="email" required maxLength={200} />
-            <Field label={t.contactPage.fields.phone} name="phone" type="tel" maxLength={30} />
+            <Field label={t.contact.fields.name} name="name" required maxLength={100} />
+            <Field label={t.contact.fields.company} name="company" maxLength={150} />
+            <Field label={t.contact.fields.email} name="email" type="email" required maxLength={200} />
+            <Field label={t.contact.fields.phone} name="phone" type="tel" maxLength={30} />
 
             <label className="md:col-span-2 flex flex-col gap-2">
               <span className="font-sans text-xs tracking-widest uppercase text-ink-soft">
-                {t.contactPage.fields.message}
+                {t.contact.fields.message}
               </span>
               <textarea
                 name="message"
@@ -173,7 +173,7 @@ export default function Contact({ t, lang }: Props) {
                 className="mt-1 accent-brand"
               />
               <span className="font-sans text-sm text-ink-mid leading-relaxed">
-                {t.contactPage.kvkk}
+                {t.contact.kvkk}
               </span>
             </label>
 
@@ -182,17 +182,17 @@ export default function Contact({ t, lang }: Props) {
               disabled={!kvkk || state === 'sending'}
               className="md:col-span-2 mt-4 bg-brand text-bg py-4 font-sans text-sm tracking-widest uppercase hover:bg-brand-hi disabled:bg-bg-soft disabled:text-ink-soft disabled:cursor-not-allowed transition-colors"
             >
-              {state === 'sending' ? t.contactPage.sending : t.contactPage.submit}
+              {state === 'sending' ? t.contact.sending : t.contact.submit}
             </button>
 
             {state === 'success' && (
               <p className="md:col-span-2 font-serif italic text-base text-brand">
-                {t.contactPage.success}
+                {t.contact.success}
               </p>
             )}
             {state === 'error' && (
               <p className="md:col-span-2 font-serif italic text-base text-ink">
-                {t.contactPage.error}
+                {t.contact.error}
               </p>
             )}
           </motion.form>

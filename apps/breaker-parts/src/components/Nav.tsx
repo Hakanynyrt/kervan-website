@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { NavLink, Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import type { Lang, DictBlock } from '../types';
 
 interface Props {
@@ -9,9 +9,16 @@ interface Props {
   t: DictBlock;
 }
 
+/** Top nav matches the original kervanheat.com long-scroll experience:
+ *  five anchor-style links + a CTA. On Home the links scroll to in-page
+ *  sections; on detail routes (e.g. /urunler/keski) they navigate back
+ *  to "/" with the hash, which the browser then resolves into a scroll
+ *  via `scroll-padding-top` defined in globals.css. */
 export default function Nav({ lang, setLang, t }: Props) {
   const [open, setOpen] = useState(false);
   const [stuck, setStuck] = useState(false);
+  const { pathname } = useLocation();
+  const onHome = pathname === '/';
 
   useEffect(() => {
     const onScroll = () => setStuck(window.scrollY > 8);
@@ -21,12 +28,37 @@ export default function Nav({ lang, setLang, t }: Props) {
   }, []);
 
   const links = [
-    { to: '/urunler',         label: t.nav.products },
-    { to: '/uyumluluk',       label: t.nav.brands },
-    { to: '/uretim-kalite',   label: t.nav.production },
-    { to: '/hakkimizda',      label: t.nav.about },
-    { to: '/iletisim',        label: t.nav.contact },
+    { hash: 'products',   label: t.nav.products },
+    { hash: 'atolye',     label: t.nav.atolye },
+    { hash: 'craft',      label: t.nav.craft },
+    { hash: 'industries', label: t.nav.industries },
+    { hash: 'contact',    label: t.nav.contact },
   ];
+
+  const renderLink = (hash: string, label: string, onClick?: () => void) => {
+    if (onHome) {
+      return (
+        <a
+          key={hash}
+          href={`#${hash}`}
+          onClick={onClick}
+          className="text-ink-mid hover:text-ink transition-colors"
+        >
+          {label}
+        </a>
+      );
+    }
+    return (
+      <Link
+        key={hash}
+        to={`/#${hash}`}
+        onClick={onClick}
+        className="text-ink-mid hover:text-ink transition-colors"
+      >
+        {label}
+      </Link>
+    );
+  };
 
   return (
     <header
@@ -47,19 +79,8 @@ export default function Nav({ lang, setLang, t }: Props) {
           />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8 font-sans text-sm">
-          {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              className={({ isActive }) =>
-                'transition-colors ' +
-                (isActive ? 'text-ink' : 'text-ink-mid hover:text-ink')
-              }
-            >
-              {l.label}
-            </NavLink>
-          ))}
+        <nav className="hidden md:flex items-center gap-10 font-sans text-sm">
+          {links.map((l) => renderLink(l.hash, l.label))}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -70,12 +91,21 @@ export default function Nav({ lang, setLang, t }: Props) {
           >
             {lang === 'tr' ? 'EN' : 'TR'}
           </button>
-          <Link
-            to="/iletisim"
-            className="hidden sm:inline-block bg-brand text-bg px-5 py-2 font-sans text-sm hover:bg-brand-hi transition-colors"
-          >
-            {t.nav.cta}
-          </Link>
+          {onHome ? (
+            <a
+              href="#contact"
+              className="hidden sm:inline-block bg-brand text-bg px-5 py-2 font-sans text-sm hover:bg-brand-hi transition-colors"
+            >
+              {t.nav.cta}
+            </a>
+          ) : (
+            <Link
+              to="/#contact"
+              className="hidden sm:inline-block bg-brand text-bg px-5 py-2 font-sans text-sm hover:bg-brand-hi transition-colors"
+            >
+              {t.nav.cta}
+            </Link>
+          )}
           <button
             className="md:hidden flex flex-col gap-1.5 p-1"
             aria-label="Menu"
@@ -97,18 +127,9 @@ export default function Nav({ lang, setLang, t }: Props) {
             className="md:hidden overflow-hidden bg-bg border-b border-hair"
           >
             <div className="px-6 py-4 flex flex-col gap-4 font-serif text-2xl">
-              {links.map((l) => (
-                <NavLink
-                  key={l.to}
-                  to={l.to}
-                  onClick={() => setOpen(false)}
-                  className={({ isActive }) =>
-                    isActive ? 'text-brand' : 'text-ink'
-                  }
-                >
-                  {l.label}
-                </NavLink>
-              ))}
+              {links.map((l) =>
+                renderLink(l.hash, l.label, () => setOpen(false)),
+              )}
             </div>
           </motion.div>
         )}

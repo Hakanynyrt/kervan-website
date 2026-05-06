@@ -25,14 +25,14 @@ export default function Brands({ t }: Props) {
         >
           <div className="col-span-12 lg:col-span-7 flex flex-col gap-5">
             <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand font-medium">
-              {t.brandsPage.eyebrow}
+              {t.brands.eyebrow}
             </span>
             <h1 className="font-serif italic text-h1 text-ink leading-[1.05] tracking-[-0.02em]">
-              {t.brandsPage.title}
+              {t.brands.pageTitle}
             </h1>
           </div>
           <p className="col-span-12 lg:col-span-5 font-serif italic text-lg text-ink-mid leading-relaxed max-w-[44ch]">
-            {t.brandsPage.aside}
+            {t.brands.pageAside}
           </p>
         </motion.div>
 

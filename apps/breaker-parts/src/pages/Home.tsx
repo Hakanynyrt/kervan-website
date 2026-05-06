@@ -1,9 +1,13 @@
-import { motion } from 'framer-motion';
-import { fadeUp, inViewOnce } from '@kervan/motion';
-import Hero from '../sections/Hero';
-import ProductGrid from '../sections/ProductGrid';
-import BrandStrip from '../sections/BrandStrip';
-import QualityTeaser from '../sections/QualityTeaser';
+import Scene from '../components/Scene';
+import OpeningHold from '../components/OpeningHold';
+import Hero from '../components/Hero';
+import Products from '../components/Products';
+import WorkshopShowcase from '../components/WorkshopShowcase';
+import BrandMarquee from '../components/BrandMarquee';
+import Craft from '../components/Craft';
+import Industries from '../components/Industries';
+import Exports from '../components/Exports';
+import Contact from '../components/Contact';
 import { UseDocTitle } from '../components/UseDocTitle';
 import type { DictBlock, Lang } from '../types';
 
@@ -12,42 +16,34 @@ interface Props {
   lang: Lang;
 }
 
+/**
+ * Long-scroll home — the original kervan-website experience moved
+ * verbatim. Scene + OpeningHold mount only here so other routes get a
+ * clean dark layout without the cinematic 3D bg.
+ */
 export default function Home({ t, lang }: Props) {
   return (
     <>
       <UseDocTitle
         title="Kervan Breaker — Hidrolik kırıcı yedek parçaları"
-        description="Keski, piston, burç, tie rod, tamir kiti, kama, alt gövde, saplama. Fabrika çıkışlı kalite, ısıl işlem garantili. 15+ marka uyumlu."
+        description="Keski, piston, burç, sızdırmazlık. 22 yıllık zanaat, 40+ kırıcı markası uyumlu."
       />
 
-      <Hero t={t} />
+      {/* 3D BG — vanilla Three.js, fixed full-viewport behind everything. */}
+      <Scene />
 
-      <section id="urunler-on" className="py-20 md:py-32 bg-bg-soft/40">
-        <motion.div
-          className="max-w-[1280px] mx-auto px-6 md:px-8 mb-12 md:mb-16 grid grid-cols-12 gap-8 items-end"
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="show"
-          viewport={inViewOnce}
-        >
-          <div className="col-span-12 lg:col-span-7 flex flex-col gap-5">
-            <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand font-medium">
-              {t.productsPage.eyebrow}
-            </span>
-            <h2 className="font-serif italic text-h2 text-ink leading-[1.1] tracking-[-0.015em] whitespace-pre-line">
-              {t.productsPage.title}
-            </h2>
-          </div>
-          <p className="col-span-12 lg:col-span-5 font-serif italic text-lg text-ink-mid leading-relaxed max-w-[40ch]">
-            {t.productsPage.aside}
-          </p>
-        </motion.div>
-
-        <ProductGrid lang={lang} />
-      </section>
-
-      <BrandStrip t={t} />
-      <QualityTeaser t={t} />
+      <div className="app-root">
+        {/* Cinematic opening hold — first viewport is just chisel + starfield. */}
+        <OpeningHold t={t} />
+        <Hero t={t} />
+        <Products t={t} />
+        <WorkshopShowcase t={t} />
+        <BrandMarquee t={t} />
+        <Craft t={t} />
+        <Industries t={t} />
+        <Exports t={t} lang={lang} />
+        <Contact t={t} />
+      </div>
     </>
   );
 }

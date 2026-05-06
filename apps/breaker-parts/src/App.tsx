@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useLang } from './lib/use-lang';
 import { DICT } from './lib/dict';
+import IntroOverlay from './components/IntroOverlay';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
 import WhatsAppFAB from './components/WhatsAppFAB';
@@ -20,7 +21,8 @@ export default function App() {
 
   return (
     <>
-      <ScrollToTop />
+      <IntroOverlay />
+
       <Nav lang={lang} setLang={setLang} t={t} />
       <main>
         <Routes>
@@ -36,17 +38,20 @@ export default function App() {
       </main>
       <Footer t={t} />
       <WhatsAppFAB />
+
+      <ScrollToTop />
     </>
   );
 }
 
-/** Resets scroll position to top on every route change. Anchor links
- *  (#id) on the same page still work — the effect only fires when the
- *  pathname changes, not on hash-only updates. */
+/** On every route change with no hash, scroll to top. Hash-based links
+ *  (e.g. /#products) are left to the browser's native scroll-to-id, with
+ *  `scroll-padding-top` in globals.css accounting for the fixed nav. */
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   useEffect(() => {
+    if (hash) return;
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
-  }, [pathname]);
+  }, [pathname, hash]);
   return null;
 }
