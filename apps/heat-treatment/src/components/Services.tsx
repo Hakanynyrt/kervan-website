@@ -20,8 +20,8 @@ export default function Services({ t }: Props) {
       />
 
       <motion.div
-        className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-px bg-hair"
-        variants={staggerContainer(0, 0.12)}
+        className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-px bg-hair"
+        variants={staggerContainer(0, 0.1)}
         initial="hidden"
         whileInView="show"
         viewport={inViewOnce}

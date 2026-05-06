@@ -64,6 +64,16 @@ export const DICT: Dict = {
             'Numune → seri akış',
           ],
         },
+        {
+          index: '04',
+          name: 'Üretim & Entegrasyon',
+          body: 'Hidrolik kırıcı yedek parçalarımızı da kendi tezgahımızda üretir, kendi pit-tip fırınımızda işleriz. Metallurjiyi sadece müşteri parçası için değil, kendi parçamız için de yaşıyoruz.',
+          bullets: [
+            'Keski, piston, burç, tamir kiti',
+            'Aynı tesis, aynı disiplin',
+            'Vitrin: kervanbreaker.com',
+          ],
+        },
       ],
     },
     capacity: {
@@ -179,6 +189,16 @@ export const DICT: Dict = {
             'Other alloys on request',
             'Custom temperature curves',
             'Sample → production flow',
+          ],
+        },
+        {
+          index: '04',
+          name: 'Production & Integration',
+          body: 'We also produce hydraulic breaker spare parts on our own benches, run through our own pit furnaces. We live the metallurgy not just for customer parts — for our own parts too.',
+          bullets: [
+            'Chisel, piston, bushing, repair kit',
+            'Same shop, same discipline',
+            'Catalogue: kervanbreaker.com',
           ],
         },
       ],
