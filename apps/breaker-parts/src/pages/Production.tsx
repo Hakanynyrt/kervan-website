@@ -1,6 +1,12 @@
 import { motion } from 'framer-motion';
+import {
+  PageMeta,
+  JsonLd,
+  breadcrumbList,
+  service as serviceSchema,
+  KERVAN_BREAKER_URL,
+} from '@kervan/seo';
 import { fadeUp, inViewOnce } from '@kervan/motion';
-import { UseDocTitle } from '../components/UseDocTitle';
 import type { DictBlock } from '../types';
 
 interface Props {
@@ -10,9 +16,24 @@ interface Props {
 export default function Production({ t }: Props) {
   return (
     <>
-      <UseDocTitle
+      <PageMeta
         title="Üretim & Kalite — Kervan Breaker"
         description="42CrMo / 42CrMoA standart alaşım. Kontrollü atmosfer pit-tip fırınlarda sertleştirme + temperleme. OES spektrometre ile lot başı malzeme analizi."
+        canonical={`${KERVAN_BREAKER_URL}/uretim-kalite`}
+        image={`${KERVAN_BREAKER_URL}/og.png`}
+      />
+      <JsonLd
+        schema={breadcrumbList([
+          { name: 'Anasayfa', url: `${KERVAN_BREAKER_URL}/` },
+          { name: 'Üretim & Kalite', url: `${KERVAN_BREAKER_URL}/uretim-kalite` },
+        ])}
+      />
+      <JsonLd
+        schema={serviceSchema({
+          url: `${KERVAN_BREAKER_URL}/uretim-kalite`,
+          name: 'Hidrolik kırıcı parça üretimi + ısıl işlem entegrasyonu',
+          description: '42CrMo / 42CrMoA standart alaşım. Kendi pit-tip fırınımızda sertleştirme + temperleme. OES spektrometre ile lot başı malzeme analizi.',
+        })}
       />
 
       <section className="pt-32 pb-16 md:pt-40 md:pb-24">

@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
+import {
+  PageMeta,
+  JsonLd,
+  breadcrumbList,
+  KERVAN_BREAKER_URL,
+} from '@kervan/seo';
 import { fadeUp, inViewOnce } from '@kervan/motion';
 import { PRODUCT_BY_SLUG } from '../data/products';
-import { UseDocTitle } from '../components/UseDocTitle';
 import type { DictBlock, Lang } from '../types';
 
 interface Props {
@@ -61,9 +66,17 @@ export default function Contact({ t, lang }: Props) {
 
   return (
     <>
-      <UseDocTitle
+      <PageMeta
         title="İletişim — Kervan Breaker"
         description="Hidrolik kırıcı yedek parça teklifi için: ahmet@kervanheat.com · +90 531 669 37 34."
+        canonical={`${KERVAN_BREAKER_URL}/iletisim`}
+        image={`${KERVAN_BREAKER_URL}/og.png`}
+      />
+      <JsonLd
+        schema={breadcrumbList([
+          { name: 'Anasayfa', url: `${KERVAN_BREAKER_URL}/` },
+          { name: 'İletişim', url: `${KERVAN_BREAKER_URL}/iletisim` },
+        ])}
       />
 
       <section className="pt-32 pb-16 md:pt-40 md:pb-24">

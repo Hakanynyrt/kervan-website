@@ -1,7 +1,14 @@
 import { motion } from 'framer-motion';
+import {
+  PageMeta,
+  JsonLd,
+  breadcrumbList,
+  itemList,
+  KERVAN_BREAKER_URL,
+} from '@kervan/seo';
 import { fadeUp, inViewOnce } from '@kervan/motion';
 import ProductGrid from '../sections/ProductGrid';
-import { UseDocTitle } from '../components/UseDocTitle';
+import { PRODUCTS } from '../data/products';
 import type { DictBlock, Lang } from '../types';
 
 interface Props {
@@ -12,9 +19,28 @@ interface Props {
 export default function Products({ t, lang }: Props) {
   return (
     <>
-      <UseDocTitle
+      <PageMeta
         title="Ürünler — Kervan Breaker"
         description="Hidrolik kırıcı yedek parçalarımız: keski, piston, burç, tie rod, tamir kiti, kama, alt gövde, saplama, yan saplama."
+        canonical={`${KERVAN_BREAKER_URL}/urunler`}
+        image={`${KERVAN_BREAKER_URL}/og.png`}
+      />
+      <JsonLd
+        schema={breadcrumbList([
+          { name: 'Anasayfa', url: `${KERVAN_BREAKER_URL}/` },
+          { name: 'Ürünler', url: `${KERVAN_BREAKER_URL}/urunler` },
+        ])}
+      />
+      <JsonLd
+        schema={itemList({
+          name: 'Hidrolik kırıcı yedek parçaları',
+          items: PRODUCTS.map((p) => ({
+            name: p[lang].name,
+            url: `${KERVAN_BREAKER_URL}/urunler/${p.slug}`,
+            description: p[lang].tagline,
+            image: p.image ? `${KERVAN_BREAKER_URL}${p.image}` : undefined,
+          })),
+        })}
       />
 
       <section className="pt-32 pb-12 md:pt-40 md:pb-16">

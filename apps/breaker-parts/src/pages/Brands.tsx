@@ -1,7 +1,12 @@
 import { motion } from 'framer-motion';
+import {
+  PageMeta,
+  JsonLd,
+  breadcrumbList,
+  KERVAN_BREAKER_URL,
+} from '@kervan/seo';
 import { fadeUp, inViewOnce, staggerContainer } from '@kervan/motion';
 import { BRANDS } from '../data/brands';
-import { UseDocTitle } from '../components/UseDocTitle';
 import type { DictBlock } from '../types';
 
 interface Props {
@@ -11,9 +16,17 @@ interface Props {
 export default function Brands({ t }: Props) {
   return (
     <>
-      <UseDocTitle
+      <PageMeta
         title="Marka Uyumluluk — Kervan Breaker"
         description="Atlas Copco, Furukawa, Soosan, Indeco, NPK, Rammer, Montabert, Epiroc, Sandvik, Toku, Kobelco, Hanwoo, Krupp, D&A, MTB."
+        canonical={`${KERVAN_BREAKER_URL}/uyumluluk`}
+        image={`${KERVAN_BREAKER_URL}/og.png`}
+      />
+      <JsonLd
+        schema={breadcrumbList([
+          { name: 'Anasayfa', url: `${KERVAN_BREAKER_URL}/` },
+          { name: 'Marka Uyumluluk', url: `${KERVAN_BREAKER_URL}/uyumluluk` },
+        ])}
       />
 
       <section className="pt-32 pb-16 md:pt-40 md:pb-24">

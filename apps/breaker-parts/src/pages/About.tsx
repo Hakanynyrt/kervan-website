@@ -1,6 +1,11 @@
 import { motion } from 'framer-motion';
+import {
+  PageMeta,
+  JsonLd,
+  breadcrumbList,
+  KERVAN_BREAKER_URL,
+} from '@kervan/seo';
 import { fadeUp } from '@kervan/motion';
-import { UseDocTitle } from '../components/UseDocTitle';
 import type { DictBlock } from '../types';
 
 interface Props {
@@ -10,9 +15,17 @@ interface Props {
 export default function About({ t }: Props) {
   return (
     <>
-      <UseDocTitle
+      <PageMeta
         title="Hakkımızda — Kervan Breaker"
         description="Kervan Makina, Kartepe / Kocaeli'de fason ısıl işlem ve hidrolik kırıcı yedek parça üreten aile şirketi."
+        canonical={`${KERVAN_BREAKER_URL}/hakkimizda`}
+        image={`${KERVAN_BREAKER_URL}/og.png`}
+      />
+      <JsonLd
+        schema={breadcrumbList([
+          { name: 'Anasayfa', url: `${KERVAN_BREAKER_URL}/` },
+          { name: 'Hakkımızda', url: `${KERVAN_BREAKER_URL}/hakkimizda` },
+        ])}
       />
 
       <section className="pt-32 pb-16 md:pt-40 md:pb-24">

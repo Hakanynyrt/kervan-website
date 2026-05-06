@@ -1,9 +1,15 @@
 import { motion } from 'framer-motion';
 import { Link, useParams } from 'react-router-dom';
+import {
+  PageMeta,
+  JsonLd,
+  breadcrumbList,
+  product as productSchema,
+  KERVAN_BREAKER_URL,
+} from '@kervan/seo';
 import { fadeUp, inViewOnce, kenBurns } from '@kervan/motion';
 import { PRODUCT_BY_SLUG } from '../data/products';
 import { BRANDS } from '../data/brands';
-import { UseDocTitle } from '../components/UseDocTitle';
 import type { DictBlock, Lang } from '../types';
 
 interface Props {
@@ -18,7 +24,7 @@ export default function ProductDetail({ t, lang }: Props) {
   if (!product) {
     return (
       <>
-        <UseDocTitle title="404 — Kervan Breaker" />
+        <PageMeta title="404 — Kervan Breaker" />
         <section className="min-h-[60dvh] flex flex-col justify-center items-center pt-32 pb-16 text-center px-6">
           <h1 className="font-serif italic text-h2 text-ink mb-6">{t.productDetail.notFound}</h1>
           <Link
@@ -34,12 +40,35 @@ export default function ProductDetail({ t, lang }: Props) {
 
   const loc = product[lang];
   const quoteHref = `/iletisim?part=${encodeURIComponent(product.slug)}`;
+  const productUrl = `${KERVAN_BREAKER_URL}/urunler/${product.slug}`;
+  const productImageUrl = product.image ? `${KERVAN_BREAKER_URL}${product.image}` : undefined;
 
   return (
     <>
-      <UseDocTitle
+      <PageMeta
         title={`${loc.name} — Kervan Breaker`}
         description={loc.tagline}
+        canonical={productUrl}
+        image={productImageUrl ?? `${KERVAN_BREAKER_URL}/og.png`}
+        type="product"
+      />
+      <JsonLd
+        schema={productSchema({
+          url: productUrl,
+          name: loc.name,
+          description: loc.body,
+          image: productImageUrl,
+          material: '42CrMo · 42CrMoA',
+          brandFits: BRANDS.map((b) => b.name),
+          sku: product.slug,
+        })}
+      />
+      <JsonLd
+        schema={breadcrumbList([
+          { name: 'Anasayfa', url: `${KERVAN_BREAKER_URL}/` },
+          { name: 'Ürünler', url: `${KERVAN_BREAKER_URL}/urunler` },
+          { name: loc.name, url: productUrl },
+        ])}
       />
 
       <section className="pt-32 pb-16 md:pt-40 md:pb-24">

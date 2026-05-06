@@ -25,6 +25,97 @@
 
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Organization schema — sameAs links to kervanbreaker.com so Google
+         understands the two domains belong to the same business entity. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://kervanheat.com/#organization",
+        "name": "Kervan Isıl İşlem San. Tic. Ltd. Şti.",
+        "legalName": "Kervan Isıl İşlem San. Tic. Ltd. Şti.",
+        "alternateName": "Kervan Heat",
+        "url": "https://kervanheat.com",
+        "logo": "https://kervanheat.com/logo-krv-128.png",
+        "sameAs": [
+          "https://kervanbreaker.com",
+          "https://www.instagram.com/kervanmakina/"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+90 531 669 37 34",
+          "email": "ahmet@kervanheat.com",
+          "contactType": "sales",
+          "areaServed": "TR",
+          "availableLanguage": ["tr", "en"]
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Uzunçiftlik Mah. Sadun Atığ Cad. No:112/A",
+          "addressLocality": "Kartepe",
+          "addressRegion": "Kocaeli",
+          "addressCountry": "TR"
+        }
+      }
+    </script>
+
+    <!-- WebSite schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "https://kervanheat.com",
+        "name": "Kervan Heat",
+        "description": "Kontrollü atmosfer pit-tip fırınlarda fason ısıl işlem.",
+        "inLanguage": "tr",
+        "publisher": { "@id": "https://kervanheat.com/#organization" }
+      }
+    </script>
+
+    <!-- Service schema — heat treatment as the primary offering. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "serviceType": "Fason ısıl işlem",
+        "name": "Fason ısıl işlem",
+        "description": "Kontrollü atmosfer pit-tip fırınlarda sertleştirme, temperleme ve sementasyon. 42CrMo, 42CrMoA ve diğer alaşımlar — kendi ölçüm ve kontrol disiplinimizle.",
+        "url": "https://kervanheat.com",
+        "provider": { "@id": "https://kervanheat.com/#organization" },
+        "areaServed": { "@type": "Country", "name": "Türkiye" },
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Isıl işlem hizmetleri",
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Sertleştirme & Temperleme",
+                "description": "Pit-tip fırında ısıtma, kontrollü soğutma, çift potalı temper hattı."
+              }
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Sementasyon",
+                "description": "Propan-hava karışımı atmosfer ile karbon zenginleştirme."
+              }
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Fason ısıl işlem",
+                "description": "Özel alaşım, özel sıcaklık eğrisi, özel parti büyüklüğü."
+              }
+            }
+          ]
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

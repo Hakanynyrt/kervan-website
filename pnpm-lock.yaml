@@ -51,6 +51,9 @@ importers:
       '@kervan/motion':
         specifier: workspace:*
         version: link:../../packages/motion
+      '@kervan/seo':
+        specifier: workspace:*
+        version: link:../../packages/seo
       '@kervan/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -154,7 +157,15 @@ importers:
         specifier: ^18.3.12
         version: 18.3.28
 
-  packages/seo: {}
+  packages/seo:
+    dependencies:
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+    devDependencies:
+      '@types/react':
+        specifier: ^18.3.12
+        version: 18.3.28
 
   packages/ui:
     dependencies:

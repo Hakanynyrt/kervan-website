@@ -25,6 +25,53 @@
 
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Organization schema — sameAs links to kervanheat.com so Google
+         understands the two domains belong to the same business entity. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://kervanbreaker.com/#organization",
+        "name": "Kervan Isıl İşlem San. Tic. Ltd. Şti.",
+        "legalName": "Kervan Isıl İşlem San. Tic. Ltd. Şti.",
+        "alternateName": "Kervan Breaker",
+        "url": "https://kervanbreaker.com",
+        "logo": "https://kervanbreaker.com/logo-krv-128.png",
+        "sameAs": [
+          "https://kervanheat.com",
+          "https://www.instagram.com/kervanmakina/"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+90 531 669 37 34",
+          "email": "ahmet@kervanheat.com",
+          "contactType": "sales",
+          "areaServed": "TR",
+          "availableLanguage": ["tr", "en"]
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Uzunçiftlik Mah. Sadun Atığ Cad. No:112/A",
+          "addressLocality": "Kartepe",
+          "addressRegion": "Kocaeli",
+          "addressCountry": "TR"
+        }
+      }
+    </script>
+
+    <!-- WebSite schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "https://kervanbreaker.com",
+        "name": "Kervan Breaker",
+        "description": "Hidrolik kırıcı yedek parçaları — keski, piston, burç, tamir kiti.",
+        "inLanguage": "tr",
+        "publisher": { "@id": "https://kervanbreaker.com/#organization" }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { UseDocTitle } from '../components/UseDocTitle';
+import { PageMeta } from '@kervan/seo';
 import type { DictBlock } from '../types';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 export default function NotFound({ t }: Props) {
   return (
     <>
-      <UseDocTitle title="404 — Kervan Breaker" />
+      <PageMeta title="404 — Kervan Breaker" />
       <section className="min-h-[70dvh] flex flex-col justify-center items-center pt-32 pb-16 text-center px-6">
         <h1 className="font-serif italic text-h1 text-ink mb-6">{t.notFound.title}</h1>
         <p className="font-serif italic text-lg text-ink-mid max-w-[44ch] mb-8">

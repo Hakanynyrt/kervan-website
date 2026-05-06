@@ -1,3 +1,4 @@
+import { PageMeta, JsonLd, itemList, KERVAN_BREAKER_URL } from '@kervan/seo';
 import Scene from '../components/Scene';
 import OpeningHold from '../components/OpeningHold';
 import Hero from '../components/Hero';
@@ -8,7 +9,7 @@ import Craft from '../components/Craft';
 import Industries from '../components/Industries';
 import Exports from '../components/Exports';
 import Contact from '../components/Contact';
-import { UseDocTitle } from '../components/UseDocTitle';
+import { PRODUCTS } from '../data/products';
 import type { DictBlock, Lang } from '../types';
 
 interface Props {
@@ -24,9 +25,22 @@ interface Props {
 export default function Home({ t, lang }: Props) {
   return (
     <>
-      <UseDocTitle
+      <PageMeta
         title="Kervan Breaker — Hidrolik kırıcı yedek parçaları"
         description="Keski, piston, burç, sızdırmazlık. 22 yıllık zanaat, 40+ kırıcı markası uyumlu."
+        canonical={`${KERVAN_BREAKER_URL}/`}
+        image={`${KERVAN_BREAKER_URL}/og.png`}
+      />
+      <JsonLd
+        schema={itemList({
+          name: 'Hidrolik kırıcı yedek parça aileleri',
+          items: PRODUCTS.map((p) => ({
+            name: p[lang].name,
+            url: `${KERVAN_BREAKER_URL}/urunler/${p.slug}`,
+            description: p[lang].tagline,
+            image: p.image ? `${KERVAN_BREAKER_URL}${p.image}` : undefined,
+          })),
+        })}
       />
 
       {/* 3D BG — vanilla Three.js, fixed full-viewport behind everything. */}
