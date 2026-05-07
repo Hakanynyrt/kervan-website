@@ -164,6 +164,6 @@ Tavsiye edilen ölçü/limit:
 
 ## Legacy
 
-- `public/` (kök) — eski monolit site asset'leri. Breaker-only HTML'ler (`compat.html`, `part.html`, `gallery.html`, `cases.html`, `diagram.html`, `post.html`, `blog.html`) silindi; `apps/heat-treatment/public/_redirects` bunları `kervanbreaker.com`'a 301'liyor. Kalan v1 dosyaları (`index.html`, `about.html`, `kvkk.html` + JSX/CSS dependency'leri ve asset'ler) ileride ayrı turda temizlenir.
+- `public/` (kök) — yalnızca symlink hedefi 3 öğe kaldı: `photos/`, `videos/`, `kirici-uc.glb`. `apps/heat-treatment/public/{photos,videos}` ve `apps/breaker-parts/public/{videos,kirici-uc.glb}` bunlara symlink'liyor (videolar iki app arasında paylaşılıyor; photos sadece heat-treatment'te symlink, breaker-parts'ta gerçek). Eski v1 HTML / JSX / CSS / JS bağımlılıkları ve duplikasyon asset'leri (her app kendi kopyasına sahip) silindi.
 - `legacy-astro/` — daha eski Astro denemesi, arşiv.
 
