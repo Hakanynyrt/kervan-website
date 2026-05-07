@@ -1,6 +1,7 @@
 node_modules/
 .wrangler/
 dist/
+.turbo/
 .env
 .env.local
 .DS_Store
@@ -10,3 +11,6 @@ dist/
 package-lock.json
 *.mov
 *.MOV
+*.tsbuildinfo
+*.log
+.vite/

@@ -1,0 +1,57 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   @kervan/ui — Mood C tokens
+   Forge Ember accent · Near-black bg · Warm cream ink · Fraunces editorial.
+   Forj ateşi yanında, sayfaları parşömen, başlıkları el yazısı bir
+   endüstriyel monografi.
+═══════════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* Colors */
+  --color-bg:           #0A0A0B;
+  --color-bg-soft:      #141416;
+  --color-bg-warm:      #1C1C20;
+
+  --color-ink:          #E8E2D6;
+  --color-ink-mid:      #B8AFA0;
+  --color-ink-soft:     #7A7066;
+
+  --color-brand:        #E8431B;
+  --color-brand-hi:     #FF5C32;
+  --color-brand-lo:     #C53614;
+  --color-brand-soft:   rgba(232, 67, 27, 0.12);
+
+  --color-hair:         #262629;
+  --color-hair-strong:  #36363B;
+
+  --color-ok:           #3FB173;
+  --color-err:          #FF7B6E;
+
+  /* Typography */
+  --font-serif:         "Fraunces", "Times New Roman", Georgia, serif;
+  --font-sans:          "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --text-display:       clamp(56px, 9vw, 128px);
+  --text-h1:            clamp(48px, 7vw, 96px);
+  --text-h2:            clamp(36px, 5vw, 64px);
+  --text-h3:            clamp(24px, 3vw, 36px);
+  --text-eyebrow:       12px;
+  --text-body:          17px;
+  --text-body-sm:       14px;
+
+  /* Shadows */
+  --shadow-xs:          0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm:          0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md:          0 6px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg:          0 16px 48px rgba(0, 0, 0, 0.5);
+  --shadow-glow-brand:  0 0 24px rgba(232, 67, 27, 0.35);
+
+  /* Radius */
+  --radius-sm:          6px;
+  --radius-md:          14px;
+  --radius-lg:          20px;
+  --radius-pill:        999px;
+
+  /* Motion easings */
+  --ease-editorial:     cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft:          cubic-bezier(0.4, 0, 0.2, 1);
+}

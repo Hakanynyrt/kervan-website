@@ -1,159 +1,169 @@
-# kervanheat.com
+# kervan-platform
 
-Production static site for Kervan Heat Treatment — heat-treated chisels, pistons and kits for hydraulic breakers.
+Monorepo for Kervan Makina'nın iki web sitesi:
+- **kervanheat.com** — fason ısıl işlem hizmetleri (sertleştirme, temperleme, sementasyon)
+- **kervanbreaker.com** — hidrolik kırıcı yedek parçaları (keski, piston, burç, kit)
 
 ## Stack
 
-- **Static HTML + inline JSX** (React via CDN, Babel standalone) — no build step
-- **Cloudflare Worker** (`src/worker/index.ts`) — serves `public/` assets + handles `/api/rfq` RFQ submissions (Resend → MailChannels fallback + Telegram notifications)
+- pnpm 10+ workspace · Turborepo 2.9
+- Vite 5 + TypeScript 5.9 + React 18 (her iki app)
+- Tailwind v4 + Framer Motion
+- Mood C dark palette + Forge Ember accent (`#E8431B`)
+- Cloudflare Pages (static + Functions için RFQ endpoint)
 
 ## Layout
 
-- `public/` — all static assets served by Cloudflare (HTML, JSX, CSS, images)
-- `src/worker/index.ts` — Cloudflare Worker entry (static assets + RFQ API)
-- `legacy-astro/` — previous Astro build, archived for reference
+```
+apps/
+  heat-treatment/        kervanheat.com — single-page, plain
+    functions/api/rfq.ts   Pages Function — RFQ POST handler
+    src/                   React + sections + dict
+    public/                static assets, _redirects, _headers, sitemap, robots
+  breaker-parts/         kervanbreaker.com — long-scroll + 8 detail routes
+    src/                   pages, components, sections, data, lib
+    public/                photos, videos symlink, brand-logos, kirici-uc.glb
+
+packages/
+  ui/                    @kervan/ui — Mood C tokens + base components
+  motion/                @kervan/motion — Framer variants + ScrollReveal
+  seo/                   @kervan/seo — JSON-LD + PageMeta + JsonLd
+```
+
+## Komutlar
+
+```bash
+pnpm install                                       # workspace tümü
+pnpm dev                                           # turbo dev (her iki app)
+pnpm --filter @kervan/heat-treatment dev           # tek app — http://localhost:5173
+pnpm --filter @kervan/breaker-parts dev            # tek app — http://localhost:5174
+pnpm turbo build                                   # her iki app + paketler
+pnpm turbo typecheck                               # 5 paket
+pnpm format                                        # Prettier
+pnpm lint                                          # ESLint flat config
+```
 
 ## Deploy
 
-Cloudflare Pages is connected to the `main` branch. Every push deploys automatically.
+İki ayrı Cloudflare Pages projesi. `main` branch → production, diğerleri → preview.
 
-For local preview:
-```
-npm install
-npm run dev
-```
+| Pages projesi | Domain | Build path |
+|---|---|---|
+| `kervan-heat-treatment` | kervanheat.com | `apps/heat-treatment/dist` |
+| `kervan-breaker-parts` | kervanbreaker.com | `apps/breaker-parts/dist` |
 
-## Environment variables (Cloudflare dashboard)
+GitHub Actions workflow (`.github/workflows/deploy.yml`):
+- `dorny/paths-filter` ile değişen app'i tespit eder
+- Sadece etkilenen app'i build + deploy eder (`packages/**` değişirse ikisini de)
+- `cloudflare/wrangler-action@v3` ile `pages deploy`
 
-Required for the RFQ form to deliver email + Telegram:
+### Manuel kurulum (bir kerelik, dashboard'dan)
+
+**A. Cloudflare Pages projeleri oluştur** (dashboard → Workers & Pages → Create → Pages):
+
+| Proje adı | Production branch | Build command | Output dir |
+|---|---|---|---|
+| `kervan-heat-treatment` | `main` | (empty — Actions yapacak) | `apps/heat-treatment/dist` |
+| `kervan-breaker-parts` | `main` | (empty — Actions yapacak) | `apps/breaker-parts/dist` |
+
+> Build command'ı boş bırak — bu repo'yu Cloudflare git integration'a bağlama. Deploy'lar Actions tarafından `wrangler pages deploy` ile yapılır. Pages projesi sadece "host" rolünde.
+
+**B. Custom domain bind:**
+- `kervan-heat-treatment` → `kervanheat.com` + `www.kervanheat.com`
+- `kervan-breaker-parts` → `kervanbreaker.com` + `www.kervanbreaker.com`
+
+Her iki domain Cloudflare'de zaten kayıtlı; Pages otomatik DNS kayıtlarını kuruyor.
+
+**C. GitHub repository secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | Source |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | dashboard → My Profile → API Tokens → "Edit Cloudflare Workers" template ile yeni token |
+| `CLOUDFLARE_ACCOUNT_ID` | dashboard → Workers & Pages anasayfası → sağ alt "Account ID" |
+
+**D. Heat-treatment Pages env vars** (RFQ Function için — sadece `kervan-heat-treatment` projesinde, breaker'da gerek yok):
 
 | Variable | Purpose |
 |---|---|
-| `RESEND_API_KEY` | Primary email sender |
-| `MAILCHANNELS_DKIM_DOMAIN` | Fallback email sender |
-| `MAILCHANNELS_DKIM_SELECTOR` | DKIM selector |
+| `RESEND_API_KEY` | primary email transport |
+| `MAILCHANNELS_DKIM_DOMAIN` | fallback transport |
+| `MAILCHANNELS_DKIM_SELECTOR` | DKIM selector (default: `mailchannels`) |
 | `MAILCHANNELS_DKIM_PRIVATE_KEY` | DKIM private key |
 | `TG_BOT_TOKEN` | Telegram bot token |
-| `TG_CHAT_ID` | Telegram chat ID for RFQ alerts |
-| `MAIL_TO` | Destination inbox (default: info@kervanheat.com) |
-| `MAIL_FROM` | Sender address (default: noreply@kervanheat.com) |
+| `TG_CHAT_ID` | Telegram chat ID |
+| `MAIL_TO` | RFQ inbox (default: `ahmet@kervanheat.com`) |
+| `MAIL_FROM` | sender (default: `noreply@kervanheat.com`) |
 
-## Medya ekleme (galerilere foto/video koymak)
+**E. Cutover sırası — downtime'sız geçiş için:**
 
-Ana sayfada üç galeri var — **Uçlar**, **Stok**, **Atölye**. Her slot `public/dict.jsx` içinde `{ name, desc, img, video }` formatında. `img` veya `video` alanı boşsa, kart isimli placeholder olarak çıkar. Doldurmak için:
+1. PR aç (`claude/kervan-dual-site-migration-gKTT3` → `main`) ama **henüz merge etme**
+2. PR açılınca workflow tetiklenir → preview deploy
+3. Preview URL'leri kontrol et:
+   - `https://<branch>.kervan-heat-treatment.pages.dev`
+   - `https://<branch>.kervan-breaker-parts.pages.dev`
+4. Her şey çalışıyorsa **main'e merge et** → production deploy. Bu noktada Pages projeleri canlı ama özel domain hâlâ eski Worker'a yönlü.
+5. Cloudflare dashboard'dan custom domain'leri Pages projelerine bind et — bu DNS cutover anı. Saniyeler içinde traffic Pages'e geçer.
+6. Eski Worker route'unu (`kervanheat.com → kervan-website` Worker) deaktive et veya Worker'ı tamamen sil.
+7. Sonraki commit'te `src/worker/`, `wrangler.jsonc` ve kök `public/`'in breaker-only HTML'leri (`compat.html`, `part.html`, `gallery.html` vs.) temizlenir.
 
-### Hızlı yol — Inbox (önerilen)
+> **Önemli:** Adım 4'ten önce eski Worker hâlâ canlı, kervanheat.com hizmet vermeye devam ediyor. Pages'e DNS cutover sadece adım 5'te. Bu sıra downtime'sız bir geçiş garanti eder.
 
-Ham dosyaları **tek bir yere** at, ismi ne olursa olsun:
+## RFQ akışı
+
+Her iki site `/api/rfq` endpoint'ine POST atar:
+- **kervanheat.com Contact** → same-origin POST (`/api/rfq` Pages Function)
+- **kervanbreaker.com Contact** → cross-origin POST (`https://kervanheat.com/api/rfq`)
+
+Worker tarafı CORS allowlist'inde `kervanbreaker.com` var; allowlist dışı origin'ler 403.
+
+Email pipeline: Resend (primary) → MailChannels (fallback) → Telegram (notification, parallel).
+
+## Medya ekleme
+
+### Hızlı yol — Inbox
+
+Ham dosyaları **tek yere** at, ismi ne olursa olsun:
 
 ```
-public/photos/_inbox/
+public/photos/_inbox/         # repo kökü, eski paylaşılan dizin
 ```
 
-GitHub web upload veya `git push` fark etmez. Sonra Claude'a "yükledim, bakar mısın?" de → içeriklere bakar, doğru isme çevirir, doğru kategoriye (`uclar/`, `stok/`, `atolye/`) taşır, `dict.jsx`'e bağlar, commit eder.
+Sonra Claude'a "yükledim, bakar mısın?" de → içerikleri inceler, doğru isme çevirir, doğru kategoriye taşır, dict'e bağlar, commit eder.
 
-**Video için**: Claude video içeriğini göremez — ya dosya adında bir ipucu olsun (`forj.mp4`, `cnc-kesim.mp4`) ya da mesajında kısaca söyle (*"1.mp4 forj, 2.mp4 CNC, 3.mp4 paketleme"*).
+**Video için**: dosya adında ipucu olsun (`forj.mp4`, `cnc-kesim.mp4`) ya da mesajında belirt.
 
-### Manuel yol
+### Manuel yol — Slot referansı
 
-Eğer yerleri ve isimleri kendin vermek istersen:
+| App | Dizin | Slotlar |
+|---|---|---|
+| breaker-parts | `apps/breaker-parts/public/photos/uclar/` | sivri-uc, yassi, konik, piramit, asfalt |
+| breaker-parts | `apps/breaker-parts/public/photos/pistonlar/` | piston-stack, piston-detay |
+| breaker-parts | `apps/breaker-parts/public/photos/burclar/` | burclar-raf, burc-detay |
+| breaker-parts | `apps/breaker-parts/public/photos/kit/` | seal-kit |
 
-```
-public/photos/uclar/   # keski foto’ları
-public/photos/stok/    # stok/işlenmiş parça foto’ları
-public/photos/atolye/  # atölye sahneleri
-public/videos/uclar/   # keski videoları
-public/videos/stok/    # stok video loop’ları
-public/videos/atolye/  # atölye sahnesi videoları
-```
+`apps/breaker-parts/public/videos` → repo kökünde `public/videos/` symlink (paylaşılan).
 
-### Dosya adlandırma (manuel yoldaysan)
-
-- **Foto**: `slot-kisa-aciklama-NN.jpg` (ör. `piston-01.jpg`, `burc-detay-01.jpg`)
-- **Video**: `slot-kisa-NN.mp4` (ör. `piston-01.mp4`, `silindir-cnc-01.mp4`)
-- Türkçe karakter yok, hepsi küçük harf, boşluk yerine tire
-
-**Stok slot'ları** (referans için): piston, burc, sizdirmazlik, silindir, tamir-kiti, ozel  
-**Uçlar slot'ları**: sivri-uc, yassi, konik, piramit, asfalt, ozel-olcu  
-**Atölye slot'ları**: cnc, forj, isil-islem, taslama, kalite, paketleme
-
-### Tavsiye edilen ölçüler / limitler
+Tavsiye edilen ölçü/limit:
 
 | Tip | Boyut | Format | Dosya | Not |
 |---|---|---|---|---|
-| Foto | 1600×2000 px (4:5) | JPEG veya WebP | < 400 KB | Web için sıkıştırılmış — ham kamera dosyası koymayın |
-| Video | 1080×1350 (4:5) | MP4, H.264 + AAC | < 10 MB | 5–10 sn seamless loop, **ses yok (muted)** |
+| Foto | 1600×2000 px (4:5) | JPEG veya WebP | < 400 KB | sıkıştırılmış |
+| Video | 1080×1350 (4:5) | MP4 H.264 + AAC | < 10 MB | seamless loop, ses yok |
 
-### `dict.jsx`’e bağla (manuel yoldaysan)
+### Cache uyarısı
 
-İlgili item’ın `img` veya `video` alanını doldur:
+`_headers` `/photos/*` için 1 yıllık immutable cache verir. Aynı dosya adıyla güncelleme yaparsan eski sürüm CDN'de kalır → yeni sürüm için **yeni dosya adı** kullan (`-02`, `-v2`).
 
-```ts
-// site_v2/src/lib/dict.ts içinde, stock.items array'i:
-{ name: 'Piston', desc: '...', img: '/photos/stok/piston-01.jpg', video: '/videos/stok/piston-01.mp4' },
-```
+## Mimarinin notları
 
-Video varsa `img` poster olarak kullanılır (yüklenirken thumbnail). TR ve EN blokları ayrı — aynı dosyayı iki yere de yaz. Path'ler **kök-relatif**: `/photos/...` ve `/videos/...` (Vite root'tan servis ediyor).
+- **Mood C** — dark industrial palette: bg `#0A0A0B`, ink `#E8E2D6` (warm cream), accent `#E8431B` (Forge Ember). Tokens `packages/ui/src/tokens.css` Tailwind v4 `@theme` bloğu ile expose edilir; her iki app `@import "@kervan/ui/tokens.css"` ile çeker.
+- **Typography** — Display Fraunces italic serif, body Inter. "Atelier editorial · dark variant" karakteri.
+- **3D scene** — sadece breaker-parts'ın `/` route'unda (Three.js + GLTF). heat-treatment'ta 3D yok.
+- **i18n** — TR default, EN altyapı. `?lang=` query > `localStorage('kv_lang')` > `navigator.language` > 'tr' fallback.
+- **Branch discipline** — `main` korunur (otomatik prod deploy). Feature branch'ler `feature/<topic>`.
 
-### Commit
+## Legacy
 
-```
-git add public/photos/uclar/sivri-uc-granit-01.jpg public/dict.jsx
-git commit -m "media: add sivri-uc-granit-01"
-git push
-```
+- `public/` (kök) — yalnızca symlink hedefi 3 öğe kaldı: `photos/`, `videos/`, `kirici-uc.glb`. `apps/heat-treatment/public/{photos,videos}` ve `apps/breaker-parts/public/{videos,kirici-uc.glb}` bunlara symlink'liyor (videolar iki app arasında paylaşılıyor; photos sadece heat-treatment'te symlink, breaker-parts'ta gerçek). Eski v1 HTML / JSX / CSS / JS bağımlılıkları ve duplikasyon asset'leri (her app kendi kopyasına sahip) silindi.
+- `legacy-astro/` — daha eski Astro denemesi, arşiv.
 
-Cloudflare deploy otomatik — push’tan 30–60 saniye sonra canlıda.
-
-### Sınırlar
-
-- GitHub tek dosya **100 MB** sert limit. Video için **ham/4K/HDR yüklemeyin** — sıkıştırılmış halde koyun.
-- `_headers` `public/photos/` için 1 yıllık cache header’ı yollar. Aynı dosya adıyla güncelleme yaparsan eski sürüm CDN’de kalır → yeni sürüm için yeni dosya adı (`-02`, `-v2` vs.) kullan.
-
-## site_v2 — Atelier Editorial rebuild
-
-Paralel `site_v2/` klasörü, modern stack ile yeniden yazılmış v2 sitesi: Vite 5 + React 18 + TypeScript + Tailwind v4 + Framer Motion. Mevcut site `kervanheat.com` üzerinde dokunulmadan canlıda. site_v2 ayrı Worker (`kervan-website-v2`) olarak `v2.kervanheat.com` üzerinde yayınlanır.
-
-```
-cd site_v2
-npm install
-npm run dev      # http://localhost:5173
-npm run build    # → site_v2/dist
-npm run typecheck
-```
-
-`site_v2/public/photos` ve `site_v2/public/videos` mevcut `public/` klasörüne symlink — galeri medyası tek yerde, iki site de aynı dosyayı kullanır.
-
-### v2 deploy
-
-`site_v2/**` altında her push GitHub Actions'da `Deploy site_v2` workflow'unu tetikler:
-1. `npm install` (site_v2)
-2. `npm run build` (Vite → site_v2/dist)
-3. `wrangler deploy` (kervan-website-v2 Worker)
-
-### v2 için DNS — kullanıcı yapması gereken (bir kerelik)
-
-1. Cloudflare dashboard → **Workers & Pages → kervan-website-v2 → Custom Domains → Add Custom Domain**
-2. `v2.kervanheat.com` gir, kaydet
-3. CF otomatik `kervanheat.com` zone'una CNAME ekler (`v2 → kervan-website-v2.workers.dev`)
-4. ~30 sn sonra `https://v2.kervanheat.com/` çalışır
-
-### Cross-origin RFQ
-
-site_v2'deki form `https://kervanheat.com/api/rfq` adresine POST atar (cross-origin). Mevcut Worker (`src/worker/index.ts`):
-- `ALLOWED_ORIGINS` içinde `https://v2.kervanheat.com` var
-- Yanıt header'ında `Access-Control-Allow-Origin` echo back ediliyor
-- OPTIONS preflight desteği var (form-data POST'u için gerek yok ama gelecekteki JSON için hazır)
-
-## Pages
-
-- `/` — homepage (TR/EN/DE/RU)
-- `/about.html` — company story, Hakan Yünyurt bio
-- `/catalog.html` — full parts catalog (print-ready)
-- `/cases.html` — case studies
-- `/gallery.html` — workshop grid
-- `/certs.html` — certifications
-- `/blog.html` + `/post.html` — resources
-- `/diagram.html` — interactive exploded breaker
-- `/compat.html` — compatibility finder
-- `/part.html` — individual part detail

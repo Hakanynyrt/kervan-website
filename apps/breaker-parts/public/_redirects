@@ -1,0 +1,18 @@
+# Eski about / heat-treatment URL'leri için.
+# kervanbreaker.com — sadece hidrolik kırıcı yedek parça vitrini.
+# Heat-treatment talepleri kervanheat.com'a yönlendirilir.
+
+/hizmetler              https://kervanheat.com/#hizmetler            301
+/teknik-kapasite        https://kervanheat.com/#teknik-kapasite      301
+/imalathanemiz          https://kervanheat.com/#imalathanemiz        301
+/isil-islem             https://kervanheat.com/                      301
+/isil-islem.html        https://kervanheat.com/                      301
+
+# Kervan Makina (eski sosyal medya kullanıcı adı) ve genel rotalar
+/about                  /hakkimizda                                   301
+/about.html             /hakkimizda                                   301
+
+# SPA fallback — React Router'ın client-side routing'ini destekle.
+# Cloudflare Pages'in standart SPA modu: bilinmeyen tüm rota /index.html'e
+# düşer (200 status), React Router 404 handler'ı devreye girer.
+/*                      /index.html                                   200
