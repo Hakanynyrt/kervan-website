@@ -10,16 +10,6 @@ interface Props {
 
 type State = 'idle' | 'sending' | 'success' | 'error';
 
-/** RFQ endpoint — mevcut Cloudflare Worker'ın yaşadığı yer.
- *  Production'da v2.kervanheat.com'dan kervanheat.com'a cross-origin POST.
- *  Mevcut Worker (src/worker/index.ts) v2.kervanheat.com'u ALLOWED_ORIGINS'e
- *  ekliyor ve Access-Control-Allow-Origin yanıt header'ı dönüyor.
- *  Dev'de Vite same-origin proxy yok — submit `error` durumuna düşer,
- *  beklenen davranış. */
-const RFQ_ENDPOINT = import.meta.env.PROD
-  ? 'https://kervanheat.com/api/rfq'
-  : '/api/rfq';
-
 export default function Contact({ t }: Props) {
   const [state, setState] = useState<State>('idle');
   const [kvkk, setKvkk] = useState(false);
@@ -32,7 +22,7 @@ export default function Contact({ t }: Props) {
     try {
       const fd = new FormData(formRef.current);
       fd.set('kvkk_consent', '1');
-      const r = await fetch(RFQ_ENDPOINT, { method: 'POST', body: fd });
+      const r = await fetch('/api/rfq', { method: 'POST', body: fd });
       const j = (await r.json().catch(() => ({}))) as {
         ok?: boolean;
         emailSent?: boolean;
