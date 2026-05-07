@@ -10,11 +10,10 @@ interface Props {
 
 type State = 'idle' | 'sending' | 'success' | 'error';
 
-/** RFQ endpoint — mevcut Cloudflare Worker'ın yaşadığı yer.
- *  Production'da v2.kervanheat.com'dan kervanheat.com'a cross-origin POST.
- *  Mevcut Worker (src/worker/index.ts) v2.kervanheat.com'u ALLOWED_ORIGINS'e
- *  ekliyor ve Access-Control-Allow-Origin yanıt header'ı dönüyor.
- *  Dev'de Vite same-origin proxy yok — submit `error` durumuna düşer,
+/** RFQ endpoint — heat-treatment app'inin Pages Function'ı
+ *  (apps/heat-treatment/functions/api/rfq.ts). PROD'da kervanbreaker.com'dan
+ *  kervanheat.com'a cross-origin POST; CORS allowlist'i kervanbreaker.com'u
+ *  kabul ediyor. Dev'de Pages Function yok → submit `error` durumuna düşer,
  *  beklenen davranış. */
 const RFQ_ENDPOINT = import.meta.env.PROD
   ? 'https://kervanheat.com/api/rfq'

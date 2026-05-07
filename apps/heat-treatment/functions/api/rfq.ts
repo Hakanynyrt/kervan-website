@@ -1,8 +1,7 @@
 /**
  * RFQ Pages Function — kervanheat.com/api/rfq
  *
- * Ported from src/worker/index.ts (legacy Cloudflare Worker). Same logic:
- * validate origin → KVKK consent → email format → Resend → MailChannels
+ * Logic: validate origin → KVKK consent → email format → Resend → MailChannels
  * fallback → Telegram notification. Both kervanheat.com (same-origin) and
  * kervanbreaker.com (cross-origin) post here; CORS allowlist gates access.
  *

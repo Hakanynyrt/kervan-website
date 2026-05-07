@@ -192,7 +192,7 @@ export default function Scene() {
     // MeshStandardMaterial with high metalness reflects the environment;
     // without one, metallic surfaces render nearly black (only direct-light
     // specular highlights are visible) and the chisel disappears against
-    // body bg #0A0A0B. v1 had this (public/scene.js:41) — restored here.
+    // body bg #0A0A0B.
     const pmrem = new THREE.PMREMGenerator(renderer);
     pmrem.compileEquirectangularShader();
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
