@@ -164,8 +164,6 @@ Tavsiye edilen ölçü/limit:
 
 ## Legacy
 
-- `src/worker/index.ts` — eski Cloudflare Worker (Pages Function'a port edildi). Pages canlıya geçtikten sonra silinir.
-- `wrangler.jsonc` (kök) — eski Worker config. Pages canlıya geçince silinir.
-- `public/` (kök) — eski monolit site asset'leri. Bazıları breaker-parts'a kopyalandı, fotolar+videolar paylaşılıyor.
+- `public/` (kök) — eski monolit site asset'leri. Breaker-only HTML'ler (`compat.html`, `part.html`, `gallery.html`, `cases.html`, `diagram.html`, `post.html`, `blog.html`) silindi; `apps/heat-treatment/public/_redirects` bunları `kervanbreaker.com`'a 301'liyor. Kalan v1 dosyaları (`index.html`, `about.html`, `kvkk.html` + JSX/CSS dependency'leri ve asset'ler) ileride ayrı turda temizlenir.
 - `legacy-astro/` — daha eski Astro denemesi, arşiv.
 
