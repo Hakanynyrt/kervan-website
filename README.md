@@ -169,3 +169,4 @@ Tavsiye edilen ölçü/limit:
 - `public/` (kök) — eski monolit site asset'leri. Bazıları breaker-parts'a kopyalandı, fotolar+videolar paylaşılıyor.
 - `legacy-astro/` — daha eski Astro denemesi, arşiv.
 
+
