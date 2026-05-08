@@ -75,7 +75,11 @@ function withSecurityHeaders(res: Response): Response {
 const clean = (v: FormDataEntryValue | null, max = 500): string =>
   String(v ?? '').trim().slice(0, max);
 
-async function handleRfq(request: Request, env: Env): Promise<Response> {
+async function handleRfq(
+  request: Request,
+  env: Env,
+  waitUntil: (promise: Promise<unknown>) => void,
+): Promise<Response> {
   const origin = request.headers.get('Origin') ?? request.headers.get('Referer') ?? '';
   const originOk =
     ALLOWED_ORIGINS.some((a) => origin.startsWith(a)) || origin.includes('.pages.dev');
@@ -203,9 +207,9 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
   }
 
   if (env.TG_BOT_TOKEN && env.TG_CHAT_ID) {
-    try {
-      const tgText = `🔔 *New RFQ — ${sourceSite}*\n\n*Name:* ${name}\n*Company:* ${company}\n*Email:* ${email}\n*Phone:* ${phone}\n*Country:* ${country}\n*Service:* ${service}\n*Qty:* ${qty}\n*Files:* ${fileList.length} item(s)\n\n_${(message || '(no message)').slice(0, 500)}_`;
-      await fetch(`https://api.telegram.org/bot${env.TG_BOT_TOKEN}/sendMessage`, {
+    const tgText = `🔔 *New RFQ — ${sourceSite}*\n\n*Name:* ${name}\n*Company:* ${company}\n*Email:* ${email}\n*Phone:* ${phone}\n*Country:* ${country}\n*Service:* ${service}\n*Qty:* ${qty}\n*Files:* ${fileList.length} item(s)\n\n_${(message || '(no message)').slice(0, 500)}_`;
+    waitUntil(
+      fetch(`https://api.telegram.org/bot${env.TG_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -213,10 +217,20 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
           text: tgText,
           parse_mode: 'Markdown',
         }),
-      });
-    } catch (e) {
-      console.error('Telegram error', e);
-    }
+      })
+        .then(async (r) => {
+          if (!r.ok) {
+            const body = await r.text().catch(() => '<no body>');
+            console.error('telegram fail:', r.status, body);
+          } else {
+            console.log('telegram ok');
+          }
+        })
+        .catch((err: unknown) => {
+          const e = err as { message?: string; stack?: string };
+          console.error('telegram throw:', e?.message, e?.stack);
+        }),
+    );
   }
 
   return Response.json({ ok: true, emailSent });
@@ -227,8 +241,8 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
    request method.
 ═══════════════════════════════════════════════════════════════════════ */
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  return withCors(withSecurityHeaders(await handleRfq(request, env)), request);
+export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUntil }) => {
+  return withCors(withSecurityHeaders(await handleRfq(request, env, waitUntil)), request);
 };
 
 export const onRequestOptions: PagesFunction<Env> = async ({ request }) => {
