@@ -207,7 +207,7 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
   }
 
   if (env.TG_BOT_TOKEN && env.TG_CHAT_ID) {
-    const tgText = `🔔 *New RFQ — ${sourceSite}*\n\n*Name:* ${name}\n*Company:* ${company}\n*Email:* ${email}\n*Phone:* ${phone}\n*Country:* ${country}\n*Service:* ${service}\n*Qty:* ${qty}\n*Files:* ${fileList.length} item(s)\n\n_${(message || '(no message)').slice(0, 500)}_`;
+    const tgText = `🔔 New RFQ — ${sourceSite}\n\nName: ${name}\nCompany: ${company}\nEmail: ${email}\nPhone: ${phone}\nCountry: ${country}\nService: ${service}\nQty: ${qty}\nFiles: ${fileList.length} item(s)\n\nMessage:\n${(message || '(no message)').slice(0, 500)}`;
     waitUntil(
       fetch(`https://api.telegram.org/bot${env.TG_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
@@ -215,7 +215,6 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
         body: JSON.stringify({
           chat_id: env.TG_CHAT_ID,
           text: tgText,
-          parse_mode: 'Markdown',
         }),
       })
         .then(async (r) => {
