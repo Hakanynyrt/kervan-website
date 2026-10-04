@@ -46,10 +46,4 @@ export default tseslint.config(
       ],
     },
   },
-  {
-    files: ['src/worker/**/*.ts'],
-    languageOptions: {
-      globals: { ...globals.node },
-    },
-  },
 );

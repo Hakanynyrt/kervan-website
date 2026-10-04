@@ -37,7 +37,7 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 - Redeploy without a commit (e.g. after changing a Pages env var): Actions → Deploy → **Run workflow**, pick `both` / `heat-treatment` / `breaker-parts` (on `main` = production).
 - `.github/workflows/uptime.yml` runs the same smoke probe every 15 minutes.
 - The Pages projects are **not** connected to Cloudflare's git integration — GitHub Actions is the only deployer. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
-- Custom domains are bound to the Pages projects (proxied CNAME → `<project>.pages.dev`). The legacy `kervan-website` Worker no longer has any routes or custom domains.
+- Custom domains are bound to the Pages projects (proxied CNAME → `<project>.pages.dev`). The old `kervan-website` Worker is gone from the repo and has no routes or custom domains.
 
 ## Architecture
 
@@ -73,7 +73,7 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 - Server (identical in both apps apart from the allowed hostnames in `_lib/tech-auth.ts` — keep them in sync): `functions/_lib/tech-auth.ts` + `functions/api/tech/{login,logout,session,content}.ts` (HMAC-signed `__Host-kv_tech` cookie, HttpOnly/Secure/SameSite=Strict, 4 h absolute expiry). Only the custom hostnames are allowed, never `*.pages.dev`. It **fails closed**: missing/short secrets ⇒ login 503, content 401. Every response is `no-store` + `noindex`.
 - Secrets (Pages → Variables and Secrets, as Secrets, per project; use different values or leave unset in Preview): `TECH_PASSWORD` (≥16 chars), `SESSION_SECRET` (≥32 chars), `TECH_CONTENT`; optional `SESSION_VERSION` (bump + redeploy to revoke all sessions). Changing any of them needs a redeploy.
 - Client: `src/lib/use-tech-auth.ts`; the tab is hidden unless the server confirmed a session. heat-treatment: the login form is reachable only at `/#giris`. breaker-parts: `/teknik-bilgiler` is a `noindex` shell showing the login form or the content, and is not in the sitemap.
-- Local testing: put test secrets in `apps/<app>/.dev.vars` (gitignored) and run `wrangler pages dev` from a copy of the app **outside the repo** — the legacy root `wrangler.jsonc` breaks it inside the repo.
+- Local testing: put test secrets in `apps/<app>/.dev.vars` (gitignored) and run `wrangler pages dev` from the app directory.
 - Never POST to `/api/tech/login` from CI or probes; `smoke.sh` only checks that anonymous `GET /api/tech/content` returns JSON 401.
 
 ### i18n
@@ -82,10 +82,10 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 - The `kv_lang` key is shared between the two sites on purpose — keep it identical in both apps.
 - All user-facing text goes through the dict, including `aria-label`s.
 
-### Legacy (do not build on)
+### Shared media at the repo root
 
-- `src/worker/index.ts` + root `wrangler.jsonc` — the old `kervan-website` Worker. It is detached from all domains and no longer deployed by CI; its RFQ logic was ported to `functions/api/rfq.ts`.
-- Root `public/` — the old no-build site (Babel-in-browser JSX, `kit.css`, importmap). Its pages are dead, **but it is still referenced**: `apps/breaker-parts/public/kirici-uc.glb` and `apps/breaker-parts/public/videos` are symlinks into it. Do not delete root `public/` wholesale without moving those assets first.
+- Root `public/` now holds only shared media: `photos/` (symlinked as `apps/heat-treatment/public/photos`), `videos/` (symlinked by both apps) and `kirici-uc.glb` (symlinked by breaker-parts). `deploy.yml`'s `paths-filter` watches these paths. Do not delete or move them without updating the symlinks and the filter.
+- The old `kervan-website` Worker (`src/worker/`, root `wrangler.jsonc`, the Babel-in-browser root site) was removed; its RFQ logic lives in `functions/api/rfq.ts`. The Worker itself is deleted in the Cloudflare dashboard.
 
 ## Design system
 
