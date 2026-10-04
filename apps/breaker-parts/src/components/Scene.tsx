@@ -124,8 +124,16 @@ function makeStarLayer(spec: StarLayerSpec): { points: THREE.Points } {
  *
  * Chisel arkaplanda eliptik orbital drift'te, görünür alana sığar.
  */
-export default function Scene() {
+/** One star in a colour that no other star uses. It circles behind the chisel;
+ *  clicking it calls `onSecret` (the owner's hidden way into /teknik-bilgiler —
+ *  the page itself is still password-protected and reachable by URL). */
+const KEY_STAR_COLOR = new THREE.Color(0x3ee6b4);
+const KEY_STAR_HIT_PX = 28;
+
+export default function Scene({ onSecret }: { onSecret?: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const onSecretRef = useRef(onSecret);
+  onSecretRef.current = onSecret;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -259,6 +267,20 @@ export default function Scene() {
     });
     scene.add(FAR.points);
     scene.add(NEAR.points);
+
+    // ─── Key star: the only mint-coloured star, orbiting behind the chisel ──
+    const keyMat = new THREE.SpriteMaterial({
+      map: starSprite,
+      color: KEY_STAR_COLOR,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const keyStar = new THREE.Sprite(keyMat);
+    keyStar.scale.setScalar(0.13);
+    scene.add(keyStar);
+    const KEY_Z = -2.2;
+    let sceneVisible = true;
 
     // ─── Postprocessing: bloom for cinematic rim glow ────────────────
     // RenderPass → UnrealBloomPass → OutputPass (does the final colour
@@ -501,6 +523,18 @@ export default function Scene() {
         container.style.opacity = String(targetO);
       }
 
+      // Key star: ellipse behind the chisel, sized to stay inside the frame.
+      const halfW = Math.tan(THREE.MathUtils.degToRad(FOV_DEG / 2)) * (CAM_Z - KEY_Z) * aspect;
+      const keyRx = Math.min(1.2, halfW * 0.7);
+      const keyA = reduced ? Math.PI * 0.9 : t * 0.2;
+      keyStar.position.set(
+        orbitGroup.position.x + Math.cos(keyA) * keyRx,
+        0.45 + Math.sin(keyA) * 0.6,
+        KEY_Z,
+      );
+      keyMat.opacity = reduced ? 1 : 0.8 + Math.sin(t * 1.3) * 0.2;
+      sceneVisible = (reduced ? targetO : cur.o) > 0.5;
+
       // Layered parallax drift — far layer slower (anchors depth),
       // near layer faster (foreground). The relative speed is the
       // visual cue; absolute speeds are still imperceptible per-frame.
@@ -522,8 +556,50 @@ export default function Scene() {
     };
     tick();
 
+    // ─── Key star hit-testing ────────────────────────────────────────
+    // The canvas is pointer-events:none behind the page, so listen on the
+    // window and compare the pointer with the star's projected position.
+    const raycaster = new THREE.Raycaster();
+    const keyWorld = new THREE.Vector3();
+    const INTERACTIVE = 'a,button,input,select,textarea,label,summary,[role="button"],[tabindex]';
+    const overKeyStar = (e: MouseEvent): boolean => {
+      if (!sceneVisible || !onSecretRef.current) return false;
+      const target = e.target as Element | null;
+      if (target?.closest?.(INTERACTIVE)) return false;
+      keyStar.getWorldPosition(keyWorld);
+      const ndc = keyWorld.clone().project(camera);
+      if (ndc.z > 1) return false;
+      const rect = renderer.domElement.getBoundingClientRect();
+      const sx = rect.left + ((ndc.x + 1) / 2) * rect.width;
+      const sy = rect.top + ((1 - ndc.y) / 2) * rect.height;
+      if (Math.hypot(e.clientX - sx, e.clientY - sy) > KEY_STAR_HIT_PX) return false;
+      // Not while it passes behind the chisel (hidden from view).
+      raycaster.set(camera.position, keyWorld.clone().sub(camera.position).normalize());
+      const dist = camera.position.distanceTo(keyWorld);
+      const hit = raycaster.intersectObject(spinGroup, true)[0];
+      return !(hit && hit.distance < dist);
+    };
+    let hovering = false;
+    const onPointerMove = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') return;
+      const over = overKeyStar(e);
+      if (over !== hovering) {
+        hovering = over;
+        document.documentElement.style.cursor = over ? 'pointer' : '';
+      }
+    };
+    const onClick = (e: MouseEvent) => {
+      if (overKeyStar(e)) onSecretRef.current?.();
+    };
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('click', onClick);
+
     // ─── Cleanup ─────────────────────────────────────────────────────
     return () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('click', onClick);
+      if (hovering) document.documentElement.style.cursor = '';
+      keyMat.dispose();
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', onResize);

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { PageMeta, JsonLd, itemList, KERVAN_BREAKER_URL } from '@kervan/seo';
 import Scene from '../components/Scene';
 import OpeningHold from '../components/OpeningHold';
@@ -23,6 +24,7 @@ interface Props {
  * clean dark layout without the cinematic 3D bg.
  */
 export default function Home({ t, lang }: Props) {
+  const navigate = useNavigate();
   return (
     <>
       <PageMeta
@@ -44,7 +46,7 @@ export default function Home({ t, lang }: Props) {
       />
 
       {/* 3D BG — vanilla Three.js, fixed full-viewport behind everything. */}
-      <Scene />
+      <Scene onSecret={() => navigate('/teknik-bilgiler')} />
 
       <div className="app-root">
         {/* Cinematic opening hold — first viewport is just chisel + starfield. */}
