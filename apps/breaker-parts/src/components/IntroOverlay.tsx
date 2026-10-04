@@ -11,7 +11,7 @@ const TOTAL_MS = 2400;
  *   0.0s — full siyah perde, ortada brand-color hairline (yarık)
  *   0.4s — yarık genişler, sol/sağ yarımlar dışarı kayar
  *   1.0s — chisel arkada zaten orbital animasyon başlamış, görünür hale gelir
- *   1.4s — "KERVAN HEAT" italic Fraunces brand fade-in/out
+ *   1.4s — "KERVAN BREAKER" italic Fraunces brand fade-in/out
  *   2.4s — overlay tamamen unmount, sayfa serbest
  *
  * Session başına bir kez (sessionStorage gate). prefers-reduced-motion
@@ -105,7 +105,7 @@ export default function IntroOverlay() {
             }}
           >
             <h1 className="font-serif italic text-[clamp(40px,8vw,96px)] text-ink leading-none tracking-tight">
-              Kervan Heat
+              Kervan Breaker
             </h1>
           </motion.div>
         </motion.div>
