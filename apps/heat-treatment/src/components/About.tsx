@@ -8,10 +8,7 @@ interface Props {
 
 export default function About({ t }: Props) {
   return (
-    <section
-      id="hakkimizda"
-      className="min-h-[60dvh] flex flex-col justify-center py-20 md:py-32"
-    >
+    <section id="hakkimizda" className="min-h-[60dvh] flex flex-col justify-center py-20 md:py-32">
       <motion.div
         className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-12 gap-8 md:gap-16 items-start"
         variants={fadeUp}
@@ -26,9 +23,7 @@ export default function About({ t }: Props) {
           <h2 className="font-serif italic text-3xl md:text-4xl text-ink leading-tight">
             {t.about.title}
           </h2>
-          <span className="font-sans text-sm text-ink-soft mt-2">
-            {t.about.location}
-          </span>
+          <span className="font-sans text-sm text-ink-soft mt-2">{t.about.location}</span>
         </div>
 
         <p className="col-span-12 lg:col-span-8 font-serif text-xl md:text-2xl text-ink-mid leading-relaxed italic max-w-[60ch]">

@@ -23,16 +23,17 @@ export const DICT: Dict = {
       cta: 'Teklif Al',
       ctaSecondary: 'Hizmetler',
       stats: [
-        { n: '1+2',     l: 'sementasyon + temper potası' },
-        { n: 'Ø1200',   l: 'mm max çap' },
-        { n: '2.5 t',   l: 'tek sefer max yük' },
-        { n: '42CrMo',  l: 'standart alaşım' },
+        { n: '1+2', l: 'sementasyon + temper potası' },
+        { n: 'Ø1200', l: 'mm max çap' },
+        { n: '2.5 t', l: 'tek sefer max yük' },
+        { n: '42CrMo', l: 'standart alaşım' },
       ],
     },
     services: {
       eyebrow: 'Hizmetler',
       title: 'Üç ana süreç. Tek disiplin.',
-      aside: 'Her parti için malzeme analizi, kontrollü atmosfer, ölçülmüş sıcaklık eğrisi. Lot izi sonuna kadar açık.',
+      aside:
+        'Her parti için malzeme analizi, kontrollü atmosfer, ölçülmüş sıcaklık eğrisi. Lot izi sonuna kadar açık.',
       items: [
         {
           index: '01',
@@ -86,7 +87,11 @@ export const DICT: Dict = {
         { value: 'Ø1200 mm', label: 'Max parça çapı', note: 'Pit-tip fırın iç ölçüsü' },
         { value: '2.5 ton', label: 'Tek sefer max yük', note: 'Brüt parti ağırlığı' },
         { value: 'OES', label: 'Spektrometre', note: 'Lot başı malzeme analizi' },
-        { value: '42CrMo · 42CrMoA', label: 'Standart alaşımlar', note: 'Diğerleri — talep üzerine' },
+        {
+          value: '42CrMo · 42CrMoA',
+          label: 'Standart alaşımlar',
+          note: 'Diğerleri — talep üzerine',
+        },
       ],
     },
     craft: {
@@ -97,7 +102,7 @@ export const DICT: Dict = {
     about: {
       eyebrow: 'Hakkımızda',
       title: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
-      body: 'Kartepe / Kocaeli\'de fason ısıl işlem hizmeti veriyoruz. Türkiye\'nin sanayi koridorunun ortasında — gelen parçayı ölçer, işler, kontrol eder ve aynı disiplinle teslim ederiz. Her partinin ardında bir lot kaydı, bir spektrometre okuması ve bir sertlik testi vardır.',
+      body: "Kartepe / Kocaeli'de fason ısıl işlem hizmeti veriyoruz. Türkiye'nin sanayi koridorunun ortasında — gelen parçayı ölçer, işler, kontrol eder ve aynı disiplinle teslim ederiz. Her partinin ardında bir lot kaydı, bir spektrometre okuması ve bir sertlik testi vardır.",
       company: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
       location: 'Kartepe · Kocaeli',
     },
@@ -112,11 +117,11 @@ export const DICT: Dict = {
         phone: 'Telefon',
         message: 'Hangi alaşım, hangi parti büyüklüğü, hangi süreç?',
       },
-      kvkk: 'KVKK Aydınlatma Metni\'ni okudum, iletişim için bilgilerimin işlenmesini kabul ediyorum.',
+      kvkk: "KVKK Aydınlatma Metni'ni okudum, iletişim için bilgilerimin işlenmesini kabul ediyorum.",
       submit: 'Gönder',
       sending: 'Gönderiliyor…',
       success: 'Aldık. En kısa sürede dönüyoruz.',
-      error: 'Bir sorun oldu. +90 531 669 37 34\'ü arayabilirsin.',
+      error: "Bir sorun oldu. +90 531 669 37 34'ü arayabilirsin.",
       address: 'Kartepe · Kocaeli',
       phoneLabel: 'Telefon',
       whatsappLabel: 'WhatsApp',
@@ -150,16 +155,17 @@ export const DICT: Dict = {
       cta: 'Get a Quote',
       ctaSecondary: 'Services',
       stats: [
-        { n: '1+2',     l: 'carburizing + tempering pots' },
-        { n: 'Ø1200',   l: 'mm max diameter' },
-        { n: '2.5 t',   l: 'max load per batch' },
-        { n: '42CrMo',  l: 'standard alloy' },
+        { n: '1+2', l: 'carburizing + tempering pots' },
+        { n: 'Ø1200', l: 'mm max diameter' },
+        { n: '2.5 t', l: 'max load per batch' },
+        { n: '42CrMo', l: 'standard alloy' },
       ],
     },
     services: {
       eyebrow: 'Services',
       title: 'Three core processes. One discipline.',
-      aside: 'Material analysis per batch, controlled atmosphere, measured temperature curves. The lot record stays open through delivery.',
+      aside:
+        'Material analysis per batch, controlled atmosphere, measured temperature curves. The lot record stays open through delivery.',
       items: [
         {
           index: '01',
@@ -175,11 +181,7 @@ export const DICT: Dict = {
           index: '02',
           name: 'Carburizing',
           body: 'Carbon enrichment via propane-air atmosphere. Single-pass carburizing by default — a second pass is only run when geometry or specification requires it.',
-          bullets: [
-            'Propane-air atmosphere',
-            'Single-pass by default',
-            'Second pass on request',
-          ],
+          bullets: ['Propane-air atmosphere', 'Single-pass by default', 'Second pass on request'],
         },
         {
           index: '03',
@@ -224,7 +226,7 @@ export const DICT: Dict = {
     about: {
       eyebrow: 'About',
       title: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
-      body: 'We provide contract heat treatment in Kartepe / Kocaeli, in the heart of Türkiye\'s industrial corridor. We measure the part, run the process, verify the result and ship it back — with the same discipline every time. Behind every batch is a lot record, a spectrometer reading and a hardness test.',
+      body: "We provide contract heat treatment in Kartepe / Kocaeli, in the heart of Türkiye's industrial corridor. We measure the part, run the process, verify the result and ship it back — with the same discipline every time. Behind every batch is a lot record, a spectrometer reading and a hardness test.",
       company: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
       location: 'Kartepe · Kocaeli · Türkiye',
     },

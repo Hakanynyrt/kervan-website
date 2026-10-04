@@ -1,11 +1,5 @@
 import { motion } from 'framer-motion';
-import {
-  PageMeta,
-  JsonLd,
-  breadcrumbList,
-  itemList,
-  KERVAN_BREAKER_URL,
-} from '@kervan/seo';
+import { PageMeta, JsonLd, breadcrumbList, itemList, KERVAN_BREAKER_URL } from '@kervan/seo';
 import { fadeUp, inViewOnce } from '@kervan/motion';
 import ProductGrid from '../sections/ProductGrid';
 import { PRODUCTS } from '../data/products';

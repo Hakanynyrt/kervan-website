@@ -1,0 +1,5 @@
+# Mechanical formatting commits, skipped by `git blame` (GitHub does this
+# automatically; locally: git config blame.ignoreRevsFile .git-blame-ignore-revs).
+
+# style: apply prettier across the workspace
+70698a4c4df7437e4dfda9508a4e8bf990fa98c9

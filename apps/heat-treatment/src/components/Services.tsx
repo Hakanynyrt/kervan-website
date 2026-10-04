@@ -9,10 +9,7 @@ interface Props {
 
 export default function Services({ t }: Props) {
   return (
-    <section
-      id="hizmetler"
-      className="min-h-dvh flex flex-col justify-center py-20 md:py-32"
-    >
+    <section id="hizmetler" className="min-h-dvh flex flex-col justify-center py-20 md:py-32">
       <SectionHeading
         eyebrow={t.services.eyebrow}
         title={t.services.title}
@@ -41,16 +38,11 @@ export default function Services({ t }: Props) {
               </h3>
             </div>
 
-            <p className="font-sans text-base text-ink-mid leading-relaxed">
-              {s.body}
-            </p>
+            <p className="font-sans text-base text-ink-mid leading-relaxed">{s.body}</p>
 
             <ul className="flex flex-col gap-2 mt-auto pt-6 border-t border-hair">
               {s.bullets.map((b, i) => (
-                <li
-                  key={i}
-                  className="font-sans text-sm text-ink-mid flex items-start gap-3"
-                >
+                <li key={i} className="font-sans text-sm text-ink-mid flex items-start gap-3">
                   <span
                     aria-hidden="true"
                     className="mt-2 w-1 h-1 bg-brand rounded-full flex-shrink-0"

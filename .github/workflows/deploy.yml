@@ -6,7 +6,7 @@ name: Deploy
 # Manual "Run workflow" → redeploy one or both apps from the chosen branch
 #   (main = production), e.g. after changing a Pages env var. No dummy commits.
 #
-# Every deploy waits for `verify` (typecheck + lint). Production deploys are
+# Every deploy waits for `verify` (typecheck + lint + format). Production deploys are
 # followed by the smoke probe in .github/scripts/smoke.sh.
 on:
   push:
@@ -65,7 +65,7 @@ jobs:
               - 'public/kirici-uc.glb'
 
   verify:
-    name: Typecheck + lint
+    name: Typecheck + lint + format
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -88,6 +88,9 @@ jobs:
 
       - name: Lint
         run: pnpm lint
+
+      - name: Format
+        run: pnpm format:check
 
   deploy-heat-treatment:
     name: kervanheat.com

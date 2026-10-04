@@ -57,7 +57,10 @@ export default function Gallery({ idAttr, eyebrow, title, aside, items }: Props)
         whileInView="show"
         viewport={inViewOnce}
       >
-        <div className="flex-shrink-0 w-8 md:w-[max(2rem,calc((100vw-1280px)/2+2rem))]" aria-hidden="true" />
+        <div
+          className="flex-shrink-0 w-8 md:w-[max(2rem,calc((100vw-1280px)/2+2rem))]"
+          aria-hidden="true"
+        />
 
         {items.map((it, i) => (
           <motion.article

@@ -48,11 +48,7 @@ export default function Nav({ lang, setLang, t }: Props) {
 
         <nav className="hidden md:flex items-center gap-10 font-sans text-sm">
           {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="text-ink-mid hover:text-ink transition-colors"
-            >
+            <a key={l.href} href={l.href} className="text-ink-mid hover:text-ink transition-colors">
               {l.label}
             </a>
           ))}
@@ -94,12 +90,7 @@ export default function Nav({ lang, setLang, t }: Props) {
           >
             <div className="px-6 py-4 flex flex-col gap-4 font-serif text-2xl">
               {links.map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  className="text-ink"
-                >
+                <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="text-ink">
                   {l.label}
                 </a>
               ))}
