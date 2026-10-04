@@ -9,7 +9,11 @@ interface Props {
 
 export default function Industries({ t }: Props) {
   return (
-    <section id="industries" data-scene-pose="industries" className="min-h-dvh flex flex-col justify-center py-8 md:py-16">
+    <section
+      id="industries"
+      data-scene-pose="industries"
+      className="min-h-dvh flex flex-col justify-center py-8 md:py-16"
+    >
       <SectionHeading
         eyebrow={t.industries.eyebrow}
         title={t.industries.title}

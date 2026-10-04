@@ -6,7 +6,7 @@ name: Deploy
 # Manual "Run workflow" → redeploy one or both apps from the chosen branch
 #   (main = production), e.g. after changing a Pages env var. No dummy commits.
 #
-# Every deploy waits for `verify` (typecheck + lint). Production deploys are
+# Every deploy waits for `verify` (typecheck + lint + format). Production deploys are
 # followed by the smoke probe in .github/scripts/smoke.sh.
 on:
   push:
@@ -39,8 +39,8 @@ jobs:
       heat-treatment: ${{ steps.filter.outputs.heat-treatment }}
       breaker-parts: ${{ steps.filter.outputs.breaker-parts }}
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
-      - uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         with:
           # Root public/ paths: the apps symlink these into their own public/.
@@ -65,17 +65,17 @@ jobs:
               - 'public/kirici-uc.glb'
 
   verify:
-    name: Typecheck + lint
+    name: Typecheck + lint + format
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
           cache: 'pnpm'
@@ -89,17 +89,22 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Format
+        run: pnpm format:check
+
   deploy-heat-treatment:
     name: kervanheat.com
     needs: [changes, verify]
-    # Fork PRs get no secrets, so they only run verify.
+    # Fork PRs and Dependabot-triggered runs get no Actions secrets
+    # (CLOUDFLARE_API_TOKEN), so they only run verify.
     if: >-
       !cancelled() && needs.verify.result == 'success' && (
         github.event_name == 'push' ||
         (github.event_name == 'workflow_dispatch' && inputs.app != 'breaker-parts') ||
         (github.event_name == 'pull_request' &&
           needs.changes.outputs.heat-treatment == 'true' &&
-          github.event.pull_request.head.repo.full_name == github.repository)
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.actor != 'dependabot[bot]')
       )
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -107,11 +112,11 @@ jobs:
       contents: read
       deployments: write
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
           cache: 'pnpm'
@@ -145,7 +150,8 @@ jobs:
         (github.event_name == 'workflow_dispatch' && inputs.app != 'heat-treatment') ||
         (github.event_name == 'pull_request' &&
           needs.changes.outputs.breaker-parts == 'true' &&
-          github.event.pull_request.head.repo.full_name == github.repository)
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.actor != 'dependabot[bot]')
       )
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -153,11 +159,11 @@ jobs:
       contents: read
       deployments: write
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
           cache: 'pnpm'
@@ -194,7 +200,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: .github/scripts
 

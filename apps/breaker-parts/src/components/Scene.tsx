@@ -62,11 +62,11 @@ interface StarLayerSpec {
 /** Realistic spectral mix — mostly cream, with warm whites, cool
  *  blues, ember accents and a few far-redshift dim reds. */
 const STAR_PALETTE: Array<{ weight: number; color: THREE.Color }> = [
-  { weight: 0.60, color: new THREE.Color(0xE8E2D6) }, // brand cream
-  { weight: 0.18, color: new THREE.Color(0xFFF1D8) }, // warm white
-  { weight: 0.10, color: new THREE.Color(0xC8D8FF) }, // cool blue
-  { weight: 0.07, color: new THREE.Color(0xFF6A1A) }, // ember accent
-  { weight: 0.05, color: new THREE.Color(0xC07060) }, // dim red
+  { weight: 0.6, color: new THREE.Color(0xe8e2d6) }, // brand cream
+  { weight: 0.18, color: new THREE.Color(0xfff1d8) }, // warm white
+  { weight: 0.1, color: new THREE.Color(0xc8d8ff) }, // cool blue
+  { weight: 0.07, color: new THREE.Color(0xff6a1a) }, // ember accent
+  { weight: 0.05, color: new THREE.Color(0xc07060) }, // dim red
 ];
 
 function pickStarColor(): THREE.Color {
@@ -169,10 +169,8 @@ export default function Scene() {
     // `visualViewport` always reflects the *visible* area; fall back to
     // `innerWidth/Height`, then `container.clientWidth/Height` as a last
     // resort for environments without either (very old WebViews).
-    const w = () =>
-      window.visualViewport?.width ?? window.innerWidth ?? container.clientWidth;
-    const h = () =>
-      window.visualViewport?.height ?? window.innerHeight ?? container.clientHeight;
+    const w = () => window.visualViewport?.width ?? window.innerWidth ?? container.clientWidth;
+    const h = () => window.visualViewport?.height ?? window.innerHeight ?? container.clientHeight;
     renderer.setSize(w(), h(), false);
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
@@ -274,9 +272,9 @@ export default function Scene() {
     composer.addPass(new RenderPass(scene, camera));
     const bloom = new UnrealBloomPass(
       new THREE.Vector2(w(), h()),
-      0.55,  // strength
-      0.7,   // radius
-      0.85,  // threshold (0..1)
+      0.55, // strength
+      0.7, // radius
+      0.85, // threshold (0..1)
     );
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
@@ -382,7 +380,8 @@ export default function Scene() {
 
     // ─── Resize listener ─────────────────────────────────────────────
     const onResize = () => {
-      const W = w(), H = h();
+      const W = w(),
+        H = h();
       camera.aspect = W / H;
       camera.updateProjectionMatrix();
       renderer.setSize(W, H, false);
@@ -413,12 +412,8 @@ export default function Scene() {
       const sy = window.scrollY;
       const ih = window.innerHeight;
       const hero = document.querySelector<HTMLElement>('[data-scene-pose="hero"]');
-      const heroTop = hero
-        ? hero.getBoundingClientRect().top + window.scrollY
-        : 0;
-      const heroBot = hero
-        ? hero.getBoundingClientRect().bottom + window.scrollY
-        : ih;
+      const heroTop = hero ? hero.getBoundingClientRect().top + window.scrollY : 0;
+      const heroBot = hero ? hero.getBoundingClientRect().bottom + window.scrollY : ih;
       const heroSpan = Math.max(1, heroBot - heroTop);
       if (sy < heroTop) {
         // OPENING — 0 at top of doc, → 1 as scroll hits hero start
@@ -484,7 +479,7 @@ export default function Scene() {
         cur.pz += (targetPz - cur.pz) * a;
         cur.rx += (targetRx - cur.rx) * a;
         cur.rz += (targetRz - cur.rz) * a;
-        cur.s  += (targetS  - cur.s ) * a;
+        cur.s += (targetS - cur.s) * a;
         cur.o = targetO;
 
         // Tiny breath so the chisel reads as alive at rest. Y rotation

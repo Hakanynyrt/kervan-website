@@ -1,6 +1,7 @@
 # kervan-platform
 
 Monorepo for Kervan Makina'nın iki web sitesi:
+
 - **kervanheat.com** — fason ısıl işlem hizmetleri (sertleştirme, temperleme, sementasyon)
 - **kervanbreaker.com** — hidrolik kırıcı yedek parçaları (keski, piston, burç, kit)
 
@@ -47,12 +48,13 @@ pnpm lint                                          # ESLint flat config
 
 İki ayrı Cloudflare Pages projesi. `main` branch → production, diğerleri → preview.
 
-| Pages projesi | Domain | Build path |
-|---|---|---|
-| `kervan-heat-treatment` | kervanheat.com | `apps/heat-treatment/dist` |
-| `kervan-breaker-parts` | kervanbreaker.com | `apps/breaker-parts/dist` |
+| Pages projesi           | Domain            | Build path                 |
+| ----------------------- | ----------------- | -------------------------- |
+| `kervan-heat-treatment` | kervanheat.com    | `apps/heat-treatment/dist` |
+| `kervan-breaker-parts`  | kervanbreaker.com | `apps/breaker-parts/dist`  |
 
 GitHub Actions workflow (`.github/workflows/deploy.yml`):
+
 - `dorny/paths-filter` ile değişen app'i tespit eder
 - Sadece etkilenen app'i build + deploy eder (`packages/**` değişirse ikisini de)
 - `cloudflare/wrangler-action@v3` ile `pages deploy`
@@ -61,14 +63,15 @@ GitHub Actions workflow (`.github/workflows/deploy.yml`):
 
 **A. Cloudflare Pages projeleri oluştur** (dashboard → Workers & Pages → Create → Pages):
 
-| Proje adı | Production branch | Build command | Output dir |
-|---|---|---|---|
-| `kervan-heat-treatment` | `main` | (empty — Actions yapacak) | `apps/heat-treatment/dist` |
-| `kervan-breaker-parts` | `main` | (empty — Actions yapacak) | `apps/breaker-parts/dist` |
+| Proje adı               | Production branch | Build command             | Output dir                 |
+| ----------------------- | ----------------- | ------------------------- | -------------------------- |
+| `kervan-heat-treatment` | `main`            | (empty — Actions yapacak) | `apps/heat-treatment/dist` |
+| `kervan-breaker-parts`  | `main`            | (empty — Actions yapacak) | `apps/breaker-parts/dist`  |
 
 > Build command'ı boş bırak — bu repo'yu Cloudflare git integration'a bağlama. Deploy'lar Actions tarafından `wrangler pages deploy` ile yapılır. Pages projesi sadece "host" rolünde.
 
 **B. Custom domain bind:**
+
 - `kervan-heat-treatment` → `kervanheat.com` + `www.kervanheat.com`
 - `kervan-breaker-parts` → `kervanbreaker.com` + `www.kervanbreaker.com`
 
@@ -76,23 +79,23 @@ Her iki domain Cloudflare'de zaten kayıtlı; Pages otomatik DNS kayıtlarını 
 
 **C. GitHub repository secrets** (Settings → Secrets and variables → Actions):
 
-| Secret | Source |
-|---|---|
-| `CLOUDFLARE_API_TOKEN` | dashboard → My Profile → API Tokens → "Edit Cloudflare Workers" template ile yeni token |
-| `CLOUDFLARE_ACCOUNT_ID` | dashboard → Workers & Pages anasayfası → sağ alt "Account ID" |
+| Secret                  | Source                                                                                  |
+| ----------------------- | --------------------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`  | dashboard → My Profile → API Tokens → "Edit Cloudflare Workers" template ile yeni token |
+| `CLOUDFLARE_ACCOUNT_ID` | dashboard → Workers & Pages anasayfası → sağ alt "Account ID"                           |
 
 **D. Heat-treatment Pages env vars** (RFQ Function için — sadece `kervan-heat-treatment` projesinde, breaker'da gerek yok):
 
-| Variable | Purpose |
-|---|---|
-| `RESEND_API_KEY` | primary email transport |
-| `MAILCHANNELS_DKIM_DOMAIN` | fallback transport |
-| `MAILCHANNELS_DKIM_SELECTOR` | DKIM selector (default: `mailchannels`) |
-| `MAILCHANNELS_DKIM_PRIVATE_KEY` | DKIM private key |
-| `TG_BOT_TOKEN` | Telegram bot token |
-| `TG_CHAT_ID` | Telegram chat ID |
-| `MAIL_TO` | RFQ inbox (default: `ahmet@kervanheat.com`) |
-| `MAIL_FROM` | sender (default: `noreply@kervanheat.com`) |
+| Variable                        | Purpose                                     |
+| ------------------------------- | ------------------------------------------- |
+| `RESEND_API_KEY`                | primary email transport                     |
+| `MAILCHANNELS_DKIM_DOMAIN`      | fallback transport                          |
+| `MAILCHANNELS_DKIM_SELECTOR`    | DKIM selector (default: `mailchannels`)     |
+| `MAILCHANNELS_DKIM_PRIVATE_KEY` | DKIM private key                            |
+| `TG_BOT_TOKEN`                  | Telegram bot token                          |
+| `TG_CHAT_ID`                    | Telegram chat ID                            |
+| `MAIL_TO`                       | RFQ inbox (default: `ahmet@kervanheat.com`) |
+| `MAIL_FROM`                     | sender (default: `noreply@kervanheat.com`)  |
 
 **E. Cutover sırası — downtime'sız geçiş için:**
 
@@ -111,6 +114,7 @@ Her iki domain Cloudflare'de zaten kayıtlı; Pages otomatik DNS kayıtlarını 
 ## RFQ akışı
 
 Her iki site `/api/rfq` endpoint'ine POST atar:
+
 - **kervanheat.com Contact** → same-origin POST (`/api/rfq` Pages Function)
 - **kervanbreaker.com Contact** → cross-origin POST (`https://kervanheat.com/api/rfq`)
 
@@ -134,21 +138,21 @@ Sonra Claude'a "yükledim, bakar mısın?" de → içerikleri inceler, doğru is
 
 ### Manuel yol — Slot referansı
 
-| App | Dizin | Slotlar |
-|---|---|---|
-| breaker-parts | `apps/breaker-parts/public/photos/uclar/` | sivri-uc, yassi, konik, piramit, asfalt |
-| breaker-parts | `apps/breaker-parts/public/photos/pistonlar/` | piston-stack, piston-detay |
-| breaker-parts | `apps/breaker-parts/public/photos/burclar/` | burclar-raf, burc-detay |
-| breaker-parts | `apps/breaker-parts/public/photos/kit/` | seal-kit |
+| App           | Dizin                                         | Slotlar                                 |
+| ------------- | --------------------------------------------- | --------------------------------------- |
+| breaker-parts | `apps/breaker-parts/public/photos/uclar/`     | sivri-uc, yassi, konik, piramit, asfalt |
+| breaker-parts | `apps/breaker-parts/public/photos/pistonlar/` | piston-stack, piston-detay              |
+| breaker-parts | `apps/breaker-parts/public/photos/burclar/`   | burclar-raf, burc-detay                 |
+| breaker-parts | `apps/breaker-parts/public/photos/kit/`       | seal-kit                                |
 
 `apps/breaker-parts/public/videos` → repo kökünde `public/videos/` symlink (paylaşılan).
 
 Tavsiye edilen ölçü/limit:
 
-| Tip | Boyut | Format | Dosya | Not |
-|---|---|---|---|---|
-| Foto | 1600×2000 px (4:5) | JPEG veya WebP | < 400 KB | sıkıştırılmış |
-| Video | 1080×1350 (4:5) | MP4 H.264 + AAC | < 10 MB | seamless loop, ses yok |
+| Tip   | Boyut              | Format          | Dosya    | Not                    |
+| ----- | ------------------ | --------------- | -------- | ---------------------- |
+| Foto  | 1600×2000 px (4:5) | JPEG veya WebP  | < 400 KB | sıkıştırılmış          |
+| Video | 1080×1350 (4:5)    | MP4 H.264 + AAC | < 10 MB  | seamless loop, ses yok |
 
 ### Cache uyarısı
 
@@ -168,7 +172,3 @@ Tavsiye edilen ölçü/limit:
 - `wrangler.jsonc` (kök) — eski Worker config. Pages canlıya geçince silinir.
 - `public/` (kök) — eski monolit site asset'leri. Bazıları breaker-parts'a kopyalandı, fotolar+videolar paylaşılıyor.
 - `legacy-astro/` — daha eski Astro denemesi, arşiv.
-
-
-
-

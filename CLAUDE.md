@@ -27,13 +27,13 @@ pnpm lint                                      # ESLint flat config (eslint.conf
 pnpm format / pnpm format:check                # Prettier (.prettierrc.json)
 ```
 
-There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint` and a build of the affected app.
+There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm format:check` (or `pnpm format`) and a build of the affected app.
 
 ## Deploying
 
-- `.github/workflows/deploy.yml` deploys with `wrangler pages deploy`. Every deploy waits for the `verify` job (`pnpm typecheck` + `pnpm lint`), so keep both green.
+- `.github/workflows/deploy.yml` deploys with `wrangler pages deploy`. Every deploy waits for the `verify` job (`pnpm typecheck` + `pnpm lint` + `pnpm format:check`), so keep all three green.
 - Push to `main` → production deploy of **both** apps, then `.github/scripts/smoke.sh` (GET/OPTIONS probe of the live sites). `main` runs are never cancelled mid-deploy.
-- PR → Pages preview (`https://<branch>.<project>.pages.dev`) of the changed apps only: `dorny/paths-filter` maps `apps/<app>/**` (plus the root `public/` assets that app symlinks) to that app; `packages/**`, the lockfile, root configs or the workflow itself → both. Fork PRs only run `verify`.
+- PR → Pages preview (`https://<branch>.<project>.pages.dev`) of the changed apps only: `dorny/paths-filter` maps `apps/<app>/**` (plus the root `public/` assets that app symlinks) to that app; `packages/**`, the lockfile, root configs or the workflow itself → both. Fork PRs and Dependabot runs get no Actions secrets, so they only run `verify` (test an action bump's deploy by running the workflow manually on the Dependabot branch).
 - Redeploy without a commit (e.g. after changing a Pages env var): Actions → Deploy → **Run workflow**, pick `both` / `heat-treatment` / `breaker-parts` (on `main` = production).
 - `.github/workflows/uptime.yml` runs the same smoke probe every 15 minutes.
 - The Pages projects are **not** connected to Cloudflare's git integration — GitHub Actions is the only deployer. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.

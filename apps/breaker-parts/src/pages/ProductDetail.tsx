@@ -146,12 +146,8 @@ export default function ProductDetail({ t, lang }: Props) {
                     const stLoc = st[lang];
                     return (
                       <li key={st.slug} className="py-4 flex flex-col gap-1">
-                        <span className="font-serif italic text-xl text-ink">
-                          {stLoc.name}
-                        </span>
-                        <span className="font-sans text-sm text-ink-mid">
-                          {stLoc.desc}
-                        </span>
+                        <span className="font-serif italic text-xl text-ink">{stLoc.name}</span>
+                        <span className="font-sans text-sm text-ink-mid">{stLoc.desc}</span>
                       </li>
                     );
                   })}
@@ -164,9 +160,7 @@ export default function ProductDetail({ t, lang }: Props) {
                   <dt className="font-sans text-xs tracking-[0.2em] uppercase text-ink-soft">
                     {t.productDetail.materialsLabel}
                   </dt>
-                  <dd className="font-serif italic text-lg text-ink m-0">
-                    42CrMo · 42CrMoA
-                  </dd>
+                  <dd className="font-serif italic text-lg text-ink m-0">42CrMo · 42CrMoA</dd>
                 </div>
                 <div className="flex flex-col gap-2 border-t border-hair pt-4">
                   <dt className="font-sans text-xs tracking-[0.2em] uppercase text-ink-soft">
