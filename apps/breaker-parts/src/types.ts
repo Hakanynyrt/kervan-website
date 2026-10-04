@@ -39,6 +39,7 @@ export interface DictBlock {
     craft: string;
     industries: string;
     contact: string;
+    tech: string;
     cta: string;
   };
   opening: {
@@ -107,6 +108,19 @@ export interface DictBlock {
     /** Headline shown on the dedicated /uyumluluk page. */
     pageTitle: string;
     pageAside: string;
+  };
+  techUi: {
+    eyebrow: string;
+    title: string;
+    loginTitle: string;
+    passwordLabel: string;
+    submit: string;
+    sending: string;
+    wrong: string;
+    notConfigured: string;
+    error: string;
+    logout: string;
+    loading: string;
   };
   productionPage: {
     eyebrow: string;
@@ -206,4 +220,12 @@ export interface BrandSpec {
   name: string;
   logo?: string;
   country: string;
+}
+
+/** Shape of the protected content served by /api/tech/content (never bundled). */
+export interface TechContent {
+  eyebrow: string;
+  title: string;
+  aside: string;
+  groups: { title: string; rows: { k: string; v: string }[] }[];
 }

@@ -7,6 +7,8 @@ interface Props {
   lang: Lang;
   setLang: (l: Lang) => void;
   t: DictBlock;
+  /** Tab is shown only while the server has confirmed an owner session. */
+  techAuthed: boolean;
 }
 
 /** Top nav matches the original kervanheat.com long-scroll experience:
@@ -14,7 +16,7 @@ interface Props {
  *  sections; on detail routes (e.g. /urunler/keski) they navigate back
  *  to "/" with the hash, which the browser then resolves into a scroll
  *  via `scroll-padding-top` defined in globals.css. */
-export default function Nav({ lang, setLang, t }: Props) {
+export default function Nav({ lang, setLang, t, techAuthed }: Props) {
   const [open, setOpen] = useState(false);
   const [stuck, setStuck] = useState(false);
   const { pathname } = useLocation();
@@ -60,6 +62,18 @@ export default function Nav({ lang, setLang, t }: Props) {
     );
   };
 
+  // Real route (not a Home anchor), so always a <Link>.
+  const renderTechLink = (onClick?: () => void) => (
+    <Link
+      key="tech"
+      to="/teknik-bilgiler"
+      onClick={onClick}
+      className="text-ink-mid hover:text-ink transition-colors"
+    >
+      {t.nav.tech}
+    </Link>
+  );
+
   return (
     <header
       className={
@@ -81,6 +95,7 @@ export default function Nav({ lang, setLang, t }: Props) {
 
         <nav className="hidden md:flex items-center gap-10 font-sans text-sm">
           {links.map((l) => renderLink(l.hash, l.label))}
+          {techAuthed && renderTechLink()}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -128,6 +143,7 @@ export default function Nav({ lang, setLang, t }: Props) {
           >
             <div className="px-6 py-4 flex flex-col gap-4 font-serif text-2xl">
               {links.map((l) => renderLink(l.hash, l.label, () => setOpen(false)))}
+              {techAuthed && renderTechLink(() => setOpen(false))}
             </div>
           </motion.div>
         )}

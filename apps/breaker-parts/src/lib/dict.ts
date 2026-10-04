@@ -13,6 +13,7 @@ export const DICT: Dict = {
       craft: 'İmalathanemiz',
       industries: 'Sektörler',
       contact: 'İletişim',
+      tech: 'Teknik Bilgiler',
       cta: 'Teklif Al',
     },
     opening: {
@@ -199,6 +200,19 @@ export const DICT: Dict = {
       aside:
         "Kocaeli'den çıkıp Avrupa, MENA, Orta Asya ve Amerika'ya yol alan parçalar. Sürükle, döndür — noktaya dokun, hangi şehir olduğunu gör.",
     },
+    techUi: {
+      eyebrow: 'Teknik Bilgiler',
+      title: 'Teknik bilgiler.',
+      loginTitle: 'Giriş',
+      passwordLabel: 'Parola',
+      submit: 'Giriş yap',
+      sending: 'Giriliyor…',
+      wrong: 'Parola hatalı.',
+      notConfigured: 'Giriş şu anda kapalı (yapılandırılmamış).',
+      error: 'Bir hata oluştu. Tekrar deneyin.',
+      logout: 'Çıkış yap',
+      loading: 'Yükleniyor…',
+    },
     productionPage: {
       eyebrow: 'Üretim & Kalite',
       title: 'Çelik, ısıl işlem, kontrol.',
@@ -274,6 +288,7 @@ export const DICT: Dict = {
       craft: 'Our Story',
       industries: 'Industries',
       contact: 'Contact',
+      tech: 'Technical Info',
       cta: 'Get a Quote',
     },
     opening: {
@@ -464,6 +479,19 @@ export const DICT: Dict = {
       title: 'Shipped to {count}+ countries.',
       aside:
         'Parts shipped from Kocaeli to Europe, MENA, Central Asia and the Americas. Drag to spin — tap a marker for the city.',
+    },
+    techUi: {
+      eyebrow: 'Technical Info',
+      title: 'Technical info.',
+      loginTitle: 'Sign in',
+      passwordLabel: 'Password',
+      submit: 'Sign in',
+      sending: 'Signing in…',
+      wrong: 'Wrong password.',
+      notConfigured: 'Sign-in is currently disabled (not configured).',
+      error: 'Something went wrong. Please try again.',
+      logout: 'Sign out',
+      loading: 'Loading…',
     },
     productionPage: {
       eyebrow: 'Production & Quality',

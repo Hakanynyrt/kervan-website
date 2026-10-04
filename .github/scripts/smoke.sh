@@ -58,6 +58,9 @@ check "$RFQ" 405 application/json
 
 # Owner-only tech info must stay closed to anonymous visitors (JSON 401, not HTML).
 check https://kervanheat.com/api/tech/content 401 application/json
+# Same on the breaker site: its SPA fallback must not shadow the Pages Function
+# (HTML 200 here would mean the API is not deployed).
+check https://kervanbreaker.com/api/tech/content 401 application/json
 
 # The breaker contact form posts cross-origin to the heat-treatment function.
 preflight "$RFQ" https://kervanbreaker.com yes
