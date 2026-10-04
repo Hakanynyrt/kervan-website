@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useLang } from './lib/use-lang';
 import { DICT } from './lib/dict';
+import { useTechAuth } from './lib/use-tech-auth';
 import IntroOverlay from './components/IntroOverlay';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
@@ -11,6 +12,7 @@ import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import Brands from './pages/Brands';
 import Production from './pages/Production';
+import TechInfo from './pages/TechInfo';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
@@ -18,12 +20,13 @@ import NotFound from './pages/NotFound';
 export default function App() {
   const [lang, setLang] = useLang();
   const t = DICT[lang];
+  const tech = useTechAuth();
 
   return (
     <>
       <IntroOverlay />
 
-      <Nav lang={lang} setLang={setLang} t={t} />
+      <Nav lang={lang} setLang={setLang} t={t} techAuthed={tech.state === 'authed'} />
       <main>
         <Routes>
           <Route path="/" element={<Home t={t} lang={lang} />} />
@@ -31,6 +34,7 @@ export default function App() {
           <Route path="/urunler/:slug" element={<ProductDetail t={t} lang={lang} />} />
           <Route path="/uyumluluk" element={<Brands t={t} />} />
           <Route path="/uretim-kalite" element={<Production t={t} />} />
+          <Route path="/teknik-bilgiler" element={<TechInfo t={t} lang={lang} tech={tech} />} />
           <Route path="/hakkimizda" element={<About t={t} />} />
           <Route path="/iletisim" element={<Contact t={t} lang={lang} />} />
           <Route path="*" element={<NotFound t={t} />} />

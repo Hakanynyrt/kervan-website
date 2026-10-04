@@ -58,7 +58,7 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 - React Router app: `src/pages/` (Home, Products, ProductDetail, Brands, Production, About, Contact, NotFound); sections in `src/components/` and `src/sections/`; product/brand data in `src/data/`.
 - `public/_redirects` ends with the SPA fallback `/* /index.html 200` — add explicit redirects **above** it. Heat-treatment URLs are 301'd to kervanheat.com.
 - `src/components/Scene.tsx` — Three.js scene (plain `GLTFLoader`, no DRACO) loading `/kirici-uc.glb`. Keep the model local; never switch it to a remote URL.
-- No Pages Functions here. The contact form posts cross-origin to `https://kervanheat.com/api/rfq` in production (`/api/rfq` in dev, which 404s).
+- Its only Pages Functions are the owner-only `api/tech/*` endpoints (see "Owner-only Teknik Bilgiler"). The contact form still posts cross-origin to `https://kervanheat.com/api/rfq` in production (`/api/rfq` in dev, which 404s). The `/* → /index.html` fallback does **not** shadow the functions (verified); `smoke.sh` checks `/api/tech/content` returns JSON 401, not HTML.
 
 ### RFQ flow
 
@@ -69,11 +69,11 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 
 ### Owner-only "Teknik Bilgiler" (login)
 
-- A single-owner login protects the technical-info tab. **The text must never be in the repo (it is public), `dict.ts` or the JS bundle** — it lives in the Pages secret `TECH_CONTENT` (JSON `{ "tr": {…}, "en": {…} }`) and is only returned by `GET /api/tech/content` for a valid session.
-- Server: `functions/_lib/tech-auth.ts` + `functions/api/tech/{login,logout,session,content}.ts` (HMAC-signed `__Host-kv_tech` cookie, HttpOnly/Secure/SameSite=Strict, 4 h absolute expiry). Only the custom hostnames are allowed, never `*.pages.dev`. It **fails closed**: missing/short secrets ⇒ login 503, content 401. Every response is `no-store` + `noindex`.
+- A single-owner login protects the technical-info tab **on both sites** (separate cookies and separate Pages secrets per project; the two domains cannot share a session). **The text must never be in the repo (it is public), `dict.ts` or the JS bundle** — it lives in the Pages secret `TECH_CONTENT` (JSON `{ "tr": {…}, "en": {…} }`) and is only returned by `GET /api/tech/content` for a valid session.
+- Server (identical in both apps apart from the allowed hostnames in `_lib/tech-auth.ts` — keep them in sync): `functions/_lib/tech-auth.ts` + `functions/api/tech/{login,logout,session,content}.ts` (HMAC-signed `__Host-kv_tech` cookie, HttpOnly/Secure/SameSite=Strict, 4 h absolute expiry). Only the custom hostnames are allowed, never `*.pages.dev`. It **fails closed**: missing/short secrets ⇒ login 503, content 401. Every response is `no-store` + `noindex`.
 - Secrets (Pages → Variables and Secrets, as Secrets, per project; use different values or leave unset in Preview): `TECH_PASSWORD` (≥16 chars), `SESSION_SECRET` (≥32 chars), `TECH_CONTENT`; optional `SESSION_VERSION` (bump + redeploy to revoke all sessions). Changing any of them needs a redeploy.
-- Client: `src/lib/use-tech-auth.ts`; the tab is hidden unless the server confirmed a session. The login form is reachable only at `/#giris`.
-- Local testing: put test secrets in `apps/heat-treatment/.dev.vars` (gitignored) and run `wrangler pages dev` from a copy of the app **outside the repo** — the legacy root `wrangler.jsonc` breaks it inside the repo.
+- Client: `src/lib/use-tech-auth.ts`; the tab is hidden unless the server confirmed a session. heat-treatment: the login form is reachable only at `/#giris`. breaker-parts: `/teknik-bilgiler` is a `noindex` shell showing the login form or the content, and is not in the sitemap.
+- Local testing: put test secrets in `apps/<app>/.dev.vars` (gitignored) and run `wrangler pages dev` from a copy of the app **outside the repo** — the legacy root `wrangler.jsonc` breaks it inside the repo.
 - Never POST to `/api/tech/login` from CI or probes; `smoke.sh` only checks that anonymous `GET /api/tech/content` returns JSON 401.
 
 ### i18n
