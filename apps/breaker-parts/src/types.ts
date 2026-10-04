@@ -122,6 +122,82 @@ export interface DictBlock {
     logout: string;
     loading: string;
   };
+  catalogUi: {
+    tabsLabel: string;
+    tabGeneral: string;
+    tabCatalog: string;
+    title: string;
+    sub: string;
+    loading: string;
+    errorUnauthorized: string;
+    errorNotConfigured: string;
+    errorEmpty: string;
+    errorGeneric: string;
+    retry: string;
+    searchLabel: string;
+    searchPlaceholder: string;
+    brandLabel: string;
+    brandAll: string;
+    tipLabel: string;
+    hideLow: string;
+    measureTitle: string;
+    measureHint: string;
+    measureDia: string;
+    measureKeyThk: string;
+    measureKeyCount: string;
+    keyAny: string;
+    keySingle: string;
+    keyDouble: string;
+    measureBackToSlot: string;
+    measureSlotLen: string;
+    measureRearDia: string;
+    measureLength: string;
+    tolLabel: string;
+    clear: string;
+    resultsCount: string;
+    groupMatch: string;
+    groupMaybe: string;
+    groupMaybeHint: string;
+    groupWear: string;
+    groupWearHint: string;
+    emptyResults: string;
+    emptyHint: string;
+    more: string;
+    details: string;
+    hideDetails: string;
+    compare: string;
+    compareTitle: string;
+    compareClose: string;
+    compareMax: string;
+    compareRemove: string;
+    invalidNumber: string;
+    copyLabel: string;
+    tipLabels: Record<VegaTip, string>;
+    copy: string;
+    copied: string;
+    warnBadge: string;
+    missing: string;
+    fDia: string;
+    fCollar: string;
+    fKey: string;
+    fKeyThk: string;
+    fBackToSlot: string;
+    fSlotLen: string;
+    fRearDia: string;
+    fLength: string;
+    fWeight: string;
+    fTips: string;
+    fFits: string;
+    fPartNos: string;
+    fOther: string;
+    fNotes: string;
+    fSource: string;
+    sourceFmt: string;
+    byType: string;
+    diffLabels: Record<'dia' | 'keyThk' | 'backToSlot' | 'slotLen' | 'rearDia' | 'length', string>;
+    qualityLabels: Record<string, string>;
+    flagLabels: Record<string, string>;
+  };
   productionPage: {
     eyebrow: string;
     title: string;
@@ -228,4 +304,45 @@ export interface TechContent {
   title: string;
   aside: string;
   groups: { title: string; rows: { k: string; v: string }[] }[];
+}
+
+/* ── Private VEGA tip catalog (served by /api/tech/catalog, never bundled) ── */
+export type VegaTip = 'chisel' | 'moil' | 'blunt' | 'pyramid';
+export interface VegaRange {
+  min: number;
+  max: number;
+}
+export interface VegaItem {
+  id: string;
+  model: string;
+  brand: string;
+  seriesRaw: string;
+  partNos: string[];
+  fitsBreakers: string[];
+  tipTypes: VegaTip[];
+  diameterMm: number | null;
+  collarDiameterMm: number | null;
+  key: {
+    count: 1 | 2 | null;
+    thicknessMm: number | null;
+    slotLengthMm: number | null;
+    backEndToSlotMm: number | null;
+  };
+  rearShoulderDiameterMm: number | null;
+  lengthMm: VegaRange | null;
+  lengthByType: Partial<Record<VegaTip, VegaRange>> | null;
+  weightKg: VegaRange | null;
+  weightByType: Partial<Record<VegaTip, VegaRange>> | null;
+  confidence: 'high' | 'medium' | 'low';
+  reviewFlags: string[];
+  notes: string[];
+  extra: string | null;
+  source: { pdfPage: number | null; catalogPage: number | null; line: number };
+  quality: string[];
+}
+export interface VegaCatalog {
+  schema: number;
+  source: string;
+  count: number;
+  items: VegaItem[];
 }
