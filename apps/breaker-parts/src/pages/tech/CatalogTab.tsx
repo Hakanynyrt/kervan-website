@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { DictBlock, Lang, VegaCatalog, VegaItem, VegaTip } from '../../types';
 import type { CatalogStatus } from '../../lib/use-vega-catalog';
 import {
   DEFAULT_TOL,
-  TIP_LABEL,
   TIP_TYPES,
   TOLERANCES,
   brandsOf,
@@ -31,7 +30,7 @@ const PAGE = 40;
 const MAX_COMPARE = 3;
 const focusRing =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2';
-const inputCls = `w-full min-h-11 bg-bg-soft border border-hair-strong rounded-md px-3 font-sans text-ink placeholder:text-ink-mid ${focusRing}`;
+const inputCls = `w-full min-h-11 bg-bg-soft border border-ink-soft rounded-md px-3 font-sans text-ink placeholder:text-ink-mid ${focusRing}`;
 const labelCls = 'font-sans text-xs tracking-[0.12em] uppercase text-ink-mid';
 const btnCls = `min-h-11 px-4 rounded-full border border-hair-strong font-sans text-sm text-ink hover:border-ink-mid transition-colors ${focusRing}`;
 
@@ -66,6 +65,7 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
   const [limit, setLimit] = useState(PAGE);
   const [sel, setSel] = useState<string[]>([]);
   const [openId, setOpenId] = useState<string | null>(null);
+  const statusRef = useRef<HTMLParagraphElement>(null);
 
   const measure = useMemo<Measure>(() => {
     const m: Measure = {};
@@ -152,7 +152,7 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h2 className="font-serif italic text-3xl text-ink m-0">{c.title}</h2>
+        <h1 className="font-serif italic text-3xl text-ink m-0">{c.title}</h1>
         <p className="font-sans text-ink-mid mt-2 mb-0 max-w-[60ch]">{c.sub}</p>
       </div>
 
@@ -203,7 +203,7 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
                 onClick={() => setTip(tip === k ? '' : k)}
                 className={`${btnCls} px-3 ${tip === k ? 'bg-brand text-bg border-brand hover:border-brand' : ''}`}
               >
-                {TIP_LABEL[k]}
+                {c.tipLabels[k]}
               </button>
             ))}
           </div>
@@ -236,8 +236,19 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
                 autoComplete="off"
                 value={raw[key]}
                 onChange={(e) => setRaw({ ...raw, [key]: e.target.value })}
+                aria-invalid={raw[key].trim() !== '' && parseNum(raw[key]) === undefined}
+                aria-describedby={
+                  raw[key].trim() !== '' && parseNum(raw[key]) === undefined
+                    ? `vc-m-${key}-e`
+                    : undefined
+                }
                 className={inputCls}
               />
+              {raw[key].trim() !== '' && parseNum(raw[key]) === undefined && (
+                <span id={`vc-m-${key}-e`} className="font-sans text-xs text-err">
+                  {c.invalidNumber}
+                </span>
+              )}
             </div>
           ))}
           <div className="flex flex-col gap-2">
@@ -285,14 +296,26 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
           items={compared}
           t={t}
           lang={lang}
-          onRemove={(id) => setSel((s) => s.filter((x) => x !== id))}
-          onClose={() => setSel([])}
+          onRemove={(id) => {
+            setSel((s) => s.filter((x) => x !== id));
+            if (sel.length <= 1) statusRef.current?.focus();
+          }}
+          onClose={() => {
+            setSel([]);
+            statusRef.current?.focus();
+          }}
         />
       )}
 
-      <p role="status" aria-live="polite" className="font-sans text-sm text-ink-mid m-0">
+      <p
+        ref={statusRef}
+        tabIndex={-1}
+        role="status"
+        aria-live="polite"
+        className="font-sans text-sm text-ink-mid m-0"
+      >
         {fill(c.resultsCount, { n: fmtNum(results.total, lang) })}
-        {sel.length >= MAX_COMPARE && <> · {c.compareMax}</>}
+        {sel.length >= MAX_COMPARE && <> · {fill(c.compareMax, { n: MAX_COMPARE })}</>}
       </p>
 
       {results.measuring ? (
@@ -310,9 +333,9 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
             return (
               <section key={g} aria-label={title} className="flex flex-col gap-4">
                 <div>
-                  <h3 className="font-sans text-sm tracking-[0.12em] uppercase text-brand-hi m-0">
+                  <h2 className="font-sans text-sm tracking-[0.12em] uppercase text-brand-hi m-0">
                     {title} ({hits.length})
-                  </h3>
+                  </h2>
                   {hint && <p className="font-sans text-sm text-ink-mid mt-1 mb-0">{hint}</p>}
                 </div>
                 <ul className="list-none p-0 m-0 grid grid-cols-1 xl:grid-cols-2 gap-4">
@@ -413,7 +436,7 @@ function ItemCard({
     <li className="bg-bg-soft border border-hair rounded-[14px] p-5 flex flex-col gap-3 min-w-0">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <h4 className="font-serif text-xl text-ink m-0 break-words">{it.model}</h4>
+          <h3 className="font-serif text-xl text-ink m-0 break-words">{it.model}</h3>
           <p className="font-sans text-xs tracking-[0.12em] uppercase text-ink-mid m-0 mt-1">
             {it.brand}
           </p>
@@ -471,9 +494,13 @@ function CopyButton({ value, t }: { value: string; t: DictBlock }) {
           .then(() => setDone(true))
           .catch(() => undefined);
       }}
+      aria-label={t.catalogUi.copyLabel}
       className={`ml-2 min-h-8 px-3 rounded-full border border-hair-strong font-sans text-xs text-ink-mid hover:text-ink ${focusRing}`}
     >
       {done ? t.catalogUi.copied : t.catalogUi.copy}
+      <span role="status" aria-live="polite" className="sr-only">
+        {done ? t.catalogUi.copied : ''}
+      </span>
     </button>
   );
 }
@@ -513,7 +540,7 @@ function Detail({ item: it, t, lang }: { item: VegaItem; t: DictBlock; lang: Lan
   ) =>
     m
       ? (Object.keys(m) as VegaTip[])
-          .map((k) => `${TIP_LABEL[k]} ${fmtRange(m[k] ?? null, lang)}${unit}`)
+          .map((k) => `${c.tipLabels[k]} ${fmtRange(m[k] ?? null, lang)}${unit}`)
           .join(' · ')
       : null;
   const lenBy = byType(it.lengthByType, '');
@@ -549,7 +576,7 @@ function Detail({ item: it, t, lang }: { item: VegaItem; t: DictBlock; lang: Lan
         <div className="sm:col-span-2">
           <dt className={labelCls}>{c.fTips}</dt>
           <dd className="m-0 font-sans text-ink">
-            {it.tipTypes.map((k) => TIP_LABEL[k]).join(', ') || c.missing}
+            {it.tipTypes.map((k) => c.tipLabels[k]).join(', ') || c.missing}
           </dd>
         </div>
         <div className="sm:col-span-2">
@@ -610,7 +637,7 @@ function CompareTable({
   return (
     <section aria-label={c.compareTitle} className="border border-hair-strong rounded-[14px] p-5">
       <div className="flex items-center justify-between gap-3 mb-4">
-        <h3 className="font-serif text-xl text-ink m-0">{c.compareTitle}</h3>
+        <h2 className="font-serif text-xl text-ink m-0">{c.compareTitle}</h2>
         <button type="button" onClick={onClose} className={btnCls}>
           {c.compareClose}
         </button>
@@ -632,10 +659,11 @@ function CompareTable({
                   <button
                     type="button"
                     onClick={() => onRemove(it.id)}
-                    aria-label={`${it.model}: ${c.compare} ✕`}
+                    aria-label={`${c.compareRemove}: ${it.model}`}
                     className={`mt-2 min-h-8 px-3 rounded-full border border-hair-strong text-xs text-ink-mid hover:text-ink ${focusRing}`}
                   >
-                    {c.compare} ✕
+                    <span aria-hidden="true">✕ </span>
+                    {c.compareRemove}
                   </button>
                 </th>
               ))}

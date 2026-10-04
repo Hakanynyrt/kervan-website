@@ -169,6 +169,10 @@ export interface DictBlock {
     compareTitle: string;
     compareClose: string;
     compareMax: string;
+    compareRemove: string;
+    invalidNumber: string;
+    copyLabel: string;
+    tipLabels: Record<VegaTip, string>;
     copy: string;
     copied: string;
     warnBadge: string;

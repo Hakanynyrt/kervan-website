@@ -5,12 +5,6 @@ import type { VegaItem, VegaRange, VegaTip } from '../types';
 export const TOLERANCES = [1, 2, 5] as const;
 export const DEFAULT_TOL = 5;
 export const TIP_TYPES: VegaTip[] = ['chisel', 'moil', 'blunt', 'pyramid'];
-export const TIP_LABEL: Record<VegaTip, string> = {
-  chisel: 'Chisel',
-  moil: 'Moil Point',
-  blunt: 'Blunt Tool',
-  pyramid: 'Pyramid',
-};
 
 export type MeasureKey = 'dia' | 'keyThk' | 'backToSlot' | 'slotLen' | 'rearDia' | 'length';
 export type Measure = Partial<Record<MeasureKey, number>> & { keyCount?: 1 | 2 };
@@ -42,7 +36,10 @@ export interface Results {
 
 /** "52,5" | "52.5" -> 52.5; empty/invalid/negative -> undefined */
 export function parseNum(raw: string): number | undefined {
-  const s = raw.trim().replace(',', '.');
+  const s = raw
+    .trim()
+    .replace(/\s*mm$/i, '')
+    .replace(',', '.');
   if (!s || !/^\d+(\.\d+)?$/.test(s)) return undefined;
   const n = Number(s);
   return Number.isFinite(n) ? n : undefined;
@@ -101,10 +98,12 @@ function evaluate(it: VegaItem, m: Measure, tol: number): Hit | null {
   const unknown: FieldKey[] = [];
   const misses: string[] = [];
   let ok = 0;
+  let geoOk = 0;
   let score = 0;
   const take = (k: MeasureKey, v: Verdict) => {
     if (v.kind === 'ok') {
       ok++;
+      geoOk++;
       score += Math.abs(v.diff);
       diffs[k] = v.diff;
     } else if (v.kind === 'unknown') unknown.push(k);
@@ -128,7 +127,15 @@ function evaluate(it: VegaItem, m: Measure, tol: number): Hit | null {
     return { item: it, group: unknown.length ? 'maybe' : 'match', score, diffs, unknown };
   }
   // Only the length differs while something else matched: worn tip candidate.
-  if (misses.length === 1 && misses[0] === 'length' && ok > 0) {
+  // (the entered tip must be SHORTER than the catalog length, and a real size must match)
+  if (
+    misses.length === 1 &&
+    misses[0] === 'length' &&
+    geoOk > 0 &&
+    it.lengthMm &&
+    m.length !== undefined &&
+    m.length < it.lengthMm.min
+  ) {
     return { item: it, group: 'wear', score, diffs, unknown };
   }
   return null;

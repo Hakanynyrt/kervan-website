@@ -101,7 +101,7 @@ function Tabs({ t, tab, onSelect }: { t: DictBlock; tab: Tab; onSelect: (x: Tab)
           type="button"
           role="tab"
           aria-selected={tab === x}
-          aria-controls={`tech-panel-${x}`}
+          aria-controls={tab === x ? `tech-panel-${x}` : undefined}
           tabIndex={tab === x ? 0 : -1}
           onClick={() => onSelect(x)}
           className={`min-h-11 px-5 rounded-full border font-sans text-sm transition-colors ${focusRing} ${
@@ -143,6 +143,7 @@ function Content({
         <div
           id="tech-panel-catalog"
           role="tabpanel"
+          tabIndex={0}
           aria-labelledby="tech-tab-catalog"
           className="max-w-[1280px] mx-auto px-6 md:px-8"
         >
@@ -156,7 +157,12 @@ function Content({
         </div>
       )}
       {tab === 'general' && (
-        <div id="tech-panel-general" role="tabpanel" aria-labelledby="tech-tab-general">
+        <div
+          id="tech-panel-general"
+          role="tabpanel"
+          tabIndex={0}
+          aria-labelledby="tech-tab-general"
+        >
           <motion.div
             className="max-w-[1280px] mx-auto px-6 md:px-8 mb-16 md:mb-20 grid grid-cols-12 gap-8 items-end"
             variants={fadeUp}
