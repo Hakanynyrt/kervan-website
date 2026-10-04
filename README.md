@@ -107,7 +107,7 @@ Her iki domain Cloudflare'de zaten kayıtlı; Pages otomatik DNS kayıtlarını 
 4. Her şey çalışıyorsa **main'e merge et** → production deploy. Bu noktada Pages projeleri canlı ama özel domain hâlâ eski Worker'a yönlü.
 5. Cloudflare dashboard'dan custom domain'leri Pages projelerine bind et — bu DNS cutover anı. Saniyeler içinde traffic Pages'e geçer.
 6. Eski Worker route'unu (`kervanheat.com → kervan-website` Worker) deaktive et veya Worker'ı tamamen sil.
-7. Sonraki commit'te `src/worker/`, `wrangler.jsonc` ve kök `public/`'in breaker-only HTML'leri (`compat.html`, `part.html`, `gallery.html` vs.) temizlenir.
+7. Eski `src/worker/`, `wrangler.jsonc` ve kök `public/`'in eski sayfaları temizlendi.
 
 > **Önemli:** Adım 4'ten önce eski Worker hâlâ canlı, kervanheat.com hizmet vermeye devam ediyor. Pages'e DNS cutover sadece adım 5'te. Bu sıra downtime'sız bir geçiş garanti eder.
 
@@ -166,9 +166,6 @@ Tavsiye edilen ölçü/limit:
 - **i18n** — TR default, EN altyapı. `?lang=` query > `localStorage('kv_lang')` > `navigator.language` > 'tr' fallback.
 - **Branch discipline** — `main` korunur (otomatik prod deploy). Feature branch'ler `feature/<topic>`.
 
-## Legacy
+## Paylaşılan medya
 
-- `src/worker/index.ts` — eski Cloudflare Worker (Pages Function'a port edildi). Pages canlıya geçtikten sonra silinir.
-- `wrangler.jsonc` (kök) — eski Worker config. Pages canlıya geçince silinir.
-- `public/` (kök) — eski monolit site asset'leri. Bazıları breaker-parts'a kopyalandı, fotolar+videolar paylaşılıyor.
-- `legacy-astro/` — daha eski Astro denemesi, arşiv.
+Kök `public/` yalnızca iki sitenin paylaştığı medyayı taşır: `photos/`, `videos/` ve `kirici-uc.glb`. Uygulamalar bunlara symlink ile bağlanır; taşırken symlink'leri ve `deploy.yml` içindeki `paths-filter` yollarını da güncelle. Eski Worker (`src/worker/`, kök `wrangler.jsonc`) ve eski monolit site repodan kaldırıldı.
