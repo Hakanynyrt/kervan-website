@@ -18,3 +18,7 @@ package-lock.json
 # Local Pages Functions secrets (never commit)
 .dev.vars
 .dev.vars.*
+
+# Private catalog data (repo is public): never commit; it lives in Cloudflare KV
+*.csv
+vega-catalog*.json

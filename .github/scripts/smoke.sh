@@ -61,6 +61,8 @@ check https://kervanheat.com/api/tech/content 401 application/json
 # Same on the breaker site: its SPA fallback must not shadow the Pages Function
 # (HTML 200 here would mean the API is not deployed).
 check https://kervanbreaker.com/api/tech/content 401 application/json
+# Private tip catalog (KV-backed): anonymous requests must be rejected before KV is read.
+check https://kervanbreaker.com/api/tech/catalog 401 application/json
 
 # The breaker contact form posts cross-origin to the heat-treatment function.
 preflight "$RFQ" https://kervanbreaker.com yes

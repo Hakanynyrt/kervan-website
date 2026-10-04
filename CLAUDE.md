@@ -76,6 +76,13 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 - Local testing: put test secrets in `apps/<app>/.dev.vars` (gitignored) and run `wrangler pages dev` from the app directory.
 - Never POST to `/api/tech/login` from CI or probes; `smoke.sh` only checks that anonymous `GET /api/tech/content` returns JSON 401.
 
+### Private VEGA tip catalog (breaker-parts, KV)
+
+- The owner-only tip catalog (609 rows, ~420 KB) is **not** in the repo or the bundle and is too big for a Pages secret (5 KB limit). It lives in a Workers KV namespace bound to the `kervan-breaker-parts` Pages project as **`VEGA_CATALOG`** (Production only), key `catalog:v1`.
+- `GET /api/tech/catalog` (`functions/api/tech/catalog.ts`) returns it only for a valid owner session (same host + cookie checks as `/api/tech/content`). No session → JSON 401 before KV is read; no binding → 503; empty key → 404. `smoke.sh` checks the anonymous 401 only.
+- Update the data without a deploy: `node scripts/vega-import.mjs <catalog.csv> <out.json>` (writes **outside** the repo, refuses paths inside it), then upload `out.json` to KV key `catalog:v1` (dashboard: KV → namespace → Add entry → Upload file). Never commit the CSV or JSON (`*.csv` and `vega-catalog*.json` are gitignored). Keep the namespace unbound in Preview.
+- Local test: `wrangler kv key put --namespace-id=VEGA_CATALOG --local "catalog:v1" --path <catalog.json>`, then `wrangler pages dev dist --kv VEGA_CATALOG --compatibility-date=2026-04-17` with test secrets in `.dev.vars`.
+
 ### i18n
 
 - TR is primary, EN secondary. Strings live in each app's `src/lib/dict.ts`; `src/lib/use-lang.ts` resolves `?lang=` → `localStorage('kv_lang')` → `navigator.language` → `'tr'`.
