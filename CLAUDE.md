@@ -2,141 +2,115 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Overview
+
+pnpm + Turborepo monorepo for Kervan Makina's two websites:
+
+| App                    | Domain                                     | Cloudflare Pages project |
+| ---------------------- | ------------------------------------------ | ------------------------ |
+| `apps/heat-treatment/` | kervanheat.com + www (fason ısıl işlem)    | `kervan-heat-treatment`  |
+| `apps/breaker-parts/`  | kervanbreaker.com + www (kırıcı parçaları) | `kervan-breaker-parts`   |
+
+Both apps are Vite 5 + React 18 + TypeScript + Tailwind v4 + Framer Motion, sharing code through `packages/*`.
+
 ## Commands
 
 ```bash
-npm install        # install wrangler
-npm run dev        # local preview at http://localhost:8787
-npm run deploy     # deploy to Cloudflare (requires wrangler auth)
+pnpm install                                   # whole workspace
+pnpm dev                                       # both apps (turbo)
+pnpm --filter @kervan/heat-treatment dev       # http://localhost:5173
+pnpm --filter @kervan/breaker-parts dev        # http://localhost:5174
+pnpm turbo build                               # build apps + packages
+pnpm turbo build --filter=@kervan/breaker-parts
+pnpm typecheck                                 # tsc --noEmit across the workspace
+pnpm lint                                      # ESLint flat config (eslint.config.js)
+pnpm format / pnpm format:check                # Prettier (.prettierrc.json)
 ```
 
-There is no build step, no test suite, and no linter. The site is plain static files — edit and deploy directly.
+There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint` and a build of the affected app.
 
-**Deploying:** every push to `main` auto-deploys via GitHub Actions → Cloudflare Workers. Manual deploy requires `wrangler login` or a `CLOUDFLARE_API_TOKEN` env var. Use `gh auth login --web` for GitHub push access (device flow).
+## Deploying
+
+- `.github/workflows/deploy.yml` deploys with `wrangler pages deploy`. Push to `main` → production; any PR / other branch → Pages preview (`https://<branch>.<project>.pages.dev`).
+- `dorny/paths-filter` decides which app deploys: `apps/<app>/**` deploys that app only; `packages/**`, the lockfile, root configs or the workflow itself deploy both.
+- The Pages projects are **not** connected to Cloudflare's git integration — GitHub Actions is the only deployer. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
+- Custom domains are bound to the Pages projects (proxied CNAME → `<project>.pages.dev`). The legacy `kervan-website` Worker no longer has any routes or custom domains.
 
 ## Architecture
 
-**Two-layer stack:**
+### Packages
 
-1. **`src/worker/index.ts`** — Cloudflare Worker. Routes `/api/rfq` (POST) to `handleRfq()`, everything else falls through to `env.ASSETS.fetch()` (static files). No other API routes exist.
+- **`@kervan/ui`** (`packages/ui`) — design tokens (`src/tokens.css`, a Tailwind v4 `@theme` block, plus TS mirrors in `src/tokens/`) and base components (`Button`, `Card`, `Container`, `SectionHeading`, `Marquee`, …). Both apps' `src/styles/globals.css` do `@import "tailwindcss"; @import "@kervan/ui/tokens.css";`.
+- **`@kervan/motion`** (`packages/motion`) — shared Framer Motion variants (`fadeUp`, `staggerContainer`, `inViewOnce`, …), `ScrollReveal`, `useParallaxSlow`, and a re-export of `useReducedMotion`.
+- **`@kervan/seo`** (`packages/seo`) — `PageMeta`, `JsonLd` and JSON-LD builders. Used by breaker-parts.
 
-2. **`public/`** — all static assets, served as-is. The homepage is a React 18 app assembled at runtime without a build step:
-   - `index.html` fetches `dict.jsx` + `components.jsx` via `fetch()`, concatenates them, runs `Babel.transform()` in-browser, then injects the compiled script tag. React/ReactDOM/Babel all load from unpkg CDN.
-   - `dict.jsx` exports `window.DICT` (TR/EN strings) and `window.useLang()` (React hook with localStorage + `?lang=` param + `navigator.language` fallback).
-   - `components.jsx` exports all homepage sections as globals: `Nav, Hero, Products, Gallery, Chisels, Stock, Atolye, Craft, Industries, Contact, Footer`. Render order: `Nav → Hero → Products → Chisels → Stock → Atolye → Craft → Industries → Contact → Footer`.
-     - `Products` — 4-card family grid (Keski / Piston / Burç / Kit)
-     - `Chisels` / `Stock` / `Atolye` — three horizontal scroll-snap galleries built on a shared `<Gallery>` component (img + video + placeholder support)
-     - `Craft` ("İmalathanemiz") — 5/7 grid: copy + workshop photo, `--bg-soft` background
-     - `Industries` — divided sector list with hover padding-shift
-     - `Contact` — 5/7 grid: info `<dl>` + RFQ form (`<form>` with honeypot, KVKK consent, `/api/rfq` POST)
-   - Inner pages (`about.html`, `catalog.html`, etc.) each follow the same pattern using `pages-dict.jsx` + `posts.jsx` as needed.
+### heat-treatment (kervanheat.com)
 
-**3D scene (`public/scene.js`):**
-- ES module, loaded via `<script type="module">`. Three.js is resolved via importmap pointing to unpkg (this is intentional and approved — it's infrastructure, not an asset).
-- The chisel model is `/kirici-uc.glb` from the repo — **do not change this to a remote URL**.
-- `GLTFLoader` from `three/addons/` is the only loader; no DRACOLoader.
-- Scene runs in a fixed `#scene-root` div behind all content (z-index: 0).
+- Single-page site: `src/App.tsx` composes the sections in `src/components/` (Hero, Services, TechnicalCapacity, Craft, About, Contact, Footer, …). No router, no 3D.
+- **`functions/api/rfq.ts`** — the only server-side code in the repo, a Cloudflare Pages Function. It is the RFQ endpoint for **both** sites (see below).
+- `public/_redirects` 301s legacy breaker URLs (`/keski`, `/catalog.html`, `/products/*`, …) to kervanbreaker.com.
 
-**CSS system:**
-- `kit.css` — full design system (variables, all section styles). Soft-cornered industrial aesthetic: `--radius: 14px` for cards, `--radius-lg: 20px` for large surfaces; pill-shaped buttons (`border-radius: 999px`).
-- `scene-overlay.css` — overrides that make sections transparent so the 3D scene shows through. Hides `.hero__drawing` SVG when 3D is active.
-- `intro.css` — styles for the cinematic intro screen.
+### breaker-parts (kervanbreaker.com)
 
-**Intro screen (`public/intro.js`):**
-- Vanilla JS, runs before React. Shown once per session (`sessionStorage`). 2.1s display + 0.52s fade. No React dependency.
+- React Router app: `src/pages/` (Home, Products, ProductDetail, Brands, Production, About, Contact, NotFound); sections in `src/components/` and `src/sections/`; product/brand data in `src/data/`.
+- `public/_redirects` ends with the SPA fallback `/* /index.html 200` — add explicit redirects **above** it. Heat-treatment URLs are 301'd to kervanheat.com.
+- `src/components/Scene.tsx` — Three.js scene (plain `GLTFLoader`, no DRACO) loading `/kirici-uc.glb`. Keep the model local; never switch it to a remote URL.
+- No Pages Functions here. The contact form posts cross-origin to `https://kervanheat.com/api/rfq` in production (`/api/rfq` in dev, which 404s).
 
-**RFQ form flow:**
-- `components.jsx` `<RFQ>` component POSTs `multipart/form-data` to `/api/rfq`.
-- Worker validates origin, KVKK consent, email format; then tries Resend → MailChannels fallback → Telegram notification.
-- Honeypot field: `name="website"` — if filled, silently returns `{ ok: true }`.
+### RFQ flow
 
-## Key constraints
+- Both Contact forms POST `multipart/form-data` to the heat-treatment function, with a `website` honeypot (filled → silent `{ ok: true }`) and KVKK consent.
+- The function checks the origin against `ALLOWED_ORIGINS` (both domains + www, plus `*.pages.dev` previews), then consent and email format; it sends email via Resend → MailChannels fallback and a Telegram notification. It tags each request with its source site.
+- Env vars live **only** on the `kervan-heat-treatment` Pages project (Production + Preview): `RESEND_API_KEY`, `MAIL_TO`, `MAIL_FROM`, `TG_BOT_TOKEN`, `TG_CHAT_ID`, `MAILCHANNELS_DKIM_*`. breaker-parts needs none. Pages env changes take effect on the next deploy.
+- Adding a new domain that posts the form means updating `ALLOWED_ORIGINS`.
 
-- **No build step** — changes to `.jsx` and `.css` files are live immediately after deploy. Babel compiles JSX in the browser.
-- **No CDN for assets** — GLB files, images, and CSS must live in `public/`. Three.js infrastructure (importmap) is the only approved external dependency in `scene.js`.
-- **`dict.jsx` is loaded before `components.jsx`** — globals from `dict.jsx` (`window.DICT`, `window.useLang`, `useState`, `useEffect`, `useRef`) are available in `components.jsx` without re-importing React.
-- **i18n** — all user-facing text goes through `window.DICT[lang]`. Language is detected from `?lang=` param → localStorage → `navigator.language` (TR/EN only).
+### i18n
 
-## UI/UX Pro Max — Brand & Motion Guidelines
+- TR is primary, EN secondary. Strings live in each app's `src/lib/dict.ts`; `src/lib/use-lang.ts` resolves `?lang=` → `localStorage('kv_lang')` → `navigator.language` → `'tr'`.
+- The `kv_lang` key is shared between the two sites on purpose — keep it identical in both apps.
+- All user-facing text goes through the dict, including `aria-label`s.
 
-This section is the contract for any motion, visual, or interaction work added to the site. Existing constraints above always win — anything below is layered on top, never around them.
+### Legacy (do not build on)
 
-### Color Tokens
-`kit.css` is the single source of truth. Do not hardcode hex values in components — always reference custom properties.
+- `src/worker/index.ts` + root `wrangler.jsonc` — the old `kervan-website` Worker. It is detached from all domains and no longer deployed by CI; its RFQ logic was ported to `functions/api/rfq.ts`.
+- Root `public/` — the old no-build site (Babel-in-browser JSX, `kit.css`, importmap). Its pages are dead, **but it is still referenced**: `apps/breaker-parts/public/kirici-uc.glb` and `apps/breaker-parts/public/videos` are symlinks into it. Do not delete root `public/` wholesale without moving those assets first.
 
-- `--bg #FAFAF7` · `--bg-card #FFFFFF` · `--bg-soft #F3F1EC`
-- `--ink #0E0E10` · `--ink-mid #54524E` · `--ink-soft #8A867F`
-- `--hair #EAE7DF` · `--hair-2 #D8D3C7`
-- `--brand #E8781A` · `--brand-d #C65A0C` (hover/active)
-- `--ok #1E8C4A` · `--err #C24130`
+## Design system
 
-### Typography
-- Display/UI: **Space Grotesk** 400–700 (`--f-sans`)
-- Body: **Inter** 400–600 (`--f-body`)
-- Display: `clamp(44px, 6.6vw, 96px)`, letter-spacing `-.035em`, line-height 1.0
-- H2: `clamp(30px, 3.6vw, 52px)`, letter-spacing `-.025em`
-- Eyebrow: 12px, uppercase, tracking `0.16em`, color `--brand`
+`packages/ui/src/tokens.css` is the single source of truth. Use Tailwind token utilities / CSS variables; never hardcode hex values in components.
 
-### Spacing
-- Scale: `4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96` px
-- Container: 1240px; pad-x 40px (mobile 22px)
-- Radius: 14px (cards), 20px (large surfaces), 999px (pills/buttons)
+- **Palette ("Mood C", dark):** `bg #0A0A0B`, `bg-soft #141416`, `bg-warm #1C1C20`; `ink #E8E2D6`, `ink-mid #B8AFA0`, `ink-soft #7A7066`; brand "Forge Ember" `#E8431B` (`brand-hi #FF5C32`, `brand-lo #C53614`).
+- **Type:** display Fraunces (`--font-serif`), body/UI Inter (`--font-sans`), loaded from Google Fonts in each app's `index.html`.
+- **Radius:** 6 / 14 (cards) / 20 (large surfaces) / 999px (pills, buttons).
 
-### Motion Principles
-- **Default ease:** `cubic-bezier(0.22, 1, 0.36, 1)` — identical to `--ease` in `kit.css`. One ease for the whole site.
-- **Durations:** micro 150ms, small 250ms, medium 400ms, large 600ms. No animation longer than 600ms unless it is a deliberate hero moment.
-- **Stagger children:** 60–80ms.
-- **`whileInView` defaults:** `{ once: true, amount: 0.3 }`. Never animate the same element more than once per session.
-- **`useReducedMotion` is mandatory** in every motion hook. The kit.css `prefers-reduced-motion` media query is the floor; Framer Motion components must observe the same contract and short-circuit to a static state when reduced motion is requested.
-- **Intro coordination:** `intro.js` runs once per session (2.1s display + 0.52s fade = 2.62s total). On the homepage, hero motion sequences must either delay until after the intro or check `sessionStorage` to skip the delay on subsequent visits.
-- **Concurrency limit:** never start more than 3 simultaneous animations on screen. Stagger or queue rather than firing everything at once.
+### Motion
+
+- One ease: `--ease-editorial` = `cubic-bezier(0.22, 1, 0.36, 1)` (`editorialEase` in `@kervan/motion`). Prefer the shared variants over ad-hoc ones.
+- Durations: micro 150ms, small 250ms, medium 400ms, large 600ms. Nothing longer than 600ms unless it is a deliberate hero moment. Stagger children 60–80ms.
+- In-view reveals animate once (`{ once: true, amount: 0.3 }`); no more than 3 simultaneous animations on screen.
+- **`useReducedMotion` is mandatory** in every animated component — short-circuit to the static state. `globals.css` also has a `prefers-reduced-motion` floor.
+- Intro: each app's `IntroOverlay` shows once per session (`sessionStorage`). Hero sequences must account for it (delay until it finishes, or skip the delay when the session flag is set).
 
 ### Accessibility
+
 - WCAG AA contrast: 4.5:1 body text, 3:1 large text and non-text UI.
-- Focus ring: `2px solid var(--brand)` with `outline-offset: 2px`. Never remove focus rings; restyle them.
-- All interactive elements (buttons, links, form fields, gallery controls, language toggle, burger) must be keyboard-reachable and Enter/Space-activatable.
-- `aria-label` strings default to Turkish (TR is the primary language). When the user toggles to EN, surface labels via `t.*` keys in `dict.jsx`.
+- Focus ring: `2px solid` brand with `outline-offset: 2px` (`focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2`). Restyle focus rings, never remove them.
+- Every interactive element (buttons, links, form fields, carousel/gallery controls, language toggle, menu) must be keyboard-reachable and Enter/Space-activatable.
 
-### Framer Motion Loading (CRITICAL)
-This project has **no build step**. The `motion@12.38.0` package in `node_modules` never reaches the browser — Wrangler only serves files from `public/`.
+### 21st.dev Magic usage
 
-**The pattern:** load Motion via the existing importmap in `index.html` (and every inner page). Three.js is already there; Motion sits beside it.
+- Start with `21st_magic_component_inspiration`; never generate cold.
+- Never accept output verbatim: convert to this repo's conventions — map colors/spacing to `@kervan/ui` tokens, use `@kervan/ui` components where they exist, replace `lucide-react` with inline SVG or the `Icon` component, and apply the motion contract above.
+- Brand logo bars: `logo_search` against Atlas Copco, Furukawa, Soosan, Montabert, Indeco, Rammer, Epiroc, Sandvik, NPK, Toku, Kobelco, Hanwoo (existing logos: `apps/breaker-parts/public/brand-logos/`).
 
-```html
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-    "motion":       "https://esm.sh/motion@12.38.0?bundle",
-    "motion/react": "https://esm.sh/motion@12.38.0/react?bundle"
-  }
-}
-</script>
-```
+## Media
 
-A small ES-module shim (e.g. `motion-shim.js`, loaded via `<script type="module">` before the React bundle) imports `motion` and `useReducedMotion` from `motion/react` and assigns them to `window.motion` / `window.useReducedMotion`. From there `components.jsx` consumes them as globals — exactly the same pattern `dict.jsx` uses for `window.DICT` and `window.useLang`.
+- Photos are cached for 1 year as immutable (`_headers`). To replace an image, use a **new filename** (`-02`, `-v2`), not an overwrite.
+- Slot directories and size limits are documented in `README.md` ("Medya ekleme").
 
-Constraints:
-- Pin the version in the importmap (`@12.38.0`) — never use a floating tag.
-- Do not add a bundler, do not import from `node_modules`, do not break the Babel-in-browser pipeline.
-- Add the same importmap entries to inner pages (`about.html`, `catalog.html`, etc.) only when those pages actually use Motion.
+## Branch & commit discipline
 
-### 21st.dev Magic Usage Rules
-- Start with `21st_magic_component_inspiration` to gather references before generating; never generate cold.
-- Never accept Magic output verbatim. Magic ships Tailwind + TS + lucide-react patterns — this codebase ships JSX-in-browser + custom CSS variables.
-  - Strip Tailwind classes; map intent to `kit.css` custom properties (`var(--brand)`, `var(--ink)`, `var(--hair)`, etc.).
-  - Convert TypeScript to JSX. Remove `import` statements (we have no module system in `components.jsx`).
-  - Replace `lucide-react` icons with inline SVG or existing markup.
-- For brand-compatibility logo bars use `logo_search` against the hydraulic breaker brand list: Atlas Copco, Furukawa, Soosan, Montabert, Indeco, Rammer, Epiroc, Sandvik, NPK, Toku, Kobelco, Hanwoo.
-- Adapt every Magic-derived component to the existing motion contract (`--ease`, `useReducedMotion`, `whileInView` defaults) before committing.
-
-### Branch & Commit Discipline
-- **No direct commits to `main`.** Every push to `main` auto-deploys to production via GitHub Actions; treat `main` as protected.
-- Branch naming: `feature/<topic>` (e.g. `feature/motion-v1`, `feature/logo-marquee`).
-- Conventional commits are mandatory:
-  - `feat(hero): add word-by-word reveal`
-  - `fix(meters): respect reduced-motion in count-up`
-  - `chore(deps): pin motion to 12.38.0 via importmap`
-  - `refactor(rfq): wrap states with AnimatePresence`
+- **No direct commits to `main`** — it auto-deploys both sites to production.
+- Branch naming: `feature/<topic>`.
+- Conventional commits with app/area scope, e.g. `feat(breaker): add brand marquee`, `fix(rfq): …`, `chore(deps): …`, `docs: …`.
 - Wait for explicit user approval before each major step. Show diffs and intent before writing.
