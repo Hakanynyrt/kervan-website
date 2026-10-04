@@ -148,7 +148,6 @@ export interface DictBlock {
       phone: string;
       message: string;
     };
-    kvkk: string;
     submit: string;
     sending: string;
     success: string;
