@@ -39,24 +39,28 @@ type PagesFunction<E = unknown> = (context: {
   waitUntil: (promise: Promise<unknown>) => void;
 }) => Response | Promise<Response>;
 
-const ALLOWED_ORIGINS = [
+const ALLOWED_ORIGINS = new Set([
   'https://kervanheat.com',
   'https://www.kervanheat.com',
   'https://kervanbreaker.com',
   'https://www.kervanbreaker.com',
-];
+]);
 
-function corsOrigin(request: Request): string | null {
+// Our own Pages projects only: <project>.pages.dev and <branch|hash>.<project>.pages.dev.
+// A bare `.pages.dev` suffix check would let any attacker-owned Pages site through.
+const PREVIEW_ORIGIN =
+  /^https:\/\/(?:[a-z0-9-]+\.)?kervan-(?:heat-treatment|breaker-parts)\.pages\.dev$/;
+
+// Exact-match check on the Origin header, shared by CORS and the POST gate.
+// Browsers always send Origin on POST, so there is no Referer fallback.
+function allowedOrigin(request: Request): string | null {
   const origin = request.headers.get('Origin');
   if (!origin) return null;
-  if (ALLOWED_ORIGINS.includes(origin)) return origin;
-  // Cloudflare Pages preview deployments
-  if (origin.endsWith('.pages.dev')) return origin;
-  return null;
+  return ALLOWED_ORIGINS.has(origin) || PREVIEW_ORIGIN.test(origin) ? origin : null;
 }
 
 function withCors(res: Response, request: Request): Response {
-  const allow = corsOrigin(request);
+  const allow = allowedOrigin(request);
   if (!allow) return res;
   const h = new Headers(res.headers);
   h.set('Access-Control-Allow-Origin', allow);
@@ -80,10 +84,8 @@ async function handleRfq(
   env: Env,
   waitUntil: (promise: Promise<unknown>) => void,
 ): Promise<Response> {
-  const origin = request.headers.get('Origin') ?? request.headers.get('Referer') ?? '';
-  const originOk =
-    ALLOWED_ORIGINS.some((a) => origin.startsWith(a)) || origin.includes('.pages.dev');
-  if (!originOk) return Response.json({ ok: false, error: 'origin' }, { status: 403 });
+  const origin = allowedOrigin(request);
+  if (!origin) return Response.json({ ok: false, error: 'origin' }, { status: 403 });
 
   let form: FormData;
   try {
@@ -122,9 +124,11 @@ async function handleRfq(
   }
 
   // Identify which site sent the request — useful for routing in inbox
-  const sourceSite = origin.includes('kervanbreaker.com')
-    ? 'kervanbreaker.com'
-    : 'kervanheat.com';
+  const host = new URL(origin).hostname;
+  const sourceSite =
+    host.endsWith('kervanbreaker.com') || host.endsWith('kervan-breaker-parts.pages.dev')
+      ? 'kervanbreaker.com'
+      : 'kervanheat.com';
 
   const emailSubject = `[RFQ · ${sourceSite}] ${company || name}${service ? ' — ' + service : ''}`;
   const emailBody = `New RFQ — ${sourceSite}
@@ -246,7 +250,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUnti
 
 export const onRequestOptions: PagesFunction<Env> = async ({ request }) => {
   // CORS preflight for cross-origin form posts (kervanbreaker.com → here).
-  const allow = corsOrigin(request);
+  const allow = allowedOrigin(request);
   if (!allow) return new Response(null, { status: 204 });
   return new Response(null, {
     status: 204,
