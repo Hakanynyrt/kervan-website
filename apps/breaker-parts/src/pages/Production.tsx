@@ -82,7 +82,7 @@ export default function Production({ t }: Props) {
             <a
               href="https://kervanheat.com"
               target="_blank"
-              rel="noopener"
+              rel="noopener noreferrer"
               className="font-sans text-sm tracking-[0.16em] uppercase text-brand hover:text-brand-hi transition-colors mt-2 inline-block"
             >
               {t.productionPage.heatLink}
