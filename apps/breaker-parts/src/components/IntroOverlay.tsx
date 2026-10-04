@@ -36,11 +36,19 @@ export default function IntroOverlay() {
     if (!show) return;
     if (reduced) {
       // Reduced motion: hiç gösterme, flag kaydet, çık
-      try { sessionStorage.setItem(SESSION_KEY, '1'); } catch { /* ignore */ }
+      try {
+        sessionStorage.setItem(SESSION_KEY, '1');
+      } catch {
+        /* ignore */
+      }
       setShow(false);
       return;
     }
-    try { sessionStorage.setItem(SESSION_KEY, '1'); } catch { /* ignore */ }
+    try {
+      sessionStorage.setItem(SESSION_KEY, '1');
+    } catch {
+      /* ignore */
+    }
 
     // Body scroll'u intro süresince kilitle
     const prevOverflow = document.documentElement.style.overflow;

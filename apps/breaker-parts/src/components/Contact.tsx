@@ -16,9 +16,7 @@ type State = 'idle' | 'sending' | 'success' | 'error';
  *  ekliyor ve Access-Control-Allow-Origin yanıt header'ı dönüyor.
  *  Dev'de Vite same-origin proxy yok — submit `error` durumuna düşer,
  *  beklenen davranış. */
-const RFQ_ENDPOINT = import.meta.env.PROD
-  ? 'https://kervanheat.com/api/rfq'
-  : '/api/rfq';
+const RFQ_ENDPOINT = import.meta.env.PROD ? 'https://kervanheat.com/api/rfq' : '/api/rfq';
 
 export default function Contact({ t }: Props) {
   const [state, setState] = useState<State>('idle');
@@ -51,12 +49,12 @@ export default function Contact({ t }: Props) {
   }
 
   return (
-    <section id="contact" data-scene-pose="contact" className="min-h-dvh flex flex-col justify-center py-16 md:py-24 bg-bg-soft/40">
-      <SectionHeading
-        eyebrow={t.contact.eyebrow}
-        title={t.contact.title}
-        aside={t.contact.sub}
-      />
+    <section
+      id="contact"
+      data-scene-pose="contact"
+      className="min-h-dvh flex flex-col justify-center py-16 md:py-24 bg-bg-soft/40"
+    >
+      <SectionHeading eyebrow={t.contact.eyebrow} title={t.contact.title} aside={t.contact.sub} />
 
       <div className="max-w-[1280px] mx-auto px-8 grid grid-cols-12 gap-8 md:gap-16">
         {/* Info — 4 col */}
@@ -68,13 +66,32 @@ export default function Contact({ t }: Props) {
           viewport={inViewOnce}
         >
           {[
-            { label: t.contact.phoneLabel, value: <a href="tel:+905316693734" className="hover:text-brand transition-colors">+90 531 669 37 34</a> },
-            { label: t.contact.emailLabel, value: <a href="mailto:info@kervanheat.com" className="hover:text-brand transition-colors">info@kervanheat.com</a> },
-            { label: 'Adres', value: <span className="whitespace-pre-line">{t.contact.address}</span> },
+            {
+              label: t.contact.phoneLabel,
+              value: (
+                <a href="tel:+905316693734" className="hover:text-brand transition-colors">
+                  +90 531 669 37 34
+                </a>
+              ),
+            },
+            {
+              label: t.contact.emailLabel,
+              value: (
+                <a href="mailto:info@kervanheat.com" className="hover:text-brand transition-colors">
+                  info@kervanheat.com
+                </a>
+              ),
+            },
+            {
+              label: 'Adres',
+              value: <span className="whitespace-pre-line">{t.contact.address}</span>,
+            },
             { label: t.contact.hoursLabel, value: t.contact.hours },
           ].map((row, i) => (
             <div key={i} className="flex flex-col gap-1.5">
-              <dt className="font-sans text-xs tracking-widest uppercase text-ink-soft">{row.label}</dt>
+              <dt className="font-sans text-xs tracking-widest uppercase text-ink-soft">
+                {row.label}
+              </dt>
               <dd className="font-serif italic text-lg text-ink m-0">{row.value}</dd>
             </div>
           ))}
@@ -102,7 +119,13 @@ export default function Contact({ t }: Props) {
 
           <Field label={t.contact.fields.name} name="name" required maxLength={100} />
           <Field label={t.contact.fields.company} name="company" maxLength={150} />
-          <Field label={t.contact.fields.email} name="email" type="email" required maxLength={200} />
+          <Field
+            label={t.contact.fields.email}
+            name="email"
+            type="email"
+            required
+            maxLength={200}
+          />
           <Field label={t.contact.fields.phone} name="phone" type="tel" maxLength={30} />
 
           <label className="md:col-span-2 flex flex-col gap-2">
@@ -136,7 +159,9 @@ export default function Contact({ t }: Props) {
           </button>
 
           {state === 'success' && (
-            <p className="md:col-span-2 font-serif italic text-base text-brand">{t.contact.success}</p>
+            <p className="md:col-span-2 font-serif italic text-base text-brand">
+              {t.contact.success}
+            </p>
           )}
           {state === 'error' && (
             <p className="md:col-span-2 font-serif italic text-base text-ink">{t.contact.error}</p>

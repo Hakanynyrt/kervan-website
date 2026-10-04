@@ -18,7 +18,7 @@ export function Icon({ as: Svg, size = '1em', className, ...aria }: Props) {
       width={size}
       height={size}
       className={cn('inline-block fill-current', className)}
-      aria-hidden={aria['aria-label'] ? undefined : aria['aria-hidden'] ?? true}
+      aria-hidden={aria['aria-label'] ? undefined : (aria['aria-hidden'] ?? true)}
       aria-label={aria['aria-label']}
       role={aria['aria-label'] ? 'img' : undefined}
     />

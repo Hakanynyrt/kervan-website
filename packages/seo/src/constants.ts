@@ -22,8 +22,4 @@ export const ORG_INSTAGRAM = 'https://www.instagram.com/kervanmakina/';
 
 /** Both domains' canonical base URLs in one array — used as `sameAs` so
  *  each Organization JSON-LD instance references its sibling site. */
-export const ORG_SAME_AS = [
-  KERVAN_HEAT_URL,
-  KERVAN_BREAKER_URL,
-  ORG_INSTAGRAM,
-] as const;
+export const ORG_SAME_AS = [KERVAN_HEAT_URL, KERVAN_BREAKER_URL, ORG_INSTAGRAM] as const;

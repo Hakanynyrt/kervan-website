@@ -28,10 +28,7 @@ export function Marquee({
   const doubled = [...items, ...items];
 
   return (
-    <div
-      className={cn('overflow-hidden whitespace-nowrap py-6', className)}
-      aria-hidden="true"
-    >
+    <div className={cn('overflow-hidden whitespace-nowrap py-6', className)} aria-hidden="true">
       <motion.div
         className="inline-flex gap-12"
         animate={{ x: ['0%', '-50%'] }}

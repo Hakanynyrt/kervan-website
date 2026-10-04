@@ -13,16 +13,13 @@ export default function Hero({ t }: Props) {
   const words2 = t.hero.title2.split(/\s+/).filter(Boolean);
 
   return (
-    <section
-      className="relative min-h-dvh flex flex-col justify-center pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden"
-    >
+    <section className="relative min-h-dvh flex flex-col justify-center pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden">
       {/* Subtle radial gradient — forge ember warmth without an asset */}
       <div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none"
         style={{
-          background:
-            'radial-gradient(ellipse at 75% 30%, rgba(232,67,27,0.08), transparent 55%)',
+          background: 'radial-gradient(ellipse at 75% 30%, rgba(232,67,27,0.08), transparent 55%)',
         }}
       />
 
@@ -49,7 +46,13 @@ export default function Hero({ t }: Props) {
               <span key={li} className="block">
                 {line.map((w, wi) => (
                   <span key={`${li}-${wi}`}>
-                    <span style={{ display: 'inline-block', overflow: 'hidden', verticalAlign: 'baseline' }}>
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        overflow: 'hidden',
+                        verticalAlign: 'baseline',
+                      }}
+                    >
                       <motion.span
                         variants={lineReveal}
                         style={{ display: 'inline-block', willChange: 'transform' }}
@@ -108,12 +111,8 @@ export default function Hero({ t }: Props) {
               variants={fadeUp}
               className="flex flex-col gap-2 border-t border-hair pt-5"
             >
-              <dd className="font-serif text-4xl md:text-5xl text-ink leading-none m-0">
-                {s.n}
-              </dd>
-              <dt className="font-sans text-xs tracking-widest uppercase text-ink-soft">
-                {s.l}
-              </dt>
+              <dd className="font-serif text-4xl md:text-5xl text-ink leading-none m-0">{s.n}</dd>
+              <dt className="font-sans text-xs tracking-widest uppercase text-ink-soft">{s.l}</dt>
             </motion.div>
           ))}
         </motion.dl>

@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
-import {
-  PageMeta,
-  JsonLd,
-  breadcrumbList,
-  KERVAN_BREAKER_URL,
-} from '@kervan/seo';
+import { PageMeta, JsonLd, breadcrumbList, KERVAN_BREAKER_URL } from '@kervan/seo';
 import { fadeUp, inViewOnce } from '@kervan/motion';
 import { PRODUCT_BY_SLUG } from '../data/products';
 import type { DictBlock, Lang } from '../types';
@@ -21,9 +16,7 @@ type State = 'idle' | 'sending' | 'success' | 'error';
 /** RFQ endpoint — same Cloudflare Worker that serves kervanheat.com.
  *  In dev, posts to local /api/rfq (404 expected). In prod, cross-origin
  *  POST to kervanheat.com — Worker validates Origin against an allowlist. */
-const RFQ_ENDPOINT = import.meta.env.PROD
-  ? 'https://kervanheat.com/api/rfq'
-  : '/api/rfq';
+const RFQ_ENDPOINT = import.meta.env.PROD ? 'https://kervanheat.com/api/rfq' : '/api/rfq';
 
 export default function Contact({ t, lang }: Props) {
   const [params] = useSearchParams();
@@ -120,7 +113,10 @@ export default function Contact({ t, lang }: Props) {
               {
                 label: t.contact.emailLabel,
                 value: (
-                  <a href="mailto:ahmet@kervanheat.com" className="hover:text-brand transition-colors">
+                  <a
+                    href="mailto:ahmet@kervanheat.com"
+                    className="hover:text-brand transition-colors"
+                  >
                     ahmet@kervanheat.com
                   </a>
                 ),
@@ -161,7 +157,13 @@ export default function Contact({ t, lang }: Props) {
 
             <Field label={t.contact.fields.name} name="name" required maxLength={100} />
             <Field label={t.contact.fields.company} name="company" maxLength={150} />
-            <Field label={t.contact.fields.email} name="email" type="email" required maxLength={200} />
+            <Field
+              label={t.contact.fields.email}
+              name="email"
+              type="email"
+              required
+              maxLength={200}
+            />
             <Field label={t.contact.fields.phone} name="phone" type="tel" maxLength={30} />
 
             <label className="md:col-span-2 flex flex-col gap-2">

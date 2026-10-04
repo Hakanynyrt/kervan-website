@@ -51,7 +51,7 @@ export const PRODUCTS: Product[] = [
     },
     en: {
       name: 'Piston',
-      tagline: 'The source of the strike. High frequency, doesn\'t flinch.',
+      tagline: "The source of the strike. High frequency, doesn't flinch.",
       body: 'The heart of the hammer. Tight tolerance, hardened + tempered for high impact endurance. Multiple diameter / length variants per brand and model held in stock.',
     },
   },
@@ -75,7 +75,7 @@ export const PRODUCTS: Product[] = [
     tr: {
       name: 'Tie Rod (Gergi çubuğu)',
       tagline: 'Üst ve alt gövdeyi tek beden tutar.',
-      body: 'Kırıcının iskeletini sıkıştıran çubuk. Yüksek çekme dayanımı, doğru ön gerilme. Aşırı yüklenmiş veya yorulmuş tie rod\'u zamanında değiştirmek, gövdeyi de korur.',
+      body: "Kırıcının iskeletini sıkıştıran çubuk. Yüksek çekme dayanımı, doğru ön gerilme. Aşırı yüklenmiş veya yorulmuş tie rod'u zamanında değiştirmek, gövdeyi de korur.",
     },
     en: {
       name: 'Tie Rod',
@@ -122,7 +122,7 @@ export const PRODUCTS: Product[] = [
     en: {
       name: 'Lower Housing',
       tagline: 'Where the bushings and chisel live.',
-      body: 'The lower half of the breaker shell. Holds the bushing seats, takes the field abuse, hits stone. Replacing it before deep wear extends the whole machine\'s life.',
+      body: "The lower half of the breaker shell. Holds the bushing seats, takes the field abuse, hits stone. Replacing it before deep wear extends the whole machine's life.",
     },
   },
   {
