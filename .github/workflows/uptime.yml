@@ -1,0 +1,31 @@
+name: Uptime
+
+# Probes both production sites and the RFQ endpoint every 15 minutes
+# (GET/OPTIONS only — see .github/scripts/smoke.sh). A failed run emails
+# the repo owner. GitHub cron is best-effort (runs can be late) and is
+# disabled after 60 days without repo activity, so keep an external
+# monitor as the primary alerting layer.
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    name: Probe production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/scripts
+
+      - name: Smoke probe
+        run: bash .github/scripts/smoke.sh
