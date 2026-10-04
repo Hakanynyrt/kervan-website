@@ -17,13 +17,20 @@ const padClasses: Record<Padding, string> = {
   lg: 'p-8 md:p-10',
 };
 
-export function Card({ children, padding = 'md', hover = false, as: Tag = 'div', className }: Props) {
+export function Card({
+  children,
+  padding = 'md',
+  hover = false,
+  as: Tag = 'div',
+  className,
+}: Props) {
   return (
     <Tag
       className={cn(
         'bg-bg-soft border border-hair rounded-md',
         padClasses[padding],
-        hover && 'transition-transform duration-300 ease-soft hover:-translate-y-1.5 hover:border-hair-strong',
+        hover &&
+          'transition-transform duration-300 ease-soft hover:-translate-y-1.5 hover:border-hair-strong',
         className,
       )}
     >

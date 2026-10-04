@@ -32,7 +32,8 @@ export default function Production({ t }: Props) {
         schema={serviceSchema({
           url: `${KERVAN_BREAKER_URL}/uretim-kalite`,
           name: 'Hidrolik kırıcı parça üretimi + ısıl işlem entegrasyonu',
-          description: '42CrMo / 42CrMoA standart alaşım. Kendi pit-tip fırınımızda sertleştirme + temperleme. OES spektrometre ile lot başı malzeme analizi.',
+          description:
+            '42CrMo / 42CrMoA standart alaşım. Kendi pit-tip fırınımızda sertleştirme + temperleme. OES spektrometre ile lot başı malzeme analizi.',
         })}
       />
 
@@ -103,7 +104,11 @@ export default function Production({ t }: Props) {
           <div className="flex flex-wrap gap-x-8 gap-y-2 font-serif italic text-2xl md:text-3xl text-ink">
             {t.productionPage.materials.map((m, i) => (
               <span key={i} className="inline-flex items-center gap-3">
-                {i > 0 && <span aria-hidden="true" className="text-ink-soft">·</span>}
+                {i > 0 && (
+                  <span aria-hidden="true" className="text-ink-soft">
+                    ·
+                  </span>
+                )}
                 {m}
               </span>
             ))}

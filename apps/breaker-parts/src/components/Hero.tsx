@@ -14,7 +14,10 @@ export default function Hero({ t }: Props) {
   const words2 = t.hero.title2.split(/\s+/).filter(Boolean);
 
   return (
-    <section data-scene-pose="hero" className="relative min-h-dvh flex flex-col justify-center pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden">
+    <section
+      data-scene-pose="hero"
+      className="relative min-h-dvh flex flex-col justify-center pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden"
+    >
       <div className="max-w-[1280px] mx-auto px-8 grid grid-cols-12 gap-8 md:gap-12 items-center">
         {/* Copy — sol yarı */}
         <div className="col-span-12 lg:col-span-7 flex flex-col gap-8">
@@ -40,7 +43,11 @@ export default function Hero({ t }: Props) {
                 {line.map((w, wi) => (
                   <span key={`${li}-${wi}`}>
                     <span
-                      style={{ display: 'inline-block', overflow: 'hidden', verticalAlign: 'baseline' }}
+                      style={{
+                        display: 'inline-block',
+                        overflow: 'hidden',
+                        verticalAlign: 'baseline',
+                      }}
                     >
                       <motion.span
                         variants={lineReveal}
@@ -95,7 +102,11 @@ export default function Hero({ t }: Props) {
           animate="show"
         >
           {t.hero.stats.map((s, i) => (
-            <motion.div key={i} variants={fadeUp} className="flex flex-col gap-2 border-t border-hair pt-5">
+            <motion.div
+              key={i}
+              variants={fadeUp}
+              className="flex flex-col gap-2 border-t border-hair pt-5"
+            >
               <div className="font-serif text-5xl md:text-6xl text-ink leading-none">{s.n}</div>
               <div className="font-sans text-xs tracking-widest uppercase text-ink-soft">{s.l}</div>
             </motion.div>

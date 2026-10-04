@@ -29,11 +29,7 @@ interface BuildOrgOpts {
   logoUrl?: string;
 }
 
-export function organization({
-  primaryUrl,
-  alternateName,
-  logoUrl,
-}: BuildOrgOpts) {
+export function organization({ primaryUrl, alternateName, logoUrl }: BuildOrgOpts) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -68,12 +64,7 @@ interface BuildWebsiteOpts {
   inLanguage?: string;
 }
 
-export function website({
-  url,
-  name,
-  description,
-  inLanguage = 'tr',
-}: BuildWebsiteOpts) {
+export function website({ url, name, description, inLanguage = 'tr' }: BuildWebsiteOpts) {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',

@@ -1,10 +1,5 @@
 import { motion } from 'framer-motion';
-import {
-  PageMeta,
-  JsonLd,
-  breadcrumbList,
-  KERVAN_BREAKER_URL,
-} from '@kervan/seo';
+import { PageMeta, JsonLd, breadcrumbList, KERVAN_BREAKER_URL } from '@kervan/seo';
 import { fadeUp, inViewOnce, staggerContainer } from '@kervan/motion';
 import { BRANDS } from '../data/brands';
 import type { DictBlock } from '../types';
@@ -70,9 +65,7 @@ export default function Brands({ t }: Props) {
                   loading="lazy"
                 />
               ) : (
-                <span className="font-serif italic text-2xl text-ink-mid">
-                  {b.name}
-                </span>
+                <span className="font-serif italic text-2xl text-ink-mid">{b.name}</span>
               )}
               <span className="font-sans text-xs tracking-[0.18em] uppercase text-ink-soft mt-2">
                 {b.country}

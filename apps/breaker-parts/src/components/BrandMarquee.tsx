@@ -24,7 +24,8 @@ export default function BrandMarquee({ t }: Props) {
   const items = [...t.brands.items, ...t.brands.items]; // seamless loop
 
   return (
-    <section data-scene-pose="brands"
+    <section
+      data-scene-pose="brands"
       className="min-h-dvh flex flex-col justify-center py-16 md:py-24 border-y border-hair overflow-hidden"
       style={{ perspective: '1500px' }}
     >
@@ -40,7 +41,10 @@ export default function BrandMarquee({ t }: Props) {
       </motion.div>
 
       {/* Top row — slides left, tilted up */}
-      <div className="overflow-hidden whitespace-nowrap py-4" style={{ transformStyle: 'preserve-3d' }}>
+      <div
+        className="overflow-hidden whitespace-nowrap py-4"
+        style={{ transformStyle: 'preserve-3d' }}
+      >
         <motion.div
           className="inline-flex gap-6"
           animate={{ x: ['0%', '-50%'] }}
@@ -48,13 +52,22 @@ export default function BrandMarquee({ t }: Props) {
           style={{ transform: 'rotateX(10deg)', transformStyle: 'preserve-3d' }}
         >
           {items.map((b, i) => (
-            <BrandTile key={`a-${i}`} name={b} slug={slug(b)} z={(i % 2 === 0 ? 30 : 18)} skewY={i % 2 === 0 ? 3 : -3} />
+            <BrandTile
+              key={`a-${i}`}
+              name={b}
+              slug={slug(b)}
+              z={i % 2 === 0 ? 30 : 18}
+              skewY={i % 2 === 0 ? 3 : -3}
+            />
           ))}
         </motion.div>
       </div>
 
       {/* Bottom row — slides right, tilted down */}
-      <div className="overflow-hidden whitespace-nowrap py-4 mt-2" style={{ transformStyle: 'preserve-3d' }}>
+      <div
+        className="overflow-hidden whitespace-nowrap py-4 mt-2"
+        style={{ transformStyle: 'preserve-3d' }}
+      >
         <motion.div
           className="inline-flex gap-6"
           animate={{ x: ['-50%', '0%'] }}
@@ -62,7 +75,13 @@ export default function BrandMarquee({ t }: Props) {
           style={{ transform: 'rotateX(-10deg)', transformStyle: 'preserve-3d' }}
         >
           {items.map((b, i) => (
-            <BrandTile key={`b-${i}`} name={b} slug={slug(b)} z={(i % 2 === 0 ? 18 : 30)} skewY={i % 2 === 0 ? -3 : 3} />
+            <BrandTile
+              key={`b-${i}`}
+              name={b}
+              slug={slug(b)}
+              z={i % 2 === 0 ? 18 : 30}
+              skewY={i % 2 === 0 ? -3 : 3}
+            />
           ))}
         </motion.div>
       </div>

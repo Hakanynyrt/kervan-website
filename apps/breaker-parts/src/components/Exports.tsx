@@ -20,11 +20,7 @@ export default function Exports({ t, lang }: Props) {
       data-scene-pose="exports"
       className="min-h-dvh flex flex-col justify-center py-8 md:py-16"
     >
-      <SectionHeading
-        eyebrow={t.exports.eyebrow}
-        title={title}
-        aside={t.exports.aside}
-      />
+      <SectionHeading eyebrow={t.exports.eyebrow} title={title} aside={t.exports.aside} />
       <ExportsGlobe lang={lang} />
     </section>
   );

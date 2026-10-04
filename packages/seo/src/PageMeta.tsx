@@ -16,13 +16,7 @@ interface Props {
 /** Updates `<title>`, description, canonical and OpenGraph tags for the
  *  lifetime of the component, then restores the previous values on
  *  unmount. Replaces `UseDocTitle` with full meta coverage. */
-export function PageMeta({
-  title,
-  description,
-  canonical,
-  image,
-  type = 'website',
-}: Props) {
+export function PageMeta({ title, description, canonical, image, type = 'website' }: Props) {
   useEffect(() => {
     const prev = capture();
 

@@ -120,9 +120,7 @@ export default function StackedCarousel({ items }: Props) {
               aria-current={isActive ? 'true' : undefined}
               className={
                 'h-1.5 rounded-full transition-all duration-300 ease-out ' +
-                (isActive
-                  ? 'w-8 bg-brand'
-                  : 'w-1.5 bg-ink-soft/40 hover:bg-ink-soft/70')
+                (isActive ? 'w-8 bg-brand' : 'w-1.5 bg-ink-soft/40 hover:bg-ink-soft/70')
               }
             />
           );
@@ -210,7 +208,17 @@ function Card({ item, index, active, N, isMobile, onOpen }: CardProps) {
             aria-hidden="true"
             className="absolute top-4 left-4 z-20 inline-flex items-center justify-center w-9 h-9 rounded-full bg-bg/55 backdrop-blur-sm pointer-events-none"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ink">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-ink"
+            >
               <polyline points="15 3 21 3 21 9" />
               <polyline points="9 21 3 21 3 15" />
               <line x1="21" y1="3" x2="14" y2="10" />
@@ -317,7 +325,17 @@ function Lightbox({ items, active, onPrev, onNext, onClose }: LightboxProps) {
         aria-label="Kapat"
         className="absolute top-4 right-4 z-10 inline-flex items-center justify-center w-12 h-12 rounded-full bg-bg-soft/60 hover:bg-bg-soft text-ink transition-colors"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
@@ -392,9 +410,7 @@ function Lightbox({ items, active, onPrev, onNext, onClose }: LightboxProps) {
               aria-current={isActive ? 'true' : undefined}
               className={
                 'h-1.5 rounded-full transition-all duration-300 ease-out ' +
-                (isActive
-                  ? 'w-8 bg-brand'
-                  : 'w-1.5 bg-ink-soft/40 hover:bg-ink-soft/70')
+                (isActive ? 'w-8 bg-brand' : 'w-1.5 bg-ink-soft/40 hover:bg-ink-soft/70')
               }
             />
           );
@@ -422,7 +438,10 @@ function InViewVideo({ src, poster }: InViewVideoProps) {
     const obs = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
-          if (e.isIntersecting) el.play().catch(() => { /* user-gesture */ });
+          if (e.isIntersecting)
+            el.play().catch(() => {
+              /* user-gesture */
+            });
           else el.pause();
         }
       },

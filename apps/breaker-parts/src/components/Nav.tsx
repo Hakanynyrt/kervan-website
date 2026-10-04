@@ -28,11 +28,11 @@ export default function Nav({ lang, setLang, t }: Props) {
   }, []);
 
   const links = [
-    { hash: 'products',   label: t.nav.products },
-    { hash: 'atolye',     label: t.nav.atolye },
-    { hash: 'craft',      label: t.nav.craft },
+    { hash: 'products', label: t.nav.products },
+    { hash: 'atolye', label: t.nav.atolye },
+    { hash: 'craft', label: t.nav.craft },
     { hash: 'industries', label: t.nav.industries },
-    { hash: 'contact',    label: t.nav.contact },
+    { hash: 'contact', label: t.nav.contact },
   ];
 
   const renderLink = (hash: string, label: string, onClick?: () => void) => {
@@ -127,9 +127,7 @@ export default function Nav({ lang, setLang, t }: Props) {
             className="md:hidden overflow-hidden bg-bg border-b border-hair"
           >
             <div className="px-6 py-4 flex flex-col gap-4 font-serif text-2xl">
-              {links.map((l) =>
-                renderLink(l.hash, l.label, () => setOpen(false)),
-              )}
+              {links.map((l) => renderLink(l.hash, l.label, () => setOpen(false)))}
             </div>
           </motion.div>
         )}

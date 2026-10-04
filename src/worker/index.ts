@@ -44,7 +44,9 @@ function withCors(res: Response, request: Request): Response {
 }
 
 const clean = (v: FormDataEntryValue | null, max = 500): string =>
-  String(v ?? '').trim().slice(0, max);
+  String(v ?? '')
+    .trim()
+    .slice(0, max);
 
 function withSecurityHeaders(res: Response): Response {
   const h = new Headers(res.headers);
@@ -61,8 +63,11 @@ async function handleRfq(request: Request, env: Env): Promise<Response> {
   if (!originOk) return Response.json({ ok: false, error: 'origin' }, { status: 403 });
 
   let form: FormData;
-  try { form = await request.formData(); }
-  catch { return Response.json({ ok: false, error: 'parse' }, { status: 400 }); }
+  try {
+    form = await request.formData();
+  } catch {
+    return Response.json({ ok: false, error: 'parse' }, { status: 400 });
+  }
 
   if (form.get('website')) return Response.json({ ok: true });
 
@@ -126,11 +131,22 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
     try {
       const r = await fetch('https://api.resend.com/emails', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: mailFrom, to: mailTo, reply_to: email, subject: emailSubject, text: emailBody }),
+        headers: {
+          Authorization: `Bearer ${env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: mailFrom,
+          to: mailTo,
+          reply_to: email,
+          subject: emailSubject,
+          text: emailBody,
+        }),
       });
       emailSent = r.ok;
-    } catch (e) { console.error('Resend error', e); }
+    } catch (e) {
+      console.error('Resend error', e);
+    }
   }
 
   if (!emailSent && env.MAILCHANNELS_DKIM_DOMAIN) {
@@ -140,7 +156,8 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
         dkim_domain: env.MAILCHANNELS_DKIM_DOMAIN,
         dkim_selector: env.MAILCHANNELS_DKIM_SELECTOR ?? 'mailchannels',
       };
-      if (env.MAILCHANNELS_DKIM_PRIVATE_KEY) personalization.dkim_private_key = env.MAILCHANNELS_DKIM_PRIVATE_KEY;
+      if (env.MAILCHANNELS_DKIM_PRIVATE_KEY)
+        personalization.dkim_private_key = env.MAILCHANNELS_DKIM_PRIVATE_KEY;
       const r = await fetch('https://api.mailchannels.net/tx/v1/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -153,7 +170,9 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
         }),
       });
       emailSent = r.ok;
-    } catch (e) { console.error('MailChannels error', e); }
+    } catch (e) {
+      console.error('MailChannels error', e);
+    }
   }
 
   if (env.TG_BOT_TOKEN && env.TG_CHAT_ID) {
@@ -164,7 +183,9 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: env.TG_CHAT_ID, text: tgText, parse_mode: 'Markdown' }),
       });
-    } catch (e) { console.error('Telegram error', e); }
+    } catch (e) {
+      console.error('Telegram error', e);
+    }
   }
 
   return Response.json({ ok: true, emailSent });
@@ -192,7 +213,8 @@ export default {
           },
         });
       }
-      if (request.method !== 'POST') return Response.json({ ok: false, error: 'method' }, { status: 405 });
+      if (request.method !== 'POST')
+        return Response.json({ ok: false, error: 'method' }, { status: 405 });
       return withCors(withSecurityHeaders(await handleRfq(request, env)), request);
     }
 
