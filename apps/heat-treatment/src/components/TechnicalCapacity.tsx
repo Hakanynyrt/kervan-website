@@ -27,20 +27,14 @@ export default function TechnicalCapacity({ t }: Props) {
         viewport={inViewOnce}
       >
         {t.capacity.items.map((c, i) => (
-          <motion.div
-            key={i}
-            variants={fadeUp}
-            className="bg-bg p-8 md:p-10 flex flex-col gap-3"
-          >
+          <motion.div key={i} variants={fadeUp} className="bg-bg p-8 md:p-10 flex flex-col gap-3">
             <dt className="font-sans text-xs tracking-[0.2em] uppercase text-ink-soft">
               {c.label}
             </dt>
             <dd className="font-serif text-4xl md:text-5xl text-ink leading-none m-0 mt-1">
               {c.value}
             </dd>
-            {c.note && (
-              <p className="font-sans text-sm text-ink-mid mt-2">{c.note}</p>
-            )}
+            {c.note && <p className="font-sans text-sm text-ink-mid mt-2">{c.note}</p>}
           </motion.div>
         ))}
       </motion.dl>

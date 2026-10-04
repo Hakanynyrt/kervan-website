@@ -13,8 +13,13 @@ interface CommonProps {
 }
 
 type ButtonProps =
-  | (CommonProps & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'> & { href?: undefined })
-  | (CommonProps & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'className'> & { href: string; external?: boolean });
+  | (CommonProps &
+      Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'> & { href?: undefined })
+  | (CommonProps &
+      Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'className'> & {
+        href: string;
+        external?: boolean;
+      });
 
 const variantClasses: Record<Variant, string> = {
   primary: 'bg-brand text-bg hover:bg-brand-hi active:bg-brand-lo',
@@ -40,8 +45,21 @@ export function Button(props: ButtonProps) {
   const content = loading ? <span aria-live="polite">…</span> : children;
 
   if ('href' in props && props.href !== undefined) {
-    const { href, external, variant: _v, size: _s, loading: _l, children: _c, className: _cn, ...rest } = props;
-    void _v; void _s; void _l; void _c; void _cn;
+    const {
+      href,
+      external,
+      variant: _v,
+      size: _s,
+      loading: _l,
+      children: _c,
+      className: _cn,
+      ...rest
+    } = props;
+    void _v;
+    void _s;
+    void _l;
+    void _c;
+    void _cn;
     const anchorExtras = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
     return (
       <a href={href} className={classes} {...anchorExtras} {...rest}>
@@ -51,9 +69,17 @@ export function Button(props: ButtonProps) {
   }
 
   const { variant: _v, size: _s, loading: _l, children: _c, className: _cn, ...rest } = props;
-  void _v; void _s; void _l; void _c; void _cn;
+  void _v;
+  void _s;
+  void _l;
+  void _c;
+  void _cn;
   return (
-    <button type="button" className={classes} {...(rest as ButtonHTMLAttributes<HTMLButtonElement>)}>
+    <button
+      type="button"
+      className={classes}
+      {...(rest as ButtonHTMLAttributes<HTMLButtonElement>)}
+    >
       {content}
     </button>
   );

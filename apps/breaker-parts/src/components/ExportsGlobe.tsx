@@ -51,7 +51,10 @@ interface Topo {
   arcs: number[][][];
 }
 function decodeArcs(topo: Topo): number[][][] {
-  const { scale: [sx, sy], translate: [tx, ty] } = topo.transform;
+  const {
+    scale: [sx, sy],
+    translate: [tx, ty],
+  } = topo.transform;
   return topo.arcs.map((arc) => {
     let x = 0;
     let y = 0;
@@ -91,8 +94,7 @@ export default function ExportsGlobe({ lang }: Props) {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    const reduced =
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
     let renderer: THREE.WebGLRenderer;
     try {
@@ -151,10 +153,9 @@ export default function ExportsGlobe({ lang }: Props) {
     // just skip borders; the globe still works without them.
     const abortCtrl = new AbortController();
     let bordersGroup: THREE.LineSegments | null = null;
-    fetch(
-      'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json',
-      { signal: abortCtrl.signal },
-    )
+    fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json', {
+      signal: abortCtrl.signal,
+    })
       .then((r) => r.json())
       .then((topo: Topo) => {
         const arcs = decodeArcs(topo);
@@ -169,10 +170,7 @@ export default function ExportsGlobe({ lang }: Props) {
           }
         }
         const geom = new THREE.BufferGeometry();
-        geom.setAttribute(
-          'position',
-          new THREE.Float32BufferAttribute(positions, 3),
-        );
+        geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
         bordersGroup = new THREE.LineSegments(
           geom,
           new THREE.LineBasicMaterial({
@@ -368,7 +366,9 @@ export default function ExportsGlobe({ lang }: Props) {
       lastInteractionT = performance.now();
       try {
         renderer.domElement.setPointerCapture(e.pointerId);
-      } catch { /* old browsers */ }
+      } catch {
+        /* old browsers */
+      }
     };
     const onPointerMove = (e: PointerEvent) => {
       if (isDragging) {
@@ -409,7 +409,9 @@ export default function ExportsGlobe({ lang }: Props) {
       isDragging = false;
       try {
         renderer.domElement.releasePointerCapture(e.pointerId);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       renderer.domElement.style.cursor = 'grab';
       if (!wasDragging || didDrag) return;
       // Tap (no drag): pick a dot, fly the chisel to it.
@@ -431,7 +433,9 @@ export default function ExportsGlobe({ lang }: Props) {
       isDragging = false;
       try {
         renderer.domElement.releasePointerCapture(e.pointerId);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       renderer.domElement.style.cursor = 'grab';
     };
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
@@ -517,17 +521,12 @@ export default function ExportsGlobe({ lang }: Props) {
   }, []);
 
   const hoverCity = hover ? (lang === 'tr' ? hover.cityTr : hover.city) : '';
-  const hoverCountry = hover
-    ? lang === 'tr'
-      ? hover.countryTr
-      : hover.country
-    : '';
+  const hoverCountry = hover ? (lang === 'tr' ? hover.countryTr : hover.country) : '';
 
   // Selected city panel data — index 0 is origin (Kocaeli), all others
   // are destinations from EXPORTS. Origin shows "Üretim merkezi"
   // instead of sales numbers.
-  const selectedPoint: ExportPoint =
-    selected === 0 ? ORIGIN : EXPORTS[selected - 1] ?? ORIGIN;
+  const selectedPoint: ExportPoint = selected === 0 ? ORIGIN : (EXPORTS[selected - 1] ?? ORIGIN);
   const selCity = lang === 'tr' ? selectedPoint.cityTr : selectedPoint.city;
   const selCountry = lang === 'tr' ? selectedPoint.countryTr : selectedPoint.country;
   const isOrigin = selected === 0;
@@ -597,9 +596,7 @@ export default function ExportsGlobe({ lang }: Props) {
             <div className="font-sans tracking-[0.18em] uppercase text-ink-soft text-[10px]">
               {hoverCity}
             </div>
-            <div className="font-serif italic text-base text-ink leading-tight">
-              {hoverCountry}
-            </div>
+            <div className="font-serif italic text-base text-ink leading-tight">{hoverCountry}</div>
           </div>
         )}
       </div>

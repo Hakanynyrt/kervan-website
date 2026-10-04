@@ -77,7 +77,9 @@ function withSecurityHeaders(res: Response): Response {
 }
 
 const clean = (v: FormDataEntryValue | null, max = 500): string =>
-  String(v ?? '').trim().slice(0, max);
+  String(v ?? '')
+    .trim()
+    .slice(0, max);
 
 async function handleRfq(
   request: Request,
@@ -108,8 +110,7 @@ async function handleRfq(
   const specs = clean(form.get('specs'), 2000);
   const message = clean(form.get('message'), 3000);
   const kvkk = form.get('kvkk_consent') === '1' || form.get('kvkk_consent') === 'on';
-  const marketing =
-    form.get('marketing_consent') === '1' || form.get('marketing_consent') === 'on';
+  const marketing = form.get('marketing_consent') === '1' || form.get('marketing_consent') === 'on';
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
   if (!name || !email || !kvkk || !emailValid)

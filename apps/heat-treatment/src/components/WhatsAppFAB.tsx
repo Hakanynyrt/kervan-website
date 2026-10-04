@@ -19,9 +19,7 @@ export default function WhatsAppFAB() {
     const computeVisible = () => {
       const passedOpening = window.scrollY >= window.innerHeight * 0.5;
       const footer = document.querySelector('footer');
-      const footerInView = footer
-        ? footer.getBoundingClientRect().top < window.innerHeight
-        : false;
+      const footerInView = footer ? footer.getBoundingClientRect().top < window.innerHeight : false;
       setVisible(passedOpening && !footerInView);
     };
     window.addEventListener('scroll', computeVisible, { passive: true });
