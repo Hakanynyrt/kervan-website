@@ -20,11 +20,11 @@ export const DICT: Dict = {
       eyebrow: 'Kartepe · Kocaeli',
       title1: 'Kontrollü atmosfer pit-tip',
       title2: 'fırınlarda fason ısıl işlem.',
-      sub: 'Sertleştirme, temperleme, sementasyon. 42CrMo, 42CrMoA ve diğer alaşımlar — kendi ölçüm ve kontrol disiplinimizle.',
+      sub: 'Sertleştirme ve temperleme. 42CrMo, 42CrMoA ve diğer alaşımlar — kendi ölçüm ve kontrol disiplinimizle.',
       cta: 'Teklif Al',
       ctaSecondary: 'Hizmetler',
       stats: [
-        { n: '1+2', l: 'sementasyon + temper potası' },
+        { n: '2', l: 'temper potası' },
         { n: 'Ø1200', l: 'mm max çap' },
         { n: '2.5 t', l: 'tek sefer max yük' },
         { n: '42CrMo', l: 'standart alaşım' },
@@ -33,8 +33,7 @@ export const DICT: Dict = {
     services: {
       eyebrow: 'Hizmetler',
       title: 'Üç ana süreç. Tek disiplin.',
-      aside:
-        'Her parti için malzeme analizi, kontrollü atmosfer, ölçülmüş sıcaklık eğrisi. Lot izi sonuna kadar açık.',
+      aside: 'Kontrollü atmosfer, ölçülmüş sıcaklık eğrisi, sertlik kontrolü.',
       items: [
         {
           index: '01',
@@ -48,16 +47,6 @@ export const DICT: Dict = {
         },
         {
           index: '02',
-          name: 'Sementasyon',
-          body: 'Propan-hava karışımı ile karbon zenginleştirme. Default tek sementasyon — gerekli olmadıkça ikinci pasaja geçilmez. Müşteri istediğinde veya geometri zorladığında ikinci sementasyon talep üzerine yapılır.',
-          bullets: [
-            'Propan-hava atmosfer',
-            'Default tek sementasyon',
-            'Gerekirse ikinci pasaj — talep üzerine',
-          ],
-        },
-        {
-          index: '03',
           name: 'Fason Isıl İşlem',
           body: 'Standart hizmet listesinin dışına çıkan ihtiyaçlar için: özel alaşım, özel sıcaklık eğrisi, özel parti büyüklüğü. Önce numune, sonra seri.',
           bullets: [
@@ -67,7 +56,7 @@ export const DICT: Dict = {
           ],
         },
         {
-          index: '04',
+          index: '03',
           name: 'Üretim & Entegrasyon',
           body: 'Hidrolik kırıcı yedek parçalarımızı da kendi tezgahımızda üretir, kendi pit-tip fırınımızda işleriz. Metallurjiyi sadece müşteri parçası için değil, kendi parçamız için de yaşıyoruz.',
           bullets: [
@@ -83,11 +72,9 @@ export const DICT: Dict = {
       title: 'Sayılarla atölye.',
       aside: 'Bir bakışta fırın kapasitesi, malzeme yelpazesi ve ölçüm disiplini.',
       items: [
-        { value: '1', label: 'Sementasyon potası', note: 'Propan-hava karışımı atmosfer' },
         { value: '2', label: 'Temper potası', note: 'Paralel iki sıcaklık eğrisi' },
         { value: 'Ø1200 mm', label: 'Max parça çapı', note: 'Pit-tip fırın iç ölçüsü' },
         { value: '2.5 ton', label: 'Tek sefer max yük', note: 'Brüt parti ağırlığı' },
-        { value: 'OES', label: 'Spektrometre', note: 'Lot başı malzeme analizi' },
         {
           value: '42CrMo · 42CrMoA',
           label: 'Standart alaşımlar',
@@ -116,7 +103,7 @@ export const DICT: Dict = {
     about: {
       eyebrow: 'Hakkımızda',
       title: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
-      body: "Kartepe / Kocaeli'de fason ısıl işlem hizmeti veriyoruz. Türkiye'nin sanayi koridorunun ortasında — gelen parçayı ölçer, işler, kontrol eder ve aynı disiplinle teslim ederiz. Her partinin ardında bir lot kaydı, bir spektrometre okuması ve bir sertlik testi vardır.",
+      body: "Kartepe / Kocaeli'de fason ısıl işlem hizmeti veriyoruz. Türkiye'nin sanayi koridorunun ortasında — gelen parçayı ölçer, işler, kontrol eder ve aynı disiplinle teslim ederiz. Her partinin ardında bir sertlik testi vardır.",
       company: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
       location: 'Kartepe · Kocaeli',
     },
@@ -166,11 +153,11 @@ export const DICT: Dict = {
       eyebrow: 'Kartepe · Kocaeli',
       title1: 'Contract heat treatment in',
       title2: 'controlled-atmosphere pit furnaces.',
-      sub: 'Hardening, tempering, carburizing. 42CrMo, 42CrMoA and other alloys — under our own measurement and control discipline.',
+      sub: 'Hardening and tempering. 42CrMo, 42CrMoA and other alloys — under our own measurement and control discipline.',
       cta: 'Get a Quote',
       ctaSecondary: 'Services',
       stats: [
-        { n: '1+2', l: 'carburizing + tempering pots' },
+        { n: '2', l: 'tempering pots' },
         { n: 'Ø1200', l: 'mm max diameter' },
         { n: '2.5 t', l: 'max load per batch' },
         { n: '42CrMo', l: 'standard alloy' },
@@ -179,8 +166,7 @@ export const DICT: Dict = {
     services: {
       eyebrow: 'Services',
       title: 'Three core processes. One discipline.',
-      aside:
-        'Material analysis per batch, controlled atmosphere, measured temperature curves. The lot record stays open through delivery.',
+      aside: 'Controlled atmosphere, measured temperature curves, hardness checks.',
       items: [
         {
           index: '01',
@@ -194,12 +180,6 @@ export const DICT: Dict = {
         },
         {
           index: '02',
-          name: 'Carburizing',
-          body: 'Carbon enrichment via propane-air atmosphere. Single-pass carburizing by default — a second pass is only run when geometry or specification requires it.',
-          bullets: ['Propane-air atmosphere', 'Single-pass by default', 'Second pass on request'],
-        },
-        {
-          index: '03',
           name: 'Bespoke Heat Treatment',
           body: 'For requirements outside the standard list: special alloys, special curves, special batch sizes. Sample first, then production run.',
           bullets: [
@@ -209,7 +189,7 @@ export const DICT: Dict = {
           ],
         },
         {
-          index: '04',
+          index: '03',
           name: 'Production & Integration',
           body: 'We also produce hydraulic breaker spare parts on our own benches, run through our own pit furnaces. We live the metallurgy not just for customer parts — for our own parts too.',
           bullets: [
@@ -225,11 +205,9 @@ export const DICT: Dict = {
       title: 'The shop in numbers.',
       aside: 'Furnace capacity, material range and measurement discipline at a glance.',
       items: [
-        { value: '1', label: 'Carburizing pot', note: 'Propane-air atmosphere' },
         { value: '2', label: 'Tempering pots', note: 'Two parallel temperature curves' },
         { value: 'Ø1200 mm', label: 'Max part diameter', note: 'Pit furnace inner dimension' },
         { value: '2.5 ton', label: 'Max load per batch', note: 'Gross batch weight' },
-        { value: 'OES', label: 'Spectrometer', note: 'Material analysis per lot' },
         { value: '42CrMo · 42CrMoA', label: 'Standard alloys', note: 'Others on request' },
       ],
     },
@@ -254,7 +232,7 @@ export const DICT: Dict = {
     about: {
       eyebrow: 'About',
       title: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
-      body: "We provide contract heat treatment in Kartepe / Kocaeli, in the heart of Türkiye's industrial corridor. We measure the part, run the process, verify the result and ship it back — with the same discipline every time. Behind every batch is a lot record, a spectrometer reading and a hardness test.",
+      body: "We provide contract heat treatment in Kartepe / Kocaeli, in the heart of Türkiye's industrial corridor. We measure the part, run the process, verify the result and ship it back — with the same discipline every time. Behind every batch is a hardness test.",
       company: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
       location: 'Kartepe · Kocaeli · Türkiye',
     },
