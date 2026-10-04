@@ -56,6 +56,9 @@ check https://kervanbreaker.com/kirici-uc.glb 200 model/gltf-binary
 RFQ=https://kervanheat.com/api/rfq
 check "$RFQ" 405 application/json
 
+# Owner-only tech info must stay closed to anonymous visitors (JSON 401, not HTML).
+check https://kervanheat.com/api/tech/content 401 application/json
+
 # The breaker contact form posts cross-origin to the heat-treatment function.
 preflight "$RFQ" https://kervanbreaker.com yes
 preflight "$RFQ" https://www.kervanbreaker.com yes
