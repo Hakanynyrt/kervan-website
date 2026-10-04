@@ -31,8 +31,11 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint` and a 
 
 ## Deploying
 
-- `.github/workflows/deploy.yml` deploys with `wrangler pages deploy`. Push to `main` → production; any PR / other branch → Pages preview (`https://<branch>.<project>.pages.dev`).
-- `dorny/paths-filter` decides which app deploys: `apps/<app>/**` deploys that app only; `packages/**`, the lockfile, root configs or the workflow itself deploy both.
+- `.github/workflows/deploy.yml` deploys with `wrangler pages deploy`. Every deploy waits for the `verify` job (`pnpm typecheck` + `pnpm lint`), so keep both green.
+- Push to `main` → production deploy of **both** apps, then `.github/scripts/smoke.sh` (GET/OPTIONS probe of the live sites). `main` runs are never cancelled mid-deploy.
+- PR → Pages preview (`https://<branch>.<project>.pages.dev`) of the changed apps only: `dorny/paths-filter` maps `apps/<app>/**` (plus the root `public/` assets that app symlinks) to that app; `packages/**`, the lockfile, root configs or the workflow itself → both. Fork PRs only run `verify`.
+- Redeploy without a commit (e.g. after changing a Pages env var): Actions → Deploy → **Run workflow**, pick `both` / `heat-treatment` / `breaker-parts` (on `main` = production).
+- `.github/workflows/uptime.yml` runs the same smoke probe every 15 minutes.
 - The Pages projects are **not** connected to Cloudflare's git integration — GitHub Actions is the only deployer. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
 - Custom domains are bound to the Pages projects (proxied CNAME → `<project>.pages.dev`). The legacy `kervan-website` Worker no longer has any routes or custom domains.
 
