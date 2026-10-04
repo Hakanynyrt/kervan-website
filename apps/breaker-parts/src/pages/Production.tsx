@@ -18,7 +18,7 @@ export default function Production({ t }: Props) {
     <>
       <PageMeta
         title="Üretim & Kalite — Kervan Breaker"
-        description="42CrMo / 42CrMoA standart alaşım. Kontrollü atmosfer pit-tip fırınlarda sertleştirme + temperleme. OES spektrometre ile lot başı malzeme analizi."
+        description="42CrMo / 42CrMoA standart alaşım. Kontrollü atmosfer pit-tip fırınlarda sertleştirme + temperleme."
         canonical={`${KERVAN_BREAKER_URL}/uretim-kalite`}
         image={`${KERVAN_BREAKER_URL}/og.png`}
       />
@@ -33,7 +33,7 @@ export default function Production({ t }: Props) {
           url: `${KERVAN_BREAKER_URL}/uretim-kalite`,
           name: 'Hidrolik kırıcı parça üretimi + ısıl işlem entegrasyonu',
           description:
-            '42CrMo / 42CrMoA standart alaşım. Kendi pit-tip fırınımızda sertleştirme + temperleme. OES spektrometre ile lot başı malzeme analizi.',
+            '42CrMo / 42CrMoA standart alaşım. Kendi pit-tip fırınımızda sertleştirme + temperleme.',
         })}
       />
 

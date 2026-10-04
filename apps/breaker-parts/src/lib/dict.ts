@@ -208,7 +208,7 @@ export const DICT: Dict = {
         'TTT/CCT eğrileri üzerinde çalışıyoruz — soğuma hızının iç yapıyı nasıl yazdığını biliyoruz. Sertlik ve dayanım, her parti için lot başı ölçülür.',
       heatHeading: 'Isıl İşlem Entegrasyonu',
       heatBody:
-        'Her parça kendi tesisimizde — kontrollü atmosfer pit-tip fırınlarda — sertleştirme, temperleme ve gerektiğinde sementasyon süreçlerinden geçer. Aynı çatı, aynı disiplin.',
+        'Her parça kendi tesisimizde — kontrollü atmosfer pit-tip fırınlarda — sertleştirme ve temperleme süreçlerinden geçer. Aynı çatı, aynı disiplin.',
       heatLink: 'Isıl işlem hattımızı tanıyın →',
       materialsHeading: 'Standart Alaşımlar',
       materials: ['42CrMo', '42CrMoA', 'Diğer alaşımlar — talep üzerine'],
@@ -475,7 +475,7 @@ export const DICT: Dict = {
         'We work on TTT/CCT curves — we know how cooling rate writes the microstructure. Hardness and yield are measured per lot, every batch.',
       heatHeading: 'Heat Treatment Integration',
       heatBody:
-        'Every part is hardened, tempered and (where required) carburized in our own controlled-atmosphere pit furnaces. Same roof, same discipline.',
+        'Every part is hardened and tempered in our own controlled-atmosphere pit furnaces. Same roof, same discipline.',
       heatLink: 'See our heat treatment line →',
       materialsHeading: 'Standard Alloys',
       materials: ['42CrMo', '42CrMoA', 'Other alloys on request'],
