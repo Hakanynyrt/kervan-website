@@ -20,7 +20,7 @@ export default function TechnicalCapacity({ t }: Props) {
       />
 
       <motion.dl
-        className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-hair m-0"
+        className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-hair m-0"
         variants={staggerContainer(0, 0.08)}
         initial="hidden"
         whileInView="show"

@@ -2,7 +2,7 @@
 
 Monorepo for Kervan Makina'nın iki web sitesi:
 
-- **kervanheat.com** — fason ısıl işlem hizmetleri (sertleştirme, temperleme, sementasyon)
+- **kervanheat.com** — fason ısıl işlem hizmetleri (sertleştirme, temperleme)
 - **kervanbreaker.com** — hidrolik kırıcı yedek parçaları (keski, piston, burç, kit)
 
 ## Stack
