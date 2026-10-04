@@ -95,14 +95,16 @@ jobs:
   deploy-heat-treatment:
     name: kervanheat.com
     needs: [changes, verify]
-    # Fork PRs get no secrets, so they only run verify.
+    # Fork PRs and Dependabot-triggered runs get no Actions secrets
+    # (CLOUDFLARE_API_TOKEN), so they only run verify.
     if: >-
       !cancelled() && needs.verify.result == 'success' && (
         github.event_name == 'push' ||
         (github.event_name == 'workflow_dispatch' && inputs.app != 'breaker-parts') ||
         (github.event_name == 'pull_request' &&
           needs.changes.outputs.heat-treatment == 'true' &&
-          github.event.pull_request.head.repo.full_name == github.repository)
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.actor != 'dependabot[bot]')
       )
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -148,7 +150,8 @@ jobs:
         (github.event_name == 'workflow_dispatch' && inputs.app != 'heat-treatment') ||
         (github.event_name == 'pull_request' &&
           needs.changes.outputs.breaker-parts == 'true' &&
-          github.event.pull_request.head.repo.full_name == github.repository)
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.actor != 'dependabot[bot]')
       )
     runs-on: ubuntu-24.04
     timeout-minutes: 10
