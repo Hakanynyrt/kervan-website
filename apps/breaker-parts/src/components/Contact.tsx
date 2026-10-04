@@ -20,16 +20,14 @@ const RFQ_ENDPOINT = import.meta.env.PROD ? 'https://kervanheat.com/api/rfq' : '
 
 export default function Contact({ t }: Props) {
   const [state, setState] = useState<State>('idle');
-  const [kvkk, setKvkk] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!kvkk || state === 'sending' || !formRef.current) return;
+    if (state === 'sending' || !formRef.current) return;
     setState('sending');
     try {
       const fd = new FormData(formRef.current);
-      fd.set('kvkk_consent', '1');
       const r = await fetch(RFQ_ENDPOINT, { method: 'POST', body: fd });
       const j = (await r.json().catch(() => ({}))) as {
         ok?: boolean;
@@ -140,19 +138,9 @@ export default function Contact({ t }: Props) {
             />
           </label>
 
-          <label className="md:col-span-2 flex items-start gap-3 cursor-pointer mt-2">
-            <input
-              type="checkbox"
-              checked={kvkk}
-              onChange={(e) => setKvkk(e.target.checked)}
-              className="mt-1 accent-brand"
-            />
-            <span className="font-sans text-sm text-ink-mid leading-relaxed">{t.contact.kvkk}</span>
-          </label>
-
           <button
             type="submit"
-            disabled={!kvkk || state === 'sending'}
+            disabled={state === 'sending'}
             className="md:col-span-2 mt-4 bg-brand text-bg py-4 font-sans text-sm tracking-widest uppercase hover:bg-brand-hi disabled:bg-bg-soft disabled:text-ink-soft disabled:cursor-not-allowed transition-colors"
           >
             {state === 'sending' ? t.contact.sending : t.contact.submit}
