@@ -2,7 +2,7 @@
  * RFQ Pages Function — kervanheat.com/api/rfq
  *
  * Ported from src/worker/index.ts (legacy Cloudflare Worker). Same logic:
- * validate origin → KVKK consent → email format → Resend → MailChannels
+ * validate origin → email format → Resend → MailChannels
  * fallback → Telegram notification. Both kervanheat.com (same-origin) and
  * kervanbreaker.com (cross-origin) post here; CORS allowlist gates access.
  *
@@ -109,11 +109,10 @@ async function handleRfq(
   const country = clean(form.get('country'), 80);
   const specs = clean(form.get('specs'), 2000);
   const message = clean(form.get('message'), 3000);
-  const kvkk = form.get('kvkk_consent') === '1' || form.get('kvkk_consent') === 'on';
   const marketing = form.get('marketing_consent') === '1' || form.get('marketing_consent') === 'on';
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
-  if (!name || !email || !kvkk || !emailValid)
+  if (!name || !email || !emailValid)
     return Response.json({ ok: false, error: 'validation' }, { status: 422 });
 
   const fileList: string[] = [];
@@ -153,7 +152,6 @@ Files:
 ${fileList.length ? fileList.join('\n') : 'No attachments'}
 
 Marketing consent: ${marketing ? 'YES' : 'NO'}
-KVKK consent: ${kvkk ? 'YES' : 'NO'}
 Source: ${sourceSite}
 IP: ${request.headers.get('CF-Connecting-IP') ?? 'unknown'}
 Country (CF): ${request.headers.get('CF-IPCountry') ?? 'unknown'}
