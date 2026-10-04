@@ -1,24 +1,38 @@
 name: Deploy
 
-# Push to main → production deploy.
-# PRs and other branches → preview deploy (Cloudflare Pages branch deploys).
+# Push to main → production deploy of BOTH apps.
+# PRs → preview deploy (Cloudflare Pages branch deploys) of the apps whose
+#   source changed (`paths-filter`; `packages/**` etc. → both).
+# Manual "Run workflow" → redeploy one or both apps from the chosen branch
+#   (main = production), e.g. after changing a Pages env var. No dummy commits.
 #
-# Each app deploys independently — `paths-filter` detects which app's source
-# (or shared package) changed. If only `apps/heat-treatment/**` changed,
-# only kervanheat.com redeploys; both deploy when `packages/**` changes.
+# Every deploy waits for `verify` (typecheck + lint). Production deploys are
+# followed by the smoke probe in .github/scripts/smoke.sh.
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: App to deploy
+        type: choice
+        options: [both, heat-treatment, breaker-parts]
+        default: both
 
+# PR runs supersede each other. main/dispatch runs are never cancelled
+# mid-deploy; a newer queued run can still replace an older *pending* one,
+# which is why every push to main deploys both apps instead of relying on
+# the per-push paths filter.
 concurrency:
   group: deploy-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   changes:
     name: Detect changed apps
-    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
     permissions:
       pull-requests: read
     outputs:
@@ -29,31 +43,65 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          # Root public/ paths: the apps symlink these into their own public/.
           filters: |
+            shared: &shared
+              - 'packages/**'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'turbo.json'
+              - 'tsconfig.base.json'
+              - 'package.json'
+              - '.github/workflows/deploy.yml'
             heat-treatment:
+              - *shared
               - 'apps/heat-treatment/**'
-              - 'packages/**'
-              - 'pnpm-lock.yaml'
-              - 'pnpm-workspace.yaml'
-              - 'turbo.json'
-              - 'tsconfig.base.json'
-              - 'package.json'
-              - '.github/workflows/deploy.yml'
+              - 'public/photos/**'
+              - 'public/videos/**'
             breaker-parts:
+              - *shared
               - 'apps/breaker-parts/**'
-              - 'packages/**'
-              - 'pnpm-lock.yaml'
-              - 'pnpm-workspace.yaml'
-              - 'turbo.json'
-              - 'tsconfig.base.json'
-              - 'package.json'
-              - '.github/workflows/deploy.yml'
+              - 'public/videos/**'
+              - 'public/kirici-uc.glb'
+
+  verify:
+    name: Typecheck + lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
 
   deploy-heat-treatment:
     name: kervanheat.com
-    needs: changes
-    if: needs.changes.outputs.heat-treatment == 'true'
-    runs-on: ubuntu-latest
+    needs: [changes, verify]
+    # Fork PRs get no secrets, so they only run verify.
+    if: >-
+      !cancelled() && needs.verify.result == 'success' && (
+        github.event_name == 'push' ||
+        (github.event_name == 'workflow_dispatch' && inputs.app != 'breaker-parts') ||
+        (github.event_name == 'pull_request' &&
+          needs.changes.outputs.heat-treatment == 'true' &&
+          github.event.pull_request.head.repo.full_name == github.repository)
+      )
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: read
@@ -90,9 +138,16 @@ jobs:
 
   deploy-breaker-parts:
     name: kervanbreaker.com
-    needs: changes
-    if: needs.changes.outputs.breaker-parts == 'true'
-    runs-on: ubuntu-latest
+    needs: [changes, verify]
+    if: >-
+      !cancelled() && needs.verify.result == 'success' && (
+        github.event_name == 'push' ||
+        (github.event_name == 'workflow_dispatch' && inputs.app != 'heat-treatment') ||
+        (github.event_name == 'pull_request' &&
+          needs.changes.outputs.breaker-parts == 'true' &&
+          github.event.pull_request.head.repo.full_name == github.repository)
+      )
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: read
@@ -124,3 +179,24 @@ jobs:
             --project-name=kervan-breaker-parts
             --branch=${{ github.head_ref || github.ref_name }}
             --commit-hash=${{ github.sha }}
+
+  smoke:
+    name: Production smoke test
+    needs: [deploy-heat-treatment, deploy-breaker-parts]
+    # Only after a production deploy (main), and only if no deploy failed.
+    if: >-
+      !cancelled() && github.event_name != 'pull_request' &&
+      github.ref == 'refs/heads/main' &&
+      !contains(needs.*.result, 'failure') &&
+      contains(needs.*.result, 'success')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/scripts
+
+      - name: Smoke probe (GET/OPTIONS only)
+        run: bash .github/scripts/smoke.sh
