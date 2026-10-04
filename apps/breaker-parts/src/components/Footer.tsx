@@ -44,7 +44,7 @@ export default function Footer({ t }: Props) {
           <a
             href="https://kervanheat.com"
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
             className="hover:text-ink transition-colors"
           >
             kervanheat.com
