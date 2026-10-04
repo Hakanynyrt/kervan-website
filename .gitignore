@@ -14,3 +14,7 @@ package-lock.json
 *.tsbuildinfo
 *.log
 .vite/
+
+# Local Pages Functions secrets (never commit)
+.dev.vars
+.dev.vars.*

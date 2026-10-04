@@ -35,6 +35,7 @@ export interface DictBlock {
     craft: string;
     about: string;
     contact: string;
+    tech: string;
     cta: string;
   };
   hero: {
@@ -57,6 +58,19 @@ export interface DictBlock {
     title: string;
     aside: string;
     items: CapacityItem[];
+  };
+  techUi: {
+    eyebrow: string;
+    title: string;
+    loginTitle: string;
+    passwordLabel: string;
+    submit: string;
+    sending: string;
+    wrong: string;
+    notConfigured: string;
+    error: string;
+    logout: string;
+    loading: string;
   };
   craft: {
     eyebrow: string;
@@ -103,3 +117,11 @@ export interface DictBlock {
 }
 
 export type Dict = Record<Lang, DictBlock>;
+
+/** Shape of the protected content served by /api/tech/content (never bundled). */
+export interface TechContent {
+  eyebrow: string;
+  title: string;
+  aside: string;
+  groups: { title: string; rows: { k: string; v: string }[] }[];
+}

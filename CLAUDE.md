@@ -67,6 +67,15 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 - Env vars live **only** on the `kervan-heat-treatment` Pages project (Production + Preview): `RESEND_API_KEY`, `MAIL_TO`, `MAIL_FROM`, `TG_BOT_TOKEN`, `TG_CHAT_ID`, `MAILCHANNELS_DKIM_*`. breaker-parts needs none. Pages env changes take effect on the next deploy.
 - Adding a new domain that posts the form means updating `ALLOWED_ORIGINS` (or `PREVIEW_ORIGIN` for a new Pages project).
 
+### Owner-only "Teknik Bilgiler" (login)
+
+- A single-owner login protects the technical-info tab. **The text must never be in the repo (it is public), `dict.ts` or the JS bundle** — it lives in the Pages secret `TECH_CONTENT` (JSON `{ "tr": {…}, "en": {…} }`) and is only returned by `GET /api/tech/content` for a valid session.
+- Server: `functions/_lib/tech-auth.ts` + `functions/api/tech/{login,logout,session,content}.ts` (HMAC-signed `__Host-kv_tech` cookie, HttpOnly/Secure/SameSite=Strict, 4 h absolute expiry). Only the custom hostnames are allowed, never `*.pages.dev`. It **fails closed**: missing/short secrets ⇒ login 503, content 401. Every response is `no-store` + `noindex`.
+- Secrets (Pages → Variables and Secrets, as Secrets, per project; use different values or leave unset in Preview): `TECH_PASSWORD` (≥16 chars), `SESSION_SECRET` (≥32 chars), `TECH_CONTENT`; optional `SESSION_VERSION` (bump + redeploy to revoke all sessions). Changing any of them needs a redeploy.
+- Client: `src/lib/use-tech-auth.ts`; the tab is hidden unless the server confirmed a session. The login form is reachable only at `/#giris`.
+- Local testing: put test secrets in `apps/heat-treatment/.dev.vars` (gitignored) and run `wrangler pages dev` from a copy of the app **outside the repo** — the legacy root `wrangler.jsonc` breaks it inside the repo.
+- Never POST to `/api/tech/login` from CI or probes; `smoke.sh` only checks that anonymous `GET /api/tech/content` returns JSON 401.
+
 ### i18n
 
 - TR is primary, EN secondary. Strings live in each app's `src/lib/dict.ts`; `src/lib/use-lang.ts` resolves `?lang=` → `localStorage('kv_lang')` → `navigator.language` → `'tr'`.

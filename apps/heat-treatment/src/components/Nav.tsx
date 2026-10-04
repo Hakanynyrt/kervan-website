@@ -6,9 +6,11 @@ interface Props {
   lang: Lang;
   setLang: (l: Lang) => void;
   t: DictBlock;
+  /** Tab is shown only while the server has confirmed an owner session. */
+  techAuthed: boolean;
 }
 
-export default function Nav({ lang, setLang, t }: Props) {
+export default function Nav({ lang, setLang, t, techAuthed }: Props) {
   const [open, setOpen] = useState(false);
   const [stuck, setStuck] = useState(false);
 
@@ -22,6 +24,7 @@ export default function Nav({ lang, setLang, t }: Props) {
   const links = [
     { href: '#hizmetler', label: t.nav.services },
     { href: '#teknik-kapasite', label: t.nav.capacity },
+    ...(techAuthed ? [{ href: '#teknik-bilgiler', label: t.nav.tech }] : []),
     { href: '#imalathanemiz', label: t.nav.craft },
     { href: '#hakkimizda', label: t.nav.about },
     { href: '#contact', label: t.nav.contact },
