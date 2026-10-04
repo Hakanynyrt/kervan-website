@@ -60,9 +60,9 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint` and a 
 ### RFQ flow
 
 - Both Contact forms POST `multipart/form-data` to the heat-treatment function, with a `website` honeypot (filled → silent `{ ok: true }`) and KVKK consent.
-- The function checks the origin against `ALLOWED_ORIGINS` (both domains + www, plus `*.pages.dev` previews), then consent and email format; it sends email via Resend → MailChannels fallback and a Telegram notification. It tags each request with its source site.
+- The function checks the `Origin` header by exact match (`allowedOrigin()`: both domains + www, plus previews of our own two Pages projects, `*.kervan-heat-treatment.pages.dev` / `*.kervan-breaker-parts.pages.dev` — never a bare `.pages.dev` suffix), then consent and email format; it sends email via Resend → MailChannels fallback and a Telegram notification. It tags each request with its source site.
 - Env vars live **only** on the `kervan-heat-treatment` Pages project (Production + Preview): `RESEND_API_KEY`, `MAIL_TO`, `MAIL_FROM`, `TG_BOT_TOKEN`, `TG_CHAT_ID`, `MAILCHANNELS_DKIM_*`. breaker-parts needs none. Pages env changes take effect on the next deploy.
-- Adding a new domain that posts the form means updating `ALLOWED_ORIGINS`.
+- Adding a new domain that posts the form means updating `ALLOWED_ORIGINS` (or `PREVIEW_ORIGIN` for a new Pages project).
 
 ### i18n
 
