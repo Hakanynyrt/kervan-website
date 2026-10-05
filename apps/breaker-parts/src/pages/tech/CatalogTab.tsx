@@ -14,6 +14,7 @@ import {
   needsVerification,
   parseNum,
   searchCatalog,
+  type Feat,
   type Group,
   type Hit,
   type Measure,
@@ -38,6 +39,7 @@ import {
 } from '../../lib/vega-score';
 import { type Popularity, buildPopularity, popularPrior } from '../../lib/vega-popular';
 import { useDrawings } from '../../lib/use-vega-drawings';
+import { carrierTons } from '../../lib/vega-usage';
 
 interface Props {
   t: DictBlock;
@@ -95,6 +97,10 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
     rearDia: '',
   });
   const [keyCount, setKeyCount] = useState<'' | '1' | '2'>('');
+  const [rear, setRear] = useState<'' | 'yes' | 'no'>('');
+  const [slot, setSlot] = useState<'' | 'tapered' | 'rounded'>('');
+  const [angle, setAngle] = useState<'' | 'yes' | 'no'>('');
+  const [tonsRaw, setTonsRaw] = useState('');
   const [tol, setTol] = useState<number>(DEFAULT_TOL);
   const [limit, setLimit] = useState(PAGE);
   const [sel, setSel] = useState<string[]>([]);
@@ -111,9 +117,20 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
     return m;
   }, [raw, keyCount]);
 
+  const feat = useMemo<Feat>(() => {
+    const f: Feat = {};
+    if (rear) f.rear = rear;
+    if (slot) f.slot = slot;
+    if (angle) f.angle = angle;
+    const n = parseNum(tonsRaw);
+    if (n !== undefined && n > 0) f.tons = n;
+    return f;
+  }, [rear, slot, angle, tonsRaw]);
+
   // The inputs stay instant; the 609-row search follows one render behind while typing.
   const dText = useDeferredValue(text);
   const dMeasure = useDeferredValue(measure);
+  const dFeat = useDeferredValue(feat);
 
   const items = catalog?.items;
   const brands = useMemo(() => (items ? brandsOf(items) : []), [items]);
@@ -127,12 +144,12 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
       items && idx
         ? searchCatalog(
             items,
-            { text: dText, brand, tip, hideLow, measure: dMeasure, tol, popularOnly },
+            { text: dText, brand, tip, hideLow, measure: dMeasure, tol, popularOnly, feat: dFeat },
             idx,
             pop ?? undefined,
           )
         : null,
-    [items, idx, pop, dText, brand, tip, hideLow, popularOnly, dMeasure, tol],
+    [items, idx, pop, dText, brand, tip, hideLow, popularOnly, dMeasure, tol, dFeat],
   );
 
   const scored = useMemo<Scored[]>(
@@ -153,7 +170,7 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
   );
   const [likelyOpen, setLikelyOpen] = useState(false);
 
-  useEffect(() => setLimit(PAGE), [text, brand, tip, hideLow, popularOnly, measure, tol]);
+  useEffect(() => setLimit(PAGE), [text, brand, tip, hideLow, popularOnly, measure, tol, feat]);
 
   if (status === 'idle' || status === 'loading') {
     return (
@@ -201,6 +218,10 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
   const clearMeasure = () => {
     setRaw({ dia: '', keyThk: '', backToSlot: '', slotLen: '', rearDia: '' });
     setKeyCount('');
+    setRear('');
+    setSlot('');
+    setAngle('');
+    setTonsRaw('');
   };
 
   const renderHits = (hits: Hit[], max: number) =>
@@ -419,6 +440,104 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
           </button>
         </div>
       </fieldset>
+
+      {/* Drawing-derived features + carrier weight */}
+      <fieldset className="border border-hair rounded-[14px] p-5 md:p-6 m-0 min-w-0">
+        <legend className="px-2 font-serif text-xl text-ink">{c.featTitle}</legend>
+        <p className="font-sans text-sm text-ink-mid mt-0 mb-5 max-w-[70ch]">{c.featHint}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="vc-f-rear" className={labelCls}>
+              {c.featRear}
+            </label>
+            <select
+              id="vc-f-rear"
+              value={rear}
+              onChange={(e) => setRear(e.target.value as '' | 'yes' | 'no')}
+              className={inputCls}
+            >
+              <option value="">{c.featAny}</option>
+              <option value="yes">{c.featYes}</option>
+              <option value="no">{c.featNo}</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="vc-f-slot" className={labelCls}>
+              {c.featSlot}
+            </label>
+            <select
+              id="vc-f-slot"
+              value={slot}
+              onChange={(e) => setSlot(e.target.value as '' | 'tapered' | 'rounded')}
+              className={inputCls}
+            >
+              <option value="">{c.featAny}</option>
+              <option value="tapered">{c.featSlotTapered}</option>
+              <option value="rounded">{c.featSlotRounded}</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="vc-f-angle" className={labelCls}>
+              {c.featAngle}
+            </label>
+            <select
+              id="vc-f-angle"
+              value={angle}
+              onChange={(e) => setAngle(e.target.value as '' | 'yes' | 'no')}
+              className={inputCls}
+            >
+              <option value="">{c.featAny}</option>
+              <option value="yes">{c.featAngled}</option>
+              <option value="no">{c.featNotAngled}</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="vc-f-tons" className={labelCls}>
+              {c.featTons}
+            </label>
+            <input
+              id="vc-f-tons"
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              value={tonsRaw}
+              onChange={(e) => setTonsRaw(e.target.value)}
+              aria-invalid={tonsRaw.trim() !== '' && parseNum(tonsRaw) === undefined}
+              className={inputCls}
+            />
+          </div>
+        </div>
+      </fieldset>
+
+      <details className="border border-hair rounded-[14px] px-5 md:px-6 py-3 group">
+        <summary
+          className={`cursor-pointer min-h-11 flex items-center font-serif text-xl text-ink ${focusRing} rounded-md`}
+        >
+          {c.useTitle}
+        </summary>
+        <p className="font-sans text-sm text-ink-mid mt-2 mb-4 max-w-[70ch]">{c.useNote}</p>
+        <ul className="list-none p-0 m-0 grid grid-cols-1 md:grid-cols-2 gap-4 pb-3">
+          {TIP_TYPES.map((k) => (
+            <li key={k} className="rounded-[14px] border border-hair p-4 flex flex-col gap-2">
+              <span className="font-serif text-lg text-ink">{c.tipLabels[k]}</span>
+              <dl className="m-0 flex flex-col gap-2 font-sans text-sm">
+                {(
+                  [
+                    [c.useRock, c.useTips[k].rock],
+                    [c.useWhere, c.useTips[k].where],
+                    [c.useWatch, c.useTips[k].watch],
+                  ] as const
+                ).map(([dt, dd]) => (
+                  <div key={dt}>
+                    <dt className={labelCls}>{dt}</dt>
+                    <dd className="m-0 text-ink">{dd}</dd>
+                  </div>
+                ))}
+              </dl>
+            </li>
+          ))}
+        </ul>
+      </details>
 
       {results.measuring && likely && (
         <LikelyCard
@@ -752,9 +871,18 @@ function rows(
     { k: c.fBackToSlot, v: n(it.key.backEndToSlotMm) },
     { k: c.fSlotLen, v: n(it.key.slotLengthMm) },
     { k: c.fRearDia, v: n(it.rearShoulderDiameterMm) },
+    ...(it.rearStep != null ? [{ k: c.fRearStep, v: it.rearStep ? c.featYes : c.featNo }] : []),
+    ...(it.slotEnd
+      ? [{ k: c.fSlotEnd, v: it.slotEnd === 'tapered' ? c.featSlotTapered : c.featSlotRounded }]
+      : []),
+    ...(it.rearStep != null || it.tipAngleDeg != null
+      ? [{ k: c.fTipAngle, v: it.tipAngleDeg != null ? `${it.tipAngleDeg}°` : c.featNotAngled }]
+      : []),
     { k: c.fLength, v: fmtRange(it.lengthMm, lang) ?? miss },
     { k: c.fWeight, v: fmtRange(it.weightKg, lang) ? `${fmtRange(it.weightKg, lang)} kg` : miss },
   );
+  const cr = carrierTons(it);
+  if (cr) out.push({ k: c.fCarrier, v: fill(c.carrierValue, { a: cr.min, b: cr.max }) });
   return out;
 }
 
@@ -916,6 +1044,9 @@ function Detail({
           </div>
         )}
       </dl>
+      {carrierTons(it) && (
+        <p className="font-sans text-xs text-ink-mid m-0 max-w-[70ch]">{c.carrierNote}</p>
+      )}
     </div>
   );
 }

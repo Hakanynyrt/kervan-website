@@ -2,6 +2,7 @@ import type { VegaItem, VegaRange, VegaTip } from '../types';
 import { type CatalogIndex, compact, geomKey, textSearch } from './vega-index';
 import { scoreItem } from './vega-score';
 import { type Popularity, popularPrior } from './vega-popular';
+import { suitsCarrier } from './vega-usage';
 
 /** Pure search/matching helpers for the private tip catalog. No I/O, no storage. */
 
@@ -14,6 +15,30 @@ export type Measure = Partial<Record<MeasureKey, number>> & { keyCount?: 1 | 2 }
 export type FieldKey = MeasureKey | 'keyCount';
 export type Group = 'match' | 'maybe';
 
+/** Drawing-derived features and the carrier weight. A tip whose value is unknown is never
+ *  excluded: only a known mismatch hides it. */
+export interface Feat {
+  rear?: 'yes' | 'no';
+  slot?: 'tapered' | 'rounded';
+  angle?: 'yes' | 'no';
+  tons?: number;
+}
+export const hasFeat = (f: Feat): boolean =>
+  f.rear !== undefined || f.slot !== undefined || f.angle !== undefined || f.tons !== undefined;
+
+export function featOk(it: VegaItem, f: Feat): boolean {
+  if (f.rear && it.rearStep != null && it.rearStep !== (f.rear === 'yes')) return false;
+  if (f.slot && it.slotEnd != null && it.slotEnd !== f.slot) return false;
+  if (f.angle) {
+    // the angle is only printed on the drawings that have one: no value means not angled,
+    // but only for rows whose drawing was read (rearStep is set together with it)
+    const known = it.tipAngleDeg != null || it.rearStep != null;
+    if (known && (it.tipAngleDeg != null) !== (f.angle === 'yes')) return false;
+  }
+  if (f.tons !== undefined && !suitsCarrier(it, f.tons)) return false;
+  return true;
+}
+
 export interface Query {
   text: string;
   brand: string;
@@ -21,6 +46,7 @@ export interface Query {
   hideLow: boolean;
   measure: Measure;
   tol: number;
+  feat?: Feat;
 }
 export interface Hit {
   item: VegaItem;
@@ -137,6 +163,7 @@ export function searchCatalog(
       (!q.brand || it.brand === q.brand) &&
       (!q.tip || it.tipTypes.includes(q.tip)) &&
       (!q.hideLow || it.confidence === 'high') &&
+      (!q.feat || featOk(it, q.feat)) &&
       (!q.popularOnly || !pop || pop.tier.has(it) || pop.twin.has(it)) &&
       (!ts || ts.hits.has(it)),
   );

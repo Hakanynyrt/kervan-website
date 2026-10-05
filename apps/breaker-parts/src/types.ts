@@ -155,6 +155,19 @@ export interface DictBlock {
     measureSlotLen: string;
     measureRearDia: string;
     tolLabel: string;
+    featTitle: string;
+    featHint: string;
+    featAny: string;
+    featYes: string;
+    featNo: string;
+    featRear: string;
+    featSlot: string;
+    featSlotTapered: string;
+    featSlotRounded: string;
+    featAngle: string;
+    featAngled: string;
+    featNotAngled: string;
+    featTons: string;
     clear: string;
     resultsCount: string;
     groupMatch: string;
@@ -219,6 +232,18 @@ export interface DictBlock {
     fBackToSlot: string;
     fSlotLen: string;
     fRearDia: string;
+    fRearStep: string;
+    fSlotEnd: string;
+    fTipAngle: string;
+    fCarrier: string;
+    carrierValue: string;
+    carrierNote: string;
+    useTitle: string;
+    useNote: string;
+    useRock: string;
+    useWhere: string;
+    useWatch: string;
+    useTips: Record<VegaTip, { rock: string; where: string; watch: string }>;
     fLength: string;
     fWeight: string;
     fTips: string;
@@ -374,6 +399,10 @@ export interface VegaItem {
   extra: string | null;
   source: { pdfPage: number | null; catalogPage: number | null; line: number };
   quality: string[];
+  /** Read from the drawing (scripts/vega-attrs.mjs); missing/null = unknown. */
+  rearStep?: boolean | null;
+  slotEnd?: 'rounded' | 'tapered' | null;
+  tipAngleDeg?: number | null;
 }
 /** popular:v1 in KV — tier 1 = sells most in Turkey, 2 = sells well. */
 export interface VegaPopular {
