@@ -151,14 +151,18 @@ export default function Contact({ t, lang }: Props) {
             whileInView="show"
             viewport={inViewOnce}
           >
-            <input
-              type="text"
-              name="website"
-              tabIndex={-1}
-              autoComplete="off"
-              aria-hidden="true"
-              className="absolute -left-[9999px]"
-            />
+            <div hidden aria-hidden="true">
+              <input
+                type="text"
+                name="hp_ref"
+                tabIndex={-1}
+                autoComplete="off"
+                data-1p-ignore
+                data-lpignore="true"
+                data-bwignore="true"
+                data-form-type="other"
+              />
+            </div>
 
             <Field label={t.contact.fields.name} name="name" required maxLength={100} />
             <Field label={t.contact.fields.company} name="company" maxLength={150} />

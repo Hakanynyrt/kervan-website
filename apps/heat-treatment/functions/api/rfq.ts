@@ -15,7 +15,9 @@
  *   MAIL_TO                           — RFQ inbox (default: ahmet@kervanheat.com)
  *   MAIL_FROM                         — sender (default: noreply@kervanheat.com)
  *
- * Response: { ok, emailSent, delivered } — `delivered` is true only when an email went
+ * Response: { ok, emailSent, delivered, emailStatus } — `emailStatus` is a diagnostic
+ * (transport name + HTTP status of the last attempt, never a body or key); a honeypot hit
+ * reports `{ transport: 'none', status: 'honeypot' }`. `delivered` is true only when an email went
  * out; the forms show success only when it is true.
  */
 
@@ -28,6 +30,13 @@ interface Env {
   MAIL_TO?: string;
   MAIL_FROM?: string;
 }
+
+// Which transport was tried last and how it ended. Diagnostic only: a status code or a
+// short marker, never a response body, key or address.
+type EmailStatus = {
+  transport: 'brevo' | 'resend' | 'mailchannels' | 'none';
+  status: number | 'error' | 'honeypot';
+};
 
 // Self-contained Pages Function type — avoids needing @cloudflare/workers-types
 // here. Cloudflare Pages bundles this file at deploy time; this type is just
@@ -94,9 +103,6 @@ async function handleRfq(request: Request, env: Env): Promise<Response> {
     return Response.json({ ok: false, error: 'parse' }, { status: 400 });
   }
 
-  // Honeypot — silently accept and discard
-  if (form.get('website')) return Response.json({ ok: true });
-
   const name = clean(form.get('name'), 100);
   const email = clean(form.get('email'), 200);
   const phone = clean(form.get('phone'), 30);
@@ -108,6 +114,18 @@ async function handleRfq(request: Request, env: Env): Promise<Response> {
   const specs = clean(form.get('specs'), 2000);
   const message = clean(form.get('message'), 3000);
   const marketing = form.get('marketing_consent') === '1' || form.get('marketing_consent') === 'on';
+
+  // Honeypot — accept and discard. The field is hidden from people, but browser autofill can
+  // still copy the visitor's own data into it (a phone number did exactly that), so a value that
+  // equals one of the visitor's own fields is treated as autofill, not a bot. The legacy field
+  // name "website" is ignored for the same reason. The marker lets a real person who tripped it
+  // be told apart from a delivery failure when the response is inspected.
+  const trap = clean(form.get('hp_ref'), 200);
+  const own = [name, email, phone, company].filter(Boolean);
+  if (trap && !own.includes(trap)) {
+    const honeypot: EmailStatus = { transport: 'none', status: 'honeypot' };
+    return Response.json({ ok: true, emailSent: false, delivered: false, emailStatus: honeypot });
+  }
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
   if (!name || !email || !emailValid)
@@ -159,6 +177,7 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
   const mailFrom = env.MAIL_FROM ?? 'noreply@kervanheat.com';
 
   let emailSent = false;
+  let emailStatus: EmailStatus = { transport: 'none', status: 'error' };
   if (env.BREVO_API_KEY) {
     try {
       const r = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -178,8 +197,10 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
         signal: AbortSignal.timeout(8000),
       });
       emailSent = r.ok;
+      emailStatus = { transport: 'brevo', status: r.status };
       if (!r.ok) console.error('Brevo fail:', r.status, await r.text().catch(() => '<no body>'));
     } catch (e) {
+      emailStatus = { transport: 'brevo', status: 'error' };
       console.error('Brevo error', e);
     }
   }
@@ -201,7 +222,9 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
         }),
       });
       emailSent = r.ok;
+      emailStatus = { transport: 'resend', status: r.status };
     } catch (e) {
+      emailStatus = { transport: 'resend', status: 'error' };
       console.error('Resend error', e);
     }
   }
@@ -227,14 +250,16 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
         }),
       });
       emailSent = r.ok;
+      emailStatus = { transport: 'mailchannels', status: r.status };
     } catch (e) {
+      emailStatus = { transport: 'mailchannels', status: 'error' };
       console.error('MailChannels error', e);
     }
   }
 
   // `delivered` is what the forms trust: the request reached the owner by email.
   // (`emailSent` stays for older clients.)
-  return Response.json({ ok: true, emailSent, delivered: emailSent });
+  return Response.json({ ok: true, emailSent, delivered: emailSent, emailStatus });
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
