@@ -65,6 +65,7 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 - Both Contact forms POST `multipart/form-data` to the heat-treatment function, with a `website` honeypot (filled → silent `{ ok: true }`). There is no consent checkbox; the footer links to the KVKK notice.
 - The function checks the `Origin` header by exact match (`allowedOrigin()`: both domains + www, plus previews of our own two Pages projects, `*.kervan-heat-treatment.pages.dev` / `*.kervan-breaker-parts.pages.dev` — never a bare `.pages.dev` suffix), then email format; it sends email via Resend → MailChannels fallback and a Telegram notification. It tags each request with its source site.
 - Env vars live **only** on the `kervan-heat-treatment` Pages project (Production + Preview): `RESEND_API_KEY`, `MAIL_TO`, `MAIL_FROM`, `TG_BOT_TOKEN`, `TG_CHAT_ID`, `MAILCHANNELS_DKIM_*`. breaker-parts needs none. Pages env changes take effect on the next deploy.
+- The response is `{ ok, emailSent, delivered }`. `delivered` is true when the request reached the owner by email **or** Telegram (the Telegram call is awaited, 4 s timeout); all three forms show success only when `delivered` is true (older servers without it fall back to `emailSent`). The public contact address is `ORG_EMAIL` in `@kervan/seo` (`ahmet@kervanheat.com`) everywhere, including both KVKK pages.
 - Adding a new domain that posts the form means updating `ALLOWED_ORIGINS` (or `PREVIEW_ORIGIN` for a new Pages project).
 
 ### Owner-only "Teknik Bilgiler" (login)

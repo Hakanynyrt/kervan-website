@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ORG_EMAIL } from '@kervan/seo';
 import type { DictBlock } from '../types';
 
 interface Props {
@@ -52,8 +53,8 @@ export default function Footer({ t }: Props) {
           <a href="/kvkk.html" className="hover:text-ink transition-colors">
             {t.footer.kvkk}
           </a>
-          <a href="mailto:ahmet@kervanheat.com" className="hover:text-ink transition-colors">
-            ahmet@kervanheat.com
+          <a href={`mailto:${ORG_EMAIL}`} className="hover:text-ink transition-colors">
+            {ORG_EMAIL}
           </a>
           <a href="tel:+905316693734" className="hover:text-ink transition-colors">
             +90 531 669 37 34

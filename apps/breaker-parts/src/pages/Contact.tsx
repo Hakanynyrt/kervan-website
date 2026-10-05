@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
-import { PageMeta, JsonLd, breadcrumbList, KERVAN_BREAKER_URL } from '@kervan/seo';
+import {
+  PageMeta,
+  JsonLd,
+  breadcrumbList,
+  KERVAN_BREAKER_URL,
+  ORG_EMAIL,
+  ORG_PHONE,
+} from '@kervan/seo';
 import { fadeUp, inViewOnce } from '@kervan/motion';
 import { PRODUCT_BY_SLUG } from '../data/products';
 import type { DictBlock, Lang } from '../types';
@@ -13,9 +20,9 @@ interface Props {
 
 type State = 'idle' | 'sending' | 'success' | 'error';
 
-/** RFQ endpoint — same Cloudflare Worker that serves kervanheat.com.
- *  In dev, posts to local /api/rfq (404 expected). In prod, cross-origin
- *  POST to kervanheat.com — Worker validates Origin against an allowlist. */
+/** RFQ endpoint: the Pages Function on kervanheat.com serves both sites. In dev it posts to
+ *  the local /api/rfq (404 expected); in production it posts cross-origin to kervanheat.com,
+ *  which checks the Origin against an allowlist. */
 const RFQ_ENDPOINT = import.meta.env.PROD ? 'https://kervanheat.com/api/rfq' : '/api/rfq';
 
 export default function Contact({ t, lang }: Props) {
@@ -45,9 +52,12 @@ export default function Contact({ t, lang }: Props) {
       const r = await fetch(RFQ_ENDPOINT, { method: 'POST', body: fd });
       const j = (await r.json().catch(() => ({}))) as {
         ok?: boolean;
+        delivered?: boolean;
         emailSent?: boolean;
       };
-      const ok = r.ok && j.ok === true && j.emailSent === true;
+      // `delivered`: the request reached the owner by email or Telegram. An older
+      // server only sends `emailSent`. Never show success when nothing was delivered.
+      const ok = r.ok && j.ok === true && (j.delivered ?? j.emailSent) === true;
       setState(ok ? 'success' : 'error');
       if (ok) formRef.current.reset();
     } catch {
@@ -59,7 +69,7 @@ export default function Contact({ t, lang }: Props) {
     <>
       <PageMeta
         title="İletişim — Kervan Breaker"
-        description="Hidrolik kırıcı yedek parça teklifi için: ahmet@kervanheat.com · +90 531 669 37 34."
+        description={`Hidrolik kırıcı yedek parça teklifi için: ${ORG_EMAIL} · ${ORG_PHONE}.`}
         canonical={`${KERVAN_BREAKER_URL}/iletisim`}
         image={`${KERVAN_BREAKER_URL}/og.png`}
       />
@@ -111,11 +121,8 @@ export default function Contact({ t, lang }: Props) {
               {
                 label: t.contact.emailLabel,
                 value: (
-                  <a
-                    href="mailto:ahmet@kervanheat.com"
-                    className="hover:text-brand transition-colors"
-                  >
-                    ahmet@kervanheat.com
+                  <a href={`mailto:${ORG_EMAIL}`} className="hover:text-brand transition-colors">
+                    {ORG_EMAIL}
                   </a>
                 ),
               },

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
 import { fadeUp, inViewOnce } from '../lib/motion';
 import { SectionHeading } from '@kervan/ui';
+import { ORG_EMAIL } from '@kervan/seo';
 
 interface Props {
   t: DictBlock;
@@ -10,12 +11,9 @@ interface Props {
 
 type State = 'idle' | 'sending' | 'success' | 'error';
 
-/** RFQ endpoint — mevcut Cloudflare Worker'ın yaşadığı yer.
- *  Production'da v2.kervanheat.com'dan kervanheat.com'a cross-origin POST.
- *  Mevcut Worker (src/worker/index.ts) v2.kervanheat.com'u ALLOWED_ORIGINS'e
- *  ekliyor ve Access-Control-Allow-Origin yanıt header'ı dönüyor.
- *  Dev'de Vite same-origin proxy yok — submit `error` durumuna düşer,
- *  beklenen davranış. */
+/** RFQ endpoint: the Pages Function on kervanheat.com serves both sites. In production
+ *  the form posts cross-origin to it (it checks the Origin against an allowlist); in dev
+ *  there is no such endpoint, so a submit ends in the error state, as expected. */
 const RFQ_ENDPOINT = import.meta.env.PROD ? 'https://kervanheat.com/api/rfq' : '/api/rfq';
 
 export default function Contact({ t }: Props) {
@@ -31,14 +29,12 @@ export default function Contact({ t }: Props) {
       const r = await fetch(RFQ_ENDPOINT, { method: 'POST', body: fd });
       const j = (await r.json().catch(() => ({}))) as {
         ok?: boolean;
+        delivered?: boolean;
         emailSent?: boolean;
       };
-      // The worker returns `ok: true` even when neither Resend nor
-      // MailChannels delivered (it still tries Telegram and the form
-      // succeeded structurally). Treat a missing/false `emailSent` as
-      // an error so the user gets the phone-fallback copy instead of
-      // a misleading success.
-      const ok = r.ok && j.ok === true && j.emailSent === true;
+      // `delivered`: the request reached the owner by email or Telegram. An older
+      // server only sends `emailSent`. Never show success when nothing was delivered.
+      const ok = r.ok && j.ok === true && (j.delivered ?? j.emailSent) === true;
       setState(ok ? 'success' : 'error');
       if (ok) formRef.current.reset();
     } catch {
@@ -75,8 +71,8 @@ export default function Contact({ t }: Props) {
             {
               label: t.contact.emailLabel,
               value: (
-                <a href="mailto:info@kervanheat.com" className="hover:text-brand transition-colors">
-                  info@kervanheat.com
+                <a href={`mailto:${ORG_EMAIL}`} className="hover:text-brand transition-colors">
+                  {ORG_EMAIL}
                 </a>
               ),
             },
