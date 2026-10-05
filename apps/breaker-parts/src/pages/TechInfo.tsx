@@ -4,6 +4,7 @@ import { fadeUp, inViewOnce, staggerContainer } from '@kervan/motion';
 import type { DictBlock, Lang, TechContent } from '../types';
 import type { TechAuth } from '../lib/use-tech-auth';
 import { useVegaCatalog } from '../lib/use-vega-catalog';
+import { DrawingsContext, useVegaDrawings } from '../lib/use-vega-drawings';
 import CatalogTab from './tech/CatalogTab';
 
 type Tab = 'general' | 'catalog';
@@ -134,6 +135,9 @@ function Content({
   selectTab: (x: Tab) => void;
   catalog: ReturnType<typeof useVegaCatalog>;
 }) {
+  // Drawings are fetched when the first detail panel opens; the state lives here so it
+  // survives tab switches and is dropped with this component on sign-out.
+  const drawings = useVegaDrawings(tech.logout);
   return (
     <section className="pt-32 pb-16 md:pt-40 md:pb-24">
       <div className="max-w-[1280px] mx-auto px-6 md:px-8 mb-10">
@@ -147,14 +151,16 @@ function Content({
           aria-labelledby="tech-tab-catalog"
           className="max-w-[1280px] mx-auto px-6 md:px-8"
         >
-          <CatalogTab
-            t={t}
-            lang={lang}
-            status={catalog.status}
-            catalog={catalog.catalog}
-            popular={catalog.popular}
-            retry={catalog.retry}
-          />
+          <DrawingsContext.Provider value={drawings}>
+            <CatalogTab
+              t={t}
+              lang={lang}
+              status={catalog.status}
+              catalog={catalog.catalog}
+              popular={catalog.popular}
+              retry={catalog.retry}
+            />
+          </DrawingsContext.Provider>
         </div>
       )}
       {tab === 'general' && (

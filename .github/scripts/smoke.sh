@@ -63,6 +63,7 @@ check https://kervanheat.com/api/tech/content 401 application/json
 check https://kervanbreaker.com/api/tech/content 401 application/json
 # Private tip catalog (KV-backed): anonymous requests must be rejected before KV is read.
 check https://kervanbreaker.com/api/tech/catalog 401 application/json
+check https://kervanbreaker.com/api/tech/drawings 401 application/json
 
 # The breaker contact form posts cross-origin to the heat-treatment function.
 preflight "$RFQ" https://kervanbreaker.com yes

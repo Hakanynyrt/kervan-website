@@ -162,6 +162,10 @@ export interface DictBlock {
     more: string;
     details: string;
     hideDetails: string;
+    drawingTitle: string;
+    drawingAlt: string;
+    drawingLoading: string;
+    drawingError: string;
     compare: string;
     compareTitle: string;
     compareClose: string;
