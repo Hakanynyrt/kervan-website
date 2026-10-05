@@ -152,6 +152,7 @@ function Content({
             lang={lang}
             status={catalog.status}
             catalog={catalog.catalog}
+            popular={catalog.popular}
             retry={catalog.retry}
           />
         </div>

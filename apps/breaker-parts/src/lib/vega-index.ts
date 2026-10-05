@@ -113,6 +113,8 @@ export interface CatalogIndex {
   byGeom: Map<string, VegaItem[]>;
   /** compact breaker name -> distinct geometries it points to */
   nameGeoms: Map<string, Set<string>>;
+  /** part number -> rows with DIFFERENT geometry that also list it (catalog error) */
+  partNoClash: Map<string, VegaItem[]>;
 }
 
 export function buildIndex(items: VegaItem[]): CatalogIndex {
@@ -141,11 +143,34 @@ export function buildIndex(items: VegaItem[]): CatalogIndex {
       nameGeoms.set(k, s);
     }
   }
-  return { rows, byGeom, nameGeoms };
+  const byPn = new Map<string, VegaItem[]>();
+  for (const it of items) {
+    for (const pn of it.partNos) {
+      const l = byPn.get(pn) ?? [];
+      l.push(it);
+      byPn.set(pn, l);
+    }
+  }
+  const partNoClash = new Map<string, VegaItem[]>();
+  for (const [pn, l] of byPn) {
+    if (new Set(l.map(geomKey)).size > 1) partNoClash.set(pn, l);
+  }
+  return { rows, byGeom, nameGeoms, partNoClash };
 }
 
 export const equivalentsOf = (idx: CatalogIndex, it: VegaItem): VegaItem[] =>
   (idx.byGeom.get(geomKey(it)) ?? []).filter((x) => x !== it);
+
+/** Other rows (different sizes) that share one of this row's part numbers. */
+export const partNoClashesOf = (idx: CatalogIndex, it: VegaItem): VegaItem[] => {
+  const out: VegaItem[] = [];
+  for (const pn of it.partNos) {
+    for (const x of idx.partNoClash.get(pn) ?? []) if (x !== it && !out.includes(x)) out.push(x);
+  }
+  return out;
+};
+/** VEGA part numbers are "VT" + 7 digits; anything else is a catalog typo. */
+export const partNoLooksBroken = (pn: string): boolean => !/^VT\d{7}$/.test(pn);
 
 /** How many different tip geometries the catalog lists for this breaker name. */
 export const geometriesFor = (idx: CatalogIndex, name: string): number =>

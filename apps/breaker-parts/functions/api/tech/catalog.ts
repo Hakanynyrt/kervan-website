@@ -15,6 +15,8 @@ type CatalogCtx = { request: Ctx['request']; env: TechEnv & { VEGA_CATALOG?: KvL
 type Fn = (ctx: CatalogCtx) => Response | Promise<Response>;
 
 const KEY = 'catalog:v1';
+/** Owner-edited list of tips that sell well in Turkey (optional, small JSON). */
+const POPULAR_KEY = 'popular:v1';
 
 /** Owner-only VEGA tip catalog. The data lives in the KV namespace bound as
  *  VEGA_CATALOG (never in git or the bundle) and is returned only to a valid session.
@@ -32,7 +34,14 @@ const handle: Fn = async ({ request, env }) => {
     return json({ ok: false, authed: true, error: 'catalog' }, 500);
   }
   if (!catalog) return json({ ok: false, authed: true, error: 'empty' }, 404);
-  return json({ ok: true, authed: true, catalog });
+  // A missing or malformed popular list must never break the catalog.
+  let popular: unknown = null;
+  try {
+    popular = await env.VEGA_CATALOG.get(POPULAR_KEY, 'json');
+  } catch {
+    popular = null;
+  }
+  return json({ ok: true, authed: true, catalog, popular });
 };
 
 export const onRequestGet: Fn = handle;
