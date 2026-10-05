@@ -103,13 +103,6 @@ async function handleRfq(request: Request, env: Env): Promise<Response> {
     return Response.json({ ok: false, error: 'parse' }, { status: 400 });
   }
 
-  // Honeypot — accept and discard. The marker lets a real person who tripped it (autofill)
-  // be told apart from a delivery failure when the response is inspected.
-  if (form.get('website')) {
-    const honeypot: EmailStatus = { transport: 'none', status: 'honeypot' };
-    return Response.json({ ok: true, emailSent: false, delivered: false, emailStatus: honeypot });
-  }
-
   const name = clean(form.get('name'), 100);
   const email = clean(form.get('email'), 200);
   const phone = clean(form.get('phone'), 30);
@@ -121,6 +114,18 @@ async function handleRfq(request: Request, env: Env): Promise<Response> {
   const specs = clean(form.get('specs'), 2000);
   const message = clean(form.get('message'), 3000);
   const marketing = form.get('marketing_consent') === '1' || form.get('marketing_consent') === 'on';
+
+  // Honeypot — accept and discard. The field is hidden from people, but browser autofill can
+  // still copy the visitor's own data into it (a phone number did exactly that), so a value that
+  // equals one of the visitor's own fields is treated as autofill, not a bot. The legacy field
+  // name "website" is ignored for the same reason. The marker lets a real person who tripped it
+  // be told apart from a delivery failure when the response is inspected.
+  const trap = clean(form.get('hp_ref'), 200);
+  const own = [name, email, phone, company].filter(Boolean);
+  if (trap && !own.includes(trap)) {
+    const honeypot: EmailStatus = { transport: 'none', status: 'honeypot' };
+    return Response.json({ ok: true, emailSent: false, delivered: false, emailStatus: honeypot });
+  }
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
   if (!name || !email || !emailValid)
