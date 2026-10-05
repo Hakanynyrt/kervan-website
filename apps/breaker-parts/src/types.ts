@@ -181,6 +181,23 @@ export interface DictBlock {
     equivalentsHint: string;
     conflictWarn: string;
     conflictMeasure: string;
+    measureOptional: string;
+    likelyTitle: string;
+    likelyPct: string;
+    likelyModels: string;
+    likelyRunner: string;
+    likelyOutsideTol: string;
+    likelyMoreMeasure: string;
+    nextMeasure: string;
+    nextMeasureHint: string;
+    chipLegend: string;
+    chipUnknown: string;
+    fieldNames: Record<
+      'dia' | 'keyThk' | 'backToSlot' | 'slotLen' | 'rearDia' | 'length' | 'keyCount',
+      string
+    >;
+    partNoClash: string;
+    partNoBroken: string;
     copy: string;
     copied: string;
     warnBadge: string;

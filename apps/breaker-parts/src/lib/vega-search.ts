@@ -1,5 +1,6 @@
 import type { VegaItem, VegaRange, VegaTip } from '../types';
 import { type CatalogIndex, geomKey, textSearch } from './vega-index';
+import { scoreItem } from './vega-score';
 
 /** Pure search/matching helpers for the private tip catalog. No I/O, no storage. */
 
@@ -40,6 +41,8 @@ export interface Results {
   measuring: boolean;
   /** the text search only matched through the sound-alike fallback */
   phonetic: boolean;
+  /** rows that passed the text/brand/tip filters (before tolerance) */
+  pool: VegaItem[];
   groups: Record<Group, Hit[]>;
   list: Hit[];
   total: number;
@@ -152,16 +155,22 @@ export function searchCatalog(items: VegaItem[], q: Query, idx: CatalogIndex): R
     const list = pool
       .map((item): Hit => withText({ item, group: null, score: 0, diffs: {}, unknown: [] }))
       .sort((a, b) => (a.textCost ?? 0) - (b.textCost ?? 0) || byName(a, b));
-    return { measuring, phonetic, groups, list, total: list.length };
+    return { measuring, phonetic, pool, groups, list, total: list.length };
   }
   for (const it of pool) {
     const h = evaluate(it, q.measure, q.tol);
     if (h && h.group) groups[h.group].push(withText(h));
   }
+  // Inside a group the wear-aware score decides the order (a worn tip is
+  // thinner, its slot longer): a 1 mm thinner diameter beats a 1 mm thicker one.
+  const soft = new Map<VegaItem, number>();
   for (const g of Object.keys(groups) as Group[]) {
+    for (const h of groups[g]) soft.set(h.item, scoreItem(h.item, q.measure).cost);
     groups[g].sort(
       (a, b) =>
-        a.score - b.score || a.item.model.localeCompare(b.item.model, 'en', { numeric: true }),
+        (soft.get(a.item) ?? 0) - (soft.get(b.item) ?? 0) ||
+        a.score - b.score ||
+        a.item.model.localeCompare(b.item.model, 'en', { numeric: true }),
     );
     // Identical geometry = the same part: show one card with the others listed on it.
     const seen = new Map<string, Hit>();
@@ -179,6 +188,7 @@ export function searchCatalog(items: VegaItem[], q: Query, idx: CatalogIndex): R
   return {
     measuring,
     phonetic,
+    pool,
     groups,
     list: [],
     total: groups.match.length + groups.maybe.length + groups.wear.length,

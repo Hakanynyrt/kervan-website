@@ -17,7 +17,23 @@ import {
   type Measure,
   type MeasureKey,
 } from '../../lib/vega-search';
-import { type CatalogIndex, buildIndex, equivalentsOf, geometriesFor } from '../../lib/vega-index';
+import {
+  type CatalogIndex,
+  buildIndex,
+  equivalentsOf,
+  geometriesFor,
+  partNoClashesOf,
+  partNoLooksBroken,
+} from '../../lib/vega-index';
+import {
+  type ChipState,
+  type FieldScore,
+  type Scored,
+  likelyIsMeaningful,
+  mostLikely,
+  nextBestMeasure,
+  rankByScore,
+} from '../../lib/vega-score';
 
 interface Props {
   t: DictBlock;
@@ -35,14 +51,26 @@ const inputCls = `w-full min-h-11 bg-bg-soft border border-ink-soft rounded-md p
 const labelCls = 'font-sans text-xs tracking-[0.12em] uppercase text-ink-mid';
 const btnCls = `min-h-11 px-4 rounded-full border border-hair-strong font-sans text-sm text-ink hover:border-ink-mid transition-colors ${focusRing}`;
 
-const MEASURE_FIELDS: { key: MeasureKey; label: keyof DictBlock['catalogUi'] }[] = [
+/** Order follows how much each size narrows the candidates (key count and
+ *  back-end→slot are the independent ones; key thickness tracks diameter).
+ *  Length is not asked: a worn tip's length says nothing. */
+const MEASURE_FIELDS: {
+  key: Exclude<MeasureKey, 'length'>;
+  label: keyof DictBlock['catalogUi'];
+  optional?: boolean;
+}[] = [
   { key: 'dia', label: 'measureDia' },
-  { key: 'keyThk', label: 'measureKeyThk' },
   { key: 'backToSlot', label: 'measureBackToSlot' },
   { key: 'slotLen', label: 'measureSlotLen' },
-  { key: 'rearDia', label: 'measureRearDia' },
-  { key: 'length', label: 'measureLength' },
+  { key: 'keyThk', label: 'measureKeyThk' },
+  { key: 'rearDia', label: 'measureRearDia', optional: true },
 ];
+const CHIP_CLS: Record<ChipState, string> = {
+  ok: 'border-ok/70 text-ok',
+  wear: 'border-brand/70 text-brand-hi',
+  off: 'border-err/70 text-err',
+  unknown: 'border-hair-strong text-ink-soft',
+};
 
 const fill = (tpl: string, vars: Record<string, string | number>): string =>
   Object.entries(vars).reduce((s, [k, v]) => s.replace(`{${k}}`, String(v)), tpl);
@@ -53,13 +81,12 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
   const [brand, setBrand] = useState('');
   const [tip, setTip] = useState<VegaTip | ''>('');
   const [hideLow, setHideLow] = useState(false);
-  const [raw, setRaw] = useState<Record<MeasureKey, string>>({
+  const [raw, setRaw] = useState<Record<Exclude<MeasureKey, 'length'>, string>>({
     dia: '',
     keyThk: '',
     backToSlot: '',
     slotLen: '',
     rearDia: '',
-    length: '',
   });
   const [keyCount, setKeyCount] = useState<'' | '1' | '2'>('');
   const [tol, setTol] = useState<number>(DEFAULT_TOL);
@@ -86,6 +113,21 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
       items && idx ? searchCatalog(items, { text, brand, tip, hideLow, measure, tol }, idx) : null,
     [items, idx, text, brand, tip, hideLow, measure, tol],
   );
+
+  const scored = useMemo<Scored[]>(
+    () => (results?.measuring ? rankByScore(results.pool, measure) : []),
+    [results, measure],
+  );
+  const fieldsFor = useMemo(() => new Map(scored.map((x) => [x.item, x.fields])), [scored]);
+  const likely = useMemo(
+    () => (scored.length && likelyIsMeaningful(measure) ? mostLikely(scored) : null),
+    [scored, measure],
+  );
+  const next = useMemo(
+    () => (scored.length ? nextBestMeasure(measure, scored) : null),
+    [scored, measure],
+  );
+  const [likelyOpen, setLikelyOpen] = useState(false);
 
   useEffect(() => setLimit(PAGE), [text, brand, tip, hideLow, measure, tol]);
 
@@ -124,7 +166,7 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
       s.includes(id) ? s.filter((x) => x !== id) : s.length < MAX_COMPARE ? [...s, id] : s,
     );
   const clearMeasure = () => {
-    setRaw({ dia: '', keyThk: '', backToSlot: '', slotLen: '', rearDia: '', length: '' });
+    setRaw({ dia: '', keyThk: '', backToSlot: '', slotLen: '', rearDia: '' });
     setKeyCount('');
   };
 
@@ -141,6 +183,7 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
         canSelect={sel.length < MAX_COMPARE}
         onSelect={() => toggleSel(h.item.id)}
         idx={idx}
+        fields={fieldsFor.get(h.item)}
         onMeasure={() => {
           setText('');
           document.getElementById('vc-m-dia')?.focus();
@@ -151,7 +194,6 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
   const groupDefs: { g: Group; title: string; hint?: string }[] = [
     { g: 'match', title: c.groupMatch },
     { g: 'maybe', title: c.groupMaybe, hint: c.groupMaybeHint },
-    { g: 'wear', title: c.groupWear, hint: c.groupWearHint },
   ];
   let budget = limit;
 
@@ -230,48 +272,57 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
         <legend className="px-2 font-serif text-xl text-ink">{c.measureTitle}</legend>
         <p className="font-sans text-sm text-ink-mid mt-0 mb-5 max-w-[70ch]">{c.measureHint}</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {MEASURE_FIELDS.map(({ key, label }) => (
-            <div key={key} className="flex flex-col gap-2">
-              <label htmlFor={`vc-m-${key}`} className={labelCls}>
-                {c[label] as string}
-              </label>
-              <input
-                id={`vc-m-${key}`}
-                type="text"
-                inputMode="decimal"
-                autoComplete="off"
-                value={raw[key]}
-                onChange={(e) => setRaw({ ...raw, [key]: e.target.value })}
-                aria-invalid={raw[key].trim() !== '' && parseNum(raw[key]) === undefined}
-                aria-describedby={
-                  raw[key].trim() !== '' && parseNum(raw[key]) === undefined
-                    ? `vc-m-${key}-e`
-                    : undefined
-                }
-                className={inputCls}
-              />
-              {raw[key].trim() !== '' && parseNum(raw[key]) === undefined && (
-                <span id={`vc-m-${key}-e`} className="font-sans text-xs text-err">
-                  {c.invalidNumber}
-                </span>
-              )}
-            </div>
-          ))}
-          <div className="flex flex-col gap-2">
-            <label htmlFor="vc-m-kc" className={labelCls}>
-              {c.measureKeyCount}
-            </label>
-            <select
-              id="vc-m-kc"
-              value={keyCount}
-              onChange={(e) => setKeyCount(e.target.value as '' | '1' | '2')}
-              className={inputCls}
-            >
-              <option value="">{c.keyAny}</option>
-              <option value="1">{c.keySingle}</option>
-              <option value="2">{c.keyDouble}</option>
-            </select>
-          </div>
+          {MEASURE_FIELDS.map(({ key, label, optional }) => {
+            const invalid = raw[key].trim() !== '' && parseNum(raw[key]) === undefined;
+            const hot = next?.key === key;
+            const field = (
+              <div key={key} className="flex flex-col gap-2">
+                <label htmlFor={`vc-m-${key}`} className={labelCls}>
+                  {c[label] as string}
+                  {optional && (
+                    <span className="normal-case tracking-normal"> {c.measureOptional}</span>
+                  )}
+                </label>
+                <input
+                  id={`vc-m-${key}`}
+                  type="text"
+                  inputMode="decimal"
+                  autoComplete="off"
+                  value={raw[key]}
+                  onChange={(e) => setRaw({ ...raw, [key]: e.target.value })}
+                  aria-invalid={invalid}
+                  aria-describedby={invalid ? `vc-m-${key}-e` : hot ? 'vc-next' : undefined}
+                  className={`${inputCls} ${hot ? 'border-brand ring-2 ring-brand/40' : ''}`}
+                />
+                {invalid && (
+                  <span id={`vc-m-${key}-e`} className="font-sans text-xs text-err">
+                    {c.invalidNumber}
+                  </span>
+                )}
+              </div>
+            );
+            if (key !== 'dia') return field;
+            const kcHot = next?.key === 'keyCount';
+            return [
+              field,
+              <div key="kc" className="flex flex-col gap-2">
+                <label htmlFor="vc-m-kc" className={labelCls}>
+                  {c.measureKeyCount}
+                </label>
+                <select
+                  id="vc-m-kc"
+                  value={keyCount}
+                  onChange={(e) => setKeyCount(e.target.value as '' | '1' | '2')}
+                  aria-describedby={kcHot ? 'vc-next' : undefined}
+                  className={`${inputCls} ${kcHot ? 'border-brand ring-2 ring-brand/40' : ''}`}
+                >
+                  <option value="">{c.keyAny}</option>
+                  <option value="1">{c.keySingle}</option>
+                  <option value="2">{c.keyDouble}</option>
+                </select>
+              </div>,
+            ];
+          })}
           <div className="flex flex-col gap-2">
             <label htmlFor="vc-m-tol" className={labelCls}>
               {c.tolLabel}
@@ -290,12 +341,44 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
             </select>
           </div>
         </div>
+        {next && (
+          <p id="vc-next" role="status" className="font-sans text-sm text-ink mt-5 mb-0">
+            <span className="text-brand-hi font-medium">
+              {fill(c.nextMeasure, { field: c.fieldNames[next.key] })}
+            </span>{' '}
+            <span className="text-ink-mid">
+              {fill(c.nextMeasureHint, {
+                a: Math.round(next.before),
+                b: Math.max(1, Math.round(next.after)),
+              })}
+            </span>
+          </p>
+        )}
         <div className="mt-5">
           <button type="button" onClick={clearMeasure} className={btnCls}>
             {c.clear}
           </button>
         </div>
       </fieldset>
+
+      {results.measuring && likely && (
+        <LikelyCard
+          likely={likely}
+          t={t}
+          lang={lang}
+          idx={idx}
+          tol={tol}
+          insideTol={Object.values(results.groups)
+            .flat()
+            .some(
+              (h) =>
+                likely.items.includes(h.item) || !!h.twins?.some((x) => likely.items.includes(x)),
+            )}
+          fields={fieldsFor.get(likely.items[0]) ?? []}
+          open={likelyOpen}
+          onOpen={() => setLikelyOpen((o) => !o)}
+        />
+      )}
 
       {compared.length > 0 && (
         <CompareTable
@@ -324,6 +407,9 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
         {results.phonetic && <> · {c.phoneticHint}</>}
         {sel.length >= MAX_COMPARE && <> · {fill(c.compareMax, { n: MAX_COMPARE })}</>}
       </p>
+      {results.measuring && (results.total > 0 || likely) && (
+        <p className="font-sans text-xs text-ink-mid m-0 -mt-4">{c.chipLegend}</p>
+      )}
 
       {results.measuring ? (
         results.total === 0 ? (
@@ -426,6 +512,7 @@ function ItemCard({
   canSelect,
   onSelect,
   idx,
+  fields,
   onMeasure,
 }: {
   hit: Hit;
@@ -437,11 +524,11 @@ function ItemCard({
   canSelect: boolean;
   onSelect: () => void;
   idx: CatalogIndex;
+  fields?: FieldScore[];
   onMeasure: () => void;
 }) {
   const c = t.catalogUi;
   const it = hit.item;
-  const diffEntries = Object.entries(hit.diffs) as [MeasureKey, number][];
   const panelId = `vc-d-${it.id}`;
   // The breaker name the search matched points to tips with different sizes.
   const conflictN = hit.matched ? geometriesFor(idx, hit.matched) : 0;
@@ -484,11 +571,7 @@ function ItemCard({
           <p className="font-sans text-xs text-ink-mid m-0 mt-1">{c.twinsHint}</p>
         </div>
       )}
-      {diffEntries.length > 0 && (
-        <p className="font-sans text-sm text-ink-mid m-0">
-          {diffEntries.map(([k, d]) => `${c.diffLabels[k]} ${fmtDiff(d, lang)}`).join(' · ')} mm
-        </p>
-      )}
+      {fields && fields.length > 0 && <Chips fields={fields} t={t} lang={lang} />}
       <div className="flex flex-wrap gap-2 mt-1">
         <button
           type="button"
@@ -581,9 +664,14 @@ function Detail({
 }) {
   const c = t.catalogUi;
   const eq = equivalentsOf(idx, it);
+  const clash = partNoClashesOf(idx, it);
   const problems = [
     ...it.quality.map((q) => c.qualityLabels[q] ?? q),
     ...it.reviewFlags.map((f) => c.flagLabels[f] ?? f),
+    ...(clash.length
+      ? [fill(c.partNoClash, { models: clash.map((x) => x.model).join(', ') })]
+      : []),
+    ...(it.partNos.some(partNoLooksBroken) ? [c.partNoBroken] : []),
   ];
   const byType = (
     m: Partial<Record<VegaTip, { min: number; max: number }>> | null,
@@ -679,6 +767,133 @@ function Detail({
         )}
       </dl>
     </div>
+  );
+}
+
+function Chips({ fields, t, lang }: { fields: FieldScore[]; t: DictBlock; lang: Lang }) {
+  const c = t.catalogUi;
+  return (
+    <ul className="list-none p-0 m-0 flex flex-wrap gap-1.5">
+      {fields.map((f) => (
+        <li
+          key={f.key}
+          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-sans text-xs ${CHIP_CLS[f.state]}`}
+        >
+          <span>{f.key === 'keyCount' ? c.fKey : c.diffLabels[f.key]}</span>
+          <span className="font-medium">
+            {f.state === 'unknown'
+              ? c.chipUnknown
+              : f.key === 'keyCount'
+                ? f.state === 'ok'
+                  ? '✓'
+                  : '✕'
+                : `${fmtDiff(f.diff ?? 0, lang)} mm`}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function LikelyCard({
+  likely,
+  t,
+  lang,
+  idx,
+  tol,
+  insideTol,
+  fields,
+  open,
+  onOpen,
+}: {
+  likely: NonNullable<ReturnType<typeof mostLikely>>;
+  t: DictBlock;
+  lang: Lang;
+  idx: CatalogIndex;
+  tol: number;
+  insideTol: boolean;
+  fields: FieldScore[];
+  open: boolean;
+  onOpen: () => void;
+}) {
+  const c = t.catalogUi;
+  const it = likely.items[0];
+  const others = likely.items.slice(1);
+  const pct = Math.round(likely.p * 100);
+  const lens = likely.items.map((x) => x.lengthMm).filter((r): r is NonNullable<typeof r> => !!r);
+  const lenRange = lens.length
+    ? fmtRange(
+        { min: Math.min(...lens.map((r) => r.min)), max: Math.max(...lens.map((r) => r.max)) },
+        lang,
+      )
+    : null;
+  return (
+    <section
+      aria-label={c.likelyTitle}
+      className="border border-brand rounded-[14px] p-5 md:p-6 flex flex-col gap-3 bg-brand-soft"
+    >
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="font-sans text-xs tracking-[0.2em] uppercase text-brand-hi m-0">
+          {c.likelyTitle}
+        </h2>
+        <span className="font-serif text-2xl text-ink">{fill(c.likelyPct, { p: pct })}</span>
+      </div>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="font-serif text-2xl text-ink m-0 break-words">{it.model}</h3>
+          <p className="font-sans text-xs tracking-[0.12em] uppercase text-ink-mid m-0 mt-1">
+            {it.brand}
+          </p>
+        </div>
+        {likely.items.some(needsVerification) && <WarnBadge label={c.warnBadge} />}
+      </div>
+      <p className="font-sans text-ink m-0">
+        {summary(it, lang, t)}
+        {lenRange && others.length > 0 && ` · ${c.fLength} ${lenRange}`}
+      </p>
+      {others.length > 0 && (
+        <p className="font-sans text-sm text-ink m-0">
+          {fill(c.likelyModels, { models: others.map((x) => x.model).join(' · ') })}
+        </p>
+      )}
+      {it.partNos.length > 0 && (
+        <p className="font-sans text-sm text-ink-mid m-0">
+          {c.fPartNos}: {it.partNos.join(', ')}
+          <CopyButton value={it.partNos.join(', ')} t={t} />
+        </p>
+      )}
+      <Chips fields={fields} t={t} lang={lang} />
+      {!insideTol && (
+        <p className="font-sans text-sm text-brand-hi m-0">
+          {fill(c.likelyOutsideTol, { t: tol })}
+        </p>
+      )}
+      {pct < 80 && <p className="font-sans text-sm text-ink-mid m-0">{c.likelyMoreMeasure}</p>}
+      {likely.runner && (
+        <p className="font-sans text-sm text-ink-mid m-0">
+          {fill(c.likelyRunner, {
+            model: likely.runner.items[0].model,
+            p: Math.round(likely.runner.p * 100),
+          })}
+        </p>
+      )}
+      <div>
+        <button
+          type="button"
+          onClick={onOpen}
+          aria-expanded={open}
+          aria-controls="vc-likely-d"
+          className={btnCls}
+        >
+          {open ? c.hideDetails : c.details}
+        </button>
+      </div>
+      {open && (
+        <div id="vc-likely-d">
+          <Detail item={it} t={t} lang={lang} idx={idx} />
+        </div>
+      )}
+    </section>
   );
 }
 
