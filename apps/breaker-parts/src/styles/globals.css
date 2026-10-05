@@ -135,6 +135,19 @@ button {
   }
 }
 
+/* One-off pulse on the field the catalog suggests measuring next (Uç Kataloğu). */
+@keyframes vcPulse {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 55%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-brand) 0%, transparent);
+  }
+}
+.vc-pulse {
+  animation: vcPulse 600ms var(--ease-editorial) 1;
+}
+
 /* Hide scrollbar but keep scroll behavior */
 .scrollbar-hide {
   scrollbar-width: none;

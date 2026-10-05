@@ -1,6 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
-import { fadeUp, inViewOnce, staggerContainer } from '@kervan/motion';
+import {
+  durations,
+  editorialEase,
+  fadeUp,
+  inViewOnce,
+  staggerContainer,
+  useReducedMotion,
+} from '@kervan/motion';
 import type { DictBlock, Lang, TechContent } from '../types';
 import type { TechAuth } from '../lib/use-tech-auth';
 import { useVegaCatalog } from '../lib/use-vega-catalog';
@@ -138,17 +145,21 @@ function Content({
   // Drawings are fetched when the first detail panel opens; the state lives here so it
   // survives tab switches and is dropped with this component on sign-out.
   const drawings = useVegaDrawings(tech.logout);
+  const reduce = useReducedMotion();
   return (
     <section className="pt-32 pb-16 md:pt-40 md:pb-24">
       <div className="max-w-[1280px] mx-auto px-6 md:px-8 mb-10">
         <Tabs t={t} tab={tab} onSelect={selectTab} />
       </div>
       {tab === 'catalog' && (
-        <div
+        <motion.div
           id="tech-panel-catalog"
           role="tabpanel"
           tabIndex={0}
           aria-labelledby="tech-tab-catalog"
+          initial={reduce ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: durations.sm, ease: editorialEase }}
           className="max-w-[1280px] mx-auto px-6 md:px-8"
         >
           <DrawingsContext.Provider value={drawings}>
@@ -161,7 +172,7 @@ function Content({
               retry={catalog.retry}
             />
           </DrawingsContext.Provider>
-        </div>
+        </motion.div>
       )}
       {tab === 'general' && (
         <div
