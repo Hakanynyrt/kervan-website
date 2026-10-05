@@ -109,6 +109,9 @@ importers:
       '@kervan/motion':
         specifier: workspace:*
         version: link:../../packages/motion
+      '@kervan/seo':
+        specifier: workspace:*
+        version: link:../../packages/seo
       '@kervan/ui':
         specifier: workspace:*
         version: link:../../packages/ui

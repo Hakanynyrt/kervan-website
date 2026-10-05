@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import type { GalleryItem } from '../types';
-import { staggerContainer, fadeUp, inViewOnce } from '../lib/motion';
+import { staggerContainer, fadeUp, inViewOnce, useReducedMotion } from '../lib/motion';
 import { SectionHeading } from '@kervan/ui';
 
 interface Props {
@@ -17,6 +17,7 @@ interface Props {
  *  Empty slots render named dashed-border placeholders.
  *  Video items autoplay loop muted; image items show static bg-image. */
 export default function Gallery({ idAttr, eyebrow, title, aside, items }: Props) {
+  const reduce = useReducedMotion();
   const scroller = useRef<HTMLDivElement>(null);
 
   const scroll = (dir: 1 | -1) => {
@@ -53,7 +54,7 @@ export default function Gallery({ idAttr, eyebrow, title, aside, items }: Props)
         className="flex gap-6 md:gap-8 overflow-x-auto snap-x snap-mandatory pb-2 scrollbar-hide"
         style={{ scrollPaddingLeft: 'max(2rem, calc((100vw - 1280px) / 2 + 2rem))' }}
         variants={staggerContainer(0, 0.08)}
-        initial="hidden"
+        initial={reduce ? false : 'hidden'}
         whileInView="show"
         viewport={inViewOnce}
       >

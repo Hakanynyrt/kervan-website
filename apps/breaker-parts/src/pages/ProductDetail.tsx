@@ -1,16 +1,10 @@
 import { motion } from 'framer-motion';
 import { Link, useParams } from 'react-router-dom';
-import {
-  PageMeta,
-  JsonLd,
-  breadcrumbList,
-  product as productSchema,
-  KERVAN_BREAKER_URL,
-} from '@kervan/seo';
-import { fadeUp, inViewOnce, kenBurns } from '@kervan/motion';
+import { fadeUp, inViewOnce, kenBurns, useReducedMotion } from '@kervan/motion';
 import { PRODUCT_BY_SLUG } from '../data/products';
 import { BRANDS } from '../data/brands';
 import type { DictBlock, Lang } from '../types';
+import { localePath } from '../lib/locale-path';
 
 interface Props {
   t: DictBlock;
@@ -18,17 +12,17 @@ interface Props {
 }
 
 export default function ProductDetail({ t, lang }: Props) {
+  const reduce = useReducedMotion();
   const { slug = '' } = useParams<{ slug: string }>();
   const product = PRODUCT_BY_SLUG[slug];
 
   if (!product) {
     return (
       <>
-        <PageMeta title="404 — Kervan Breaker" />
         <section className="min-h-[60dvh] flex flex-col justify-center items-center pt-32 pb-16 text-center px-6">
           <h1 className="font-serif italic text-h2 text-ink mb-6">{t.productDetail.notFound}</h1>
           <Link
-            to="/urunler"
+            to={localePath('/urunler', lang)}
             className="font-sans text-sm tracking-[0.16em] uppercase text-brand hover:text-brand-hi transition-colors"
           >
             {t.productDetail.notFoundCta} →
@@ -39,42 +33,14 @@ export default function ProductDetail({ t, lang }: Props) {
   }
 
   const loc = product[lang];
-  const quoteHref = `/iletisim?part=${encodeURIComponent(product.slug)}`;
-  const productUrl = `${KERVAN_BREAKER_URL}/urunler/${product.slug}`;
-  const productImageUrl = product.image ? `${KERVAN_BREAKER_URL}${product.image}` : undefined;
+  const quoteHref = localePath(`/iletisim?part=${encodeURIComponent(product.slug)}`, lang);
 
   return (
     <>
-      <PageMeta
-        title={`${loc.name} — Kervan Breaker`}
-        description={loc.tagline}
-        canonical={productUrl}
-        image={productImageUrl ?? `${KERVAN_BREAKER_URL}/og.png`}
-        type="product"
-      />
-      <JsonLd
-        schema={productSchema({
-          url: productUrl,
-          name: loc.name,
-          description: loc.body,
-          image: productImageUrl,
-          material: '42CrMo · 42CrMoA',
-          brandFits: BRANDS.map((b) => b.name),
-          sku: product.slug,
-        })}
-      />
-      <JsonLd
-        schema={breadcrumbList([
-          { name: 'Anasayfa', url: `${KERVAN_BREAKER_URL}/` },
-          { name: 'Ürünler', url: `${KERVAN_BREAKER_URL}/urunler` },
-          { name: loc.name, url: productUrl },
-        ])}
-      />
-
       <section className="pt-32 pb-16 md:pt-40 md:pb-24">
         <div className="max-w-[1280px] mx-auto px-6 md:px-8">
           <Link
-            to="/urunler"
+            to={localePath('/urunler', lang)}
             className="inline-block font-sans text-xs tracking-[0.2em] uppercase text-ink-soft hover:text-ink transition-colors mb-8"
           >
             {t.productDetail.backLink}
@@ -84,7 +50,7 @@ export default function ProductDetail({ t, lang }: Props) {
             {/* Photo / placeholder — left, sticky on desktop */}
             <motion.div
               className="col-span-12 lg:col-span-6 lg:sticky lg:top-24"
-              initial="hidden"
+              initial={reduce ? false : 'hidden'}
               animate="show"
               variants={kenBurns}
             >
@@ -117,7 +83,7 @@ export default function ProductDetail({ t, lang }: Props) {
             <motion.div
               className="col-span-12 lg:col-span-6 flex flex-col gap-8"
               variants={fadeUp}
-              initial="hidden"
+              initial={reduce ? false : 'hidden'}
               animate="show"
             >
               <header className="flex flex-col gap-4">
@@ -138,7 +104,7 @@ export default function ProductDetail({ t, lang }: Props) {
                 <motion.ul
                   className="flex flex-col divide-y divide-hair border-y border-hair m-0 p-0 list-none"
                   variants={fadeUp}
-                  initial="hidden"
+                  initial={reduce ? false : 'hidden'}
                   whileInView="show"
                   viewport={inViewOnce}
                 >

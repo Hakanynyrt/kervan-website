@@ -1,17 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { durations, editorialEase } from '@kervan/motion';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent,
+} from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
 import type { Lang, DictBlock } from '../types';
+import { pathForLang, rememberLang } from '../lib/use-lang';
 
 interface Props {
   lang: Lang;
-  setLang: (l: Lang) => void;
   t: DictBlock;
   /** Tab is shown only while the server has confirmed an owner session. */
   techAuthed: boolean;
 }
 
-export default function Nav({ lang, setLang, t, techAuthed }: Props) {
+export default function Nav({ lang, t, techAuthed }: Props) {
   const [open, setOpen] = useState(false);
   const [stuck, setStuck] = useState(false);
   const reduced = useReducedMotion();
@@ -36,6 +42,24 @@ export default function Nav({ lang, setLang, t, techAuthed }: Props) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // The language toggle is a real link to the other-language URL of this page.
+  const otherLang: Lang = lang === 'tr' ? 'en' : 'tr';
+  const otherHref = pathForLang(otherLang);
+  const onLangClick = (e: MouseEvent<HTMLAnchorElement>) => {
+    rememberLang(otherLang);
+    // Keep the visitor's section: carry the current #hash over.
+    if (window.location.hash && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+      e.preventDefault();
+      window.location.assign(otherHref + window.location.hash);
+    }
+  };
+  // Links activate on Enter natively; Space too, like the button it replaced.
+  const onLangKey = (e: ReactKeyboardEvent<HTMLAnchorElement>) => {
+    if (e.key !== ' ') return;
+    e.preventDefault();
+    e.currentTarget.click();
+  };
+
   const links = [
     { href: '#hizmetler', label: t.nav.services },
     { href: '#teknik-kapasite', label: t.nav.capacity },
@@ -53,7 +77,7 @@ export default function Nav({ lang, setLang, t, techAuthed }: Props) {
       }
     >
       <div className="max-w-[1280px] mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
-        <a href="/" className="flex items-center" aria-label={t.nav.home}>
+        <a href={pathForLang(lang)} className="flex items-center" aria-label={t.nav.home}>
           <img
             src="/logo-krv-128.png"
             alt="Kervan Heat"
@@ -73,13 +97,17 @@ export default function Nav({ lang, setLang, t, techAuthed }: Props) {
         </nav>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setLang(lang === 'tr' ? 'en' : 'tr')}
-            className="min-h-11 min-w-11 font-sans text-xs tracking-widest uppercase text-ink-mid hover:text-ink px-2 transition-colors"
+          <a
+            href={otherHref}
+            hrefLang={otherLang}
+            lang={otherLang}
+            onClick={onLangClick}
+            onKeyDown={onLangKey}
+            className="min-h-11 min-w-11 inline-flex items-center justify-center font-sans text-xs tracking-widest uppercase text-ink-mid hover:text-ink px-2 transition-colors"
             aria-label={t.nav.language}
           >
-            {lang === 'tr' ? 'EN' : 'TR'}
-          </button>
+            {otherLang === 'en' ? 'EN' : 'TR'}
+          </a>
           <a
             href="#contact"
             className="hidden sm:inline-block bg-brand text-bg px-5 py-2 font-sans text-sm hover:bg-brand-hi transition-colors"

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { fadeUp, inViewOnce, staggerContainer } from '@kervan/motion';
+import { fadeUp, inViewOnce, staggerContainer, useReducedMotion } from '@kervan/motion';
+import { localePath } from '../lib/locale-path';
 import { PRODUCTS } from '../data/products';
 import type { Lang } from '../types';
 
@@ -12,12 +13,13 @@ interface Props {
 
 export default function ProductGrid({ lang, limit }: Props) {
   const items = limit ? PRODUCTS.slice(0, limit) : PRODUCTS;
+  const reduce = useReducedMotion();
 
   return (
     <motion.div
       className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-hair"
       variants={staggerContainer(0, 0.06)}
-      initial="hidden"
+      initial={reduce ? false : 'hidden'}
       whileInView="show"
       viewport={inViewOnce}
     >
@@ -26,7 +28,7 @@ export default function ProductGrid({ lang, limit }: Props) {
         return (
           <motion.article key={p.slug} variants={fadeUp} className="bg-bg group">
             <Link
-              to={`/urunler/${p.slug}`}
+              to={localePath(`/urunler/${p.slug}`, lang)}
               className="flex flex-col h-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
             >
               <div className="relative aspect-[4/3] overflow-hidden bg-bg-soft">

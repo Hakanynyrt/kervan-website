@@ -1,12 +1,5 @@
 import { motion } from 'framer-motion';
-import {
-  PageMeta,
-  JsonLd,
-  breadcrumbList,
-  service as serviceSchema,
-  KERVAN_BREAKER_URL,
-} from '@kervan/seo';
-import { fadeUp, inViewOnce } from '@kervan/motion';
+import { fadeUp, inViewOnce, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
 
 interface Props {
@@ -14,34 +7,14 @@ interface Props {
 }
 
 export default function Production({ t }: Props) {
+  const reduce = useReducedMotion();
   return (
     <>
-      <PageMeta
-        title="Üretim & Kalite — Kervan Breaker"
-        description="42CrMo / 42CrMoA standart alaşım. Kontrollü atmosfer pit-tip fırınlarda sertleştirme + temperleme."
-        canonical={`${KERVAN_BREAKER_URL}/uretim-kalite`}
-        image={`${KERVAN_BREAKER_URL}/og.png`}
-      />
-      <JsonLd
-        schema={breadcrumbList([
-          { name: 'Anasayfa', url: `${KERVAN_BREAKER_URL}/` },
-          { name: 'Üretim & Kalite', url: `${KERVAN_BREAKER_URL}/uretim-kalite` },
-        ])}
-      />
-      <JsonLd
-        schema={serviceSchema({
-          url: `${KERVAN_BREAKER_URL}/uretim-kalite`,
-          name: 'Hidrolik kırıcı parça üretimi + ısıl işlem entegrasyonu',
-          description:
-            '42CrMo / 42CrMoA standart alaşım. Kendi pit-tip fırınımızda sertleştirme + temperleme.',
-        })}
-      />
-
       <section className="pt-32 pb-16 md:pt-40 md:pb-24">
         <motion.div
           className="max-w-[1280px] mx-auto px-6 md:px-8 mb-16 md:mb-20 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end"
           variants={fadeUp}
-          initial="hidden"
+          initial={reduce ? false : 'hidden'}
           animate="show"
         >
           <div className="col-span-12 lg:col-span-7 flex flex-col gap-5">
@@ -60,7 +33,7 @@ export default function Production({ t }: Props) {
         <motion.div
           className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-px bg-hair"
           variants={fadeUp}
-          initial="hidden"
+          initial={reduce ? false : 'hidden'}
           whileInView="show"
           viewport={inViewOnce}
         >
@@ -94,7 +67,7 @@ export default function Production({ t }: Props) {
         <motion.div
           className="max-w-[1280px] mx-auto px-6 md:px-8 mt-16 md:mt-20 flex flex-col gap-5"
           variants={fadeUp}
-          initial="hidden"
+          initial={reduce ? false : 'hidden'}
           whileInView="show"
           viewport={inViewOnce}
         >

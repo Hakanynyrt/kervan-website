@@ -96,8 +96,19 @@ export const inViewOnce = {
 };
 
 /** Helper: spread onto a `motion.*` element to get a "fade-up on scroll" pattern.
- *  Optional delay (seconds) applied to the show transition. */
-export function revealOnScroll(delay = 0) {
+ *  Optional delay (seconds) applied to the show transition. Pass
+ *  `final = true` (static mode / reduced motion) to render the final state
+ *  directly (`initial={false}`, no in-view trigger). Inside components
+ *  prefer `useRevealOnScroll(delay)`, which picks `final` for you. */
+export function revealOnScroll(delay = 0, final = false) {
+  if (final) {
+    return {
+      initial: false,
+      animate: 'show',
+      variants: fadeUp,
+      transition: { delay: 0 },
+    } as const;
+  }
   return {
     initial: 'hidden',
     whileInView: 'show',

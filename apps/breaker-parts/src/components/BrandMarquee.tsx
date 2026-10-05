@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
-import { fadeUp, inViewOnce } from '../lib/motion';
+import { fadeUp, inViewOnce, useReducedMotion } from '../lib/motion';
 
 interface Props {
   t: DictBlock;
@@ -21,6 +21,7 @@ const slug = (name: string) =>
  * marka logosu. Dosyayı aynı isimle değiştirince kod değişmez.
  */
 export default function BrandMarquee({ t }: Props) {
+  const reduce = useReducedMotion();
   const items = [...t.brands.items, ...t.brands.items]; // seamless loop
 
   return (
@@ -32,7 +33,7 @@ export default function BrandMarquee({ t }: Props) {
       <motion.div
         className="max-w-[1280px] mx-auto px-6 md:px-8 mb-12 md:mb-16 flex flex-col gap-4"
         variants={fadeUp}
-        initial="hidden"
+        initial={reduce ? false : 'hidden'}
         whileInView="show"
         viewport={inViewOnce}
       >

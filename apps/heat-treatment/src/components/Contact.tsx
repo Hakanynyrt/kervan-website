@@ -1,7 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
-import { fadeUp, inViewOnce } from '../lib/motion';
+import { fadeUp, inViewOnce, useReducedMotion } from '../lib/motion';
 import { SectionHeading } from '@kervan/ui';
 
 interface Props {
@@ -11,6 +11,8 @@ interface Props {
 type State = 'idle' | 'sending' | 'success' | 'error';
 
 export default function Contact({ t }: Props) {
+  // Static (prerendered) mode and reduced motion render the final state.
+  const reduce = useReducedMotion();
   const [state, setState] = useState<State>('idle');
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -48,7 +50,7 @@ export default function Contact({ t }: Props) {
         <motion.dl
           className="col-span-12 lg:col-span-4 flex flex-col gap-7 m-0"
           variants={fadeUp}
-          initial="hidden"
+          initial={reduce ? false : 'hidden'}
           whileInView="show"
           viewport={inViewOnce}
         >
@@ -93,7 +95,7 @@ export default function Contact({ t }: Props) {
           onSubmit={onSubmit}
           className="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-5"
           variants={fadeUp}
-          initial="hidden"
+          initial={reduce ? false : 'hidden'}
           whileInView="show"
           viewport={inViewOnce}
         >

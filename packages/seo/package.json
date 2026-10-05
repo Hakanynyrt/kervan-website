@@ -8,7 +8,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./constants": "./src/constants.ts",
-    "./jsonld": "./src/jsonld.ts"
+    "./jsonld": "./src/jsonld.ts",
+    "./head": "./src/head.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

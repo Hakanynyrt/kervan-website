@@ -7,6 +7,35 @@ import type { Dict } from '../types';
 
 export const DICT: Dict = {
   tr: {
+    meta: {
+      title: 'Kervan Heat — Fason ısıl işlem · Kartepe / Kocaeli',
+      description:
+        'Kontrollü atmosfer pit-tip fırınlarda fason ısıl işlem. Sertleştirme ve temperleme. 42CrMo, 42CrMoA ve diğer alaşımlar.',
+      siteDescription: 'Kontrollü atmosfer pit-tip fırınlarda fason ısıl işlem.',
+      service: {
+        type: 'Fason ısıl işlem',
+        name: 'Fason ısıl işlem',
+        description:
+          'Kontrollü atmosfer pit-tip fırınlarda sertleştirme ve temperleme. 42CrMo, 42CrMoA ve diğer alaşımlar — kendi ölçüm ve kontrol disiplinimizle.',
+        catalogName: 'Isıl işlem hizmetleri',
+        offers: [
+          {
+            name: 'Sertleştirme & Temperleme',
+            description: 'Pit-tip fırında ısıtma, kontrollü soğutma, çift potalı temper hattı.',
+          },
+          {
+            name: 'Fason ısıl işlem',
+            description: 'Özel alaşım, özel sıcaklık eğrisi, özel parti büyüklüğü.',
+          },
+        ],
+      },
+    },
+    notFound: {
+      eyebrow: '404',
+      title: 'Sayfa bulunamadı.',
+      body: 'Aradığınız sayfa taşınmış ya da hiç var olmamış olabilir.',
+      home: 'Ana sayfaya dön',
+    },
     nav: {
       services: 'Hizmetler',
       capacity: 'Teknik Kapasite',
@@ -142,6 +171,35 @@ export const DICT: Dict = {
   },
 
   en: {
+    meta: {
+      title: 'Kervan Heat — Contract heat treatment · Kartepe / Kocaeli',
+      description:
+        'Contract heat treatment in controlled-atmosphere pit furnaces. Hardening and tempering. 42CrMo, 42CrMoA and other alloys.',
+      siteDescription: 'Contract heat treatment in controlled-atmosphere pit furnaces.',
+      service: {
+        type: 'Contract heat treatment',
+        name: 'Contract heat treatment',
+        description:
+          'Hardening and tempering in controlled-atmosphere pit furnaces. 42CrMo, 42CrMoA and other alloys — under our own measurement and control discipline.',
+        catalogName: 'Heat treatment services',
+        offers: [
+          {
+            name: 'Hardening & Tempering',
+            description: 'Heating in a pit furnace, controlled cooling, two-pot tempering line.',
+          },
+          {
+            name: 'Contract heat treatment',
+            description: 'Special alloys, special temperature curves, special batch sizes.',
+          },
+        ],
+      },
+    },
+    notFound: {
+      eyebrow: '404',
+      title: 'Page not found.',
+      body: 'The page you are looking for may have moved or never existed.',
+      home: 'Back to the home page',
+    },
     nav: {
       services: 'Services',
       capacity: 'Capacity',

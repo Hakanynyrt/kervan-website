@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { SectionHeading } from '@kervan/ui';
-import { fadeUp, inViewOnce, staggerContainer } from '@kervan/motion';
+import { fadeUp, inViewOnce, staggerContainer, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
 
 interface Props {
@@ -8,6 +8,8 @@ interface Props {
 }
 
 export default function TechnicalCapacity({ t }: Props) {
+  // Static (prerendered) mode and reduced motion render the final state.
+  const reduce = useReducedMotion();
   return (
     <section
       id="teknik-kapasite"
@@ -22,7 +24,7 @@ export default function TechnicalCapacity({ t }: Props) {
       <motion.dl
         className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-hair m-0"
         variants={staggerContainer(0, 0.08)}
-        initial="hidden"
+        initial={reduce ? false : 'hidden'}
         whileInView="show"
         viewport={inViewOnce}
       >

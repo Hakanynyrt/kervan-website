@@ -8,7 +8,9 @@ export type TechBundle = { tr?: TechContent; en?: TechContent };
 const hasHint = (): boolean =>
   document.cookie.split(';').some((c) => c.trim() === 'kv_tech_hint=1');
 
-const wantsLogin = (): boolean => window.location.hash === '#giris';
+/** SSR-safe: the prerender has no window (and never shows the login form). */
+const wantsLogin = (): boolean =>
+  typeof window !== 'undefined' && window.location.hash === '#giris';
 
 /** Strict check: only a real 200 JSON answer with authed === true counts. */
 async function fetchContent(): Promise<TechBundle | null> {

@@ -479,6 +479,39 @@ export const DICT: Dict = {
       body: 'Aradığınız sayfa taşınmış veya hiç var olmamış olabilir.',
       cta: 'Anasayfaya dön',
     },
+    meta: {
+      siteName: 'Kervan Breaker',
+      websiteDesc: 'Hidrolik kırıcı yedek parçaları — keski, piston, burç, tamir kiti.',
+      homeTitle: 'Kervan Breaker — Hidrolik kırıcı yedek parçaları',
+      homeDesc:
+        "Keski, piston, burç, sızdırmazlık. 2004'ten beri Kocaeli'de üretiliyor. 40+ kırıcı markası uyumlu.",
+      homeListName: 'Hidrolik kırıcı yedek parça aileleri',
+      productsTitle: 'Ürünler — Kervan Breaker',
+      productsDesc:
+        'Hidrolik kırıcı yedek parçalarımız: keski, piston, burç, tie rod, tamir kiti, kama, alt gövde, saplama, yan saplama.',
+      productsListName: 'Hidrolik kırıcı yedek parçaları',
+      brandsTitle: 'Marka Uyumluluk — Kervan Breaker',
+      brandsDesc:
+        'Atlas Copco, Furukawa, Soosan, Indeco, NPK, Rammer, Montabert, Epiroc, Sandvik, Toku, Kobelco, Hanwoo, Krupp, D&A, MTB.',
+      productionTitle: 'Üretim & Kalite — Kervan Breaker',
+      productionDesc:
+        '42CrMo / 42CrMoA standart alaşım. Kontrollü atmosfer pit-tip fırınlarda sertleştirme + temperleme.',
+      productionServiceName: 'Hidrolik kırıcı parça üretimi + ısıl işlem entegrasyonu',
+      productionServiceDesc:
+        '42CrMo / 42CrMoA standart alaşım. Kendi pit-tip fırınımızda sertleştirme + temperleme.',
+      aboutTitle: 'Hakkımızda — Kervan Breaker',
+      aboutDesc:
+        "Kervan Makina, Kartepe / Kocaeli'de fason ısıl işlem ve hidrolik kırıcı yedek parça üreten aile şirketi.",
+      contactTitle: 'İletişim — Kervan Breaker',
+      contactDesc: 'Hidrolik kırıcı yedek parça teklifi için: {email} · {phone}.',
+      notFoundTitle: '404 — Kervan Breaker',
+      crumbHome: 'Anasayfa',
+      crumbProducts: 'Ürünler',
+      crumbBrands: 'Marka Uyumluluk',
+      crumbProduction: 'Üretim & Kalite',
+      crumbAbout: 'Hakkımızda',
+      crumbContact: 'İletişim',
+    },
     footer: {
       brand: 'Kervan Breaker',
       tag: 'Kocaeli · 2004',
@@ -962,6 +995,39 @@ export const DICT: Dict = {
       title: 'Page not found.',
       body: 'The page you are looking for may have moved or never existed.',
       cta: 'Back to home',
+    },
+    meta: {
+      siteName: 'Kervan Breaker',
+      websiteDesc: 'Hydraulic breaker spare parts — chisels, pistons, bushings, repair kits.',
+      homeTitle: 'Kervan Breaker — Hydraulic breaker spare parts',
+      homeDesc:
+        'Chisels, pistons, bushings, seals. Made in Kocaeli since 2004. Compatible with 40+ breaker brands.',
+      homeListName: 'Hydraulic breaker spare-part families',
+      productsTitle: 'Products — Kervan Breaker',
+      productsDesc:
+        'Our hydraulic breaker spare parts: chisel, piston, bushing, tie rod, repair kit, wedge, lower housing, stud, side stud.',
+      productsListName: 'Hydraulic breaker spare parts',
+      brandsTitle: 'Brand Compatibility — Kervan Breaker',
+      brandsDesc:
+        'Atlas Copco, Furukawa, Soosan, Indeco, NPK, Rammer, Montabert, Epiroc, Sandvik, Toku, Kobelco, Hanwoo, Krupp, D&A, MTB.',
+      productionTitle: 'Production & Quality — Kervan Breaker',
+      productionDesc:
+        '42CrMo / 42CrMoA standard alloy. Hardening + tempering in controlled-atmosphere pit furnaces.',
+      productionServiceName: 'Hydraulic breaker part production + integrated heat treatment',
+      productionServiceDesc:
+        '42CrMo / 42CrMoA standard alloy. Hardening + tempering in our own pit furnace.',
+      aboutTitle: 'About — Kervan Breaker',
+      aboutDesc:
+        'Kervan Makina is a family company in Kartepe / Kocaeli producing contract heat treatment and hydraulic breaker spare parts.',
+      contactTitle: 'Contact — Kervan Breaker',
+      contactDesc: 'For a hydraulic breaker spare-part quote: {email} · {phone}.',
+      notFoundTitle: '404 — Kervan Breaker',
+      crumbHome: 'Home',
+      crumbProducts: 'Products',
+      crumbBrands: 'Brand Compatibility',
+      crumbProduction: 'Production & Quality',
+      crumbAbout: 'About',
+      crumbContact: 'Contact',
     },
     footer: {
       brand: 'Kervan Breaker',

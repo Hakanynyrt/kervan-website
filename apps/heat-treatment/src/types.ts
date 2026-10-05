@@ -28,7 +28,29 @@ export interface CapacityItem {
   note?: string;
 }
 
+/** Page metadata and JSON-LD text (prerendered into <head>). */
+export interface MetaBlock {
+  title: string;
+  description: string;
+  /** WebSite JSON-LD description. */
+  siteDescription: string;
+  service: {
+    type: string;
+    name: string;
+    description: string;
+    catalogName: string;
+    offers: { name: string; description: string }[];
+  };
+}
+
 export interface DictBlock {
+  meta: MetaBlock;
+  notFound: {
+    eyebrow: string;
+    title: string;
+    body: string;
+    home: string;
+  };
   nav: {
     services: string;
     capacity: string;

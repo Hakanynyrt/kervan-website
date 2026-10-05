@@ -1,19 +1,35 @@
 import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { DictBlock, Lang } from '../types';
 import { SectionHeading } from '@kervan/ui';
+import { BOT_UA_PATTERN } from '@kervan/motion';
 import { EXPORTS } from '../lib/exports';
 
 // The globe pulls in three.js (~700 KB) and runs a WebGL loop: load it as its own chunk,
 // and only once the section is within a few screens of the viewport.
 const ExportsGlobe = lazy(() => import('./ExportsGlobe'));
 
-/** Square placeholder that swaps to its children when it comes near the viewport. */
+/** Bots and headless browsers never load the globe (it is decoration). */
+const isBot = () => {
+  try {
+    return navigator.webdriver || new RegExp(BOT_UA_PATTERN, 'i').test(navigator.userAgent || '');
+  } catch {
+    return false;
+  }
+};
+
+/** Square placeholder that swaps to its children when it comes near the viewport.
+ *  Always the placeholder on the server and on the first client render (so
+ *  the prerendered markup hydrates cleanly); the swap happens after mount. */
 function NearViewport({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [near, setNear] = useState(typeof IntersectionObserver === 'undefined');
+  const [near, setNear] = useState(false);
   useEffect(() => {
     const el = ref.current;
-    if (near || !el) return;
+    if (near || !el || isBot()) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      setNear(true);
+      return;
+    }
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
