@@ -169,6 +169,7 @@ function Content({
               status={catalog.status}
               catalog={catalog.catalog}
               popular={catalog.popular}
+              guide={catalog.guide}
               retry={catalog.retry}
             />
           </DrawingsContext.Provider>

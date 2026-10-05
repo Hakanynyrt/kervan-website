@@ -1,7 +1,15 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
-import type { DictBlock, Lang, VegaCatalog, VegaItem, VegaPopular, VegaTip } from '../../types';
+import type {
+  DictBlock,
+  Lang,
+  VegaCatalog,
+  VegaGuide,
+  VegaItem,
+  VegaPopular,
+  VegaTip,
+} from '../../types';
 import type { CatalogStatus } from '../../lib/use-vega-catalog';
 import {
   DEFAULT_TOL,
@@ -47,6 +55,7 @@ interface Props {
   status: CatalogStatus;
   catalog: VegaCatalog | null;
   popular?: VegaPopular | null;
+  guide?: VegaGuide | null;
   retry: () => void;
 }
 
@@ -82,7 +91,7 @@ const CHIP_CLS: Record<ChipState, string> = {
 const fill = (tpl: string, vars: Record<string, string | number>): string =>
   Object.entries(vars).reduce((s, [k, v]) => s.replace(`{${k}}`, String(v)), tpl);
 
-export default function CatalogTab({ t, lang, status, catalog, popular, retry }: Props) {
+export default function CatalogTab({ t, lang, status, catalog, popular, guide, retry }: Props) {
   const c = t.catalogUi;
   const [text, setText] = useState('');
   const [brand, setBrand] = useState('');
@@ -539,6 +548,8 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
         </ul>
       </details>
 
+      {guide?.breakage && <BreakageGuide g={guide.breakage} t={t} lang={lang} />}
+
       {results.measuring && likely && (
         <LikelyCard
           likely={likely}
@@ -851,6 +862,72 @@ function CopyButton({ value, t }: { value: string; t: DictBlock }) {
         {done ? t.catalogUi.copied : ''}
       </span>
     </button>
+  );
+}
+
+/** Owner-only reading guide from KV (guide:v1): where a tip breaks and how warranty is judged. */
+function BreakageGuide({
+  g,
+  t,
+  lang,
+}: {
+  g: NonNullable<VegaGuide['breakage']>;
+  t: DictBlock;
+  lang: Lang;
+}) {
+  const c = t.catalogUi;
+  const tr = lang === 'tr';
+  return (
+    <details className="border border-hair rounded-[14px] px-5 md:px-6 py-3">
+      <summary
+        className={`cursor-pointer min-h-11 flex items-center font-serif text-xl text-ink ${focusRing} rounded-md`}
+      >
+        {c.guideTitle}
+      </summary>
+      <div className="flex flex-col gap-6 pb-3">
+        <p className="font-sans text-sm text-ink-mid mt-2 mb-0 max-w-[75ch]">{g.intro[lang]}</p>
+        <ul className="list-none p-0 m-0 grid grid-cols-1 gap-4">
+          {g.zones.map((z) => (
+            <li key={z.key} className="rounded-[14px] border border-hair p-4 flex flex-col gap-3">
+              <span className="font-serif text-lg text-ink">{tr ? z.nameTr : z.nameEn}</span>
+              <div>
+                <span className={labelCls}>{c.guideCauses}</span>
+                <p className="font-sans text-sm text-ink m-0 mt-1 max-w-[75ch]">
+                  {tr ? z.causesTr : z.causesEn}
+                </p>
+              </div>
+              <div>
+                <span className={labelCls}>{c.guideWarranty}</span>
+                <p className="font-sans text-sm text-ink m-0 mt-1 max-w-[75ch]">
+                  {tr ? z.warrantyTr : z.warrantyEn}
+                </p>
+              </div>
+              {z.sources.length > 0 && (
+                <p className="font-sans text-xs text-ink-mid m-0">
+                  {c.guideSources}: {z.sources.join('; ')}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+        {(
+          [
+            [c.guideDefectTitle, g.defectVsMisuse[lang]],
+            [c.guideClaimTitle, g.claimChecklist[lang]],
+          ] as const
+        ).map(([title, list]) => (
+          <section key={title}>
+            <h3 className="font-serif text-lg text-ink m-0 mb-2">{title}</h3>
+            <ul className="m-0 pl-5 flex flex-col gap-2 font-sans text-sm text-ink max-w-[75ch]">
+              {list.map((x) => (
+                <li key={x}>{x}</li>
+              ))}
+            </ul>
+          </section>
+        ))}
+        <p className="font-sans text-xs text-ink-mid m-0 max-w-[75ch]">{g.disclaimer[lang]}</p>
+      </div>
+    </details>
   );
 }
 
