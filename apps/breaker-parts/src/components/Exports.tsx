@@ -1,7 +1,36 @@
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { DictBlock, Lang } from '../types';
 import { SectionHeading } from '@kervan/ui';
-import ExportsGlobe from './ExportsGlobe';
 import { EXPORTS } from '../lib/exports';
+
+// The globe pulls in three.js (~700 KB) and runs a WebGL loop: load it as its own chunk,
+// and only once the section is within a few screens of the viewport.
+const ExportsGlobe = lazy(() => import('./ExportsGlobe'));
+
+/** Square placeholder that swaps to its children when it comes near the viewport. */
+function NearViewport({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [near, setNear] = useState(typeof IntersectionObserver === 'undefined');
+  useEffect(() => {
+    const el = ref.current;
+    if (near || !el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setNear(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: '800px 0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [near]);
+  if (near) return <>{children}</>;
+  return (
+    <div ref={ref} aria-hidden="true" className="w-full max-w-[640px] mx-auto aspect-square" />
+  );
+}
 
 interface Props {
   t: DictBlock;
@@ -21,7 +50,15 @@ export default function Exports({ t, lang }: Props) {
       className="min-h-dvh flex flex-col justify-center py-8 md:py-16"
     >
       <SectionHeading eyebrow={t.exports.eyebrow} title={title} aside={t.exports.aside} />
-      <ExportsGlobe lang={lang} />
+      <NearViewport>
+        <Suspense
+          fallback={
+            <div aria-hidden="true" className="w-full max-w-[640px] mx-auto aspect-square" />
+          }
+        >
+          <ExportsGlobe lang={lang} />
+        </Suspense>
+      </NearViewport>
     </section>
   );
 }

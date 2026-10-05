@@ -1,6 +1,6 @@
+import { lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageMeta, JsonLd, itemList, KERVAN_BREAKER_URL } from '@kervan/seo';
-import Scene from '../components/Scene';
 import OpeningHold from '../components/OpeningHold';
 import Hero from '../components/Hero';
 import Products from '../components/Products';
@@ -12,6 +12,9 @@ import Exports from '../components/Exports';
 import Contact from '../components/Contact';
 import { PRODUCTS } from '../data/products';
 import type { DictBlock, Lang } from '../types';
+
+// three.js is ~700 KB: load it as its own chunk, in parallel with the page, only here.
+const Scene = lazy(() => import('../components/Scene'));
 
 interface Props {
   t: DictBlock;
@@ -46,7 +49,9 @@ export default function Home({ t, lang }: Props) {
       />
 
       {/* 3D BG — vanilla Three.js, fixed full-viewport behind everything. */}
-      <Scene onSecret={() => navigate('/teknik-bilgiler')} />
+      <Suspense fallback={null}>
+        <Scene onSecret={() => navigate('/teknik-bilgiler')} />
+      </Suspense>
 
       <div className="app-root">
         {/* Cinematic opening hold — first viewport is just chisel + starfield. */}

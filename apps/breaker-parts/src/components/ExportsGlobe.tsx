@@ -94,7 +94,13 @@ export default function ExportsGlobe({ lang }: Props) {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    // Follows the OS setting live, not just its value at mount.
+    const reducedMq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    let reduced = reducedMq?.matches ?? false;
+    const onReducedChange = () => {
+      reduced = reducedMq?.matches ?? false;
+    };
+    reducedMq?.addEventListener?.('change', onReducedChange);
 
     let renderer: THREE.WebGLRenderer;
     try {
@@ -105,9 +111,12 @@ export default function ExportsGlobe({ lang }: Props) {
       });
     } catch (e) {
       console.error('[exports-globe] WebGLRenderer init failed', e);
+      reducedMq?.removeEventListener?.('change', onReducedChange);
       return;
     }
-    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    // Phones render at most 1.5x (same reasoning as the opening scene).
+    const coarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+    renderer.setPixelRatio(Math.min(coarse ? 1.5 : 2, window.devicePixelRatio || 1));
     const cw = () => container.clientWidth || 1;
     const ch = () => container.clientHeight || 1;
     renderer.setSize(cw(), ch(), false);
@@ -461,6 +470,19 @@ export default function ExportsGlobe({ lang }: Props) {
     let lastT = performance.now();
     const POSE_TC = 0.35; // seconds — chisel ease time-constant
 
+    // Draw only while the globe is on (or close to) the screen; the loop itself stays cheap.
+    let onScreen = true;
+    const io =
+      typeof IntersectionObserver === 'undefined'
+        ? null
+        : new IntersectionObserver(
+            ([entry]) => {
+              onScreen = entry.isIntersecting;
+            },
+            { rootMargin: '100px' },
+          );
+    io?.observe(container);
+
     const tick = (now: number) => {
       const dt = Math.min(0.05, (now - lastT) / 1000);
       lastT = now;
@@ -500,13 +522,15 @@ export default function ExportsGlobe({ lang }: Props) {
       chiselWrapper.position.copy(currentPos);
       chiselWrapper.quaternion.copy(currentQuat);
 
-      renderer.render(scene, camera);
+      if (onScreen) renderer.render(scene, camera);
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
+      io?.disconnect();
+      reducedMq?.removeEventListener?.('change', onReducedChange);
       abortCtrl.abort();
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);

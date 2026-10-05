@@ -1,5 +1,5 @@
 import { useRef, type ReactNode } from 'react';
-import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion';
+import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion';
 
 interface Props {
   /** Plain string content (split into words) or a single React node. */
@@ -7,7 +7,7 @@ interface Props {
   /** Class names applied to the wrapping <p>. Consumer owns presentation
    *  (font, size, color) — this primitive is purely a scroll-reveal driver. */
   className?: string;
-  /** Min opacity each word starts at. Default 0.18. */
+  /** Min opacity each word starts at. Default 0.4 (0.18 left unrevealed text unreadable). */
   baseOpacity?: number;
 }
 
@@ -15,14 +15,16 @@ interface Props {
  *  Kullanıcı section'a girdikçe metin parça parça koyulaşır.
  *  Tek bir text bloğu için tasarlandı (paragraf seviyesi).
  *  Stilsizdir — consumer className ile font/size/color verir. */
-export function ScrollReveal({ children, className, baseOpacity = 0.18 }: Props) {
+export function ScrollReveal({ children, className, baseOpacity = 0.4 }: Props) {
   const ref = useRef<HTMLParagraphElement>(null);
+  const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start 0.85', 'start 0.25'],
   });
 
-  if (typeof children !== 'string') {
+  // Reduced motion: no progressive reveal, the text is simply fully visible.
+  if (reduced || typeof children !== 'string') {
     return (
       <p ref={ref} className={className}>
         {children}

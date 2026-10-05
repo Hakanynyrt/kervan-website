@@ -13,7 +13,8 @@
 
   --color-ink: #e8e2d6;
   --color-ink-mid: #b8afa0;
-  --color-ink-soft: #7a7066;
+  /* >= 4.5:1 on bg, bg-soft and bg-warm (was #7a7066: 3.8:1 on bg-soft) */
+  --color-ink-soft: #918879;
 
   --color-brand: #e8431b;
   --color-brand-hi: #ff5c32;
@@ -22,6 +23,9 @@
 
   --color-hair: #262629;
   --color-hair-strong: #36363b;
+
+  /* WhatsApp's dark green: white glyph reaches 4.1:1 (the bright #25d366 only 2:1) */
+  --color-whatsapp: #128c7e;
 
   --color-ok: #3fb173;
   --color-err: #ff7b6e;

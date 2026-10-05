@@ -126,7 +126,7 @@ export default function Contact({ t }: Props) {
               name="message"
               rows={4}
               maxLength={3000}
-              className="bg-transparent border-b border-hair pb-2 font-serif text-lg text-ink resize-none focus:border-ink transition-colors"
+              className="bg-transparent border-b border-ink-soft pb-2 font-serif text-lg text-ink resize-none focus:border-ink transition-colors"
             />
           </label>
 
@@ -180,7 +180,7 @@ function Field({ label, name, type = 'text', required, maxLength }: FieldProps) 
         autoComplete={AUTOCOMPLETE[name]}
         required={required}
         maxLength={maxLength}
-        className="bg-transparent border-b border-hair pb-2 font-serif text-lg text-ink focus:border-ink transition-colors"
+        className="bg-transparent border-b border-ink-soft pb-2 font-serif text-lg text-ink focus:border-ink transition-colors"
       />
     </label>
   );
