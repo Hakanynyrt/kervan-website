@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
 import type { DictBlock, Lang, VegaCatalog, VegaItem, VegaPopular, VegaTip } from '../../types';
 import type { CatalogStatus } from '../../lib/use-vega-catalog';
 import {
@@ -109,6 +111,10 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
     return m;
   }, [raw, keyCount]);
 
+  // The inputs stay instant; the 609-row search follows one render behind while typing.
+  const dText = useDeferredValue(text);
+  const dMeasure = useDeferredValue(measure);
+
   const items = catalog?.items;
   const brands = useMemo(() => (items ? brandsOf(items) : []), [items]);
   const idx = useMemo(() => (items ? buildIndex(items) : null), [items]);
@@ -121,29 +127,29 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
       items && idx
         ? searchCatalog(
             items,
-            { text, brand, tip, hideLow, measure, tol, popularOnly },
+            { text: dText, brand, tip, hideLow, measure: dMeasure, tol, popularOnly },
             idx,
             pop ?? undefined,
           )
         : null,
-    [items, idx, pop, text, brand, tip, hideLow, popularOnly, measure, tol],
+    [items, idx, pop, dText, brand, tip, hideLow, popularOnly, dMeasure, tol],
   );
 
   const scored = useMemo<Scored[]>(
     () =>
       results?.measuring
-        ? rankByScore(results.pool, measure, (it) => (pop ? popularPrior(pop, it) : 0))
+        ? rankByScore(results.pool, dMeasure, (it) => (pop ? popularPrior(pop, it) : 0))
         : [],
-    [results, measure, pop],
+    [results, dMeasure, pop],
   );
   const fieldsFor = useMemo(() => new Map(scored.map((x) => [x.item, x.fields])), [scored]);
   const likely = useMemo(
-    () => (scored.length && likelyIsMeaningful(measure) ? mostLikely(scored) : null),
-    [scored, measure],
+    () => (scored.length && likelyIsMeaningful(dMeasure) ? mostLikely(scored) : null),
+    [scored, dMeasure],
   );
   const next = useMemo(
-    () => (scored.length ? nextBestMeasure(measure, scored) : null),
-    [scored, measure],
+    () => (scored.length ? nextBestMeasure(dMeasure, scored) : null),
+    [scored, dMeasure],
   );
   const [likelyOpen, setLikelyOpen] = useState(false);
 
@@ -151,9 +157,18 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
 
   if (status === 'idle' || status === 'loading') {
     return (
-      <p className="font-sans text-ink-mid" role="status">
-        {c.loading}
-      </p>
+      <div role="status" aria-busy="true" className="flex flex-col gap-6">
+        <p className="font-sans text-ink-mid m-0">{c.loading}</p>
+        <div aria-hidden="true" className="flex flex-col gap-6 animate-pulse">
+          <div className="h-11 rounded-md bg-bg-soft border border-hair" />
+          <div className="h-44 rounded-[14px] bg-bg-soft border border-hair" />
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="h-32 rounded-[14px] bg-bg-soft border border-hair" />
+            ))}
+          </div>
+        </div>
+      </div>
     );
   }
   if (status !== 'ready' || !catalog || !items || !results || !idx || !pop) {
@@ -189,9 +204,10 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
   };
 
   const renderHits = (hits: Hit[], max: number) =>
-    hits.slice(0, max).map((h) => (
+    hits.slice(0, max).map((h, i) => (
       <ItemCard
         key={h.item.id}
+        enterIndex={i < 3 ? i : undefined}
         hit={h}
         t={t}
         lang={lang}
@@ -325,7 +341,7 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
                   onChange={(e) => setRaw({ ...raw, [key]: e.target.value })}
                   aria-invalid={invalid}
                   aria-describedby={invalid ? `vc-m-${key}-e` : hot ? 'vc-next' : undefined}
-                  className={`${inputCls} ${hot ? 'border-brand ring-2 ring-brand/40' : ''}`}
+                  className={`${inputCls} ${hot ? 'vc-pulse border-brand ring-2 ring-brand/40' : ''}`}
                 />
                 {invalid && (
                   <span id={`vc-m-${key}-e`} className="font-sans text-xs text-err">
@@ -347,7 +363,7 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
                   value={keyCount}
                   onChange={(e) => setKeyCount(e.target.value as '' | '1' | '2')}
                   aria-describedby={kcHot ? 'vc-next' : undefined}
-                  className={`${inputCls} ${kcHot ? 'border-brand ring-2 ring-brand/40' : ''}`}
+                  className={`${inputCls} ${kcHot ? 'vc-pulse border-brand ring-2 ring-brand/40' : ''}`}
                 >
                   <option value="">{c.keyAny}</option>
                   <option value="1">{c.keySingle}</option>
@@ -374,19 +390,29 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
             </select>
           </div>
         </div>
-        {next && (
-          <p id="vc-next" role="status" className="font-sans text-sm text-ink mt-5 mb-0">
-            <span className="text-brand-hi font-medium">
-              {fill(c.nextMeasure, { field: c.fieldNames[next.key] })}
-            </span>{' '}
-            <span className="text-ink-mid">
-              {fill(c.nextMeasureHint, {
-                a: Math.round(next.before),
-                b: Math.max(1, Math.round(next.after)),
-              })}
-            </span>
-          </p>
-        )}
+        <div className="mt-5 min-h-11">
+          {next && (
+            <motion.p
+              key={next.key}
+              id="vc-next"
+              role="status"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: durations.md, ease: editorialEase }}
+              className="font-sans text-sm text-ink m-0"
+            >
+              <span className="text-brand-hi font-medium">
+                {fill(c.nextMeasure, { field: c.fieldNames[next.key] })}
+              </span>{' '}
+              <span className="text-ink-mid">
+                {fill(c.nextMeasureHint, {
+                  a: Math.round(next.before),
+                  b: Math.max(1, Math.round(next.after)),
+                })}
+              </span>
+            </motion.p>
+          )}
+        </div>
         <div className="mt-5">
           <button type="button" onClick={clearMeasure} className={btnCls}>
             {c.clear}
@@ -495,6 +521,40 @@ export default function CatalogTab({ t, lang, status, catalog, popular, retry }:
   );
 }
 
+/* ── motion helpers ─────────────────────────────────────────────── */
+
+/** Detail panel that opens and closes with a short height + opacity transition.
+ *  Overflow is clipped only while it moves, so focus rings are never cut off. */
+function Collapse({ open, id, children }: { open: boolean; id: string; children: ReactNode }) {
+  const reduce = useReducedMotion();
+  const d = reduce ? 0 : durations.sm;
+  return (
+    <AnimatePresence initial={false}>
+      {open && (
+        <motion.div
+          id={id}
+          initial={{ height: 0, opacity: 0, overflow: 'hidden' }}
+          animate={{
+            height: 'auto',
+            opacity: 1,
+            overflow: 'visible',
+            // switch to visible only once the panel has finished opening
+            transition: { duration: d, ease: editorialEase, overflow: { duration: 0, delay: d } },
+          }}
+          exit={{
+            height: 0,
+            opacity: 0,
+            overflow: 'hidden',
+            transition: { duration: d, ease: editorialEase, overflow: { duration: 0 } },
+          }}
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 /* ── single result ─────────────────────────────────────────────── */
 
 function WarnBadge({ label }: { label: string }) {
@@ -538,6 +598,7 @@ function summary(it: VegaItem, lang: Lang, t: DictBlock): string {
 }
 
 function ItemCard({
+  enterIndex,
   hit,
   t,
   lang,
@@ -551,6 +612,8 @@ function ItemCard({
   pop,
   onMeasure,
 }: {
+  /** position among the first few results: those fade in, the rest appear at once */
+  enterIndex?: number;
   hit: Hit;
   t: DictBlock;
   lang: Lang;
@@ -567,10 +630,16 @@ function ItemCard({
   const c = t.catalogUi;
   const it = hit.item;
   const panelId = `vc-d-${it.id}`;
+  const reduce = useReducedMotion();
   // The breaker name the search matched points to tips with different sizes.
   const conflictN = hit.matched ? geometriesFor(idx, hit.matched) : 0;
   return (
-    <li className="bg-bg-soft border border-hair rounded-[14px] p-5 flex flex-col gap-3 min-w-0">
+    <motion.li
+      initial={enterIndex === undefined || reduce ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: durations.sm, ease: editorialEase, delay: (enterIndex ?? 0) * 0.06 }}
+      className="bg-bg-soft border border-hair rounded-[14px] p-5 flex flex-col gap-3 min-w-0"
+    >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <h3 className="font-serif text-xl text-ink m-0 break-words">{it.model}</h3>
@@ -632,12 +701,10 @@ function ItemCard({
           {c.compare}
         </button>
       </div>
-      {open && (
-        <div id={panelId}>
-          <Detail item={it} t={t} lang={lang} idx={idx} />
-        </div>
-      )}
-    </li>
+      <Collapse open={open} id={panelId}>
+        <Detail item={it} t={t} lang={lang} idx={idx} />
+      </Collapse>
+    </motion.li>
   );
 }
 
@@ -879,7 +946,7 @@ function Chips({ fields, t, lang }: { fields: FieldScore[]; t: DictBlock; lang: 
       {fields.map((f) => (
         <li
           key={f.key}
-          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-sans text-xs ${CHIP_CLS[f.state]}`}
+          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-sans text-xs transition-colors duration-[250ms] ${CHIP_CLS[f.state]}`}
         >
           <span>{f.key === 'keyCount' ? c.fKey : c.diffLabels[f.key]}</span>
           <span className="font-medium">
@@ -921,6 +988,7 @@ function LikelyCard({
   onOpen: () => void;
 }) {
   const c = t.catalogUi;
+  const reduce = useReducedMotion();
   const it = likely.items[0];
   const others = likely.items.slice(1);
   const pct = Math.round(likely.p * 100);
@@ -941,6 +1009,14 @@ function LikelyCard({
           {c.likelyTitle}
         </h2>
         <span className="font-serif text-2xl text-ink">{fill(c.likelyPct, { p: pct })}</span>
+      </div>
+      <div aria-hidden="true" className="h-1.5 rounded-full bg-hair overflow-hidden">
+        <motion.div
+          className="h-full w-full origin-left rounded-full bg-brand"
+          initial={reduce ? false : { scaleX: 0 }}
+          animate={{ scaleX: pct / 100 }}
+          transition={{ duration: reduce ? 0 : durations.md, ease: editorialEase }}
+        />
       </div>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
@@ -995,11 +1071,9 @@ function LikelyCard({
           {open ? c.hideDetails : c.details}
         </button>
       </div>
-      {open && (
-        <div id="vc-likely-d">
-          <Detail item={it} t={t} lang={lang} idx={idx} />
-        </div>
-      )}
+      <Collapse open={open} id="vc-likely-d">
+        <Detail item={it} t={t} lang={lang} idx={idx} />
+      </Collapse>
     </section>
   );
 }
@@ -1021,8 +1095,15 @@ function CompareTable({
 }) {
   const c = t.catalogUi;
   const all = items.map((it) => rows(it, t, lang, true));
+  const reduce = useReducedMotion();
   return (
-    <section aria-label={c.compareTitle} className="border border-hair-strong rounded-[14px] p-5">
+    <motion.section
+      aria-label={c.compareTitle}
+      initial={reduce ? false : { opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: durations.sm, ease: editorialEase }}
+      className="border border-hair-strong rounded-[14px] p-5"
+    >
       <div className="flex items-center justify-between gap-3 mb-4">
         <h2 className="font-serif text-xl text-ink m-0">{c.compareTitle}</h2>
         <button type="button" onClick={onClose} className={btnCls}>
@@ -1072,6 +1153,6 @@ function CompareTable({
           </tbody>
         </table>
       </div>
-    </section>
+    </motion.section>
   );
 }
