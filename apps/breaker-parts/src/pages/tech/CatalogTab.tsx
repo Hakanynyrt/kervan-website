@@ -35,6 +35,7 @@ import {
   rankByScore,
 } from '../../lib/vega-score';
 import { type Popularity, buildPopularity, popularPrior } from '../../lib/vega-popular';
+import { useDrawings } from '../../lib/use-vega-drawings';
 
 interface Props {
   t: DictBlock;
@@ -690,6 +691,48 @@ function rows(
   return out;
 }
 
+/** Technical drawing of the tip (side view with dimensions), shown inside the detail
+ *  panel. The images come from the owner-only /api/tech/drawings and are loaded once,
+ *  when the first panel opens. Nothing is shown when no drawing was uploaded. */
+function Drawing({ item, t }: { item: VegaItem; t: DictBlock }) {
+  const c = t.catalogUi;
+  const d = useDrawings();
+  const load = d?.load;
+  useEffect(() => load?.(), [load]);
+  if (!d || d.status === 'idle' || d.status === 'missing') return null;
+  const src = d.status === 'ready' ? d.src(item.id) : null;
+  if (d.status === 'ready' && !src) return null;
+  return (
+    <figure className="m-0 flex flex-col gap-2">
+      <figcaption className={labelCls}>{c.drawingTitle}</figcaption>
+      {d.status === 'error' ? (
+        <div role="alert" className="flex flex-wrap items-center gap-3">
+          <p className="font-sans text-sm text-ink-mid m-0">{c.drawingError}</p>
+          <button type="button" onClick={d.retry} className={btnCls}>
+            {c.retry}
+          </button>
+        </div>
+      ) : src ? (
+        <img
+          src={src}
+          alt={fill(c.drawingAlt, { model: item.model })}
+          width={401}
+          height={118}
+          className="block w-full max-w-[520px] h-auto rounded-md border border-hair bg-bg-soft select-none"
+          style={{ filter: 'invert(1)', mixBlendMode: 'screen' }}
+          draggable={false}
+        />
+      ) : (
+        <div
+          role="status"
+          aria-label={c.drawingLoading}
+          className="w-full max-w-[520px] aspect-[401/118] rounded-md border border-hair bg-bg-soft"
+        />
+      )}
+    </figure>
+  );
+}
+
 function Detail({
   item: it,
   t,
@@ -734,6 +777,7 @@ function Detail({
           ))}
         </ul>
       )}
+      <Drawing item={it} t={t} />
       <dl className="m-0 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
         {rows(it, t, lang, it.collarDiameterMm != null).map((r) => (
           <div key={r.k}>
