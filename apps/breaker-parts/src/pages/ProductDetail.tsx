@@ -80,7 +80,7 @@ export default function ProductDetail({ t, lang }: Props) {
             {t.productDetail.backLink}
           </Link>
 
-          <div className="grid grid-cols-12 gap-8 md:gap-12 items-start">
+          <div className="grid grid-cols-12 gap-x-0 gap-y-8 md:gap-12 items-start">
             {/* Photo / placeholder — left, sticky on desktop */}
             <motion.div
               className="col-span-12 lg:col-span-6 lg:sticky lg:top-24"

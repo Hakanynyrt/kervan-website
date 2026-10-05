@@ -1,6 +1,15 @@
 @import 'tailwindcss';
 @import '@kervan/ui/tokens.css';
 
+/* One visible focus ring for every keyboard-focusable element (WCAG 2.4.7).
+   In the base layer so a component can still restyle it with a utility class. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
 /* Tailwind v4 — scan @kervan/ui sources so utility classes used inside
    the package are emitted in the bundle. */
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";

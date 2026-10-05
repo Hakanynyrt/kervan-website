@@ -26,7 +26,7 @@ export default function Brands({ t }: Props) {
 
       <section className="pt-32 pb-16 md:pt-40 md:pb-24">
         <motion.div
-          className="max-w-[1280px] mx-auto px-6 md:px-8 mb-16 md:mb-20 grid grid-cols-12 gap-8 items-end"
+          className="max-w-[1280px] mx-auto px-6 md:px-8 mb-16 md:mb-20 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end"
           variants={fadeUp}
           initial="hidden"
           animate="show"

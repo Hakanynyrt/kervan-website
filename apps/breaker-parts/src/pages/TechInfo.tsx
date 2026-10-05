@@ -182,7 +182,7 @@ function Content({
           aria-labelledby="tech-tab-general"
         >
           <motion.div
-            className="max-w-[1280px] mx-auto px-6 md:px-8 mb-16 md:mb-20 grid grid-cols-12 gap-8 items-end"
+            className="max-w-[1280px] mx-auto px-6 md:px-8 mb-16 md:mb-20 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end"
             variants={fadeUp}
             initial="hidden"
             animate="show"

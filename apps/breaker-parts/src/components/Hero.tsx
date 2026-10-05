@@ -1,6 +1,13 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import type { DictBlock } from '../types';
-import { staggerContainer, lineReveal, fadeUp } from '../lib/motion';
+import {
+  durations,
+  editorialEase,
+  fadeUp,
+  inViewOnce,
+  lineReveal,
+  staggerContainer,
+} from '../lib/motion';
 
 interface Props {
   t: DictBlock;
@@ -8,6 +15,17 @@ interface Props {
 
 export default function Hero({ t }: Props) {
   const reduced = useReducedMotion();
+  // The opening hold keeps the first viewport empty, so the hero is below the fold at load.
+  // It plays when it scrolls into view (once) instead of finishing unseen on mount.
+  const view = { whileInView: 'show', viewport: inViewOnce } as const;
+  const hidden = reduced ? 'show' : 'hidden';
+  // Explicit initial/whileInView objects (not variants) so the delay below really applies.
+  const rise = (delay: number, y: number, duration: number) => ({
+    initial: reduced ? (false as const) : { opacity: 0, y },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: inViewOnce,
+    transition: { duration, ease: editorialEase, delay },
+  });
 
   // Whitespace-split her satır için kelime listesi.
   const words1 = t.hero.title1.split(/\s+/).filter(Boolean);
@@ -18,15 +36,10 @@ export default function Hero({ t }: Props) {
       data-scene-pose="hero"
       className="relative min-h-dvh flex flex-col justify-center pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden"
     >
-      <div className="max-w-[1280px] mx-auto px-8 grid grid-cols-12 gap-8 md:gap-12 items-center">
+      <div className="max-w-[1280px] mx-auto px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-12 items-center">
         {/* Copy — sol yarı */}
         <div className="col-span-12 lg:col-span-7 flex flex-col gap-8">
-          <motion.div
-            className="font-eyebrow"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          >
+          <motion.div className="font-eyebrow" {...rise(0.1, 8, durations.lg)}>
             {t.hero.eyebrow}
           </motion.div>
 
@@ -34,8 +47,8 @@ export default function Hero({ t }: Props) {
             className="font-display text-ink"
             style={{ letterSpacing: '-0.005em' }}
             variants={staggerContainer(0.2, reduced ? 0 : 0.12)}
-            initial="hidden"
-            animate="show"
+            initial={hidden}
+            {...view}
             aria-label={`${t.hero.title1} ${t.hero.title2}`}
           >
             {[words1, words2].map((line, li) => (
@@ -47,6 +60,9 @@ export default function Hero({ t }: Props) {
                         display: 'inline-block',
                         overflow: 'hidden',
                         verticalAlign: 'baseline',
+                        // room for descenders that the mask would clip
+                        paddingBottom: '0.14em',
+                        marginBottom: '-0.14em',
                       }}
                     >
                       <motion.span
@@ -65,20 +81,12 @@ export default function Hero({ t }: Props) {
 
           <motion.p
             className="font-serif text-xl md:text-2xl text-ink-mid italic max-w-[44ch] leading-snug"
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            transition={{ delay: 1.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            {...rise(0.7, 18, durations.lg)}
           >
             {t.hero.sub}
           </motion.p>
 
-          <motion.div
-            className="flex flex-wrap gap-4 mt-2"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.4, duration: 0.5 }}
-          >
+          <motion.div className="flex flex-wrap gap-4 mt-2" {...rise(0.85, 12, durations.md)}>
             <a
               href="#contact"
               className="bg-brand text-bg px-7 py-3 font-sans text-sm tracking-wide hover:bg-brand-hi transition-colors"
@@ -97,9 +105,9 @@ export default function Hero({ t }: Props) {
         {/* Stats — sağ yarı, chisel arka planda görünüyor */}
         <motion.div
           className="col-span-12 lg:col-span-5 grid grid-cols-2 gap-8"
-          variants={staggerContainer(1.6, 0.12)}
-          initial="hidden"
-          animate="show"
+          variants={staggerContainer(1, 0.12)}
+          initial={hidden}
+          {...view}
         >
           {t.hero.stats.map((s, i) => (
             <motion.div

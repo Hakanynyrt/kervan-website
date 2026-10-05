@@ -15,6 +15,9 @@ export const DICT: Dict = {
       contact: 'İletişim',
       tech: 'Teknik Bilgiler',
       cta: 'Teklif Al',
+      home: 'Kervan Heat — ana sayfa',
+      menu: 'Menü',
+      language: 'Dil',
     },
     hero: {
       eyebrow: 'Kartepe · Kocaeli',
@@ -147,6 +150,9 @@ export const DICT: Dict = {
       contact: 'Contact',
       tech: 'Technical Info',
       cta: 'Get a Quote',
+      home: 'Kervan Heat — home',
+      menu: 'Menu',
+      language: 'Language',
     },
     hero: {
       eyebrow: 'Kartepe · Kocaeli',

@@ -34,7 +34,7 @@ export const lineReveal: Variants = {
   hidden: { y: '100%' },
   show: {
     y: 0,
-    transition: { duration: 0.7, ease: editorialEase },
+    transition: { duration: durations.lg, ease: editorialEase },
   },
 };
 

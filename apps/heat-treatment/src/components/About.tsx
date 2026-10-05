@@ -10,7 +10,7 @@ export default function About({ t }: Props) {
   return (
     <section id="hakkimizda" className="min-h-[60dvh] flex flex-col justify-center py-20 md:py-32">
       <motion.div
-        className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-12 gap-8 md:gap-16 items-start"
+        className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-16 items-start"
         variants={fadeUp}
         initial="hidden"
         whileInView="show"

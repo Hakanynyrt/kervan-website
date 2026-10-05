@@ -21,7 +21,7 @@ export function SectionHeading({ eyebrow, title, aside, controls, className }: P
   return (
     <div
       className={cn(
-        'max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-12 gap-8 items-end mb-16 md:mb-20',
+        'max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end mb-16 md:mb-20',
         className,
       )}
     >
