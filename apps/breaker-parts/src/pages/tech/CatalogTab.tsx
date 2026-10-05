@@ -17,6 +17,7 @@ import {
   type Measure,
   type MeasureKey,
 } from '../../lib/vega-search';
+import { type CatalogIndex, buildIndex, equivalentsOf, geometriesFor } from '../../lib/vega-index';
 
 interface Props {
   t: DictBlock;
@@ -79,9 +80,11 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
 
   const items = catalog?.items;
   const brands = useMemo(() => (items ? brandsOf(items) : []), [items]);
+  const idx = useMemo(() => (items ? buildIndex(items) : null), [items]);
   const results = useMemo(
-    () => (items ? searchCatalog(items, { text, brand, tip, hideLow, measure, tol }) : null),
-    [items, text, brand, tip, hideLow, measure, tol],
+    () =>
+      items && idx ? searchCatalog(items, { text, brand, tip, hideLow, measure, tol }, idx) : null,
+    [items, idx, text, brand, tip, hideLow, measure, tol],
   );
 
   useEffect(() => setLimit(PAGE), [text, brand, tip, hideLow, measure, tol]);
@@ -93,7 +96,7 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
       </p>
     );
   }
-  if (status !== 'ready' || !catalog || !items || !results) {
+  if (status !== 'ready' || !catalog || !items || !results || !idx) {
     const msg =
       status === 'unauthorized'
         ? c.errorUnauthorized
@@ -126,21 +129,24 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
   };
 
   const renderHits = (hits: Hit[], max: number) =>
-    hits
-      .slice(0, max)
-      .map((h) => (
-        <ItemCard
-          key={h.item.id}
-          hit={h}
-          t={t}
-          lang={lang}
-          open={openId === h.item.id}
-          onOpen={() => setOpenId(openId === h.item.id ? null : h.item.id)}
-          selected={sel.includes(h.item.id)}
-          canSelect={sel.length < MAX_COMPARE}
-          onSelect={() => toggleSel(h.item.id)}
-        />
-      ));
+    hits.slice(0, max).map((h) => (
+      <ItemCard
+        key={h.item.id}
+        hit={h}
+        t={t}
+        lang={lang}
+        open={openId === h.item.id}
+        onOpen={() => setOpenId(openId === h.item.id ? null : h.item.id)}
+        selected={sel.includes(h.item.id)}
+        canSelect={sel.length < MAX_COMPARE}
+        onSelect={() => toggleSel(h.item.id)}
+        idx={idx}
+        onMeasure={() => {
+          setText('');
+          document.getElementById('vc-m-dia')?.focus();
+        }}
+      />
+    ));
 
   const groupDefs: { g: Group; title: string; hint?: string }[] = [
     { g: 'match', title: c.groupMatch },
@@ -315,6 +321,7 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
         className="font-sans text-sm text-ink-mid m-0"
       >
         {fill(c.resultsCount, { n: fmtNum(results.total, lang) })}
+        {results.phonetic && <> · {c.phoneticHint}</>}
         {sel.length >= MAX_COMPARE && <> · {fill(c.compareMax, { n: MAX_COMPARE })}</>}
       </p>
 
@@ -418,6 +425,8 @@ function ItemCard({
   selected,
   canSelect,
   onSelect,
+  idx,
+  onMeasure,
 }: {
   hit: Hit;
   t: DictBlock;
@@ -427,11 +436,15 @@ function ItemCard({
   selected: boolean;
   canSelect: boolean;
   onSelect: () => void;
+  idx: CatalogIndex;
+  onMeasure: () => void;
 }) {
   const c = t.catalogUi;
   const it = hit.item;
   const diffEntries = Object.entries(hit.diffs) as [MeasureKey, number][];
   const panelId = `vc-d-${it.id}`;
+  // The breaker name the search matched points to tips with different sizes.
+  const conflictN = hit.matched ? geometriesFor(idx, hit.matched) : 0;
   return (
     <li className="bg-bg-soft border border-hair rounded-[14px] p-5 flex flex-col gap-3 min-w-0">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -444,6 +457,33 @@ function ItemCard({
         {needsVerification(it) && <WarnBadge label={c.warnBadge} />}
       </div>
       <p className="font-sans text-ink m-0">{summary(it, lang, t)}</p>
+      {hit.via && (
+        <p className="font-sans text-sm text-ink-mid m-0">
+          {fill(c.matchedVia, { name: hit.via })}
+        </p>
+      )}
+      {conflictN > 1 && (
+        <div
+          role="note"
+          className="flex flex-wrap items-center gap-3 rounded-md border border-brand/60 px-3 py-2"
+        >
+          <p className="font-sans text-sm text-brand-hi m-0">
+            {fill(c.conflictWarn, { name: hit.matched ?? '', n: conflictN })}
+          </p>
+          <button type="button" onClick={onMeasure} className={`${btnCls} min-h-9 px-3 text-xs`}>
+            {c.conflictMeasure}
+          </button>
+        </div>
+      )}
+      {hit.twins && hit.twins.length > 0 && (
+        <div>
+          <p className="font-sans text-sm text-ink m-0">
+            {fill(c.twinsLabel, { n: hit.twins.length })}:{' '}
+            {hit.twins.map((x) => x.model).join(' · ')}
+          </p>
+          <p className="font-sans text-xs text-ink-mid m-0 mt-1">{c.twinsHint}</p>
+        </div>
+      )}
       {diffEntries.length > 0 && (
         <p className="font-sans text-sm text-ink-mid m-0">
           {diffEntries.map(([k, d]) => `${c.diffLabels[k]} ${fmtDiff(d, lang)}`).join(' · ')} mm
@@ -471,7 +511,7 @@ function ItemCard({
       </div>
       {open && (
         <div id={panelId}>
-          <Detail item={it} t={t} lang={lang} />
+          <Detail item={it} t={t} lang={lang} idx={idx} />
         </div>
       )}
     </li>
@@ -528,8 +568,19 @@ function rows(
   return out;
 }
 
-function Detail({ item: it, t, lang }: { item: VegaItem; t: DictBlock; lang: Lang }) {
+function Detail({
+  item: it,
+  t,
+  lang,
+  idx,
+}: {
+  item: VegaItem;
+  t: DictBlock;
+  lang: Lang;
+  idx: CatalogIndex;
+}) {
   const c = t.catalogUi;
+  const eq = equivalentsOf(idx, it);
   const problems = [
     ...it.quality.map((q) => c.qualityLabels[q] ?? q),
     ...it.reviewFlags.map((f) => c.flagLabels[f] ?? f),
@@ -602,6 +653,20 @@ function Detail({ item: it, t, lang }: { item: VegaItem; t: DictBlock; lang: Lan
           <div className="sm:col-span-2">
             <dt className={labelCls}>{c.fNotes}</dt>
             <dd className="m-0 font-sans text-ink">{it.notes.join(' · ')}</dd>
+          </div>
+        )}
+        {eq.length > 0 && (
+          <div className="sm:col-span-2">
+            <dt className={labelCls}>{c.equivalents}</dt>
+            <dd className="m-0 font-sans text-ink">
+              {eq
+                .map(
+                  (x) =>
+                    `${x.model}${fmtRange(x.lengthMm, lang) ? ` (${c.fLength} ${fmtRange(x.lengthMm, lang)})` : ''}`,
+                )
+                .join(' · ')}
+              <span className="block text-xs text-ink-mid mt-1">{c.equivalentsHint}</span>
+            </dd>
           </div>
         )}
         {it.source.catalogPage != null && (

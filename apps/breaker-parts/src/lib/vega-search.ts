@@ -1,4 +1,5 @@
 import type { VegaItem, VegaRange, VegaTip } from '../types';
+import { type CatalogIndex, geomKey, textSearch } from './vega-index';
 
 /** Pure search/matching helpers for the private tip catalog. No I/O, no storage. */
 
@@ -26,9 +27,19 @@ export interface Hit {
   /** item value minus entered value (0 when an entered range contains it) */
   diffs: Partial<Record<MeasureKey, number>>;
   unknown: FieldKey[];
+  /** text search: lower is better */
+  textCost?: number;
+  /** cross-reference name that made this row match */
+  via?: string;
+  /** breaker name the text query matched (model or cross-reference) */
+  matched?: string;
+  /** measurement mode: other rows with identical geometry folded into this card */
+  twins?: VegaItem[];
 }
 export interface Results {
   measuring: boolean;
+  /** the text search only matched through the sound-alike fallback */
+  phonetic: boolean;
   groups: Record<Group, Hit[]>;
   list: Hit[];
   total: number;
@@ -43,30 +54,6 @@ export function parseNum(raw: string): number | undefined {
   if (!s || !/^\d+(\.\d+)?$/.test(s)) return undefined;
   const n = Number(s);
   return Number.isFinite(n) ? n : undefined;
-}
-
-const TR_MAP: Record<string, string> = { ı: 'i', ğ: 'g', ü: 'u', ş: 's', ö: 'o', ç: 'c', İ: 'i' };
-export const compact = (s: string): string =>
-  s
-    .replace(/[ıİğüşöç]/g, (c) => TR_MAP[c] ?? c)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '');
-const hay = new WeakMap<VegaItem, { fields: string[] }>();
-function haystack(it: VegaItem) {
-  let h = hay.get(it);
-  if (!h) {
-    h = { fields: [it.model, ...it.partNos, ...it.fitsBreakers, it.brand].map(compact) };
-    hay.set(it, h);
-  }
-  return h;
-}
-
-function textMatches(it: VegaItem, text: string): boolean {
-  const q = text.trim();
-  if (!q) return true;
-  const h = haystack(it);
-  const cq = compact(q);
-  return cq === '' || h.fields.some((f) => f.includes(cq));
 }
 
 type Verdict = { kind: 'ok'; diff: number } | { kind: 'miss' } | { kind: 'unknown' };
@@ -141,38 +128,57 @@ function evaluate(it: VegaItem, m: Measure, tol: number): Hit | null {
   return null;
 }
 
-export function searchCatalog(items: VegaItem[], q: Query): Results {
+export function searchCatalog(items: VegaItem[], q: Query, idx: CatalogIndex): Results {
+  const text = q.text.trim();
+  const ts = text ? textSearch(idx, text) : null;
   const pool = items.filter(
     (it) =>
       (!q.brand || it.brand === q.brand) &&
       (!q.tip || it.tipTypes.includes(q.tip)) &&
       (!q.hideLow || it.confidence === 'high') &&
-      textMatches(it, q.text),
+      (!ts || ts.hits.has(it)),
   );
+  const withText = (h: Hit): Hit => {
+    const th = ts?.hits.get(h.item);
+    return th ? { ...h, textCost: th.cost, via: th.via, matched: th.matched } : h;
+  };
+  const byName = (a: Hit, b: Hit) =>
+    a.item.brand.localeCompare(b.item.brand) ||
+    a.item.model.localeCompare(b.item.model, 'en', { numeric: true });
   const measuring = hasMeasure(q.measure);
+  const phonetic = ts?.phonetic ?? false;
   const groups: Record<Group, Hit[]> = { match: [], maybe: [], wear: [] };
   if (!measuring) {
     const list = pool
-      .map((item): Hit => ({ item, group: null, score: 0, diffs: {}, unknown: [] }))
-      .sort(
-        (a, b) =>
-          a.item.brand.localeCompare(b.item.brand) ||
-          a.item.model.localeCompare(b.item.model, 'en', { numeric: true }),
-      );
-    return { measuring, groups, list, total: list.length };
+      .map((item): Hit => withText({ item, group: null, score: 0, diffs: {}, unknown: [] }))
+      .sort((a, b) => (a.textCost ?? 0) - (b.textCost ?? 0) || byName(a, b));
+    return { measuring, phonetic, groups, list, total: list.length };
   }
   for (const it of pool) {
     const h = evaluate(it, q.measure, q.tol);
-    if (h && h.group) groups[h.group].push(h);
+    if (h && h.group) groups[h.group].push(withText(h));
   }
   for (const g of Object.keys(groups) as Group[]) {
     groups[g].sort(
       (a, b) =>
         a.score - b.score || a.item.model.localeCompare(b.item.model, 'en', { numeric: true }),
     );
+    // Identical geometry = the same part: show one card with the others listed on it.
+    const seen = new Map<string, Hit>();
+    groups[g] = groups[g].filter((h) => {
+      const k = geomKey(h.item);
+      const first = seen.get(k);
+      if (first) {
+        (first.twins ??= []).push(h.item);
+        return false;
+      }
+      seen.set(k, h);
+      return true;
+    });
   }
   return {
     measuring,
+    phonetic,
     groups,
     list: [],
     total: groups.match.length + groups.maybe.length + groups.wear.length,
