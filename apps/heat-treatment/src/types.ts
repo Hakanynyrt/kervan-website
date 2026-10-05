@@ -37,6 +37,9 @@ export interface DictBlock {
     contact: string;
     tech: string;
     cta: string;
+    home: string;
+    menu: string;
+    language: string;
   };
   hero: {
     eyebrow: string;

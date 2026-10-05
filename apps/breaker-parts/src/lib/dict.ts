@@ -15,6 +15,9 @@ export const DICT: Dict = {
       contact: 'İletişim',
       tech: 'Teknik Bilgiler',
       cta: 'Teklif Al',
+      home: 'Kervan Breaker — anasayfa',
+      menu: 'Menü',
+      language: 'Dil',
     },
     opening: {
       scroll: 'kaydır',
@@ -437,6 +440,9 @@ export const DICT: Dict = {
       contact: 'Contact',
       tech: 'Technical Info',
       cta: 'Get a Quote',
+      home: 'Kervan Breaker — home',
+      menu: 'Menu',
+      language: 'Language',
     },
     opening: {
       scroll: 'scroll',

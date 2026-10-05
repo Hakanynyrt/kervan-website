@@ -72,7 +72,7 @@ export default function Contact({ t, lang }: Props) {
 
       <section className="pt-32 pb-16 md:pt-40 md:pb-24">
         <motion.div
-          className="max-w-[1280px] mx-auto px-6 md:px-8 mb-12 md:mb-16 grid grid-cols-12 gap-8 items-end"
+          className="max-w-[1280px] mx-auto px-6 md:px-8 mb-12 md:mb-16 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end"
           variants={fadeUp}
           initial="hidden"
           animate="show"
@@ -90,7 +90,7 @@ export default function Contact({ t, lang }: Props) {
           </p>
         </motion.div>
 
-        <div className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-12 gap-8 md:gap-16">
+        <div className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-16">
           {/* Info — 4 col */}
           <motion.dl
             className="col-span-12 lg:col-span-4 flex flex-col gap-7 m-0"
@@ -174,7 +174,7 @@ export default function Contact({ t, lang }: Props) {
                 maxLength={3000}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="bg-transparent border-b border-hair pb-2 font-serif text-lg text-ink resize-none focus:border-ink outline-none transition-colors"
+                className="bg-transparent border-b border-hair pb-2 font-serif text-lg text-ink resize-none focus:border-ink transition-colors"
               />
             </label>
 
@@ -187,12 +187,12 @@ export default function Contact({ t, lang }: Props) {
             </button>
 
             {state === 'success' && (
-              <p className="md:col-span-2 font-serif italic text-base text-brand">
+              <p role="status" className="md:col-span-2 font-serif italic text-base text-brand">
                 {t.contact.success}
               </p>
             )}
             {state === 'error' && (
-              <p className="md:col-span-2 font-serif italic text-base text-ink">
+              <p role="alert" className="md:col-span-2 font-serif italic text-base text-ink">
                 {t.contact.error}
               </p>
             )}
@@ -202,6 +202,14 @@ export default function Contact({ t, lang }: Props) {
     </>
   );
 }
+
+/** Lets browsers and password managers fill the form (WCAG 1.3.5). */
+const AUTOCOMPLETE: Record<string, string | undefined> = {
+  name: 'name',
+  company: 'organization',
+  email: 'email',
+  phone: 'tel',
+};
 
 interface FieldProps {
   label: string;
@@ -218,9 +226,10 @@ function Field({ label, name, type = 'text', required, maxLength }: FieldProps) 
       <input
         type={type}
         name={name}
+        autoComplete={AUTOCOMPLETE[name]}
         required={required}
         maxLength={maxLength}
-        className="bg-transparent border-b border-hair pb-2 font-serif text-lg text-ink focus:border-ink outline-none transition-colors"
+        className="bg-transparent border-b border-hair pb-2 font-serif text-lg text-ink focus:border-ink transition-colors"
       />
     </label>
   );
