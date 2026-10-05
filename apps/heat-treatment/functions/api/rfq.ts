@@ -14,6 +14,9 @@
  *   TG_BOT_TOKEN, TG_CHAT_ID          — Telegram alerts
  *   MAIL_TO                           — RFQ inbox (default: ahmet@kervanheat.com)
  *   MAIL_FROM                         — sender (default: noreply@kervanheat.com)
+ *
+ * Response: { ok, emailSent, delivered } — `delivered` means the request reached the
+ * owner by email or Telegram; the forms show success only when it is true.
  */
 
 interface Env {
@@ -81,11 +84,7 @@ const clean = (v: FormDataEntryValue | null, max = 500): string =>
     .trim()
     .slice(0, max);
 
-async function handleRfq(
-  request: Request,
-  env: Env,
-  waitUntil: (promise: Promise<unknown>) => void,
-): Promise<Response> {
+async function handleRfq(request: Request, env: Env): Promise<Response> {
   const origin = allowedOrigin(request);
   if (!origin) return Response.json({ ok: false, error: 'origin' }, { status: 403 });
 
@@ -209,33 +208,35 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
     }
   }
 
+  // The Telegram alert is awaited (short timeout) so the response can say whether the
+  // request really reached the owner by at least one channel.
+  let telegramSent = false;
   if (env.TG_BOT_TOKEN && env.TG_CHAT_ID) {
     const tgText = `🔔 New RFQ — ${sourceSite}\n\nName: ${name}\nCompany: ${company}\nEmail: ${email}\nPhone: ${phone}\nCountry: ${country}\nService: ${service}\nQty: ${qty}\nFiles: ${fileList.length} item(s)\n\nMessage:\n${(message || '(no message)').slice(0, 500)}`;
-    waitUntil(
-      fetch(`https://api.telegram.org/bot${env.TG_BOT_TOKEN}/sendMessage`, {
+    try {
+      const r = await fetch(`https://api.telegram.org/bot${env.TG_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: env.TG_CHAT_ID,
           text: tgText,
         }),
-      })
-        .then(async (r) => {
-          if (!r.ok) {
-            const body = await r.text().catch(() => '<no body>');
-            console.error('telegram fail:', r.status, body);
-          } else {
-            console.log('telegram ok');
-          }
-        })
-        .catch((err: unknown) => {
-          const e = err as { message?: string; stack?: string };
-          console.error('telegram throw:', e?.message, e?.stack);
-        }),
-    );
+        signal: AbortSignal.timeout(4000),
+      });
+      telegramSent = r.ok;
+      if (!r.ok) {
+        const body = await r.text().catch(() => '<no body>');
+        console.error('telegram fail:', r.status, body);
+      }
+    } catch (err: unknown) {
+      const e = err as { message?: string; stack?: string };
+      console.error('telegram throw:', e?.message, e?.stack);
+    }
   }
 
-  return Response.json({ ok: true, emailSent });
+  // `delivered` is what the forms trust: the request reached the owner by email or Telegram.
+  // (`emailSent` stays for older clients.)
+  return Response.json({ ok: true, emailSent, delivered: emailSent || telegramSent });
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -243,8 +244,8 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
    request method.
 ═══════════════════════════════════════════════════════════════════════ */
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUntil }) => {
-  return withCors(withSecurityHeaders(await handleRfq(request, env, waitUntil)), request);
+export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+  return withCors(withSecurityHeaders(await handleRfq(request, env)), request);
 };
 
 export const onRequestOptions: PagesFunction<Env> = async ({ request }) => {

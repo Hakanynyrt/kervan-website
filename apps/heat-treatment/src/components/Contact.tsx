@@ -21,8 +21,14 @@ export default function Contact({ t }: Props) {
     try {
       const fd = new FormData(formRef.current);
       const r = await fetch('/api/rfq', { method: 'POST', body: fd });
-      const j = (await r.json().catch(() => ({}))) as { ok?: boolean };
-      const ok = r.ok && j.ok === true;
+      const j = (await r.json().catch(() => ({}))) as {
+        ok?: boolean;
+        delivered?: boolean;
+        emailSent?: boolean;
+      };
+      // `delivered`: the request reached the owner by email or Telegram. An older
+      // server only sends `emailSent`. Never show success when nothing was delivered.
+      const ok = r.ok && j.ok === true && (j.delivered ?? j.emailSent) === true;
       setState(ok ? 'success' : 'error');
       if (ok) formRef.current.reset();
     } catch {
