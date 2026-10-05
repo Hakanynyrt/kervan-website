@@ -88,12 +88,11 @@ Her iki domain Cloudflare'de zaten kayıtlı; Pages otomatik DNS kayıtlarını 
 
 | Variable                        | Purpose                                     |
 | ------------------------------- | ------------------------------------------- |
-| `RESEND_API_KEY`                | primary email transport                     |
+| `BREVO_API_KEY`                 | primary email transport (Brevo)             |
+| `RESEND_API_KEY`                | fallback transport                          |
 | `MAILCHANNELS_DKIM_DOMAIN`      | fallback transport                          |
 | `MAILCHANNELS_DKIM_SELECTOR`    | DKIM selector (default: `mailchannels`)     |
 | `MAILCHANNELS_DKIM_PRIVATE_KEY` | DKIM private key                            |
-| `TG_BOT_TOKEN`                  | Telegram bot token                          |
-| `TG_CHAT_ID`                    | Telegram chat ID                            |
 | `MAIL_TO`                       | RFQ inbox (default: `ahmet@kervanheat.com`) |
 | `MAIL_FROM`                     | sender (default: `noreply@kervanheat.com`)  |
 
@@ -120,7 +119,7 @@ Her iki site `/api/rfq` endpoint'ine POST atar:
 
 Worker tarafı CORS allowlist'inde `kervanbreaker.com` var; allowlist dışı origin'ler 403.
 
-Email pipeline: Resend (primary) → MailChannels (fallback) → Telegram (notification, parallel).
+Email pipeline: Brevo (primary) → Resend → MailChannels (fallbacks). Email is the only notification channel.
 
 ## Medya ekleme
 

@@ -2,30 +2,29 @@
  * RFQ Pages Function — kervanheat.com/api/rfq
  *
  * Ported from src/worker/index.ts (legacy Cloudflare Worker). Same logic:
- * validate origin → email format → Resend → MailChannels
- * fallback → Telegram notification. Both kervanheat.com (same-origin) and
+ * validate origin → email format → Brevo → Resend → MailChannels
+ * fallback. Both kervanheat.com (same-origin) and
  * kervanbreaker.com (cross-origin) post here; CORS allowlist gates access.
  *
  * Env vars (set in Cloudflare Pages project settings, not via .env):
- *   RESEND_API_KEY                    — primary email transport
+ *   BREVO_API_KEY                     — primary email transport (Brevo transactional API)
+ *   RESEND_API_KEY                    — fallback transport
  *   MAILCHANNELS_DKIM_DOMAIN          — fallback transport
  *   MAILCHANNELS_DKIM_SELECTOR        — DKIM selector for MailChannels
  *   MAILCHANNELS_DKIM_PRIVATE_KEY     — DKIM private key for MailChannels
- *   TG_BOT_TOKEN, TG_CHAT_ID          — Telegram alerts
  *   MAIL_TO                           — RFQ inbox (default: ahmet@kervanheat.com)
  *   MAIL_FROM                         — sender (default: noreply@kervanheat.com)
  *
- * Response: { ok, emailSent, delivered } — `delivered` means the request reached the
- * owner by email or Telegram; the forms show success only when it is true.
+ * Response: { ok, emailSent, delivered } — `delivered` is true only when an email went
+ * out; the forms show success only when it is true.
  */
 
 interface Env {
+  BREVO_API_KEY?: string;
   RESEND_API_KEY?: string;
   MAILCHANNELS_DKIM_DOMAIN?: string;
   MAILCHANNELS_DKIM_SELECTOR?: string;
   MAILCHANNELS_DKIM_PRIVATE_KEY?: string;
-  TG_BOT_TOKEN?: string;
-  TG_CHAT_ID?: string;
   MAIL_TO?: string;
   MAIL_FROM?: string;
 }
@@ -160,7 +159,32 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
   const mailFrom = env.MAIL_FROM ?? 'noreply@kervanheat.com';
 
   let emailSent = false;
-  if (env.RESEND_API_KEY) {
+  if (env.BREVO_API_KEY) {
+    try {
+      const r = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': env.BREVO_API_KEY,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { email: mailFrom, name: 'Kervan RFQ' },
+          to: [{ email: mailTo }],
+          replyTo: { email, name },
+          subject: emailSubject,
+          textContent: emailBody,
+        }),
+        signal: AbortSignal.timeout(8000),
+      });
+      emailSent = r.ok;
+      if (!r.ok) console.error('Brevo fail:', r.status, await r.text().catch(() => '<no body>'));
+    } catch (e) {
+      console.error('Brevo error', e);
+    }
+  }
+
+  if (!emailSent && env.RESEND_API_KEY) {
     try {
       const r = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -208,35 +232,9 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
     }
   }
 
-  // The Telegram alert is awaited (short timeout) so the response can say whether the
-  // request really reached the owner by at least one channel.
-  let telegramSent = false;
-  if (env.TG_BOT_TOKEN && env.TG_CHAT_ID) {
-    const tgText = `🔔 New RFQ — ${sourceSite}\n\nName: ${name}\nCompany: ${company}\nEmail: ${email}\nPhone: ${phone}\nCountry: ${country}\nService: ${service}\nQty: ${qty}\nFiles: ${fileList.length} item(s)\n\nMessage:\n${(message || '(no message)').slice(0, 500)}`;
-    try {
-      const r = await fetch(`https://api.telegram.org/bot${env.TG_BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: env.TG_CHAT_ID,
-          text: tgText,
-        }),
-        signal: AbortSignal.timeout(4000),
-      });
-      telegramSent = r.ok;
-      if (!r.ok) {
-        const body = await r.text().catch(() => '<no body>');
-        console.error('telegram fail:', r.status, body);
-      }
-    } catch (err: unknown) {
-      const e = err as { message?: string; stack?: string };
-      console.error('telegram throw:', e?.message, e?.stack);
-    }
-  }
-
-  // `delivered` is what the forms trust: the request reached the owner by email or Telegram.
+  // `delivered` is what the forms trust: the request reached the owner by email.
   // (`emailSent` stays for older clients.)
-  return Response.json({ ok: true, emailSent, delivered: emailSent || telegramSent });
+  return Response.json({ ok: true, emailSent, delivered: emailSent });
 }
 
 /* ═══════════════════════════════════════════════════════════════════════

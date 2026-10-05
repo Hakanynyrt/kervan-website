@@ -2,7 +2,7 @@
 # Production smoke probe for kervanheat.com + kervanbreaker.com.
 #
 # Read-only: GET and OPTIONS only. Never POST to /api/rfq — a valid POST
-# sends real email + Telegram notifications.
+# sends real email notifications.
 # Exits non-zero if any check fails, so the calling workflow goes red.
 set -uo pipefail
 
