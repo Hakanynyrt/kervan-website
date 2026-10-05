@@ -173,6 +173,14 @@ export interface DictBlock {
     invalidNumber: string;
     copyLabel: string;
     tipLabels: Record<VegaTip, string>;
+    matchedVia: string;
+    phoneticHint: string;
+    twinsLabel: string;
+    twinsHint: string;
+    equivalents: string;
+    equivalentsHint: string;
+    conflictWarn: string;
+    conflictMeasure: string;
     copy: string;
     copied: string;
     warnBadge: string;
