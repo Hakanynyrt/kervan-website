@@ -17,6 +17,8 @@ type Fn = (ctx: CatalogCtx) => Response | Promise<Response>;
 const KEY = 'catalog:v1';
 /** Owner-edited list of tips that sell well in Turkey (optional, small JSON). */
 const POPULAR_KEY = 'popular:v1';
+/** Owner-only reading guide (e.g. where a tip breaks and how warranty is judged). */
+const GUIDE_KEY = 'guide:v1';
 
 /** Owner-only VEGA tip catalog. The data lives in the KV namespace bound as
  *  VEGA_CATALOG (never in git or the bundle) and is returned only to a valid session.
@@ -41,7 +43,13 @@ const handle: Fn = async ({ request, env }) => {
   } catch {
     popular = null;
   }
-  return json({ ok: true, authed: true, catalog, popular });
+  let guide: unknown = null;
+  try {
+    guide = await env.VEGA_CATALOG.get(GUIDE_KEY, 'json');
+  } catch {
+    guide = null;
+  }
+  return json({ ok: true, authed: true, catalog, popular, guide });
 };
 
 export const onRequestGet: Fn = handle;

@@ -244,6 +244,12 @@ export interface DictBlock {
     useWhere: string;
     useWatch: string;
     useTips: Record<VegaTip, { rock: string; where: string; watch: string }>;
+    guideTitle: string;
+    guideCauses: string;
+    guideWarranty: string;
+    guideSources: string;
+    guideDefectTitle: string;
+    guideClaimTitle: string;
     fLength: string;
     fWeight: string;
     fTips: string;
@@ -412,6 +418,26 @@ export interface VegaPopular {
   models: Record<string, 1 | 2>;
   /** breaker name (not in the catalog) -> catalog model name that uses the same tip */
   aliases?: Record<string, string>;
+}
+/** guide:v1 in KV — owner-only reading guide shown next to the catalog. */
+export interface VegaGuide {
+  schema: number;
+  breakage?: {
+    intro: Record<Lang, string>;
+    zones: {
+      key: string;
+      nameTr: string;
+      nameEn: string;
+      causesTr: string;
+      causesEn: string;
+      warrantyTr: string;
+      warrantyEn: string;
+      sources: string[];
+    }[];
+    defectVsMisuse: Record<Lang, string[]>;
+    claimChecklist: Record<Lang, string[]>;
+    disclaimer: Record<Lang, string>;
+  };
 }
 export interface VegaCatalog {
   schema: number;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { VegaCatalog, VegaPopular } from '../types';
+import type { VegaCatalog, VegaGuide, VegaPopular } from '../types';
 
 export type CatalogStatus =
   | 'idle'
@@ -16,12 +16,14 @@ export function useVegaCatalog(enabled: boolean, onUnauthorized: () => void) {
   const [status, setStatus] = useState<CatalogStatus>('idle');
   const [catalog, setCatalog] = useState<VegaCatalog | null>(null);
   const [popular, setPopular] = useState<VegaPopular | null>(null);
+  const [guide, setGuide] = useState<VegaGuide | null>(null);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!enabled) {
       setCatalog(null);
       setPopular(null);
+      setGuide(null);
       setStatus('idle');
       return;
     }
@@ -46,12 +48,15 @@ export function useVegaCatalog(enabled: boolean, onUnauthorized: () => void) {
           authed?: boolean;
           catalog?: VegaCatalog;
           popular?: unknown;
+          guide?: unknown;
         };
         if (!alive) return;
         if (b.ok === true && b.authed === true && Array.isArray(b.catalog?.items)) {
           setCatalog(b.catalog as VegaCatalog);
           const pop = b.popular as VegaPopular | null | undefined;
           setPopular(pop && typeof pop.models === 'object' && pop.models ? pop : null);
+          const g = b.guide as VegaGuide | null | undefined;
+          setGuide(g && typeof g === 'object' && g.schema === 1 ? g : null);
           setStatus('ready');
         } else setStatus('error');
       } catch {
@@ -65,5 +70,5 @@ export function useVegaCatalog(enabled: boolean, onUnauthorized: () => void) {
   }, [enabled, attempt]);
 
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
-  return { status, catalog, popular, retry };
+  return { status, catalog, popular, guide, retry };
 }

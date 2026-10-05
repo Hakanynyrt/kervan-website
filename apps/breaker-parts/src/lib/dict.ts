@@ -313,6 +313,12 @@ export const DICT: Dict = {
       useRock: 'Taş / malzeme',
       useWhere: 'Nerede',
       useWatch: 'Dikkat',
+      guideTitle: 'Uç nereden kırılırsa garantiye girer?',
+      guideCauses: 'Sık nedenler',
+      guideWarranty: 'Garanti yaklaşımı',
+      guideSources: 'Kaynaklar',
+      guideDefectTitle: 'Kusur mu, hatalı kullanım mı? (kırık yüzeyinden)',
+      guideClaimTitle: 'Garanti talebinde istenecekler',
       useTips: {
         chisel: {
           rock: 'Orta sert, tabakalı taş; beton, asfalt',
@@ -792,6 +798,12 @@ export const DICT: Dict = {
       useRock: 'Rock / material',
       useWhere: 'Where',
       useWatch: 'Watch out',
+      guideTitle: 'Where a tip breaks: what warranty usually covers',
+      guideCauses: 'Usual causes',
+      guideWarranty: 'Warranty approach',
+      guideSources: 'Sources',
+      guideDefectTitle: 'Defect or misuse? (from the fracture face)',
+      guideClaimTitle: 'What a warranty claim needs',
       useTips: {
         chisel: {
           rock: 'Medium-hard, layered rock; concrete, asphalt',
