@@ -151,15 +151,12 @@ export interface DictBlock {
     measureBackToSlot: string;
     measureSlotLen: string;
     measureRearDia: string;
-    measureLength: string;
     tolLabel: string;
     clear: string;
     resultsCount: string;
     groupMatch: string;
     groupMaybe: string;
     groupMaybeHint: string;
-    groupWear: string;
-    groupWearHint: string;
     emptyResults: string;
     emptyHint: string;
     more: string;
@@ -182,6 +179,12 @@ export interface DictBlock {
     conflictWarn: string;
     conflictMeasure: string;
     measureOptional: string;
+    popularBadge: string;
+    popularBadge2: string;
+    popularTwin: string;
+    popularOnly: string;
+    popularStatus: string;
+    popularNote: string;
     likelyTitle: string;
     likelyPct: string;
     likelyModels: string;
@@ -364,6 +367,15 @@ export interface VegaItem {
   extra: string | null;
   source: { pdfPage: number | null; catalogPage: number | null; line: number };
   quality: string[];
+}
+/** popular:v1 in KV — tier 1 = sells most in Turkey, 2 = sells well. */
+export interface VegaPopular {
+  schema: number;
+  updated?: string;
+  /** catalog model name -> tier */
+  models: Record<string, 1 | 2>;
+  /** breaker name (not in the catalog) -> catalog model name that uses the same tip */
+  aliases?: Record<string, string>;
 }
 export interface VegaCatalog {
   schema: number;

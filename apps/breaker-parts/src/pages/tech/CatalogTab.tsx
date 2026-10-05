@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { DictBlock, Lang, VegaCatalog, VegaItem, VegaTip } from '../../types';
+import type { DictBlock, Lang, VegaCatalog, VegaItem, VegaPopular, VegaTip } from '../../types';
 import type { CatalogStatus } from '../../lib/use-vega-catalog';
 import {
   DEFAULT_TOL,
@@ -34,12 +34,14 @@ import {
   nextBestMeasure,
   rankByScore,
 } from '../../lib/vega-score';
+import { type Popularity, buildPopularity, popularPrior } from '../../lib/vega-popular';
 
 interface Props {
   t: DictBlock;
   lang: Lang;
   status: CatalogStatus;
   catalog: VegaCatalog | null;
+  popular?: VegaPopular | null;
   retry: () => void;
 }
 
@@ -75,12 +77,13 @@ const CHIP_CLS: Record<ChipState, string> = {
 const fill = (tpl: string, vars: Record<string, string | number>): string =>
   Object.entries(vars).reduce((s, [k, v]) => s.replace(`{${k}}`, String(v)), tpl);
 
-export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
+export default function CatalogTab({ t, lang, status, catalog, popular, retry }: Props) {
   const c = t.catalogUi;
   const [text, setText] = useState('');
   const [brand, setBrand] = useState('');
   const [tip, setTip] = useState<VegaTip | ''>('');
   const [hideLow, setHideLow] = useState(false);
+  const [popularOnly, setPopularOnly] = useState(false);
   const [raw, setRaw] = useState<Record<Exclude<MeasureKey, 'length'>, string>>({
     dia: '',
     keyThk: '',
@@ -108,15 +111,29 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
   const items = catalog?.items;
   const brands = useMemo(() => (items ? brandsOf(items) : []), [items]);
   const idx = useMemo(() => (items ? buildIndex(items) : null), [items]);
+  const pop = useMemo(
+    () => (items ? buildPopularity(items, popular ?? null) : null),
+    [items, popular],
+  );
   const results = useMemo(
     () =>
-      items && idx ? searchCatalog(items, { text, brand, tip, hideLow, measure, tol }, idx) : null,
-    [items, idx, text, brand, tip, hideLow, measure, tol],
+      items && idx
+        ? searchCatalog(
+            items,
+            { text, brand, tip, hideLow, measure, tol, popularOnly },
+            idx,
+            pop ?? undefined,
+          )
+        : null,
+    [items, idx, pop, text, brand, tip, hideLow, popularOnly, measure, tol],
   );
 
   const scored = useMemo<Scored[]>(
-    () => (results?.measuring ? rankByScore(results.pool, measure) : []),
-    [results, measure],
+    () =>
+      results?.measuring
+        ? rankByScore(results.pool, measure, (it) => (pop ? popularPrior(pop, it) : 0))
+        : [],
+    [results, measure, pop],
   );
   const fieldsFor = useMemo(() => new Map(scored.map((x) => [x.item, x.fields])), [scored]);
   const likely = useMemo(
@@ -129,7 +146,7 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
   );
   const [likelyOpen, setLikelyOpen] = useState(false);
 
-  useEffect(() => setLimit(PAGE), [text, brand, tip, hideLow, measure, tol]);
+  useEffect(() => setLimit(PAGE), [text, brand, tip, hideLow, popularOnly, measure, tol]);
 
   if (status === 'idle' || status === 'loading') {
     return (
@@ -138,7 +155,7 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
       </p>
     );
   }
-  if (status !== 'ready' || !catalog || !items || !results || !idx) {
+  if (status !== 'ready' || !catalog || !items || !results || !idx || !pop) {
     const msg =
       status === 'unauthorized'
         ? c.errorUnauthorized
@@ -184,6 +201,7 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
         onSelect={() => toggleSel(h.item.id)}
         idx={idx}
         fields={fieldsFor.get(h.item)}
+        pop={pop}
         onMeasure={() => {
           setText('');
           document.getElementById('vc-m-dia')?.focus();
@@ -265,6 +283,20 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
           />
           <span className="font-sans text-sm text-ink-mid">{c.hideLow}</span>
         </label>
+        {pop.tier.size > 0 && (
+          <label className="md:col-span-12 flex items-center gap-3 min-h-11 cursor-pointer -mt-2">
+            <input
+              type="checkbox"
+              checked={popularOnly}
+              onChange={(e) => setPopularOnly(e.target.checked)}
+              className="w-5 h-5 accent-brand"
+            />
+            <span className="font-sans text-sm text-ink-mid">
+              {c.popularOnly}{' '}
+              <span className="text-ink-soft">({fill(c.popularStatus, { n: pop.tier.size })})</span>
+            </span>
+          </label>
+        )}
       </div>
 
       {/* Measure form */}
@@ -375,6 +407,7 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
                 likely.items.includes(h.item) || !!h.twins?.some((x) => likely.items.includes(x)),
             )}
           fields={fieldsFor.get(likely.items[0]) ?? []}
+          pop={pop}
           open={likelyOpen}
           onOpen={() => setLikelyOpen((o) => !o)}
         />
@@ -408,7 +441,10 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
         {sel.length >= MAX_COMPARE && <> · {fill(c.compareMax, { n: MAX_COMPARE })}</>}
       </p>
       {results.measuring && (results.total > 0 || likely) && (
-        <p className="font-sans text-xs text-ink-mid m-0 -mt-4">{c.chipLegend}</p>
+        <p className="font-sans text-xs text-ink-mid m-0 -mt-4">
+          {c.chipLegend}
+          {pop.tier.size > 0 && <> · {c.popularNote}</>}
+        </p>
       )}
 
       {results.measuring ? (
@@ -446,9 +482,7 @@ export default function CatalogTab({ t, lang, status, catalog, retry }: Props) {
         </ul>
       )}
 
-      {((results.measuring &&
-        results.groups.match.length + results.groups.maybe.length + results.groups.wear.length >
-          limit) ||
+      {((results.measuring && results.groups.match.length + results.groups.maybe.length > limit) ||
         (!results.measuring && results.list.length > limit)) && (
         <div>
           <button type="button" onClick={() => setLimit((n) => n + PAGE)} className={btnCls}>
@@ -513,6 +547,7 @@ function ItemCard({
   onSelect,
   idx,
   fields,
+  pop,
   onMeasure,
 }: {
   hit: Hit;
@@ -525,6 +560,7 @@ function ItemCard({
   onSelect: () => void;
   idx: CatalogIndex;
   fields?: FieldScore[];
+  pop: Popularity;
   onMeasure: () => void;
 }) {
   const c = t.catalogUi;
@@ -541,7 +577,10 @@ function ItemCard({
             {it.brand}
           </p>
         </div>
-        {needsVerification(it) && <WarnBadge label={c.warnBadge} />}
+        <div className="flex flex-wrap gap-1.5">
+          <PopularBadge it={it} pop={pop} t={t} />
+          {needsVerification(it) && <WarnBadge label={c.warnBadge} />}
+        </div>
       </div>
       <p className="font-sans text-ink m-0">{summary(it, lang, t)}</p>
       {hit.via && (
@@ -770,6 +809,25 @@ function Detail({
   );
 }
 
+function PopularBadge({ it, pop, t }: { it: VegaItem; pop: Popularity; t: DictBlock }) {
+  const c = t.catalogUi;
+  const tier = pop.tier.get(it);
+  if (!tier && !pop.twin.has(it)) return null;
+  const label = tier === 1 ? c.popularBadge : tier === 2 ? c.popularBadge2 : c.popularTwin;
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-sans text-xs ${
+        tier === 1 ? 'border-ok/70 text-ok' : 'border-hair-strong text-ink-mid'
+      }`}
+    >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="m12 2 2.9 6.2 6.8.7-5.1 4.6 1.5 6.7L12 16.8 5.9 20.2l1.5-6.7L2.3 8.9l6.8-.7L12 2Z" />
+      </svg>
+      {label}
+    </span>
+  );
+}
+
 function Chips({ fields, t, lang }: { fields: FieldScore[]; t: DictBlock; lang: Lang }) {
   const c = t.catalogUi;
   return (
@@ -803,6 +861,7 @@ function LikelyCard({
   tol,
   insideTol,
   fields,
+  pop,
   open,
   onOpen,
 }: {
@@ -813,6 +872,7 @@ function LikelyCard({
   tol: number;
   insideTol: boolean;
   fields: FieldScore[];
+  pop: Popularity;
   open: boolean;
   onOpen: () => void;
 }) {
@@ -845,11 +905,14 @@ function LikelyCard({
             {it.brand}
           </p>
         </div>
-        {likely.items.some(needsVerification) && <WarnBadge label={c.warnBadge} />}
+        <div className="flex flex-wrap gap-1.5">
+          <PopularBadge it={likely.items.find((x) => pop.tier.has(x)) ?? it} pop={pop} t={t} />
+          {likely.items.some(needsVerification) && <WarnBadge label={c.warnBadge} />}
+        </div>
       </div>
       <p className="font-sans text-ink m-0">
         {summary(it, lang, t)}
-        {lenRange && others.length > 0 && ` · ${c.fLength} ${lenRange}`}
+        {lenRange && lenRange !== fmtRange(it.lengthMm, lang) && ` (${c.fLength} ${lenRange})`}
       </p>
       {others.length > 0 && (
         <p className="font-sans text-sm text-ink m-0">

@@ -1,6 +1,7 @@
 import type { VegaItem, VegaRange, VegaTip } from '../types';
-import { type CatalogIndex, geomKey, textSearch } from './vega-index';
+import { type CatalogIndex, compact, geomKey, textSearch } from './vega-index';
 import { scoreItem } from './vega-score';
+import { type Popularity, popularPrior } from './vega-popular';
 
 /** Pure search/matching helpers for the private tip catalog. No I/O, no storage. */
 
@@ -11,7 +12,7 @@ export const TIP_TYPES: VegaTip[] = ['chisel', 'moil', 'blunt', 'pyramid'];
 export type MeasureKey = 'dia' | 'keyThk' | 'backToSlot' | 'slotLen' | 'rearDia' | 'length';
 export type Measure = Partial<Record<MeasureKey, number>> & { keyCount?: 1 | 2 };
 export type FieldKey = MeasureKey | 'keyCount';
-export type Group = 'match' | 'maybe' | 'wear';
+export type Group = 'match' | 'maybe';
 
 export interface Query {
   text: string;
@@ -88,12 +89,10 @@ function evaluate(it: VegaItem, m: Measure, tol: number): Hit | null {
   const unknown: FieldKey[] = [];
   const misses: string[] = [];
   let ok = 0;
-  let geoOk = 0;
   let score = 0;
   const take = (k: MeasureKey, v: Verdict) => {
     if (v.kind === 'ok') {
       ok++;
-      geoOk++;
       score += Math.abs(v.diff);
       diffs[k] = v.diff;
     } else if (v.kind === 'unknown') unknown.push(k);
@@ -116,29 +115,29 @@ function evaluate(it: VegaItem, m: Measure, tol: number): Hit | null {
     if (ok === 0) return null; // nothing we could actually compare
     return { item: it, group: unknown.length ? 'maybe' : 'match', score, diffs, unknown };
   }
-  // Only the length differs while something else matched: worn tip candidate.
-  // (the entered tip must be SHORTER than the catalog length, and a real size must match)
-  if (
-    misses.length === 1 &&
-    misses[0] === 'length' &&
-    geoOk > 0 &&
-    it.lengthMm &&
-    m.length !== undefined &&
-    m.length < it.lengthMm.min
-  ) {
-    return { item: it, group: 'wear', score, diffs, unknown };
-  }
   return null;
 }
 
-export function searchCatalog(items: VegaItem[], q: Query, idx: CatalogIndex): Results {
+export function searchCatalog(
+  items: VegaItem[],
+  q: Query & { popularOnly?: boolean },
+  idx: CatalogIndex,
+  pop?: Popularity,
+): Results {
   const text = q.text.trim();
   const ts = text ? textSearch(idx, text) : null;
+  // owner aliases (breaker name -> catalog model) count as an exact cross-reference hit
+  const aliasHit = text && pop ? pop.aliasTo.get(compact(text)) : undefined;
+  if (ts && aliasHit && !ts.hits.has(aliasHit)) {
+    ts.hits.set(aliasHit, { cost: -9, matched: text, via: text });
+  }
+  const prior = (it: VegaItem) => (pop ? popularPrior(pop, it) : 0);
   const pool = items.filter(
     (it) =>
       (!q.brand || it.brand === q.brand) &&
       (!q.tip || it.tipTypes.includes(q.tip)) &&
       (!q.hideLow || it.confidence === 'high') &&
+      (!q.popularOnly || !pop || pop.tier.has(it) || pop.twin.has(it)) &&
       (!ts || ts.hits.has(it)),
   );
   const withText = (h: Hit): Hit => {
@@ -150,11 +149,15 @@ export function searchCatalog(items: VegaItem[], q: Query, idx: CatalogIndex): R
     a.item.model.localeCompare(b.item.model, 'en', { numeric: true });
   const measuring = hasMeasure(q.measure);
   const phonetic = ts?.phonetic ?? false;
-  const groups: Record<Group, Hit[]> = { match: [], maybe: [], wear: [] };
+  const groups: Record<Group, Hit[]> = { match: [], maybe: [] };
   if (!measuring) {
     const list = pool
       .map((item): Hit => withText({ item, group: null, score: 0, diffs: {}, unknown: [] }))
-      .sort((a, b) => (a.textCost ?? 0) - (b.textCost ?? 0) || byName(a, b));
+      .sort(
+        (a, b) =>
+          (a.textCost ?? 0) + prior(a.item) / 6 - ((b.textCost ?? 0) + prior(b.item) / 6) ||
+          byName(a, b),
+      );
     return { measuring, phonetic, pool, groups, list, total: list.length };
   }
   for (const it of pool) {
@@ -165,7 +168,7 @@ export function searchCatalog(items: VegaItem[], q: Query, idx: CatalogIndex): R
   // thinner, its slot longer): a 1 mm thinner diameter beats a 1 mm thicker one.
   const soft = new Map<VegaItem, number>();
   for (const g of Object.keys(groups) as Group[]) {
-    for (const h of groups[g]) soft.set(h.item, scoreItem(h.item, q.measure).cost);
+    for (const h of groups[g]) soft.set(h.item, scoreItem(h.item, q.measure).cost + prior(h.item));
     groups[g].sort(
       (a, b) =>
         (soft.get(a.item) ?? 0) - (soft.get(b.item) ?? 0) ||
@@ -191,7 +194,7 @@ export function searchCatalog(items: VegaItem[], q: Query, idx: CatalogIndex): R
     pool,
     groups,
     list: [],
-    total: groups.match.length + groups.maybe.length + groups.wear.length,
+    total: groups.match.length + groups.maybe.length,
   };
 }
 

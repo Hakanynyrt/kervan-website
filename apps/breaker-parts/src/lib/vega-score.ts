@@ -131,8 +131,15 @@ export function scoreItem(it: VegaItem, m: Measure): { cost: number; fields: Fie
 }
 
 /** Score and rank a pool; p is a softmax over the pool. */
-export function rankByScore(pool: VegaItem[], m: Measure): Scored[] {
-  const s = pool.map((item) => ({ item, ...scoreItem(item, m), p: 0 }));
+export function rankByScore(
+  pool: VegaItem[],
+  m: Measure,
+  prior: (it: VegaItem) => number = () => 0,
+): Scored[] {
+  const s = pool.map((item) => {
+    const r = scoreItem(item, m);
+    return { item, fields: r.fields, cost: r.cost + prior(item), p: 0 };
+  });
   s.sort((a, b) => a.cost - b.cost);
   if (!s.length) return s;
   const c0 = s[0].cost;
@@ -157,6 +164,7 @@ export interface Likely {
 export function mostLikely(ranked: Scored[]): Likely | null {
   if (!ranked.length) return null;
   const groups = new Map<string, { items: VegaItem[]; p: number }>();
+  const pOf = new Map(ranked.map((x) => [x.item, x.p]));
   for (const s of ranked) {
     const k = geomKey(s.item);
     const g = groups.get(k);
@@ -165,7 +173,13 @@ export function mostLikely(ranked: Scored[]): Likely | null {
       g.p += s.p;
     } else groups.set(k, { items: [s.item], p: s.p });
   }
-  const [top, runner] = [...groups.values()].sort((a, b) => b.p - a.p);
+  // Rank groups by their best row, not the sum: two near-identical neighbours
+  // must not outvote the row whose sizes match exactly.
+  const best = new Map<{ items: VegaItem[]; p: number }, number>();
+  for (const g of groups.values()) best.set(g, Math.max(...g.items.map((x) => pOf.get(x) ?? 0)));
+  const [top, runner] = [...groups.values()].sort(
+    (a, b) => (best.get(b) ?? 0) - (best.get(a) ?? 0),
+  );
   return { items: top.items, p: top.p, runner: runner ?? null };
 }
 
