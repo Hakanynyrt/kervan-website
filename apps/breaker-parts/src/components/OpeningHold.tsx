@@ -111,9 +111,9 @@ export default function OpeningHold({ t }: Props) {
       className="relative h-dvh w-full pointer-events-none"
     >
       <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-sans text-[11px] tracking-[0.32em] uppercase text-ink-soft"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-sans text-[11px] tracking-[0.32em] uppercase text-ink-mid"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.65 }}
+        animate={{ opacity: 0.85 }}
         transition={{ delay: 3, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
       >
         <span>{t.opening.scroll}</span>

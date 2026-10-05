@@ -57,7 +57,7 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 
 - React Router app: `src/pages/` (Home, Products, ProductDetail, Brands, Production, About, Contact, NotFound); sections in `src/components/` and `src/sections/`; product/brand data in `src/data/`.
 - `public/_redirects` ends with the SPA fallback `/* /index.html 200` — add explicit redirects **above** it. Heat-treatment URLs are 301'd to kervanheat.com.
-- `src/components/Scene.tsx` — Three.js scene (plain `GLTFLoader`, no DRACO) loading `/kirici-uc.glb`. Keep the model local; never switch it to a remote URL.
+- `src/components/Scene.tsx` — Three.js scene (plain `GLTFLoader`, no DRACO) loading `/kirici-uc.glb`. Keep the model local; never switch it to a remote URL. Both three.js users (`Scene` on Home, `ExportsGlobe` inside `Exports`) are `React.lazy` chunks, the globe only mounts about a screen before its section, so the main bundle stays small and other routes never download three.js. The scene skips drawing once the chisel has faded out, caps the pixel ratio at 1.5 on touch devices (2 elsewhere), follows `prefers-reduced-motion` live, and leaves an ember glow when WebGL is unavailable. The globe draws only while on screen.
 - Its only Pages Functions are the owner-only `api/tech/*` endpoints (see "Owner-only Teknik Bilgiler"). The contact form still posts cross-origin to `https://kervanheat.com/api/rfq` in production (`/api/rfq` in dev, which 404s). The `/* → /index.html` fallback does **not** shadow the functions (verified); `smoke.sh` checks `/api/tech/content` returns JSON 401, not HTML.
 
 ### RFQ flow
@@ -101,6 +101,7 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 
 `packages/ui/src/tokens.css` is the single source of truth. Use Tailwind token utilities / CSS variables; never hardcode hex values in components.
 
+- **Contrast:** every text token must stay >= 4.5:1 on `bg`, `bg-soft` and `bg-warm` (`ink-soft` is `#918879` for that reason; check with the WCAG formula before changing it). Form fields use `border-ink-soft` (UI boundaries need 3:1). The WhatsApp button uses `bg-whatsapp` (`#128c7e`, white glyph 4.1:1), not the bright brand green.
 - **Palette ("Mood C", dark):** `bg #0A0A0B`, `bg-soft #141416`, `bg-warm #1C1C20`; `ink #E8E2D6`, `ink-mid #B8AFA0`, `ink-soft #7A7066`; brand "Forge Ember" `#E8431B` (`brand-hi #FF5C32`, `brand-lo #C53614`).
 - **Type:** display Fraunces (`--font-serif`), body/UI Inter (`--font-sans`), loaded from Google Fonts in each app's `index.html`.
 - **Radius:** 6 / 14 (cards) / 20 (large surfaces) / 999px (pills, buttons).

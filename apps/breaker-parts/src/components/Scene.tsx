@@ -139,7 +139,13 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     const container = containerRef.current;
     if (!container) return;
 
-    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    // Follows the OS setting live, not just its value at mount.
+    const reducedMq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    let reduced = reducedMq?.matches ?? false;
+    const onReducedChange = () => {
+      reduced = reducedMq?.matches ?? false;
+    };
+    reducedMq?.addEventListener?.('change', onReducedChange);
 
     // ─── Camera framing constants ────────────────────────────────────
     // Single source of truth — `targetH` and the orbit clamp both
@@ -160,10 +166,18 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       });
     } catch (e) {
       console.error('[scene] WebGLRenderer init failed', e);
+      // No 3D: leave a soft ember glow instead of an empty black opening.
+      container.style.background =
+        'radial-gradient(ellipse at 50% 55%, color-mix(in srgb, var(--color-brand) 16%, transparent), transparent 60%)';
+      reducedMq?.removeEventListener?.('change', onReducedChange);
       return;
     }
     renderer.setClearAlpha(0);
-    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    // Phones render at most 1.5x: the bloom pipeline costs the most there and the
+    // difference is not visible on a soft, dark scene.
+    const coarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+    const DPR = Math.min(coarse ? 1.5 : 2, window.devicePixelRatio || 1);
+    renderer.setPixelRatio(DPR);
     // Cinematic colour pipeline: physically-based output, ACES Filmic
     // tone mapping (the de-facto film response curve) at 1.05 exposure
     // — gives shadows their density back and lets bright specular hits
@@ -184,6 +198,19 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     renderer.domElement.style.height = '100%';
     renderer.domElement.style.display = 'block';
     container.appendChild(renderer.domElement);
+
+    // GPU context loss (tab switch on low memory, driver reset): stop drawing until three
+    // restores it, instead of rendering into a dead context.
+    let contextLost = false;
+    const onContextLost = (e: Event) => {
+      e.preventDefault();
+      contextLost = true;
+    };
+    const onContextRestored = () => {
+      contextLost = false;
+    };
+    renderer.domElement.addEventListener('webglcontextlost', onContextLost);
+    renderer.domElement.addEventListener('webglcontextrestored', onContextRestored);
 
     // ─── Scene + Camera ──────────────────────────────────────────────
     const scene = new THREE.Scene();
@@ -290,7 +317,7 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     // shadow body stays clean. Threshold 0.85 keeps mid-tones out of it.
     const composer = new EffectComposer(renderer);
     composer.setSize(w(), h());
-    composer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    composer.setPixelRatio(DPR);
     composer.addPass(new RenderPass(scene, camera));
     const bloom = new UnrealBloomPass(
       new THREE.Vector2(w(), h()),
@@ -550,8 +577,11 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       }
 
       // Composer chain (RenderPass → UnrealBloomPass → OutputPass)
-      // owns the final draw — no direct renderer.render here.
-      composer.render();
+      // owns the final draw — no direct renderer.render here. Once the chisel has
+      // faded out (scrolled past the hero) there is nothing to see, so skip the bloom
+      // pipeline; the cheap pose maths above keeps running so it fades back in.
+      const invisible = (reduced ? targetO : cur.o) < 0.01;
+      if (!invisible && !contextLost) composer.render();
       raf = requestAnimationFrame(tick);
     };
     tick();
@@ -604,6 +634,9 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', onResize);
       window.removeEventListener('scroll', updatePhase);
+      reducedMq?.removeEventListener?.('change', onReducedChange);
+      renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
+      renderer.domElement.removeEventListener('webglcontextrestored', onContextRestored);
       window.visualViewport?.removeEventListener('resize', onResize);
       FAR.points.geometry.dispose();
       (FAR.points.material as THREE.PointsMaterial).dispose();

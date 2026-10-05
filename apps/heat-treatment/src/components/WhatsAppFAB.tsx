@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 /**
- * Floating WhatsApp button — fixed bottom-right, brand green.
+ * Floating WhatsApp button — fixed bottom-right, dark WhatsApp green (white glyph >= 4:1).
  *
  * Hidden during the cinematic opening so it doesn't compete with the
  * chisel-only intro; fades in once the user has scrolled past ~half
@@ -20,7 +20,15 @@ export default function WhatsAppFAB() {
       const passedOpening = window.scrollY >= window.innerHeight * 0.5;
       const footer = document.querySelector('footer');
       const footerInView = footer ? footer.getBoundingClientRect().top < window.innerHeight : false;
-      setVisible(passedOpening && !footerInView);
+      // On phones the button would sit on top of a form's fields and submit button.
+      const form = document.querySelector('form');
+      const fr = form?.getBoundingClientRect();
+      const overForm =
+        window.innerWidth < 768 &&
+        !!fr &&
+        fr.top < window.innerHeight * 0.9 &&
+        fr.bottom > window.innerHeight * 0.1;
+      setVisible(passedOpening && !footerInView && !overForm);
     };
     window.addEventListener('scroll', computeVisible, { passive: true });
     window.addEventListener('resize', computeVisible, { passive: true });
@@ -39,9 +47,8 @@ export default function WhatsAppFAB() {
       aria-label="WhatsApp +90 531 669 37 34"
       aria-hidden={!visible}
       tabIndex={visible ? 0 : -1}
-      className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-40 inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full text-white shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
+      className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-40 inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full bg-whatsapp text-white shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
       style={{
-        backgroundColor: '#25D366',
         pointerEvents: visible ? 'auto' : 'none',
       }}
       initial={{ opacity: 0, scale: 0.9 }}
