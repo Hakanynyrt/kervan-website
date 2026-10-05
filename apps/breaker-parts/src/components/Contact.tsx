@@ -32,7 +32,7 @@ export default function Contact({ t }: Props) {
         delivered?: boolean;
         emailSent?: boolean;
       };
-      // `delivered`: the request reached the owner by email or Telegram. An older
+      // `delivered`: the request reached the owner by email. An older
       // server only sends `emailSent`. Never show success when nothing was delivered.
       const ok = r.ok && j.ok === true && (j.delivered ?? j.emailSent) === true;
       setState(ok ? 'success' : 'error');
