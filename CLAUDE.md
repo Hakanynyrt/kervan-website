@@ -36,6 +36,7 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 - PR → Pages preview (`https://<branch>.<project>.pages.dev`) of the changed apps only: `dorny/paths-filter` maps `apps/<app>/**` (plus the root `public/` assets that app symlinks) to that app; `packages/**`, the lockfile, root configs or the workflow itself → both. Fork PRs and Dependabot runs get no Actions secrets, so they only run `verify` (test an action bump's deploy by running the workflow manually on the Dependabot branch).
 - Redeploy without a commit (e.g. after changing a Pages env var): Actions → Deploy → **Run workflow**, pick `both` / `heat-treatment` / `breaker-parts` (on `main` = production).
 - `.github/workflows/uptime.yml` runs the same smoke probe every 15 minutes.
+- Cloudflare Web Analytics (cookie-free) is on for both sites. kervanbreaker.com: enabled on the Pages project, which adds the beacon at deploy time, so turning it on or changing it only takes effect on the next deploy. kervanheat.com: automatic setup on the zone (beacon injected at the edge), in "Lite" mode, so EU visitors are not counted.
 - The Pages projects are **not** connected to Cloudflare's git integration — GitHub Actions is the only deployer. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
 - Custom domains are bound to the Pages projects (proxied CNAME → `<project>.pages.dev`). The old `kervan-website` Worker is gone from the repo and has no routes or custom domains.
 
