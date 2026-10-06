@@ -44,22 +44,22 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 ### Packages
 
 - **`@kervan/ui`** (`packages/ui`) — design tokens (`src/tokens.css`, a Tailwind v4 `@theme` block, plus TS mirrors in `src/tokens/`) and base components (`Button`, `Card`, `Container`, `SectionHeading`, `Marquee`, …). Both apps' `src/styles/globals.css` do `@import "tailwindcss"; @import "@kervan/ui/tokens.css";`.
-- **`@kervan/motion`** (`packages/motion`) — shared Framer Motion variants (`fadeUp`, `staggerContainer`, `inViewOnce`, …), `ScrollReveal`, `useParallaxSlow`, and a re-export of `useReducedMotion`.
+- **`@kervan/motion`** (`packages/motion`) — shared Framer Motion variants (`fadeUp`, `staggerContainer`, `inViewOnce`, …), `ScrollReveal`, `useParallaxSlow`, a re-export of `useReducedMotion` (true in static mode, see Motion) and the static-mode pieces (`StaticMotionProvider`, `useStaticMotion`, `isAnimatedClient`, the `js-anim` inline script).
 - **`@kervan/seo`** (`packages/seo`) — `PageMeta`, `JsonLd` and JSON-LD builders. Used by breaker-parts.
 
 ### heat-treatment (kervanheat.com)
 
-- Single-page site: `src/App.tsx` composes the sections in `src/components/` (Hero, Services, TechnicalCapacity, Craft, About, Contact, Footer, …). No router, no 3D.
+- Single-page site (served at `/` and `/en/`): `src/App.tsx` composes the sections in `src/components/` (Hero, Services, TechnicalCapacity, Craft, About, Contact, Footer, …). No router, no 3D.
 - **`functions/api/rfq.ts`** — the only server-side code in the repo, a Cloudflare Pages Function. It is the RFQ endpoint for **both** sites (see below).
 - `public/_redirects` 301s legacy breaker URLs (`/keski`, `/catalog.html`, `/products/*`, …) to kervanbreaker.com.
 
 ### breaker-parts (kervanbreaker.com)
 
 - React Router app: `src/pages/` (Home, Products, ProductDetail, Brands, Production, About, Contact, NotFound); sections in `src/components/` and `src/sections/`; product/brand data in `src/data/`.
-- `public/_redirects` ends with the SPA fallback `/* /index.html 200` — add explicit redirects **above** it. Heat-treatment URLs are 301'd to kervanheat.com.
+- `public/_redirects` has **no** SPA fallback: every route is a prerendered file, unknown paths get `404.html` with HTTP 404. Heat-treatment URLs are 301'd to `https://kervanheat.com/`.
 - `src/components/OpeningHold.tsx` — the empty first viewport over the 3D scene. It never fights scrolling: touch and the arrow/Home/End keys are native; only a mouse-wheel flick or Space/PageDown inside the opening glides to the hero (instant under reduced motion, with an instant-jump safety net if the glide is cancelled, never inside form fields). It unmounts only after scrolling has settled, cancelling any glide first, so a touch fling is not cut short and the page cannot land past the hero.
 - `src/components/Scene.tsx` — Three.js scene (plain `GLTFLoader`, no DRACO) loading `/kirici-uc.glb`. Keep the model local; never switch it to a remote URL. Both three.js users (`Scene` on Home, `ExportsGlobe` inside `Exports`) are `React.lazy` chunks, the globe only mounts about a screen before its section, so the main bundle stays small and other routes never download three.js. The scene skips drawing once the chisel has faded out, caps the pixel ratio at 1.5 on touch devices (2 elsewhere), follows `prefers-reduced-motion` live, and leaves an ember glow when WebGL is unavailable. The globe draws only while on screen.
-- Its only Pages Functions are the owner-only `api/tech/*` endpoints (see "Owner-only Teknik Bilgiler"). The contact form still posts cross-origin to `https://kervanheat.com/api/rfq` in production (`/api/rfq` in dev, which 404s). The `/* → /index.html` fallback does **not** shadow the functions (verified); `smoke.sh` checks `/api/tech/content` returns JSON 401, not HTML.
+- Its only Pages Functions are the owner-only `api/tech/*` endpoints (see "Owner-only Teknik Bilgiler"). The contact form still posts cross-origin to `https://kervanheat.com/api/rfq` in production (`/api/rfq` in dev, which 404s). `smoke.sh` checks `/api/tech/content` returns JSON 401, not HTML.
 
 ### RFQ flow
 
@@ -92,8 +92,17 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 
 ### i18n
 
-- TR is primary, EN secondary. Strings live in each app's `src/lib/dict.ts`; `src/lib/use-lang.ts` resolves `?lang=` → `localStorage('kv_lang')` → `navigator.language` → `'tr'`.
+- TR is primary, EN secondary. Strings (incl. page titles/meta descriptions) live in each app's `src/lib/dict.ts`.
+- The URL is the only source of language: `/…` = Turkish, `/en/…` = English (breaker keeps Turkish slugs: `/en/urunler/keski`). No redirect by browser language. The toggle links to the same page in the other language and writes `localStorage('kv_lang')`; a legacy `?lang=` is sent to the matching URL client-side (`location.replace`, after hydration).
 - The `kv_lang` key is shared between the two sites on purpose — keep it identical in both apps.
+- Each page has its own `<html lang>`, title, description, og tags, JSON-LD `inLanguage`, a self canonical and reciprocal `hreflang` tr / en / x-default (= TR).
+
+### Prerender, 404, sitemap, robots
+
+- `build` = `tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs`. The script writes one full-text `index.html` per route and language (`dist/…/index.html`, `dist/en/…/index.html`) plus `404.html` (noindex), the generated `sitemap.xml`, then deletes `dist-ssr/`. It never calls `/api/tech/*` or reads `TECH_CONTENT`; `/teknik-bilgiler` (+ `/en/`) is prerendered as a noindex shell without content and is not in the sitemap.
+- No SPA fallback in either app: Pages serves the nearest `404.html` with HTTP 404 for unknown paths; Pages Functions (`/api/*`) still take precedence.
+- `sitemap.xml` lists only canonical, indexable pages in both languages with `xhtml:link` hreflang alternates; `<lastmod>` is the last git commit date of the page's files, so the deploy jobs check out with `fetch-depth: 0` (build date only if git is unavailable). Do not add a static `public/sitemap.xml`.
+- `robots.txt`: allow all, `Disallow: /api/`, sitemap link. KVKK is canonical at `/kvkk` (Pages 308s `/kvkk.html`); link and list `/kvkk`.
 - All user-facing text goes through the dict, including `aria-label`s.
 
 ### Shared media at the repo root
@@ -115,7 +124,8 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 - One ease: `--ease-editorial` = `cubic-bezier(0.22, 1, 0.36, 1)` (`editorialEase` in `@kervan/motion`). Prefer the shared variants over ad-hoc ones.
 - Durations: micro 150ms, small 250ms, medium 400ms, large 600ms. Nothing longer than 600ms unless it is a deliberate hero moment. Stagger children 60–80ms.
 - In-view reveals animate once (`{ once: true, amount: 0.3 }`); no more than 3 simultaneous animations on screen.
-- **`useReducedMotion` is mandatory** in every animated component — short-circuit to the static state. `globals.css` also has a `prefers-reduced-motion` floor.
+- **`useReducedMotion` is mandatory** in every animated component — short-circuit to the static state. Import it only from `@kervan/motion`, never from `framer-motion`. `globals.css` also has a `prefers-reduced-motion` floor.
+- Static vs animated mode: the prerendered HTML is the final static state (no intro, OpeningHold or 3D canvas, no inline hiding). An inline `<head>` script adds `js-anim` to `<html>` only for JS-running humans without reduced motion (bots/headless/webdriver excluded). With `js-anim`, `main.tsx` does `createRoot` (today's animated site; `#root[data-prerendered]` is hidden until the first render); otherwise it `hydrateRoot`s in static mode (`StaticMotionProvider`, where `useReducedMotion()` is true) and must match the server markup exactly. Heavy effects (the 3D scene) mount client-side only.
 - Intro: each app's `IntroOverlay` shows once per session (`sessionStorage`). Hero sequences must account for it (delay until it finishes, or skip the delay when the session flag is set).
 
 ### Accessibility

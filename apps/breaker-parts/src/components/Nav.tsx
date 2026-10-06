@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -128,6 +128,13 @@ export default function Nav({ lang, t, techAuthed }: Props) {
           <Link
             to={otherHref}
             hrefLang={otherLang}
+            lang={otherLang}
+            onKeyDown={(e: ReactKeyboardEvent<HTMLAnchorElement>) => {
+              // Links activate on Enter natively; Space too, like the button it replaced.
+              if (e.key !== ' ') return;
+              e.preventDefault();
+              e.currentTarget.click();
+            }}
             onClick={(e) => {
               rememberLang(otherLang);
               if (!search && !locHash) return;
