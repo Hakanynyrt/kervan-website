@@ -203,6 +203,14 @@ export const DICT: Dict = {
       tag: 'Kartepe · Kocaeli',
       rights: '© 2026 Kervan Isıl İşlem San. Tic. Ltd. Şti. Tüm hakları saklıdır.',
       kvkk: 'KVKK',
+      cookies: 'Çerez tercihleri',
+    },
+    consent: {
+      title: 'Çerez tercihi',
+      body: 'Reklamlarımızın işe yarayıp yaramadığını ölçmek için Google Ads çerezlerini kullanmak istiyoruz. Bu çerezler yalnızca kabul ederseniz yüklenir ve veriler Google’a (ABD) aktarılır. Reddederseniz site aynen çalışır.',
+      accept: 'Kabul et',
+      reject: 'Reddet',
+      policy: 'Ayrıntılar',
     },
   },
 
@@ -399,6 +407,14 @@ export const DICT: Dict = {
       tag: 'Kartepe · Kocaeli',
       rights: '© 2026 Kervan Heat Treatment. All rights reserved.',
       kvkk: 'Privacy',
+      cookies: 'Cookie settings',
+    },
+    consent: {
+      title: 'Cookie preference',
+      body: 'We would like to use Google Ads cookies to measure whether our ads work. They load only if you accept, and the data is transferred to Google (USA). If you decline, the site works exactly the same.',
+      accept: 'Accept',
+      reject: 'Decline',
+      policy: 'Details',
     },
   },
 };

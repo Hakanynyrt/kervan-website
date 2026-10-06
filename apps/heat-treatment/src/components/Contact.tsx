@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
 import { fadeUp, inViewOnce, useReducedMotion } from '../lib/motion';
 import { SectionHeading } from '@kervan/ui';
+import { trackConversion } from '../lib/ads';
 
 interface Props {
   t: DictBlock;
@@ -32,7 +33,10 @@ export default function Contact({ t }: Props) {
       // server only sends `emailSent`. Never show success when nothing was delivered.
       const ok = r.ok && j.ok === true && (j.delivered ?? j.emailSent) === true;
       setState(ok ? 'success' : 'error');
-      if (ok) formRef.current.reset();
+      if (ok) {
+        formRef.current.reset();
+        trackConversion('form');
+      }
     } catch {
       setState('error');
     }

@@ -1,4 +1,5 @@
 import type { DictBlock } from '../types';
+import { CONSENT_OPEN_EVENT } from '../lib/ads';
 
 interface Props {
   t: DictBlock;
@@ -45,6 +46,13 @@ export default function Footer({ t }: Props) {
           <a href="/kvkk" className="hover:text-ink transition-colors">
             {t.footer.kvkk}
           </a>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new Event(CONSENT_OPEN_EVENT))}
+            className="hover:text-ink transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+          >
+            {t.footer.cookies}
+          </button>
           <a href="mailto:ahmet@kervanheat.com" className="hover:text-ink transition-colors">
             ahmet@kervanheat.com
           </a>
