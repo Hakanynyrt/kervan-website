@@ -65,7 +65,7 @@ export default function Nav({ lang, t, techAuthed }: Props) {
     { href: '#hizmetler', label: t.nav.services },
     { href: '#teknik-kapasite', label: t.nav.capacity },
     ...(techAuthed ? [{ href: '#teknik-bilgiler', label: t.nav.tech }] : []),
-    { href: '#imalathanemiz', label: t.nav.craft },
+    { href: '#tesisimiz', label: t.nav.craft },
     { href: '#hakkimizda', label: t.nav.about },
     { href: '#contact', label: t.nav.contact },
   ];

@@ -104,6 +104,10 @@ export interface DictBlock {
     eyebrow: string;
     title: string;
     body: string;
+    /** Label of the photo row (screen readers). */
+    photosLabel: string;
+    /** Real photos of our furnaces, 4:5, `${base}-640.webp` and `${base}-1080.webp` under /photos/isil-islem/. */
+    photos: { base: string; alt: string; caption: string }[];
   };
   about: {
     eyebrow: string;

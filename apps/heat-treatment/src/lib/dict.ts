@@ -39,7 +39,7 @@ export const DICT: Dict = {
     nav: {
       services: 'Hizmetler',
       capacity: 'Teknik Kapasite',
-      craft: 'İmalathanemiz',
+      craft: 'Tesisimiz',
       about: 'Hakkımızda',
       contact: 'İletişim',
       tech: 'Teknik Bilgiler',
@@ -135,9 +135,27 @@ export const DICT: Dict = {
       loading: 'Yükleniyor…',
     },
     craft: {
-      eyebrow: 'İmalathanemiz',
+      eyebrow: 'Tesisimiz',
       title: 'Sıcaklık sabırla yükselir.',
       body: 'Fırın bir tezgâh değil; bir saat. Termokupldan gelen her okuma, atmosferdeki her oksijen seviyesi, eğrideki her dakika — hepsi parçanın iç yapısına yazılır. Burada acele etmek yok; doğru sıcaklık, doğru süre, doğru soğutma. Ve bunun arkasında, on yıllardır aynı tezgâhın başında olan eller.',
+      photosLabel: 'Isıl işlem tesisimizden fotoğraflar',
+      photos: [
+        {
+          base: 'tesis-genel-01',
+          alt: 'Kervan Isıl İşlem tesisi: tavan vinci, kuyu tipi fırınlar, fikstürler ve şarja hazır burçlar',
+          caption: 'Tesisimiz: şarja hazır parçalar ve fikstürler',
+        },
+        {
+          base: 'kuyu-firin-01',
+          alt: 'Kapağı açık kuyu tipi ısıl işlem fırını ve sirkülasyon fanı motoru',
+          caption: 'Kuyu tipi fırın',
+        },
+        {
+          base: 'firin-hatti-01',
+          alt: 'Kuyu tipi fırın hattı; arkadaki fırın çalışıyor',
+          caption: 'Fırın hattımız',
+        },
+      ],
     },
     about: {
       eyebrow: 'Hakkımızda',
@@ -210,7 +228,7 @@ export const DICT: Dict = {
     nav: {
       services: 'Services',
       capacity: 'Capacity',
-      craft: 'Our Workshop',
+      craft: 'Our Plant',
       about: 'About',
       contact: 'Contact',
       tech: 'Technical Info',
@@ -302,9 +320,27 @@ export const DICT: Dict = {
       loading: 'Loading…',
     },
     craft: {
-      eyebrow: 'Our Workshop',
+      eyebrow: 'Our Plant',
       title: 'Temperature rises with patience.',
       body: 'A furnace is not a bench; it is a clock. Every reading from the thermocouple, every oxygen level in the atmosphere, every minute on the curve — all of it is written into the part. There is no rushing here; the right temperature, the right time, the right cooling. Behind it, the same hands that have stood at the same furnace for decades.',
+      photosLabel: 'Photos from our heat treatment plant',
+      photos: [
+        {
+          base: 'tesis-genel-01',
+          alt: 'Kervan heat treatment plant: overhead crane, pit furnaces, fixtures and bushings ready to load',
+          caption: 'Our plant: parts and fixtures ready to load',
+        },
+        {
+          base: 'kuyu-firin-01',
+          alt: 'Pit-type heat treatment furnace with the lid open and its circulation fan motor',
+          caption: 'Pit-type furnace',
+        },
+        {
+          base: 'firin-hatti-01',
+          alt: 'Row of pit-type furnaces; the one at the back is running',
+          caption: 'Our furnace line',
+        },
+      ],
     },
     about: {
       eyebrow: 'About',
