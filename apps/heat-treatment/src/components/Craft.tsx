@@ -22,7 +22,7 @@ export default function Craft({ t }: Props) {
   const reduce = useReducedMotion();
   return (
     <section
-      id="imalathanemiz"
+      id="tesisimiz"
       className="min-h-dvh flex flex-col justify-center py-20 md:py-32 border-y border-hair"
     >
       <motion.div

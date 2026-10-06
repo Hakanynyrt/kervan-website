@@ -39,7 +39,7 @@ export const DICT: Dict = {
     nav: {
       services: 'Hizmetler',
       capacity: 'Teknik Kapasite',
-      craft: 'İmalathanemiz',
+      craft: 'Tesisimiz',
       about: 'Hakkımızda',
       contact: 'İletişim',
       tech: 'Teknik Bilgiler',
@@ -135,7 +135,7 @@ export const DICT: Dict = {
       loading: 'Yükleniyor…',
     },
     craft: {
-      eyebrow: 'İmalathanemiz',
+      eyebrow: 'Tesisimiz',
       title: 'Sıcaklık sabırla yükselir.',
       body: 'Fırın bir tezgâh değil; bir saat. Termokupldan gelen her okuma, atmosferdeki her oksijen seviyesi, eğrideki her dakika — hepsi parçanın iç yapısına yazılır. Burada acele etmek yok; doğru sıcaklık, doğru süre, doğru soğutma. Ve bunun arkasında, on yıllardır aynı tezgâhın başında olan eller.',
       photosLabel: 'Isıl işlem tesisimizden fotoğraflar',
@@ -228,7 +228,7 @@ export const DICT: Dict = {
     nav: {
       services: 'Services',
       capacity: 'Capacity',
-      craft: 'Our Workshop',
+      craft: 'Our Plant',
       about: 'About',
       contact: 'Contact',
       tech: 'Technical Info',
@@ -320,7 +320,7 @@ export const DICT: Dict = {
       loading: 'Loading…',
     },
     craft: {
-      eyebrow: 'Our Workshop',
+      eyebrow: 'Our Plant',
       title: 'Temperature rises with patience.',
       body: 'A furnace is not a bench; it is a clock. Every reading from the thermocouple, every oxygen level in the atmosphere, every minute on the curve — all of it is written into the part. There is no rushing here; the right temperature, the right time, the right cooling. Behind it, the same hands that have stood at the same furnace for decades.',
       photosLabel: 'Photos from our heat treatment plant',
