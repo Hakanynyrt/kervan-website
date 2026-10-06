@@ -1,0 +1,3 @@
+# M1 preview: not for search engines yet (M4 opens it).
+User-agent: *
+Disallow: /

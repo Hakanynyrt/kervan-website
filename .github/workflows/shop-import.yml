@@ -1,0 +1,63 @@
+name: Shop data import
+
+# Manual: owner catalog (KV catalog:v1 + popular:v1) → D1 kervan-shop, then a shop
+# redeploy. The data never enters the repository. This repo is public, so its Actions
+# logs are public: every command that outputs data goes to $RUNNER_TEMP, never to the log.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: shop-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    name: KV → D1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: write
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_SHOP_DATA_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      KV_ID: ${{ vars.SHOP_SOURCE_KV_ID }}
+      DB: kervan-shop
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check configuration
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::secret CLOUDFLARE_SHOP_DATA_TOKEN is not set"; exit 1; }
+          test -n "$KV_ID" || { echo "::error::variable SHOP_SOURCE_KV_ID is not set"; exit 1; }
+
+      - name: Apply schema
+        run: pnpm exec wrangler d1 execute "$DB" --remote --yes --file apps/parts-shop/migrations/0001_init.sql > /dev/null
+
+      - name: Import (output kept out of the log)
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/shop"
+          mkdir -p "$D"
+          pnpm exec wrangler kv key get "catalog:v1" --namespace-id "$KV_ID" --remote > "$D/catalog.json"
+          pnpm exec wrangler kv key get "popular:v1" --namespace-id "$KV_ID" --remote > "$D/popular.json" 2>/dev/null || echo 'null' > "$D/popular.json"
+          pnpm exec wrangler d1 execute "$DB" --remote --json --command "SELECT private_ref, code FROM families" > "$D/existing.json"
+          node --experimental-strip-types --no-warnings apps/parts-shop/scripts/shop-import.ts \
+            "$D/catalog.json" "$D/popular.json" "$D/existing.json" "$D/import.sql"
+          pnpm exec wrangler d1 execute "$DB" --remote --yes --file "$D/import.sql" > /dev/null
+          rm -rf "$D"
+
+      - name: Redeploy the shop with the new data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main -f app=parts-shop

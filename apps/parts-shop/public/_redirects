@@ -1,0 +1,3 @@
+# magaza.kervanbreaker.com — no SPA fallback: every page is a prerendered file and
+# unknown paths get the nearest 404.html with HTTP 404. (shop.kervanbreaker.com → magaza
+# is a Cloudflare Redirect Rule on the zone; Pages cannot match the host here.)

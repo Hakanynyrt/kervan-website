@@ -23,3 +23,6 @@ package-lock.json
 # Private catalog data (repo is public): never commit; it lives in Cloudflare KV
 *.csv
 vega-catalog*.json
+
+# Shop catalog snapshot written at build time from D1 (public fields only, still not for git)
+apps/parts-shop/.catalog/

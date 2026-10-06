@@ -1,0 +1,30 @@
+@import 'tailwindcss';
+@import '@kervan/ui/tokens.css';
+
+/* Scan @kervan/ui sources so utilities used inside the package are emitted. */
+@source "../../../../packages/ui/src/**/*.{ts,tsx}";
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+  html {
+    background: var(--color-bg);
+    color: var(--color-ink);
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
