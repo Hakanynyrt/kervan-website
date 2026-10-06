@@ -180,3 +180,16 @@ button {
   position: relative;
   z-index: 1;
 }
+
+/* Static mode (no js-anim: crawlers, no-JS, reduced motion). Google renders with a viewport as
+   tall as the page, so full-viewport sections would grow thousands of pixels and push their
+   centred text out of the screenshot. Cap them; only screens taller than 1000px notice. */
+html:not(.js-anim) .min-h-dvh {
+  min-height: min(100dvh, 1000px);
+}
+html:not(.js-anim) .min-h-\[60dvh\] {
+  min-height: min(60dvh, 600px);
+}
+html:not(.js-anim) .min-h-\[70dvh\] {
+  min-height: min(70dvh, 700px);
+}
