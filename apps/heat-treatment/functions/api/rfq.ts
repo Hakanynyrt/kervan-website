@@ -12,7 +12,7 @@
  *   MAILCHANNELS_DKIM_DOMAIN          — fallback transport
  *   MAILCHANNELS_DKIM_SELECTOR        — DKIM selector for MailChannels
  *   MAILCHANNELS_DKIM_PRIVATE_KEY     — DKIM private key for MailChannels
- *   MAIL_TO                           — RFQ inbox (default: ahmet@kervanheat.com)
+ *   MAIL_TO                           — RFQ inbox (default: info@kervanheat.com)
  *   MAIL_FROM                         — sender (default: noreply@kervanheat.com)
  *
  * Response: { ok, emailSent, delivered, emailStatus } — `emailStatus` is a diagnostic
@@ -173,7 +173,7 @@ IP: ${request.headers.get('CF-Connecting-IP') ?? 'unknown'}
 Country (CF): ${request.headers.get('CF-IPCountry') ?? 'unknown'}
 UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
 
-  const mailTo = env.MAIL_TO ?? 'ahmet@kervanheat.com';
+  const mailTo = env.MAIL_TO ?? 'info@kervanheat.com';
   const mailFrom = env.MAIL_FROM ?? 'noreply@kervanheat.com';
 
   let emailSent = false;

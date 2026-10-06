@@ -11,7 +11,7 @@ export const ORG_TRADING_NAME = 'Kervan Makina';
 
 export const ORG_PHONE = '+90 531 669 37 34';
 export const ORG_PHONE_E164 = '+905316693734';
-export const ORG_EMAIL = 'ahmet@kervanheat.com';
+export const ORG_EMAIL = 'info@kervanheat.com';
 
 export const ORG_LOCALITY = 'Kartepe';
 export const ORG_REGION = 'Kocaeli';
