@@ -14,6 +14,7 @@ import About from './components/About';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import WhatsAppFAB from './components/WhatsAppFAB';
+import ConsentBanner from './components/ConsentBanner';
 
 interface Props {
   /** Page language, decided by the URL ("/" = tr, "/en/" = en). */
@@ -46,6 +47,7 @@ export default function App({ lang }: Props) {
       <Footer t={t} />
 
       {(!isStatic || clientReady) && <WhatsAppFAB />}
+      <ConsentBanner t={t.consent} />
     </>
   );
 }

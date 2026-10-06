@@ -72,6 +72,12 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 - The response is `{ ok, emailSent, delivered, emailStatus }`; `emailStatus` is a diagnostic `{ transport, status }` (HTTP status of the last attempt, `'error'` on a thrown fetch, `'honeypot'` when the hidden field was filled) and never carries a body or key. `delivered` is true only when an email went out (Brevo 8 s timeout); all three forms show success only when `delivered` is true (older servers without it fall back to `emailSent`). The public contact address is `ORG_EMAIL` in `@kervan/seo` (`ahmet@kervanheat.com`) everywhere, including both KVKK pages.
 - Adding a new domain that posts the form means updating `ALLOWED_ORIGINS` (or `PREVIEW_ORIGIN` for a new Pages project).
 
+### Google Ads measurement (heat-treatment only, consent-gated)
+
+- `src/lib/ads.ts` + `src/components/ConsentBanner.tsx`: gtag.js (`AW-16701476208`) is injected **only after** the visitor clicks "Kabul et" in the cookie banner (choice in `localStorage('kv_ads_consent_v1')`; bump the suffix to ask again if the purpose changes). Declined or undecided ⇒ no request to Google, no cookie. Bots/headless/webdriver never see the banner. The footer "Çerez tercihleri" button reopens it (`kv:consent-open`).
+- Conversions (`trackConversion`, no-op without consent): RFQ form success (`delivered`), clicks on any `tel:` link and on WhatsApp links. The send_to labels live in `ads.ts`.
+- Consent mode: ad_storage/ad_user_data granted only after consent; ad_personalization and analytics_storage always denied (no remarketing). Both `kvkk.html` files describe this (section 09, `#cerezler`); keep them in sync with any change here.
+
 ### Owner-only "Teknik Bilgiler" (login)
 
 - A single-owner login protects the technical-info tab **on both sites** (separate cookies and separate Pages secrets per project; the two domains cannot share a session). **The text must never be in the repo (it is public), `dict.ts` or the JS bundle** — it lives in the Pages secret `TECH_CONTENT` (JSON `{ "tr": {…}, "en": {…} }`) and is only returned by `GET /api/tech/content` for a valid session.

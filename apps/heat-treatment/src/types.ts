@@ -146,6 +146,16 @@ export interface DictBlock {
     tag: string;
     rights: string;
     kvkk: string;
+    /** Reopens the cookie banner. */
+    cookies: string;
+  };
+  /** Cookie banner for Google Ads measurement (ConsentBanner). */
+  consent: {
+    title: string;
+    body: string;
+    accept: string;
+    reject: string;
+    policy: string;
   };
 }
 
