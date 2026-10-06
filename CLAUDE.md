@@ -36,7 +36,7 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 - PR → Pages preview (`https://<branch>.<project>.pages.dev`) of the changed apps only: `dorny/paths-filter` maps `apps/<app>/**` (plus the root `public/` assets that app symlinks) to that app; `packages/**`, the lockfile, root configs or the workflow itself → both. Fork PRs and Dependabot runs get no Actions secrets, so they only run `verify` (test an action bump's deploy by running the workflow manually on the Dependabot branch).
 - Redeploy without a commit (e.g. after changing a Pages env var): Actions → Deploy → **Run workflow**, pick `both` / `heat-treatment` / `breaker-parts` (on `main` = production).
 - `.github/workflows/uptime.yml` runs the same smoke probe every 15 minutes.
-- Cloudflare Web Analytics (cookie-free) is on for both sites. kervanbreaker.com: enabled on the Pages project, which adds the beacon at deploy time, so turning it on or changing it only takes effect on the next deploy. kervanheat.com: automatic setup on the zone (beacon injected at the edge), in "Lite" mode, so EU visitors are not counted.
+- Cloudflare Web Analytics (cookie-free) is on for both sites. kervanbreaker.com: enabled on the Pages project, which adds the beacon at deploy time, so turning it on or changing it only takes effect on the next deploy. kervanheat.com: automatic setup on the zone (beacon injected at the edge), in normal mode (EU visitors are counted).
 - The Pages projects are **not** connected to Cloudflare's git integration — GitHub Actions is the only deployer. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
 - Custom domains are bound to the Pages projects (proxied CNAME → `<project>.pages.dev`). The old `kervan-website` Worker is gone from the repo and has no routes or custom domains.
 
@@ -51,6 +51,7 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 ### heat-treatment (kervanheat.com)
 
 - Single-page site (served at `/` and `/en/`): `src/App.tsx` composes the sections in `src/components/` (Hero, Services, TechnicalCapacity, Craft, About, Contact, Footer, …). No router, no 3D.
+- `src/components/SisterSiteStrip.tsx` is the top band of the fixed header (first child of `<header>` in `Nav.tsx`). It links to kervanbreaker.com (same-language home, same tab, no `rel`) and slides away with the header once the page scrolls (`-translate-y-(--kv-strip-h)`). Hero's top padding includes `--kv-strip-h` (defined in `globals.css`); keep the two in sync.
 - **`functions/api/rfq.ts`** — the only server-side code in the repo, a Cloudflare Pages Function. It is the RFQ endpoint for **both** sites (see below).
 - `public/_redirects` 301s legacy breaker URLs (`/keski`, `/catalog.html`, `/products/*`, …) to kervanbreaker.com.
 

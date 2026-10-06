@@ -41,7 +41,7 @@ export default function Hero({ t }: Props) {
   const words2 = t.hero.title2.split(/\s+/).filter(Boolean);
 
   return (
-    <section className="relative min-h-dvh flex flex-col justify-center pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden">
+    <section className="relative min-h-dvh flex flex-col justify-center pt-[calc(8rem+var(--kv-strip-h))] pb-16 md:pt-[calc(10rem+var(--kv-strip-h))] md:pb-24 overflow-hidden">
       {/* Subtle radial gradient — forge ember warmth without an asset */}
       <div
         aria-hidden="true"
