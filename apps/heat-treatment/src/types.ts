@@ -1,3 +1,4 @@
+import type { SisterSiteCopy } from '@kervan/ui';
 /* ═══════════════════════════════════════════════════════════════════════
    Dictionary types — heat-treatment app surface.
 ═══════════════════════════════════════════════════════════════════════ */
@@ -64,18 +65,7 @@ export interface DictBlock {
     language: string;
   };
   /** Top strip of the fixed header linking to the breaker-parts sister site. */
-  sister: {
-    /** Pill label, sm+ (CSS-uppercased; <html lang> makes TR "KARDEŞ SİTE"). */
-    tag: string;
-    /** Lead before the domain, md+. */
-    lead: string;
-    /** Lead before the domain, below md (sr-only under 340px). */
-    leadShort: string;
-    /** Visible domain. */
-    site: string;
-    /** Same-language home page of kervanbreaker.com. */
-    href: string;
-  };
+  sister: SisterSiteCopy;
   hero: {
     eyebrow: string;
     title1: string;

@@ -14,6 +14,12 @@
    the package are emitted in the bundle. */
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
 
+/* Height of the sister-site strip at the top of the fixed header (SisterSiteStrip in Nav).
+   <main> is padded by it; the header slides up by it once the page is scrolled. */
+:root {
+  --kv-strip-h: 2.75rem; /* 44px: full-width touch target */
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    Breaker-parts app — Mood C tokens are sourced from @kervan/ui.
 ═══════════════════════════════════════════════════════════════════════ */

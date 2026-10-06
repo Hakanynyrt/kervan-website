@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Lang, DictBlock } from '../types';
 import { localePath, stripLang } from '../lib/locale-path';
 import { rememberLang } from '../lib/use-lang';
+import { SisterSiteStrip } from '@kervan/ui';
 
 interface Props {
   lang: Lang;
@@ -104,9 +105,20 @@ export default function Nav({ lang, t, techAuthed }: Props) {
     <header
       className={
         'fixed top-0 inset-x-0 z-40 transition-all duration-300 ' +
-        (stuck ? 'bg-bg/85 backdrop-blur-md border-b border-hair' : 'bg-transparent')
+        (stuck
+          ? // Slides the sister strip away, but not while its link has keyboard focus (see SisterSiteStrip).
+            '-translate-y-(--kv-strip-h) has-[[data-sister-link]:focus-visible]:translate-y-0 bg-bg/85 backdrop-blur-md border-b border-hair'
+          : 'bg-transparent')
       }
     >
+      <SisterSiteStrip
+        lang={lang}
+        t={t.sister}
+        image="/sister/kervanheat-firin-01.webp"
+        hidden={stuck}
+        // First visit: after the intro curtain and the opening glide to the hero; later visits right away.
+        sheenAt={{ first: 3.4, later: 1 }}
+      />
       <div className="max-w-[1280px] mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
         <Link to={to('/')} className="flex items-center" aria-label={t.nav.home}>
           <img

@@ -13,6 +13,8 @@ export { Icon } from './components/Icon.js';
 
 // Migrated specialty components
 export { Marquee } from './components/Marquee.js';
+export { SisterSiteStrip } from './components/SisterSiteStrip.js';
+export type { SisterSiteCopy } from './components/SisterSiteStrip.js';
 
 // Helpers
 export { cn } from './lib/cn.js';
