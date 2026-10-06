@@ -1,5 +1,11 @@
 import { motion } from 'framer-motion';
-import { fadeUp, inViewOnce, ScrollReveal, useReducedMotion } from '@kervan/motion';
+import {
+  fadeUp,
+  inViewOnce,
+  ScrollReveal,
+  staggerContainer,
+  useReducedMotion,
+} from '@kervan/motion';
 import type { DictBlock } from '../types';
 
 interface Props {
@@ -8,7 +14,8 @@ interface Props {
 
 /**
  * Craft — atelier manifesto, heat-treatment voice.
- * Centered editorial copy block, italic Fraunces, generous whitespace.
+ * Centered editorial copy block, italic Fraunces, generous whitespace,
+ * then a row of real photos of our furnaces.
  */
 export default function Craft({ t }: Props) {
   // Static (prerendered) mode and reduced motion render the final state.
@@ -35,6 +42,34 @@ export default function Craft({ t }: Props) {
           {t.craft.body}
         </ScrollReveal>
       </motion.div>
+
+      <motion.ul
+        aria-label={t.craft.photosLabel}
+        className="mt-14 md:mt-20 w-full max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 sm:grid-cols-3 gap-6 list-none"
+        variants={staggerContainer(0, 0.08)}
+        initial={reduce ? false : 'hidden'}
+        whileInView="show"
+        viewport={inViewOnce}
+      >
+        {t.craft.photos.map((p) => (
+          <motion.li key={p.base} variants={fadeUp}>
+            <figure className="m-0 flex flex-col gap-3">
+              <img
+                src={`/photos/isil-islem/${p.base}-1080.webp`}
+                srcSet={`/photos/isil-islem/${p.base}-640.webp 640w, /photos/isil-islem/${p.base}-1080.webp 1080w`}
+                sizes="(min-width: 640px) 33vw, 100vw"
+                width={1080}
+                height={1350}
+                alt={p.alt}
+                loading="lazy"
+                decoding="async"
+                className="w-full aspect-[4/3] sm:aspect-[4/5] object-cover object-[50%_35%] rounded-md border border-hair bg-bg-soft"
+              />
+              <figcaption className="font-sans text-sm text-ink-mid">{p.caption}</figcaption>
+            </figure>
+          </motion.li>
+        ))}
+      </motion.ul>
     </section>
   );
 }

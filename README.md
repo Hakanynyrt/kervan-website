@@ -137,12 +137,13 @@ Sonra Claude'a "yükledim, bakar mısın?" de → içerikleri inceler, doğru is
 
 ### Manuel yol — Slot referansı
 
-| App           | Dizin                                         | Slotlar                                 |
-| ------------- | --------------------------------------------- | --------------------------------------- |
-| breaker-parts | `apps/breaker-parts/public/photos/uclar/`     | sivri-uc, yassi, konik, piramit, asfalt |
-| breaker-parts | `apps/breaker-parts/public/photos/pistonlar/` | piston-stack, piston-detay              |
-| breaker-parts | `apps/breaker-parts/public/photos/burclar/`   | burclar-raf, burc-detay                 |
-| breaker-parts | `apps/breaker-parts/public/photos/kit/`       | seal-kit                                |
+| App            | Dizin                                              | Slotlar                                                                 |
+| -------------- | -------------------------------------------------- | ----------------------------------------------------------------------- |
+| breaker-parts  | `apps/breaker-parts/public/photos/uclar/`          | sivri-uc, yassi, konik, piramit, asfalt                                 |
+| breaker-parts  | `apps/breaker-parts/public/photos/pistonlar/`      | piston-stack, piston-detay                                              |
+| breaker-parts  | `apps/breaker-parts/public/photos/burclar/`        | burclar-raf, burc-detay                                                 |
+| breaker-parts  | `apps/breaker-parts/public/photos/kit/`            | seal-kit                                                                |
+| heat-treatment | `public/photos/isil-islem/` (repo root, symlinked) | `<ad>-640.webp` + `<ad>-1080.webp` (4:5), listed in dict `craft.photos` |
 
 `apps/breaker-parts/public/videos` → repo kökünde `public/videos/` symlink (paylaşılan).
 
