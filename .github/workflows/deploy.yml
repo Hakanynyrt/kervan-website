@@ -215,8 +215,9 @@ jobs:
           github.actor != 'dependabot[bot]')
       )
     runs-on: ubuntu-24.04
-    # The first full render (~1,500 SKUs) takes a while; later runs only render changes.
-    timeout-minutes: 60
+    # The first full render (~5,400 images) is spread over runs by a time budget (best-sellers
+    # first); later runs only render changes.
+    timeout-minutes: 120
     permissions:
       contents: read
       deployments: write
@@ -246,17 +247,29 @@ jobs:
       # Renders are content-addressed (file name = hash of the geometry and RENDER_VERSION),
       # so every cached file stays valid; only new or changed tips are rendered.
       - name: Restore tip renders
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: apps/parts-shop/.renders
-          key: shop-renders-${{ github.run_id }}
+          key: shop-renders-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: shop-renders-
 
       - name: Install Chromium for the renderer
         run: pnpm --filter @kervan/parts-shop exec playwright install --with-deps chromium
 
+      # Stops starting new renders after the budget; tips without images yet get them next run.
       - name: Render tips
+        env:
+          SHOP_RENDER_WORKERS: '4'
+          SHOP_RENDER_BUDGET_MIN: '80'
         run: node --experimental-strip-types --no-warnings apps/parts-shop/scripts/render-tips.ts
+
+      # Saved even when a later step fails, so finished renders are never lost.
+      - name: Save tip renders
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: apps/parts-shop/.renders
+          key: shop-renders-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Build parts-shop
         run: pnpm turbo build --filter=@kervan/parts-shop

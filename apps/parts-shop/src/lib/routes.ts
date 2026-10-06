@@ -6,7 +6,7 @@ export interface FamilyCard {
   path: string;
   diameterMm: number;
   types: TipType[];
-  /** Render key of the first SKU that has one (`/tips/<key>-480.webp`). */
+  /** Render key of the first SKU that has one (`/tips/<key>-sm.webp`). */
   image: string | null;
   popularTier: 1 | 2 | null;
   /** First breakers it fits ("Brand Model"). */

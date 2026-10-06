@@ -60,6 +60,41 @@ export interface FamilyAttrs {
   collarEndMm?: number | null;
   /** Chisel edge relative to the key slots, read from the drawing (render only). */
   chiselEdge?: 'parallel' | 'perpendicular' | null;
+  /** Full shank outline read from the drawing (render only); replaces the defaults above. */
+  profile?: ShankProfile | null;
+}
+
+export type StepKind = 'square' | 'chamfer' | 'fillet' | 'taper';
+export type SlotEndKind = 'radius' | 'ramp' | 'square';
+
+/**
+ * Shank outline from the back end, in mm. Printed drawing values are exact; lengths the
+ * drawing does not print (stub, collar, transitions) are measured on it with the local
+ * scale of the nearest printed dimension.
+ */
+export interface ShankProfile {
+  /** Chamfer on the striking-face edge (axial = radial). */
+  backChamferMm: number;
+  /**
+   * Axisymmetric sections, back to front. `lengthMm` includes the step into the next
+   * section; the last section has `lengthMm: null` and runs to the working end.
+   */
+  sections: {
+    diameterMm: number;
+    lengthMm: number | null;
+    /** Transition into the next section (axial length), null for the last one. */
+    step: { kind: StepKind; lengthMm: number } | null;
+  }[];
+  slot: {
+    count: 1 | 2;
+    /** From the very back end to where the slot starts / its full length, ends included. */
+    startMm: number;
+    lengthMm: number;
+    /** Material left across the slotted section (one key: to the far side; two: between flats). */
+    sectionMm: number;
+    back: { kind: SlotEndKind; lengthMm: number };
+    front: { kind: SlotEndKind; lengthMm: number };
+  };
 }
 
 export interface Breaker {
@@ -83,8 +118,10 @@ export interface PublicSku {
   /** Net USD list price in cents; null = "ask for a quote". */
   priceUsdNetCents: number | null;
   availability: Availability;
-  /** Render file key (`/tips/<image>-{480,1200}.webp`), added at build time when a render exists. */
+  /** Render keys (`/tips/<key>-{sm,lg}.webp`), added at build time when renders exist. */
   image?: string;
+  /** Side view, like the catalogue drawing. */
+  imageSide?: string;
 }
 
 export interface PublicFamily {
@@ -94,6 +131,8 @@ export interface PublicFamily {
   popularTier: 1 | 2 | null;
   fits: Breaker[];
   skus: PublicSku[];
+  /** Rear end and key slot close-up (same for every tip type), added at build time. */
+  imageRear?: string;
 }
 
 export interface PublicCatalog {

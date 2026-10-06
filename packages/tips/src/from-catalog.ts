@@ -8,6 +8,7 @@ import {
   type Range,
   type TipType,
 } from './types.ts';
+import { publicProfile } from './public.ts';
 
 /** One row of the owner's private catalog JSON (`items[]`); only the fields the shop uses. */
 export interface SourceRow {
@@ -32,6 +33,8 @@ export interface SourceRow {
   rearStep?: boolean | null;
   slotEnd?: 'rounded' | 'tapered' | null;
   tipAngleDeg?: number | null;
+  /** Shank outline read from the drawing (scripts/vega-profile.mjs); unchecked here. */
+  profile?: unknown;
 }
 
 /** Owner's best-seller list: catalog model name → tier. */
@@ -109,6 +112,7 @@ export function fromCatalog(
       seen.add(b.slug);
       fits.push(b);
     }
+    const profile = publicProfile(row.profile);
     return {
       ref: row.id,
       code,
@@ -123,6 +127,7 @@ export function fromCatalog(
           slotEnd: row.slotEnd ?? null,
         },
         rear: { step: row.rearStep ?? null, diameterMm: row.rearShoulderDiameterMm },
+        ...(profile ? { profile } : {}),
       },
       popularTier: tier(popular?.models?.[row.model]),
       fits,

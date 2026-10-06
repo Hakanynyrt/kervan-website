@@ -6,12 +6,17 @@ import { buildTip, maxRadius } from './tipgen';
 
 /** Brand "Forge Ember" (tokens.css --color-brand); a render-only rim light colour. */
 const EMBER = 0xe8431b;
-export const LARGE = { w: 1200, h: 800 };
-export const SMALL = { w: 480, h: 320 };
+export type View = 'hero' | 'side' | 'rear';
+/** Output sizes per view: large (detail page) and small (cards, thumbnails). */
+export const SIZES: Record<View, { large: [number, number]; small: [number, number] }> = {
+  hero: { large: [1200, 800], small: [480, 320] },
+  side: { large: [1200, 400], small: [600, 200] },
+  rear: { large: [1200, 800], small: [480, 320] },
+};
 
 declare global {
   interface Window {
-    renderTip: (spec: TipSpec) => Promise<{ large: string; small: string }>;
+    renderTip: (spec: TipSpec, view?: View) => Promise<{ large: string; small: string }>;
     renderReady: boolean;
   }
 }
@@ -109,8 +114,16 @@ function studioEnv(renderer: THREE.WebGLRenderer): THREE.Texture {
   return tex;
 }
 
-function fitCamera(box: THREE.Box3, dir: THREE.Vector3, aspect: number, fov = 24, margin = 0.08) {
+function fitCamera(
+  box: THREE.Box3,
+  dir: THREE.Vector3,
+  aspect: number,
+  fov = 24,
+  margin = 0.08,
+  up = new THREE.Vector3(0, 1, 0),
+) {
   const cam = new THREE.PerspectiveCamera(fov, aspect, 1, 1e5);
+  cam.up.copy(up);
   const c = box.getCenter(new THREE.Vector3());
   const d = dir.clone().normalize();
   const corners: THREE.Vector3[] = [];
@@ -149,17 +162,29 @@ const renderer = new THREE.WebGLRenderer({
   preserveDrawingBuffer: true,
 });
 renderer.setPixelRatio(1);
-renderer.setSize(LARGE.w, LARGE.h);
+renderer.setSize(1200, 800);
 renderer.setClearColor(0x000000, 0);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 const env = studioEnv(renderer);
 const small = document.createElement('canvas');
-small.width = SMALL.w;
-small.height = SMALL.h;
 
-window.renderTip = async (spec: TipSpec) => {
+/** Corners of the tool between y0 and y1 (local), in world space. */
+function boxOf(mesh: THREE.Object3D, spec: TipSpec, y0: number, y1: number): THREE.Box3 {
+  const box = new THREE.Box3();
+  const r = maxRadius(spec);
+  for (const y of [y0, y1])
+    for (const x of [-r, r])
+      for (const z of [-r, r])
+        box.expandByPoint(new THREE.Vector3(x, y, z).applyMatrix4(mesh.matrixWorld));
+  return box;
+}
+
+window.renderTip = async (spec: TipSpec, view: View = 'hero') => {
+  const [w, h] = SIZES[view].large;
+  const [sw, shh] = SIZES[view].small;
+  renderer.setSize(w, h);
   const mats = materials();
   const mesh = buildTip(spec, mats);
   const scene = new THREE.Scene();
@@ -172,30 +197,45 @@ window.renderTip = async (spec: TipSpec) => {
   rim2.position.set(-800, -60, -600);
   scene.add(key, rim, rim2, new THREE.HemisphereLight(0x30302e, 0x050505, 0.4));
 
-  // Lying diagonally, working end to the lower right, key slot turned towards the viewer.
   const pivot = new THREE.Group();
-  mesh.rotation.z = -Math.PI / 2;
+  mesh.rotation.z = -Math.PI / 2; // tool axis along +X, back end on the left
   mesh.position.x = -spec.L / 2;
   pivot.add(mesh);
-  pivot.rotation.y = -0.25;
-  pivot.rotation.z = -0.42;
   scene.add(pivot);
-  scene.updateMatrixWorld(true);
-
-  const box = new THREE.Box3();
-  const r = maxRadius(spec);
-  for (const y of [0, spec.L])
-    for (const x of [-r, r])
-      for (const z of [-r, r])
-        box.expandByPoint(new THREE.Vector3(x, y, z).applyMatrix4(mesh.matrixWorld));
-  const cam = fitCamera(box, new THREE.Vector3(0.12, 0.38, 1), LARGE.w / LARGE.h);
+  let cam: THREE.PerspectiveCamera;
+  if (view === 'side') {
+    // Like the catalogue drawing: seen square-on, key slot on top.
+    mesh.rotation.x = -Math.PI / 2;
+    scene.updateMatrixWorld(true);
+    cam = fitCamera(boxOf(mesh, spec, 0, spec.L), new THREE.Vector3(0, 0.1, 1), w / h, 8, 0.04);
+  } else if (view === 'rear') {
+    // Back end and key slot, three-quarter from behind and above.
+    const end = Math.min(spec.L, spec.slot.start + spec.slot.len + 0.9 * spec.D);
+    pivot.rotation.y = 0.35;
+    scene.updateMatrixWorld(true);
+    cam = fitCamera(boxOf(mesh, spec, 0, end), new THREE.Vector3(-0.55, 0.5, 1), w / h, 30, 0.06);
+  } else {
+    // Lying diagonally, working end to the lower right, key slot turned towards the viewer.
+    pivot.rotation.y = -0.25;
+    pivot.rotation.z = -0.42;
+    scene.updateMatrixWorld(true);
+    cam = fitCamera(boxOf(mesh, spec, 0, spec.L), new THREE.Vector3(0.12, 0.38, 1), w / h);
+  }
+  if (view !== 'hero') {
+    // Square-on and close-up views: a soft light from the camera shows the slot faces.
+    const fill = new THREE.DirectionalLight(0xfff4ea, view === 'rear' ? 1.1 : 0.7);
+    fill.position.copy(cam.position);
+    scene.add(fill);
+  }
   renderer.render(scene, cam);
 
   const large = canvas.toDataURL('image/webp', 0.82);
+  small.width = sw;
+  small.height = shh;
   const g = small.getContext('2d')!;
-  g.clearRect(0, 0, SMALL.w, SMALL.h);
+  g.clearRect(0, 0, sw, shh);
   g.imageSmoothingQuality = 'high';
-  g.drawImage(canvas, 0, 0, SMALL.w, SMALL.h);
+  g.drawImage(canvas, 0, 0, sw, shh);
   const smallUrl = small.toDataURL('image/webp', 0.8);
 
   mesh.geometry.dispose();

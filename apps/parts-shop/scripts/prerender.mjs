@@ -21,15 +21,21 @@ try {
   if (fs.existsSync(path.join(renders, 'manifest.json'))) {
     const manifest = JSON.parse(fs.readFileSync(path.join(renders, 'manifest.json'), 'utf8'));
     fs.mkdirSync(path.join(DIST, 'tips'), { recursive: true });
+    const copy = (key) => {
+      const files = ['sm', 'lg'].map((v) => `${key}-${v}.webp`);
+      if (!files.every((n) => fs.existsSync(path.join(renders, n)))) return false;
+      for (const n of files) fs.copyFileSync(path.join(renders, n), path.join(DIST, 'tips', n));
+      images += 2;
+      return true;
+    };
     for (const f of catalog.families) {
+      const rear = manifest.families?.[f.code];
+      if (rear && copy(rear)) f.imageRear = rear;
       for (const s of f.skus) {
-        const key = manifest[s.code];
-        if (!key) continue;
-        const files = ['480', '1200'].map((w) => `${key}-${w}.webp`);
-        if (!files.every((n) => fs.existsSync(path.join(renders, n)))) continue;
-        for (const n of files) fs.copyFileSync(path.join(renders, n), path.join(DIST, 'tips', n));
-        s.image = key;
-        images++;
+        const v = manifest.skus?.[s.code];
+        if (!v || !copy(v.hero) || !copy(v.side)) continue;
+        s.image = v.hero;
+        s.imageSide = v.side;
       }
     }
   }

@@ -12,7 +12,7 @@ export default function FamilyCardView({ c, lang, t }: { c: FamilyCard; lang: La
     >
       {c.image && (
         <img
-          src={`/tips/${c.image}-480.webp`}
+          src={`/tips/${c.image}-sm.webp`}
           alt=""
           width={480}
           height={320}

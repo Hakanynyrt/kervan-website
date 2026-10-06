@@ -58,16 +58,31 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
         </p>
       )}
 
-      {f.skus.some((s) => s.image) && (
+      {(f.imageRear || f.skus.some((s) => s.image)) && (
         <figure className="m-0 mt-8">
           <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+            {f.imageRear && (
+              <li className="rounded-md border border-hair bg-bg-soft p-2">
+                <img
+                  src={`/tips/${f.imageRear}-lg.webp`}
+                  srcSet={`/tips/${f.imageRear}-sm.webp 480w, /tips/${f.imageRear}-lg.webp 1200w`}
+                  sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+                  width={1200}
+                  height={800}
+                  alt={tf.rearAlt(f.code)}
+                  decoding="async"
+                  className="block h-auto w-full"
+                />
+                <span className="block px-2 pb-1 font-sans text-sm text-ink">{tf.viewRear}</span>
+              </li>
+            )}
             {f.skus
               .filter((s) => s.image)
               .map((s) => (
                 <li key={s.code} className="rounded-md border border-hair bg-bg-soft p-2">
                   <img
-                    src={`/tips/${s.image}-1200.webp`}
-                    srcSet={`/tips/${s.image}-480.webp 480w, /tips/${s.image}-1200.webp 1200w`}
+                    src={`/tips/${s.image}-lg.webp`}
+                    srcSet={`/tips/${s.image}-sm.webp 480w, /tips/${s.image}-lg.webp 1200w`}
                     sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
                     width={1200}
                     height={800}
@@ -75,6 +90,19 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
                     decoding="async"
                     className="block h-auto w-full"
                   />
+                  {s.imageSide && (
+                    <img
+                      src={`/tips/${s.imageSide}-lg.webp`}
+                      srcSet={`/tips/${s.imageSide}-sm.webp 600w, /tips/${s.imageSide}-lg.webp 1200w`}
+                      sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+                      width={1200}
+                      height={400}
+                      alt={tf.sideAlt(f.code, t.tip[s.tipType])}
+                      loading="lazy"
+                      decoding="async"
+                      className="mt-1 block h-auto w-full"
+                    />
+                  )}
                   <span className="block px-2 pb-1 font-sans text-sm text-ink">
                     {t.tip[s.tipType]}
                   </span>
