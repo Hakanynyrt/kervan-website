@@ -112,7 +112,7 @@ export function pageHead(pathname: string): PageHead {
         jsonLd: [
           {
             ...organization({ primaryUrl: SITE, alternateName: m.siteName }),
-            '@id': `${SITE}#organization`,
+            '@id': `${SITE}/#organization`,
           },
           website({ url: SITE, name: m.siteName, description: m.websiteDesc, inLanguage: lang }),
           webPage(url, m.homeTitle, m.homeDesc, lang),

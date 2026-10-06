@@ -4,6 +4,7 @@
 // Each page is full text in STATIC motion mode; the inline js-anim script
 // lets animated visitors re-render it client-side (see src/main.tsx).
 // Never calls /api/* and never reads secrets. Deletes dist-ssr/ when done.
+import process from 'node:process';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,6 +13,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const appDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const distDir = path.join(appDir, 'dist');
 const ssrDir = path.join(appDir, 'dist-ssr');
+process.on('exit', () => fs.rmSync(ssrDir, { recursive: true, force: true }));
 
 const ssr = await import(pathToFileURL(path.join(ssrDir, 'entry-server.js')).href);
 const template = fs.readFileSync(path.join(distDir, 'index.html'), 'utf8');

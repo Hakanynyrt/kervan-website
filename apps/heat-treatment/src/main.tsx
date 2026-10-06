@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, useLayoutEffect } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import { MotionConfig } from 'framer-motion';
 import { isAnimatedClient, PRERENDERED_ATTR, StaticMotionProvider } from '@kervan/motion';
@@ -9,6 +9,15 @@ import { langFromPath, pathForLang } from './lib/use-lang';
 const el = document.getElementById('root')!;
 const lang = langFromPath(window.location.pathname);
 
+/** Removes `data-prerendered` once the animated render has committed
+ *  (CSS hides the static markup under html.js-anim until then). */
+function RevealRoot() {
+  useLayoutEffect(() => {
+    el.removeAttribute(PRERENDERED_ATTR);
+  }, []);
+  return null;
+}
+
 if (isAnimatedClient() || !el.hasChildNodes()) {
   // Animated visitors (and the dev server, which has no prerendered markup):
   // a fresh render replaces the static HTML, exactly like before prerendering.
@@ -16,10 +25,10 @@ if (isAnimatedClient() || !el.hasChildNodes()) {
     <StrictMode>
       <MotionConfig reducedMotion="user">
         <App lang={lang} />
+        <RevealRoot />
       </MotionConfig>
     </StrictMode>,
   );
-  requestAnimationFrame(() => el.removeAttribute(PRERENDERED_ATTR));
 } else {
   // Bots, headless browsers and reduced-motion visitors: keep the
   // prerendered static page and hydrate it (same tree as entry-server.tsx).

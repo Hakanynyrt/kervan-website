@@ -101,7 +101,9 @@ export const JS_ANIM_INLINE_SCRIPT =
 /** Inline CSS for <head>: hides the prerendered (static) markup from
  *  animated visitors until the client's first createRoot render replaces
  *  it, so they never see a flash of the static layout. */
-export const JS_ANIM_ROOT_CSS = `html.${JS_ANIM_CLASS} #root[${PRERENDERED_ATTR}]{visibility:hidden}`;
+// If the bundle never loads or throws before its first render, the static page is shown
+// again after 4 s instead of staying hidden.
+export const JS_ANIM_ROOT_CSS = `html.${JS_ANIM_CLASS} #root[${PRERENDERED_ATTR}]{visibility:hidden;animation:kv-unhide 0s linear 4s forwards}@keyframes kv-unhide{to{visibility:visible}}`;
 
 /** Browser-only: true when the head script chose the animated mode.
  *  Call it in main.tsx (never during render). */

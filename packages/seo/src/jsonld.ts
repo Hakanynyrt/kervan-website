@@ -72,7 +72,7 @@ export function website({ url, name, description, inLanguage = 'tr' }: BuildWebs
     name,
     description,
     inLanguage,
-    publisher: { '@id': `${url}#organization` },
+    publisher: { '@id': `${url}/#organization` },
   } as const;
 }
 
@@ -94,7 +94,7 @@ export function service({ url, name, description, catalog }: BuildServiceOpts) {
     name,
     description,
     url,
-    provider: { '@id': `${KERVAN_HEAT_URL}#organization` },
+    provider: { '@id': `${KERVAN_HEAT_URL}/#organization` },
     areaServed: { '@type': 'Country', name: 'Türkiye' },
     ...(catalog && catalog.length > 0
       ? {
@@ -148,7 +148,7 @@ export function product({
     ...(image ? { image } : {}),
     ...(sku ? { sku } : {}),
     brand: { '@type': 'Brand', name: 'Kervan' },
-    manufacturer: { '@id': `${KERVAN_BREAKER_URL}#organization` },
+    manufacturer: { '@id': `${KERVAN_BREAKER_URL}/#organization` },
     ...(material
       ? {
           material,
