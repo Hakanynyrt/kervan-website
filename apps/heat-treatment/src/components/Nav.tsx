@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
 import type { Lang, DictBlock } from '../types';
 import { pathForLang, rememberLang } from '../lib/use-lang';
+import SisterSiteStrip from './SisterSiteStrip';
 
 interface Props {
   lang: Lang;
@@ -73,9 +74,13 @@ export default function Nav({ lang, t, techAuthed }: Props) {
     <header
       className={
         'fixed top-0 inset-x-0 z-40 transition-all duration-300 ' +
-        (stuck ? 'bg-bg/85 backdrop-blur-md border-b border-hair' : 'bg-transparent')
+        (stuck
+          ? // Slides the sister strip away, but not while its link has keyboard focus (see SisterSiteStrip).
+            '-translate-y-(--kv-strip-h) has-[[data-sister-link]:focus-visible]:translate-y-0 bg-bg/85 backdrop-blur-md border-b border-hair'
+          : 'bg-transparent')
       }
     >
+      <SisterSiteStrip lang={lang} t={t.sister} hidden={stuck} />
       <div className="max-w-[1280px] mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
         <a href={pathForLang(lang)} className="flex items-center" aria-label={t.nav.home}>
           <img

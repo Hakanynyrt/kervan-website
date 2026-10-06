@@ -48,6 +48,13 @@ export const DICT: Dict = {
       menu: 'Menü',
       language: 'Dil',
     },
+    sister: {
+      tag: 'Kardeş site',
+      lead: 'Hidrolik kırıcı yedek parçalarımız ayrı sitemizde:',
+      leadShort: 'Kırıcı yedek parçaları:',
+      site: 'kervanbreaker.com',
+      href: 'https://kervanbreaker.com/',
+    },
     hero: {
       eyebrow: 'Kartepe · Kocaeli',
       title1: 'Kontrollü atmosfer pit-tip',
@@ -211,6 +218,13 @@ export const DICT: Dict = {
       home: 'Kervan Heat — home',
       menu: 'Menu',
       language: 'Language',
+    },
+    sister: {
+      tag: 'Sister site',
+      lead: 'Our hydraulic breaker spare parts have their own site:',
+      leadShort: 'Breaker spare parts:',
+      site: 'kervanbreaker.com',
+      href: 'https://kervanbreaker.com/en/',
     },
     hero: {
       eyebrow: 'Kartepe · Kocaeli',
