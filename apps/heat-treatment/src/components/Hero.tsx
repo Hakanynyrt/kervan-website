@@ -9,6 +9,7 @@ import {
   useReducedMotion,
 } from '@kervan/motion';
 import type { DictBlock } from '../types';
+import HeroFilm from './HeroFilm';
 
 interface Props {
   t: DictBlock;
@@ -18,6 +19,8 @@ interface Props {
 const INTRO_KEY = 'kv_v2_intro_seen';
 /** The curtain opens and its brand text fades by ~2 s. */
 const INTRO_WAIT = 2;
+/** Last stat starts at t0 + 1 + 3 × 0.12 and runs 0.6 s → ends t0 + 1.96. Keep in sync with the dl stagger. */
+const HERO_SEQ_END = 2;
 const introPending = (): boolean => {
   try {
     return sessionStorage.getItem(INTRO_KEY) !== '1';
@@ -51,9 +54,9 @@ export default function Hero({ t }: Props) {
         }}
       />
 
-      <div className="relative max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-12 items-center">
+      <div className="relative w-full max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 gap-y-8 md:gap-y-12 lg:grid-cols-[calc((100%_-_33rem)*7/12_+_18rem)_9rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-x-12 lg:gap-y-0 lg:items-start">
         {/* Copy — left */}
-        <div className="col-span-12 lg:col-span-7 flex flex-col gap-8">
+        <div className="flex flex-col gap-8 lg:col-start-1 lg:row-start-1 lg:row-span-2">
           <motion.div
             className="font-sans text-eyebrow uppercase tracking-[0.2em] text-brand font-medium"
             {...rise(0.1, 8, durations.lg)}
@@ -119,9 +122,12 @@ export default function Hero({ t }: Props) {
           </motion.div>
         </div>
 
-        {/* Stats — right (capacity numbers, not marketing claims) */}
+        {/* Film — far right column at lg; below lg it comes before the stats so phones see it on the first screen. */}
+        <HeroFilm t={t} startAt={t0 + HERO_SEQ_END} />
+
+        {/* Stats — middle column at lg (capacity numbers, not marketing claims) */}
         <motion.dl
-          className="col-span-12 lg:col-span-5 grid grid-cols-2 gap-8 m-0"
+          className="grid grid-cols-2 gap-8 m-0 lg:col-start-2 lg:row-start-1 lg:self-stretch lg:flex lg:flex-col lg:justify-between lg:gap-6"
           variants={staggerContainer(t0 + 1, 0.12)}
           initial={reduced ? 'show' : 'hidden'}
           animate="show"
@@ -133,7 +139,9 @@ export default function Hero({ t }: Props) {
               className="flex flex-col-reverse gap-2 border-t border-hair pt-5"
             >
               <dt className="font-sans text-xs tracking-widest uppercase text-ink-soft">{s.l}</dt>
-              <dd className="font-serif text-4xl md:text-5xl text-ink leading-none m-0">{s.n}</dd>
+              <dd className="font-serif text-4xl md:text-5xl lg:text-4xl text-ink leading-none m-0">
+                {s.n}
+              </dd>
             </motion.div>
           ))}
         </motion.dl>

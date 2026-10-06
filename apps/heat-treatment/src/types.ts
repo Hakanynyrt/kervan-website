@@ -74,6 +74,8 @@ export interface DictBlock {
     cta: string;
     ctaSecondary: string;
     stats: Stat[];
+    /** Hero film card (client-only video over a poster). */
+    film: { alt: string; caption: string; pause: string; play: string };
   };
   services: {
     eyebrow: string;
