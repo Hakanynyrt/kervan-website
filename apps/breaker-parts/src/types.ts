@@ -323,6 +323,35 @@ export interface DictBlock {
     body: string;
     cta: string;
   };
+  /** Per-page <title>, meta description and JSON-LD names (prerender + client head). */
+  meta: {
+    siteName: string;
+    websiteDesc: string;
+    homeTitle: string;
+    homeDesc: string;
+    homeListName: string;
+    productsTitle: string;
+    productsDesc: string;
+    productsListName: string;
+    brandsTitle: string;
+    brandsDesc: string;
+    productionTitle: string;
+    productionDesc: string;
+    productionServiceName: string;
+    productionServiceDesc: string;
+    aboutTitle: string;
+    aboutDesc: string;
+    contactTitle: string;
+    /** `{email}` and `{phone}` placeholders. */
+    contactDesc: string;
+    notFoundTitle: string;
+    crumbHome: string;
+    crumbProducts: string;
+    crumbBrands: string;
+    crumbProduction: string;
+    crumbAbout: string;
+    crumbContact: string;
+  };
   footer: {
     brand: string;
     tag: string;

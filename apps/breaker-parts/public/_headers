@@ -38,6 +38,12 @@
 /robots.txt
   Cache-Control: public, max-age=3600
 
+# Owner-only tech page shell: never indexed (the page also has meta robots).
+/teknik-bilgiler
+  X-Robots-Tag: noindex, nofollow
+/en/teknik-bilgiler
+  X-Robots-Tag: noindex, nofollow
+
 # Apply security headers globally.
 /*
   X-Content-Type-Options: nosniff

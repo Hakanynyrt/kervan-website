@@ -164,9 +164,9 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
         antialias: true,
         powerPreference: 'low-power',
       });
-    } catch (e) {
-      console.error('[scene] WebGLRenderer init failed', e);
-      // No 3D: leave a soft ember glow instead of an empty black opening.
+    } catch {
+      // No WebGL (blocked, old GPU, headless): silently leave a soft ember glow
+      // instead of an empty black opening.
       container.style.background =
         'radial-gradient(ellipse at 50% 55%, color-mix(in srgb, var(--color-brand) 16%, transparent), transparent 60%)';
       reducedMq?.removeEventListener?.('change', onReducedChange);
@@ -177,6 +177,18 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     // difference is not visible on a soft, dark scene.
     const coarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
     const DPR = Math.min(coarse ? 1.5 : 2, window.devicePixelRatio || 1);
+    // The drawing buffer must stay within what the GPU accepts, whatever the
+    // viewport: clamp its size to the renderbuffer/texture/viewport limits.
+    const gl = renderer.getContext();
+    const glMax = (p: number) => {
+      const v = Number(gl.getParameter(p));
+      return Number.isFinite(v) && v > 0 ? v : 4096;
+    };
+    const vpDims = gl.getParameter(gl.MAX_VIEWPORT_DIMS) as ArrayLike<number> | null;
+    const maxSide = Math.min(glMax(gl.MAX_RENDERBUFFER_SIZE), glMax(gl.MAX_TEXTURE_SIZE));
+    const MAX_W = Math.min(maxSide, vpDims?.[0] || maxSide);
+    const MAX_H = Math.min(maxSide, vpDims?.[1] || maxSide);
+    const ratioFor = (W: number, H: number) => Math.max(0.1, Math.min(DPR, MAX_W / W, MAX_H / H));
     renderer.setPixelRatio(DPR);
     // Cinematic colour pipeline: physically-based output, ACES Filmic
     // tone mapping (the de-facto film response curve) at 1.05 exposure
@@ -191,11 +203,26 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     // `visualViewport` always reflects the *visible* area; fall back to
     // `innerWidth/Height`, then `container.clientWidth/Height` as a last
     // resort for environments without either (very old WebViews).
-    const w = () => window.visualViewport?.width ?? window.innerWidth ?? container.clientWidth;
-    const h = () => window.visualViewport?.height ?? window.innerHeight ?? container.clientHeight;
-    renderer.setSize(w(), h(), false);
+    // The height is clamped (never taller than the layout viewport or
+    // MAX_CSS_H): a very tall window must not make a huge drawing buffer.
+    const MAX_CSS_H = 1400;
+    const w = () =>
+      Math.floor(window.visualViewport?.width ?? window.innerWidth ?? container.clientWidth) || 0;
+    const h = () =>
+      Math.floor(
+        Math.min(
+          window.visualViewport?.height ?? window.innerHeight ?? container.clientHeight,
+          window.innerHeight || MAX_CSS_H,
+          MAX_CSS_H,
+        ),
+      ) || 0;
+    const W0 = Math.max(1, w());
+    const H0 = Math.max(1, h());
+    const ratio0 = ratioFor(W0, H0);
+    renderer.setPixelRatio(ratio0);
+    renderer.setSize(W0, H0, false);
     renderer.domElement.style.width = '100%';
-    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.height = `${H0}px`;
     renderer.domElement.style.display = 'block';
     container.appendChild(renderer.domElement);
 
@@ -218,7 +245,7 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     // model — classic monument/hero framing. Tighter FOV compresses
     // perspective slightly, makes the chisel feel longer and weightier.
     // CAM_Z 7 (was 9) brings the model closer for a cinematic close-up.
-    const camera = new THREE.PerspectiveCamera(FOV_DEG, w() / h(), 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(FOV_DEG, W0 / H0, 0.1, 100);
     camera.position.set(0, -0.55, CAM_Z);
     camera.lookAt(0, 0.45, 0);
 
@@ -316,11 +343,11 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     // (specular hits where rim/sun catch the polished steel) bloom; the
     // shadow body stays clean. Threshold 0.85 keeps mid-tones out of it.
     const composer = new EffectComposer(renderer);
-    composer.setSize(w(), h());
-    composer.setPixelRatio(DPR);
+    composer.setSize(W0, H0);
+    composer.setPixelRatio(ratio0);
     composer.addPass(new RenderPass(scene, camera));
     const bloom = new UnrealBloomPass(
-      new THREE.Vector2(w(), h()),
+      new THREE.Vector2(W0, H0),
       0.55, // strength
       0.7, // radius
       0.85, // threshold (0..1)
@@ -431,9 +458,15 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     const onResize = () => {
       const W = w(),
         H = h();
+      // Hidden / collapsed viewport (0 × n): keep the last size, draw nothing.
+      if (W <= 0 || H <= 0) return;
+      const ratio = ratioFor(W, H);
       camera.aspect = W / H;
       camera.updateProjectionMatrix();
+      renderer.setPixelRatio(ratio);
       renderer.setSize(W, H, false);
+      renderer.domElement.style.height = `${H}px`;
+      composer.setPixelRatio(ratio);
       composer.setSize(W, H);
       bloom.setSize(W, H);
     };
@@ -488,7 +521,13 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       const t = (now - startTime) / 1000;
       const dt = Math.min(0.05, (now - lastTickT) / 1000);
       lastTickT = now;
-      const aspect = w() / h();
+      const vw = w();
+      const vh = h();
+      if (vw <= 0 || vh <= 0) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      const aspect = vw / vh;
       const isPortrait = aspect < 0.85;
 
       // Phase mapped to per-frame target pose.

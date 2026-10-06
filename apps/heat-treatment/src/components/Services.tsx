@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { SectionHeading } from '@kervan/ui';
-import { fadeUp, inViewOnce, staggerContainer } from '@kervan/motion';
+import { fadeUp, inViewOnce, staggerContainer, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
 
 interface Props {
@@ -8,6 +8,8 @@ interface Props {
 }
 
 export default function Services({ t }: Props) {
+  // Static (prerendered) mode and reduced motion render the final state.
+  const reduce = useReducedMotion();
   return (
     <section id="hizmetler" className="min-h-dvh flex flex-col justify-center py-20 md:py-32">
       <SectionHeading
@@ -19,7 +21,7 @@ export default function Services({ t }: Props) {
       <motion.div
         className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-px bg-hair"
         variants={staggerContainer(0, 0.1)}
-        initial="hidden"
+        initial={reduce ? false : 'hidden'}
         whileInView="show"
         viewport={inViewOnce}
       >

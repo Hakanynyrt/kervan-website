@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { fadeUp, inViewOnce } from '@kervan/motion';
+import { fadeUp, inViewOnce, useReducedMotion } from '@kervan/motion';
 import { cn } from '../lib/cn.js';
 
 interface Props {
@@ -17,6 +17,8 @@ interface Props {
 export function SectionHeading({ eyebrow, title, aside, controls, className }: Props) {
   const [firstSentence, ...rest] = title.split('.');
   const remainder = rest.join('.').trim();
+  // Static (prerendered/bot) mode and reduced motion render the final state.
+  const reduce = useReducedMotion();
 
   return (
     <div
@@ -28,7 +30,7 @@ export function SectionHeading({ eyebrow, title, aside, controls, className }: P
       <motion.div
         className="col-span-12 lg:col-span-7 flex flex-col gap-5"
         variants={fadeUp}
-        initial="hidden"
+        initial={reduce ? false : 'hidden'}
         whileInView="show"
         viewport={inViewOnce}
       >
@@ -44,7 +46,7 @@ export function SectionHeading({ eyebrow, title, aside, controls, className }: P
         <motion.div
           className="col-span-12 lg:col-span-5 flex flex-col gap-4"
           variants={fadeUp}
-          initial="hidden"
+          initial={reduce ? false : 'hidden'}
           whileInView="show"
           viewport={inViewOnce}
           transition={{ delay: 0.1 }}

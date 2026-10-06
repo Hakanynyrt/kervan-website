@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { durations, editorialEase } from '@kervan/motion';
-import { Link, useLocation } from 'react-router-dom';
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Lang, DictBlock } from '../types';
+import { localePath, stripLang } from '../lib/locale-path';
+import { rememberLang } from '../lib/use-lang';
 
 interface Props {
   lang: Lang;
-  setLang: (l: Lang) => void;
   t: DictBlock;
   /** Tab is shown only while the server has confirmed an owner session. */
   techAuthed: boolean;
@@ -17,7 +18,7 @@ interface Props {
  *  sections; on detail routes (e.g. /urunler/keski) they navigate back
  *  to "/" with the hash, which the browser then resolves into a scroll
  *  via `scroll-padding-top` defined in globals.css. */
-export default function Nav({ lang, setLang, t, techAuthed }: Props) {
+export default function Nav({ lang, t, techAuthed }: Props) {
   const [open, setOpen] = useState(false);
   const [stuck, setStuck] = useState(false);
   const reduced = useReducedMotion();
@@ -34,8 +35,15 @@ export default function Nav({ lang, setLang, t, techAuthed }: Props) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
-  const { pathname } = useLocation();
-  const onHome = pathname === '/';
+  const { pathname, search, hash: locHash } = useLocation();
+  const navigate = useNavigate();
+  const onHome = stripLang(pathname) === '/';
+  const to = (path: string) => localePath(path, lang);
+  // The same page in the other language (the URL decides the language). The
+  // href is the bare path so it matches the prerendered markup; a click also
+  // carries the query (e.g. ?part=) and hash over.
+  const otherLang: Lang = lang === 'tr' ? 'en' : 'tr';
+  const otherHref = localePath(stripLang(pathname), otherLang);
 
   // A route change always closes the mobile menu.
   useEffect(() => setOpen(false), [pathname]);
@@ -71,7 +79,7 @@ export default function Nav({ lang, setLang, t, techAuthed }: Props) {
     return (
       <Link
         key={hash}
-        to={`/#${hash}`}
+        to={to(`/#${hash}`)}
         onClick={onClick}
         className="text-ink-mid hover:text-ink transition-colors"
       >
@@ -84,7 +92,7 @@ export default function Nav({ lang, setLang, t, techAuthed }: Props) {
   const renderTechLink = (onClick?: () => void) => (
     <Link
       key="tech"
-      to="/teknik-bilgiler"
+      to={to('/teknik-bilgiler')}
       onClick={onClick}
       className="text-ink-mid hover:text-ink transition-colors"
     >
@@ -100,7 +108,7 @@ export default function Nav({ lang, setLang, t, techAuthed }: Props) {
       }
     >
       <div className="max-w-[1280px] mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center" aria-label={t.nav.home}>
+        <Link to={to('/')} className="flex items-center" aria-label={t.nav.home}>
           <img
             src="/logo-krv-128.png"
             alt="Kervan Breaker"
@@ -117,13 +125,28 @@ export default function Nav({ lang, setLang, t, techAuthed }: Props) {
         </nav>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setLang(lang === 'tr' ? 'en' : 'tr')}
-            className="min-h-11 min-w-11 font-sans text-xs tracking-widest uppercase text-ink-mid hover:text-ink px-2 transition-colors"
+          <Link
+            to={otherHref}
+            hrefLang={otherLang}
+            lang={otherLang}
+            onKeyDown={(e: ReactKeyboardEvent<HTMLAnchorElement>) => {
+              // Links activate on Enter natively; Space too, like the button it replaced.
+              if (e.key !== ' ') return;
+              e.preventDefault();
+              e.currentTarget.click();
+            }}
+            onClick={(e) => {
+              rememberLang(otherLang);
+              if (!search && !locHash) return;
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+              e.preventDefault();
+              navigate(otherHref + search + locHash);
+            }}
+            className="min-h-11 min-w-11 inline-flex items-center justify-center font-sans text-xs tracking-widest uppercase text-ink-mid hover:text-ink px-2 transition-colors"
             aria-label={t.nav.language}
           >
             {lang === 'tr' ? 'EN' : 'TR'}
-          </button>
+          </Link>
           {onHome ? (
             <a
               href="#contact"
@@ -133,7 +156,7 @@ export default function Nav({ lang, setLang, t, techAuthed }: Props) {
             </a>
           ) : (
             <Link
-              to="/#contact"
+              to={to('/#contact')}
               className="hidden sm:inline-block bg-brand text-bg px-5 py-2 font-sans text-sm hover:bg-brand-hi transition-colors"
             >
               {t.nav.cta}
@@ -167,7 +190,7 @@ export default function Nav({ lang, setLang, t, techAuthed }: Props) {
               {links.map((l) => renderLink(l.hash, l.label, () => setOpen(false)))}
               {techAuthed && renderTechLink(() => setOpen(false))}
               <Link
-                to="/#contact"
+                to={to('/#contact')}
                 onClick={() => setOpen(false)}
                 className="sm:hidden mt-2 bg-brand text-bg px-5 py-3 font-sans text-sm text-center"
               >

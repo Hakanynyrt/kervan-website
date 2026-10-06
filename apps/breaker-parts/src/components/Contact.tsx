@@ -1,7 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
-import { fadeUp, inViewOnce } from '../lib/motion';
+import { fadeUp, inViewOnce, useReducedMotion } from '../lib/motion';
 import { SectionHeading } from '@kervan/ui';
 import { ORG_EMAIL } from '@kervan/seo';
 
@@ -17,6 +17,7 @@ type State = 'idle' | 'sending' | 'success' | 'error';
 const RFQ_ENDPOINT = import.meta.env.PROD ? 'https://kervanheat.com/api/rfq' : '/api/rfq';
 
 export default function Contact({ t }: Props) {
+  const reduce = useReducedMotion();
   const [state, setState] = useState<State>('idle');
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -55,7 +56,7 @@ export default function Contact({ t }: Props) {
         <motion.dl
           className="col-span-12 lg:col-span-4 flex flex-col gap-7 m-0"
           variants={fadeUp}
-          initial="hidden"
+          initial={reduce ? false : 'hidden'}
           whileInView="show"
           viewport={inViewOnce}
         >
@@ -97,7 +98,7 @@ export default function Contact({ t }: Props) {
           onSubmit={onSubmit}
           className="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-5"
           variants={fadeUp}
-          initial="hidden"
+          initial={reduce ? false : 'hidden'}
           whileInView="show"
           viewport={inViewOnce}
         >

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useReducedMotion, useStaticMotion } from '@kervan/motion';
 
 const SESSION_KEY = 'kv_v2_intro_seen';
 const TOTAL_MS = 2400;
@@ -23,8 +24,10 @@ const TOTAL_MS = 2400;
  */
 export default function IntroOverlay() {
   const reduced = useReducedMotion();
+  const isStatic = useStaticMotion();
+  // Never in static mode (prerender + hydrate): the server markup has no overlay.
   const [show, setShow] = useState(() => {
-    if (typeof window === 'undefined') return false;
+    if (isStatic || typeof window === 'undefined') return false;
     try {
       return sessionStorage.getItem(SESSION_KEY) !== '1';
     } catch {

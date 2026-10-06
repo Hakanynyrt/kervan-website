@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
-import { PageMeta, JsonLd, breadcrumbList, KERVAN_BREAKER_URL } from '@kervan/seo';
-import { fadeUp } from '@kervan/motion';
+import { fadeUp, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
 
 interface Props {
@@ -8,26 +7,14 @@ interface Props {
 }
 
 export default function About({ t }: Props) {
+  const reduce = useReducedMotion();
   return (
     <>
-      <PageMeta
-        title="Hakkımızda — Kervan Breaker"
-        description="Kervan Makina, Kartepe / Kocaeli'de fason ısıl işlem ve hidrolik kırıcı yedek parça üreten aile şirketi."
-        canonical={`${KERVAN_BREAKER_URL}/hakkimizda`}
-        image={`${KERVAN_BREAKER_URL}/og.png`}
-      />
-      <JsonLd
-        schema={breadcrumbList([
-          { name: 'Anasayfa', url: `${KERVAN_BREAKER_URL}/` },
-          { name: 'Hakkımızda', url: `${KERVAN_BREAKER_URL}/hakkimizda` },
-        ])}
-      />
-
       <section className="pt-32 pb-16 md:pt-40 md:pb-24">
         <motion.div
           className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-16 items-start"
           variants={fadeUp}
-          initial="hidden"
+          initial={reduce ? false : 'hidden'}
           animate="show"
         >
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-3">

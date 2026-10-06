@@ -15,7 +15,8 @@ import { DrawingsContext, useVegaDrawings } from '../lib/use-vega-drawings';
 import CatalogTab from './tech/CatalogTab';
 
 type Tab = 'general' | 'catalog';
-const tabFromHash = (): Tab => (window.location.hash === '#katalog' ? 'catalog' : 'general');
+const tabFromHash = (): Tab =>
+  typeof window !== 'undefined' && window.location.hash === '#katalog' ? 'catalog' : 'general';
 
 interface Props {
   t: DictBlock;
@@ -28,7 +29,9 @@ const focusRing =
 
 /** Owner-only page. This route is only a shell: the content arrives from
  *  /api/tech/content after the server confirmed a session, and the page is
- *  kept out of search engines. */
+ *  kept out of search engines (noindex, set by RouteHead / the prerender).
+ *  The prerendered shell only ever shows the loading line: the server
+ *  render never has a session. */
 export default function TechInfo({ t, lang, tech }: Props) {
   const [tab, setTab] = useState<Tab>(tabFromHash);
   useEffect(() => {
@@ -46,19 +49,6 @@ export default function TechInfo({ t, lang, tech }: Props) {
   };
   // The catalog is fetched only after sign-in and only when its tab is opened.
   const catalog = useVegaCatalog(tech.state === 'authed' && tab === 'catalog', tech.logout);
-
-  useEffect(() => {
-    const m = document.createElement('meta');
-    m.name = 'robots';
-    m.content = 'noindex, nofollow';
-    document.head.appendChild(m);
-    const prev = document.title;
-    document.title = `${t.techUi.eyebrow} — Kervan Breaker`;
-    return () => {
-      m.remove();
-      document.title = prev;
-    };
-  }, [t.techUi.eyebrow]);
 
   if (tech.state === 'authed' && tech.content) {
     const c = tech.content[lang] ?? tech.content.tr;

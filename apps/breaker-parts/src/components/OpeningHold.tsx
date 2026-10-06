@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
 
 interface Props {

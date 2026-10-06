@@ -14,6 +14,21 @@ export {
   type BuildItemListOpts,
 } from './jsonld.js';
 
+// Build-time head / sitemap helpers (pure strings, no DOM)
+export {
+  buildHeadTags,
+  injectHead,
+  buildSitemapXml,
+  ogLocale,
+  escapeHtml,
+  jsonForScript,
+  type HeadLang,
+  type HeadAlternates,
+  type HeadInput,
+  type InjectHeadOptions,
+  type SitemapEntry,
+} from './head.js';
+
 // React components
 export { JsonLd } from './JsonLd.js';
 export { PageMeta } from './PageMeta.js';

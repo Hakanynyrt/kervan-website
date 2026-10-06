@@ -42,7 +42,7 @@ export default function Footer({ t }: Props) {
               <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
             </svg>
           </a>
-          <a href="/kvkk.html" className="hover:text-ink transition-colors">
+          <a href="/kvkk" className="hover:text-ink transition-colors">
             {t.footer.kvkk}
           </a>
           <a href="mailto:ahmet@kervanheat.com" className="hover:text-ink transition-colors">

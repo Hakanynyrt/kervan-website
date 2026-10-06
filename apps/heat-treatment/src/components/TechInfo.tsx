@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { SectionHeading } from '@kervan/ui';
-import { fadeUp, inViewOnce, staggerContainer } from '@kervan/motion';
+import { fadeUp, inViewOnce, staggerContainer, useReducedMotion } from '@kervan/motion';
 import type { DictBlock, Lang } from '../types';
 import type { TechAuth } from '../lib/use-tech-auth';
 
@@ -17,6 +17,8 @@ const focusRing =
 /** Owner-only section. Nothing renders for visitors: the login form appears
  *  only at /#giris, and the content only after the server confirmed a session. */
 export default function TechInfo({ t, lang, tech }: Props) {
+  // Static (prerendered) mode and reduced motion render the final state.
+  const reduce = useReducedMotion();
   if (tech.state === 'authed' && tech.content) {
     const c = tech.content[lang] ?? tech.content.tr;
     if (!c) return null;
@@ -27,7 +29,7 @@ export default function TechInfo({ t, lang, tech }: Props) {
         <motion.div
           className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-px bg-hair"
           variants={staggerContainer(0, 0.08)}
-          initial="hidden"
+          initial={reduce ? false : 'hidden'}
           whileInView="show"
           viewport={inViewOnce}
         >

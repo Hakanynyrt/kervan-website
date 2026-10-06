@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
-import { staggerContainer, fadeUp, inViewOnce } from '../lib/motion';
+import { staggerContainer, fadeUp, inViewOnce, useReducedMotion } from '../lib/motion';
 import { SectionHeading, Marquee } from '@kervan/ui';
 
 interface Props {
@@ -8,6 +8,7 @@ interface Props {
 }
 
 export default function Industries({ t }: Props) {
+  const reduce = useReducedMotion();
   return (
     <section
       id="industries"
@@ -23,7 +24,7 @@ export default function Industries({ t }: Props) {
       <motion.ul
         className="max-w-[1280px] mx-auto px-8 border-t border-hair list-none m-0 p-0"
         variants={staggerContainer(0, 0.08)}
-        initial="hidden"
+        initial={reduce ? false : 'hidden'}
         whileInView="show"
         viewport={inViewOnce}
       >

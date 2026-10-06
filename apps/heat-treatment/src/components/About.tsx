@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { fadeUp, inViewOnce } from '@kervan/motion';
+import { fadeUp, inViewOnce, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
 
 interface Props {
@@ -7,12 +7,14 @@ interface Props {
 }
 
 export default function About({ t }: Props) {
+  // Static (prerendered) mode and reduced motion render the final state.
+  const reduce = useReducedMotion();
   return (
     <section id="hakkimizda" className="min-h-[60dvh] flex flex-col justify-center py-20 md:py-32">
       <motion.div
         className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-16 items-start"
         variants={fadeUp}
-        initial="hidden"
+        initial={reduce ? false : 'hidden'}
         whileInView="show"
         viewport={inViewOnce}
       >

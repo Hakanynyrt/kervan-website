@@ -3,12 +3,16 @@ import { Link } from 'react-router-dom';
 import { SectionHeading } from '@kervan/ui';
 import { staggerContainer, fadeUp, inViewOnce } from '../lib/motion';
 import type { DictBlock } from '../types';
+import { useLocalePath } from '../lib/locale-path';
+import { useReducedMotion } from '@kervan/motion';
 
 interface Props {
   t: DictBlock;
 }
 
 export default function Products({ t }: Props) {
+  const to = useLocalePath();
+  const reduce = useReducedMotion();
   return (
     <section
       id="products"
@@ -24,7 +28,7 @@ export default function Products({ t }: Props) {
       <motion.div
         className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8"
         variants={staggerContainer(0, 0.12)}
-        initial="hidden"
+        initial={reduce ? false : 'hidden'}
         whileInView="show"
         viewport={inViewOnce}
       >
@@ -32,7 +36,7 @@ export default function Products({ t }: Props) {
           const Wrapper = p.slug
             ? ({ children }: { children: React.ReactNode }) => (
                 <Link
-                  to={`/urunler/${p.slug}`}
+                  to={to(`/urunler/${p.slug}`)}
                   className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                 >
                   {children}

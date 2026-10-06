@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PageMeta, JsonLd, itemList, KERVAN_BREAKER_URL } from '@kervan/seo';
+import { useClientIdle, useStaticMotion } from '@kervan/motion';
 import OpeningHold from '../components/OpeningHold';
 import Hero from '../components/Hero';
 import Products from '../components/Products';
@@ -10,10 +10,10 @@ import Craft from '../components/Craft';
 import Industries from '../components/Industries';
 import Exports from '../components/Exports';
 import Contact from '../components/Contact';
-import { PRODUCTS } from '../data/products';
 import type { DictBlock, Lang } from '../types';
+import { localePath } from '../lib/locale-path';
 
-// three.js is ~700 KB: load it as its own chunk, in parallel with the page, only here.
+// three.js is ~700 KB: load it as its own chunk, only here, once the page has painted.
 const Scene = lazy(() => import('../components/Scene'));
 
 interface Props {
@@ -25,37 +25,27 @@ interface Props {
  * Long-scroll home — the original kervan-website experience moved
  * verbatim. Scene + OpeningHold mount only here so other routes get a
  * clean dark layout without the cinematic 3D bg.
+ *
+ * Both exist only in the animated (js-anim) mode: the prerendered static
+ * page (bots, no JS, reduced motion) starts straight at the hero. The
+ * scene mounts after the first paint, when the browser is idle.
  */
 export default function Home({ t, lang }: Props) {
   const navigate = useNavigate();
+  const isStatic = useStaticMotion();
+  const idle = useClientIdle();
   return (
     <>
-      <PageMeta
-        title="Kervan Breaker — Hidrolik kırıcı yedek parçaları"
-        description="Keski, piston, burç, sızdırmazlık. 22 yıllık zanaat, 40+ kırıcı markası uyumlu."
-        canonical={`${KERVAN_BREAKER_URL}/`}
-        image={`${KERVAN_BREAKER_URL}/og.png`}
-      />
-      <JsonLd
-        schema={itemList({
-          name: 'Hidrolik kırıcı yedek parça aileleri',
-          items: PRODUCTS.map((p) => ({
-            name: p[lang].name,
-            url: `${KERVAN_BREAKER_URL}/urunler/${p.slug}`,
-            description: p[lang].tagline,
-            image: p.image ? `${KERVAN_BREAKER_URL}${p.image}` : undefined,
-          })),
-        })}
-      />
-
       {/* 3D BG — vanilla Three.js, fixed full-viewport behind everything. */}
-      <Suspense fallback={null}>
-        <Scene onSecret={() => navigate('/teknik-bilgiler')} />
-      </Suspense>
+      {!isStatic && idle && (
+        <Suspense fallback={null}>
+          <Scene onSecret={() => navigate(localePath('/teknik-bilgiler', lang))} />
+        </Suspense>
+      )}
 
       <div className="app-root">
         {/* Cinematic opening hold — first viewport is just chisel + starfield. */}
-        <OpeningHold t={t} />
+        {!isStatic && <OpeningHold t={t} />}
         <Hero t={t} />
         <Products t={t} />
         <WorkshopShowcase t={t} />

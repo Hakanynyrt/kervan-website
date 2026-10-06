@@ -1,15 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
-import {
-  PageMeta,
-  JsonLd,
-  breadcrumbList,
-  KERVAN_BREAKER_URL,
-  ORG_EMAIL,
-  ORG_PHONE,
-} from '@kervan/seo';
-import { fadeUp, inViewOnce } from '@kervan/motion';
+import { ORG_EMAIL } from '@kervan/seo';
+import { fadeUp, inViewOnce, useReducedMotion, useStaticMotion } from '@kervan/motion';
 import { PRODUCT_BY_SLUG } from '../data/products';
 import type { DictBlock, Lang } from '../types';
 
@@ -26,6 +19,8 @@ type State = 'idle' | 'sending' | 'success' | 'error';
 const RFQ_ENDPOINT = import.meta.env.PROD ? 'https://kervanheat.com/api/rfq' : '/api/rfq';
 
 export default function Contact({ t, lang }: Props) {
+  const reduce = useReducedMotion();
+  const isStatic = useStaticMotion();
   const [params] = useSearchParams();
   const partSlug = params.get('part');
   const prefilledPart = partSlug ? PRODUCT_BY_SLUG[partSlug] : undefined;
@@ -34,7 +29,9 @@ export default function Contact({ t, lang }: Props) {
     : '';
 
   const [state, setState] = useState<State>('idle');
-  const [message, setMessage] = useState(prefilledMessage);
+  // Static (prerender/hydrate) mode starts empty like the server markup; the
+  // effect below fills in the ?part= prefill right after hydration.
+  const [message, setMessage] = useState(isStatic ? '' : prefilledMessage);
   const formRef = useRef<HTMLFormElement>(null);
 
   // If user navigates between product detail pages while on contact, refresh
@@ -67,24 +64,11 @@ export default function Contact({ t, lang }: Props) {
 
   return (
     <>
-      <PageMeta
-        title="İletişim — Kervan Breaker"
-        description={`Hidrolik kırıcı yedek parça teklifi için: ${ORG_EMAIL} · ${ORG_PHONE}.`}
-        canonical={`${KERVAN_BREAKER_URL}/iletisim`}
-        image={`${KERVAN_BREAKER_URL}/og.png`}
-      />
-      <JsonLd
-        schema={breadcrumbList([
-          { name: 'Anasayfa', url: `${KERVAN_BREAKER_URL}/` },
-          { name: 'İletişim', url: `${KERVAN_BREAKER_URL}/iletisim` },
-        ])}
-      />
-
       <section className="pt-32 pb-16 md:pt-40 md:pb-24">
         <motion.div
           className="max-w-[1280px] mx-auto px-6 md:px-8 mb-12 md:mb-16 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end"
           variants={fadeUp}
-          initial="hidden"
+          initial={reduce ? false : 'hidden'}
           animate="show"
         >
           <div className="col-span-12 lg:col-span-7 flex flex-col gap-5">
@@ -105,7 +89,7 @@ export default function Contact({ t, lang }: Props) {
           <motion.dl
             className="col-span-12 lg:col-span-4 flex flex-col gap-7 m-0"
             variants={fadeUp}
-            initial="hidden"
+            initial={reduce ? false : 'hidden'}
             whileInView="show"
             viewport={inViewOnce}
           >
@@ -147,7 +131,7 @@ export default function Contact({ t, lang }: Props) {
             onSubmit={onSubmit}
             className="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-5"
             variants={fadeUp}
-            initial="hidden"
+            initial={reduce ? false : 'hidden'}
             whileInView="show"
             viewport={inViewOnce}
           >

@@ -1,5 +1,6 @@
 import { useRef, type ReactNode } from 'react';
-import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion';
+import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion';
+import { useReducedMotion } from './static-mode.js';
 
 interface Props {
   /** Plain string content (split into words) or a single React node. */
@@ -23,7 +24,8 @@ export function ScrollReveal({ children, className, baseOpacity = 0.4 }: Props) 
     offset: ['start 0.85', 'start 0.25'],
   });
 
-  // Reduced motion: no progressive reveal, the text is simply fully visible.
+  // Reduced motion or static (prerender/hydrate) mode: no progressive
+  // reveal, the text is simply fully visible.
   if (reduced || typeof children !== 'string') {
     return (
       <p ref={ref} className={className}>

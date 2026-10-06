@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
-import { fadeUp, inViewOnce } from '../lib/motion';
+import { fadeUp, inViewOnce, useReducedMotion } from '../lib/motion';
 import { ScrollReveal } from '@kervan/motion';
 
 interface Props {
@@ -12,6 +12,7 @@ interface Props {
  * sütun centered editorial copy bloğu, geniş whitespace, italic Fraunces.
  */
 export default function Craft({ t }: Props) {
+  const reduce = useReducedMotion();
   return (
     <section
       id="craft"
@@ -21,7 +22,7 @@ export default function Craft({ t }: Props) {
       <motion.div
         className="max-w-[820px] mx-auto px-8 flex flex-col gap-10 items-start"
         variants={fadeUp}
-        initial="hidden"
+        initial={reduce ? false : 'hidden'}
         whileInView="show"
         viewport={inViewOnce}
       >

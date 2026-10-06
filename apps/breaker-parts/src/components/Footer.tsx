@@ -1,16 +1,19 @@
 import { Link } from 'react-router-dom';
 import { ORG_EMAIL } from '@kervan/seo';
 import type { DictBlock } from '../types';
+import { useLocalePath } from '../lib/locale-path';
 
 interface Props {
   t: DictBlock;
 }
 
 export default function Footer({ t }: Props) {
+  const to = useLocalePath();
   return (
-    <footer className="border-t border-hair">
+    // relative + z-[1]: always above the fixed 3D scene layer (z-0).
+    <footer className="relative z-[1] border-t border-hair">
       <div className="max-w-[1280px] mx-auto px-6 md:px-8 py-12 flex flex-col md:flex-row gap-6 md:gap-12 items-start md:items-center justify-between">
-        <Link to="/" className="flex items-baseline gap-3">
+        <Link to={to('/')} className="flex items-baseline gap-3">
           <span className="font-serif italic text-3xl text-ink leading-none">K</span>
           <div className="flex flex-col">
             <span className="font-sans text-sm font-medium text-ink">{t.footer.brand}</span>
@@ -50,7 +53,7 @@ export default function Footer({ t }: Props) {
           >
             kervanheat.com
           </a>
-          <a href="/kvkk.html" className="hover:text-ink transition-colors">
+          <a href="/kvkk" className="hover:text-ink transition-colors">
             {t.footer.kvkk}
           </a>
           <a href={`mailto:${ORG_EMAIL}`} className="hover:text-ink transition-colors">
