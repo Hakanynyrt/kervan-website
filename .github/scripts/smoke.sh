@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Production smoke probe for kervanheat.com + kervanbreaker.com.
+# Production smoke probe for kervanheat.com + kervanbreaker.com + magaza.kervanbreaker.com.
 #
 # Read-only: GET and OPTIONS only. Never POST to /api/rfq — a valid POST
 # sends real email notifications.
@@ -69,5 +69,16 @@ check https://kervanbreaker.com/api/tech/drawings 401 application/json
 preflight "$RFQ" https://kervanbreaker.com yes
 preflight "$RFQ" https://www.kervanbreaker.com yes
 preflight "$RFQ" https://evil.example no
+
+# Parts shop (M1 preview): up, and still closed to search engines.
+check https://magaza.kervanbreaker.com/ 200 text/html
+robots=$("${CURL[@]}" -o /dev/null -D - https://magaza.kervanbreaker.com/ | tr -d '\r' |
+  awk -F': ' 'tolower($1) == "x-robots-tag" { print $2 }')
+if [[ $robots == *noindex* ]]; then
+  echo "ok    X-Robots-Tag '$robots'  https://magaza.kervanbreaker.com/"
+else
+  echo "FAIL  X-Robots-Tag '$robots'  https://magaza.kervanbreaker.com/  (want noindex)"
+  fail=1
+fi
 
 exit $fail
