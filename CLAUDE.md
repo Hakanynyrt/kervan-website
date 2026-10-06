@@ -76,7 +76,7 @@ Unit tests exist only for `@kervan/tips` (Node's built-in runner, `node --experi
 - **CI logs are public** (public repo): data scripts print counts only.
 - **Codes:** families `KU{Ø}-{NN}`, SKUs `…-{C|M|B|P|K|A}` (chisel, moil, blunt, pyramid, conical, asphalt). Permanent: never renumber or reuse. No third-party catalogue names or part numbers on the site or in shop identifiers.
 - **Search engines:** closed in M1 on three layers (meta robots, `_headers` `X-Robots-Tag`, `robots.txt` `Disallow: /`); `smoke.sh` checks the header. M4 opens them.
-- Pages project `kervan-parts-shop` (Direct Upload, created by the deploy job's "Ensure the Pages project exists" step); custom domain `magaza.kervanbreaker.com`; `shop.kervanbreaker.com` 301s to it via a zone Redirect Rule. The design decisions (pricing, payments, legal) are in the owner's private design doc, not in the repo.
+- Pages project `kervan-parts-shop` (Direct Upload; `pages deploy` does not create projects, so a renamed/new project needs `wrangler pages project create` once); custom domain `magaza.kervanbreaker.com`; `shop.kervanbreaker.com` 301s to it via a zone Redirect Rule. The design decisions (pricing, payments, legal) are in the owner's private design doc, not in the repo.
 
 ### RFQ flow
 
