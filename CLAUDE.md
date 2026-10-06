@@ -4,14 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-pnpm + Turborepo monorepo for Kervan Makina's two websites:
+pnpm + Turborepo monorepo for Kervan Makina's websites:
 
 | App                    | Domain                                     | Cloudflare Pages project |
 | ---------------------- | ------------------------------------------ | ------------------------ |
 | `apps/heat-treatment/` | kervanheat.com + www (fason ısıl işlem)    | `kervan-heat-treatment`  |
 | `apps/breaker-parts/`  | kervanbreaker.com + www (kırıcı parçaları) | `kervan-breaker-parts`   |
+| `apps/parts-shop/`     | magaza.kervanbreaker.com (shop. → 301)     | `kervan-parts-shop`      |
 
-Both apps are Vite 5 + React 18 + TypeScript + Tailwind v4 + Framer Motion, sharing code through `packages/*`.
+All apps are Vite 5 + React 18 + TypeScript + Tailwind v4 + Framer Motion, sharing code through `packages/*`.
 
 ## Commands
 
@@ -20,21 +21,23 @@ pnpm install                                   # whole workspace
 pnpm dev                                       # both apps (turbo)
 pnpm --filter @kervan/heat-treatment dev       # http://localhost:5173
 pnpm --filter @kervan/breaker-parts dev        # http://localhost:5174
+pnpm --filter @kervan/parts-shop dev           # http://localhost:5175 (DEMO catalog)
 pnpm turbo build                               # build apps + packages
 pnpm turbo build --filter=@kervan/breaker-parts
 pnpm typecheck                                 # tsc --noEmit across the workspace
 pnpm lint                                      # ESLint flat config (eslint.config.js)
+pnpm test                                      # unit tests (node --test; today only @kervan/tips)
 pnpm format / pnpm format:check                # Prettier (.prettierrc.json)
 ```
 
-There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm format:check` (or `pnpm format`) and a build of the affected app.
+Unit tests exist only for `@kervan/tips` (Node's built-in runner, `node --experimental-strip-types --test`). Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm format:check` (or `pnpm format`), `pnpm test` and a build of the affected app.
 
 ## Deploying
 
-- `.github/workflows/deploy.yml` deploys with `wrangler pages deploy`. Every deploy waits for the `verify` job (`pnpm typecheck` + `pnpm lint` + `pnpm format:check`), so keep all three green.
-- Push to `main` → production deploy of **both** apps, then `.github/scripts/smoke.sh` (GET/OPTIONS probe of the live sites). `main` runs are never cancelled mid-deploy.
+- `.github/workflows/deploy.yml` deploys with `wrangler pages deploy`. Every deploy waits for the `verify` job (`pnpm typecheck` + `pnpm lint` + `pnpm format:check` + `pnpm test`), so keep all four green.
+- Push to `main` → production deploy of **all** apps, then `.github/scripts/smoke.sh` (GET/OPTIONS probe of the live sites). `main` runs are never cancelled mid-deploy.
 - PR → Pages preview (`https://<branch>.<project>.pages.dev`) of the changed apps only: `dorny/paths-filter` maps `apps/<app>/**` (plus the root `public/` assets that app symlinks) to that app; `packages/**`, the lockfile, root configs or the workflow itself → both. Fork PRs and Dependabot runs get no Actions secrets, so they only run `verify` (test an action bump's deploy by running the workflow manually on the Dependabot branch).
-- Redeploy without a commit (e.g. after changing a Pages env var): Actions → Deploy → **Run workflow**, pick `both` / `heat-treatment` / `breaker-parts` (on `main` = production).
+- Redeploy without a commit (e.g. after changing a Pages env var): Actions → Deploy → **Run workflow**, pick `both` (heat + breaker) / `all` (+ shop) / `heat-treatment` / `breaker-parts` / `parts-shop` (on `main` = production).
 - `.github/workflows/uptime.yml` runs the same smoke probe every 15 minutes.
 - Cloudflare Web Analytics (cookie-free) is on for both sites. kervanbreaker.com: enabled on the Pages project, which adds the beacon at deploy time, so turning it on or changing it only takes effect on the next deploy. kervanheat.com: automatic setup on the zone (beacon injected at the edge), in normal mode (EU visitors are counted).
 - The Pages projects are **not** connected to Cloudflare's git integration — GitHub Actions is the only deployer. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
@@ -47,6 +50,7 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 - **`@kervan/ui`** (`packages/ui`) — design tokens (`src/tokens.css`, a Tailwind v4 `@theme` block, plus TS mirrors in `src/tokens/`) and base components (`Button`, `Card`, `Container`, `SectionHeading`, `Marquee`, …). `SisterSiteStrip` is the sister-site band at the top of both fixed headers (kervanheat.com ↔ kervanbreaker.com): the first child of `<header>` in each app's `Nav.tsx`, copy from the dict (`sister`, typed `SisterSiteCopy`), a 3:2 thumbnail from the app's `public/sister/` (new filename to replace, cached immutable), same tab, no `rel`. Once the page scrolls the header slides up by `--kv-strip-h` (defined in each app's `globals.css`), so the stuck header is unchanged; heat-treatment's Hero and breaker-parts' `<main>` add the same variable to their top offset — keep them in sync. Both apps' `src/styles/globals.css` do `@import "tailwindcss"; @import "@kervan/ui/tokens.css";`.
 - **`@kervan/motion`** (`packages/motion`) — shared Framer Motion variants (`fadeUp`, `staggerContainer`, `inViewOnce`, …), `ScrollReveal`, `useParallaxSlow`, a re-export of `useReducedMotion` (true in static mode, see Motion) and the static-mode pieces (`StaticMotionProvider`, `useStaticMotion`, `isAnimatedClient`, the `js-anim` inline script).
 - **`@kervan/seo`** (`packages/seo`) — `PageMeta`, `JsonLd` and JSON-LD builders. Used by breaker-parts.
+- **`@kervan/tips`** (`packages/tips`) — pure, unit-tested tip logic shared by the shop and breaker-parts: tip types and labels, Kervan codes (`codes.ts`), Turkish-safe `slugify`, breaker-name parsing, carrier tonnage bands (`usage.ts`, moved from breaker-parts' `vega-usage.ts`, which now delegates), the owner-catalog → shop mapping (`from-catalog.ts`), the D1 import SQL (`sql.ts`), the public projection (`public.ts`) and the DEMO catalog. Imports inside the package use explicit `.ts` extensions so Node can run it without a build.
 
 ### heat-treatment (kervanheat.com)
 
@@ -63,6 +67,16 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 - `src/components/OpeningHold.tsx` — the empty first viewport over the 3D scene. It never fights scrolling: touch and the arrow/Home/End keys are native; only a mouse-wheel flick or Space/PageDown inside the opening glides to the hero (instant under reduced motion, with an instant-jump safety net if the glide is cancelled, never inside form fields). It unmounts only after scrolling has settled, cancelling any glide first, so a touch fling is not cut short and the page cannot land past the hero.
 - `src/components/Scene.tsx` — Three.js scene (plain `GLTFLoader`, no DRACO) loading `/kirici-uc.glb`. Keep the model local; never switch it to a remote URL. Both three.js users (`Scene` on Home, `ExportsGlobe` inside `Exports`) are `React.lazy` chunks, the globe only mounts about a screen before its section, so the main bundle stays small and other routes never download three.js. The scene skips drawing once the chisel has faded out, caps the pixel ratio at 1.5 on touch devices (2 elsewhere), follows `prefers-reduced-motion` live, and leaves an ember glow when WebGL is unavailable. The globe draws only while on screen.
 - Its only Pages Functions are the owner-only `api/tech/*` endpoints (see "Owner-only Teknik Bilgiler"). The contact form still posts cross-origin to `https://kervanheat.com/api/rfq` in production (`/api/rfq` in dev, which 404s). `smoke.sh` checks `/api/tech/content` returns JSON 401, not HTML.
+
+### parts-shop (magaza.kervanbreaker.com) — M1 preview
+
+- **Static, no router, no server code.** Every page is prerendered with its props embedded as JSON (`<script id="kv-page">`) and hydrated by `main.tsx`; links are plain `<a>`. Pages: `/`, `/kirici-ucu`, `/urun/<family code>` (+ `/en/…`), `404.html`. No motion in M1. `vite` dev renders the DEMO catalog.
+- **Data lives in D1 `kervan-shop`, never in git.** The manual workflow **Shop data import** (`.github/workflows/shop-import.yml`) reads KV `catalog:v1` / `popular:v1` (namespace id in the repo variable `SHOP_SOURCE_KV_ID`), applies `migrations/0001_init.sql`, runs `scripts/shop-import.ts` into `$RUNNER_TEMP` (refuses paths inside the repo) and executes the SQL, then redeploys the shop. Re-imports update geometry and best-seller tiers only; codes, `published`, prices and stock are the owner's.
+- **Build:** `scripts/build-catalog.ts` queries D1 (`SHOP_D1` + `CLOUDFLARE_API_TOKEN` = secret `CLOUDFLARE_SHOP_DATA_TOKEN`, D1 Edit + KV Read) and writes `.catalog/catalog.json` (gitignored) through `toPublicCatalog` (whitelist). Without the token it writes the DEMO catalog (`XX…` codes, DEMO banner); repo variable `SHOP_REQUIRE_CATALOG=1` makes main deploys fail instead. Turbo never caches this build. `scripts/check-dist.mjs` fails the build if a page lacks `noindex` / props or any file contains a forbidden string (`vega`, `VT` + 7 digits, private D1 column names).
+- **CI logs are public** (public repo): data scripts print counts only.
+- **Codes:** families `KU{Ø}-{NN}`, SKUs `…-{C|M|B|P|K|A}` (chisel, moil, blunt, pyramid, conical, asphalt). Permanent: never renumber or reuse. No third-party catalogue names or part numbers on the site or in shop identifiers.
+- **Search engines:** closed in M1 on three layers (meta robots, `_headers` `X-Robots-Tag`, `robots.txt` `Disallow: /`); `smoke.sh` checks the header. M4 opens them.
+- Pages project `kervan-parts-shop` (Direct Upload, created by the deploy job's "Ensure the Pages project exists" step); custom domain `magaza.kervanbreaker.com`; `shop.kervanbreaker.com` 301s to it via a zone Redirect Rule. The design decisions (pricing, payments, legal) are in the owner's private design doc, not in the repo.
 
 ### RFQ flow
 

@@ -1,9 +1,10 @@
 name: Deploy
 
-# Push to main → production deploy of BOTH apps.
+# Push to main → production deploy of ALL apps (heat-treatment, breaker-parts, parts-shop).
 # PRs → preview deploy (Cloudflare Pages branch deploys) of the apps whose
 #   source changed (`paths-filter`; `packages/**` etc. → both).
-# Manual "Run workflow" → redeploy one or both apps from the chosen branch
+# Manual "Run workflow" → redeploy apps from the chosen branch (both = heat + breaker,
+#   all = + parts-shop)
 #   (main = production), e.g. after changing a Pages env var. No dummy commits.
 #
 # Every deploy waits for `verify` (typecheck + lint + format). Production deploys are
@@ -17,12 +18,12 @@ on:
       app:
         description: App to deploy
         type: choice
-        options: [both, heat-treatment, breaker-parts]
+        options: [both, heat-treatment, breaker-parts, parts-shop, all]
         default: both
 
 # PR runs supersede each other. main/dispatch runs are never cancelled
 # mid-deploy; a newer queued run can still replace an older *pending* one,
-# which is why every push to main deploys both apps instead of relying on
+# which is why every push to main deploys every app instead of relying on
 # the per-push paths filter.
 concurrency:
   group: deploy-${{ github.ref }}
@@ -38,6 +39,7 @@ jobs:
     outputs:
       heat-treatment: ${{ steps.filter.outputs.heat-treatment }}
       breaker-parts: ${{ steps.filter.outputs.breaker-parts }}
+      parts-shop: ${{ steps.filter.outputs.parts-shop }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
@@ -63,6 +65,9 @@ jobs:
               - 'apps/breaker-parts/**'
               - 'public/videos/**'
               - 'public/kirici-uc.glb'
+            parts-shop:
+              - *shared
+              - 'apps/parts-shop/**'
 
   verify:
     name: Typecheck + lint + format
@@ -92,6 +97,9 @@ jobs:
       - name: Format
         run: pnpm format:check
 
+      - name: Unit tests
+        run: pnpm test
+
   deploy-heat-treatment:
     name: kervanheat.com
     needs: [changes, verify]
@@ -100,7 +108,7 @@ jobs:
     if: >-
       !cancelled() && needs.verify.result == 'success' && (
         github.event_name == 'push' ||
-        (github.event_name == 'workflow_dispatch' && inputs.app != 'breaker-parts') ||
+        (github.event_name == 'workflow_dispatch' && contains(fromJSON('["both","all","heat-treatment"]'), inputs.app)) ||
         (github.event_name == 'pull_request' &&
           needs.changes.outputs.heat-treatment == 'true' &&
           github.event.pull_request.head.repo.full_name == github.repository &&
@@ -151,7 +159,7 @@ jobs:
     if: >-
       !cancelled() && needs.verify.result == 'success' && (
         github.event_name == 'push' ||
-        (github.event_name == 'workflow_dispatch' && inputs.app != 'heat-treatment') ||
+        (github.event_name == 'workflow_dispatch' && contains(fromJSON('["both","all","breaker-parts"]'), inputs.app)) ||
         (github.event_name == 'pull_request' &&
           needs.changes.outputs.breaker-parts == 'true' &&
           github.event.pull_request.head.repo.full_name == github.repository &&
@@ -194,9 +202,73 @@ jobs:
             --branch=${{ github.head_ref || github.ref_name }}
             --commit-hash=${{ github.sha }}
 
+  deploy-parts-shop:
+    name: magaza.kervanbreaker.com
+    needs: [changes, verify]
+    if: >-
+      !cancelled() && needs.verify.result == 'success' && (
+        github.event_name == 'push' ||
+        (github.event_name == 'workflow_dispatch' && contains(fromJSON('["all","parts-shop"]'), inputs.app)) ||
+        (github.event_name == 'pull_request' &&
+          needs.changes.outputs.parts-shop == 'true' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.actor != 'dependabot[bot]')
+      )
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Public fields of published rows only (toPublicCatalog); prints counts only.
+      # Without the data token → DEMO catalog, unless SHOP_REQUIRE_CATALOG=1 (main).
+      - name: Catalog snapshot from D1
+        env:
+          SHOP_D1: kervan-shop
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_SHOP_DATA_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SHOP_REQUIRE_CATALOG: ${{ github.ref == 'refs/heads/main' && vars.SHOP_REQUIRE_CATALOG || '0' }}
+        run: node --experimental-strip-types --no-warnings apps/parts-shop/scripts/build-catalog.ts
+
+      - name: Build parts-shop
+        run: pnpm turbo build --filter=@kervan/parts-shop
+
+      # Direct Upload projects are not created by `pages deploy`; this fails harmlessly once it exists.
+      - name: Ensure the Pages project exists
+        continue-on-error: true
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages project create kervan-parts-shop --production-branch=main
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/parts-shop
+          command: >-
+            pages deploy dist
+            --project-name=kervan-parts-shop
+            --branch=${{ github.head_ref || github.ref_name }}
+            --commit-hash=${{ github.sha }}
+
   smoke:
     name: Production smoke test
-    needs: [deploy-heat-treatment, deploy-breaker-parts]
+    needs: [deploy-heat-treatment, deploy-breaker-parts, deploy-parts-shop]
     # Only after a production deploy (main), and only if no deploy failed.
     if: >-
       !cancelled() && github.event_name != 'pull_request' &&
