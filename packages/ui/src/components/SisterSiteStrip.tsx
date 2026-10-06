@@ -1,14 +1,9 @@
 import { useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { motion } from 'framer-motion';
 import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
-import type { DictBlock, Lang } from '../types';
 
-/** Same session flag as IntroOverlay / Hero (keep the three in sync). */
+/** Session flag both apps' IntroOverlay set (keep in sync). */
 const INTRO_KEY = 'kv_v2_intro_seen';
-/** Hero waits this long for the intro curtain on a first visit (Hero.tsx INTRO_WAIT). */
-const INTRO_WAIT = 2;
-/** Hero's last stat ends at ~t0 + 1.96 s (stagger t0+1, 4 × 0.12, 0.6 s); the sheen plays alone after it. */
-const SHEEN_AT = 2.1;
 const introPending = (): boolean => {
   try {
     return sessionStorage.getItem(INTRO_KEY) !== '1';
@@ -24,17 +19,39 @@ const onSpace = (e: ReactKeyboardEvent<HTMLAnchorElement>) => {
   e.currentTarget.click();
 };
 
-interface Props {
-  lang: Lang;
-  t: DictBlock['sister'];
-  /** The header is stuck and has slid this strip above the viewport. */
-  hidden: boolean;
+export interface SisterSiteCopy {
+  /** Pill label, sm+ (CSS-uppercased; <html lang> makes TR "KARDEŞ SİTE"). */
+  tag: string;
+  /** Lead before the domain, md+. */
+  lead: string;
+  /** Lead before the domain, below md (sr-only under 340px). */
+  leadShort: string;
+  /** Visible domain. */
+  site: string;
+  /** Same-language home page of the sister site. */
+  href: string;
 }
 
-export default function SisterSiteStrip({ lang, t, hidden }: Props) {
+interface Props {
+  lang: string;
+  t: SisterSiteCopy;
+  /** A small photo of what the sister site sells (3:2, 192×128 or larger). Decorative: the link text names the site. */
+  image: string;
+  /** The header is stuck and has slid this strip above the viewport. */
+  hidden: boolean;
+  /** Seconds before the one-shot sheen plays: on the session's first visit (intro curtain) and on later visits. */
+  sheenAt: { first: number; later: number };
+}
+
+/**
+ * Top band of the fixed header linking to the sister site (kervanheat.com ↔ kervanbreaker.com).
+ * Each app's Nav renders it as the header's first child and slides the header up by
+ * `--kv-strip-h` once the page scrolls; the page content is offset by the same variable.
+ */
+export function SisterSiteStrip({ lang, t, image, hidden, sheenAt }: Props) {
   // True in static mode (prerender + hydrate) and under reduced motion: final state, no motion nodes.
   const reduced = useReducedMotion();
-  const [sheenDelay] = useState(() => (!reduced && introPending() ? INTRO_WAIT : 0) + SHEEN_AT);
+  const [sheenDelay] = useState(() => (!reduced && introPending() ? sheenAt.first : sheenAt.later));
 
   return (
     <div
@@ -72,17 +89,34 @@ export default function SisterSiteStrip({ lang, t, hidden }: Props) {
         data-sister-link=""
         className="group relative flex h-full items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 md:px-8 whitespace-nowrap font-sans text-xs sm:text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:-outline-offset-4"
       >
-        <span className="inline-flex shrink-0 items-center gap-1.5 sm:rounded-pill sm:border sm:border-brand sm:px-2.5 sm:py-1">
+        {/* Photo of the sister site's work (about 3:2), ember ring */}
+        <span className="relative shrink-0 overflow-hidden rounded-sm ring-1 ring-brand shadow-glow-brand h-7 w-10 sm:h-9 sm:w-14">
+          <img
+            src={image}
+            alt=""
+            width={56}
+            height={36}
+            decoding="async"
+            draggable={false}
+            className={
+              'size-full object-cover select-none ' +
+              (reduced
+                ? ''
+                : 'transition-transform duration-250 ease-editorial group-hover:scale-110 group-focus-visible:scale-110')
+            }
+          />
+        </span>{' '}
+        <span className="hidden sm:inline-flex shrink-0 items-center gap-1.5 rounded-pill border border-brand px-2.5 py-1">
           <span
             aria-hidden="true"
             className="size-1.5 rounded-pill bg-brand-hi shadow-glow-brand"
           />
-          <span className="hidden sm:inline text-xs/none font-medium uppercase tracking-[0.2em] text-brand-hi">
+          <span className="text-xs/none font-medium uppercase tracking-[0.2em] text-brand-hi">
             {t.tag}
           </span>
         </span>{' '}
         {/* Only the lead shrinks (ellipsis) when the text is enlarged; the domain and arrow always stay whole.
-            Colour sits on the spans: the global `a { color: inherit }` overrides utilities on the <a>. */}
+            Colour sits on the spans: the apps' global `a { color: inherit }` overrides utilities on the <a>. */}
         <span className="min-w-0 truncate text-ink-mid transition-colors group-hover:text-ink group-focus-visible:text-ink md:hidden max-[340px]:sr-only">
           {t.leadShort}
         </span>{' '}

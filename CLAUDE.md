@@ -44,14 +44,13 @@ There is no test suite. Before pushing, run `pnpm typecheck`, `pnpm lint`, `pnpm
 
 ### Packages
 
-- **`@kervan/ui`** (`packages/ui`) — design tokens (`src/tokens.css`, a Tailwind v4 `@theme` block, plus TS mirrors in `src/tokens/`) and base components (`Button`, `Card`, `Container`, `SectionHeading`, `Marquee`, …). Both apps' `src/styles/globals.css` do `@import "tailwindcss"; @import "@kervan/ui/tokens.css";`.
+- **`@kervan/ui`** (`packages/ui`) — design tokens (`src/tokens.css`, a Tailwind v4 `@theme` block, plus TS mirrors in `src/tokens/`) and base components (`Button`, `Card`, `Container`, `SectionHeading`, `Marquee`, …). `SisterSiteStrip` is the sister-site band at the top of both fixed headers (kervanheat.com ↔ kervanbreaker.com): the first child of `<header>` in each app's `Nav.tsx`, copy from the dict (`sister`, typed `SisterSiteCopy`), a 3:2 thumbnail from the app's `public/sister/` (new filename to replace, cached immutable), same tab, no `rel`. Once the page scrolls the header slides up by `--kv-strip-h` (defined in each app's `globals.css`), so the stuck header is unchanged; heat-treatment's Hero and breaker-parts' `<main>` add the same variable to their top offset — keep them in sync. Both apps' `src/styles/globals.css` do `@import "tailwindcss"; @import "@kervan/ui/tokens.css";`.
 - **`@kervan/motion`** (`packages/motion`) — shared Framer Motion variants (`fadeUp`, `staggerContainer`, `inViewOnce`, …), `ScrollReveal`, `useParallaxSlow`, a re-export of `useReducedMotion` (true in static mode, see Motion) and the static-mode pieces (`StaticMotionProvider`, `useStaticMotion`, `isAnimatedClient`, the `js-anim` inline script).
 - **`@kervan/seo`** (`packages/seo`) — `PageMeta`, `JsonLd` and JSON-LD builders. Used by breaker-parts.
 
 ### heat-treatment (kervanheat.com)
 
 - Single-page site (served at `/` and `/en/`): `src/App.tsx` composes the sections in `src/components/` (Hero, Services, TechnicalCapacity, Craft, About, Contact, Footer, …). No router, no 3D.
-- `src/components/SisterSiteStrip.tsx` is the top band of the fixed header (first child of `<header>` in `Nav.tsx`). It links to kervanbreaker.com (same-language home, same tab, no `rel`) and slides away with the header once the page scrolls (`-translate-y-(--kv-strip-h)`). Hero's top padding includes `--kv-strip-h` (defined in `globals.css`); keep the two in sync.
 - **`functions/api/rfq.ts`** — the only server-side code in the repo, a Cloudflare Pages Function. It is the RFQ endpoint for **both** sites (see below).
 - `public/_redirects` 301s legacy breaker URLs (`/keski`, `/catalog.html`, `/products/*`, …) to kervanbreaker.com.
 

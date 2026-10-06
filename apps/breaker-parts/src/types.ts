@@ -4,6 +4,8 @@
    About, NotFound).
 ═══════════════════════════════════════════════════════════════════════ */
 
+import type { SisterSiteCopy } from '@kervan/ui';
+
 export type Lang = 'tr' | 'en';
 
 export interface Stat {
@@ -45,6 +47,8 @@ export interface DictBlock {
     menu: string;
     language: string;
   };
+  /** Top strip of the fixed header linking to the heat-treatment sister site. */
+  sister: SisterSiteCopy;
   opening: {
     scroll: string;
   };

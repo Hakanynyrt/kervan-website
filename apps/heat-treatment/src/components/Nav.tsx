@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
 import type { Lang, DictBlock } from '../types';
 import { pathForLang, rememberLang } from '../lib/use-lang';
-import SisterSiteStrip from './SisterSiteStrip';
+import { SisterSiteStrip } from '@kervan/ui';
 
 interface Props {
   lang: Lang;
@@ -80,7 +80,14 @@ export default function Nav({ lang, t, techAuthed }: Props) {
           : 'bg-transparent')
       }
     >
-      <SisterSiteStrip lang={lang} t={t.sister} hidden={stuck} />
+      <SisterSiteStrip
+        lang={lang}
+        t={t.sister}
+        image="/sister/kervanbreaker-uclar-01.webp"
+        hidden={stuck}
+        // Hero's last stat ends ~2 s after its start (which waits 2 s for the intro curtain on a first visit).
+        sheenAt={{ first: 4.1, later: 2.1 }}
+      />
       <div className="max-w-[1280px] mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
         <a href={pathForLang(lang)} className="flex items-center" aria-label={t.nav.home}>
           <img
