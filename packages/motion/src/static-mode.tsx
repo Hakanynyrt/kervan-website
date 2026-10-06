@@ -86,8 +86,12 @@ export const JS_ANIM_CLASS = 'js-anim';
 export const PRERENDERED_ATTR = 'data-prerendered';
 
 /** Bot / headless user agents that must always get the static page. */
+// Broad on purpose: a false positive only means a human gets the static page.
+// "google" covers Google-InspectionTool (Search Console live test), Storebot-Google,
+// GoogleOther, AdsBot-Google, Mediapartners-Google, etc.; normal browser UAs never
+// contain it.
 export const BOT_UA_PATTERN =
-  'googlebot|bingbot|yandex|baiduspider|duckduckbot|applebot|slurp|facebookexternalhit|twitterbot|linkedinbot|petalbot|gptbot|claudebot|chrome-lighthouse|headlesschrome';
+  'bot|crawl|spider|slurp|google|bing|yandex|baidu|duckduck|facebookexternalhit|lighthouse|pagespeed|headless|inspectiontool|preview|ia_archiver';
 
 /** Inline script for <head> (before any stylesheet/module script). Adds
  *  `js-anim` to <html> only when JS runs, prefers-reduced-motion is not
