@@ -6,7 +6,9 @@ import {
   CONSENT_OPEN_EVENT,
   isAutomatedClient,
   loadAdsTag,
+  conversionForHref,
   readConsent,
+  revokeAdsConsent,
   trackConversion,
   writeConsent,
   type ConsentChoice,
@@ -40,9 +42,8 @@ export default function ConsentBanner({ t }: Props) {
     const onClick = (e: MouseEvent) => {
       const a = (e.target as Element | null)?.closest?.('a[href]');
       if (!a) return;
-      const href = a.getAttribute('href') ?? '';
-      if (href.startsWith('tel:')) trackConversion('phone');
-      else if (/^https:\/\/(wa\.me|api\.whatsapp\.com)\//.test(href)) trackConversion('whatsapp');
+      const kind = conversionForHref(a.getAttribute('href') ?? '');
+      if (kind) trackConversion(kind);
     };
     document.addEventListener('click', onClick, true);
 
@@ -55,8 +56,9 @@ export default function ConsentBanner({ t }: Props) {
   const choose = (choice: ConsentChoice) => {
     writeConsent(choice);
     if (choice === 'granted') loadAdsTag();
-    // A withdrawn consent takes full effect on the next page load (the tag
-    // cannot be unloaded); nothing new is sent from then on.
+    // The tag cannot be unloaded, but consent mode stops it from storing or
+    // sending ad data at once; from the next page load it is not loaded at all.
+    else revokeAdsConsent();
     setOpen(false);
   };
 

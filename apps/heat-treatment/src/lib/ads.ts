@@ -54,6 +54,21 @@ export function isAutomatedClient(): boolean {
 
 let loaded = false;
 
+const GRANTED = { ad_storage: 'granted', ad_user_data: 'granted', analytics_storage: 'granted' };
+const DENIED = { ad_storage: 'denied', ad_user_data: 'denied', analytics_storage: 'denied' };
+
+/** A withdrawn consent: an already loaded tag stops storing and sending ad data at once. */
+export function revokeAdsConsent(): void {
+  if (loaded && window.gtag) window.gtag('consent', 'update', DENIED);
+}
+
+/** `tel:` links → phone; wa.me / WhatsApp links → whatsapp; anything else → null. */
+export function conversionForHref(href: string): Conversion | null {
+  if (/^tel:/i.test(href)) return 'phone';
+  if (/wa\.me|whatsapp/i.test(href)) return 'whatsapp';
+  return null;
+}
+
 /** Injects gtag.js once. Call only after consent. */
 export function loadAdsTag(): void {
   if (loaded || typeof document === 'undefined') return;
@@ -64,12 +79,15 @@ export function loadAdsTag(): void {
     // eslint-disable-next-line prefer-rest-params
     window.dataLayer!.push(arguments);
   };
+  // Consent mode: everything denied by default, then granted for measurement only.
+  // ad_personalization stays denied (no remarketing).
   window.gtag('consent', 'default', {
-    ad_storage: 'granted',
-    ad_user_data: 'granted',
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
     ad_personalization: 'denied',
     analytics_storage: 'denied',
   });
+  window.gtag('consent', 'update', GRANTED);
   window.gtag('js', new Date());
   window.gtag('config', AW_ID);
   const s = document.createElement('script');

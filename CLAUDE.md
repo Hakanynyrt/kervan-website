@@ -91,7 +91,7 @@ Unit tests exist only for `@kervan/tips` (Node's built-in runner, `node --experi
 
 - `src/lib/ads.ts` + `src/components/ConsentBanner.tsx`: gtag.js (`AW-16701476208`) is injected **only after** the visitor clicks "Kabul et" in the cookie banner (choice in `localStorage('kv_ads_consent_v1')`; bump the suffix to ask again if the purpose changes). Declined or undecided ⇒ no request to Google, no cookie. Bots/headless/webdriver never see the banner. The footer "Çerez tercihleri" button reopens it (`kv:consent-open`).
 - Conversions (`trackConversion`, no-op without consent): RFQ form success (`delivered`), clicks on any `tel:` link and on WhatsApp links. The send_to labels live in `ads.ts`.
-- Consent mode: ad_storage/ad_user_data granted only after consent; ad_personalization and analytics_storage always denied (no remarketing). Both `kvkk.html` files describe this (section 09, `#cerezler`); keep them in sync with any change here.
+- Consent mode: the tag loads only after consent, with ad_storage/ad_user_data/analytics_storage defaulted to `denied` and immediately updated to `granted`; ad_personalization is always denied (no remarketing). Withdrawing consent sends a `denied` update at once (`revokeAdsConsent`) and the tag is not loaded on later pages. Phone/WhatsApp clicks are caught by one capture-phase listener on `document` (`conversionForHref`: `tel:`, any href containing `wa.me` or `whatsapp`). The heat-treatment `kvkk.html` describes this (sections 05 and 09, `#cerezler`); the breaker copy keeps the older, still-accurate wording.
 
 ### Owner-only "Teknik Bilgiler" (login)
 
