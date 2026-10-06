@@ -61,7 +61,8 @@ if (db && process.env.CLOUDFLARE_API_TOKEN) {
       query<SkuRow>(db, SKUS_SQL),
       query<FitRow>(db, FITS_SQL),
     );
-    if (required && c.families.length === 0) throw new Error('empty catalog');
+    // An empty D1 (before the first import) must not ship an empty shop: DEMO, or fail on main.
+    if (c.families.length === 0) throw new Error('empty catalog');
     write(c, 'D1');
   } catch (e) {
     if (required) {
