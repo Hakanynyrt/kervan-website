@@ -2,7 +2,7 @@
 // window.renderTip(spec) once per SKU; the result is two transparent WebP data URLs.
 import * as THREE from 'three';
 import type { TipSpec } from '@kervan/tips';
-import { buildTip } from './tipgen';
+import { buildTip, maxRadius } from './tipgen';
 
 /** Brand "Forge Ember" (tokens.css --color-brand); a render-only rim light colour. */
 const EMBER = 0xe8431b;
@@ -183,7 +183,7 @@ window.renderTip = async (spec: TipSpec) => {
   scene.updateMatrixWorld(true);
 
   const box = new THREE.Box3();
-  const r = spec.Rb;
+  const r = maxRadius(spec);
   for (const y of [0, spec.L])
     for (const x of [-r, r])
       for (const z of [-r, r])

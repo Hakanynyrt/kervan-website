@@ -1,7 +1,7 @@
 import type { FamilyAttrs, PublicSku, TipType } from './types.ts';
 
 /** Bump when the renderer's look or geometry rules change: every image gets a new key. */
-export const RENDER_VERSION = 1;
+export const RENDER_VERSION = 2;
 
 /** Included angle (deg) when the data has none. Assumptions, labelled as such. */
 export const DEFAULT_INCLUDED_ANGLE: Record<'moil' | 'conical' | 'chisel' | 'pyramid', number> = {
@@ -11,25 +11,29 @@ export const DEFAULT_INCLUDED_ANGLE: Record<'moil' | 'conical' | 'chisel' | 'pyr
   pyramid: 40,
 };
 
-/** Concrete geometry for the renderer (mm). Local frame: axis +Y, back end at y = 0. */
+/**
+ * Concrete geometry for the renderer (mm). Local frame: axis +Y, back end at y = 0.
+ * Proportions not in the table come from the catalogue drawings (see renderSpec).
+ */
 export interface TipSpec {
   type: Exclude<TipType, 'asphalt'>;
   D: number;
   R: number;
-  /** Shank radius above the working diameter (collar), R when there is no collar. */
-  Rb: number;
-  hasCollar: boolean;
-  /** Where the collar steps down to D; null = placed by rule. */
-  collarEnd: number | null;
   L: number;
   keyCount: 1 | 2;
-  t: number;
-  slotLen: number;
+  /** Depth of each key flat below the shank surface. */
+  depth: number;
+  /** Axial position of the slot start (from the very back end). */
   slotStart: number;
+  slotLen: number;
+  /** End of the slot towards the working end; the back end is always a short radius. */
   slotEnd: 'rounded' | 'tapered';
   rearStep: boolean;
+  /** Rear stub radius (rearStep only). */
   Rs: number | null;
   stubLen: number;
+  /** Collar ring: radius, axial start and width; null when the tip has none. */
+  collar: { Rc: number; start: number; width: number } | null;
   /** Included tip angle; null for blunt. */
   angle: number | null;
   /** Chisel edge relative to the key slots. */
@@ -41,6 +45,12 @@ const r1 = (v: number): number => Math.round(v * 10) / 10;
 /**
  * Turns a family's public dimensions and one SKU into renderer geometry, recording every guess.
  * Returns null for types the generator does not draw yet (asphalt).
+ *
+ * Reading of the catalogue table, checked against its drawings:
+ * - key "thickness" is the material left across the slotted section, not the cut depth:
+ *   one key → depth = D − t, two keys (opposite flats) → depth = (D − t) / 2;
+ * - "back end → slot" is measured from the very back end, rear stub included;
+ * - the collar is a short ring past the slot, falling back to D through a concave fillet.
  */
 export function renderSpec(
   a: FamilyAttrs,
@@ -50,11 +60,6 @@ export function renderSpec(
   const A: string[] = [];
   const D = a.diameterMm;
   const R = D / 2;
-
-  const hasCollar = a.collarDiameterMm != null && a.collarDiameterMm > D;
-  const Rb = hasCollar ? a.collarDiameterMm! / 2 : R;
-  const collarEnd = hasCollar ? (a.collarEndMm ?? null) : null;
-  if (hasCollar && collarEnd === null) A.push('collar end placed 0.6·D past the key slot');
 
   let L: number;
   if (sku.lengthMm) {
@@ -69,23 +74,36 @@ export function renderSpec(
   const k = a.key;
   const keyCount = k.count ?? 1;
   if (k.count == null) A.push('key count missing → 1');
-  const t = k.thicknessMm ?? Math.round(0.14 * D);
-  if (k.thicknessMm == null) A.push('key thickness missing → 0.14·D');
+  const t = k.thicknessMm;
+  let depth = t != null ? (keyCount === 2 ? (D - t) / 2 : D - t) : NaN;
+  if (!(depth >= 0.03 * D && depth <= 0.45 * D)) {
+    depth = 0.14 * D;
+    A.push(
+      t == null ? 'key section missing → depth 0.14·D' : 'key section implausible → depth 0.14·D',
+    );
+  }
   const slotLen = k.slotLengthMm ?? Math.round(1.3 * D);
   if (k.slotLengthMm == null) A.push('slot length missing → 1.3·D');
   const slotStart = k.backEndToSlotMm ?? Math.round(0.9 * D);
   if (k.backEndToSlotMm == null) A.push('back end → slot missing → 0.9·D');
-  const slotEnd = k.slotEnd ?? 'rounded';
-  if (k.slotEnd == null) A.push('slot end unknown → rounded');
+  const slotEnd = k.slotEnd ?? (keyCount === 2 ? 'tapered' : 'rounded');
+  if (k.slotEnd == null) A.push(`slot end unknown → ${slotEnd} (usual for ${keyCount} key)`);
 
   const rearStep = a.rear.step ?? a.rear.diameterMm != null;
   let Rs: number | null = null;
   let stubLen = 0;
   if (rearStep) {
-    Rs = a.rear.diameterMm != null ? a.rear.diameterMm / 2 : 0.85 * Rb;
-    if (a.rear.diameterMm == null) A.push('rear stub Ø missing → 0.85·shank Ø');
-    stubLen = a.rear.stubLengthMm ?? Math.min(0.4 * D, 0.55 * slotStart);
-    if (a.rear.stubLengthMm == null) A.push('rear stub length guessed');
+    Rs = a.rear.diameterMm != null ? a.rear.diameterMm / 2 : 0.8 * R;
+    if (a.rear.diameterMm == null) A.push('rear stub Ø missing → 0.8·D');
+    stubLen = a.rear.stubLengthMm ?? Math.min(0.7 * D, 0.8 * slotStart);
+    if (a.rear.stubLengthMm == null) A.push('rear stub length → 0.7·D (catalogue drawings)');
+  }
+
+  let collar: TipSpec['collar'] = null;
+  if (a.collarDiameterMm != null && a.collarDiameterMm > D) {
+    const start = a.collarEndMm ?? slotStart + slotLen + 1.6 * D;
+    if (a.collarEndMm == null) A.push('collar ring placed 1.6·D past the slot');
+    collar = { Rc: r1(a.collarDiameterMm / 2), start: r1(start), width: r1(0.35 * D) };
   }
 
   const type = sku.tipType;
@@ -103,18 +121,16 @@ export function renderSpec(
       type,
       D: r1(D),
       R: r1(R),
-      Rb: r1(Rb),
-      hasCollar,
-      collarEnd: collarEnd === null ? null : r1(collarEnd),
       L: r1(L),
       keyCount,
-      t: r1(t),
-      slotLen: r1(slotLen),
+      depth: r1(depth),
       slotStart: r1(slotStart),
+      slotLen: r1(slotLen),
       slotEnd,
       rearStep,
       Rs: Rs === null ? null : r1(Rs),
       stubLen: r1(stubLen),
+      collar,
       angle,
       chiselEdge,
     },

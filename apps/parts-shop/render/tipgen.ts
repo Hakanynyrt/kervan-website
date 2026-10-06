@@ -111,53 +111,55 @@ function revolve(runs: Run[], segs = 160, maxSeg = 40): THREE.BufferGeometry {
   return g;
 }
 
-function profileRuns(s: TipSpec): { runs: Run[]; workStart: number } {
+function profileRuns(s: TipSpec): Run[] {
   const runs: Run[] = [];
-  const { D, R, Rb, L } = s;
-  const cb = Math.max(2, 0.03 * D); // striking-face chamfer
-  const r0 = s.rearStep && s.Rs !== null ? s.Rs : Rb;
-  runs.push({
-    pts: [
-      [0, 0],
-      [r0 - cb, 0],
-    ],
-    mat: MAT.GROUND,
-  });
-  runs.push({
-    pts: [
-      [r0 - cb, 0],
-      [r0, cb],
-    ],
-    mat: MAT.BODY,
-  });
+  const { D, R, L } = s;
+  const seg = (a: [number, number], b: [number, number], mat: number) =>
+    runs.push({ pts: [a, b], mat });
+  const cb = Math.max(1.5, 0.03 * D); // striking-face chamfer
+  const r0 = s.rearStep && s.Rs !== null ? s.Rs : R;
+  seg([0, 0], [r0 - cb, 0], MAT.GROUND);
+  seg([r0 - cb, 0], [r0, cb], MAT.BODY);
   let y = cb;
   if (s.rearStep && s.Rs !== null) {
-    runs.push({
-      pts: [
-        [s.Rs, y],
-        [s.Rs, s.stubLen],
-      ],
-      mat: MAT.BODY,
-    });
-    runs.push({
-      pts: [
-        [s.Rs, s.stubLen],
-        [Rb, s.stubLen + (Rb - s.Rs)],
-      ],
-      mat: MAT.BODY,
-    });
-    y = s.stubLen + (Rb - s.Rs);
+    // Rear stub, then a short chamfered shoulder up to the shank (catalogue drawings).
+    const ch = Math.min(0.3 * (R - s.Rs), 0.03 * D) + 0.5;
+    seg([s.Rs, y], [s.Rs, s.stubLen - ch], MAT.BODY);
+    seg([s.Rs, s.stubLen - ch], [s.Rs + ch, s.stubLen], MAT.BODY);
+    seg([s.Rs + ch, s.stubLen], [R - ch, s.stubLen], MAT.GROUND);
+    seg([R - ch, s.stubLen], [R, s.stubLen + ch], MAT.BODY);
+    y = s.stubLen + ch;
+  }
+  if (s.collar) {
+    // Short ring past the slot, falling back to D through a concave fillet.
+    const { Rc, start, width } = s.collar;
+    const ch = Math.min(0.15 * (Rc - R), 0.02 * D) + 0.3;
+    seg([R, y], [R, start], MAT.BODY);
+    seg([R, start], [Rc - ch, start], MAT.GROUND);
+    seg([Rc - ch, start], [Rc, start + ch], MAT.BODY);
+    seg([Rc, start + ch], [Rc, start + width], MAT.BODY);
+    const fil = 0.6 * D;
+    const arc: [number, number][] = [];
+    for (let i = 0; i <= 14; i++) {
+      const u = i / 14; // quarter-ellipse, concave: steep at the ring, tangent to the shank
+      arc.push([
+        R + (Rc - R) * (1 - Math.sin((u * Math.PI) / 2)),
+        start + width + fil * (1 - Math.cos((u * Math.PI) / 2)),
+      ]);
+    }
+    runs.push({ pts: arc, mat: MAT.BODY, smooth: true });
+    y = start + width + fil;
   }
 
   let workStart: number;
-  const tipRuns: Run[] = [];
+  const tip: Run[] = [];
   if (s.type === 'moil' || s.type === 'conical') {
     const half = deg(s.angle! / 2);
     const rho = (s.type === 'moil' ? 0.06 : 0.1) * D; // blunted point radius
     const rt = rho * Math.cos(half);
     const yt = L - rho + rho * Math.sin(half);
     workStart = yt - (R - rt) / Math.tan(half);
-    tipRuns.push({
+    tip.push({
       pts: [
         [R, workStart],
         [rt, yt],
@@ -169,18 +171,18 @@ function profileRuns(s: TipSpec): { runs: Run[]; workStart: number } {
       const b = half + ((Math.PI / 2 - half) * i) / 12;
       cap.push([rho * Math.cos(b), L - rho + rho * Math.sin(b)]);
     }
-    tipRuns.push({ pts: cap, mat: MAT.GROUND, smooth: true });
+    tip.push({ pts: cap, mat: MAT.GROUND, smooth: true });
   } else if (s.type === 'blunt') {
     const c = 0.07 * D;
     workStart = L - c;
-    tipRuns.push({
+    tip.push({
       pts: [
         [R, L - c],
         [R - c, L],
       ],
       mat: MAT.GROUND,
     });
-    tipRuns.push({
+    tip.push({
       pts: [
         [R - c, L],
         [0, L],
@@ -188,16 +190,16 @@ function profileRuns(s: TipSpec): { runs: Run[]; workStart: number } {
       mat: MAT.GROUND,
     });
   } else {
-    const c0 = 1.5; // chisel / pyramid: flats come from CSG
+    const c0 = 1.5; // chisel / pyramid: the flats come from CSG
     workStart = L - c0;
-    tipRuns.push({
+    tip.push({
       pts: [
         [R, L - c0],
         [R - c0, L],
       ],
       mat: MAT.GROUND,
     });
-    tipRuns.push({
+    tip.push({
       pts: [
         [R - c0, L],
         [0, L],
@@ -205,61 +207,36 @@ function profileRuns(s: TipSpec): { runs: Run[]; workStart: number } {
       mat: MAT.GROUND,
     });
   }
-
-  if (s.hasCollar) {
-    const yc = s.collarEnd ?? s.slotStart + s.slotLen + 0.6 * D;
-    const yc2 = yc + (Rb - R) / Math.tan(deg(15));
-    runs.push({
-      pts: [
-        [Rb, y],
-        [Rb, yc],
-      ],
-      mat: MAT.BODY,
-    });
-    runs.push({
-      pts: [
-        [Rb, yc],
-        [R, yc2],
-      ],
-      mat: MAT.BODY,
-    });
-    y = yc2;
-  }
   if (workStart <= y + 1) throw new Error('profile does not fit');
-  runs.push({
-    pts: [
-      [R, y],
-      [R, workStart],
-    ],
-    mat: MAT.BODY,
-  });
-  runs.push(...tipRuns);
-  return { runs, workStart };
+  seg([R, y], [R, workStart], MAT.BODY);
+  runs.push(...tip);
+  return runs;
 }
 
-/** Slot cutter on +Z: shape in (axial y, radial z), extruded along X. */
-function slotCutter(s: TipSpec, Rloc: number): THREE.BufferGeometry {
+/** Key flat on +Z: shape in (axial y, radial z), extruded along X. The back end of the
+ *  slot is always a short radius; the front end is a radius or a long ramp. */
+function slotCutter(s: TipSpec): THREE.BufferGeometry {
+  const R = s.R;
   const y0 = s.slotStart;
   const y1 = y0 + s.slotLen;
-  const top = Rloc + 40;
-  const floor = Rloc - s.t;
+  const top = R + 40;
+  const floor = R - s.depth;
+  const rr = Math.max(1, Math.min(s.depth, s.slotLen / 4));
   const sh = new THREE.Shape();
   sh.moveTo(y0, top);
-  sh.lineTo(y0, Rloc);
+  sh.lineTo(y0, R);
+  sh.absarc(y0 + rr, R, rr, Math.PI, 1.5 * Math.PI, false);
   if (s.slotEnd === 'tapered') {
-    const ramp = Math.min(s.t / Math.tan(deg(12)), 0.3 * s.slotLen);
-    sh.lineTo(y0 + ramp, floor);
+    const ramp = Math.min(s.depth / Math.tan(deg(12)), 0.4 * s.slotLen);
     sh.lineTo(y1 - ramp, floor);
-    sh.lineTo(y1, Rloc);
+    sh.lineTo(y1, R);
   } else {
-    const rr = Math.min(s.t, s.slotLen / 2 - 1);
-    sh.absarc(y0 + rr, Rloc, rr, Math.PI, 1.5 * Math.PI, false);
     sh.lineTo(y1 - rr, floor);
-    sh.absarc(y1 - rr, Rloc, rr, 1.5 * Math.PI, 2 * Math.PI, false);
+    sh.absarc(y1 - rr, R, rr, 1.5 * Math.PI, 2 * Math.PI, false);
   }
   sh.lineTo(y1, top);
   sh.lineTo(y0, top);
-  const W = Rloc + 40;
+  const W = R + 40;
   const g = new THREE.ExtrudeGeometry(sh, { depth: 2 * W, bevelEnabled: false, curveSegments: 24 });
   // (sx, sy, sz) → (x = sz − W, y = sx, z = sy): a proper rotation, keeps winding
   g.applyMatrix4(new THREE.Matrix4().set(0, 0, 1, -W, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1));
@@ -269,7 +246,7 @@ function slotCutter(s: TipSpec, Rloc: number): THREE.BufferGeometry {
 /** Wedge prism whose half-width shrinks to e/2 at y = L. Flats face ±X; extruded along Z. */
 function wedgePrism(s: TipSpec, e: number): THREE.BufferGeometry {
   const th = Math.tan(deg(s.angle! / 2));
-  const W = s.Rb + 60;
+  const W = maxRadius(s) + 60;
   const yW = s.L - (W - e / 2) / th;
   const xk = Math.max(0.3, e / 2 - th);
   const sh = new THREE.Shape();
@@ -287,16 +264,18 @@ function wedgePrism(s: TipSpec, e: number): THREE.BufferGeometry {
   return g;
 }
 
+/** Largest radius along the tool (shank or collar ring). */
+export const maxRadius = (s: TipSpec): number => Math.max(s.R, s.collar?.Rc ?? 0);
+
 export function buildTip(s: TipSpec, materials: THREE.Material[], segs = 160): THREE.Mesh {
-  const { runs } = profileRuns(s);
   const ev = new Evaluator();
   ev.useGroups = true;
   ev.attributes = ['position', 'uv', 'normal'];
 
-  let brush = new Brush(revolve(runs, segs), materials);
+  let brush = new Brush(revolve(profileRuns(s), segs), materials);
   brush.updateMatrixWorld();
 
-  const cut = slotCutter(s, s.Rb);
+  const cut = slotCutter(s);
   for (const rot of s.keyCount === 2 ? [0, Math.PI] : [0]) {
     const c = new Brush(cut.clone(), materials[MAT.MACHINED]);
     c.rotation.y = rot;
