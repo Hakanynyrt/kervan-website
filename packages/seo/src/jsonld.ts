@@ -139,29 +139,20 @@ export function product({
   material,
   sku,
 }: BuildProductOpts) {
+  // A WebPage, not a Product: Google's product snippets need a price (offers) or real
+  // reviews/ratings, and parts are sold on request with no public price, so a Product here
+  // only ever shows up as an invalid item in Search Console.
+  const keywords = [name, material, ...(brandFits ?? []), sku].filter(Boolean).join(', ');
   return {
     '@context': 'https://schema.org',
-    '@type': 'Product',
+    '@type': 'WebPage',
     name,
     description,
     url,
-    ...(image ? { image } : {}),
-    ...(sku ? { sku } : {}),
-    brand: { '@type': 'Brand', name: 'Kervan' },
-    manufacturer: { '@id': `${KERVAN_BREAKER_URL}/#organization` },
-    ...(material
-      ? {
-          material,
-        }
-      : {}),
-    ...(brandFits && brandFits.length > 0
-      ? {
-          isRelatedTo: brandFits.map((b) => ({
-            '@type': 'Brand',
-            name: b,
-          })),
-        }
-      : {}),
+    ...(image ? { primaryImageOfPage: { '@type': 'ImageObject', url: image } } : {}),
+    about: { '@type': 'Thing', name },
+    keywords,
+    publisher: { '@id': `${KERVAN_BREAKER_URL}/#organization` },
   } as const;
 }
 
