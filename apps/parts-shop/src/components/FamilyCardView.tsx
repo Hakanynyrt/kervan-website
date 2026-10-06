@@ -10,6 +10,17 @@ export default function FamilyCardView({ c, lang, t }: { c: FamilyCard; lang: La
       href={localePath(c.path, lang)}
       className="group flex h-full flex-col gap-3 rounded-md border border-hair bg-bg-soft p-5 transition-colors hover:border-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
     >
+      {c.image && (
+        <img
+          src={`/tips/${c.image}-480.webp`}
+          alt=""
+          width={480}
+          height={320}
+          loading="lazy"
+          decoding="async"
+          className="-mx-2 -mt-2 block h-auto w-[calc(100%+1rem)] max-w-none"
+        />
+      )}
       <div className="flex items-start justify-between gap-3">
         <span className="font-serif text-2xl text-ink">Ø{fmtNum(c.diameterMm, lang)}</span>
         {c.popularTier !== null && (

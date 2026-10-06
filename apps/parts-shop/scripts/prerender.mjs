@@ -15,6 +15,24 @@ process.env.NODE_ENV ??= 'production';
 try {
   const ssr = await import(pathToFileURL(path.join(SSR, 'entry-server.js')).href);
   const catalog = JSON.parse(fs.readFileSync(CATALOG, 'utf8'));
+  // Renders (scripts/render-tips.ts) are optional: without them pages simply have no images.
+  const renders = path.join(APP, '.renders');
+  let images = 0;
+  if (fs.existsSync(path.join(renders, 'manifest.json'))) {
+    const manifest = JSON.parse(fs.readFileSync(path.join(renders, 'manifest.json'), 'utf8'));
+    fs.mkdirSync(path.join(DIST, 'tips'), { recursive: true });
+    for (const f of catalog.families) {
+      for (const s of f.skus) {
+        const key = manifest[s.code];
+        if (!key) continue;
+        const files = ['480', '1200'].map((w) => `${key}-${w}.webp`);
+        if (!files.every((n) => fs.existsSync(path.join(renders, n)))) continue;
+        for (const n of files) fs.copyFileSync(path.join(renders, n), path.join(DIST, 'tips', n));
+        s.image = key;
+        images++;
+      }
+    }
+  }
   const template = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
   let count = 0;
   for (const p of ssr.prerender(catalog)) {
@@ -30,7 +48,7 @@ try {
     count++;
   }
   process.stdout.write(
-    `prerender: ${count} pages (${catalog.families.length} families${catalog.demo ? ', DEMO data' : ''})\n`,
+    `prerender: ${count} pages (${catalog.families.length} families, ${images} images${catalog.demo ? ', DEMO data' : ''})\n`,
   );
 } finally {
   fs.rmSync(SSR, { recursive: true, force: true });

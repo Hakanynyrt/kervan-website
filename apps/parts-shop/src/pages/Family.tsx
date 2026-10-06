@@ -58,6 +58,33 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
         </p>
       )}
 
+      {f.skus.some((s) => s.image) && (
+        <figure className="m-0 mt-8">
+          <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+            {f.skus
+              .filter((s) => s.image)
+              .map((s) => (
+                <li key={s.code} className="rounded-md border border-hair bg-bg-soft p-2">
+                  <img
+                    src={`/tips/${s.image}-1200.webp`}
+                    srcSet={`/tips/${s.image}-480.webp 480w, /tips/${s.image}-1200.webp 1200w`}
+                    sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+                    width={1200}
+                    height={800}
+                    alt={tf.renderAlt(f.code, t.tip[s.tipType])}
+                    decoding="async"
+                    className="block h-auto w-full"
+                  />
+                  <span className="block px-2 pb-1 font-sans text-sm text-ink">
+                    {t.tip[s.tipType]}
+                  </span>
+                </li>
+              ))}
+          </ul>
+          <figcaption className="mt-3 font-sans text-xs text-ink-soft">{tf.renderNote}</figcaption>
+        </figure>
+      )}
+
       <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="flex min-w-0 flex-col gap-10">
           <section aria-labelledby="variants">

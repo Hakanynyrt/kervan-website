@@ -12,6 +12,10 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/.turbo/**',
       '**/.wrangler/**',
+      // parts-shop build artefacts (gitignored)
+      '**/.render-app/**',
+      '**/.renders/**',
+      '**/.catalog/**',
       '**/public/**',
       'public/**',
       'apps/heat-treatment/public/**',

@@ -72,7 +72,11 @@ function publicAttrs(raw: string): FamilyAttrs | null {
     rear: {
       step: typeof rear.step === 'boolean' ? rear.step : null,
       diameterMm: num(rear.diameterMm),
+      stubLengthMm: num(rear.stubLengthMm),
     },
+    collarEndMm: num(a.collarEndMm),
+    chiselEdge:
+      a.chiselEdge === 'parallel' || a.chiselEdge === 'perpendicular' ? a.chiselEdge : null,
   };
 }
 

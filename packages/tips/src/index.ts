@@ -7,3 +7,4 @@ export * from './from-catalog.ts';
 export * from './sql.ts';
 export * from './public.ts';
 export * from './demo.ts';
+export * from './render-spec.ts';

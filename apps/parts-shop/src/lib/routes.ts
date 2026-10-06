@@ -6,6 +6,8 @@ export interface FamilyCard {
   path: string;
   diameterMm: number;
   types: TipType[];
+  /** Render key of the first SKU that has one (`/tips/<key>-480.webp`). */
+  image: string | null;
   popularTier: 1 | 2 | null;
   /** First breakers it fits ("Brand Model"). */
   fits: string[];
@@ -45,6 +47,7 @@ export function familyCard(f: PublicFamily): FamilyCard {
     path: familyPath(f.code),
     diameterMm: f.attrs.diameterMm,
     types: f.skus.map((s) => s.tipType),
+    image: f.skus.find((s) => s.image)?.image ?? null,
     popularTier: f.popularTier,
     fits: f.fits.slice(0, FITS_SHOWN).map(breakerName),
     fitsMore: Math.max(0, f.fits.length - FITS_SHOWN),

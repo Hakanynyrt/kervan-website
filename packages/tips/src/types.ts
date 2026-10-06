@@ -53,7 +53,13 @@ export interface FamilyAttrs {
   rear: {
     step: boolean | null;
     diameterMm: number | null;
+    /** Length of the narrower rear stub, read from the drawing (render only). */
+    stubLengthMm?: number | null;
   };
+  /** Back end → where the collar steps down to D, read from the drawing (render only). */
+  collarEndMm?: number | null;
+  /** Chisel edge relative to the key slots, read from the drawing (render only). */
+  chiselEdge?: 'parallel' | 'perpendicular' | null;
 }
 
 export interface Breaker {
@@ -77,6 +83,8 @@ export interface PublicSku {
   /** Net USD list price in cents; null = "ask for a quote". */
   priceUsdNetCents: number | null;
   availability: Availability;
+  /** Render file key (`/tips/<image>-{480,1200}.webp`), added at build time when a render exists. */
+  image?: string;
 }
 
 export interface PublicFamily {
