@@ -72,8 +72,9 @@ interface Option {
 /**
  * Product page body. One tip-type selector for every type the breaker takes; a type comes
  * from the first tip family that has it (the Kervan code only goes into the quote message).
- * Prerendered with the first type; the choice works after hydration. On phones the selector
- * and the quote come before the pictures, and a quote bar stays at the bottom.
+ * Prerendered with the first type; the choice works after hydration. The pictures come first
+ * (on phones too, owner's direction), then the selector and the quote; a quote bar stays at
+ * the bottom on phones.
  */
 export default function TipProduct({
   title,
@@ -141,7 +142,57 @@ export default function TipProduct({
       <PageTitle>{title}</PageTitle>
 
       <div className="mt-6 grid gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
-        <aside className="flex flex-col gap-6 lg:order-2">
+        {(sku?.image || f?.imageRear) && (
+          <div className="flex min-w-0 flex-col gap-4">
+            {sku?.image && (
+              <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
+                <img
+                  key={sku.image}
+                  src={tipImg(sku.image, 'md')}
+                  srcSet={`${tipImg(sku.image, 'sm')} 480w, ${tipImg(sku.image, 'md')} 800w`}
+                  sizes="(min-width: 1024px) 800px, 100vw"
+                  width={800}
+                  height={533}
+                  alt={tf.renderAlt(quoteName, t.tip[opt.tipType])}
+                  decoding="async"
+                  className="block h-auto w-full"
+                />
+                {sku.imageSide && (
+                  <img
+                    key={sku.imageSide}
+                    src={tipImg(sku.imageSide, 'md')}
+                    srcSet={`${tipImg(sku.imageSide, 'sm')} 600w, ${tipImg(sku.imageSide, 'md')} 800w`}
+                    sizes="(min-width: 1024px) 800px, 100vw"
+                    width={800}
+                    height={267}
+                    alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
+                    loading="lazy"
+                    decoding="async"
+                    className="block h-auto w-full"
+                  />
+                )}
+              </figure>
+            )}
+            {f?.imageRear && (
+              <figure className="m-0 max-w-sm overflow-hidden rounded-md border border-hair bg-stage">
+                <img
+                  src={tipImg(f.imageRear, 'sm')}
+                  width={480}
+                  height={320}
+                  alt={tf.rearAlt(quoteName)}
+                  loading="lazy"
+                  decoding="async"
+                  className="block h-auto w-full"
+                />
+                <figcaption className="border-t border-hair bg-bg px-3 py-2 font-sans text-sm text-ink">
+                  {tf.viewRear}
+                </figcaption>
+              </figure>
+            )}
+          </div>
+        )}
+
+        <aside className="flex flex-col gap-6 lg:col-start-2">
           <Chips
             legend={tf.type}
             name="type"
@@ -239,54 +290,6 @@ export default function TipProduct({
           </div>
           <Terms t={t} />
         </aside>
-
-        <div className="flex min-w-0 flex-col gap-4 lg:order-1">
-          {sku?.image && (
-            <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
-              <img
-                key={sku.image}
-                src={tipImg(sku.image, 'md')}
-                srcSet={`${tipImg(sku.image, 'sm')} 480w, ${tipImg(sku.image, 'md')} 800w`}
-                sizes="(min-width: 1024px) 800px, 100vw"
-                width={800}
-                height={533}
-                alt={tf.renderAlt(quoteName, t.tip[opt.tipType])}
-                decoding="async"
-                className="block h-auto w-full"
-              />
-              {sku.imageSide && (
-                <img
-                  key={sku.imageSide}
-                  src={tipImg(sku.imageSide, 'md')}
-                  srcSet={`${tipImg(sku.imageSide, 'sm')} 600w, ${tipImg(sku.imageSide, 'md')} 800w`}
-                  sizes="(min-width: 1024px) 800px, 100vw"
-                  width={800}
-                  height={267}
-                  alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
-                  loading="lazy"
-                  decoding="async"
-                  className="block h-auto w-full"
-                />
-              )}
-            </figure>
-          )}
-          {f?.imageRear && (
-            <figure className="m-0 max-w-sm overflow-hidden rounded-md border border-hair bg-stage">
-              <img
-                src={tipImg(f.imageRear, 'sm')}
-                width={480}
-                height={320}
-                alt={tf.rearAlt(quoteName)}
-                loading="lazy"
-                decoding="async"
-                className="block h-auto w-full"
-              />
-              <figcaption className="border-t border-hair bg-bg px-3 py-2 font-sans text-sm text-ink">
-                {tf.viewRear}
-              </figcaption>
-            </figure>
-          )}
-        </div>
       </div>
 
       <section aria-labelledby="stock" className="mt-12">
