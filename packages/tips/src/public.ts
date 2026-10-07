@@ -40,6 +40,14 @@ export interface FitRow {
   slug: string;
 }
 
+/**
+ * Breaker makers whose names must never appear on the site (the catalogue's own brand, K4).
+ * Their breakers are left out of the public "fits" lists.
+ */
+export const HIDDEN_BRAND = /\bvega\b/i;
+export const isHiddenBreaker = (b: { brand: string; model: string; slug?: string }): boolean =>
+  HIDDEN_BRAND.test(b.brand) || HIDDEN_BRAND.test(b.model) || HIDDEN_BRAND.test(b.slug ?? '');
+
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
 const range = (a: number | null, b: number | null): Range | null => {
@@ -187,6 +195,7 @@ export function toPublicCatalog(
   }
   const fitsBy = new Map<number, PublicFamily['fits']>();
   for (const f of fits) {
+    if (isHiddenBreaker(f)) continue;
     const list = fitsBy.get(f.family_id) ?? [];
     list.push({ brand: f.brand, model: f.model, slug: f.slug });
     fitsBy.set(f.family_id, list);
