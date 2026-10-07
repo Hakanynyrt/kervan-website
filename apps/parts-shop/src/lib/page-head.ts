@@ -20,6 +20,8 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       return { ...page, title: m.homeTitle, description: m.homeDesc };
     case 'list':
       return { ...page, title: m.listTitle, description: m.listDesc };
+    case 'popular':
+      return { ...page, title: m.popularTitle, description: m.popularDesc };
     case 'family': {
       const f = model.family;
       const d = fmtNum(f.attrs.diameterMm, lang);

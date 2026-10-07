@@ -6,7 +6,7 @@ import type { Lang } from '../types';
 export default function NotFound({ lang, t }: { lang: Lang; t: Dict }) {
   return (
     <Container className="py-24">
-      <h1 className="m-0 font-serif text-4xl text-ink">{t.notFound.title}</h1>
+      <h1 className="m-0 font-sans text-3xl font-bold text-ink">{t.notFound.title}</h1>
       <p className="m-0 mt-4 font-sans text-ink-mid">{t.notFound.body}</p>
       <a
         href={localePath('/', lang)}

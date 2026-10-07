@@ -4,6 +4,29 @@
 /* Scan @kervan/ui sources so utilities used inside the package are emitted. */
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
 
+/*
+ * The shop is light and plain, like an industrial supplier's catalogue, not the dark showcase
+ * of the two company sites: same token names, shop values. Every text token stays >= 4.5:1 on
+ * bg, bg-soft and bg-warm (ink-soft 5.2:1 and brand 4.65:1 on bg-warm; white on brand 5.4:1).
+ */
+:root {
+  --color-bg: #ffffff;
+  --color-bg-soft: #f5f6f7;
+  --color-bg-warm: #eceef0;
+  --color-ink: #1b1f24;
+  --color-ink-mid: #454c55;
+  --color-ink-soft: #5c636c;
+  --color-brand: #c2390f;
+  --color-brand-hi: #a8300c;
+  --color-brand-lo: #8f290a;
+  --color-brand-soft: rgba(194, 57, 15, 0.08);
+  --color-hair: #dde1e5;
+  --color-hair-strong: #8e959d;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  color-scheme: light;
+}
+
 @layer base {
   :focus-visible {
     outline: 2px solid var(--color-brand);

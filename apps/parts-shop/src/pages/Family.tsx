@@ -1,16 +1,15 @@
 import { carrierTons, type PublicSku } from '@kervan/tips';
 import { Container } from '@kervan/ui';
-import { ORG_EMAIL, ORG_PHONE_E164 } from '@kervan/seo';
+import { ORG_EMAIL } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
 import { fmtMm, fmtNum, fmtRange } from '../lib/format';
-import { breakerName, type PageModel } from '../lib/routes';
+import { localePath } from '../lib/locale-path';
+import { breakerName, LIST_PATH, type PageModel } from '../lib/routes';
+import { FOCUS, whatsappHref } from '../components/Layout';
 import type { Lang } from '../types';
 import { tipImg } from '../lib/tip-img';
 
 type Model = Extract<PageModel, { kind: 'family' }>;
-
-const FOCUS =
-  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2';
 
 function availabilityText(s: PublicSku, t: Dict): string {
   const a = s.availability;
@@ -44,26 +43,43 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
     [tf.rearStep, a.rear.step === null ? '—' : a.rear.step ? tf.yes : tf.no],
     [tf.rearDiameter, fmtMm(a.rear.diameterMm, lang)],
   ];
-  const wa = `https://wa.me/${ORG_PHONE_E164.replace('+', '')}?text=${encodeURIComponent(tf.whatsappText(f.code))}`;
+  const wa = whatsappHref(tf.whatsappText(f.code));
   const mail = `mailto:${ORG_EMAIL}?subject=${encodeURIComponent(f.code)}&body=${encodeURIComponent(tf.whatsappText(f.code))}`;
 
   return (
     <Container className="py-12">
-      <p className="m-0 font-sans text-xs uppercase tracking-[0.2em] text-brand-hi">
+      <nav aria-label={tf.crumbLabel} className="font-sans text-sm text-ink-mid">
+        <ol className="m-0 flex list-none flex-wrap gap-2 p-0">
+          <li>
+            <a href={localePath('/', lang)} className={`hover:text-ink hover:underline ${FOCUS}`}>
+              {tf.crumbHome}
+            </a>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li>
+            <a
+              href={localePath(LIST_PATH, lang)}
+              className={`hover:text-ink hover:underline ${FOCUS}`}
+            >
+              {t.nav.tips}
+            </a>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" className="text-ink">
+            {f.code}
+          </li>
+        </ol>
+      </nav>
+      <h1 className="m-0 mt-5 font-sans text-3xl font-bold text-ink md:text-4xl">
         {tf.kicker(fmtNum(a.diameterMm, lang))}
-      </p>
-      <h1 className="m-0 mt-3 font-serif text-5xl text-ink">{f.code}</h1>
-      {f.popularTier !== null && (
-        <p className="m-0 mt-3 inline-block rounded-pill border border-brand px-3 py-1 font-sans text-xs font-medium text-brand-hi">
-          {t.card.popular}
-        </p>
-      )}
+      </h1>
+      <p className="m-0 mt-2 font-sans text-lg font-medium text-ink-mid">{f.code}</p>
 
       {(f.imageRear || f.skus.some((s) => s.image)) && (
         <figure className="m-0 mt-8">
           <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
             {f.imageRear && (
-              <li className="rounded-md border border-hair bg-bg-soft p-2">
+              <li className="flex flex-col overflow-hidden rounded-md border border-hair bg-bg-warm">
                 <img
                   src={tipImg(f.imageRear, 'sm')}
                   srcSet={`${tipImg(f.imageRear, 'sm')} 480w, ${tipImg(f.imageRear, 'md')} 800w`}
@@ -74,13 +90,18 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
                   decoding="async"
                   className="block h-auto w-full"
                 />
-                <span className="block px-2 pb-1 font-sans text-sm text-ink">{tf.viewRear}</span>
+                <span className="mt-auto block border-t border-hair bg-bg px-3 py-2 font-sans text-sm font-medium text-ink">
+                  {tf.viewRear}
+                </span>
               </li>
             )}
             {f.skus
               .filter((s): s is typeof s & { image: string } => !!s.image)
               .map((s) => (
-                <li key={s.code} className="rounded-md border border-hair bg-bg-soft p-2">
+                <li
+                  key={s.code}
+                  className="flex flex-col overflow-hidden rounded-md border border-hair bg-bg-warm"
+                >
                   <img
                     src={tipImg(s.image, 'sm')}
                     srcSet={`${tipImg(s.image, 'sm')} 480w, ${tipImg(s.image, 'md')} 800w`}
@@ -104,7 +125,7 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
                       className="mt-1 block h-auto w-full"
                     />
                   )}
-                  <span className="block px-2 pb-1 font-sans text-sm text-ink">
+                  <span className="mt-auto block border-t border-hair bg-bg px-3 py-2 font-sans text-sm font-medium text-ink">
                     {t.tip[s.tipType]}
                   </span>
                 </li>
@@ -117,7 +138,7 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
       <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="flex min-w-0 flex-col gap-10">
           <section aria-labelledby="variants">
-            <h2 id="variants" className="m-0 mb-4 font-serif text-2xl text-ink">
+            <h2 id="variants" className="m-0 mb-4 font-sans text-xl font-bold text-ink">
               {tf.variants}
             </h2>
             <div className="overflow-x-auto rounded-md border border-hair">
@@ -162,7 +183,7 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
           </section>
 
           <section aria-labelledby="dims">
-            <h2 id="dims" className="m-0 mb-4 font-serif text-2xl text-ink">
+            <h2 id="dims" className="m-0 mb-4 font-sans text-xl font-bold text-ink">
               {tf.dims}
             </h2>
             <dl className="m-0 grid grid-cols-1 gap-x-8 sm:grid-cols-2">
@@ -181,12 +202,15 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
 
           {f.fits.length > 0 && (
             <section aria-labelledby="fits">
-              <h2 id="fits" className="m-0 mb-4 font-serif text-2xl text-ink">
+              <h2 id="fits" className="m-0 mb-4 font-sans text-xl font-bold text-ink">
                 {tf.fits}
               </h2>
               <ul className="m-0 flex list-none flex-wrap gap-2 p-0 font-sans text-sm">
                 {f.fits.map((b) => (
-                  <li key={b.slug} className="rounded-pill border border-hair px-3 py-1 text-ink">
+                  <li
+                    key={b.slug}
+                    className="rounded-sm border border-hair bg-bg-soft px-3 py-1 text-ink"
+                  >
                     {breakerName(b)}
                   </li>
                 ))}
@@ -199,24 +223,24 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
         <aside className="flex flex-col gap-6">
           {tons && (
             <div className="rounded-md border border-hair bg-bg-soft p-5 font-sans text-sm">
-              <p className="m-0 text-xs uppercase tracking-widest text-ink-soft">{tf.carrier}</p>
+              <p className="m-0 text-sm font-semibold text-ink">{tf.carrier}</p>
               <p className="m-0 mt-2 text-lg text-ink">{tf.carrierValue(tons.min, tons.max)}</p>
               <p className="m-0 mt-2 text-ink-mid">{tf.carrierNote}</p>
             </div>
           )}
-          <div className="rounded-md border border-brand bg-bg-soft p-5 font-sans text-sm">
-            <p className="m-0 font-serif text-xl text-ink">{tf.quoteTitle}</p>
+          <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
+            <p className="m-0 font-sans text-lg font-bold text-ink">{tf.quoteTitle}</p>
             <p className="m-0 mt-2 text-ink-mid">{tf.quoteBody}</p>
             <div className="mt-4 flex flex-col gap-3">
               <a
                 href={wa}
-                className={`rounded-pill bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
+                className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
               >
                 {tf.whatsapp}
               </a>
               <a
                 href={mail}
-                className={`rounded-pill border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
+                className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
               >
                 {tf.email}
               </a>

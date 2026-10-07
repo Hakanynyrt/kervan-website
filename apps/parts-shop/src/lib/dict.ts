@@ -11,20 +11,42 @@ export interface Dict {
     familyTitle: (code: string, d: string, fits: string) => string;
     familyDesc: (code: string, d: string, types: string) => string;
     notFoundTitle: string;
+    popularTitle: string;
+    popularDesc: string;
   };
-  nav: { label: string; tips: string; catalogSite: string; langLabel: string; langOther: string };
+  nav: {
+    label: string;
+    tips: string;
+    popular: string;
+    catalogSite: string;
+    quote: string;
+    quoteText: string;
+    langLabel: string;
+    langOther: string;
+  };
+  top: { tagline: string; shop: string };
   banner: { preview: string; demo: string };
   tip: Record<TipType, string>;
   home: {
-    eyebrow: string;
     title: string;
     lead: string;
     cta: string;
+    ctaQuote: string;
     popular: string;
     featured: string;
+    morePopular: string;
     count: (n: number) => string;
+    trust: { title: string; body: string }[];
+    sectors: {
+      title: string;
+      lead: string;
+      typesLabel: string;
+      note: string;
+      items: { name: string; body: string; types: TipType[] }[];
+    };
   };
-  card: { popular: string; fits: string; more: (n: number) => string; view: string };
+  card: { fits: string; more: (n: number) => string; view: string };
+  popular: { title: string; lead: string };
   list: {
     title: string;
     lead: string;
@@ -35,6 +57,8 @@ export interface Dict {
   };
   family: {
     kicker: (d: string) => string;
+    crumbHome: string;
+    crumbLabel: string;
     dims: string;
     diameter: string;
     collar: string;
@@ -75,7 +99,15 @@ export interface Dict {
     viewRear: string;
     marks: string;
   };
-  footer: { legal: string; kvkk: string; marks: string; images: string };
+  footer: {
+    legal: string;
+    kvkk: string;
+    marks: string;
+    images: string;
+    shop: string;
+    company: string;
+    contact: string;
+  };
   notFound: { title: string; body: string; home: string };
 }
 
@@ -93,14 +125,21 @@ export const DICT: Record<Lang, Dict> = {
       familyDesc: (code, d, types) =>
         `${code}: Ø${d} mm kırıcı ucu (${types}). Ölçü tablosu ve uyumlu kırıcılar.`,
       notFoundTitle: 'Sayfa bulunamadı | Kervan Mağaza',
+      popularTitle: 'Çok satan kırıcı uçları | Kervan Mağaza',
+      popularDesc:
+        'En çok sipariş edilen Kervan kırıcı uçları: çap, uç tipleri ve uyumlu kırıcılar.',
     },
     nav: {
       label: 'Ana menü',
       tips: 'Kırıcı uçları',
-      catalogSite: 'kervanbreaker.com',
+      popular: 'Çok satanlar',
+      catalogSite: 'Kurumsal',
+      quote: 'Teklif iste',
+      quoteText: 'Merhaba, kırıcı ucu için fiyat teklifi almak istiyorum.',
       langLabel: 'English',
       langOther: 'EN',
     },
+    top: { tagline: 'Hidrolik kırıcı ucu üreticisi', shop: 'Kırıcı ucu mağazası' },
     banner: {
       preview: 'Önizleme: mağaza hazırlanıyor, henüz sipariş alınmıyor. Fiyat için bize yazın.',
       demo: 'DEMO verisi: bu ürünler gerçek değildir.',
@@ -114,30 +153,82 @@ export const DICT: Record<Lang, Dict> = {
       asphalt: 'Asfalt',
     },
     home: {
-      eyebrow: 'Kervan üretimi · Kartepe',
       title: 'Hidrolik kırıcı uçları',
-      lead: 'Kendi tezgâhımızda işlenen, kendi fırınlarımızda ısıl işlem gören uçlar. Ölçüleri karşılaştırın, kırıcınıza uyanı bulun.',
-      cta: 'Tüm uçları gör',
+      lead: 'Kendi tezgâhımızda işlenen, kendi tesisimizde ısıl işlem gören uçlar. Ölçüleri karşılaştırın, kırıcınıza uyan ucu seçin; fiyat ve teslim süresini doğrudan bize sorun.',
+      cta: 'Tüm uçlar',
+      ctaQuote: 'Teklif iste',
       popular: 'Çok satanlar',
       featured: 'Uçlar',
+      morePopular: 'Tüm çok satanlar',
       count: (n) => `${n} uç ailesi`,
+      trust: [
+        {
+          title: 'Kendi üretimimiz',
+          body: 'Uçlar Kartepe’deki tesisimizde işlenir; aracı yoktur.',
+        },
+        {
+          title: 'Kendi ısıl işlemimiz',
+          body: 'Isıl işlem kendi fırınlarımızda, kontrollü olarak yapılır.',
+        },
+        {
+          title: 'Ölçüyle seçim',
+          body: 'Her uç için kama kanalı, arka uç ve gövde ölçüleri.',
+        },
+        {
+          title: 'Doğrudan teklif',
+          body: 'Fiyat ve teslim süresi için üreticiye doğrudan yazın.',
+        },
+      ],
+      sectors: {
+        title: 'Sizin işinizi yapanlar hangi ucu seçiyor?',
+        lead: 'Sahada aynı işi yapan firmaların genellikle tercih ettiği uç tipleri.',
+        typesLabel: 'Genellikle tercih edilen',
+        note: 'Genel saha uygulamasıdır; kırıcı üreticisinin önerisi geçerlidir.',
+        items: [
+          {
+            name: 'Taş ocağı',
+            body: 'Sert kayada kırma ve iri blokların parçalanması.',
+            types: ['pyramid', 'conical', 'blunt'],
+          },
+          {
+            name: 'Maden',
+            body: 'Cevher ve sert kaya; yüksek aşınma.',
+            types: ['conical', 'moil'],
+          },
+          {
+            name: 'Yıkım',
+            body: 'Betonarme yapılar ve temel kırma.',
+            types: ['moil', 'chisel'],
+          },
+          {
+            name: 'Altyapı ve kazı',
+            body: 'Kanal açma, katmanlı zemin ve asfalt.',
+            types: ['chisel', 'asphalt', 'moil'],
+          },
+        ],
+      },
     },
     card: {
-      popular: 'Çok satan',
       fits: 'Uyumlu',
       more: (n) => `+${n} kırıcı`,
       view: 'Ölçüleri gör',
     },
     list: {
       title: 'Tüm kırıcı uçları',
-      lead: 'Çok satanlar önce, sonra çapa göre.',
+      lead: 'Çapa göre sıralıdır. En çok sipariş edilenler ayrı sayfada.',
       code: 'Kod',
       diameter: 'Çap',
       types: 'Tipler',
       fits: 'Uyumlu kırıcılar',
     },
+    popular: {
+      title: 'Çok satanlar',
+      lead: 'En çok sipariş edilen uç aileleri. Kırıcınızın çapına uyanı seçin.',
+    },
     family: {
       kicker: (d) => `Ø${d} mm hidrolik kırıcı ucu`,
+      crumbHome: 'Ana sayfa',
+      crumbLabel: 'Bulunduğunuz yer',
       dims: 'Gövde ölçüleri',
       diameter: 'Çalışma çapı (D)',
       collar: 'Yaka çapı',
@@ -186,6 +277,9 @@ export const DICT: Record<Lang, Dict> = {
       legal: 'Üretici ve satıcı',
       kvkk: 'KVKK aydınlatma metni',
       marks: 'Markalar sahiplerine aittir.',
+      shop: 'Mağaza',
+      company: 'Kurumsal',
+      contact: 'İletişim',
       images:
         '© Kervan Makina. Ürün görselleri Kervan Makina’ya aittir, temsilidir; izinsiz kullanılamaz.',
     },
@@ -207,14 +301,21 @@ export const DICT: Record<Lang, Dict> = {
       familyDesc: (code, d, types) =>
         `${code}: Ø${d} mm breaker tip (${types}). Dimension table and fitting breakers.`,
       notFoundTitle: 'Page not found | Kervan Shop',
+      popularTitle: 'Best-selling breaker tips | Kervan Shop',
+      popularDesc:
+        'The most ordered Kervan breaker tips: diameter, tip types and fitting breakers.',
     },
     nav: {
       label: 'Main menu',
       tips: 'Breaker tips',
-      catalogSite: 'kervanbreaker.com',
+      popular: 'Best sellers',
+      catalogSite: 'Company',
+      quote: 'Request a quote',
+      quoteText: 'Hello, I would like a quote for a breaker tip.',
       langLabel: 'Türkçe',
       langOther: 'TR',
     },
+    top: { tagline: 'Hydraulic breaker tip manufacturer', shop: 'Breaker tip shop' },
     banner: {
       preview:
         'Preview: the shop is being prepared and does not take orders yet. Write to us for prices.',
@@ -229,30 +330,75 @@ export const DICT: Record<Lang, Dict> = {
       asphalt: 'Asphalt',
     },
     home: {
-      eyebrow: 'Made by Kervan · Kartepe, Türkiye',
       title: 'Hydraulic breaker tips',
-      lead: 'Machined on our own lathes and heat-treated in our own furnaces. Compare the dimensions and find the tip for your breaker.',
-      cta: 'See all tips',
+      lead: 'Machined on our own lathes and heat-treated in our own plant. Compare the dimensions, pick the tip for your breaker and ask us directly for price and delivery time.',
+      cta: 'All tips',
+      ctaQuote: 'Request a quote',
       popular: 'Best sellers',
       featured: 'Tips',
+      morePopular: 'All best sellers',
       count: (n) => `${n} tip families`,
+      trust: [
+        {
+          title: 'Our own production',
+          body: 'Machined in our plant in Kartepe, Türkiye; no middlemen.',
+        },
+        {
+          title: 'Our own heat treatment',
+          body: 'Heat-treated in our own furnaces, under control.',
+        },
+        {
+          title: 'Chosen by dimensions',
+          body: 'Key slot, back end and body dimensions for every tip.',
+        },
+        { title: 'Direct quotes', body: 'Write to the manufacturer for price and delivery time.' },
+      ],
+      sectors: {
+        title: 'Which tip do people doing your work choose?',
+        lead: 'The tip types companies doing the same work usually choose on site.',
+        typesLabel: 'Usually chosen',
+        note: 'General site practice; the breaker maker’s recommendation comes first.',
+        items: [
+          {
+            name: 'Quarrying',
+            body: 'Breaking hard rock and oversize boulders.',
+            types: ['pyramid', 'conical', 'blunt'],
+          },
+          { name: 'Mining', body: 'Ore and hard rock; high wear.', types: ['conical', 'moil'] },
+          {
+            name: 'Demolition',
+            body: 'Reinforced concrete and foundations.',
+            types: ['moil', 'chisel'],
+          },
+          {
+            name: 'Utilities and excavation',
+            body: 'Trenching, layered ground and asphalt.',
+            types: ['chisel', 'asphalt', 'moil'],
+          },
+        ],
+      },
     },
     card: {
-      popular: 'Best seller',
       fits: 'Fits',
       more: (n) => `+${n} breakers`,
       view: 'See dimensions',
     },
     list: {
       title: 'All breaker tips',
-      lead: 'Best sellers first, then by diameter.',
+      lead: 'Sorted by diameter. The most ordered tips have their own page.',
       code: 'Code',
       diameter: 'Diameter',
       types: 'Types',
       fits: 'Fitting breakers',
     },
+    popular: {
+      title: 'Best sellers',
+      lead: 'The most ordered tip families. Pick the one that matches your breaker.',
+    },
     family: {
       kicker: (d) => `Ø${d} mm hydraulic breaker tip`,
+      crumbHome: 'Home',
+      crumbLabel: 'Breadcrumb',
       dims: 'Shank dimensions',
       diameter: 'Working diameter (D)',
       collar: 'Collar diameter',
@@ -300,6 +446,9 @@ export const DICT: Record<Lang, Dict> = {
       legal: 'Manufacturer and seller',
       kvkk: 'Privacy notice (KVKK)',
       marks: 'Marks belong to their owners.',
+      shop: 'Shop',
+      company: 'Company',
+      contact: 'Contact',
       images:
         '© Kervan Makina. Product images belong to Kervan Makina and are illustrations; do not use without permission.',
     },
