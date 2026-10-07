@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Container } from '@kervan/ui';
 import { ORG_EMAIL } from '@kervan/seo';
 import {
   Breadcrumb,
   Chips,
+  HeroImg,
   ImgNote,
   OemLine,
   PageTitle,
@@ -21,11 +22,14 @@ import type { Lang } from '../types';
 
 type Model = Extract<PageModel, { kind: 'part' }>;
 
+const PartViewer = lazy(() => import('../components/PartViewer'));
+
 /** One spare-part group: our stock photos and a quote by breaker model. */
 export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const p = t.parts.items[model.part];
   const [breaker, setBreaker] = useState('');
   const [qty, setQty] = useState<Qty>('1');
+  const [open3d, setOpen3d] = useState<string | null>(null);
   const text = t.parts.text(p.name, breaker.trim(), qty);
   const photos = PART_PHOTOS[model.part];
   const renders = PART_RENDERS[model.part];
@@ -40,7 +44,79 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
       <div
         className={`mt-8 grid gap-8 lg:gap-10 ${pics ? 'lg:grid-cols-[minmax(0,1fr)_22rem]' : 'max-w-md'}`}
       >
-        <aside className="lg:order-2">
+        {pics && (
+          <div className="flex min-w-0 flex-col gap-6">
+            {renders.map((r) => {
+              const caption = t.parts.renderCaption(r.model, p.name);
+              return (
+                <figure key={r.model} className="m-0">
+                  {r.hero && (
+                    <div className="mb-4">
+                      {open3d === r.model && r.model3d ? (
+                        <Suspense
+                          fallback={<div className="aspect-video w-full rounded-md bg-stage" />}
+                        >
+                          <PartViewer src={r.model3d} label={caption} t={t} />
+                        </Suspense>
+                      ) : (
+                        <div className="relative">
+                          <HeroImg base={r.hero} alt={caption} />
+                          {r.model3d && (
+                            <button
+                              type="button"
+                              onClick={() => setOpen3d(r.model)}
+                              className={`absolute bottom-3 right-3 cursor-pointer rounded-sm bg-brand px-4 py-2.5 font-sans text-sm font-medium text-white hover:bg-brand-hi ${FOCUS}`}
+                            >
+                              {t.parts.viewer.open}
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      {open3d === r.model && (
+                        <button
+                          type="button"
+                          onClick={() => setOpen3d(null)}
+                          className={`mt-2 cursor-pointer font-sans text-sm text-ink-mid underline hover:text-ink ${FOCUS}`}
+                        >
+                          {t.parts.viewer.close}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2">
+                    {r.views.map((v, i) => (
+                      <li key={v.base} className={i === 0 && !r.hero ? 'sm:col-span-2' : undefined}>
+                        <Photo
+                          base={v.base}
+                          alt={`${caption}, ${t.parts.renderView[v.view]}`}
+                          lazy={i > 0}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                  <figcaption className="mt-2 font-sans text-base font-semibold text-ink">
+                    {caption}
+                  </figcaption>
+                </figure>
+              );
+            })}
+            {photos.length > 0 && (
+              <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2">
+                {photos.map((base, i) => (
+                  <li key={base}>
+                    <Photo
+                      base={base}
+                      alt={`${t.parts.photosAlt(p.name)} (${i + 1})`}
+                      lazy={i > 0}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+            <ImgNote t={t} />
+          </div>
+        )}
+        <aside className={pics ? 'lg:col-start-2' : undefined}>
           <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
             <p className="m-0 text-lg font-bold text-ink">{t.parts.quoteTitle}</p>
             <p className="m-0 mt-2 text-ink-mid">{t.parts.quoteBody}</p>
@@ -84,45 +160,6 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
             <Terms t={t} />
           </div>
         </aside>
-        {pics && (
-          <div className="flex flex-col gap-6 lg:order-1">
-            {renders.map((r) => {
-              const caption = t.parts.renderCaption(r.model, p.name);
-              return (
-                <figure key={r.model} className="m-0">
-                  <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2">
-                    {r.views.map((v, i) => (
-                      <li key={v.base} className={i === 0 ? 'sm:col-span-2' : undefined}>
-                        <Photo
-                          base={v.base}
-                          alt={`${caption}, ${t.parts.renderView[v.view]}`}
-                          lazy={i > 0}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                  <figcaption className="mt-2 font-sans text-base font-semibold text-ink">
-                    {caption}
-                  </figcaption>
-                </figure>
-              );
-            })}
-            {photos.length > 0 && (
-              <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2">
-                {photos.map((base, i) => (
-                  <li key={base}>
-                    <Photo
-                      base={base}
-                      alt={`${t.parts.photosAlt(p.name)} (${i + 1})`}
-                      lazy={i > 0}
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
-            <ImgNote t={t} />
-          </div>
-        )}
       </div>
       <StickyQuote text={text} t={t} />
     </Container>

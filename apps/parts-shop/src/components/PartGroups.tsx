@@ -9,11 +9,12 @@ import { FOCUS } from './Layout';
 /** Tiles for the product groups: breaker tips first, then the other parts. */
 export function PartGroups({ lang, t }: { lang: Lang; t: Dict }) {
   const groups = [
-    { key: 'tips', path: LIST_PATH, photo: STOCK_TIP_PHOTOS[0], ...t.parts.tips },
+    { key: 'tips', path: LIST_PATH, photo: STOCK_TIP_PHOTOS[0], hero: undefined, ...t.parts.tips },
     ...PART_KEYS.map((k) => ({
       key: k,
       path: partPath(k),
-      photo: (PART_PHOTOS[k][0] ?? PART_RENDERS[k][0]?.views[0].base) as string | undefined,
+      photo: PART_PHOTOS[k][0] as string | undefined,
+      hero: PART_RENDERS[k].find((r) => r.hero)?.hero,
       ...t.parts.items[k],
     })),
   ];
@@ -25,7 +26,19 @@ export function PartGroups({ lang, t }: { lang: Lang; t: Dict }) {
             href={localePath(g.path, lang)}
             className={`group flex h-full flex-col gap-3 rounded-md border border-hair bg-bg p-3 hover:border-hair-strong ${FOCUS}`}
           >
-            {g.photo && <Photo base={g.photo} alt="" />}
+            {g.hero ? (
+              <img
+                src={`${g.hero}-sm.webp`}
+                width={480}
+                height={360}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="block aspect-[4/3] h-auto w-full rounded-md border border-hair bg-stage object-cover"
+              />
+            ) : (
+              g.photo && <Photo base={g.photo} alt="" />
+            )}
             <span className="px-1 font-sans text-lg font-semibold text-ink">{g.name}</span>
             <span className="px-1 font-sans text-sm text-ink-mid">{g.body}</span>
             <span className="mt-auto px-1 pb-1 font-sans text-sm font-medium text-brand-hi group-hover:underline">

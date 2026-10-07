@@ -156,6 +156,7 @@ export interface Dict {
     /** "Rammer E68 alt gövde". */
     renderCaption: (model: string, name: string) => string;
     renderView: Record<'front' | 'rear' | 'side' | 'detail', string>;
+    viewer: { open: string; close: string; hint: string; loading: string; error: string };
     quoteTitle: string;
     quoteBody: string;
     modelLabel: string;
@@ -437,6 +438,13 @@ export const DICT: Record<Lang, Dict> = {
         rear: 'arka görünüş',
         side: 'yan görünüş',
         detail: 'saplama somunu penceresi',
+      },
+      viewer: {
+        open: '3B incele',
+        close: 'Görsele dön',
+        hint: 'Sürükleyerek çevirin, iki parmakla ya da tekerlekle yakınlaştırın; ok tuşlarıyla da çevrilir.',
+        loading: '3B model yükleniyor…',
+        error: '3B model açılamadı.',
       },
       quoteTitle: 'Fiyat teklifi isteyin',
       quoteBody: 'Kırıcınızın marka ve modelini yazın; mesaja eklenir.',
@@ -726,6 +734,13 @@ export const DICT: Record<Lang, Dict> = {
         rear: 'rear view',
         side: 'side view',
         detail: 'tie-rod nut window',
+      },
+      viewer: {
+        open: 'View in 3D',
+        close: 'Back to the picture',
+        hint: 'Drag to turn, pinch or scroll to zoom; the arrow keys turn it too.',
+        loading: 'Loading the 3D model…',
+        error: 'The 3D model could not be opened.',
       },
       quoteTitle: 'Request a quote',
       quoteBody: 'Type your breaker make and model; it goes into the message.',

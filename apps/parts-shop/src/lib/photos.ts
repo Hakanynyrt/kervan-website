@@ -27,12 +27,18 @@ export const PART_PHOTOS: Record<PartKey, readonly string[]> = {
 export interface PartRender {
   /** Breaker make and model the part fits, shown as the caption. */
   model: string;
+  /** Showcase picture, 16:9 (`<base>-sm.webp` 800 px, `-lg.webp` 1600 px): page lead and card. */
+  hero?: string;
+  /** Interactive 3D model (GLB, metres), opened on demand in PartViewer. */
+  model3d?: string;
   views: { base: string; view: 'front' | 'rear' | 'side' | 'detail' }[];
 }
 export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
   'alt-govde': [
     {
       model: 'Rammer E68',
+      hero: '/photos/parca/alt-govde-rammer-e68-vitrin-01',
+      model3d: '/models/alt-govde-rammer-e68-01.glb',
       views: [
         { base: '/photos/parca/alt-govde-rammer-e68-on-03', view: 'front' },
         { base: '/photos/parca/alt-govde-rammer-e68-arka-03', view: 'rear' },

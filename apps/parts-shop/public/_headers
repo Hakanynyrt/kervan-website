@@ -13,6 +13,12 @@
   Cache-Control: public, max-age=31536000, immutable
   Cross-Origin-Resource-Policy: same-site
 
+# Interactive 3D part models (GLB): a changed model gets a new file name.
+/models/*
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: model/gltf-binary
+  Cross-Origin-Resource-Policy: same-site
+
 /favicon-32.png
   Cache-Control: public, max-age=86400
 /apple-touch-icon.png

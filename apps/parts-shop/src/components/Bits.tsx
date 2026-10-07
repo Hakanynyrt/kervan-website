@@ -168,3 +168,27 @@ export function ImgNote({ t, className = '' }: { t: Dict; className?: string }) 
 export function OemLine({ t }: { t: Dict }) {
   return <p className="m-0 mt-2 font-sans text-base font-semibold text-ink">{t.oem}</p>;
 }
+
+/** 16:9 showcase picture (`<base>-sm.webp` 800 px, `<base>-lg.webp` 1600 px) on the dark stage. */
+export function HeroImg({
+  base,
+  alt,
+  className = '',
+}: {
+  base: string;
+  alt: string;
+  className?: string;
+}) {
+  return (
+    <img
+      src={`${base}-lg.webp`}
+      srcSet={`${base}-sm.webp 800w, ${base}-lg.webp 1600w`}
+      sizes="(min-width: 1024px) 820px, 100vw"
+      width={1600}
+      height={900}
+      alt={alt}
+      decoding="async"
+      className={`block h-auto w-full rounded-md border border-hair bg-stage ${className}`}
+    />
+  );
+}
