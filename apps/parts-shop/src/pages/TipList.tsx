@@ -1,4 +1,5 @@
 import { Container } from '@kervan/ui';
+import { FOCUS } from '../components/Layout';
 import type { Dict } from '../lib/dict';
 import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
@@ -17,7 +18,7 @@ export default function TipList({ model, lang, t }: { model: Model; lang: Lang; 
           <thead className="bg-bg-soft text-left text-ink-mid">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">
-                {t.list.code}
+                {t.list.model}
               </th>
               <th scope="col" className="px-4 py-3 font-medium">
                 {t.list.diameter}
@@ -25,28 +26,21 @@ export default function TipList({ model, lang, t }: { model: Model; lang: Lang; 
               <th scope="col" className="px-4 py-3 font-medium">
                 {t.list.types}
               </th>
-              <th scope="col" className="px-4 py-3 font-medium">
-                {t.list.fits}
-              </th>
             </tr>
           </thead>
           <tbody>
             {model.rows.map((r) => (
-              <tr key={r.code} className="border-t border-hair">
+              <tr key={r.slug} className="border-t border-hair">
                 <th scope="row" className="px-4 py-3 text-left font-medium">
                   <a
                     href={localePath(r.path, lang)}
-                    className="text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+                    className={`text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
                   >
-                    {r.code}
+                    {r.name}
                   </a>
                 </th>
-                <td className="px-4 py-3 text-ink">Ø{fmtNum(r.diameterMm, lang)}</td>
+                <td className="px-4 py-3 text-ink">Ø{fmtNum(r.diameterMm, lang)} mm</td>
                 <td className="px-4 py-3 text-ink">{r.types.map((x) => t.tip[x]).join(', ')}</td>
-                <td className="px-4 py-3 text-ink-mid">
-                  {r.fits.join(', ')}
-                  {r.fitsMore > 0 && ` ${t.card.more(r.fitsMore)}`}
-                </td>
               </tr>
             ))}
           </tbody>

@@ -8,8 +8,10 @@ export interface Dict {
     homeDesc: string;
     listTitle: string;
     listDesc: string;
-    familyTitle: (code: string, d: string, fits: string) => string;
+    familyTitle: (code: string, d: string) => string;
     familyDesc: (code: string, d: string, types: string) => string;
+    breakerTitle: (name: string, d: string) => string;
+    breakerDesc: (name: string, d: string, types: string) => string;
     notFoundTitle: string;
     popularTitle: string;
     popularDesc: string;
@@ -45,44 +47,29 @@ export interface Dict {
       items: { name: string; body: string; types: TipType[] }[];
     };
   };
-  card: { fits: string; more: (n: number) => string; view: string };
+  card: { view: string };
+  breaker: { title: (name: string) => string };
   popular: { title: string; lead: string };
   list: {
     title: string;
     lead: string;
-    code: string;
+    model: string;
     diameter: string;
     types: string;
-    fits: string;
   };
   family: {
     kicker: (d: string) => string;
     crumbHome: string;
     crumbLabel: string;
-    dims: string;
     diameter: string;
-    collar: string;
-    keyCount: string;
-    keyThickness: string;
-    slotLength: string;
-    backEndToSlot: string;
-    slotEnd: string;
-    slotRounded: string;
-    slotTapered: string;
-    rearStep: string;
-    yes: string;
-    no: string;
-    rearDiameter: string;
-    variants: string;
+    option: string;
     type: string;
-    length: string;
-    weight: string;
+    code: string;
     angle: string;
     availability: string;
     inStock: (n: number) => string;
     lead: (days: number) => string;
     ask: string;
-    fits: string;
     carrier: string;
     carrierValue: (min: number, max: number) => string;
     carrierNote: string;
@@ -90,14 +77,12 @@ export interface Dict {
     quoteBody: string;
     whatsapp: string;
     email: string;
-    whatsappText: (code: string) => string;
-    measureNote: string;
+    quoteText: (name: string, type: string, code: string) => string;
     renderNote: string;
-    renderAlt: (code: string, type: string) => string;
-    sideAlt: (code: string, type: string) => string;
-    rearAlt: (code: string) => string;
+    renderAlt: (name: string, type: string) => string;
+    sideAlt: (name: string, type: string) => string;
+    rearAlt: (name: string) => string;
     viewRear: string;
-    marks: string;
   };
   footer: {
     legal: string;
@@ -117,17 +102,17 @@ export const DICT: Record<Lang, Dict> = {
       siteName: 'Kervan Mağaza',
       homeTitle: 'Hidrolik kırıcı uçları | Kervan Mağaza',
       homeDesc:
-        'Kervan üretimi hidrolik kırıcı uçları: ölçüler, uyumlu kırıcılar ve fiyat teklifi.',
+        'Kervan üretimi hidrolik kırıcı uçları: kırıcınızın marka ve modeline göre uç, fiyat teklifi.',
       listTitle: 'Tüm kırıcı uçları | Kervan Mağaza',
-      listDesc: 'Kervan kırıcı uçlarının tam listesi: çap, uç tipleri ve uyumlu kırıcılar.',
-      familyTitle: (code, d, fits) =>
-        `${code} kırıcı ucu Ø${d}${fits ? ` – ${fits}` : ''} | Kervan Mağaza`,
-      familyDesc: (code, d, types) =>
-        `${code}: Ø${d} mm kırıcı ucu (${types}). Ölçü tablosu ve uyumlu kırıcılar.`,
+      listDesc: 'Marka ve modele göre tüm Kervan kırıcı uçları: çalışma çapı ve uç tipleri.',
+      familyTitle: (code, d) => `${code} kırıcı ucu Ø${d} | Kervan Mağaza`,
+      familyDesc: (code, d, types) => `${code}: Ø${d} mm kırıcı ucu (${types}).`,
+      breakerTitle: (name, d) => `${name} kırıcı ucu Ø${d} | Kervan Mağaza`,
+      breakerDesc: (name, d, types) =>
+        `${name} hidrolik kırıcı için Kervan ucu: Ø${d} mm, ${types}. Fiyat teklifi isteyin.`,
       notFoundTitle: 'Sayfa bulunamadı | Kervan Mağaza',
       popularTitle: 'Çok satan kırıcı uçları | Kervan Mağaza',
-      popularDesc:
-        'En çok sipariş edilen Kervan kırıcı uçları: çap, uç tipleri ve uyumlu kırıcılar.',
+      popularDesc: 'En çok sipariş edilen Kervan kırıcı uçları, kırıcı marka ve modeline göre.',
     },
     nav: {
       label: 'Ana menü',
@@ -160,7 +145,7 @@ export const DICT: Record<Lang, Dict> = {
       popular: 'Çok satanlar',
       featured: 'Uçlar',
       morePopular: 'Tüm çok satanlar',
-      count: (n) => `${n} uç ailesi`,
+      count: (n) => `${n} kırıcı modeli`,
       trust: [
         {
           title: 'Kendi üretimimiz',
@@ -208,70 +193,46 @@ export const DICT: Record<Lang, Dict> = {
         ],
       },
     },
-    card: {
-      fits: 'Uyumlu',
-      more: (n) => `+${n} kırıcı`,
-      view: 'Ölçüleri gör',
-    },
+    card: { view: 'Ucu gör' },
+    breaker: { title: (name) => `${name} kırıcı ucu` },
     list: {
       title: 'Tüm kırıcı uçları',
-      lead: 'Çapa göre sıralıdır. En çok sipariş edilenler ayrı sayfada.',
-      code: 'Kod',
-      diameter: 'Çap',
-      types: 'Tipler',
-      fits: 'Uyumlu kırıcılar',
+      lead: 'Kırıcınızın marka ve modelini bulun. En çok sipariş edilenler ayrı sayfada.',
+      model: 'Kırıcı',
+      diameter: 'Çalışma çapı',
+      types: 'Uç tipleri',
     },
     popular: {
       title: 'Çok satanlar',
-      lead: 'En çok sipariş edilen uç aileleri. Kırıcınızın çapına uyanı seçin.',
+      lead: 'En çok sipariş edilen kırıcı uçları.',
     },
     family: {
       kicker: (d) => `Ø${d} mm hidrolik kırıcı ucu`,
       crumbHome: 'Ana sayfa',
       crumbLabel: 'Bulunduğunuz yer',
-      dims: 'Gövde ölçüleri',
-      diameter: 'Çalışma çapı (D)',
-      collar: 'Yaka çapı',
-      keyCount: 'Kama yuvası sayısı',
-      keyThickness: 'Kama kalınlığı',
-      slotLength: 'Kama yuvası boyu',
-      backEndToSlot: 'Arka uç – kama yuvası',
-      slotEnd: 'Kama yuvası ucu',
-      slotRounded: 'Yuvarlak',
-      slotTapered: 'Konik rampa',
-      rearStep: 'Arka kademe',
-      yes: 'Var',
-      no: 'Yok',
-      rearDiameter: 'Arka çap',
-      variants: 'Uç tipleri',
-      type: 'Tip',
-      length: 'Boy',
-      weight: 'Ağırlık',
+      diameter: 'Çalışma çapı',
+      option: 'Uç kodu',
+      type: 'Uç tipi',
+      code: 'Kod',
       angle: 'Uç açısı',
       availability: 'Durum',
       inStock: (n) => (n >= 10 ? 'Stokta (10+)' : `Stokta (${n})`),
       lead: (days) => `Üretim ~${days} iş günü`,
       ask: 'Fiyat ve süre için sorun',
-      fits: 'Uyumlu kırıcılar',
       carrier: 'Taşıyıcı (yaklaşık)',
       carrierValue: (min, max) => `${min}–${max} t ekskavatör`,
       carrierNote: 'Yaklaşık değerdir; kırıcı üreticisinin önerisi geçerlidir.',
       quoteTitle: 'Fiyat teklifi isteyin',
-      quoteBody: 'Kodu ve kırıcınızın modelini yazın; fiyat ve teslim süresini iletelim.',
+      quoteBody: 'Kırıcınız ve seçtiğiniz uç mesaja yazılır; fiyat ve teslim süresini iletelim.',
       whatsapp: 'WhatsApp ile sor',
       email: 'E-posta gönder',
-      whatsappText: (code) =>
-        `Merhaba, ${code} kırıcı ucu için fiyat ve teslim süresi öğrenmek istiyorum.`,
-      measureNote:
-        'Ölçüler tablodaki gibidir. Sipariş vermeden önce eski ucunuzla ve kırıcınızın modeliyle karşılaştırın.',
-      renderNote: 'Temsili görsel: ölçülerden üretilmiştir. Ölçüler tablodaki gibidir.',
-      renderAlt: (code, type) =>
-        `${code} ${type} kırıcı ucu, ölçülerinden üretilmiş temsili görsel`,
-      sideAlt: (code, type) => `${code} ${type} kırıcı ucu, yandan görünüş (temsili)`,
-      rearAlt: (code) => `${code} kırıcı ucunun kama kanalı ve arka ucu, yakın görünüş (temsili)`,
+      quoteText: (name, type, code) =>
+        `Merhaba, ${name} için ${type} kırıcı ucu (${code}) fiyat ve teslim süresi öğrenmek istiyorum.`,
+      renderNote: 'Temsili görsel: ucun ölçülerinden üretilmiştir.',
+      renderAlt: (name, type) => `${name} ${type} kırıcı ucu, temsili görsel`,
+      sideAlt: (name, type) => `${name} ${type} kırıcı ucu, yandan görünüş (temsili)`,
+      rearAlt: (name) => `${name} kırıcı ucunun kama kanalı ve arka ucu, yakın görünüş (temsili)`,
       viewRear: 'Kama kanalı ve arka uç',
-      marks:
-        'Kırıcı marka ve model adları yalnız uyumu belirtmek içindir; markalar sahiplerine aittir.',
     },
     footer: {
       legal: 'Üretici ve satıcı',
@@ -293,17 +254,19 @@ export const DICT: Record<Lang, Dict> = {
     meta: {
       siteName: 'Kervan Shop',
       homeTitle: 'Hydraulic breaker tips | Kervan Shop',
-      homeDesc: 'Hydraulic breaker tips made by Kervan: dimensions, fitting breakers and quotes.',
+      homeDesc:
+        'Hydraulic breaker tips made by Kervan: find the tip for your breaker make and model.',
       listTitle: 'All breaker tips | Kervan Shop',
-      listDesc: 'The full list of Kervan breaker tips: diameter, tip types and fitting breakers.',
-      familyTitle: (code, d, fits) =>
-        `${code} breaker tip Ø${d}${fits ? ` – ${fits}` : ''} | Kervan Shop`,
-      familyDesc: (code, d, types) =>
-        `${code}: Ø${d} mm breaker tip (${types}). Dimension table and fitting breakers.`,
+      listDesc:
+        'All Kervan breaker tips by breaker make and model: working diameter and tip types.',
+      familyTitle: (code, d) => `${code} breaker tip Ø${d} | Kervan Shop`,
+      familyDesc: (code, d, types) => `${code}: Ø${d} mm breaker tip (${types}).`,
+      breakerTitle: (name, d) => `${name} breaker tip Ø${d} | Kervan Shop`,
+      breakerDesc: (name, d, types) =>
+        `Kervan tip for the ${name} hydraulic breaker: Ø${d} mm, ${types}. Request a quote.`,
       notFoundTitle: 'Page not found | Kervan Shop',
       popularTitle: 'Best-selling breaker tips | Kervan Shop',
-      popularDesc:
-        'The most ordered Kervan breaker tips: diameter, tip types and fitting breakers.',
+      popularDesc: 'The most ordered Kervan breaker tips, by breaker make and model.',
     },
     nav: {
       label: 'Main menu',
@@ -337,7 +300,7 @@ export const DICT: Record<Lang, Dict> = {
       popular: 'Best sellers',
       featured: 'Tips',
       morePopular: 'All best sellers',
-      count: (n) => `${n} tip families`,
+      count: (n) => `${n} breaker models`,
       trust: [
         {
           title: 'Our own production',
@@ -378,69 +341,47 @@ export const DICT: Record<Lang, Dict> = {
         ],
       },
     },
-    card: {
-      fits: 'Fits',
-      more: (n) => `+${n} breakers`,
-      view: 'See dimensions',
-    },
+    card: { view: 'View tip' },
+    breaker: { title: (name) => `${name} breaker tip` },
     list: {
       title: 'All breaker tips',
-      lead: 'Sorted by diameter. The most ordered tips have their own page.',
-      code: 'Code',
-      diameter: 'Diameter',
-      types: 'Types',
-      fits: 'Fitting breakers',
+      lead: 'Find your breaker make and model. The most ordered tips have their own page.',
+      model: 'Breaker',
+      diameter: 'Working diameter',
+      types: 'Tip types',
     },
     popular: {
       title: 'Best sellers',
-      lead: 'The most ordered tip families. Pick the one that matches your breaker.',
+      lead: 'The most ordered breaker tips.',
     },
     family: {
       kicker: (d) => `Ø${d} mm hydraulic breaker tip`,
       crumbHome: 'Home',
       crumbLabel: 'Breadcrumb',
-      dims: 'Shank dimensions',
-      diameter: 'Working diameter (D)',
-      collar: 'Collar diameter',
-      keyCount: 'Key slots',
-      keyThickness: 'Key thickness',
-      slotLength: 'Key slot length',
-      backEndToSlot: 'Back end to slot',
-      slotEnd: 'Slot end',
-      slotRounded: 'Rounded',
-      slotTapered: 'Tapered ramp',
-      rearStep: 'Rear step',
-      yes: 'Yes',
-      no: 'No',
-      rearDiameter: 'Rear diameter',
-      variants: 'Tip types',
-      type: 'Type',
-      length: 'Length',
-      weight: 'Weight',
+      diameter: 'Working diameter',
+      option: 'Tip code',
+      type: 'Tip type',
+      code: 'Code',
       angle: 'Tip angle',
       availability: 'Availability',
       inStock: (n) => (n >= 10 ? 'In stock (10+)' : `In stock (${n})`),
       lead: (days) => `Made to order, ~${days} working days`,
       ask: 'Ask for price and lead time',
-      fits: 'Fitting breakers',
       carrier: 'Carrier (approx.)',
       carrierValue: (min, max) => `${min}–${max} t excavator`,
       carrierNote: 'Approximate; the breaker maker’s recommendation wins.',
-      quoteTitle: 'Ask for a quote',
-      quoteBody: 'Send the code and your breaker model; we will reply with price and lead time.',
+      quoteTitle: 'Request a quote',
+      quoteBody:
+        'Your breaker and the tip you chose go into the message; we reply with price and lead time.',
       whatsapp: 'Ask on WhatsApp',
-      email: 'Send an email',
-      whatsappText: (code) =>
-        `Hello, I would like the price and lead time for breaker tip ${code}.`,
-      measureNote:
-        'Dimensions are as in the table. Compare them with your old tip and your breaker model before ordering.',
-      renderNote: 'Illustration generated from the dimensions. The table is binding.',
-      renderAlt: (code, type) =>
-        `${code} ${type} breaker tip, illustration generated from its dimensions`,
-      sideAlt: (code, type) => `${code} ${type} breaker tip, side view (illustration)`,
-      rearAlt: (code) => `${code} breaker tip key slot and rear end, close-up (illustration)`,
+      email: 'Send an e-mail',
+      quoteText: (name, type, code) =>
+        `Hello, I would like the price and lead time of the ${type} tip (${code}) for the ${name}.`,
+      renderNote: 'Illustration generated from the tip’s dimensions.',
+      renderAlt: (name, type) => `${name} ${type} breaker tip, illustration`,
+      sideAlt: (name, type) => `${name} ${type} breaker tip, side view (illustration)`,
+      rearAlt: (name) => `${name} breaker tip key slot and rear end, close-up (illustration)`,
       viewRear: 'Key slot and rear end',
-      marks: 'Breaker brand and model names only indicate fit; the marks belong to their owners.',
     },
     footer: {
       legal: 'Manufacturer and seller',

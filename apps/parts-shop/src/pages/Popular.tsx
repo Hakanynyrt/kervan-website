@@ -13,7 +13,7 @@ export default function Popular({ model, lang, t }: { model: Model; lang: Lang; 
       <p className="m-0 mt-3 font-sans text-ink-mid">{t.popular.lead}</p>
       <ul className="m-0 mt-8 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-4">
         {model.cards.map((c) => (
-          <li key={c.code}>
+          <li key={c.slug}>
             <FamilyCardView c={c} lang={lang} t={t} />
           </li>
         ))}
