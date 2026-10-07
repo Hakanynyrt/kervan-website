@@ -201,7 +201,7 @@ export const DICT: Record<Lang, Dict> = {
       partTitle: (name) => `Kırıcı ${name.toLocaleLowerCase('tr')} | Kervan Mağaza`,
       partDesc: (name) =>
         `Hidrolik kırıcı ${name.toLocaleLowerCase('tr')}: Kervan üretimi, kırıcınızın modeline göre teklif.`,
-      cartTitle: 'Sepet | Kervan Mağaza',
+      cartTitle: 'Palet | Kervan Mağaza',
     },
     nav: {
       label: 'Ana menü',
@@ -212,7 +212,7 @@ export const DICT: Record<Lang, Dict> = {
       quoteText: 'Merhaba, kırıcı ucu için fiyat teklifi almak istiyorum.',
       parts: 'Yedek parçalar',
       call: 'Ara',
-      cart: 'Sepet',
+      cart: 'Palet',
       langLabel: 'English',
       langOther: 'EN',
     },
@@ -221,7 +221,7 @@ export const DICT: Record<Lang, Dict> = {
       shop: 'Kırıcı yedek parça mağazası',
     },
     banner: {
-      preview: 'Online ödeme henüz yok: sepetinizi sipariş talebi olarak gönderin, size dönelim.',
+      preview: 'Online ödeme henüz yok: paletinizi sipariş talebi olarak gönderin, size dönelim.',
       demo: 'DEMO verisi: bu ürünler gerçek değildir.',
     },
     tip: {
@@ -350,13 +350,13 @@ export const DICT: Record<Lang, Dict> = {
     price: {
       label: 'Fiyat',
       fxNote: (date) => `TL fiyatı TCMB döviz satış kuruyla (${date}) hesaplanır.`,
-      add: 'Sepete ekle',
-      added: 'Sepete eklendi',
-      goCart: 'Sepete git',
+      add: 'Palete yükle',
+      added: 'Palete yüklendi',
+      goCart: 'Palete git',
     },
     cart: {
-      title: 'Sepet',
-      empty: 'Sepetiniz boş.',
+      title: 'Palet',
+      empty: 'Paletiniz boş.',
       browse: 'Kırıcı uçlarına göz atın',
       product: 'Ürün',
       qty: 'Adet',
@@ -367,7 +367,7 @@ export const DICT: Record<Lang, Dict> = {
       subtotal: 'Ara toplam (KDV hariç)',
       vat: (pct) => `KDV (%${pct})`,
       totalNote: 'Fiyatı sorulacak ürünler toplama dahil değildir.',
-      remove: (name) => `${name} ürününü sepetten çıkar`,
+      remove: (name) => `${name} ürününü paletten indir`,
       less: 'Bir azalt',
       more: 'Bir artır',
       contactTitle: 'İletişim bilgileriniz',
@@ -378,7 +378,7 @@ export const DICT: Record<Lang, Dict> = {
       note: 'Not',
       sendWa: 'Sipariş talebini WhatsApp ile gönder',
       sendMail: 'E-posta ile gönder',
-      clear: 'Sepeti boşalt',
+      clear: 'Paleti boşalt',
       info: 'Online ödeme henüz yok: sipariş talebinizi alınca size dönüyoruz; ödeme kredi kartı veya havale/EFT ile. Stoktaki ürünler aynı gün kargoya verilir; kargo ücreti alıcıya aittir. Bilgileriniz yalnız bu mesaja yazılır, sitede saklanmaz.',
       message: (lines, total, contact) =>
         [
@@ -484,7 +484,7 @@ export const DICT: Record<Lang, Dict> = {
       partTitle: (name) => `Breaker ${name.toLowerCase()} | Kervan Shop`,
       partDesc: (name) =>
         `Hydraulic breaker ${name.toLowerCase()} made by Kervan; quotes by breaker model.`,
-      cartTitle: 'Cart | Kervan Shop',
+      cartTitle: 'Pallet | Kervan Shop',
     },
     nav: {
       label: 'Main menu',
@@ -495,7 +495,7 @@ export const DICT: Record<Lang, Dict> = {
       quoteText: 'Hello, I would like a quote for a breaker tip.',
       parts: 'Spare parts',
       call: 'Call',
-      cart: 'Cart',
+      cart: 'Pallet',
       langLabel: 'Türkçe',
       langOther: 'TR',
     },
@@ -505,7 +505,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     banner: {
       preview:
-        'No online payment yet: send your cart as an order request and we will get back to you.',
+        'No online payment yet: send your pallet as an order request and we will get back to you.',
       demo: 'DEMO data: these products are not real.',
     },
     tip: {
@@ -630,13 +630,13 @@ export const DICT: Record<Lang, Dict> = {
     price: {
       label: 'Price',
       fxNote: (date) => `TRY prices use the CBRT USD selling rate of ${date}.`,
-      add: 'Add to cart',
-      added: 'Added to cart',
-      goCart: 'Go to cart',
+      add: 'Load onto pallet',
+      added: 'Loaded onto pallet',
+      goCart: 'Go to pallet',
     },
     cart: {
-      title: 'Cart',
-      empty: 'Your cart is empty.',
+      title: 'Pallet',
+      empty: 'Your pallet is empty.',
       browse: 'Browse breaker tips',
       product: 'Product',
       qty: 'Qty',
@@ -647,7 +647,7 @@ export const DICT: Record<Lang, Dict> = {
       subtotal: 'Subtotal (excl. VAT)',
       vat: (pct) => `VAT (${pct}%)`,
       totalNote: 'Products priced on request are not in the total.',
-      remove: (name) => `Remove ${name} from the cart`,
+      remove: (name) => `Remove ${name} from the pallet`,
       less: 'One less',
       more: 'One more',
       contactTitle: 'Your contact details',
@@ -658,7 +658,7 @@ export const DICT: Record<Lang, Dict> = {
       note: 'Note',
       sendWa: 'Send the order request on WhatsApp',
       sendMail: 'Send by e-mail',
-      clear: 'Empty the cart',
+      clear: 'Empty the pallet',
       info: 'No online payment yet: once we receive your request we get back to you; payment by credit card or bank transfer. Items in stock ship the same day; shipping is paid by the buyer. Your details only go into this message; the site does not store them.',
       message: (lines, total, contact) =>
         [

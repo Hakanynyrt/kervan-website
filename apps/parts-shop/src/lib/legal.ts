@@ -79,7 +79,7 @@ const TR: Record<LegalKey, LegalDoc> = {
       {
         h: 'Siparişin verilmesi ve ödeme',
         p: [
-          'Sitede online ödeme yoktur. Sepetteki ürünler WhatsApp ya da e-posta ile sipariş talebi olarak Satıcı’ya iletilir. Satıcı, stok ve fiyatı teyit ederek sipariş onayını gönderir; Alıcı’nın onayı ve ödemesiyle sözleşme kurulur.',
+          'Sitede online ödeme yoktur. Paletteki (sepetteki) ürünler WhatsApp ya da e-posta ile sipariş talebi olarak Satıcı’ya iletilir. Satıcı, stok ve fiyatı teyit ederek sipariş onayını gönderir; Alıcı’nın onayı ve ödemesiyle sözleşme kurulur.',
           'Ödeme kredi kartı veya banka havalesi/EFT ile yapılır. Kart ödemesinde kullanılacak yöntem sipariş onayında bildirilir; kart bilgileri bu siteye girilmez ve site tarafından saklanmaz.',
         ],
       },
@@ -215,7 +215,7 @@ const TR: Record<LegalKey, LegalDoc> = {
       {
         h: 'Hangi veriler işlenir',
         p: [
-          'Site bir üyelik veya form sistemi içermez ve kişisel veri saklamaz. Sepetiniz yalnızca kendi tarayıcınızın yerel belleğinde tutulur; bize gönderilmez. Sitede çerez kullanılmaz.',
+          'Site bir üyelik veya form sistemi içermez ve kişisel veri saklamaz. Paletiniz (sepetiniz) yalnızca kendi tarayıcınızın yerel belleğinde tutulur; bize gönderilmez. Sitede çerez kullanılmaz.',
           'Sipariş talebini WhatsApp veya e-posta ile gönderdiğinizde, mesajda yazan bilgiler (ad, firma, telefon, şehir, not, sipariş içeriği) ve mesajı gönderdiğiniz numara veya e-posta adresi tarafımıza ulaşır. Sipariş onayında teslimat adresi ve fatura bilgileri de istenir.',
           'Siteyi barındıran Cloudflare, güvenlik ve işletim amacıyla IP adresi ve tarayıcı bilgisi gibi teknik kayıtları tutar. Ziyaret istatistikleri çerezsiz ve kişiyi tanımlamayan biçimde ölçülebilir.',
         ],
@@ -275,7 +275,7 @@ const EN: Record<LegalKey, LegalDoc> = {
       {
         h: 'Ordering and payment',
         p: [
-          'There is no online payment on the site. The cart is sent to the Seller as an order request by WhatsApp or e-mail; the Seller confirms stock and price, and the contract is made when the buyer accepts the confirmation and pays. Payment by credit card or bank transfer; card details are never entered on or stored by this site.',
+          'There is no online payment on the site. The pallet (cart) is sent to the Seller as an order request by WhatsApp or e-mail; the Seller confirms stock and price, and the contract is made when the buyer accepts the confirmation and pays. Payment by credit card or bank transfer; card details are never entered on or stored by this site.',
         ],
       },
       {
@@ -358,7 +358,7 @@ const EN: Record<LegalKey, LegalDoc> = {
       {
         h: 'Controller and data',
         p: [
-          `${SELLER.name}, ${SELLER.address}, is the data controller under Turkish Law No. 6698. The site has no accounts or forms, sets no cookies and stores no personal data; your cart stays in your own browser. When you send an order request by WhatsApp or e-mail we receive what the message contains and your number or address; the confirmation also asks for delivery and invoice details. Cloudflare, which hosts the site, keeps technical logs such as IP addresses for security.`,
+          `${SELLER.name}, ${SELLER.address}, is the data controller under Turkish Law No. 6698. The site has no accounts or forms, sets no cookies and stores no personal data; your pallet (cart) stays in your own browser. When you send an order request by WhatsApp or e-mail we receive what the message contains and your number or address; the confirmation also asks for delivery and invoice details. Cloudflare, which hosts the site, keeps technical logs such as IP addresses for security.`,
         ],
       },
       {

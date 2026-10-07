@@ -75,7 +75,7 @@ export interface BrandLink {
 export const PART_KEYS = ['alt-govde', 'burc', 'kama', 'saplama', 'piston'] as const;
 export type PartKey = (typeof PART_KEYS)[number];
 export const PARTS_PATH = '/yedek-parca';
-export const CART_PATH = '/sepet';
+export const CART_PATH = '/palet';
 export const partPath = (k: PartKey): string => `${PARTS_PATH}/${k}`;
 
 export interface BuiltPage {
