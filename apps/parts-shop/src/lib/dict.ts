@@ -158,9 +158,10 @@ export interface Dict {
     text: (part: string, model: string, qty: string) => string;
     noPhoto: string;
   };
+  legal: { nav: string; agree: string; and: string };
   footer: {
     legal: string;
-    kvkk: string;
+    docs: string;
     marks: string;
     images: string;
     shop: string;
@@ -427,9 +428,14 @@ export const DICT: Record<Lang, Dict> = {
         `Merhaba, ${model || '(kırıcı modeli)'} için ${part.toLocaleLowerCase('tr')}, ${qty} adet için fiyat almak istiyorum.`,
       noPhoto: 'Fotoğraf yakında',
     },
+    legal: {
+      nav: 'Yasal metinler',
+      agree: 'Sipariş talebi göndererek aşağıdaki metinleri okuduğunuzu kabul edersiniz:',
+      and: 've',
+    },
     footer: {
       legal: 'Üretici ve satıcı',
-      kvkk: 'KVKK aydınlatma metni',
+      docs: 'Yasal',
       marks: 'Markalar sahiplerine aittir.',
       shop: 'Mağaza',
       company: 'Kurumsal',
@@ -700,9 +706,14 @@ export const DICT: Record<Lang, Dict> = {
         `Hello, I would like the price of ${part.toLowerCase()} for the ${model || '(breaker model)'}, quantity ${qty}.`,
       noPhoto: 'Photo coming soon',
     },
+    legal: {
+      nav: 'Legal',
+      agree: 'By sending an order request you confirm you have read:',
+      and: 'and',
+    },
     footer: {
       legal: 'Manufacturer and seller',
-      kvkk: 'Privacy notice (KVKK)',
+      docs: 'Legal',
       marks: 'Marks belong to their owners.',
       shop: 'Shop',
       company: 'Company',

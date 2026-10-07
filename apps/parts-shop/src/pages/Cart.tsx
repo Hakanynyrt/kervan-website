@@ -8,6 +8,7 @@ import { CART_EVENT, MAX_QTY, readCart, writeCart, type CartItem } from '../lib/
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { fmtDate, fmtTry, fmtUsd } from '../lib/price';
+import { LEGAL, legalPath } from '../lib/legal';
 import { LIST_PATH } from '../lib/routes';
 import type { Lang } from '../types';
 
@@ -201,7 +202,24 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                 )}
               </div>
             ))}
-            <div className="mt-5 flex flex-col gap-3">
+            <p className="m-0 mt-5 text-xs text-ink-mid">
+              {t.legal.agree}{' '}
+              <a
+                href={localePath(legalPath('on-bilgilendirme'), lang)}
+                className={`text-brand-hi underline ${FOCUS}`}
+              >
+                {LEGAL[lang]['on-bilgilendirme'].title}
+              </a>{' '}
+              {t.legal.and}{' '}
+              <a
+                href={localePath(legalPath('mesafeli-satis'), lang)}
+                className={`text-brand-hi underline ${FOCUS}`}
+              >
+                {LEGAL[lang]['mesafeli-satis'].title}
+              </a>
+              .
+            </p>
+            <div className="mt-3 flex flex-col gap-3">
               <a
                 href={whatsappHref(message)}
                 className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}

@@ -1,18 +1,10 @@
 import type { ReactNode } from 'react';
 import { Container } from '@kervan/ui';
-import {
-  ORG_EMAIL,
-  ORG_LEGAL_NAME,
-  ORG_LOCALITY,
-  ORG_PHONE,
-  ORG_PHONE_E164,
-  ORG_REGION,
-  ORG_STREET,
-  ORG_TRADING_NAME,
-} from '@kervan/seo';
+import { ORG_EMAIL, ORG_PHONE, ORG_PHONE_E164, ORG_TRADING_NAME } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { CART_PATH, LIST_PATH, PARTS_PATH, POPULAR_PATH } from '../lib/routes';
+import { LEGAL, LEGAL_KEYS, legalPath, SELLER } from '../lib/legal';
 import { CartLink } from './CartLink';
 import type { Lang } from '../types';
 
@@ -130,13 +122,12 @@ export default function Layout({ lang, path, t, demo, hasPopular, children }: Pr
       )}
       <main>{children}</main>
       <footer className="mt-24 border-t border-hair bg-bg-soft">
-        <Container className="grid gap-8 py-12 font-sans text-sm text-ink-mid sm:grid-cols-2 lg:grid-cols-4">
+        <Container className="grid gap-8 py-12 font-sans text-sm text-ink-mid sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <p className="m-0 font-semibold text-ink">{t.footer.legal}</p>
-            <p className="m-0 mt-3">{ORG_LEGAL_NAME}</p>
-            <p className="m-0">
-              {ORG_STREET}, {ORG_LOCALITY}/{ORG_REGION}
-            </p>
+            <p className="m-0 mt-3">{SELLER.name}</p>
+            <p className="m-0">{SELLER.address}</p>
+            <p className="m-0">{SELLER.tax}</p>
           </div>
           <div>
             <p className="m-0 font-semibold text-ink">{t.footer.shop}</p>
@@ -163,16 +154,28 @@ export default function Layout({ lang, path, t, demo, hasPopular, children }: Pr
                   kervanheat.com
                 </a>
               </li>
-              <li>
-                <a href="https://kervanbreaker.com/kvkk" className={`hover:text-ink ${FOCUS}`}>
-                  {t.footer.kvkk}
-                </a>
-              </li>
+            </ul>
+          </div>
+          <div>
+            <p className="m-0 font-semibold text-ink">{t.footer.docs}</p>
+            <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0">
+              {LEGAL_KEYS.map((k) => (
+                <li key={k}>
+                  <a href={localePath(legalPath(k), lang)} className={`hover:text-ink ${FOCUS}`}>
+                    {LEGAL[lang][k].title}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
             <p className="m-0 font-semibold text-ink">{t.footer.contact}</p>
             <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0">
+              <li>
+                <a href="tel:+902623711005" className={`hover:text-ink ${FOCUS}`}>
+                  {SELLER.phone}
+                </a>
+              </li>
               <li>
                 <a href={`tel:${ORG_PHONE_E164}`} className={`hover:text-ink ${FOCUS}`}>
                   {ORG_PHONE}
