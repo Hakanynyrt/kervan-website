@@ -222,7 +222,39 @@ function profileRuns(s: TipSpec): Run[] {
   if (workStart <= y + 1) throw new Error('profile does not fit');
   seg([R, y], [R, workStart], MAT.BODY);
   runs.push(...tip);
-  return runs;
+  return breakEdges(runs, Math.min(2.5, Math.max(0.8, 0.01 * D)));
+}
+
+/**
+ * Small 45° chamfer at every sharp corner of the lathe profile (shoulders, collar edges, steps,
+ * the edges of existing chamfers): where two runs meet at more than 30°, both are trimmed by up
+ * to e (never more than 40 % of the segment) and joined by a short chamfer run.
+ */
+function breakEdges(runs: Run[], e: number): Run[] {
+  const out: Run[] = [];
+  for (let i = 0; i < runs.length; i++) {
+    const a = { ...runs[i], pts: runs[i].pts.map((p) => [...p] as [number, number]) };
+    out.push(a);
+    const b = runs[i + 1];
+    if (!b) break;
+    const pa = a.pts[a.pts.length - 2];
+    const p0 = a.pts[a.pts.length - 1];
+    const pb = b.pts[1];
+    const la = Math.hypot(p0[0] - pa[0], p0[1] - pa[1]);
+    const lb = Math.hypot(pb[0] - p0[0], pb[1] - p0[1]);
+    if (la < 1e-6 || lb < 1e-6 || p0[0] < 0.5) continue;
+    const da = [(p0[0] - pa[0]) / la, (p0[1] - pa[1]) / la];
+    const db = [(pb[0] - p0[0]) / lb, (pb[1] - p0[1]) / lb];
+    if (da[0] * db[0] + da[1] * db[1] > Math.cos((30 * Math.PI) / 180)) continue;
+    const ta = Math.min(e, 0.4 * la);
+    const tb = Math.min(e, 0.4 * lb);
+    const qa: [number, number] = [p0[0] - da[0] * ta, p0[1] - da[1] * ta];
+    const qb: [number, number] = [p0[0] + db[0] * tb, p0[1] + db[1] * tb];
+    a.pts[a.pts.length - 1] = qa;
+    runs[i + 1] = { ...b, pts: [qb, ...b.pts.slice(1)] };
+    out.push({ pts: [qa, qb], mat: MAT.BODY });
+  }
+  return out;
 }
 
 /** One end of the slot, from the shank surface (rs) down to the floor, going +y.
