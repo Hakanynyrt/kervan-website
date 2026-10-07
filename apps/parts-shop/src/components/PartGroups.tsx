@@ -1,6 +1,6 @@
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { PART_PHOTOS, STOCK_TIP_PHOTOS } from '../lib/photos';
+import { PART_PHOTOS, PART_RENDERS, STOCK_TIP_PHOTOS } from '../lib/photos';
 import { LIST_PATH, PART_KEYS, partPath } from '../lib/routes';
 import type { Lang } from '../types';
 import { Photo } from './Bits';
@@ -13,7 +13,7 @@ export function PartGroups({ lang, t }: { lang: Lang; t: Dict }) {
     ...PART_KEYS.map((k) => ({
       key: k,
       path: partPath(k),
-      photo: PART_PHOTOS[k][0] as string | undefined,
+      photo: (PART_PHOTOS[k][0] ?? PART_RENDERS[k][0]?.views[0].base) as string | undefined,
       ...t.parts.items[k],
     })),
   ];
