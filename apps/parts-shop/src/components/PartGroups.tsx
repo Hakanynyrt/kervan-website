@@ -13,7 +13,7 @@ export function PartGroups({ lang, t }: { lang: Lang; t: Dict }) {
     ...PART_KEYS.map((k) => ({
       key: k,
       path: partPath(k),
-      photo: PART_PHOTOS[k][0],
+      photo: PART_PHOTOS[k][0] as string | undefined,
       ...t.parts.items[k],
     })),
   ];
@@ -25,7 +25,7 @@ export function PartGroups({ lang, t }: { lang: Lang; t: Dict }) {
             href={localePath(g.path, lang)}
             className={`group flex h-full flex-col gap-3 rounded-md border border-hair bg-bg p-3 hover:border-hair-strong ${FOCUS}`}
           >
-            <Photo base={g.photo} alt="" />
+            {g.photo && <Photo base={g.photo} alt="" />}
             <span className="px-1 font-sans text-lg font-semibold text-ink">{g.name}</span>
             <span className="px-1 font-sans text-sm text-ink-mid">{g.body}</span>
             <span className="mt-auto px-1 pb-1 font-sans text-sm font-medium text-brand-hi group-hover:underline">

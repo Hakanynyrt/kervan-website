@@ -31,7 +31,9 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
       <PageTitle>{p.name}</PageTitle>
       <p className="m-0 mt-3 max-w-3xl font-sans text-ink-mid">{p.body}</p>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
+      <div
+        className={`mt-8 grid gap-8 lg:gap-10 ${photos.length ? 'lg:grid-cols-[minmax(0,1fr)_22rem]' : 'max-w-md'}`}
+      >
         <aside className="lg:order-2">
           <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
             <p className="m-0 text-lg font-bold text-ink">{t.parts.quoteTitle}</p>
@@ -73,13 +75,15 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
             </div>
           </div>
         </aside>
-        <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:order-1">
-          {photos.map((base, i) => (
-            <li key={base}>
-              <Photo base={base} alt={`${t.parts.photosAlt(p.name)} (${i + 1})`} lazy={i > 0} />
-            </li>
-          ))}
-        </ul>
+        {photos.length > 0 && (
+          <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:order-1">
+            {photos.map((base, i) => (
+              <li key={base}>
+                <Photo base={base} alt={`${t.parts.photosAlt(p.name)} (${i + 1})`} lazy={i > 0} />
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       <StickyQuote text={text} t={t} />
     </Container>
