@@ -122,7 +122,7 @@ export function outline(img, thr = 150) {
       if (bot[x] === null || y > bot[x]) bot[x] = y;
     }
   }
-  return { w, h, yc, top, bot, ink };
+  return { w, h, yc, top, bot, ink, px };
 }
 
 /** Fills gaps of up to 4 columns (dimension lines inside the part) by interpolation. */
@@ -140,16 +140,18 @@ function fillGaps(a, from, to) {
 }
 
 /** x of vertical extension lines standing on the part's top outline. */
-function extensionLines(o, x0, x1) {
+export function extensionLines(o, x0, x1) {
   const xs = [];
   for (let x = x0 - 3; x <= x1; x++) {
     if (x < 0 || x >= o.w) continue;
-    const t = o.top[x] ?? o.top[Math.min(o.w - 1, x + 1)] ?? o.top[Math.max(0, x - 1)];
+    let t = null;
+    for (let d = 0; d <= 5 && t === null; d++)
+      t = o.top[Math.min(o.w - 1, x + d)] ?? o.top[Math.max(0, x - d)];
     if (t === null || t < 12) continue;
     let run = 0;
     let best = 0;
     for (let y = t - 3; y >= Math.max(0, t - 40); y--) {
-      run = o.ink[y * o.w + x] ? run + 1 : 0;
+      run = o.px[y * o.w + x] < 210 ? run + 1 : 0;
       best = Math.max(best, run);
     }
     if (best >= 10) xs.push(x);
@@ -214,34 +216,35 @@ export function measure(row, b64, rd) {
   // Slot: the longest run where the top edge (and the bottom one for two keys) dips.
   const topRef = median(valid.map((x) => o.top[x]));
   const botRef = median(valid.map((x) => o.bot[x]));
-  const dipAt = (x) =>
-    o.top[x] !== null &&
-    o.top[x] > topRef + 1 &&
-    (rd.keyCount === 1 || (o.bot[x] !== null && o.bot[x] < botRef - 1));
+  // The slot is found on the top edge; whether the bottom edge dips too decides the key count.
+  const dipAt = (x) => o.top[x] !== null && o.top[x] > topRef + 1;
+  // Slot: the first dip of the top edge from the back (a rear stub starts at the back end and
+  // a front step comes after the slot, so neither is taken). Its ends snap to the extension
+  // lines of the two printed top dimensions when those are found (exact positions).
   let best = null;
-  for (let x = xA + 2; x < o.w; x++) {
+  for (let x = xA + 2; x < o.w && !best; x++) {
     if (!dipAt(x)) continue;
     let e = x;
     while (e + 1 < o.w && dipAt(e + 1)) e++;
-    if (!best || e - x > best.x1 - best.x0) best = { x0: x, x1: e };
+    if (x > xA + 4 && e - x >= 4) best = { x0: x, x1: e };
     x = e;
   }
-  if (!best || best.x1 - best.x0 < 6) return { error: 'slot not found' };
-
-  // Horizontal scales from the extension lines of the two printed top dimensions.
+  if (!best || best.x1 - best.x0 < 4) return { error: 'slot not found' };
   const ext = extensionLines(o, xA, best.x1 + 8);
-  const snap = (x) => {
+  const snap = (x, tol) => {
     let c = null;
     for (const e of ext)
-      if (Math.abs(e - x) <= 5 && (c === null || Math.abs(e - x) < Math.abs(c - x))) c = e;
+      if (Math.abs(e - x) <= tol && (c === null || Math.abs(e - x) < Math.abs(c - x))) c = e;
     return c;
   };
-  const xa = snap(xA) ?? xA - 1;
-  const xb = snap(best.x0) ?? best.x0 - 0.5;
-  const xc = snap(best.x1) ?? best.x1 + 0.5;
+  const xa = snap(xA, 4) ?? xA - 1;
+  const xb = snap(best.x0, 6) ?? best.x0 - 0.5;
+  const xc = snap(best.x1, 6) ?? best.x1 + 0.5;
   const sx1 = (xb - xa) / slotStart;
   const sx2 = (xc - xb) / slotLen;
-  if (!(sx1 > 0.15 && sx2 > 0.15) || Math.max(sx1, sx2) / Math.min(sx1, sx2) > 1.8)
+  // Each span keeps its own scale, so a drawing out of proportion still measures right;
+  // a ratio past 3 means the chain was misread.
+  if (!(sx1 > 0.12 && sx2 > 0.12) || Math.max(sx1, sx2) / Math.min(sx1, sx2) > 3)
     return { error: `inconsistent scales ${r1(sx1)} / ${r1(sx2)} px/mm` };
   const mmAt = (x) => (x <= xb ? (x - xa) / sx1 : slotStart + (x - xb) / sx2);
 
@@ -254,6 +257,10 @@ export function measure(row, b64, rd) {
   const floor = { x0: best.x0, x1: best.x1 };
   while (floor.x0 < best.x1 && o.top[floor.x0] < level) floor.x0++;
   while (floor.x1 > best.x0 && o.top[floor.x1] < level) floor.x1--;
+  const mid = floor.x1 > floor.x0 + 2 ? [floor.x0 + 1, floor.x1 - 1] : [best.x0, best.x1];
+  const botDip = median(o.bot.slice(mid[0], mid[1] + 1).map((b) => botRef - b));
+  const topDip = level - topRef;
+  const keyCount = botDip >= 2 ? 2 : 1;
   const backLen = Math.max(0, (floor.x0 - xb) / sx2);
   const frontLen = Math.max(0, (xc - floor.x1) / sx2);
 
@@ -351,8 +358,9 @@ export function measure(row, b64, rd) {
   if (!near(slotStart, row.key.backEndToSlotMm)) flags.push('slot start ≠ table');
   if (!near(slotLen, row.key.slotLengthMm)) flags.push('slot length ≠ table');
   if (!near(section, row.key.thicknessMm)) flags.push('slot section ≠ table');
-  if (rd.keyCount !== row.key.count) flags.push('key count ≠ table');
-  const depth = rd.keyCount === 2 ? (shank - section) / 2 : shank - section;
+  if (keyCount !== rd.keyCount) flags.push('key count: outline ≠ reading (outline used)');
+  if (keyCount !== row.key.count) flags.push('key count ≠ table');
+  const depth = keyCount === 2 ? (shank - section) / 2 : shank - section;
   if (!(depth > 0.02 * shank && depth < 0.45 * shank))
     return { error: `slot depth ${r1(depth)} mm implausible for Ø${shank}` };
 
@@ -363,10 +371,16 @@ export function measure(row, b64, rd) {
       backChamferMm: r1(Math.min(backChamferMm, 0.08 * shank)),
       sections,
       slot: {
-        count: rd.keyCount,
+        count: keyCount,
         startMm: slotStart,
         lengthMm: slotLen,
         sectionMm: section,
+        // Uneven only beyond pixel noise: ≥ 3 px apart and the split more than 15 % off even.
+        ...(keyCount === 2 &&
+        Math.abs(topDip - botDip) >= 3 &&
+        Math.abs(topDip / (topDip + botDip) - 0.5) > 0.15
+          ? { splitTop: Math.round((100 * topDip) / (topDip + botDip)) / 100 }
+          : {}),
         back: { kind: rd.slotBackEnd, lengthMm: r1(Math.min(backLen, 0.6 * slotLen)) },
         front: { kind: rd.slotFrontEnd, lengthMm: r1(Math.min(frontLen, 0.8 * slotLen)) },
       },

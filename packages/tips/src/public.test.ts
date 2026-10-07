@@ -117,4 +117,8 @@ test('a drawing profile passes field by field; anything malformed drops it', () 
     null,
   );
   assert.equal(publicProfile('nope'), null);
+  const uneven = publicProfile({ ...good, slot: { ...good.slot, splitTop: 0.8 } });
+  assert.equal(uneven?.slot.splitTop, 0.8);
+  const bogus = publicProfile({ ...good, slot: { ...good.slot, splitTop: 3 } });
+  assert.equal(bogus?.slot.splitTop, undefined);
 });

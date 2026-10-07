@@ -92,6 +92,8 @@ export interface ShankProfile {
     lengthMm: number;
     /** Material left across the slotted section (one key: to the far side; two: between flats). */
     sectionMm: number;
+    /** Two keys cut unevenly: the key side's share of the total cut depth (0.5 when absent). */
+    splitTop?: number;
     back: { kind: SlotEndKind; lengthMm: number };
     front: { kind: SlotEndKind; lengthMm: number };
   };

@@ -267,8 +267,8 @@ function slotEnd(
 }
 
 /** Key flat on +Z, floor plane at z = floor: shape in (axial y, radial z), extruded along X. */
-function slotCutter(s: TipSpec): THREE.BufferGeometry {
-  const { start, len, rs, floor } = s.slot;
+function slotCutter(s: TipSpec, floor: number): THREE.BufferGeometry {
+  const { start, len, rs } = s.slot;
   const y0 = start;
   const y1 = start + len;
   const top = rs + 40;
@@ -322,9 +322,10 @@ export function buildTip(s: TipSpec, materials: THREE.Material[], segs = 160): T
   let brush = new Brush(revolve(profileRuns(s), segs), materials);
   brush.updateMatrixWorld();
 
-  const cut = slotCutter(s);
-  for (const rot of s.slot.count === 2 ? [0, Math.PI] : [0]) {
-    const c = new Brush(cut.clone(), materials[MAT.MACHINED]);
+  const sides: [number, number][] = [[0, s.slot.floor]];
+  if (s.slot.count === 2) sides.push([Math.PI, s.slot.floorB]);
+  for (const [rot, floor] of sides) {
+    const c = new Brush(slotCutter(s, floor), materials[MAT.MACHINED]);
     c.rotation.y = rot;
     c.updateMatrixWorld();
     brush = ev.evaluate(brush, c, SUBTRACTION);

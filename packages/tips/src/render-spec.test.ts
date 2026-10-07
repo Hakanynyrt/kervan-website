@@ -149,3 +149,19 @@ test('specKey: stable, changes with geometry and view; the rear view ignores the
   assert.notEqual(specKey(a), specKey(a, 'side'));
   assert.equal(specKey(rearSpec(a), 'rear'), specKey(rearSpec(m), 'rear'));
 });
+
+test('uneven two-key slot: the cut depth is split between the key side and the far side', () => {
+  const p: ShankProfile = {
+    ...profile,
+    slot: { ...profile.slot, sectionMm: 125, splitTop: 0.8 },
+  };
+  const r = renderSpec(attrs({ diameterMm: 150, profile: p }), {
+    tipType: 'moil',
+    lengthMm: { min: 1510, max: 1510 },
+    tipAngleDeg: null,
+  });
+  assert.ok(r);
+  // shank Ø165, section 125 → 40 mm cut in total: 32 on the key side, 8 opposite.
+  assert.equal(r.spec.slot.floor, 50.5);
+  assert.equal(r.spec.slot.floorB, 74.5);
+});

@@ -226,6 +226,12 @@ window.renderTip = async (spec: TipSpec, view: View = 'hero') => {
     const fill = new THREE.DirectionalLight(0xfff4ea, view === 'rear' ? 1.1 : 0.7);
     fill.position.copy(cam.position);
     scene.add(fill);
+    if (view === 'side') {
+      // Ember rim from below, so the lower edge (second key slot) reads against the dark.
+      const under = new THREE.DirectionalLight(EMBER, 3.0);
+      under.position.set(0, -900, -300);
+      scene.add(under);
+    }
   }
   renderer.render(scene, cam);
 

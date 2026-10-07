@@ -8,7 +8,7 @@ import type {
 } from './types.ts';
 
 /** Bump when the renderer's look or geometry rules change: every image gets a new key. */
-export const RENDER_VERSION = 3;
+export const RENDER_VERSION = 4;
 
 /** Included angle (deg) when the data has none. Assumptions, labelled as such. */
 export const DEFAULT_INCLUDED_ANGLE: Record<'moil' | 'conical' | 'chisel' | 'pyramid', number> = {
@@ -46,6 +46,8 @@ export interface TipSpec {
     rs: number;
     /** Distance of the slot floor plane from the axis (towards the cut side). */
     floor: number;
+    /** Two keys: the opposite floor (equal to floor unless the cuts are uneven). */
+    floorB: number;
     back: { kind: SlotEndKind; len: number };
     front: { kind: SlotEndKind; len: number };
   };
@@ -181,7 +183,10 @@ export function renderSpec(
   const mid = sl.startMm + sl.lengthMm / 2;
   const hostAt = sections.findIndex((s) => mid >= s.y0 && mid < s.y1);
   const rs = radii[Math.max(0, hostAt)];
-  const floor = sl.count === 2 ? sl.sectionMm / 2 : sl.sectionMm - rs;
+  const cut = sl.count === 2 ? 2 * rs - sl.sectionMm : 0;
+  const split = sl.splitTop ?? 0.5;
+  const floor = sl.count === 2 ? rs - cut * split : sl.sectionMm - rs;
+  const floorB = sl.count === 2 ? rs - cut * (1 - split) : floor;
 
   const type = sku.tipType;
   let angle: number | null = null;
@@ -206,6 +211,7 @@ export function renderSpec(
         len: r1(sl.lengthMm),
         rs: r1(rs),
         floor: r1(floor),
+        floorB: r1(floorB),
         back: { kind: sl.back.kind, len: r1(sl.back.lengthMm) },
         front: { kind: sl.front.kind, len: r1(sl.front.lengthMm) },
       },

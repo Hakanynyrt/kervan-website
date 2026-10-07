@@ -97,10 +97,21 @@ export function publicProfile(v: unknown): ShankProfile | null {
   const sf = end(slot.front);
   if (count === null || start === null || length === null || section === null || !sb || !sf)
     return null;
+  const split = num(slot.splitTop);
   return {
     backChamferMm: back,
     sections,
-    slot: { count, startMm: start, lengthMm: length, sectionMm: section, back: sb, front: sf },
+    slot: {
+      count,
+      startMm: start,
+      lengthMm: length,
+      sectionMm: section,
+      ...(count === 2 && split !== null && split >= 0.05 && split <= 0.95
+        ? { splitTop: split }
+        : {}),
+      back: sb,
+      front: sf,
+    },
   };
 }
 
