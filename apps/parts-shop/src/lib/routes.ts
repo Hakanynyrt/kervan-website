@@ -6,6 +6,7 @@ import {
   type PublicFamily,
   type TipType,
 } from '@kervan/tips';
+import { LEGAL_KEYS, legalPath, type LegalKey } from './legal';
 
 /** One breaker model and the tip it takes: the shop's product (card, list row, page). */
 export interface BreakerCard {
@@ -61,6 +62,7 @@ export type PageModel =
     }
   | { kind: 'family'; family: PublicFamily; demo: boolean; hasPopular: boolean }
   | { kind: 'cart'; demo: boolean; hasPopular: boolean }
+  | { kind: 'legal'; doc: LegalKey; demo: boolean; hasPopular: boolean }
   | { kind: 'notFound' };
 
 export interface BrandLink {
@@ -73,7 +75,7 @@ export interface BrandLink {
 export const PART_KEYS = ['alt-govde', 'burc', 'kama', 'saplama', 'piston'] as const;
 export type PartKey = (typeof PART_KEYS)[number];
 export const PARTS_PATH = '/yedek-parca';
-export const CART_PATH = '/sepet';
+export const CART_PATH = '/palet';
 export const partPath = (k: PartKey): string => `${PARTS_PATH}/${k}`;
 
 export interface BuiltPage {
@@ -200,6 +202,10 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     })),
     { path: PARTS_PATH, model: { kind: 'parts' as const, demo, hasPopular } },
     { path: CART_PATH, model: { kind: 'cart' as const, demo, hasPopular } },
+    ...LEGAL_KEYS.map((doc) => ({
+      path: legalPath(doc),
+      model: { kind: 'legal' as const, doc, demo, hasPopular },
+    })),
     ...PART_KEYS.map((part) => ({
       path: partPath(part),
       model: { kind: 'part' as const, part, demo, hasPopular },

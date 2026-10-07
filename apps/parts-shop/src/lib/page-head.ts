@@ -1,5 +1,6 @@
 import type { HeadInput } from '@kervan/seo';
 import { DICT } from './dict';
+import { LEGAL } from './legal';
 import { localePath } from './locale-path';
 import { fmtNum } from './format';
 import type { PageProps } from './page-props';
@@ -29,6 +30,10 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       };
     case 'cart':
       return { ...page, title: m.cartTitle };
+    case 'legal': {
+      const d = LEGAL[lang][model.doc];
+      return { ...page, title: `${d.title} | ${m.siteName}`, description: d.desc };
+    }
     case 'parts':
       return { ...page, title: m.partsTitle, description: m.partsDesc };
     case 'part': {

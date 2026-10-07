@@ -6,6 +6,7 @@ import Cart from './pages/Cart';
 import Breaker from './pages/Breaker';
 import Family from './pages/Family';
 import Home from './pages/Home';
+import Legal from './pages/Legal';
 import NotFound from './pages/NotFound';
 import Part from './pages/Part';
 import Parts from './pages/Parts';
@@ -27,6 +28,7 @@ export default function App({ lang, path, model, fx }: PageProps) {
       {model.kind === 'breaker' && <Breaker model={model} path={path} fx={fx} lang={lang} t={t} />}
       {model.kind === 'family' && <Family model={model} path={path} fx={fx} lang={lang} t={t} />}
       {model.kind === 'cart' && <Cart fx={fx} lang={lang} t={t} />}
+      {model.kind === 'legal' && <Legal doc={model.doc} lang={lang} t={t} />}
       {model.kind === 'notFound' && <NotFound lang={lang} t={t} />}
     </Layout>
   );

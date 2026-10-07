@@ -4,6 +4,8 @@ import { ORG_EMAIL } from '@kervan/seo';
 import {
   Breadcrumb,
   Chips,
+  ImgNote,
+  OemLine,
   PageTitle,
   Photo,
   QTY,
@@ -13,7 +15,7 @@ import {
 } from '../components/Bits';
 import { FOCUS, whatsappHref } from '../components/Layout';
 import type { Dict } from '../lib/dict';
-import { PART_PHOTOS } from '../lib/photos';
+import { PART_PHOTOS, PART_RENDERS } from '../lib/photos';
 import { PARTS_PATH, type PageModel } from '../lib/routes';
 import type { Lang } from '../types';
 
@@ -26,14 +28,17 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
   const [qty, setQty] = useState<Qty>('1');
   const text = t.parts.text(p.name, breaker.trim(), qty);
   const photos = PART_PHOTOS[model.part];
+  const renders = PART_RENDERS[model.part];
+  const pics = photos.length + renders.length > 0;
   return (
     <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">
       <Breadcrumb trail={[[t.parts.title, PARTS_PATH]]} current={p.name} lang={lang} t={t} />
       <PageTitle>{p.name}</PageTitle>
+      <OemLine t={t} />
       <p className="m-0 mt-3 max-w-3xl font-sans text-ink-mid">{p.body}</p>
 
       <div
-        className={`mt-8 grid gap-8 lg:gap-10 ${photos.length ? 'lg:grid-cols-[minmax(0,1fr)_22rem]' : 'max-w-md'}`}
+        className={`mt-8 grid gap-8 lg:gap-10 ${pics ? 'lg:grid-cols-[minmax(0,1fr)_22rem]' : 'max-w-md'}`}
       >
         <aside className="lg:order-2">
           <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
@@ -79,14 +84,44 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
             <Terms t={t} />
           </div>
         </aside>
-        {photos.length > 0 && (
-          <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:order-1">
-            {photos.map((base, i) => (
-              <li key={base}>
-                <Photo base={base} alt={`${t.parts.photosAlt(p.name)} (${i + 1})`} lazy={i > 0} />
-              </li>
-            ))}
-          </ul>
+        {pics && (
+          <div className="flex flex-col gap-6 lg:order-1">
+            {renders.map((r) => {
+              const caption = t.parts.renderCaption(r.model, p.name);
+              return (
+                <figure key={r.model} className="m-0">
+                  <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2">
+                    {r.views.map((v, i) => (
+                      <li key={v.base} className={i === 0 ? 'sm:col-span-2' : undefined}>
+                        <Photo
+                          base={v.base}
+                          alt={`${caption}, ${t.parts.renderView[v.view]}`}
+                          lazy={i > 0}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                  <figcaption className="mt-2 font-sans text-base font-semibold text-ink">
+                    {caption}
+                  </figcaption>
+                </figure>
+              );
+            })}
+            {photos.length > 0 && (
+              <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2">
+                {photos.map((base, i) => (
+                  <li key={base}>
+                    <Photo
+                      base={base}
+                      alt={`${t.parts.photosAlt(p.name)} (${i + 1})`}
+                      lazy={i > 0}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+            <ImgNote t={t} />
+          </div>
         )}
       </div>
       <StickyQuote text={text} t={t} />
