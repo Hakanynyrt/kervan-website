@@ -227,24 +227,46 @@ function profileRuns(s: TipSpec): Run[] {
 
 /** One end of the slot, from the shank surface (rs) down to the floor, going +y.
  *  radius: a circular end tangent to the floor; ramp: a straight slope; square: a wall. */
+/** Chamfers the corner b of the polyline a → b → c: a straight cut of size r along both legs. */
+function blend(
+  a: [number, number],
+  b: [number, number],
+  c: [number, number],
+  r: number,
+): [number, number][] {
+  const toward = (p: [number, number], q: [number, number], t: number): [number, number] => {
+    const len = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1;
+    const k = Math.min(t, 0.45 * len) / len;
+    return [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k];
+  };
+  return [toward(b, a, r), toward(b, c, r)];
+}
+
 function slotEnd(
   e: TipSpec['slot']['back'],
   y: number,
   rs: number,
   floor: number,
+  r = 0,
 ): [number, number][] {
   const d = rs - floor;
   const l = Math.max(0, e.len);
+  // Square and ramp ends meet the floor at a corner: chamfered by r (radius ends are tangent).
+  const far: [number, number] = [y + l + Math.max(4 * r, 10), floor];
   if (e.kind === 'square' || l < 0.2)
-    return [
-      [y, rs],
-      [y, floor],
-    ];
+    return r > 0
+      ? [[y, rs], ...blend([y, rs], [y, floor], far, r)]
+      : [
+          [y, rs],
+          [y, floor],
+        ];
   if (e.kind === 'ramp')
-    return [
-      [y, rs],
-      [y + l, floor],
-    ];
+    return r > 0
+      ? [[y, rs], ...blend([y, rs], [y + l, floor], far, r)]
+      : [
+          [y, rs],
+          [y + l, floor],
+        ];
   const pts: [number, number][] = [];
   if (l >= d) {
     const rho = (l * l + d * d) / (2 * d); // through (y, rs), tangent to the floor at y + l
@@ -279,9 +301,9 @@ function slotCutter(s: TipSpec, floor: number): THREE.BufferGeometry {
     const k = pts.findIndex(([, z]) => z <= rs - c);
     return k < 0 ? pts : [[y - dir * c, rs], ...pts.slice(k)];
   };
-  const back = bevel(slotEnd(s.slot.back, y0, rs, floor), y0, 1);
+  const back = bevel(slotEnd(s.slot.back, y0, rs, floor, c), y0, 1);
   // Front end: build it going −y from y1, then mirror the order.
-  const front = bevel(slotEnd(s.slot.front, -y1, rs, floor), -y1, 1)
+  const front = bevel(slotEnd(s.slot.front, -y1, rs, floor, c), -y1, 1)
     .map(([y, z]) => [-y, z] as [number, number])
     .reverse();
   const sh = new THREE.Shape();
