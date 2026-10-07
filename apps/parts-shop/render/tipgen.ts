@@ -222,29 +222,83 @@ function profileRuns(s: TipSpec): Run[] {
   if (workStart <= y + 1) throw new Error('profile does not fit');
   seg([R, y], [R, workStart], MAT.BODY);
   runs.push(...tip);
-  return runs;
+  return breakEdges(runs, Math.min(2.5, Math.max(0.8, 0.01 * D)));
+}
+
+/**
+ * Small 45° chamfer at every sharp corner of the lathe profile (shoulders, collar edges, steps,
+ * the edges of existing chamfers): where two runs meet at more than 30°, both are trimmed by up
+ * to e (never more than 40 % of the segment) and joined by a short chamfer run.
+ */
+function breakEdges(runs: Run[], e: number): Run[] {
+  const out: Run[] = [];
+  for (let i = 0; i < runs.length; i++) {
+    const a = { ...runs[i], pts: runs[i].pts.map((p) => [...p] as [number, number]) };
+    out.push(a);
+    const b = runs[i + 1];
+    if (!b) break;
+    const pa = a.pts[a.pts.length - 2];
+    const p0 = a.pts[a.pts.length - 1];
+    const pb = b.pts[1];
+    const la = Math.hypot(p0[0] - pa[0], p0[1] - pa[1]);
+    const lb = Math.hypot(pb[0] - p0[0], pb[1] - p0[1]);
+    if (la < 1e-6 || lb < 1e-6 || p0[0] < 0.5) continue;
+    const da = [(p0[0] - pa[0]) / la, (p0[1] - pa[1]) / la];
+    const db = [(pb[0] - p0[0]) / lb, (pb[1] - p0[1]) / lb];
+    if (da[0] * db[0] + da[1] * db[1] > Math.cos((30 * Math.PI) / 180)) continue;
+    const ta = Math.min(e, 0.4 * la);
+    const tb = Math.min(e, 0.4 * lb);
+    const qa: [number, number] = [p0[0] - da[0] * ta, p0[1] - da[1] * ta];
+    const qb: [number, number] = [p0[0] + db[0] * tb, p0[1] + db[1] * tb];
+    a.pts[a.pts.length - 1] = qa;
+    runs[i + 1] = { ...b, pts: [qb, ...b.pts.slice(1)] };
+    out.push({ pts: [qa, qb], mat: MAT.BODY });
+  }
+  return out;
 }
 
 /** One end of the slot, from the shank surface (rs) down to the floor, going +y.
  *  radius: a circular end tangent to the floor; ramp: a straight slope; square: a wall. */
+/** Chamfers the corner b of the polyline a → b → c: a straight cut of size r along both legs. */
+function blend(
+  a: [number, number],
+  b: [number, number],
+  c: [number, number],
+  r: number,
+): [number, number][] {
+  const toward = (p: [number, number], q: [number, number], t: number): [number, number] => {
+    const len = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1;
+    const k = Math.min(t, 0.45 * len) / len;
+    return [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k];
+  };
+  return [toward(b, a, r), toward(b, c, r)];
+}
+
 function slotEnd(
   e: TipSpec['slot']['back'],
   y: number,
   rs: number,
   floor: number,
+  r = 0,
 ): [number, number][] {
   const d = rs - floor;
   const l = Math.max(0, e.len);
+  // Square and ramp ends meet the floor at a corner: chamfered by r (radius ends are tangent).
+  const far: [number, number] = [y + l + Math.max(4 * r, 10), floor];
   if (e.kind === 'square' || l < 0.2)
-    return [
-      [y, rs],
-      [y, floor],
-    ];
+    return r > 0
+      ? [[y, rs], ...blend([y, rs], [y, floor], far, r)]
+      : [
+          [y, rs],
+          [y, floor],
+        ];
   if (e.kind === 'ramp')
-    return [
-      [y, rs],
-      [y + l, floor],
-    ];
+    return r > 0
+      ? [[y, rs], ...blend([y, rs], [y + l, floor], far, r)]
+      : [
+          [y, rs],
+          [y + l, floor],
+        ];
   const pts: [number, number][] = [];
   if (l >= d) {
     const rho = (l * l + d * d) / (2 * d); // through (y, rs), tangent to the floor at y + l
@@ -266,28 +320,238 @@ function slotEnd(
   return pts;
 }
 
-/** Key flat on +Z, floor plane at z = floor: shape in (axial y, radial z), extruded along X. */
+/** The part of a polyline (z falling along it) below height z1, starting exactly at z1. */
+function below(poly: [number, number][], z1: number): [number, number][] {
+  for (let i = 0; i < poly.length - 1; i++) {
+    const [ya, za] = poly[i];
+    const [yb, zb] = poly[i + 1];
+    if (za >= z1 && zb <= z1) {
+      const t = za === zb ? 0 : (za - z1) / (za - zb);
+      return [[ya + (yb - ya) * t, z1], ...poly.slice(i + 1)];
+    }
+  }
+  return [poly[poly.length - 1]];
+}
+
+/** n points spread evenly along a polyline by length. */
+function resample(poly: [number, number][], n: number): [number, number][] {
+  const acc = [0];
+  for (let i = 1; i < poly.length; i++)
+    acc.push(acc[i - 1] + Math.hypot(poly[i][0] - poly[i - 1][0], poly[i][1] - poly[i - 1][1]));
+  const total = acc[acc.length - 1];
+  const out: [number, number][] = [];
+  for (let k = 0; k < n; k++) {
+    const d = (total * k) / (n - 1);
+    let i = 1;
+    while (i < acc.length - 1 && acc[i] < d) i++;
+    const seg = acc[i] - acc[i - 1] || 1;
+    const t = Math.min(1, Math.max(0, (d - acc[i - 1]) / seg));
+    out.push([
+      poly[i - 1][0] + (poly[i][0] - poly[i - 1][0]) * t,
+      poly[i - 1][1] + (poly[i][1] - poly[i - 1][1]) * t,
+    ]);
+  }
+  return out;
+}
+
+/**
+ * Key flat on +Z, floor plane at z = floor, as a loft across X: every slice follows the end
+ * curves in (axial y, radial z) down from the shank surface at that x, so the rim chamfer runs
+ * the whole curved edge where each slot end meets the round shank.
+ */
 function slotCutter(s: TipSpec, floor: number): THREE.BufferGeometry {
-  const { start, len, rs } = s.slot;
+  const { start, len, rs, chamfer: c } = s.slot;
   const y0 = start;
   const y1 = start + len;
   const top = rs + 40;
-  const back = slotEnd(s.slot.back, y0, rs, floor);
-  // Front end: build it going −y from y1, then mirror the order.
-  const front = slotEnd(s.slot.front, -y1, rs, floor)
-    .map(([y, z]) => [-y, z] as [number, number])
-    .reverse();
-  const sh = new THREE.Shape();
-  sh.moveTo(y0, top);
-  for (const [y, z] of back) sh.lineTo(y, z);
-  for (const [y, z] of front) sh.lineTo(y, z);
-  sh.lineTo(y1, top);
-  sh.closePath();
+  const back = slotEnd(s.slot.back, y0, rs, floor, c);
+  // Front end built going −y from y1, then mirrored: also runs from the surface down.
+  const front = slotEnd(s.slot.front, -y1, rs, floor, c).map(
+    ([y, z]) => [-y, z] as [number, number],
+  );
+  const M = 24;
   const W = maxRadius(s) + 40;
-  const g = new THREE.ExtrudeGeometry(sh, { depth: 2 * W, bevelEnabled: false, curveSegments: 24 });
-  // (sx, sy, sz) → (x = sz − W, y = sx, z = sy): a proper rotation, keeps winding
-  g.applyMatrix4(new THREE.Matrix4().set(0, 0, 1, -W, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1));
+  const xs: number[] = [-W];
+  const SL = 160;
+  for (let i = 0; i <= SL; i++) xs.push(-rs + (2 * rs * i) / SL);
+  xs.push(W);
+  const slice = (x: number): [number, number][] => {
+    const zs = Math.max(floor + 0.5, Math.sqrt(Math.max(0, rs * rs - x * x)));
+    const cc = Math.max(0, Math.min(c, zs - floor - 0.4));
+    const rimB = below(back, zs)[0];
+    const rimF = below(front, zs)[0];
+    const b = resample(below(back, zs - cc), M);
+    const f = resample(below(front, zs - cc), M).reverse();
+    // Carry each bevel line 1.5 mm past the shank surface: a cutter edge lying exactly on the
+    // surface makes CSG leave a ragged seam.
+    const out = (p: [number, number], q: [number, number]): [number, number] => {
+      const dy = p[0] - q[0];
+      const dz = p[1] - q[1];
+      const l = Math.hypot(dy, dz) || 1;
+      return [p[0] + (1.5 * dy) / l, p[1] + (1.5 * dz) / l];
+    };
+    const tb = out([rimB[0] - cc, zs], b[0]);
+    const tf = out([rimF[0] + cc, zs], f[f.length - 1]);
+    return [[tb[0], top], tb, ...b, ...f, tf, [tf[0], top]];
+  };
+  // Crisp at the top corners, both ends of each bevel; smooth along the end curves and floor.
+  const crisp = new Set([0, 1, 2, 2 * M + 1, 2 * M + 2, 2 * M + 3]);
+  return loftMesh(
+    xs.map((x) => slice(x).map(([y, z]) => [x, y, z] as V3)),
+    (p) => [p[1], p[2]],
+    crisp,
+  );
+}
+
+type V3 = [number, number, number];
+
+/**
+ * Closed solid through a series of rings with the same point count (a loft), capped at both
+ * ends. `flat` maps a cap point to 2D for triangulation. Indexed (CSG stays fast); ring corners
+ * listed in `crisp` get split normals, so chamfer facets stay sharp and the CSG cut faces,
+ * which take the cutter's normals, shade cleanly.
+ */
+function loftMesh(
+  rings: V3[][],
+  flat: (p: V3) => [number, number],
+  crisp: ReadonlySet<number> = new Set(),
+): THREE.BufferGeometry {
+  const n = rings[0].length;
+  // A crisp ring corner gets two vertices (one per side), so normals do not blend across it.
+  const slots: { inn: number; out: number }[] = [];
+  let count = 0;
+  for (let i = 0; i < n; i++) {
+    const inn = count++;
+    slots.push({ inn, out: crisp.has(i) ? count++ : inn });
+  }
+  const pos: number[] = [];
+  for (const ring of rings)
+    for (let i = 0; i < n; i++) {
+      pos.push(...ring[i]);
+      if (crisp.has(i)) pos.push(...ring[i]);
+    }
+  const v = (k: number, i: number, side: 'inn' | 'out') => k * count + slots[i][side];
+  const idx: number[] = [];
+  for (let k = 0; k < rings.length - 1; k++)
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      const a = v(k, i, 'out');
+      const b = v(k, j, 'inn');
+      const c = v(k + 1, j, 'inn');
+      const d = v(k + 1, i, 'out');
+      idx.push(a, b, c, a, c, d);
+    }
+  // Caps get their own vertices (flat).
+  const capBase = pos.length / 3;
+  let capOff = 0;
+  const capIdx: number[] = [];
+  for (const [k, flip] of [
+    [0, false],
+    [rings.length - 1, true],
+  ] as const) {
+    const base = capBase + capOff;
+    for (const p of rings[k]) pos.push(...p);
+    capOff += n;
+    const contour = rings[k].map((p) => new THREE.Vector2(...flat(p)));
+    for (const t of THREE.ShapeUtils.triangulateShape(contour, [])) {
+      const [p, q, r] = t.map((i) => base + i);
+      if (flip) capIdx.push(p, q, r);
+      else capIdx.push(p, r, q);
+    }
+  }
+  idx.push(...capIdx);
+  // Outward winding: positive signed volume.
+  const P = (i: number) => new THREE.Vector3(pos[3 * i], pos[3 * i + 1], pos[3 * i + 2]);
+  let vol = 0;
+  for (let i = 0; i < idx.length; i += 3) vol += P(idx[i]).dot(P(idx[i + 1]).cross(P(idx[i + 2])));
+  if (vol < 0)
+    for (let i = 0; i < idx.length; i += 3) [idx[i + 1], idx[i + 2]] = [idx[i + 2], idx[i + 1]];
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  g.setAttribute(
+    'uv',
+    new THREE.Float32BufferAttribute(new Array((pos.length / 3) * 2).fill(0), 2),
+  );
   return g;
+}
+
+/** Slot bottom height z at axial y (the uncut surface rs outside the slot). */
+function slotDepthAt(
+  back: [number, number][],
+  front: [number, number][],
+  y: number,
+  rs: number,
+  floor: number,
+): number {
+  const along = (poly: [number, number][]) => {
+    // poly runs with y increasing (back) and z falling; take the lowest z reached at y.
+    let z = Infinity;
+    for (let i = 0; i < poly.length - 1; i++) {
+      const [ya, za] = poly[i];
+      const [yb, zb] = poly[i + 1];
+      if ((y - ya) * (y - yb) <= 0) {
+        const t = ya === yb ? 1 : (y - ya) / (yb - ya);
+        z = Math.min(z, za + (zb - za) * t);
+      }
+    }
+    return z;
+  };
+  if (y <= back[0][0] || y >= front[0][0]) return rs;
+  // In an end zone only that end's curve applies; in between, the floor.
+  const z = Math.min(along(back), along(front));
+  if (z === Infinity) return floor;
+  return Math.max(floor, Math.min(rs, z));
+}
+
+/**
+ * 45° chamfer along both side edges of a slot, as a loft along the axis: in each cross-section
+ * the cut leaves a chord at the slot bottom height, and both chord ends are chamfered, so the
+ * side chamfer follows the slot ends' curve and joins the end-rim chamfer without a step.
+ */
+function slotSideChamfer(s: TipSpec, floor: number): THREE.BufferGeometry[] {
+  const { start, len, rs, chamfer: c } = s.slot;
+  if (c <= 0) return [];
+  const back = slotEnd(s.slot.back, start, rs, floor);
+  const front = slotEnd(s.slot.front, -(start + len), rs, floor).map(
+    ([y, z]) => [-y, z] as [number, number],
+  );
+  const out: THREE.BufferGeometry[] = [];
+  for (const side of [-1, 1]) {
+    const rings: V3[][] = [];
+    // Dense where the slot ends curve, sparse along the flat floor.
+    const lb = Math.min(s.slot.back.len + c, len / 2);
+    const lf = Math.min(s.slot.front.len + c, len / 2);
+    const ys: number[] = [];
+    for (let i = 0; i <= 32; i++) ys.push(start + (lb * i) / 32);
+    for (let i = 1; i < 16; i++) ys.push(start + lb + ((len - lb - lf) * i) / 16);
+    for (let i = 0; i <= 32; i++) ys.push(start + len - lf + (lf * i) / 32);
+    for (const y of ys) {
+      const zc = slotDepthAt(back, front, y, rs, floor);
+      if (zc > rs - 0.3 || Math.abs(zc) >= rs - 0.3) continue;
+      const xc = Math.sqrt(rs * rs - zc * zc);
+      const cc = Math.min(c, 0.8 * xc);
+      const th = Math.atan2(zc, xc) - cc / rs; // on the circle, below the corner
+      const P2: [number, number] = [side * rs * Math.cos(th), rs * Math.sin(th)];
+      const C: [number, number] = [side * xc, zc];
+      const P1: [number, number] = [side * (xc - cc), zc];
+      // Stretch the chamfer line 1 mm past both faces it joins (slot bottom inside the cut,
+      // shank surface outside), so no wedge edge lies exactly on a surface.
+      const ux = (P2[0] - P1[0]) / Math.hypot(P2[0] - P1[0], P2[1] - P1[1]);
+      const uz = (P2[1] - P1[1]) / Math.hypot(P2[0] - P1[0], P2[1] - P1[1]);
+      const A: [number, number] = [P1[0] - ux, P1[1] - uz];
+      const B: [number, number] = [P2[0] + ux, P2[1] + uz];
+      // Outside point beyond the corner, so the wedge A–B–O covers it.
+      const O: [number, number] = [
+        C[0] + 3 * (C[0] - (P1[0] + P2[0]) / 2),
+        C[1] + 3 * (C[1] - (P1[1] + P2[1]) / 2),
+      ];
+      rings.push([A, B, O].map(([x, z]) => [x, y, z] as V3));
+    }
+    if (rings.length >= 2) out.push(loftMesh(rings, (p) => [p[0], p[2]], new Set([0, 1, 2])));
+  }
+  return out;
 }
 
 /** Wedge prism whose half-width shrinks to e/2 at y = L. Flats face ±X; extruded along Z. */
@@ -325,10 +589,12 @@ export function buildTip(s: TipSpec, materials: THREE.Material[], segs = 160): T
   const sides: [number, number][] = [[0, s.slot.floor]];
   if (s.slot.count === 2) sides.push([Math.PI, s.slot.floorB]);
   for (const [rot, floor] of sides) {
-    const c = new Brush(slotCutter(s, floor), materials[MAT.MACHINED]);
-    c.rotation.y = rot;
-    c.updateMatrixWorld();
-    brush = ev.evaluate(brush, c, SUBTRACTION);
+    for (const g of [slotCutter(s, floor), ...slotSideChamfer(s, floor)]) {
+      const c = new Brush(g, materials[MAT.MACHINED]);
+      c.rotation.y = rot;
+      c.updateMatrixWorld();
+      brush = ev.evaluate(brush, c, SUBTRACTION);
+    }
   }
 
   if (s.type === 'chisel' || s.type === 'pyramid') {

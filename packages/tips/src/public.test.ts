@@ -122,3 +122,13 @@ test('a drawing profile passes field by field; anything malformed drops it', () 
   const bogus = publicProfile({ ...good, slot: { ...good.slot, splitTop: 3 } });
   assert.equal(bogus?.slot.splitTop, undefined);
 });
+
+test('hidden-brand breakers already stored in D1 are dropped from the projection', () => {
+  const c = toPublicCatalog(families, skus, [
+    ...fits,
+    { family_id: 2, brand: 'VEGA', model: 'VB 150', slug: 'vega/vb-150' },
+  ]);
+  const all = c.families.flatMap((f) => f.fits);
+  assert.equal(JSON.stringify(all).toLowerCase().includes('vega'), false);
+  assert.ok(all.some((b) => b.brand === 'Acme'));
+});

@@ -79,3 +79,15 @@ test('popular tiers outside 1|2 are ignored and existing codes are kept', () => 
   assert.equal(families[0].popularTier, null);
   assert.equal(families[0].code, 'KU135-04');
 });
+
+test("the catalogue maker's own breakers never become public fits", () => {
+  const r = fromCatalog(
+    [row({ model: 'VEGA VB 150', brand: 'VEGA', fitsBreakers: ['Acme AB 100', 'Vega VB 17'] })],
+    null,
+    new Map(),
+  );
+  const fits = r.families[0].fits;
+  assert.equal(fits.length, 1);
+  assert.equal(JSON.stringify(fits).toLowerCase().includes('vega'), false);
+  assert.ok(fits[0].model.includes('AB 100'));
+});

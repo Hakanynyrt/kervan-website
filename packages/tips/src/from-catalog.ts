@@ -8,7 +8,7 @@ import {
   type Range,
   type TipType,
 } from './types.ts';
-import { publicProfile } from './public.ts';
+import { isHiddenBreaker, publicProfile } from './public.ts';
 
 /** One row of the owner's private catalog JSON (`items[]`); only the fields the shop uses. */
 export interface SourceRow {
@@ -108,7 +108,7 @@ export function fromCatalog(
     for (const n of names) {
       if (!n.model) continue;
       const b = breaker(n.brand, n.model);
-      if (seen.has(b.slug)) continue;
+      if (isHiddenBreaker(b) || seen.has(b.slug)) continue;
       seen.add(b.slug);
       fits.push(b);
     }
