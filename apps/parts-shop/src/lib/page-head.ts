@@ -1,7 +1,6 @@
 import type { HeadInput } from '@kervan/seo';
 import { DICT } from './dict';
 import { localePath } from './locale-path';
-import { breakerName } from './routes';
 import { fmtNum } from './format';
 import type { PageProps } from './page-props';
 
@@ -20,14 +19,27 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       return { ...page, title: m.homeTitle, description: m.homeDesc };
     case 'list':
       return { ...page, title: m.listTitle, description: m.listDesc };
+    case 'popular':
+      return { ...page, title: m.popularTitle, description: m.popularDesc };
+    case 'breaker': {
+      const f = model.families[0];
+      const d = fmtNum(f.attrs.diameterMm, lang);
+      const types = [
+        ...new Set(model.families.flatMap((x) => x.skus.map((s) => t.tip[s.tipType]))),
+      ];
+      return {
+        ...page,
+        title: m.breakerTitle(model.name, d),
+        description: m.breakerDesc(model.name, d, types.join(', ')),
+      };
+    }
     case 'family': {
       const f = model.family;
       const d = fmtNum(f.attrs.diameterMm, lang);
-      const first = f.fits[0] ? breakerName(f.fits[0]) : '';
       const types = f.skus.map((s) => t.tip[s.tipType]).join(', ');
       return {
         ...page,
-        title: m.familyTitle(f.code, d, first),
+        title: m.familyTitle(f.code, d),
         description: m.familyDesc(f.code, d, types),
       };
     }
