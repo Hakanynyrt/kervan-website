@@ -22,6 +22,7 @@ import type { Lang } from '../types';
 import {
   Breadcrumb,
   Chips,
+  ImgNote,
   MissingModel,
   PageTitle,
   Photo,
@@ -189,6 +190,7 @@ export default function TipProduct({
                 </figcaption>
               </figure>
             )}
+            <ImgNote t={t} />
           </div>
         )}
 
@@ -304,6 +306,7 @@ export default function TipProduct({
             </li>
           ))}
         </ul>
+        <ImgNote t={t} className="mt-2" />
       </section>
 
       <MissingModel t={t} />

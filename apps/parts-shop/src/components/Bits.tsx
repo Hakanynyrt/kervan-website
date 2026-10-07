@@ -158,3 +158,8 @@ export function Terms({ t }: { t: Dict }) {
     </section>
   );
 }
+
+/** "Images are for illustration" line under product pictures. */
+export function ImgNote({ t, className = '' }: { t: Dict; className?: string }) {
+  return <p className={`m-0 font-sans text-xs text-ink-mid ${className}`}>{t.imgNote}</p>;
+}

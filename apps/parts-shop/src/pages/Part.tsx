@@ -4,6 +4,7 @@ import { ORG_EMAIL } from '@kervan/seo';
 import {
   Breadcrumb,
   Chips,
+  ImgNote,
   PageTitle,
   Photo,
   QTY,
@@ -80,13 +81,16 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
           </div>
         </aside>
         {photos.length > 0 && (
-          <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:order-1">
-            {photos.map((base, i) => (
-              <li key={base}>
-                <Photo base={base} alt={`${t.parts.photosAlt(p.name)} (${i + 1})`} lazy={i > 0} />
-              </li>
-            ))}
-          </ul>
+          <div className="lg:order-1">
+            <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2">
+              {photos.map((base, i) => (
+                <li key={base}>
+                  <Photo base={base} alt={`${t.parts.photosAlt(p.name)} (${i + 1})`} lazy={i > 0} />
+                </li>
+              ))}
+            </ul>
+            <ImgNote t={t} className="mt-2" />
+          </div>
         )}
       </div>
       <StickyQuote text={text} t={t} />
