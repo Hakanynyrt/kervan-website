@@ -272,22 +272,59 @@ function slotCutter(s: TipSpec, floor: number): THREE.BufferGeometry {
   const y0 = start;
   const y1 = start + len;
   const top = rs + 40;
-  const back = slotEnd(s.slot.back, y0, rs, floor);
+  const c = s.slot.chamfer;
+  // Chamfered rim: start c before the slot edge and meet the end curve c below the surface.
+  const bevel = (pts: [number, number][], y: number, dir: 1 | -1): [number, number][] => {
+    if (c <= 0) return pts;
+    const k = pts.findIndex(([, z]) => z <= rs - c);
+    return k < 0 ? pts : [[y - dir * c, rs], ...pts.slice(k)];
+  };
+  const back = bevel(slotEnd(s.slot.back, y0, rs, floor), y0, 1);
   // Front end: build it going −y from y1, then mirror the order.
-  const front = slotEnd(s.slot.front, -y1, rs, floor)
+  const front = bevel(slotEnd(s.slot.front, -y1, rs, floor), -y1, 1)
     .map(([y, z]) => [-y, z] as [number, number])
     .reverse();
   const sh = new THREE.Shape();
-  sh.moveTo(y0, top);
+  sh.moveTo(back[0][0], top);
   for (const [y, z] of back) sh.lineTo(y, z);
   for (const [y, z] of front) sh.lineTo(y, z);
-  sh.lineTo(y1, top);
+  sh.lineTo(front[front.length - 1][0], top);
   sh.closePath();
   const W = maxRadius(s) + 40;
   const g = new THREE.ExtrudeGeometry(sh, { depth: 2 * W, bevelEnabled: false, curveSegments: 24 });
   // (sx, sy, sz) → (x = sz − W, y = sx, z = sy): a proper rotation, keeps winding
   g.applyMatrix4(new THREE.Matrix4().set(0, 0, 1, -W, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1));
   return g;
+}
+
+/** 45° chamfers along the two long edges where a slot floor (z = floor) meets the shank. */
+function slotEdgeChamfers(s: TipSpec, floor: number): THREE.BufferGeometry[] {
+  const { rs, chamfer: c, start, len, back, front } = s.slot;
+  if (c <= 0 || Math.abs(floor) >= rs - c) return [];
+  const xe = Math.sqrt(rs * rs - floor * floor);
+  const ya = start + back.len;
+  const yb = start + len - front.len;
+  if (yb - ya < 2 * c) return [];
+  const out: THREE.BufferGeometry[] = [];
+  for (const side of [1, -1]) {
+    const C: [number, number] = [side * xe, floor];
+    const P1: [number, number] = [side * (xe - c), floor];
+    const th = Math.atan2(floor, side * xe) - side * (c / rs);
+    const P2: [number, number] = [rs * Math.cos(th), rs * Math.sin(th)];
+    const m: [number, number] = [(P1[0] + P2[0]) / 2, (P1[1] + P2[1]) / 2];
+    const O: [number, number] = [C[0] + 3 * (C[0] - m[0]), C[1] + 3 * (C[1] - m[1])];
+    const sh = new THREE.Shape();
+    // Shape in (−x, z) so the axis swap below stays a proper rotation.
+    sh.moveTo(-P1[0], P1[1]);
+    sh.lineTo(-P2[0], P2[1]);
+    sh.lineTo(-O[0], O[1]);
+    sh.closePath();
+    const g = new THREE.ExtrudeGeometry(sh, { depth: yb - ya, bevelEnabled: false });
+    // (sx, sy, sz) → (x = −sx, y = sz + ya, z = sy)
+    g.applyMatrix4(new THREE.Matrix4().set(-1, 0, 0, 0, 0, 0, 1, ya, 0, 1, 0, 0, 0, 0, 0, 1));
+    out.push(g);
+  }
+  return out;
 }
 
 /** Wedge prism whose half-width shrinks to e/2 at y = L. Flats face ±X; extruded along Z. */
@@ -325,10 +362,12 @@ export function buildTip(s: TipSpec, materials: THREE.Material[], segs = 160): T
   const sides: [number, number][] = [[0, s.slot.floor]];
   if (s.slot.count === 2) sides.push([Math.PI, s.slot.floorB]);
   for (const [rot, floor] of sides) {
-    const c = new Brush(slotCutter(s, floor), materials[MAT.MACHINED]);
-    c.rotation.y = rot;
-    c.updateMatrixWorld();
-    brush = ev.evaluate(brush, c, SUBTRACTION);
+    for (const g of [slotCutter(s, floor), ...slotEdgeChamfers(s, floor)]) {
+      const c = new Brush(g, materials[MAT.MACHINED]);
+      c.rotation.y = rot;
+      c.updateMatrixWorld();
+      brush = ev.evaluate(brush, c, SUBTRACTION);
+    }
   }
 
   if (s.type === 'chisel' || s.type === 'pyramid') {

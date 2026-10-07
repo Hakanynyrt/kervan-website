@@ -8,7 +8,7 @@ import type {
 } from './types.ts';
 
 /** Bump when the renderer's look or geometry rules change: every image gets a new key. */
-export const RENDER_VERSION = 4;
+export const RENDER_VERSION = 5;
 
 /** Included angle (deg) when the data has none. Assumptions, labelled as such. */
 export const DEFAULT_INCLUDED_ANGLE: Record<'moil' | 'conical' | 'chisel' | 'pyramid', number> = {
@@ -50,6 +50,8 @@ export interface TipSpec {
     floorB: number;
     back: { kind: SlotEndKind; len: number };
     front: { kind: SlotEndKind; len: number };
+    /** 45° chamfer on the slot rim (machining practice, not on the drawings). */
+    chamfer: number;
   };
   /** Included tip angle; null for blunt. */
   angle: number | null;
@@ -214,6 +216,7 @@ export function renderSpec(
         floorB: r1(floorB),
         back: { kind: sl.back.kind, len: r1(sl.back.lengthMm) },
         front: { kind: sl.front.kind, len: r1(sl.front.lengthMm) },
+        chamfer: r1(Math.min(5, Math.max(1.5, 0.03 * 2 * rs))),
       },
       angle,
       chiselEdge,
