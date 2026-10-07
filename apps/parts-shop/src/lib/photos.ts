@@ -34,9 +34,9 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
     {
       model: 'Rammer E68',
       views: [
-        { base: '/photos/parca/alt-govde-rammer-e68-on-01', view: 'front' },
-        { base: '/photos/parca/alt-govde-rammer-e68-arka-01', view: 'rear' },
-        { base: '/photos/parca/alt-govde-rammer-e68-yan-01', view: 'side' },
+        { base: '/photos/parca/alt-govde-rammer-e68-on-02', view: 'front' },
+        { base: '/photos/parca/alt-govde-rammer-e68-arka-02', view: 'rear' },
+        { base: '/photos/parca/alt-govde-rammer-e68-yan-02', view: 'side' },
       ],
     },
   ],
