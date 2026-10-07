@@ -160,6 +160,8 @@ export interface Dict {
   };
   /** Under product pictures. */
   imgNote: string;
+  /** Quality line under every product title. */
+  oem: string;
   legal: { nav: string; agree: string; and: string };
   footer: {
     legal: string;
@@ -431,6 +433,7 @@ export const DICT: Record<Lang, Dict> = {
       noPhoto: 'Fotoğraf yakında',
     },
     imgNote: 'Görseller temsilidir.',
+    oem: 'OEM / orijinal kalitesinde, orijinal ölçülerde üretilir.',
     legal: {
       nav: 'Yasal metinler',
       agree: 'Sipariş talebi göndererek aşağıdaki metinleri okuduğunuzu kabul edersiniz:',
@@ -710,6 +713,7 @@ export const DICT: Record<Lang, Dict> = {
       noPhoto: 'Photo coming soon',
     },
     imgNote: 'Images are for illustration.',
+    oem: 'Made to OEM / original quality and original dimensions.',
     legal: {
       nav: 'Legal',
       agree: 'By sending an order request you confirm you have read:',

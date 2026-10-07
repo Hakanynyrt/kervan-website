@@ -5,6 +5,7 @@ import {
   Breadcrumb,
   Chips,
   ImgNote,
+  OemLine,
   PageTitle,
   Photo,
   QTY,
@@ -31,6 +32,7 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
     <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">
       <Breadcrumb trail={[[t.parts.title, PARTS_PATH]]} current={p.name} lang={lang} t={t} />
       <PageTitle>{p.name}</PageTitle>
+      <OemLine t={t} />
       <p className="m-0 mt-3 max-w-3xl font-sans text-ink-mid">{p.body}</p>
 
       <div

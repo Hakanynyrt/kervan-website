@@ -163,3 +163,8 @@ export function Terms({ t }: { t: Dict }) {
 export function ImgNote({ t, className = '' }: { t: Dict; className?: string }) {
   return <p className={`m-0 font-sans text-xs text-ink-mid ${className}`}>{t.imgNote}</p>;
 }
+
+/** OEM / original-quality line under a product title. */
+export function OemLine({ t }: { t: Dict }) {
+  return <p className="m-0 mt-2 font-sans text-base font-semibold text-ink">{t.oem}</p>;
+}

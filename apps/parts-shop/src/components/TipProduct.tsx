@@ -24,6 +24,7 @@ import {
   Chips,
   ImgNote,
   MissingModel,
+  OemLine,
   PageTitle,
   Photo,
   QTY,
@@ -141,6 +142,7 @@ export default function TipProduct({
     <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">
       <Breadcrumb trail={[[t.nav.tips, LIST_PATH], ...trail]} current={crumb} lang={lang} t={t} />
       <PageTitle>{title}</PageTitle>
+      <OemLine t={t} />
 
       <div className="mt-6 grid gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
         {(sku?.image || f?.imageRear) && (
