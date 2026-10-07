@@ -8,7 +8,7 @@ import type {
 } from './types.ts';
 
 /** Bump when the renderer's look or geometry rules change: every image gets a new key. */
-export const RENDER_VERSION = 7;
+export const RENDER_VERSION = 8;
 
 /** Included angle (deg) when the data has none. Assumptions, labelled as such. */
 export const DEFAULT_INCLUDED_ANGLE: Record<'moil' | 'conical' | 'chisel' | 'pyramid', number> = {

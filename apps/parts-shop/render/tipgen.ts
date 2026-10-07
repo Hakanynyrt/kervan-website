@@ -288,34 +288,113 @@ function slotEnd(
   return pts;
 }
 
-/** Key flat on +Z, floor plane at z = floor: shape in (axial y, radial z), extruded along X. */
+/** The part of a polyline (z falling along it) below height z1, starting exactly at z1. */
+function below(poly: [number, number][], z1: number): [number, number][] {
+  for (let i = 0; i < poly.length - 1; i++) {
+    const [ya, za] = poly[i];
+    const [yb, zb] = poly[i + 1];
+    if (za >= z1 && zb <= z1) {
+      const t = za === zb ? 0 : (za - z1) / (za - zb);
+      return [[ya + (yb - ya) * t, z1], ...poly.slice(i + 1)];
+    }
+  }
+  return [poly[poly.length - 1]];
+}
+
+/** n points spread evenly along a polyline by length. */
+function resample(poly: [number, number][], n: number): [number, number][] {
+  const acc = [0];
+  for (let i = 1; i < poly.length; i++)
+    acc.push(acc[i - 1] + Math.hypot(poly[i][0] - poly[i - 1][0], poly[i][1] - poly[i - 1][1]));
+  const total = acc[acc.length - 1];
+  const out: [number, number][] = [];
+  for (let k = 0; k < n; k++) {
+    const d = (total * k) / (n - 1);
+    let i = 1;
+    while (i < acc.length - 1 && acc[i] < d) i++;
+    const seg = acc[i] - acc[i - 1] || 1;
+    const t = Math.min(1, Math.max(0, (d - acc[i - 1]) / seg));
+    out.push([
+      poly[i - 1][0] + (poly[i][0] - poly[i - 1][0]) * t,
+      poly[i - 1][1] + (poly[i][1] - poly[i - 1][1]) * t,
+    ]);
+  }
+  return out;
+}
+
+/**
+ * Key flat on +Z, floor plane at z = floor, as a loft across X: every slice follows the end
+ * curves in (axial y, radial z) down from the shank surface at that x, so the rim chamfer runs
+ * the whole curved edge where each slot end meets the round shank.
+ */
 function slotCutter(s: TipSpec, floor: number): THREE.BufferGeometry {
-  const { start, len, rs } = s.slot;
+  const { start, len, rs, chamfer: c } = s.slot;
   const y0 = start;
   const y1 = start + len;
   const top = rs + 40;
-  const c = s.slot.chamfer;
-  // Chamfered rim: start c before the slot edge and meet the end curve c below the surface.
-  const bevel = (pts: [number, number][], y: number, dir: 1 | -1): [number, number][] => {
-    if (c <= 0) return pts;
-    const k = pts.findIndex(([, z]) => z <= rs - c);
-    return k < 0 ? pts : [[y - dir * c, rs], ...pts.slice(k)];
-  };
-  const back = bevel(slotEnd(s.slot.back, y0, rs, floor, c), y0, 1);
-  // Front end: build it going −y from y1, then mirror the order.
-  const front = bevel(slotEnd(s.slot.front, -y1, rs, floor, c), -y1, 1)
-    .map(([y, z]) => [-y, z] as [number, number])
-    .reverse();
-  const sh = new THREE.Shape();
-  sh.moveTo(back[0][0], top);
-  for (const [y, z] of back) sh.lineTo(y, z);
-  for (const [y, z] of front) sh.lineTo(y, z);
-  sh.lineTo(front[front.length - 1][0], top);
-  sh.closePath();
+  const back = slotEnd(s.slot.back, y0, rs, floor, c);
+  // Front end built going −y from y1, then mirrored: also runs from the surface down.
+  const front = slotEnd(s.slot.front, -y1, rs, floor, c).map(
+    ([y, z]) => [-y, z] as [number, number],
+  );
+  const M = 24;
   const W = maxRadius(s) + 40;
-  const g = new THREE.ExtrudeGeometry(sh, { depth: 2 * W, bevelEnabled: false, curveSegments: 24 });
-  // (sx, sy, sz) → (x = sz − W, y = sx, z = sy): a proper rotation, keeps winding
-  g.applyMatrix4(new THREE.Matrix4().set(0, 0, 1, -W, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1));
+  const xs: number[] = [-W];
+  const SL = 56;
+  for (let i = 0; i <= SL; i++) xs.push(-rs + (2 * rs * i) / SL);
+  xs.push(W);
+  const slice = (x: number): [number, number][] => {
+    const zs = Math.max(floor + 0.5, Math.sqrt(Math.max(0, rs * rs - x * x)));
+    const cc = Math.max(0, Math.min(c, zs - floor - 0.4));
+    const rimB = below(back, zs)[0];
+    const rimF = below(front, zs)[0];
+    const b = resample(below(back, zs - cc), M);
+    const f = resample(below(front, zs - cc), M).reverse();
+    const yb = rimB[0] - cc;
+    const yf = rimF[0] + cc;
+    return [[yb, top], [yb, zs], ...b, ...f, [yf, zs], [yf, top]];
+  };
+  const rings = xs.map(slice);
+  const n = rings[0].length;
+  const pos: number[] = [];
+  for (let k = 0; k < xs.length; k++) for (const [y, z] of rings[k]) pos.push(xs[k], y, z);
+  const idx: number[] = [];
+  for (let k = 0; k < xs.length - 1; k++)
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      const a = k * n + i;
+      const b2 = k * n + j;
+      const c2 = (k + 1) * n + j;
+      const d = (k + 1) * n + i;
+      idx.push(a, b2, c2, a, c2, d);
+    }
+  // End caps: the first and last slice polygons.
+  for (const [k, flip] of [
+    [0, false],
+    [xs.length - 1, true],
+  ] as const) {
+    const contour = rings[k].map(([y, z]) => new THREE.Vector2(y, z));
+    for (const t of THREE.ShapeUtils.triangulateShape(contour, [])) {
+      const [p, q, r] = t.map((v) => k * n + v);
+      if (flip) idx.push(p, q, r);
+      else idx.push(p, r, q);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx);
+  // Make the winding face outwards (positive signed volume).
+  let vol = 0;
+  const P = (i: number) => new THREE.Vector3(pos[3 * i], pos[3 * i + 1], pos[3 * i + 2]);
+  for (let i = 0; i < idx.length; i += 3) vol += P(idx[i]).dot(P(idx[i + 1]).cross(P(idx[i + 2])));
+  if (vol < 0)
+    for (let i = 0; i < idx.length; i += 3) [idx[i + 1], idx[i + 2]] = [idx[i + 2], idx[i + 1]];
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  g.setAttribute(
+    'uv',
+    new THREE.Float32BufferAttribute(new Array((pos.length / 3) * 2).fill(0), 2),
+  );
   return g;
 }
 
