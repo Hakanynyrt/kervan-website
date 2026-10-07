@@ -79,7 +79,7 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
         <figure className="m-0 mt-8">
           <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
             {f.imageRear && (
-              <li className="flex flex-col overflow-hidden rounded-md border border-hair bg-bg-warm">
+              <li className="flex flex-col overflow-hidden rounded-md border border-hair bg-stage">
                 <img
                   src={tipImg(f.imageRear, 'sm')}
                   srcSet={`${tipImg(f.imageRear, 'sm')} 480w, ${tipImg(f.imageRear, 'md')} 800w`}
@@ -100,7 +100,7 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
               .map((s) => (
                 <li
                   key={s.code}
-                  className="flex flex-col overflow-hidden rounded-md border border-hair bg-bg-warm"
+                  className="flex flex-col overflow-hidden rounded-md border border-hair bg-stage"
                 >
                   <img
                     src={tipImg(s.image, 'sm')}

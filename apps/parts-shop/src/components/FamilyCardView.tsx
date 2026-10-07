@@ -20,7 +20,7 @@ export default function FamilyCardView({ c, lang, t }: { c: FamilyCard; lang: La
           height={320}
           loading="lazy"
           decoding="async"
-          className="block h-auto w-full border-b border-hair bg-bg-warm"
+          className="block h-auto w-full bg-stage"
         />
       )}
       <div className="flex flex-1 flex-col gap-2 p-4">

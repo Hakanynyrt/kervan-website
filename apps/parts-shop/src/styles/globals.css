@@ -4,6 +4,11 @@
 /* Scan @kervan/ui sources so utilities used inside the package are emitted. */
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
 
+/* Dark stage behind the tip renders: their ember rim light is made for a dark background. */
+@theme {
+  --color-stage: #141416;
+}
+
 /*
  * The shop is light and plain, like an industrial supplier's catalogue, not the dark showcase
  * of the two company sites: same token names, shop values. Every text token stays >= 4.5:1 on
