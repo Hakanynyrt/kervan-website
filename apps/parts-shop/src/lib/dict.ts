@@ -225,7 +225,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     home: {
       title: 'Hidrolik kırıcı ucu ve yedek parçaları',
-      lead: 'Kendi tezgâhımızda işlenen, kendi tesisimizde ısıl işlem gören uçlar. Ölçüleri karşılaştırın, kırıcınıza uyan ucu seçin. Stoktan hemen teslim.',
+      lead: 'Kendi tezgâhımızda işlenen, kendi tesisimizde ısıl işlem gören uçlar. Ölçüleri karşılaştırın, kırıcınıza uyan ucu seçin. Stoktan aynı gün kargo.',
       cta: 'Tüm uçlar',
       ctaQuote: 'Teklif iste',
       popular: 'Çok satanlar',
@@ -247,8 +247,8 @@ export const DICT: Record<Lang, Dict> = {
           body: 'Kırıcınızın marka ve modelini seçin, uyan ucu görün.',
         },
         {
-          title: 'Stoktan hemen teslim',
-          body: 'Stoktaki uçlar siparişinizin ardından hemen gönderilir.',
+          title: 'Stoktan aynı gün kargo',
+          body: 'Stoktaki uçlar siparişiniz onaylandığı gün kargoya verilir.',
         },
       ],
       sectors: {
@@ -308,7 +308,7 @@ export const DICT: Record<Lang, Dict> = {
       inStock: (n) => (n >= 10 ? 'Stokta (10+)' : `Stokta (${n})`),
       lead: (days) => `Üretim ~${days} iş günü`,
       ask: 'Fiyat için sorun',
-      askLead: 'Stoktan hemen teslim',
+      askLead: 'Stoktan aynı gün kargo',
       carrier: 'Taşıyıcı (yaklaşık)',
       carrierValue: (min, max) => `${min}–${max} t ekskavatör`,
       carrierNote: 'Yaklaşık değerdir; kırıcı üreticisinin önerisi geçerlidir.',
@@ -368,7 +368,7 @@ export const DICT: Record<Lang, Dict> = {
       sendWa: 'Sipariş talebini WhatsApp ile gönder',
       sendMail: 'E-posta ile gönder',
       clear: 'Sepeti boşalt',
-      info: 'Online ödeme henüz yok: sipariş talebinizi alınca ödeme bilgisiyle size dönüyoruz; stoktaki ürünler hemen gönderilir. Bilgileriniz yalnız bu mesaja yazılır, sitede saklanmaz.',
+      info: 'Online ödeme henüz yok: sipariş talebinizi alınca ödeme bilgisiyle size dönüyoruz; stoktaki ürünler aynı gün kargoya verilir. Bilgileriniz yalnız bu mesaja yazılır, sitede saklanmaz.',
       message: (lines, total, contact) =>
         [
           'Merhaba, sipariş talebim:',
@@ -490,7 +490,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     home: {
       title: 'Hydraulic breaker tips and spare parts',
-      lead: 'Machined on our own lathes and heat-treated in our own plant. Compare the dimensions, pick the tip for your breaker. In stock, ships immediately.',
+      lead: 'Machined on our own lathes and heat-treated in our own plant. Compare the dimensions, pick the tip for your breaker. Ships from stock the same day.',
       cta: 'All tips',
       ctaQuote: 'Request a quote',
       popular: 'Best sellers',
@@ -512,8 +512,8 @@ export const DICT: Record<Lang, Dict> = {
           body: 'Pick your breaker make and model and see the tip that fits.',
         },
         {
-          title: 'In stock, ships immediately',
-          body: 'Tips in stock ship right after your order.',
+          title: 'Ships from stock the same day',
+          body: 'Tips in stock ship the day your order is confirmed.',
         },
       ],
       sectors: {
@@ -569,7 +569,7 @@ export const DICT: Record<Lang, Dict> = {
       inStock: (n) => (n >= 10 ? 'In stock (10+)' : `In stock (${n})`),
       lead: (days) => `Made to order, ~${days} working days`,
       ask: 'Price on request',
-      askLead: 'In stock, ships immediately',
+      askLead: 'Ships from stock the same day',
       carrier: 'Carrier (approx.)',
       carrierValue: (min, max) => `${min}–${max} t excavator`,
       carrierNote: 'Approximate; the breaker maker’s recommendation wins.',
@@ -629,7 +629,7 @@ export const DICT: Record<Lang, Dict> = {
       sendWa: 'Send the order request on WhatsApp',
       sendMail: 'Send by e-mail',
       clear: 'Empty the cart',
-      info: 'No online payment yet: once we receive your request we reply with payment details; items in stock ship immediately. Your details only go into this message; the site does not store them.',
+      info: 'No online payment yet: once we receive your request we reply with payment details; items in stock ship the same day. Your details only go into this message; the site does not store them.',
       message: (lines, total, contact) =>
         [
           'Hello, my order request:',
