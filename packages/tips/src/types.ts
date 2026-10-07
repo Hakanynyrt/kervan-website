@@ -137,9 +137,30 @@ export interface PublicFamily {
   imageRear?: string;
 }
 
+/** A product sold by breaker model whose tip geometry is not in the catalogue yet. */
+export interface PublicExtra {
+  brand: string;
+  model: string;
+  slug: string;
+  tipTypes: TipType[];
+  /** Working diameter when the owner gave it; null = unknown. */
+  diameterMm: number | null;
+  /** Net USD list price in cents; null = "ask for a quote". */
+  priceUsdNetCents: number | null;
+}
+
+/** USD → TRY selling rate (CBRT), fetched at build time. */
+export interface FxRate {
+  usdTry: number;
+  /** Rate date, YYYY-MM-DD. */
+  date: string;
+}
+
 export interface PublicCatalog {
   schema: 1;
   /** True for the invented DEMO catalog (local builds, forks). */
   demo?: boolean;
   families: PublicFamily[];
+  extras?: PublicExtra[];
+  fx?: FxRate | null;
 }

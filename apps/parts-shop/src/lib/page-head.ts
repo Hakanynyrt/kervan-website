@@ -21,11 +21,29 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       return { ...page, title: m.listTitle, description: m.listDesc };
     case 'popular':
       return { ...page, title: m.popularTitle, description: m.popularDesc };
+    case 'brand':
+      return {
+        ...page,
+        title: m.brandTitle(model.brand),
+        description: m.brandDesc(model.brand, model.rows.length),
+      };
+    case 'cart':
+      return { ...page, title: m.cartTitle };
+    case 'parts':
+      return { ...page, title: m.partsTitle, description: m.partsDesc };
+    case 'part': {
+      const name = t.parts.items[model.part].name;
+      return { ...page, title: m.partTitle(name), description: m.partDesc(name) };
+    }
     case 'breaker': {
-      const f = model.families[0];
-      const d = fmtNum(f.attrs.diameterMm, lang);
+      const f = model.families[0] as (typeof model.families)[number] | undefined;
+      const dm = f ? f.attrs.diameterMm : (model.extra?.diameterMm ?? null);
+      const d = dm === null ? '' : fmtNum(dm, lang);
       const types = [
-        ...new Set(model.families.flatMap((x) => x.skus.map((s) => t.tip[s.tipType]))),
+        ...new Set([
+          ...model.families.flatMap((x) => x.skus.map((s) => t.tip[s.tipType])),
+          ...(model.extra?.tipTypes ?? []).map((x) => t.tip[x]),
+        ]),
       ];
       return {
         ...page,

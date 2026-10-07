@@ -1,4 +1,5 @@
 import type { TipType } from '@kervan/tips';
+import type { PartKey } from './routes';
 import type { Lang } from '../types';
 
 export interface Dict {
@@ -15,6 +16,13 @@ export interface Dict {
     notFoundTitle: string;
     popularTitle: string;
     popularDesc: string;
+    brandTitle: (brand: string) => string;
+    brandDesc: (brand: string, n: number) => string;
+    partsTitle: string;
+    partsDesc: string;
+    partTitle: (name: string) => string;
+    partDesc: (name: string) => string;
+    cartTitle: string;
   };
   nav: {
     label: string;
@@ -23,6 +31,9 @@ export interface Dict {
     catalogSite: string;
     quote: string;
     quoteText: string;
+    parts: string;
+    call: string;
+    cart: string;
     langLabel: string;
     langOther: string;
   };
@@ -37,6 +48,7 @@ export interface Dict {
     popular: string;
     featured: string;
     morePopular: string;
+    groups: string;
     count: (n: number) => string;
     trust: { title: string; body: string }[];
     sectors: {
@@ -62,14 +74,17 @@ export interface Dict {
     crumbHome: string;
     crumbLabel: string;
     diameter: string;
-    option: string;
     type: string;
-    code: string;
+    qty: string;
+    stockTitle: string;
+    stockNote: string;
+    stockAlt: (i: number) => string;
     angle: string;
     availability: string;
     inStock: (n: number) => string;
     lead: (days: number) => string;
     ask: string;
+    askLead: string;
     carrier: string;
     carrierValue: (min: number, max: number) => string;
     carrierNote: string;
@@ -77,12 +92,69 @@ export interface Dict {
     quoteBody: string;
     whatsapp: string;
     email: string;
-    quoteText: (name: string, type: string, code: string) => string;
-    renderNote: string;
+    quoteText: (name: string, type: string, code: string, qty: string) => string;
     renderAlt: (name: string, type: string) => string;
     sideAlt: (name: string, type: string) => string;
     rearAlt: (name: string) => string;
     viewRear: string;
+  };
+  search: {
+    label: string;
+    placeholder: string;
+    button: string;
+    none: (q: string) => string;
+    count: (n: number) => string;
+    brands: string;
+    all: string;
+  };
+  missing: { title: string; body: string; button: string; text: string };
+  price: {
+    label: string;
+    fxNote: (date: string) => string;
+    add: string;
+    added: string;
+    goCart: string;
+  };
+  cart: {
+    title: string;
+    empty: string;
+    browse: string;
+    product: string;
+    qty: string;
+    unit: string;
+    lineTotal: string;
+    ask: string;
+    total: string;
+    totalNote: string;
+    remove: (name: string) => string;
+    less: string;
+    more: string;
+    contactTitle: string;
+    name: string;
+    company: string;
+    phone: string;
+    city: string;
+    note: string;
+    sendWa: string;
+    sendMail: string;
+    clear: string;
+    info: string;
+    message: (lines: string[], total: string, contact: string[]) => string;
+  };
+  brand: { title: (brand: string) => string; lead: (n: number) => string };
+  parts: {
+    title: string;
+    lead: string;
+    tips: { name: string; body: string };
+    items: Record<PartKey, { name: string; body: string }>;
+    view: string;
+    photosAlt: (name: string) => string;
+    quoteTitle: string;
+    quoteBody: string;
+    modelLabel: string;
+    modelPlaceholder: string;
+    text: (part: string, model: string, qty: string) => string;
+    noPhoto: string;
   };
   footer: {
     legal: string;
@@ -107,12 +179,20 @@ export const DICT: Record<Lang, Dict> = {
       listDesc: 'Marka ve modele göre tüm Kervan kırıcı uçları: çalışma çapı ve uç tipleri.',
       familyTitle: (code, d) => `${code} kırıcı ucu Ø${d} | Kervan Mağaza`,
       familyDesc: (code, d, types) => `${code}: Ø${d} mm kırıcı ucu (${types}).`,
-      breakerTitle: (name, d) => `${name} kırıcı ucu Ø${d} | Kervan Mağaza`,
+      breakerTitle: (name, d) => `${name} kırıcı ucu${d ? ` Ø${d}` : ''} | Kervan Mağaza`,
       breakerDesc: (name, d, types) =>
-        `${name} hidrolik kırıcı için Kervan ucu: Ø${d} mm, ${types}. Fiyat teklifi isteyin.`,
+        `${name} hidrolik kırıcı için Kervan ucu: ${d ? `Ø${d} mm, ` : ''}${types}.`,
       notFoundTitle: 'Sayfa bulunamadı | Kervan Mağaza',
       popularTitle: 'Çok satan kırıcı uçları | Kervan Mağaza',
       popularDesc: 'En çok sipariş edilen Kervan kırıcı uçları, kırıcı marka ve modeline göre.',
+      brandTitle: (brand) => `${brand} kırıcı uçları | Kervan Mağaza`,
+      brandDesc: (brand, n) => `${brand} hidrolik kırıcılar için Kervan uçları: ${n} model.`,
+      partsTitle: 'Kırıcı yedek parçaları | Kervan Mağaza',
+      partsDesc: 'Hidrolik kırıcı ucu, alt gövde, burç, kama, saplama ve piston: Kervan üretimi.',
+      partTitle: (name) => `Kırıcı ${name.toLocaleLowerCase('tr')} | Kervan Mağaza`,
+      partDesc: (name) =>
+        `Hidrolik kırıcı ${name.toLocaleLowerCase('tr')}: Kervan üretimi, kırıcınızın modeline göre teklif.`,
+      cartTitle: 'Sepet | Kervan Mağaza',
     },
     nav: {
       label: 'Ana menü',
@@ -121,12 +201,18 @@ export const DICT: Record<Lang, Dict> = {
       catalogSite: 'Kurumsal',
       quote: 'Teklif iste',
       quoteText: 'Merhaba, kırıcı ucu için fiyat teklifi almak istiyorum.',
+      parts: 'Yedek parçalar',
+      call: 'Ara',
+      cart: 'Sepet',
       langLabel: 'English',
       langOther: 'EN',
     },
-    top: { tagline: 'Hidrolik kırıcı ucu üreticisi', shop: 'Kırıcı ucu mağazası' },
+    top: {
+      tagline: 'Hidrolik kırıcı ucu ve yedek parça üreticisi',
+      shop: 'Kırıcı yedek parça mağazası',
+    },
     banner: {
-      preview: 'Önizleme: mağaza hazırlanıyor, henüz sipariş alınmıyor. Fiyat için bize yazın.',
+      preview: 'Online ödeme henüz yok: sepetinizi sipariş talebi olarak gönderin, size dönelim.',
       demo: 'DEMO verisi: bu ürünler gerçek değildir.',
     },
     tip: {
@@ -138,13 +224,14 @@ export const DICT: Record<Lang, Dict> = {
       asphalt: 'Asfalt',
     },
     home: {
-      title: 'Hidrolik kırıcı uçları',
+      title: 'Hidrolik kırıcı ucu ve yedek parçaları',
       lead: 'Kendi tezgâhımızda işlenen, kendi tesisimizde ısıl işlem gören uçlar. Ölçüleri karşılaştırın, kırıcınıza uyan ucu seçin; fiyat ve teslim süresini doğrudan bize sorun.',
       cta: 'Tüm uçlar',
       ctaQuote: 'Teklif iste',
       popular: 'Çok satanlar',
       featured: 'Uçlar',
       morePopular: 'Tüm çok satanlar',
+      groups: 'Ürün gruplarımız',
       count: (n) => `${n} kırıcı modeli`,
       trust: [
         {
@@ -156,8 +243,8 @@ export const DICT: Record<Lang, Dict> = {
           body: 'Isıl işlem kendi fırınlarımızda, kontrollü olarak yapılır.',
         },
         {
-          title: 'Ölçüyle seçim',
-          body: 'Her uç için kama kanalı, arka uç ve gövde ölçüleri.',
+          title: 'Modele göre seçim',
+          body: 'Kırıcınızın marka ve modelini seçin, uyan ucu görün.',
         },
         {
           title: 'Doğrudan teklif',
@@ -211,14 +298,17 @@ export const DICT: Record<Lang, Dict> = {
       crumbHome: 'Ana sayfa',
       crumbLabel: 'Bulunduğunuz yer',
       diameter: 'Çalışma çapı',
-      option: 'Uç kodu',
       type: 'Uç tipi',
-      code: 'Kod',
+      qty: 'Adet',
+      stockTitle: 'Stoğumuzdan',
+      stockNote: 'Atölyemizdeki stoktan kırıcı uçları.',
+      stockAlt: (i) => `Kervan atölyesinde stoktaki kırıcı uçları (${i})`,
       angle: 'Uç açısı',
       availability: 'Durum',
       inStock: (n) => (n >= 10 ? 'Stokta (10+)' : `Stokta (${n})`),
       lead: (days) => `Üretim ~${days} iş günü`,
       ask: 'Fiyat ve süre için sorun',
+      askLead: 'Teslim süresi için sorun',
       carrier: 'Taşıyıcı (yaklaşık)',
       carrierValue: (min, max) => `${min}–${max} t ekskavatör`,
       carrierNote: 'Yaklaşık değerdir; kırıcı üreticisinin önerisi geçerlidir.',
@@ -226,13 +316,104 @@ export const DICT: Record<Lang, Dict> = {
       quoteBody: 'Kırıcınız ve seçtiğiniz uç mesaja yazılır; fiyat ve teslim süresini iletelim.',
       whatsapp: 'WhatsApp ile sor',
       email: 'E-posta gönder',
-      quoteText: (name, type, code) =>
-        `Merhaba, ${name} için ${type} kırıcı ucu (${code}) fiyat ve teslim süresi öğrenmek istiyorum.`,
-      renderNote: 'Temsili görsel: ucun ölçülerinden üretilmiştir.',
-      renderAlt: (name, type) => `${name} ${type} kırıcı ucu, temsili görsel`,
-      sideAlt: (name, type) => `${name} ${type} kırıcı ucu, yandan görünüş (temsili)`,
-      rearAlt: (name) => `${name} kırıcı ucunun kama kanalı ve arka ucu, yakın görünüş (temsili)`,
+      quoteText: (name, type, code, qty) =>
+        `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet: fiyat ve teslim süresi öğrenmek istiyorum.`,
+      renderAlt: (name, type) => `${name} ${type} kırıcı ucu`,
+      sideAlt: (name, type) => `${name} ${type} kırıcı ucu, yandan görünüş`,
+      rearAlt: (name) => `${name} kırıcı ucunun kama kanalı ve arka ucu, yakın görünüş`,
       viewRear: 'Kama kanalı ve arka uç',
+    },
+    search: {
+      label: 'Kırıcı modeli ara',
+      placeholder: 'Ör. HB 20G, MB 700, Furukawa F22',
+      button: 'Ara',
+      none: (q) => `"${q}" için model bulunamadı.`,
+      count: (n) => `${n} model`,
+      brands: 'Markalar',
+      all: 'Tüm markalar',
+    },
+    missing: {
+      title: 'Modeliniz listede yok mu, emin değil misiniz?',
+      body: 'Kırıcınızın marka ve modelini, mümkünse ucun çapını ve bir fotoğrafını WhatsApp’tan gönderin; uyan ucu biz bulalım. Çap, ucun çalışan (ön) kısmında kumpasla ölçülür.',
+      button: 'WhatsApp ile sor',
+      text: 'Merhaba, kırıcımın markası/modeli: … Ölçtüğüm uç çapı: … mm. Fotoğraf ekliyorum.',
+    },
+    price: {
+      label: 'Fiyat',
+      fxNote: (date) => `TL fiyatı TCMB döviz satış kuruyla (${date}) hesaplanır.`,
+      add: 'Sepete ekle',
+      added: 'Sepete eklendi',
+      goCart: 'Sepete git',
+    },
+    cart: {
+      title: 'Sepet',
+      empty: 'Sepetiniz boş.',
+      browse: 'Kırıcı uçlarına göz atın',
+      product: 'Ürün',
+      qty: 'Adet',
+      unit: 'Birim fiyat',
+      lineTotal: 'Tutar',
+      ask: 'Fiyat sorulacak',
+      total: 'Toplam',
+      totalNote: 'Fiyatı sorulacak ürünler toplama dahil değildir.',
+      remove: (name) => `${name} ürününü sepetten çıkar`,
+      less: 'Bir azalt',
+      more: 'Bir artır',
+      contactTitle: 'İletişim bilgileriniz',
+      name: 'Ad soyad',
+      company: 'Firma',
+      phone: 'Telefon',
+      city: 'Şehir',
+      note: 'Not',
+      sendWa: 'Sipariş talebini WhatsApp ile gönder',
+      sendMail: 'E-posta ile gönder',
+      clear: 'Sepeti boşalt',
+      info: 'Online ödeme henüz yok: sipariş talebinizi alınca stok, teslim süresi ve ödeme bilgisiyle size dönüyoruz. Bilgileriniz yalnız bu mesaja yazılır, sitede saklanmaz.',
+      message: (lines, total, contact) =>
+        [
+          'Merhaba, sipariş talebim:',
+          ...lines,
+          total,
+          ...(contact.length ? ['', ...contact] : []),
+        ].join('\n'),
+    },
+    brand: {
+      title: (brand) => `${brand} kırıcı uçları`,
+      lead: (n) => `${n} model. Kırıcınızın modelini seçin.`,
+    },
+    parts: {
+      title: 'Kırıcı yedek parçaları',
+      lead: 'Kırıcı ucunun yanında alt gövde, burç, kama, saplama ve piston da üretip satıyoruz. Kırıcınızın marka ve modelini yazın, fiyat ve teslim süresini iletelim.',
+      tips: {
+        name: 'Kırıcı ucu',
+        body: 'Keski, sivri, küt, piramit ve konik uçlar; kırıcı modeline göre.',
+      },
+      items: {
+        'alt-govde': {
+          name: 'Alt gövde',
+          body: 'Ucu ve burçları taşıyan alt gövde (ön kafa). Aşınmış ya da çatlamış gövdenin yerine.',
+        },
+        burc: {
+          name: 'Burç',
+          body: 'Ucu yönlendiren alt ve üst burçlar. Aşınmış burç ucu erken kırar; uçla birlikte kontrol edin.',
+        },
+        kama: { name: 'Kama', body: 'Ucu gövdede tutan kamalar ve tutucu pimler.' },
+        saplama: {
+          name: 'Saplama',
+          body: 'Kırıcı gövdesini bir arada tutan saplamalar, somun ve pullarıyla.',
+        },
+        piston: { name: 'Piston', body: 'Kırıcının darbe pistonu; kırıcı modeline göre.' },
+      },
+      view: 'İncele',
+      photosAlt: (name) =>
+        `Kervan atölyesinde stoktaki kırıcı ${name.toLocaleLowerCase('tr')} parçaları`,
+      quoteTitle: 'Fiyat teklifi isteyin',
+      quoteBody: 'Kırıcınızın marka ve modelini yazın; mesaja eklenir.',
+      modelLabel: 'Kırıcı marka ve modeli',
+      modelPlaceholder: 'Ör. Furukawa HB 20G',
+      text: (part, model, qty) =>
+        `Merhaba, ${model || '(kırıcı modeli)'} için ${part.toLocaleLowerCase('tr')}, ${qty} adet: fiyat ve teslim süresi öğrenmek istiyorum.`,
+      noPhoto: 'Fotoğraf yakında',
     },
     footer: {
       legal: 'Üretici ve satıcı',
@@ -261,12 +442,21 @@ export const DICT: Record<Lang, Dict> = {
         'All Kervan breaker tips by breaker make and model: working diameter and tip types.',
       familyTitle: (code, d) => `${code} breaker tip Ø${d} | Kervan Shop`,
       familyDesc: (code, d, types) => `${code}: Ø${d} mm breaker tip (${types}).`,
-      breakerTitle: (name, d) => `${name} breaker tip Ø${d} | Kervan Shop`,
+      breakerTitle: (name, d) => `${name} breaker tip${d ? ` Ø${d}` : ''} | Kervan Shop`,
       breakerDesc: (name, d, types) =>
-        `Kervan tip for the ${name} hydraulic breaker: Ø${d} mm, ${types}. Request a quote.`,
+        `Kervan tip for the ${name} hydraulic breaker: ${d ? `Ø${d} mm, ` : ''}${types}.`,
       notFoundTitle: 'Page not found | Kervan Shop',
       popularTitle: 'Best-selling breaker tips | Kervan Shop',
       popularDesc: 'The most ordered Kervan breaker tips, by breaker make and model.',
+      brandTitle: (brand) => `${brand} breaker tips | Kervan Shop`,
+      brandDesc: (brand, n) => `Kervan tips for ${brand} hydraulic breakers: ${n} models.`,
+      partsTitle: 'Breaker spare parts | Kervan Shop',
+      partsDesc:
+        'Hydraulic breaker tips, front heads, bushings, retainer keys, tie rods and pistons made by Kervan.',
+      partTitle: (name) => `Breaker ${name.toLowerCase()} | Kervan Shop`,
+      partDesc: (name) =>
+        `Hydraulic breaker ${name.toLowerCase()} made by Kervan; quotes by breaker model.`,
+      cartTitle: 'Cart | Kervan Shop',
     },
     nav: {
       label: 'Main menu',
@@ -275,13 +465,19 @@ export const DICT: Record<Lang, Dict> = {
       catalogSite: 'Company',
       quote: 'Request a quote',
       quoteText: 'Hello, I would like a quote for a breaker tip.',
+      parts: 'Spare parts',
+      call: 'Call',
+      cart: 'Cart',
       langLabel: 'Türkçe',
       langOther: 'TR',
     },
-    top: { tagline: 'Hydraulic breaker tip manufacturer', shop: 'Breaker tip shop' },
+    top: {
+      tagline: 'Hydraulic breaker tip and spare parts maker',
+      shop: 'Breaker spare parts shop',
+    },
     banner: {
       preview:
-        'Preview: the shop is being prepared and does not take orders yet. Write to us for prices.',
+        'No online payment yet: send your cart as an order request and we will get back to you.',
       demo: 'DEMO data: these products are not real.',
     },
     tip: {
@@ -293,13 +489,14 @@ export const DICT: Record<Lang, Dict> = {
       asphalt: 'Asphalt',
     },
     home: {
-      title: 'Hydraulic breaker tips',
+      title: 'Hydraulic breaker tips and spare parts',
       lead: 'Machined on our own lathes and heat-treated in our own plant. Compare the dimensions, pick the tip for your breaker and ask us directly for price and delivery time.',
       cta: 'All tips',
       ctaQuote: 'Request a quote',
       popular: 'Best sellers',
       featured: 'Tips',
       morePopular: 'All best sellers',
+      groups: 'Our product groups',
       count: (n) => `${n} breaker models`,
       trust: [
         {
@@ -311,8 +508,8 @@ export const DICT: Record<Lang, Dict> = {
           body: 'Heat-treated in our own furnaces, under control.',
         },
         {
-          title: 'Chosen by dimensions',
-          body: 'Key slot, back end and body dimensions for every tip.',
+          title: 'Chosen by model',
+          body: 'Pick your breaker make and model and see the tip that fits.',
         },
         { title: 'Direct quotes', body: 'Write to the manufacturer for price and delivery time.' },
       ],
@@ -359,14 +556,17 @@ export const DICT: Record<Lang, Dict> = {
       crumbHome: 'Home',
       crumbLabel: 'Breadcrumb',
       diameter: 'Working diameter',
-      option: 'Tip code',
       type: 'Tip type',
-      code: 'Code',
+      qty: 'Quantity',
+      stockTitle: 'From our stock',
+      stockNote: 'Breaker tips in stock at our plant.',
+      stockAlt: (i) => `Breaker tips in stock at the Kervan plant (${i})`,
       angle: 'Tip angle',
       availability: 'Availability',
       inStock: (n) => (n >= 10 ? 'In stock (10+)' : `In stock (${n})`),
       lead: (days) => `Made to order, ~${days} working days`,
       ask: 'Ask for price and lead time',
+      askLead: 'Ask for lead time',
       carrier: 'Carrier (approx.)',
       carrierValue: (min, max) => `${min}–${max} t excavator`,
       carrierNote: 'Approximate; the breaker maker’s recommendation wins.',
@@ -375,13 +575,106 @@ export const DICT: Record<Lang, Dict> = {
         'Your breaker and the tip you chose go into the message; we reply with price and lead time.',
       whatsapp: 'Ask on WhatsApp',
       email: 'Send an e-mail',
-      quoteText: (name, type, code) =>
-        `Hello, I would like the price and lead time of the ${type} tip (${code}) for the ${name}.`,
-      renderNote: 'Illustration generated from the tip’s dimensions.',
-      renderAlt: (name, type) => `${name} ${type} breaker tip, illustration`,
-      sideAlt: (name, type) => `${name} ${type} breaker tip, side view (illustration)`,
-      rearAlt: (name) => `${name} breaker tip key slot and rear end, close-up (illustration)`,
+      quoteText: (name, type, code, qty) =>
+        `Hello, I would like the price and lead time of the ${type} tip${code ? ` (${code})` : ''} for the ${name}, quantity ${qty}.`,
+      renderAlt: (name, type) => `${name} ${type} breaker tip`,
+      sideAlt: (name, type) => `${name} ${type} breaker tip, side view`,
+      rearAlt: (name) => `${name} breaker tip key slot and rear end, close-up`,
       viewRear: 'Key slot and rear end',
+    },
+    search: {
+      label: 'Search breaker model',
+      placeholder: 'E.g. HB 20G, MB 700, Furukawa F22',
+      button: 'Search',
+      none: (q) => `No model found for "${q}".`,
+      count: (n) => `${n} models`,
+      brands: 'Makes',
+      all: 'All makes',
+    },
+    missing: {
+      title: 'Model not listed, or not sure?',
+      body: 'Send your breaker make and model, if possible the tip diameter and a photo, on WhatsApp; we will find the tip that fits. Measure the diameter with a caliper on the working (front) part of the tip.',
+      button: 'Ask on WhatsApp',
+      text: 'Hello, my breaker make/model: … Tip diameter I measured: … mm. Photo attached.',
+    },
+    price: {
+      label: 'Price',
+      fxNote: (date) => `TRY prices use the CBRT USD selling rate of ${date}.`,
+      add: 'Add to cart',
+      added: 'Added to cart',
+      goCart: 'Go to cart',
+    },
+    cart: {
+      title: 'Cart',
+      empty: 'Your cart is empty.',
+      browse: 'Browse breaker tips',
+      product: 'Product',
+      qty: 'Qty',
+      unit: 'Unit price',
+      lineTotal: 'Amount',
+      ask: 'Price on request',
+      total: 'Total',
+      totalNote: 'Products priced on request are not in the total.',
+      remove: (name) => `Remove ${name} from the cart`,
+      less: 'One less',
+      more: 'One more',
+      contactTitle: 'Your contact details',
+      name: 'Name',
+      company: 'Company',
+      phone: 'Phone',
+      city: 'City',
+      note: 'Note',
+      sendWa: 'Send the order request on WhatsApp',
+      sendMail: 'Send by e-mail',
+      clear: 'Empty the cart',
+      info: 'No online payment yet: once we receive your request we reply with stock, lead time and payment details. Your details only go into this message; the site does not store them.',
+      message: (lines, total, contact) =>
+        [
+          'Hello, my order request:',
+          ...lines,
+          total,
+          ...(contact.length ? ['', ...contact] : []),
+        ].join('\n'),
+    },
+    brand: {
+      title: (brand) => `${brand} breaker tips`,
+      lead: (n) => `${n} models. Pick your breaker model.`,
+    },
+    parts: {
+      title: 'Breaker spare parts',
+      lead: 'Besides tips we make and sell front heads, bushings, retainer keys, tie rods and pistons. Send your breaker make and model and we reply with price and lead time.',
+      tips: {
+        name: 'Breaker tips',
+        body: 'Chisel, moil, blunt, pyramid and conical tips, by breaker model.',
+      },
+      items: {
+        'alt-govde': {
+          name: 'Front head',
+          body: 'The lower body that holds the tip and bushings; replaces a worn or cracked one.',
+        },
+        burc: {
+          name: 'Bushings',
+          body: 'Upper and lower bushings that guide the tip. A worn bushing breaks tips early; check both together.',
+        },
+        kama: {
+          name: 'Retainer keys',
+          body: 'Keys and retainer pins that hold the tip in the front head.',
+        },
+        saplama: {
+          name: 'Tie rods',
+          body: 'Tie rods that hold the breaker body together, with nuts and washers.',
+        },
+        piston: { name: 'Pistons', body: 'The breaker’s impact piston, by breaker model.' },
+      },
+      view: 'View',
+      photosAlt: (name) => `${name} in stock at the Kervan plant`,
+      quoteTitle: 'Request a quote',
+      quoteBody: 'Type your breaker make and model; it goes into the message.',
+      modelLabel: 'Breaker make and model',
+      modelPlaceholder: 'E.g. Furukawa HB 20G',
+      text: (part, model, qty) =>
+        `Hello, I would like the price and lead time of ${part.toLowerCase()} for the ${model || '(breaker model)'}, quantity ${qty}.`,
+      noPhoto: 'Photo coming soon',
     },
     footer: {
       legal: 'Manufacturer and seller',

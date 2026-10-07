@@ -83,11 +83,16 @@ try {
   let count = 0;
   for (const p of ssr.prerender(catalog)) {
     const props = `<script type="application/json" id="${ssr.PROPS_ID}">${ssr.jsonForScript(p.props)}</script>`;
-    const html = ssr.injectHead(template, {
-      lang: p.lang,
-      headTags: `${p.headTags}\n    ${props}`,
-      appHtml: p.appHtml,
-    });
+    // email_off: Cloudflare's Email Address Obfuscation (zone setting) would rewrite the
+    // mailto links (and their prefilled subject/body) into its own script; skip it here.
+    const html = ssr
+      .injectHead(template, {
+        lang: p.lang,
+        headTags: `${p.headTags}\n    ${props}`,
+        appHtml: p.appHtml,
+      })
+      .replace('<body>', '<body>\n    <!--email_off-->')
+      .replace('</body>', '<!--/email_off-->\n  </body>');
     const out = path.join(DIST, p.file);
     fs.mkdirSync(path.dirname(out), { recursive: true });
     fs.writeFileSync(out, html);

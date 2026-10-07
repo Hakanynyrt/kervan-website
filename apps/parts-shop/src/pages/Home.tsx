@@ -1,5 +1,7 @@
 import { Container } from '@kervan/ui';
 import FamilyCardView from '../components/FamilyCardView';
+import { SearchForm } from '../components/ModelSearch';
+import { PartGroups } from '../components/PartGroups';
 import { FOCUS, whatsappHref } from '../components/Layout';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
@@ -18,6 +20,9 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
             {h.title}
           </h1>
           <p className="m-0 mt-5 max-w-2xl font-sans text-lg text-ink-mid">{h.lead}</p>
+          <div className="mt-8 max-w-2xl">
+            <SearchForm lang={lang} t={t} />
+          </div>
           <div className="mt-8 flex flex-wrap gap-3 font-sans text-sm font-medium">
             <a
               href={localePath(LIST_PATH, lang)}
@@ -68,6 +73,15 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
               </li>
             ))}
           </ul>
+        </Container>
+      </section>
+
+      <section aria-labelledby="groups" className="border-t border-hair">
+        <Container className="py-14">
+          <h2 id="groups" className="m-0 mb-6 font-sans text-2xl font-bold text-ink">
+            {h.groups}
+          </h2>
+          <PartGroups lang={lang} t={t} />
         </Container>
       </section>
 

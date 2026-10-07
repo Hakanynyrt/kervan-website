@@ -4,6 +4,7 @@ import {
   type Availability,
   type FamilyAttrs,
   type PublicCatalog,
+  type PublicExtra,
   type PublicFamily,
   type PublicSku,
   type Range,
@@ -33,6 +34,43 @@ export interface SkuRow {
   stock_qty: number;
   lead_time_days: number | null;
 }
+/** `SELECT brand, model, slug, tip_types, diameter_mm, price_usd_net_cents FROM extra_products WHERE published = 1` */
+export interface ExtraRow {
+  brand: string;
+  model: string;
+  slug: string;
+  tip_types: string;
+  diameter_mm: number | null;
+  price_usd_net_cents: number | null;
+}
+
+/** Whitelists the extra products; rows with no usable tip type are dropped. */
+export function publicExtras(rows: readonly ExtraRow[]): PublicExtra[] {
+  const out: PublicExtra[] = [];
+  for (const r of rows) {
+    if (isHiddenBreaker(r)) continue;
+    let types: unknown;
+    try {
+      types = JSON.parse(r.tip_types);
+    } catch {
+      continue;
+    }
+    const tipTypes = Array.isArray(types) ? TIP_TYPES.filter((t) => types.includes(t)) : [];
+    if (!tipTypes.length || !r.brand || !r.model || !r.slug) continue;
+    const p = num(r.price_usd_net_cents);
+    const d = num(r.diameter_mm);
+    out.push({
+      brand: r.brand,
+      model: r.model,
+      slug: r.slug,
+      tipTypes,
+      diameterMm: d !== null && d > 0 ? d : null,
+      priceUsdNetCents: p !== null && p > 0 ? Math.round(p) : null,
+    });
+  }
+  return out;
+}
+
 export interface FitRow {
   family_id: number;
   brand: string;

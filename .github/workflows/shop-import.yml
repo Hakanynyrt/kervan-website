@@ -42,7 +42,10 @@ jobs:
           test -n "$KV_ID" || { echo "::error::variable SHOP_SOURCE_KV_ID is not set"; exit 1; }
 
       - name: Apply schema
-        run: pnpm exec wrangler d1 execute "$DB" --remote --yes --file apps/parts-shop/migrations/0001_init.sql > /dev/null
+        run: |
+          for f in apps/parts-shop/migrations/*.sql; do
+            pnpm exec wrangler d1 execute "$DB" --remote --yes --file "$f" > /dev/null
+          done
 
       - name: Import (output kept out of the log)
         run: |
