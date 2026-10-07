@@ -75,7 +75,7 @@ export interface Dict {
     viewRear: string;
     marks: string;
   };
-  footer: { legal: string; kvkk: string; marks: string };
+  footer: { legal: string; kvkk: string; marks: string; images: string };
   notFound: { title: string; body: string; home: string };
 }
 
@@ -186,6 +186,8 @@ export const DICT: Record<Lang, Dict> = {
       legal: 'Üretici ve satıcı',
       kvkk: 'KVKK aydınlatma metni',
       marks: 'Markalar sahiplerine aittir.',
+      images:
+        '© Kervan Makina. Ürün görselleri Kervan Makina’ya aittir, temsilidir; izinsiz kullanılamaz.',
     },
     notFound: {
       title: 'Sayfa bulunamadı',
@@ -298,6 +300,8 @@ export const DICT: Record<Lang, Dict> = {
       legal: 'Manufacturer and seller',
       kvkk: 'Privacy notice (KVKK)',
       marks: 'Marks belong to their owners.',
+      images:
+        '© Kervan Makina. Product images belong to Kervan Makina and are illustrations; do not use without permission.',
     },
     notFound: {
       title: 'Page not found',

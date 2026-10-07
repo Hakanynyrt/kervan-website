@@ -2,9 +2,11 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Tip renders: file name = geometry hash, so a changed tip gets a new file.
+# Tip renders: file name = geometry hash, so a changed tip gets a new file. Other sites cannot
+# embed them (the zone's Hotlink Protection skips .webp); crawlers and link previews are unaffected.
 /tips/*
   Cache-Control: public, max-age=31536000, immutable
+  Cross-Origin-Resource-Policy: same-site
 
 /favicon-32.png
   Cache-Control: public, max-age=86400

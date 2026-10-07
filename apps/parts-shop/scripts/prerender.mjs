@@ -4,11 +4,43 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import sharp from 'sharp';
 
 const APP = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(APP, 'dist');
 const SSR = path.join(APP, 'dist-ssr');
 const CATALOG = path.join(APP, '.catalog', 'catalog.json');
+
+// Published tip images: the small render as is and a medium one (800 px wide) instead of the
+// 1200 px original, both re-encoded with copyright metadata (EXIF + IPTC/XMP). Cached next to
+// the renders (.renders/pub, kept by CI's .renders cache). Change PUB when the published files
+// change: names are cached immutable. Keep in sync with src/lib/tip-img.ts.
+const PUB = 'p1';
+const MD_WIDTH = 800;
+const OWNER = 'Kervan Makina';
+const RIGHTS = `© ${OWNER}. Tüm hakları saklıdır / All rights reserved.`;
+const WEB = 'https://magaza.kervanbreaker.com/';
+const XMP = `<?xpacket begin="\uFEFF" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/" xmlns:xmpRights="http://ns.adobe.com/xap/1.0/rights/" xmlns:plus="http://ns.useplus.org/ldf/xmp/1.0/">
+<dc:creator><rdf:Seq><rdf:li>${OWNER}</rdf:li></rdf:Seq></dc:creator>
+<dc:rights><rdf:Alt><rdf:li xml:lang="x-default">${RIGHTS}</rdf:li></rdf:Alt></dc:rights>
+<photoshop:Credit>${OWNER}</photoshop:Credit>
+<xmpRights:Marked>True</xmpRights:Marked>
+<xmpRights:WebStatement>${WEB}</xmpRights:WebStatement>
+<plus:Licensor><rdf:Seq><rdf:li rdf:parseType="Resource"><plus:LicensorURL>${WEB}</plus:LicensorURL></rdf:li></rdf:Seq></plus:Licensor>
+</rdf:Description></rdf:RDF></x:xmpmeta>
+<?xpacket end="w"?>`;
+
+async function publishImage(src, out, width) {
+  let img = sharp(src);
+  if (width) img = img.resize({ width, kernel: 'lanczos3' });
+  await img
+    .withExif({ IFD0: { Artist: OWNER, Copyright: RIGHTS } })
+    .withXmp(XMP)
+    .webp({ quality: 82, effort: 5 })
+    .toFile(out);
+}
 
 process.env.NODE_ENV ??= 'production';
 
@@ -21,19 +53,27 @@ try {
   if (fs.existsSync(path.join(renders, 'manifest.json'))) {
     const manifest = JSON.parse(fs.readFileSync(path.join(renders, 'manifest.json'), 'utf8'));
     fs.mkdirSync(path.join(DIST, 'tips'), { recursive: true });
-    const copy = (key) => {
-      const files = ['sm', 'lg'].map((v) => `${key}-${v}.webp`);
-      if (!files.every((n) => fs.existsSync(path.join(renders, n)))) return false;
-      for (const n of files) fs.copyFileSync(path.join(renders, n), path.join(DIST, 'tips', n));
-      images += 2;
+    const pub = path.join(renders, 'pub');
+    fs.mkdirSync(pub, { recursive: true });
+    const copy = async (key) => {
+      const src = { sm: `${key}-sm.webp`, md: `${key}-lg.webp` };
+      if (!Object.values(src).every((n) => fs.existsSync(path.join(renders, n)))) return false;
+      for (const [size, n] of Object.entries(src)) {
+        const name = `${key}-${size}-${PUB}.webp`;
+        const cached = path.join(pub, name);
+        if (!fs.existsSync(cached))
+          await publishImage(path.join(renders, n), cached, size === 'md' ? MD_WIDTH : null);
+        fs.copyFileSync(cached, path.join(DIST, 'tips', name));
+        images++;
+      }
       return true;
     };
     for (const f of catalog.families) {
       const rear = manifest.families?.[f.code];
-      if (rear && copy(rear)) f.imageRear = rear;
+      if (rear && (await copy(rear))) f.imageRear = rear;
       for (const s of f.skus) {
         const v = manifest.skus?.[s.code];
-        if (!v || !copy(v.hero) || !copy(v.side)) continue;
+        if (!v || !(await copy(v.hero)) || !(await copy(v.side))) continue;
         s.image = v.hero;
         s.imageSide = v.side;
       }
