@@ -141,7 +141,9 @@ export function ModelTable({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang;
                       {r.name}
                     </a>
                   </th>
-                  <td className="px-4 py-3 text-ink">Ø{fmtNum(r.diameterMm, lang)} mm</td>
+                  <td className="px-4 py-3 text-ink">
+                    {r.diameterMm === null ? '—' : `Ø${fmtNum(r.diameterMm, lang)} mm`}
+                  </td>
                   <td className="hidden px-4 py-3 text-ink sm:table-cell">
                     {r.types.map((x) => t.tip[x]).join(', ')}
                   </td>

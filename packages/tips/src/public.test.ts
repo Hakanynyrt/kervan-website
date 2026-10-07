@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  publicExtras,
   publicProfile,
   toPublicCatalog,
   type FamilyRow,
@@ -131,4 +132,21 @@ test('hidden-brand breakers already stored in D1 are dropped from the projection
   const all = c.families.flatMap((f) => f.fits);
   assert.equal(JSON.stringify(all).toLowerCase().includes('vega'), false);
   assert.ok(all.some((b) => b.brand === 'Acme'));
+});
+
+test('extras: whitelisted, unknown types dropped, hidden brand left out', () => {
+  const e = publicExtras([
+    {
+      brand: 'MTB',
+      model: '125',
+      slug: 'mtb/125',
+      tip_types: '["chisel","x"]',
+      price_usd_net_cents: 21900,
+    },
+    { brand: 'Vega', model: 'X', slug: 'vega/x', tip_types: '["chisel"]', price_usd_net_cents: 1 },
+    { brand: 'A', model: 'B', slug: 'a/b', tip_types: 'oops', price_usd_net_cents: null },
+  ]);
+  assert.deepEqual(e, [
+    { brand: 'MTB', model: '125', slug: 'mtb/125', tipTypes: ['chisel'], priceUsdNetCents: 21900 },
+  ]);
 });

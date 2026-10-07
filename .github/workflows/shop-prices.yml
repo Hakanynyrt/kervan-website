@@ -1,0 +1,65 @@
+name: Shop prices
+
+# Manual: the owner's price sheet → D1 kervan-shop (SKU prices, extra products, alias breaker
+# names), then a shop redeploy. Paste the sheet (JSON, see PriceSheet in packages/tips/src/sql.ts)
+# into the input. It never enters the repository, and this public repo's logs print counts only.
+on:
+  workflow_dispatch:
+    inputs:
+      sheet:
+        description: 'Price sheet (JSON)'
+        required: true
+
+concurrency:
+  group: shop-import
+  cancel-in-progress: false
+
+jobs:
+  prices:
+    name: Price sheet → D1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: write
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_SHOP_DATA_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      DB: kervan-shop
+      SHEET: ${{ inputs.sheet }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check configuration
+        run: test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::secret CLOUDFLARE_SHOP_DATA_TOKEN is not set"; exit 1; }
+
+      - name: Apply schema
+        run: |
+          for f in apps/parts-shop/migrations/*.sql; do
+            pnpm exec wrangler d1 execute "$DB" --remote --yes --file "$f" > /dev/null
+          done
+
+      - name: Write prices (output kept out of the log)
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/prices"
+          mkdir -p "$D"
+          printf '%s' "$SHEET" > "$D/sheet.json"
+          node --experimental-strip-types --no-warnings apps/parts-shop/scripts/shop-prices.ts "$D/sheet.json" "$D/prices.sql"
+          pnpm exec wrangler d1 execute "$DB" --remote --yes --file "$D/prices.sql" > /dev/null
+          rm -rf "$D"
+
+      - name: Redeploy the shop with the new prices
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main -f app=parts-shop

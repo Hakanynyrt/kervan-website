@@ -2,6 +2,8 @@ import { useState } from 'react';
 import {
   carrierTons,
   TIP_TYPES,
+  type FxRate,
+  type PublicExtra,
   type PublicFamily,
   type PublicSku,
   type TipType,
@@ -11,7 +13,10 @@ import { ORG_EMAIL } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
 import { fmtMm, fmtNum } from '../lib/format';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
-import { LIST_PATH } from '../lib/routes';
+import { addToCart } from '../lib/cart';
+import { fmtDate, fmtTry, fmtUsd } from '../lib/price';
+import { CART_PATH, LIST_PATH } from '../lib/routes';
+import { localePath } from '../lib/locale-path';
 import { tipImg } from '../lib/tip-img';
 import type { Lang } from '../types';
 import {
@@ -45,8 +50,22 @@ interface Props {
   /** Extra breadcrumb steps between "Breaker tips" and this page (e.g. the make). */
   trail?: [string, string][];
   families: PublicFamily[];
+  /** A product sold by model without catalogue geometry (then `families` is empty). */
+  extra?: PublicExtra;
+  /** Neutral path of this page (cart line link and id). */
+  path: string;
+  fx: FxRate | null;
   lang: Lang;
   t: Dict;
+}
+
+/** One choice of the type selector: a catalogue SKU, or a type of an extra product. */
+interface Option {
+  tipType: TipType;
+  sku: PublicSku | null;
+  family: PublicFamily | null;
+  code: string | null;
+  cents: number | null;
 }
 
 /**
@@ -61,19 +80,57 @@ export default function TipProduct({
   quoteName,
   trail = [],
   families,
+  extra,
+  path,
+  fx,
   lang,
   t,
 }: Props) {
   const tf = t.family;
-  const skus = new Map<TipType, { sku: PublicSku; family: PublicFamily }>();
+  const opts = new Map<TipType, Option>();
   for (const f of families)
-    for (const s of f.skus) if (!skus.has(s.tipType)) skus.set(s.tipType, { sku: s, family: f });
-  const types = TIP_TYPES.filter((x) => skus.has(x));
+    for (const s of f.skus)
+      if (!opts.has(s.tipType))
+        opts.set(s.tipType, {
+          tipType: s.tipType,
+          sku: s,
+          family: f,
+          code: s.code,
+          cents: s.priceUsdNetCents,
+        });
+  for (const x of extra?.tipTypes ?? [])
+    if (!opts.has(x))
+      opts.set(x, {
+        tipType: x,
+        sku: null,
+        family: null,
+        code: null,
+        cents: extra!.priceUsdNetCents,
+      });
+  const types = TIP_TYPES.filter((x) => opts.has(x));
   const [type, setType] = useState<TipType>(types[0]);
   const [qty, setQty] = useState<Qty>('1');
-  const { sku, family: f } = skus.get(type) ?? skus.get(types[0])!;
-  const tons = carrierTons(f.attrs.diameterMm);
-  const text = tf.quoteText(quoteName, t.tip[sku.tipType], sku.code, qty);
+  const [added, setAdded] = useState(false);
+  const opt = opts.get(type) ?? opts.get(types[0])!;
+  const sku = opt.sku;
+  const f = opt.family;
+  const tons = f ? carrierTons(f.attrs.diameterMm) : null;
+  const text = tf.quoteText(quoteName, t.tip[opt.tipType], opt.code ?? '', qty);
+  const tl = opt.cents === null ? null : fmtTry(opt.cents, fx, lang);
+  const add = () => {
+    addToCart(
+      {
+        id: `${path}|${opt.tipType}`,
+        name: quoteName,
+        tipType: opt.tipType,
+        code: opt.code,
+        path,
+        cents: opt.cents,
+      },
+      qty === '5+' ? 5 : Number(qty),
+    );
+    setAdded(true);
+  };
   const mail = `mailto:${ORG_EMAIL}?subject=${encodeURIComponent(quoteName)}&body=${encodeURIComponent(text)}`;
 
   return (
@@ -87,16 +144,46 @@ export default function TipProduct({
             legend={tf.type}
             name="type"
             options={types.map((x) => ({ value: x, label: t.tip[x] }))}
-            value={sku.tipType}
-            onChange={setType}
+            value={opt.tipType}
+            onChange={(v) => {
+              setType(v);
+              setAdded(false);
+            }}
           />
+          <div className="font-sans">
+            <p className="m-0 text-sm text-ink-mid">{t.price.label}</p>
+            {opt.cents === null ? (
+              <p className="m-0 mt-1 text-lg font-semibold text-ink">{tf.ask}</p>
+            ) : (
+              <>
+                <p className="m-0 mt-1 text-3xl font-bold text-ink tabular-nums">
+                  {fmtUsd(opt.cents, lang)}
+                </p>
+                {tl && fx && (
+                  <>
+                    <p className="m-0 mt-1 text-lg font-semibold text-ink-mid tabular-nums">{tl}</p>
+                    <p className="m-0 mt-1 text-xs text-ink-soft">
+                      {t.price.fxNote(fmtDate(fx.date, lang))}
+                    </p>
+                  </>
+                )}
+              </>
+            )}
+          </div>
           <dl className="m-0 font-sans text-sm">
             {[
-              [tf.diameter, fmtMm(f.attrs.diameterMm, lang)],
-              ...(sku.tipAngleDeg === null
+              ...(f ? [[tf.diameter, fmtMm(f.attrs.diameterMm, lang)]] : []),
+              ...(sku?.tipAngleDeg == null
                 ? []
                 : [[tf.angle, `${fmtNum(sku.tipAngleDeg, lang)}°`]]),
-              [tf.availability, availabilityText(sku, t)],
+              [
+                tf.availability,
+                sku && sku.availability.kind !== 'ask'
+                  ? availabilityText(sku, t)
+                  : opt.cents === null
+                    ? tf.ask
+                    : tf.askLead,
+              ],
               ...(tons ? [[tf.carrier, tf.carrierValue(tons.min, tons.max)]] : []),
             ].map(([k, v]) => (
               <div key={k} className="flex justify-between gap-4 border-t border-hair py-3">
@@ -120,6 +207,24 @@ export default function TipProduct({
               />
             </div>
             <div className="mt-4 flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={add}
+                className={`cursor-pointer rounded-sm bg-brand px-5 py-3 text-center font-medium text-white hover:bg-brand-hi ${FOCUS}`}
+              >
+                {t.price.add}
+              </button>
+              {added && (
+                <p className="m-0 text-center text-ink" role="status">
+                  {t.price.added} ·{' '}
+                  <a
+                    href={localePath(CART_PATH, lang)}
+                    className={`font-medium text-brand-hi underline ${FOCUS}`}
+                  >
+                    {t.price.goCart}
+                  </a>
+                </p>
+              )}
               <a
                 href={whatsappHref(text)}
                 className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
@@ -137,7 +242,7 @@ export default function TipProduct({
         </aside>
 
         <div className="flex min-w-0 flex-col gap-4 lg:order-1">
-          {sku.image && (
+          {sku?.image && (
             <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
               <img
                 key={sku.image}
@@ -146,7 +251,7 @@ export default function TipProduct({
                 sizes="(min-width: 1024px) 800px, 100vw"
                 width={800}
                 height={533}
-                alt={tf.renderAlt(quoteName, t.tip[sku.tipType])}
+                alt={tf.renderAlt(quoteName, t.tip[opt.tipType])}
                 decoding="async"
                 className="block h-auto w-full"
               />
@@ -158,7 +263,7 @@ export default function TipProduct({
                   sizes="(min-width: 1024px) 800px, 100vw"
                   width={800}
                   height={267}
-                  alt={tf.sideAlt(quoteName, t.tip[sku.tipType])}
+                  alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
                   loading="lazy"
                   decoding="async"
                   className="block h-auto w-full"
@@ -166,7 +271,7 @@ export default function TipProduct({
               )}
             </figure>
           )}
-          {f.imageRear && (
+          {f?.imageRear && (
             <figure className="m-0 max-w-sm overflow-hidden rounded-md border border-hair bg-stage">
               <img
                 src={tipImg(f.imageRear, 'sm')}

@@ -1,0 +1,21 @@
+name: Shop daily rebuild
+
+# The shop shows TRY prices at the CBRT USD selling rate of its build day: rebuild it every
+# morning (Istanbul 06:47) so the rate stays current. Manual runs work too.
+on:
+  schedule:
+    - cron: '47 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Redeploy the shop
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run deploy.yml --ref main -f app=parts-shop

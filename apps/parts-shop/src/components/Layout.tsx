@@ -12,7 +12,8 @@ import {
 } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { LIST_PATH, PARTS_PATH, POPULAR_PATH } from '../lib/routes';
+import { CART_PATH, LIST_PATH, PARTS_PATH, POPULAR_PATH } from '../lib/routes';
+import { CartLink } from './CartLink';
 import type { Lang } from '../types';
 
 export const FOCUS =
@@ -101,6 +102,7 @@ export default function Layout({ lang, path, t, demo, hasPopular, children }: Pr
             <a href={corporate} className={`hidden text-ink-mid hover:text-ink sm:inline ${FOCUS}`}>
               {t.nav.catalogSite}
             </a>
+            <CartLink lang={lang} t={t} current={path === CART_PATH} />
             <a
               href={localePath(path, other)}
               hrefLang={other}

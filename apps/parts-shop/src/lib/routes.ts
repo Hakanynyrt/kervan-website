@@ -2,6 +2,7 @@ import {
   displayBreakers,
   slugify,
   type PublicCatalog,
+  type PublicExtra,
   type PublicFamily,
   type TipType,
 } from '@kervan/tips';
@@ -15,7 +16,8 @@ export interface BreakerCard {
   name: string;
   brand: string;
   model: string;
-  diameterMm: number;
+  /** Null for an extra product (no catalogue geometry yet). */
+  diameterMm: number | null;
   types: TipType[];
   /** Render key of the first SKU that has one (see tip-img.ts). */
   image: string | null;
@@ -48,6 +50,8 @@ export type PageModel =
   | {
       kind: 'breaker';
       name: string;
+      /** Set for a product sold by model without catalogue geometry (families is empty). */
+      extra?: PublicExtra;
       brand: string;
       model: string;
       /** Tip families that fit this breaker (usually one). */
@@ -56,6 +60,7 @@ export type PageModel =
       hasPopular: boolean;
     }
   | { kind: 'family'; family: PublicFamily; demo: boolean; hasPopular: boolean }
+  | { kind: 'cart'; demo: boolean; hasPopular: boolean }
   | { kind: 'notFound' };
 
 export interface BrandLink {
@@ -68,6 +73,7 @@ export interface BrandLink {
 export const PART_KEYS = ['alt-govde', 'burc', 'kama', 'saplama', 'piston'] as const;
 export type PartKey = (typeof PART_KEYS)[number];
 export const PARTS_PATH = '/yedek-parca';
+export const CART_PATH = '/sepet';
 export const partPath = (k: PartKey): string => `${PARTS_PATH}/${k}`;
 
 export interface BuiltPage {
@@ -103,7 +109,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
   // maker, lists split); entries that name no maker stay on their family pages only.
   const breakers = new Map<
     string,
-    { name: string; brand: string; model: string; families: PublicFamily[] }
+    { name: string; brand: string; model: string; families: PublicFamily[]; extra?: PublicExtra }
   >();
   for (const f of c.families)
     for (const raw of f.fits)
@@ -117,8 +123,30 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         if (!e.families.includes(f)) e.families.push(f);
         breakers.set(b.slug, e);
       }
+  // Extra products (sold by model, no geometry yet) unless the catalogue already has the model.
+  for (const x of c.extras ?? [])
+    if (!breakers.has(x.slug))
+      breakers.set(x.slug, {
+        name: breakerName(x),
+        brand: x.brand,
+        model: x.model,
+        families: [],
+        extra: x,
+      });
   const cards: BreakerCard[] = [...breakers].map(([slug, e]) => {
-    const f = e.families[0];
+    const f = e.families[0] as PublicFamily | undefined;
+    if (!f)
+      return {
+        slug,
+        path: breakerPath(slug),
+        name: e.name,
+        brand: e.brand,
+        model: e.model,
+        diameterMm: null,
+        types: e.extra?.tipTypes ?? [],
+        image: null,
+        popularTier: null,
+      };
     return {
       slug,
       path: breakerPath(slug),
@@ -171,6 +199,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       model: { kind: 'brand' as const, brand, rows, brands, demo, hasPopular },
     })),
     { path: PARTS_PATH, model: { kind: 'parts' as const, demo, hasPopular } },
+    { path: CART_PATH, model: { kind: 'cart' as const, demo, hasPopular } },
     ...PART_KEYS.map((part) => ({
       path: partPath(part),
       model: { kind: 'part' as const, part, demo, hasPopular },
@@ -188,6 +217,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       model: {
         kind: 'breaker' as const,
         name: e.name,
+        ...(e.extra ? { extra: e.extra } : {}),
         brand: e.brand,
         model: e.model,
         families: e.families,

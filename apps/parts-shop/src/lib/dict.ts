@@ -22,6 +22,7 @@ export interface Dict {
     partsDesc: string;
     partTitle: (name: string) => string;
     partDesc: (name: string) => string;
+    cartTitle: string;
   };
   nav: {
     label: string;
@@ -32,6 +33,7 @@ export interface Dict {
     quoteText: string;
     parts: string;
     call: string;
+    cart: string;
     langLabel: string;
     langOther: string;
   };
@@ -82,6 +84,7 @@ export interface Dict {
     inStock: (n: number) => string;
     lead: (days: number) => string;
     ask: string;
+    askLead: string;
     carrier: string;
     carrierValue: (min: number, max: number) => string;
     carrierNote: string;
@@ -105,6 +108,39 @@ export interface Dict {
     all: string;
   };
   missing: { title: string; body: string; button: string; text: string };
+  price: {
+    label: string;
+    fxNote: (date: string) => string;
+    add: string;
+    added: string;
+    goCart: string;
+  };
+  cart: {
+    title: string;
+    empty: string;
+    browse: string;
+    product: string;
+    qty: string;
+    unit: string;
+    lineTotal: string;
+    ask: string;
+    total: string;
+    totalNote: string;
+    remove: (name: string) => string;
+    less: string;
+    more: string;
+    contactTitle: string;
+    name: string;
+    company: string;
+    phone: string;
+    city: string;
+    note: string;
+    sendWa: string;
+    sendMail: string;
+    clear: string;
+    info: string;
+    message: (lines: string[], total: string, contact: string[]) => string;
+  };
   brand: { title: (brand: string) => string; lead: (n: number) => string };
   parts: {
     title: string;
@@ -143,9 +179,9 @@ export const DICT: Record<Lang, Dict> = {
       listDesc: 'Marka ve modele göre tüm Kervan kırıcı uçları: çalışma çapı ve uç tipleri.',
       familyTitle: (code, d) => `${code} kırıcı ucu Ø${d} | Kervan Mağaza`,
       familyDesc: (code, d, types) => `${code}: Ø${d} mm kırıcı ucu (${types}).`,
-      breakerTitle: (name, d) => `${name} kırıcı ucu Ø${d} | Kervan Mağaza`,
+      breakerTitle: (name, d) => `${name} kırıcı ucu${d ? ` Ø${d}` : ''} | Kervan Mağaza`,
       breakerDesc: (name, d, types) =>
-        `${name} hidrolik kırıcı için Kervan ucu: Ø${d} mm, ${types}. Fiyat teklifi isteyin.`,
+        `${name} hidrolik kırıcı için Kervan ucu: ${d ? `Ø${d} mm, ` : ''}${types}.`,
       notFoundTitle: 'Sayfa bulunamadı | Kervan Mağaza',
       popularTitle: 'Çok satan kırıcı uçları | Kervan Mağaza',
       popularDesc: 'En çok sipariş edilen Kervan kırıcı uçları, kırıcı marka ve modeline göre.',
@@ -156,6 +192,7 @@ export const DICT: Record<Lang, Dict> = {
       partTitle: (name) => `Kırıcı ${name.toLocaleLowerCase('tr')} | Kervan Mağaza`,
       partDesc: (name) =>
         `Hidrolik kırıcı ${name.toLocaleLowerCase('tr')}: Kervan üretimi, kırıcınızın modeline göre teklif.`,
+      cartTitle: 'Sepet | Kervan Mağaza',
     },
     nav: {
       label: 'Ana menü',
@@ -166,6 +203,7 @@ export const DICT: Record<Lang, Dict> = {
       quoteText: 'Merhaba, kırıcı ucu için fiyat teklifi almak istiyorum.',
       parts: 'Yedek parçalar',
       call: 'Ara',
+      cart: 'Sepet',
       langLabel: 'English',
       langOther: 'EN',
     },
@@ -174,7 +212,7 @@ export const DICT: Record<Lang, Dict> = {
       shop: 'Kırıcı yedek parça mağazası',
     },
     banner: {
-      preview: 'Önizleme: mağaza hazırlanıyor, henüz sipariş alınmıyor. Fiyat için bize yazın.',
+      preview: 'Online ödeme henüz yok: sepetinizi sipariş talebi olarak gönderin, size dönelim.',
       demo: 'DEMO verisi: bu ürünler gerçek değildir.',
     },
     tip: {
@@ -270,6 +308,7 @@ export const DICT: Record<Lang, Dict> = {
       inStock: (n) => (n >= 10 ? 'Stokta (10+)' : `Stokta (${n})`),
       lead: (days) => `Üretim ~${days} iş günü`,
       ask: 'Fiyat ve süre için sorun',
+      askLead: 'Teslim süresi için sorun',
       carrier: 'Taşıyıcı (yaklaşık)',
       carrierValue: (min, max) => `${min}–${max} t ekskavatör`,
       carrierNote: 'Yaklaşık değerdir; kırıcı üreticisinin önerisi geçerlidir.',
@@ -278,7 +317,7 @@ export const DICT: Record<Lang, Dict> = {
       whatsapp: 'WhatsApp ile sor',
       email: 'E-posta gönder',
       quoteText: (name, type, code, qty) =>
-        `Merhaba, ${name} için ${type} kırıcı ucu (${code}), ${qty} adet: fiyat ve teslim süresi öğrenmek istiyorum.`,
+        `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet: fiyat ve teslim süresi öğrenmek istiyorum.`,
       renderAlt: (name, type) => `${name} ${type} kırıcı ucu`,
       sideAlt: (name, type) => `${name} ${type} kırıcı ucu, yandan görünüş`,
       rearAlt: (name) => `${name} kırıcı ucunun kama kanalı ve arka ucu, yakın görünüş`,
@@ -298,6 +337,45 @@ export const DICT: Record<Lang, Dict> = {
       body: 'Kırıcınızın marka ve modelini, mümkünse ucun çapını ve bir fotoğrafını WhatsApp’tan gönderin; uyan ucu biz bulalım. Çap, ucun çalışan (ön) kısmında kumpasla ölçülür.',
       button: 'WhatsApp ile sor',
       text: 'Merhaba, kırıcımın markası/modeli: … Ölçtüğüm uç çapı: … mm. Fotoğraf ekliyorum.',
+    },
+    price: {
+      label: 'Fiyat',
+      fxNote: (date) => `TL fiyatı TCMB döviz satış kuruyla (${date}) hesaplanır.`,
+      add: 'Sepete ekle',
+      added: 'Sepete eklendi',
+      goCart: 'Sepete git',
+    },
+    cart: {
+      title: 'Sepet',
+      empty: 'Sepetiniz boş.',
+      browse: 'Kırıcı uçlarına göz atın',
+      product: 'Ürün',
+      qty: 'Adet',
+      unit: 'Birim fiyat',
+      lineTotal: 'Tutar',
+      ask: 'Fiyat sorulacak',
+      total: 'Toplam',
+      totalNote: 'Fiyatı sorulacak ürünler toplama dahil değildir.',
+      remove: (name) => `${name} ürününü sepetten çıkar`,
+      less: 'Bir azalt',
+      more: 'Bir artır',
+      contactTitle: 'İletişim bilgileriniz',
+      name: 'Ad soyad',
+      company: 'Firma',
+      phone: 'Telefon',
+      city: 'Şehir',
+      note: 'Not',
+      sendWa: 'Sipariş talebini WhatsApp ile gönder',
+      sendMail: 'E-posta ile gönder',
+      clear: 'Sepeti boşalt',
+      info: 'Online ödeme henüz yok: sipariş talebinizi alınca stok, teslim süresi ve ödeme bilgisiyle size dönüyoruz. Bilgileriniz yalnız bu mesaja yazılır, sitede saklanmaz.',
+      message: (lines, total, contact) =>
+        [
+          'Merhaba, sipariş talebim:',
+          ...lines,
+          total,
+          ...(contact.length ? ['', ...contact] : []),
+        ].join('\n'),
     },
     brand: {
       title: (brand) => `${brand} kırıcı uçları`,
@@ -364,9 +442,9 @@ export const DICT: Record<Lang, Dict> = {
         'All Kervan breaker tips by breaker make and model: working diameter and tip types.',
       familyTitle: (code, d) => `${code} breaker tip Ø${d} | Kervan Shop`,
       familyDesc: (code, d, types) => `${code}: Ø${d} mm breaker tip (${types}).`,
-      breakerTitle: (name, d) => `${name} breaker tip Ø${d} | Kervan Shop`,
+      breakerTitle: (name, d) => `${name} breaker tip${d ? ` Ø${d}` : ''} | Kervan Shop`,
       breakerDesc: (name, d, types) =>
-        `Kervan tip for the ${name} hydraulic breaker: Ø${d} mm, ${types}. Request a quote.`,
+        `Kervan tip for the ${name} hydraulic breaker: ${d ? `Ø${d} mm, ` : ''}${types}.`,
       notFoundTitle: 'Page not found | Kervan Shop',
       popularTitle: 'Best-selling breaker tips | Kervan Shop',
       popularDesc: 'The most ordered Kervan breaker tips, by breaker make and model.',
@@ -378,6 +456,7 @@ export const DICT: Record<Lang, Dict> = {
       partTitle: (name) => `Breaker ${name.toLowerCase()} | Kervan Shop`,
       partDesc: (name) =>
         `Hydraulic breaker ${name.toLowerCase()} made by Kervan; quotes by breaker model.`,
+      cartTitle: 'Cart | Kervan Shop',
     },
     nav: {
       label: 'Main menu',
@@ -388,6 +467,7 @@ export const DICT: Record<Lang, Dict> = {
       quoteText: 'Hello, I would like a quote for a breaker tip.',
       parts: 'Spare parts',
       call: 'Call',
+      cart: 'Cart',
       langLabel: 'Türkçe',
       langOther: 'TR',
     },
@@ -397,7 +477,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     banner: {
       preview:
-        'Preview: the shop is being prepared and does not take orders yet. Write to us for prices.',
+        'No online payment yet: send your cart as an order request and we will get back to you.',
       demo: 'DEMO data: these products are not real.',
     },
     tip: {
@@ -486,6 +566,7 @@ export const DICT: Record<Lang, Dict> = {
       inStock: (n) => (n >= 10 ? 'In stock (10+)' : `In stock (${n})`),
       lead: (days) => `Made to order, ~${days} working days`,
       ask: 'Ask for price and lead time',
+      askLead: 'Ask for lead time',
       carrier: 'Carrier (approx.)',
       carrierValue: (min, max) => `${min}–${max} t excavator`,
       carrierNote: 'Approximate; the breaker maker’s recommendation wins.',
@@ -495,7 +576,7 @@ export const DICT: Record<Lang, Dict> = {
       whatsapp: 'Ask on WhatsApp',
       email: 'Send an e-mail',
       quoteText: (name, type, code, qty) =>
-        `Hello, I would like the price and lead time of the ${type} tip (${code}) for the ${name}, quantity ${qty}.`,
+        `Hello, I would like the price and lead time of the ${type} tip${code ? ` (${code})` : ''} for the ${name}, quantity ${qty}.`,
       renderAlt: (name, type) => `${name} ${type} breaker tip`,
       sideAlt: (name, type) => `${name} ${type} breaker tip, side view`,
       rearAlt: (name) => `${name} breaker tip key slot and rear end, close-up`,
@@ -515,6 +596,45 @@ export const DICT: Record<Lang, Dict> = {
       body: 'Send your breaker make and model, if possible the tip diameter and a photo, on WhatsApp; we will find the tip that fits. Measure the diameter with a caliper on the working (front) part of the tip.',
       button: 'Ask on WhatsApp',
       text: 'Hello, my breaker make/model: … Tip diameter I measured: … mm. Photo attached.',
+    },
+    price: {
+      label: 'Price',
+      fxNote: (date) => `TRY prices use the CBRT USD selling rate of ${date}.`,
+      add: 'Add to cart',
+      added: 'Added to cart',
+      goCart: 'Go to cart',
+    },
+    cart: {
+      title: 'Cart',
+      empty: 'Your cart is empty.',
+      browse: 'Browse breaker tips',
+      product: 'Product',
+      qty: 'Qty',
+      unit: 'Unit price',
+      lineTotal: 'Amount',
+      ask: 'Price on request',
+      total: 'Total',
+      totalNote: 'Products priced on request are not in the total.',
+      remove: (name) => `Remove ${name} from the cart`,
+      less: 'One less',
+      more: 'One more',
+      contactTitle: 'Your contact details',
+      name: 'Name',
+      company: 'Company',
+      phone: 'Phone',
+      city: 'City',
+      note: 'Note',
+      sendWa: 'Send the order request on WhatsApp',
+      sendMail: 'Send by e-mail',
+      clear: 'Empty the cart',
+      info: 'No online payment yet: once we receive your request we reply with stock, lead time and payment details. Your details only go into this message; the site does not store them.',
+      message: (lines, total, contact) =>
+        [
+          'Hello, my order request:',
+          ...lines,
+          total,
+          ...(contact.length ? ['', ...contact] : []),
+        ].join('\n'),
     },
     brand: {
       title: (brand) => `${brand} breaker tips`,

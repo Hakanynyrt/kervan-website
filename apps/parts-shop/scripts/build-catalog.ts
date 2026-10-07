@@ -11,8 +11,11 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import {
   demoCatalog,
+  publicExtras,
   toPublicCatalog,
+  type ExtraRow,
   type FamilyRow,
+  type FxRate,
   type FitRow,
   type PublicCatalog,
   type SkuRow,
@@ -25,6 +28,8 @@ const log = (s: string) => process.stdout.write(`build-catalog: ${s}\n`);
 const FAMILIES_SQL = 'SELECT id, code, attrs, popular_tier FROM families WHERE published = 1';
 const SKUS_SQL =
   'SELECT s.family_id, s.code, s.tip_type, s.length_min_mm, s.length_max_mm, s.weight_min_kg, s.weight_max_kg, s.tip_angle_deg, s.price_usd_net_cents, s.stock_qty, s.lead_time_days FROM skus s JOIN families f ON f.id = s.family_id WHERE s.published = 1 AND f.published = 1';
+const EXTRAS_SQL =
+  'SELECT brand, model, slug, tip_types, price_usd_net_cents FROM extra_products WHERE published = 1 ORDER BY brand, model';
 const FITS_SQL =
   'SELECT ft.family_id, b.brand, b.model, b.slug FROM fitments ft JOIN breakers b ON b.id = ft.breaker_id JOIN families f ON f.id = ft.family_id WHERE f.published = 1 ORDER BY b.brand, b.model';
 
@@ -41,6 +46,24 @@ function query<T>(db: string, sql: string): T[] {
   );
   const parsed = JSON.parse(out) as { results?: T[] }[];
   return parsed.flatMap((b) => b.results ?? []);
+}
+
+/** CBRT (TCMB) USD selling rate of the last business day; null when it cannot be read. */
+async function fetchFx(): Promise<FxRate | null> {
+  try {
+    const res = await fetch('https://www.tcmb.gov.tr/kurlar/today.xml', {
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) return null;
+    const xml = await res.text();
+    const usd = /<Currency[^>]*CurrencyCode="USD"[^>]*>([\s\S]*?)<\/Currency>/.exec(xml)?.[1] ?? '';
+    const rate = Number(/<ForexSelling>([\d.]+)<\/ForexSelling>/.exec(usd)?.[1]);
+    const d = /Date="(\d{2})\/(\d{2})\/(\d{4})"/.exec(xml);
+    if (!(rate > 1 && rate < 1000) || !d) return null;
+    return { usdTry: rate, date: `${d[3]}-${d[1]}-${d[2]}` };
+  } catch {
+    return null;
+  }
 }
 
 function write(c: PublicCatalog, what: string) {
@@ -61,6 +84,12 @@ if (db && process.env.CLOUDFLARE_API_TOKEN) {
       query<SkuRow>(db, SKUS_SQL),
       query<FitRow>(db, FITS_SQL),
     );
+    // The extras table comes with migration 0002; before it exists there are none.
+    try {
+      c.extras = publicExtras(query<ExtraRow>(db, EXTRAS_SQL));
+    } catch {
+      c.extras = [];
+    }
     // An empty D1 (before the first import) must not ship an empty shop: DEMO, or fail on main.
     if (c.families.length === 0) throw new Error('empty catalog');
     write(c, 'D1');
@@ -78,4 +107,12 @@ if (db && process.env.CLOUDFLARE_API_TOKEN) {
   log('keeping the existing snapshot');
 } else {
   write(demoCatalog(), 'DEMO');
+}
+
+// The TRY prices follow the rate of the build day (the shop rebuilds every morning).
+if (fs.existsSync(OUT)) {
+  const c = JSON.parse(fs.readFileSync(OUT, 'utf8')) as PublicCatalog;
+  c.fx = await fetchFx();
+  fs.writeFileSync(OUT, JSON.stringify(c));
+  log(c.fx ? `USD/TRY rate of ${c.fx.date}` : 'USD/TRY rate unavailable (USD prices only)');
 }

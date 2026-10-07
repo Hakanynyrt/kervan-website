@@ -38,7 +38,7 @@ export function prerender(catalog: PublicCatalog): PrerenderPage[] {
   const out: PrerenderPage[] = [];
   for (const lang of LANGS) {
     for (const p of buildPages(catalog)) {
-      const props: PageProps = { lang, path: p.path, model: p.model };
+      const props: PageProps = { lang, path: p.path, model: p.model, fx: catalog.fx ?? null };
       out.push({
         file: fileFor(localePath(p.path, lang)),
         lang,
@@ -47,7 +47,7 @@ export function prerender(catalog: PublicCatalog): PrerenderPage[] {
         props,
       });
     }
-    const nf: PageProps = { lang, path: '/', model: { kind: 'notFound' } };
+    const nf: PageProps = { lang, path: '/', model: { kind: 'notFound' }, fx: null };
     out.push({
       file: lang === 'tr' ? '404.html' : 'en/404.html',
       lang,

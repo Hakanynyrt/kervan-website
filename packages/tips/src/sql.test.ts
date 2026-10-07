@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { sqlValue, toImportSql } from './sql.ts';
+import { sqlValue, toImportSql, toPricesSql } from './sql.ts';
 import type { ImportFamily } from './from-catalog.ts';
 
 const fam: ImportFamily = {
@@ -53,4 +53,26 @@ test('toImportSql upserts without touching codes or owner flags', () => {
     /INSERT OR IGNORE INTO fitments \(family_id, breaker_id\) VALUES \(\(SELECT id FROM families WHERE private_ref = 'r''1'\), \(SELECT id FROM breakers WHERE slug = 'o-brien\/x-1'\)\);/,
   );
   assert.doesNotMatch(sql, /BEGIN|COMMIT/);
+});
+
+test('price sheet: prices by code, extras upserted, aliases added; bad rows throw', () => {
+  const slug = (b: string, m: string) => `${b}/${m}`.toLowerCase().replace(/\s+/g, '-');
+  const sql = toPricesSql(
+    {
+      schema: 1,
+      prices: { 'KU130-09-C': 26800 },
+      extras: [{ brand: 'JCB', model: 'HM 335', types: ['chisel'], cents: 6500 }],
+      aliases: [{ brand: 'MTB', model: 'IQ 175', families: ['KU130-09'] }],
+    },
+    '2026-10-07',
+    slug,
+  );
+  assert.match(sql, /UPDATE skus SET price_usd_net_cents = 26800, .* WHERE code = 'KU130-09-C';/);
+  assert.match(sql, /INSERT INTO extra_products .*'jcb\/hm-335'.*'\["chisel"\]', 6500/);
+  assert.match(
+    sql,
+    /INSERT OR IGNORE INTO fitments .* f\.code = 'KU130-09' AND b\.slug = 'mtb\/iq-175'/,
+  );
+  assert.throws(() => toPricesSql({ schema: 1, prices: { "x'; DROP": 1 } }, 'n', slug));
+  assert.throws(() => toPricesSql({ schema: 1, prices: { 'KU130-09-C': 1.5 } }, 'n', slug));
 });

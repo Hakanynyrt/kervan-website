@@ -37,3 +37,63 @@ export function toImportSql(families: readonly ImportFamily[], now: string): str
   }
   return `${out.join('\n')}\n`;
 }
+
+/** Owner's price sheet for the "Shop prices" workflow (never in the repo). */
+export interface PriceSheet {
+  schema: 1;
+  /** SKU code → net USD cents. */
+  prices: Record<string, number>;
+  /** Products sold by breaker model without catalogue geometry. */
+  extras?: { brand: string; model: string; types: string[]; cents: number | null }[];
+  /** Extra breaker names for existing tip families (e.g. a newer model name). */
+  aliases?: { brand: string; model: string; families: string[] }[];
+}
+
+const CODE = /^KU\d+(?:\.\d+)?-\d{2}-[CMBPKA]$/;
+const FAMILY = /^KU\d+(?:\.\d+)?-\d{2}$/;
+const cents = (v: unknown): number | null =>
+  typeof v === 'number' && Number.isInteger(v) && v > 0 && v < 100_000_000 ? v : null;
+
+/**
+ * SQL for a price sheet: sets SKU prices (by code; unknown codes match no row), upserts the
+ * extra products and adds alias breakers to existing families. Throws on a malformed sheet so
+ * a bad paste never half-applies.
+ */
+export function toPricesSql(
+  sheet: PriceSheet,
+  now: string,
+  slugOf: (b: string, m: string) => string,
+): string {
+  const q = sqlValue;
+  if (!sheet || sheet.schema !== 1 || typeof sheet.prices !== 'object')
+    throw new Error('bad sheet');
+  const out: string[] = [];
+  for (const [code, v] of Object.entries(sheet.prices)) {
+    const c = cents(v);
+    if (!CODE.test(code) || c === null) throw new Error(`bad price row ${code}`);
+    out.push(
+      `UPDATE skus SET price_usd_net_cents = ${c}, updated_at = ${q(now)} WHERE code = ${q(code)};`,
+    );
+  }
+  for (const e of sheet.extras ?? []) {
+    const c = e.cents === null ? null : cents(e.cents);
+    if (!e.brand || !e.model || !Array.isArray(e.types) || (e.cents !== null && c === null))
+      throw new Error('bad extra row');
+    out.push(
+      `INSERT INTO extra_products (brand, model, slug, tip_types, price_usd_net_cents, updated_at) VALUES (${q(e.brand)}, ${q(e.model)}, ${q(slugOf(e.brand, e.model))}, ${q(JSON.stringify(e.types))}, ${q(c)}, ${q(now)}) ON CONFLICT(slug) DO UPDATE SET brand = excluded.brand, model = excluded.model, tip_types = excluded.tip_types, price_usd_net_cents = excluded.price_usd_net_cents, updated_at = excluded.updated_at;`,
+    );
+  }
+  for (const a of sheet.aliases ?? []) {
+    if (!a.brand || !a.model || !a.families?.every((f) => FAMILY.test(f)))
+      throw new Error('bad alias row');
+    const slug = slugOf(a.brand, a.model);
+    out.push(
+      `INSERT OR IGNORE INTO breakers (brand, model, slug) VALUES (${q(a.brand)}, ${q(a.model)}, ${q(slug)});`,
+    );
+    for (const f of a.families)
+      out.push(
+        `INSERT OR IGNORE INTO fitments (family_id, breaker_id) SELECT f.id, b.id FROM families f, breakers b WHERE f.code = ${q(f)} AND b.slug = ${q(slug)};`,
+      );
+  }
+  return `${out.join('\n')}\n`;
+}

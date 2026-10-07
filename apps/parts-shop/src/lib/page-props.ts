@@ -1,3 +1,4 @@
+import type { FxRate } from '@kervan/tips';
 import type { Lang } from '../types';
 import type { PageModel } from './routes';
 
@@ -7,6 +8,8 @@ export interface PageProps {
   /** Neutral (Turkish) path, used by the language toggle. */
   path: string;
   model: PageModel;
+  /** USD → TRY rate of the build day, for the TRY prices (null: USD only). */
+  fx: FxRate | null;
 }
 
 export const PROPS_ID = 'kv-page';
