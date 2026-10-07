@@ -155,7 +155,7 @@ export interface Dict {
     photosAlt: (name: string) => string;
     /** "Rammer E68 alt gövde". */
     renderCaption: (model: string, name: string) => string;
-    renderView: Record<'front' | 'rear' | 'side', string>;
+    renderView: Record<'front' | 'rear' | 'side' | 'detail', string>;
     quoteTitle: string;
     quoteBody: string;
     modelLabel: string;
@@ -432,7 +432,12 @@ export const DICT: Record<Lang, Dict> = {
       photosAlt: (name) =>
         `Kervan atölyesinde stoktaki kırıcı ${name.toLocaleLowerCase('tr')} parçaları`,
       renderCaption: (model, name) => `${model} ${name.toLocaleLowerCase('tr')}`,
-      renderView: { front: 'ön görünüş', rear: 'arka görünüş', side: 'yan görünüş' },
+      renderView: {
+        front: 'ön görünüş',
+        rear: 'arka görünüş',
+        side: 'yan görünüş',
+        detail: 'saplama somunu penceresi',
+      },
       quoteTitle: 'Fiyat teklifi isteyin',
       quoteBody: 'Kırıcınızın marka ve modelini yazın; mesaja eklenir.',
       modelLabel: 'Kırıcı marka ve modeli',
@@ -716,7 +721,12 @@ export const DICT: Record<Lang, Dict> = {
       view: 'View',
       photosAlt: (name) => `${name} in stock at the Kervan plant`,
       renderCaption: (model, name) => `${model} ${name.toLowerCase()}`,
-      renderView: { front: 'front view', rear: 'rear view', side: 'side view' },
+      renderView: {
+        front: 'front view',
+        rear: 'rear view',
+        side: 'side view',
+        detail: 'tie-rod nut window',
+      },
       quoteTitle: 'Request a quote',
       quoteBody: 'Type your breaker make and model; it goes into the message.',
       modelLabel: 'Breaker make and model',

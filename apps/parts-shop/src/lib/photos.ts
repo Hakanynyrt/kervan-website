@@ -8,7 +8,7 @@ import type { PartKey } from './routes';
  */
 export const STOCK_TIP_PHOTOS = [
   '/photos/stok/uc-stok-01',
-  '/photos/stok/uc-stok-02',
+  '/photos/stok/uc-stok-03',
   '/photos/stok/uc-stok-03',
 ] as const;
 
@@ -27,16 +27,17 @@ export const PART_PHOTOS: Record<PartKey, readonly string[]> = {
 export interface PartRender {
   /** Breaker make and model the part fits, shown as the caption. */
   model: string;
-  views: { base: string; view: 'front' | 'rear' | 'side' }[];
+  views: { base: string; view: 'front' | 'rear' | 'side' | 'detail' }[];
 }
 export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
   'alt-govde': [
     {
       model: 'Rammer E68',
       views: [
-        { base: '/photos/parca/alt-govde-rammer-e68-on-02', view: 'front' },
-        { base: '/photos/parca/alt-govde-rammer-e68-arka-02', view: 'rear' },
-        { base: '/photos/parca/alt-govde-rammer-e68-yan-02', view: 'side' },
+        { base: '/photos/parca/alt-govde-rammer-e68-on-03', view: 'front' },
+        { base: '/photos/parca/alt-govde-rammer-e68-arka-03', view: 'rear' },
+        { base: '/photos/parca/alt-govde-rammer-e68-yan-03', view: 'side' },
+        { base: '/photos/parca/alt-govde-rammer-e68-pencere-03', view: 'detail' },
       ],
     },
   ],
