@@ -142,6 +142,8 @@ export interface Dict {
     message: (lines: string[], total: string, contact: string[]) => string;
   };
   brand: { title: (brand: string) => string; lead: (n: number) => string };
+  /** Sales terms shown on every product page: quality, shipping, payment, warranty. */
+  terms: { title: string; rows: [string, string][]; note: string };
   parts: {
     title: string;
     lead: string;
@@ -236,7 +238,7 @@ export const DICT: Record<Lang, Dict> = {
       trust: [
         {
           title: 'Kendi üretimimiz',
-          body: 'Uçlar Kartepe’deki tesisimizde işlenir; aracı yoktur.',
+          body: 'Kartepe’deki tesisimizde, orijinal ölçülerde ve OEM kalitesinde işlenir; aracı yoktur.',
         },
         {
           title: 'Kendi ısıl işlemimiz',
@@ -368,7 +370,7 @@ export const DICT: Record<Lang, Dict> = {
       sendWa: 'Sipariş talebini WhatsApp ile gönder',
       sendMail: 'E-posta ile gönder',
       clear: 'Sepeti boşalt',
-      info: 'Online ödeme henüz yok: sipariş talebinizi alınca ödeme bilgisiyle size dönüyoruz; stoktaki ürünler aynı gün kargoya verilir. Bilgileriniz yalnız bu mesaja yazılır, sitede saklanmaz.',
+      info: 'Online ödeme henüz yok: sipariş talebinizi alınca size dönüyoruz; ödeme kredi kartı veya havale/EFT ile. Stoktaki ürünler aynı gün kargoya verilir; kargo ücreti alıcıya aittir. Bilgileriniz yalnız bu mesaja yazılır, sitede saklanmaz.',
       message: (lines, total, contact) =>
         [
           'Merhaba, sipariş talebim:',
@@ -380,6 +382,16 @@ export const DICT: Record<Lang, Dict> = {
     brand: {
       title: (brand) => `${brand} kırıcı uçları`,
       lead: (n) => `${n} model. Kırıcınızın modelini seçin.`,
+    },
+    terms: {
+      title: 'Satış koşulları',
+      rows: [
+        ['Kalite', 'OEM kalitesinde, orijinal ölçülerde'],
+        ['Kargo', 'Kargo ücreti alıcıya aittir'],
+        ['Ödeme', 'Kredi kartı veya havale/EFT'],
+        ['Garanti', 'Malzeme ve üretim hatalarına karşı'],
+      ],
+      note: 'Ürünlerimiz Kervan Makina üretimidir, kırıcı üreticisinin orijinal parçası değildir; marka ve model adları yalnızca uyumu belirtir. Garanti malzeme ve üretim (ısıl işlem dahil) hatalarını kapsar; normal aşınma, boşta vuruş, ucu levye gibi kullanma, yanal veya eğik vuruş, aşınmış burç ile çalışma, yağlamasız kullanma ve yanlış uç seçiminden doğan hasarlar kapsam dışıdır. İnceleme için kırık parça ve fotoğrafları istenir.',
     },
     parts: {
       title: 'Kırıcı yedek parçaları',
@@ -501,7 +513,7 @@ export const DICT: Record<Lang, Dict> = {
       trust: [
         {
           title: 'Our own production',
-          body: 'Machined in our plant in Kartepe, Türkiye; no middlemen.',
+          body: 'Machined in our plant in Kartepe, Türkiye, to original dimensions and OEM quality; no middlemen.',
         },
         {
           title: 'Our own heat treatment',
@@ -629,7 +641,7 @@ export const DICT: Record<Lang, Dict> = {
       sendWa: 'Send the order request on WhatsApp',
       sendMail: 'Send by e-mail',
       clear: 'Empty the cart',
-      info: 'No online payment yet: once we receive your request we reply with payment details; items in stock ship the same day. Your details only go into this message; the site does not store them.',
+      info: 'No online payment yet: once we receive your request we get back to you; payment by credit card or bank transfer. Items in stock ship the same day; shipping is paid by the buyer. Your details only go into this message; the site does not store them.',
       message: (lines, total, contact) =>
         [
           'Hello, my order request:',
@@ -641,6 +653,16 @@ export const DICT: Record<Lang, Dict> = {
     brand: {
       title: (brand) => `${brand} breaker tips`,
       lead: (n) => `${n} models. Pick your breaker model.`,
+    },
+    terms: {
+      title: 'Terms of sale',
+      rows: [
+        ['Quality', 'OEM quality, original dimensions'],
+        ['Shipping', 'Paid by the buyer'],
+        ['Payment', 'Credit card or bank transfer'],
+        ['Warranty', 'Against material and manufacturing defects'],
+      ],
+      note: 'Our products are made by Kervan Makina and are not the breaker maker’s original parts; make and model names only show the fit. The warranty covers material and manufacturing (including heat treatment) defects; normal wear, blank firing, prying with the tip, side or angled strikes, working with a worn bushing, running without grease and choosing the wrong tip are not covered. We ask for the broken part and photos to assess a claim.',
     },
     parts: {
       title: 'Breaker spare parts',

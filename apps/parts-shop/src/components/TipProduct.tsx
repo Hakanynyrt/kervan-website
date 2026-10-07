@@ -27,6 +27,7 @@ import {
   Photo,
   QTY,
   StickyQuote,
+  Terms,
   type Qty,
 } from './Bits';
 import { FOCUS, whatsappHref } from './Layout';
@@ -236,6 +237,7 @@ export default function TipProduct({
               </a>
             </div>
           </div>
+          <Terms t={t} />
         </aside>
 
         <div className="flex min-w-0 flex-col gap-4 lg:order-1">
