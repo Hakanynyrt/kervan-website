@@ -2,6 +2,7 @@ import type { Dict } from '../lib/dict';
 import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
 import type { FamilyCard } from '../lib/routes';
+import { tipImg } from '../lib/tip-img';
 import type { Lang } from '../types';
 
 export default function FamilyCardView({ c, lang, t }: { c: FamilyCard; lang: Lang; t: Dict }) {
@@ -12,7 +13,7 @@ export default function FamilyCardView({ c, lang, t }: { c: FamilyCard; lang: La
     >
       {c.image && (
         <img
-          src={`/tips/${c.image}-sm.webp`}
+          src={tipImg(c.image, 'sm')}
           alt=""
           width={480}
           height={320}

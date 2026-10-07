@@ -5,6 +5,7 @@ import type { Dict } from '../lib/dict';
 import { fmtMm, fmtNum, fmtRange } from '../lib/format';
 import { breakerName, type PageModel } from '../lib/routes';
 import type { Lang } from '../types';
+import { tipImg } from '../lib/tip-img';
 
 type Model = Extract<PageModel, { kind: 'family' }>;
 
@@ -64,11 +65,11 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
             {f.imageRear && (
               <li className="rounded-md border border-hair bg-bg-soft p-2">
                 <img
-                  src={`/tips/${f.imageRear}-lg.webp`}
-                  srcSet={`/tips/${f.imageRear}-sm.webp 480w, /tips/${f.imageRear}-lg.webp 1200w`}
+                  src={tipImg(f.imageRear, 'sm')}
+                  srcSet={`${tipImg(f.imageRear, 'sm')} 480w, ${tipImg(f.imageRear, 'md')} 800w`}
                   sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
-                  width={1200}
-                  height={800}
+                  width={800}
+                  height={533}
                   alt={tf.rearAlt(f.code)}
                   decoding="async"
                   className="block h-auto w-full"
@@ -77,26 +78,26 @@ export default function Family({ model, lang, t }: { model: Model; lang: Lang; t
               </li>
             )}
             {f.skus
-              .filter((s) => s.image)
+              .filter((s): s is typeof s & { image: string } => !!s.image)
               .map((s) => (
                 <li key={s.code} className="rounded-md border border-hair bg-bg-soft p-2">
                   <img
-                    src={`/tips/${s.image}-lg.webp`}
-                    srcSet={`/tips/${s.image}-sm.webp 480w, /tips/${s.image}-lg.webp 1200w`}
+                    src={tipImg(s.image, 'sm')}
+                    srcSet={`${tipImg(s.image, 'sm')} 480w, ${tipImg(s.image, 'md')} 800w`}
                     sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
-                    width={1200}
-                    height={800}
+                    width={800}
+                    height={533}
                     alt={tf.renderAlt(f.code, t.tip[s.tipType])}
                     decoding="async"
                     className="block h-auto w-full"
                   />
                   {s.imageSide && (
                     <img
-                      src={`/tips/${s.imageSide}-lg.webp`}
-                      srcSet={`/tips/${s.imageSide}-sm.webp 600w, /tips/${s.imageSide}-lg.webp 1200w`}
+                      src={tipImg(s.imageSide, 'sm')}
+                      srcSet={`${tipImg(s.imageSide, 'sm')} 600w, ${tipImg(s.imageSide, 'md')} 800w`}
                       sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
-                      width={1200}
-                      height={400}
+                      width={800}
+                      height={267}
                       alt={tf.sideAlt(f.code, t.tip[s.tipType])}
                       loading="lazy"
                       decoding="async"

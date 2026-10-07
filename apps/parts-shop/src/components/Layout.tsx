@@ -100,6 +100,7 @@ export default function Layout({ lang, path, t, demo, children }: Props) {
               {t.footer.kvkk}
             </a>
             <p className="m-0 mt-2 text-ink-soft">{t.footer.marks}</p>
+            <p className="m-0 mt-1 text-ink-soft">{t.footer.images}</p>
           </div>
         </Container>
       </footer>
