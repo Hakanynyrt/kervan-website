@@ -37,7 +37,8 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
     }
     case 'breaker': {
       const f = model.families[0] as (typeof model.families)[number] | undefined;
-      const d = f ? fmtNum(f.attrs.diameterMm, lang) : '';
+      const dm = f ? f.attrs.diameterMm : (model.extra?.diameterMm ?? null);
+      const d = dm === null ? '' : fmtNum(dm, lang);
       const types = [
         ...new Set([
           ...model.families.flatMap((x) => x.skus.map((s) => t.tip[s.tipType])),

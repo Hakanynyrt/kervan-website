@@ -143,6 +143,8 @@ export interface PublicExtra {
   model: string;
   slug: string;
   tipTypes: TipType[];
+  /** Working diameter when the owner gave it; null = unknown. */
+  diameterMm: number | null;
   /** Net USD list price in cents; null = "ask for a quote". */
   priceUsdNetCents: number | null;
 }

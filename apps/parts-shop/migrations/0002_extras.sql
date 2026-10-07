@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS extra_products (
   model TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   tip_types TEXT NOT NULL,
+  diameter_mm REAL,
   price_usd_net_cents INTEGER,
   published INTEGER NOT NULL DEFAULT 1,
   updated_at TEXT NOT NULL

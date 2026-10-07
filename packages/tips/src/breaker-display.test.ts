@@ -34,3 +34,10 @@ test('line-break fragments without a maker give nothing', () => {
   assert.deepEqual(names('', '(Produced from 1997 on)'), []);
   assert.deepEqual(names('KRUPP', 'HM 950 (951'), []);
 });
+
+test('MTB models drop the "MT" series prefix (owner)', () => {
+  assert.deepEqual(names('MTB', 'MT 170'), ['MTB | 170']);
+  assert.deepEqual(names('MTB', 'MT36'), ['MTB | 36']);
+  assert.deepEqual(names('MTB', 'GA 150'), ['MTB | GA 150']);
+  assert.equal(displayBreakers('MTB', 'MT 170')[0].slug, 'mtb/170');
+});

@@ -142,7 +142,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         name: e.name,
         brand: e.brand,
         model: e.model,
-        diameterMm: null,
+        diameterMm: e.extra?.diameterMm ?? null,
         types: e.extra?.tipTypes ?? [],
         image: null,
         popularTier: null,

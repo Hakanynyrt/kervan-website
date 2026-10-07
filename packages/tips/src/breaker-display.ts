@@ -73,6 +73,9 @@ export const BREAKER_BRANDS: Record<string, readonly string[]> = {
   Wimmer: [],
 };
 
+/** Series prefixes the owner drops from the model name ("MTB MT 170" → "MTB 170"). */
+const MODEL_PREFIX: Record<string, RegExp> = { MTB: /^MT\s*(?=\d)/i };
+
 /** Catalogue brand-column values that are not a maker: the maker is in the model text. */
 const NOT_A_BRAND = new Set(['', 'OTHER BREAKER MODELS', 'DIGER', 'DİĞER']);
 
@@ -171,5 +174,7 @@ export function displayBreakers(rawBrand: string, rawModel: string): Breaker[] {
   });
   return models
     .filter(usable)
+    .map((m) => (MODEL_PREFIX[brand] ? m.replace(MODEL_PREFIX[brand], '') : m))
+    .filter(Boolean)
     .map((m) => ({ brand, model: m, slug: `${slugify(brand)}/${slugify(m)}` }));
 }

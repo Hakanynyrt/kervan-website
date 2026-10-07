@@ -44,7 +44,13 @@ export interface PriceSheet {
   /** SKU code → net USD cents. */
   prices: Record<string, number>;
   /** Products sold by breaker model without catalogue geometry. */
-  extras?: { brand: string; model: string; types: string[]; cents: number | null }[];
+  extras?: {
+    brand: string;
+    model: string;
+    types: string[];
+    diameterMm?: number | null;
+    cents: number | null;
+  }[];
   /** Extra breaker names for existing tip families (e.g. a newer model name). */
   aliases?: { brand: string; model: string; families: string[] }[];
 }
@@ -77,10 +83,14 @@ export function toPricesSql(
   }
   for (const e of sheet.extras ?? []) {
     const c = e.cents === null ? null : cents(e.cents);
+    const d =
+      typeof e.diameterMm === 'number' && e.diameterMm > 10 && e.diameterMm < 400
+        ? e.diameterMm
+        : null;
     if (!e.brand || !e.model || !Array.isArray(e.types) || (e.cents !== null && c === null))
       throw new Error('bad extra row');
     out.push(
-      `INSERT INTO extra_products (brand, model, slug, tip_types, price_usd_net_cents, updated_at) VALUES (${q(e.brand)}, ${q(e.model)}, ${q(slugOf(e.brand, e.model))}, ${q(JSON.stringify(e.types))}, ${q(c)}, ${q(now)}) ON CONFLICT(slug) DO UPDATE SET brand = excluded.brand, model = excluded.model, tip_types = excluded.tip_types, price_usd_net_cents = excluded.price_usd_net_cents, updated_at = excluded.updated_at;`,
+      `INSERT INTO extra_products (brand, model, slug, tip_types, diameter_mm, price_usd_net_cents, updated_at) VALUES (${q(e.brand)}, ${q(e.model)}, ${q(slugOf(e.brand, e.model))}, ${q(JSON.stringify(e.types))}, ${q(d)}, ${q(c)}, ${q(now)}) ON CONFLICT(slug) DO UPDATE SET brand = excluded.brand, model = excluded.model, tip_types = excluded.tip_types, diameter_mm = excluded.diameter_mm, price_usd_net_cents = excluded.price_usd_net_cents, updated_at = excluded.updated_at;`,
     );
   }
   for (const a of sheet.aliases ?? []) {

@@ -68,7 +68,7 @@ test('price sheet: prices by code, extras upserted, aliases added; bad rows thro
     slug,
   );
   assert.match(sql, /UPDATE skus SET price_usd_net_cents = 26800, .* WHERE code = 'KU130-09-C';/);
-  assert.match(sql, /INSERT INTO extra_products .*'jcb\/hm-335'.*'\["chisel"\]', 6500/);
+  assert.match(sql, /INSERT INTO extra_products .*'jcb\/hm-335'.*'\["chisel"\]', NULL, 6500/);
   assert.match(
     sql,
     /INSERT OR IGNORE INTO fitments .* f\.code = 'KU130-09' AND b\.slug = 'mtb\/iq-175'/,

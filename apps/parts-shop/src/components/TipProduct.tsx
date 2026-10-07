@@ -114,7 +114,8 @@ export default function TipProduct({
   const opt = opts.get(type) ?? opts.get(types[0])!;
   const sku = opt.sku;
   const f = opt.family;
-  const tons = f ? carrierTons(f.attrs.diameterMm) : null;
+  const diameter = f ? f.attrs.diameterMm : (extra?.diameterMm ?? null);
+  const tons = diameter === null ? null : carrierTons(diameter);
   const text = tf.quoteText(quoteName, t.tip[opt.tipType], opt.code ?? '', qty);
   const tl = opt.cents === null ? null : fmtTry(opt.cents, fx, lang);
   const add = () => {
@@ -172,7 +173,7 @@ export default function TipProduct({
           </div>
           <dl className="m-0 font-sans text-sm">
             {[
-              ...(f ? [[tf.diameter, fmtMm(f.attrs.diameterMm, lang)]] : []),
+              ...(diameter === null ? [] : [[tf.diameter, fmtMm(diameter, lang)]]),
               ...(sku?.tipAngleDeg == null
                 ? []
                 : [[tf.angle, `${fmtNum(sku.tipAngleDeg, lang)}°`]]),
