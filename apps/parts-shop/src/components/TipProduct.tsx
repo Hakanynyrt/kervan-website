@@ -37,7 +37,7 @@ function availabilityText(s: PublicSku, t: Dict): string {
     ? t.family.inStock(a.qty)
     : a.kind === 'lead'
       ? t.family.lead(a.days)
-      : t.family.ask;
+      : t.family.askLead;
 }
 
 interface Props {
@@ -179,11 +179,7 @@ export default function TipProduct({
                 : [[tf.angle, `${fmtNum(sku.tipAngleDeg, lang)}°`]]),
               [
                 tf.availability,
-                sku && sku.availability.kind !== 'ask'
-                  ? availabilityText(sku, t)
-                  : opt.cents === null
-                    ? tf.ask
-                    : tf.askLead,
+                sku && sku.availability.kind !== 'ask' ? availabilityText(sku, t) : tf.askLead,
               ],
               ...(tons ? [[tf.carrier, tf.carrierValue(tons.min, tons.max)]] : []),
             ].map(([k, v]) => (
