@@ -138,3 +138,23 @@ export function Photo({ base, alt, lazy = true }: { base: string; alt: string; l
 export function PageTitle({ children }: { children: ReactNode }) {
   return <h1 className="m-0 mt-5 font-sans text-3xl font-bold text-ink md:text-4xl">{children}</h1>;
 }
+
+/** Quality, shipping, payment and warranty lines, with the warranty scope below. */
+export function Terms({ t }: { t: Dict }) {
+  return (
+    <section aria-labelledby="terms" className="font-sans text-sm">
+      <h2 id="terms" className="m-0 text-base font-bold text-ink">
+        {t.terms.title}
+      </h2>
+      <dl className="m-0 mt-2">
+        {t.terms.rows.map(([k, v]) => (
+          <div key={k} className="flex justify-between gap-4 border-t border-hair py-2.5">
+            <dt className="text-ink-mid">{k}</dt>
+            <dd className="m-0 text-right text-ink">{v}</dd>
+          </div>
+        ))}
+      </dl>
+      <p className="m-0 mt-2 text-xs text-ink-mid">{t.terms.note}</p>
+    </section>
+  );
+}

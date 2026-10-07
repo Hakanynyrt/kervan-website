@@ -142,6 +142,8 @@ export interface Dict {
     message: (lines: string[], total: string, contact: string[]) => string;
   };
   brand: { title: (brand: string) => string; lead: (n: number) => string };
+  /** Sales terms shown on every product page: quality, shipping, payment, warranty. */
+  terms: { title: string; rows: [string, string][]; note: string };
   parts: {
     title: string;
     lead: string;
@@ -225,7 +227,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     home: {
       title: 'Hidrolik kırıcı ucu ve yedek parçaları',
-      lead: 'Kendi tezgâhımızda işlenen, kendi tesisimizde ısıl işlem gören uçlar. Ölçüleri karşılaştırın, kırıcınıza uyan ucu seçin; fiyat ve teslim süresini doğrudan bize sorun.',
+      lead: 'Kendi tezgâhımızda işlenen, kendi tesisimizde ısıl işlem gören uçlar. Ölçüleri karşılaştırın, kırıcınıza uyan ucu seçin. Stoktan aynı gün kargo.',
       cta: 'Tüm uçlar',
       ctaQuote: 'Teklif iste',
       popular: 'Çok satanlar',
@@ -236,7 +238,7 @@ export const DICT: Record<Lang, Dict> = {
       trust: [
         {
           title: 'Kendi üretimimiz',
-          body: 'Uçlar Kartepe’deki tesisimizde işlenir; aracı yoktur.',
+          body: 'Kartepe’deki tesisimizde, orijinal ölçülerde ve OEM kalitesinde işlenir; aracı yoktur.',
         },
         {
           title: 'Kendi ısıl işlemimiz',
@@ -247,8 +249,8 @@ export const DICT: Record<Lang, Dict> = {
           body: 'Kırıcınızın marka ve modelini seçin, uyan ucu görün.',
         },
         {
-          title: 'Doğrudan teklif',
-          body: 'Fiyat ve teslim süresi için üreticiye doğrudan yazın.',
+          title: 'Stoktan aynı gün kargo',
+          body: 'Stoktaki uçlar siparişiniz onaylandığı gün kargoya verilir.',
         },
       ],
       sectors: {
@@ -307,17 +309,17 @@ export const DICT: Record<Lang, Dict> = {
       availability: 'Durum',
       inStock: (n) => (n >= 10 ? 'Stokta (10+)' : `Stokta (${n})`),
       lead: (days) => `Üretim ~${days} iş günü`,
-      ask: 'Fiyat ve süre için sorun',
-      askLead: 'Teslim süresi için sorun',
+      ask: 'Fiyat için sorun',
+      askLead: 'Stoktan aynı gün kargo',
       carrier: 'Taşıyıcı (yaklaşık)',
       carrierValue: (min, max) => `${min}–${max} t ekskavatör`,
       carrierNote: 'Yaklaşık değerdir; kırıcı üreticisinin önerisi geçerlidir.',
       quoteTitle: 'Fiyat teklifi isteyin',
-      quoteBody: 'Kırıcınız ve seçtiğiniz uç mesaja yazılır; fiyat ve teslim süresini iletelim.',
+      quoteBody: 'Kırıcınız ve seçtiğiniz uç mesaja yazılır; size hemen dönelim.',
       whatsapp: 'WhatsApp ile sor',
       email: 'E-posta gönder',
       quoteText: (name, type, code, qty) =>
-        `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet: fiyat ve teslim süresi öğrenmek istiyorum.`,
+        `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet sipariş vermek istiyorum.`,
       renderAlt: (name, type) => `${name} ${type} kırıcı ucu`,
       sideAlt: (name, type) => `${name} ${type} kırıcı ucu, yandan görünüş`,
       rearAlt: (name) => `${name} kırıcı ucunun kama kanalı ve arka ucu, yakın görünüş`,
@@ -368,7 +370,7 @@ export const DICT: Record<Lang, Dict> = {
       sendWa: 'Sipariş talebini WhatsApp ile gönder',
       sendMail: 'E-posta ile gönder',
       clear: 'Sepeti boşalt',
-      info: 'Online ödeme henüz yok: sipariş talebinizi alınca stok, teslim süresi ve ödeme bilgisiyle size dönüyoruz. Bilgileriniz yalnız bu mesaja yazılır, sitede saklanmaz.',
+      info: 'Online ödeme henüz yok: sipariş talebinizi alınca size dönüyoruz; ödeme kredi kartı veya havale/EFT ile. Stoktaki ürünler aynı gün kargoya verilir; kargo ücreti alıcıya aittir. Bilgileriniz yalnız bu mesaja yazılır, sitede saklanmaz.',
       message: (lines, total, contact) =>
         [
           'Merhaba, sipariş talebim:',
@@ -381,9 +383,19 @@ export const DICT: Record<Lang, Dict> = {
       title: (brand) => `${brand} kırıcı uçları`,
       lead: (n) => `${n} model. Kırıcınızın modelini seçin.`,
     },
+    terms: {
+      title: 'Satış koşulları',
+      rows: [
+        ['Kalite', 'OEM kalitesinde, orijinal ölçülerde'],
+        ['Kargo', 'Kargo ücreti alıcıya aittir'],
+        ['Ödeme', 'Kredi kartı veya havale/EFT'],
+        ['Garanti', 'Teslimden itibaren 3 ay, malzeme ve üretim hatalarına karşı'],
+      ],
+      note: 'Ürünlerimiz Kervan Makina üretimidir, kırıcı üreticisinin orijinal parçası değildir; marka ve model adları yalnızca uyumu belirtir. Garanti malzeme ve üretim (ısıl işlem dahil) hatalarını kapsar; normal aşınma, boşta vuruş, ucu levye gibi kullanma, yanal veya eğik vuruş, aşınmış burç ile çalışma, yağlamasız kullanma ve yanlış uç seçiminden doğan hasarlar kapsam dışıdır. İnceleme için kırık parça ve fotoğrafları istenir.',
+    },
     parts: {
       title: 'Kırıcı yedek parçaları',
-      lead: 'Kırıcı ucunun yanında alt gövde, burç, kama, saplama ve piston da üretip satıyoruz. Kırıcınızın marka ve modelini yazın, fiyat ve teslim süresini iletelim.',
+      lead: 'Kırıcı ucunun yanında alt gövde, burç, kama, saplama ve piston da üretip satıyoruz. Kırıcınızın marka ve modelini yazın, fiyatı hemen iletelim.',
       tips: {
         name: 'Kırıcı ucu',
         body: 'Keski, sivri, küt, piramit ve konik uçlar; kırıcı modeline göre.',
@@ -412,7 +424,7 @@ export const DICT: Record<Lang, Dict> = {
       modelLabel: 'Kırıcı marka ve modeli',
       modelPlaceholder: 'Ör. Furukawa HB 20G',
       text: (part, model, qty) =>
-        `Merhaba, ${model || '(kırıcı modeli)'} için ${part.toLocaleLowerCase('tr')}, ${qty} adet: fiyat ve teslim süresi öğrenmek istiyorum.`,
+        `Merhaba, ${model || '(kırıcı modeli)'} için ${part.toLocaleLowerCase('tr')}, ${qty} adet için fiyat almak istiyorum.`,
       noPhoto: 'Fotoğraf yakında',
     },
     footer: {
@@ -490,7 +502,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     home: {
       title: 'Hydraulic breaker tips and spare parts',
-      lead: 'Machined on our own lathes and heat-treated in our own plant. Compare the dimensions, pick the tip for your breaker and ask us directly for price and delivery time.',
+      lead: 'Machined on our own lathes and heat-treated in our own plant. Compare the dimensions, pick the tip for your breaker. Ships from stock the same day.',
       cta: 'All tips',
       ctaQuote: 'Request a quote',
       popular: 'Best sellers',
@@ -501,7 +513,7 @@ export const DICT: Record<Lang, Dict> = {
       trust: [
         {
           title: 'Our own production',
-          body: 'Machined in our plant in Kartepe, Türkiye; no middlemen.',
+          body: 'Machined in our plant in Kartepe, Türkiye, to original dimensions and OEM quality; no middlemen.',
         },
         {
           title: 'Our own heat treatment',
@@ -511,7 +523,10 @@ export const DICT: Record<Lang, Dict> = {
           title: 'Chosen by model',
           body: 'Pick your breaker make and model and see the tip that fits.',
         },
-        { title: 'Direct quotes', body: 'Write to the manufacturer for price and delivery time.' },
+        {
+          title: 'Ships from stock the same day',
+          body: 'Tips in stock ship the day your order is confirmed.',
+        },
       ],
       sectors: {
         title: 'Which tip do people doing your work choose?',
@@ -565,18 +580,17 @@ export const DICT: Record<Lang, Dict> = {
       availability: 'Availability',
       inStock: (n) => (n >= 10 ? 'In stock (10+)' : `In stock (${n})`),
       lead: (days) => `Made to order, ~${days} working days`,
-      ask: 'Ask for price and lead time',
-      askLead: 'Ask for lead time',
+      ask: 'Price on request',
+      askLead: 'Ships from stock the same day',
       carrier: 'Carrier (approx.)',
       carrierValue: (min, max) => `${min}–${max} t excavator`,
       carrierNote: 'Approximate; the breaker maker’s recommendation wins.',
       quoteTitle: 'Request a quote',
-      quoteBody:
-        'Your breaker and the tip you chose go into the message; we reply with price and lead time.',
+      quoteBody: 'Your breaker and the tip you chose go into the message; we reply right away.',
       whatsapp: 'Ask on WhatsApp',
       email: 'Send an e-mail',
       quoteText: (name, type, code, qty) =>
-        `Hello, I would like the price and lead time of the ${type} tip${code ? ` (${code})` : ''} for the ${name}, quantity ${qty}.`,
+        `Hello, I would like to order the ${type} tip${code ? ` (${code})` : ''} for the ${name}, quantity ${qty}.`,
       renderAlt: (name, type) => `${name} ${type} breaker tip`,
       sideAlt: (name, type) => `${name} ${type} breaker tip, side view`,
       rearAlt: (name) => `${name} breaker tip key slot and rear end, close-up`,
@@ -627,7 +641,7 @@ export const DICT: Record<Lang, Dict> = {
       sendWa: 'Send the order request on WhatsApp',
       sendMail: 'Send by e-mail',
       clear: 'Empty the cart',
-      info: 'No online payment yet: once we receive your request we reply with stock, lead time and payment details. Your details only go into this message; the site does not store them.',
+      info: 'No online payment yet: once we receive your request we get back to you; payment by credit card or bank transfer. Items in stock ship the same day; shipping is paid by the buyer. Your details only go into this message; the site does not store them.',
       message: (lines, total, contact) =>
         [
           'Hello, my order request:',
@@ -640,9 +654,19 @@ export const DICT: Record<Lang, Dict> = {
       title: (brand) => `${brand} breaker tips`,
       lead: (n) => `${n} models. Pick your breaker model.`,
     },
+    terms: {
+      title: 'Terms of sale',
+      rows: [
+        ['Quality', 'OEM quality, original dimensions'],
+        ['Shipping', 'Paid by the buyer'],
+        ['Payment', 'Credit card or bank transfer'],
+        ['Warranty', '3 months from delivery, against material and manufacturing defects'],
+      ],
+      note: 'Our products are made by Kervan Makina and are not the breaker maker’s original parts; make and model names only show the fit. The warranty covers material and manufacturing (including heat treatment) defects; normal wear, blank firing, prying with the tip, side or angled strikes, working with a worn bushing, running without grease and choosing the wrong tip are not covered. We ask for the broken part and photos to assess a claim.',
+    },
     parts: {
       title: 'Breaker spare parts',
-      lead: 'Besides tips we make and sell front heads, bushings, retainer keys, tie rods and pistons. Send your breaker make and model and we reply with price and lead time.',
+      lead: 'Besides tips we make and sell front heads, bushings, retainer keys, tie rods and pistons. Send your breaker make and model and we reply with the price right away.',
       tips: {
         name: 'Breaker tips',
         body: 'Chisel, moil, blunt, pyramid and conical tips, by breaker model.',
@@ -673,7 +697,7 @@ export const DICT: Record<Lang, Dict> = {
       modelLabel: 'Breaker make and model',
       modelPlaceholder: 'E.g. Furukawa HB 20G',
       text: (part, model, qty) =>
-        `Hello, I would like the price and lead time of ${part.toLowerCase()} for the ${model || '(breaker model)'}, quantity ${qty}.`,
+        `Hello, I would like the price of ${part.toLowerCase()} for the ${model || '(breaker model)'}, quantity ${qty}.`,
       noPhoto: 'Photo coming soon',
     },
     footer: {

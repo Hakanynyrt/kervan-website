@@ -8,6 +8,7 @@ import {
   Photo,
   QTY,
   StickyQuote,
+  Terms,
   type Qty,
 } from '../components/Bits';
 import { FOCUS, whatsappHref } from '../components/Layout';
@@ -73,6 +74,9 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
                 {t.family.email}
               </a>
             </div>
+          </div>
+          <div className="mt-6">
+            <Terms t={t} />
           </div>
         </aside>
         {photos.length > 0 && (
