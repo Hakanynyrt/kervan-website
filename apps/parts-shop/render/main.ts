@@ -2,11 +2,7 @@
 // window.renderTip(spec) once per SKU; the result is two transparent WebP data URLs.
 import * as THREE from 'three';
 import type { TipSpec } from '@kervan/tips';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-import fontJson from 'three/examples/fonts/helvetiker_bold.typeface.json';
 import { buildTip, maxRadius } from './tipgen';
-
-const font = new FontLoader().parse(fontJson);
 
 /** Brand "Forge Ember" (tokens.css --color-brand); a render-only rim light colour. */
 const EMBER = 0xe8431b;
@@ -190,7 +186,7 @@ window.renderTip = async (spec: TipSpec, view: View = 'hero') => {
   const [sw, shh] = SIZES[view].small;
   renderer.setSize(w, h);
   const mats = materials();
-  const mesh = buildTip(spec, mats, 160, font);
+  const mesh = buildTip(spec, mats);
   const scene = new THREE.Scene();
   scene.environment = env;
   const key = new THREE.DirectionalLight(0xfff4ea, 1.4);
