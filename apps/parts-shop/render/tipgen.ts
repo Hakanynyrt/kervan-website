@@ -6,6 +6,8 @@
 // per-run material) for everything axisymmetric, then three-bvh-csg for slots and flats.
 import * as THREE from 'three';
 import { Brush, Evaluator, INTERSECTION, SUBTRACTION } from 'three-bvh-csg';
+import type { Font } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import type { StepKind, TipSpec } from '@kervan/tips';
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -546,7 +548,61 @@ function wedgePrism(s: TipSpec, e: number): THREE.BufferGeometry {
 /** Largest radius along the tool (any section). */
 export const maxRadius = (s: TipSpec): number => Math.max(...s.sections.map((x) => x.r));
 
-export function buildTip(s: TipSpec, materials: THREE.Material[], segs = 160): THREE.Mesh {
+/** Maker's mark engraved on the shank. */
+export const MARK = 'KRV';
+
+/**
+ * "KRV" engraved on the +X side of the shank (the face the side view shows), centred on the
+ * key slot's length and on the band of round shank left between the slot flats. Reads along
+ * the axis, back end on the left; about 1 mm deep below the curved surface.
+ */
+function markGeometry(s: TipSpec, font: Font): THREE.BufferGeometry | null {
+  const { rs, start, len, count, floor, floorB } = s.slot;
+  const zhi = floor;
+  const zlo = count === 2 ? -floorB : -0.85 * rs;
+  const band = zhi - zlo;
+  if (band < 6 || len < 12) return null;
+  const g = new TextGeometry(MARK, {
+    font,
+    size: 10,
+    depth: 1,
+    curveSegments: 4,
+    bevelEnabled: false,
+  });
+  g.computeBoundingBox();
+  const bb = g.boundingBox!;
+  const w0 = bb.max.x - bb.min.x;
+  const h0 = bb.max.y - bb.min.y;
+  // Letter height: at most 55 % of the band and such that the word spans ≤ 75 % of the slot.
+  const h = Math.min(0.55 * band, (0.75 * len * h0) / w0, 0.3 * 2 * rs);
+  const k = h / h0;
+  const zc = (zhi + zlo) / 2;
+  const reach = Math.abs(zc) + h / 2;
+  if (reach >= rs) return null;
+  const sag = rs - Math.sqrt(rs * rs - reach * reach);
+  const depth = sag + Math.min(2, Math.max(0.6, 0.012 * 2 * rs));
+  const extra = 6;
+  // Text: x along the axis, y up (local z), extruded along local x from inside the surface.
+  g.translate(-(bb.min.x + bb.max.x) / 2, -(bb.min.y + bb.max.y) / 2, -bb.min.z);
+  g.scale(k, k, (depth + extra) / (bb.max.z - bb.min.z));
+  // (tx, ty, tz) → (x = tz + rs − depth, y = tx + mid, z = ty + zc): a proper rotation.
+  g.applyMatrix4(
+    new THREE.Matrix4().set(0, 0, 1, rs - depth, 1, 0, 0, start + len / 2, 0, 1, 0, zc, 0, 0, 0, 1),
+  );
+  g.deleteAttribute('uv');
+  g.setAttribute(
+    'uv',
+    new THREE.Float32BufferAttribute(new Array(g.getAttribute('position').count * 2).fill(0), 2),
+  );
+  return g;
+}
+
+export function buildTip(
+  s: TipSpec,
+  materials: THREE.Material[],
+  segs = 160,
+  font?: Font,
+): THREE.Mesh {
   const ev = new Evaluator();
   ev.useGroups = true;
   ev.attributes = ['position', 'uv', 'normal'];
@@ -580,6 +636,12 @@ export function buildTip(s: TipSpec, materials: THREE.Material[], segs = 160): T
       b.updateMatrixWorld();
       brush = ev.evaluate(brush, b, INTERSECTION);
     }
+  }
+  const mark = font ? markGeometry(s, font) : null;
+  if (mark) {
+    const m = new Brush(mark, materials[MAT.MACHINED]);
+    m.updateMatrixWorld();
+    brush = ev.evaluate(brush, m, SUBTRACTION);
   }
   return new THREE.Mesh(brush.geometry, brush.material);
 }
