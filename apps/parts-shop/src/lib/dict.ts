@@ -125,6 +125,8 @@ export interface Dict {
     lineTotal: string;
     ask: string;
     total: string;
+    subtotal: string;
+    vat: (pct: number) => string;
     totalNote: string;
     remove: (name: string) => string;
     less: string;
@@ -358,10 +360,12 @@ export const DICT: Record<Lang, Dict> = {
       browse: 'Kırıcı uçlarına göz atın',
       product: 'Ürün',
       qty: 'Adet',
-      unit: 'Birim fiyat',
+      unit: 'Birim fiyat (KDV hariç)',
       lineTotal: 'Tutar',
       ask: 'Fiyat sorulacak',
-      total: 'Toplam',
+      total: 'Toplam (KDV dahil)',
+      subtotal: 'Ara toplam (KDV hariç)',
+      vat: (pct) => `KDV (%${pct})`,
       totalNote: 'Fiyatı sorulacak ürünler toplama dahil değildir.',
       remove: (name) => `${name} ürününü sepetten çıkar`,
       less: 'Bir azalt',
@@ -636,10 +640,12 @@ export const DICT: Record<Lang, Dict> = {
       browse: 'Browse breaker tips',
       product: 'Product',
       qty: 'Qty',
-      unit: 'Unit price',
+      unit: 'Unit price (excl. VAT)',
       lineTotal: 'Amount',
       ask: 'Price on request',
-      total: 'Total',
+      total: 'Total (incl. VAT)',
+      subtotal: 'Subtotal (excl. VAT)',
+      vat: (pct) => `VAT (${pct}%)`,
       totalNote: 'Products priced on request are not in the total.',
       remove: (name) => `Remove ${name} from the cart`,
       less: 'One less',

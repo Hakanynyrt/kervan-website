@@ -18,3 +18,7 @@ export const fmtDate = (iso: string, lang: Lang): string => {
   const [y, m, d] = iso.split('-');
   return lang === 'tr' ? `${d}.${m}.${y}` : `${d}/${m}/${y}`;
 };
+
+/** VAT rate on our products (percent); catalogue prices are net. */
+export const VAT_PERCENT = 20;
+export const vatOf = (netCents: number): number => Math.round((netCents * VAT_PERCENT) / 100);

@@ -7,7 +7,7 @@ import { FOCUS, whatsappHref } from '../components/Layout';
 import { CART_EVENT, MAX_QTY, readCart, writeCart, type CartItem } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { fmtDate, fmtTry, fmtUsd } from '../lib/price';
+import { fmtDate, fmtTry, fmtUsd, VAT_PERCENT, vatOf } from '../lib/price';
 import { LEGAL, legalPath } from '../lib/legal';
 import { LIST_PATH } from '../lib/routes';
 import type { Lang } from '../types';
@@ -53,6 +53,8 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
 
   const list = items ?? [];
   const totalCents = list.reduce((n, x) => n + (x.cents ?? 0) * x.qty, 0);
+  const vatCents = vatOf(totalCents);
+  const grossCents = totalCents + vatCents;
   const anyAsk = list.some((x) => x.cents === null);
   const money = (cents: number) =>
     [fmtUsd(cents, lang), fmtTry(cents, fx, lang)].filter(Boolean).join(' / ');
@@ -62,7 +64,11 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   );
   const message = c.message(
     lines,
-    `${c.total}: ${money(totalCents)}${anyAsk ? ` (${c.totalNote})` : ''}`,
+    [
+      `${c.subtotal}: ${money(totalCents)}`,
+      `${c.vat(VAT_PERCENT)}: ${money(vatCents)}`,
+      `${c.total}: ${money(grossCents)}${anyAsk ? ` (${c.totalNote})` : ''}`,
+    ].join('\n'),
     FIELDS.filter((k) => contact[k].trim()).map((k) => `${c[k]}: ${contact[k].trim()}`),
   );
 
@@ -140,13 +146,26 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
               ))}
             </ul>
             <div className="mt-6 font-sans">
-              <p className="m-0 flex justify-between text-lg font-bold text-ink tabular-nums">
+              <dl className="m-0 text-sm tabular-nums">
+                {(
+                  [
+                    [c.subtotal, totalCents],
+                    [c.vat(VAT_PERCENT), vatCents],
+                  ] as [string, number][]
+                ).map(([k, v]) => (
+                  <div key={k} className="flex justify-between gap-4 py-1 text-ink-mid">
+                    <dt>{k}</dt>
+                    <dd className="m-0 text-right">{money(v)}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="m-0 mt-2 flex justify-between border-t border-hair pt-3 text-lg font-bold text-ink tabular-nums">
                 <span>{c.total}</span>
-                <span>{fmtUsd(totalCents, lang)}</span>
+                <span>{fmtUsd(grossCents, lang)}</span>
               </p>
-              {fmtTry(totalCents, fx, lang) && (
-                <p className="m-0 mt-1 text-right text-ink-mid tabular-nums">
-                  {fmtTry(totalCents, fx, lang)}
+              {fmtTry(grossCents, fx, lang) && (
+                <p className="m-0 mt-1 text-right text-lg font-semibold text-ink tabular-nums">
+                  {fmtTry(grossCents, fx, lang)}
                 </p>
               )}
               {fx && (
