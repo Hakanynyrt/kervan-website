@@ -70,11 +70,8 @@ export default function Contact({ t }: Props) {
             {
               label: t.contact.emailLabel,
               value: (
-                <a
-                  href="mailto:ahmet@kervanheat.com"
-                  className="hover:text-brand transition-colors"
-                >
-                  ahmet@kervanheat.com
+                <a href="mailto:info@kervanheat.com" className="hover:text-brand transition-colors">
+                  info@kervanheat.com
                 </a>
               ),
             },

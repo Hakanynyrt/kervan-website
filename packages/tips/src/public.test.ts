@@ -1,6 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { toPublicCatalog, type FamilyRow, type FitRow, type SkuRow } from './public.ts';
+import {
+  publicProfile,
+  toPublicCatalog,
+  type FamilyRow,
+  type FitRow,
+  type SkuRow,
+} from './public.ts';
 
 const attrs = (d: number, extra: Record<string, unknown> = {}) =>
   JSON.stringify({
@@ -73,4 +79,46 @@ test('the projection has no private keys anywhere', () => {
   for (const k of ['private_ref', 'private_notes', 'cost_try', 'secretNote', 'family_id']) {
     assert.equal(json.includes(k), false, k);
   }
+});
+
+test('a drawing profile passes field by field; anything malformed drops it', () => {
+  const good = {
+    backChamferMm: 3,
+    sections: [
+      { diameterMm: 77, lengthMm: 73, step: { kind: 'chamfer', lengthMm: 7.6 }, note: 'x' },
+      { diameterMm: 100, lengthMm: null, step: null },
+    ],
+    slot: {
+      count: 2,
+      startMm: 144,
+      lengthMm: 127,
+      sectionMm: 68,
+      back: { kind: 'radius', lengthMm: 24 },
+      front: { kind: 'radius', lengthMm: 25 },
+      source: 'private',
+    },
+    vendor: 'private',
+  };
+  const p = publicProfile(good);
+  assert.ok(p);
+  assert.deepEqual(Object.keys(p).sort(), ['backChamferMm', 'sections', 'slot']);
+  assert.deepEqual(Object.keys(p.sections[0]).sort(), ['diameterMm', 'lengthMm', 'step']);
+  assert.equal(JSON.stringify(p).includes('private'), false);
+  assert.equal(publicProfile({ ...good, sections: [] }), null);
+  assert.equal(
+    publicProfile({ ...good, slot: { ...good.slot, back: { kind: 'wavy', lengthMm: 1 } } }),
+    null,
+  );
+  assert.equal(
+    publicProfile({
+      ...good,
+      sections: [{ diameterMm: 77, lengthMm: null, step: null }, good.sections[1]],
+    }),
+    null,
+  );
+  assert.equal(publicProfile('nope'), null);
+  const uneven = publicProfile({ ...good, slot: { ...good.slot, splitTop: 0.8 } });
+  assert.equal(uneven?.slot.splitTop, 0.8);
+  const bogus = publicProfile({ ...good, slot: { ...good.slot, splitTop: 3 } });
+  assert.equal(bogus?.slot.splitTop, undefined);
 });

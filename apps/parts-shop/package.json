@@ -22,8 +22,13 @@
     "@types/node": "^22.20.5",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@types/three": "^0.184.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "playwright": "1.63.0",
     "tailwindcss": "^4.0.0",
+    "three": "^0.184.0",
+    "three-bvh-csg": "0.0.18",
+    "three-mesh-bvh": "^0.9.15",
     "typescript": "^5.6.3",
     "vite": "^5.4.11"
   }

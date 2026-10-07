@@ -86,15 +86,15 @@ Her iki domain Cloudflare'de zaten kayıtlı; Pages otomatik DNS kayıtlarını 
 
 **D. Heat-treatment Pages env vars** (RFQ Function için — sadece `kervan-heat-treatment` projesinde, breaker'da gerek yok):
 
-| Variable                        | Purpose                                     |
-| ------------------------------- | ------------------------------------------- |
-| `BREVO_API_KEY`                 | primary email transport (Brevo)             |
-| `RESEND_API_KEY`                | fallback transport                          |
-| `MAILCHANNELS_DKIM_DOMAIN`      | fallback transport                          |
-| `MAILCHANNELS_DKIM_SELECTOR`    | DKIM selector (default: `mailchannels`)     |
-| `MAILCHANNELS_DKIM_PRIVATE_KEY` | DKIM private key                            |
-| `MAIL_TO`                       | RFQ inbox (default: `ahmet@kervanheat.com`) |
-| `MAIL_FROM`                     | sender (default: `noreply@kervanheat.com`)  |
+| Variable                        | Purpose                                    |
+| ------------------------------- | ------------------------------------------ |
+| `BREVO_API_KEY`                 | primary email transport (Brevo)            |
+| `RESEND_API_KEY`                | fallback transport                         |
+| `MAILCHANNELS_DKIM_DOMAIN`      | fallback transport                         |
+| `MAILCHANNELS_DKIM_SELECTOR`    | DKIM selector (default: `mailchannels`)    |
+| `MAILCHANNELS_DKIM_PRIVATE_KEY` | DKIM private key                           |
+| `MAIL_TO`                       | RFQ inbox (default: `info@kervanheat.com`) |
+| `MAIL_FROM`                     | sender (default: `noreply@kervanheat.com`) |
 
 **E. Cutover sırası — downtime'sız geçiş için:**
 

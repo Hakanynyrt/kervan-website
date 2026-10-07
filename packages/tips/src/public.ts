@@ -7,6 +7,9 @@ import {
   type PublicFamily,
   type PublicSku,
   type Range,
+  type ShankProfile,
+  type SlotEndKind,
+  type StepKind,
 } from './types.ts';
 
 /** `SELECT id, code, attrs, popular_tier FROM families WHERE published = 1` */
@@ -45,6 +48,78 @@ const range = (a: number | null, b: number | null): Range | null => {
   return min === null || max === null ? null : { min, max };
 };
 
+const STEP_KINDS: readonly StepKind[] = ['square', 'chamfer', 'fillet', 'taper'];
+const SLOT_END_KINDS: readonly SlotEndKind[] = ['radius', 'ramp', 'square'];
+const pos = (v: unknown): number | null => {
+  const n = num(v);
+  return n !== null && n > 0 ? n : null;
+};
+const nonNeg = (v: unknown): number | null => {
+  const n = num(v);
+  return n !== null && n >= 0 ? n : null;
+};
+
+/** Whitelists a drawing profile; anything malformed drops the whole profile (renders fall back). */
+export function publicProfile(v: unknown): ShankProfile | null {
+  if (!v || typeof v !== 'object') return null;
+  const p = v as Record<string, unknown>;
+  const back = nonNeg(p.backChamferMm);
+  const secs = Array.isArray(p.sections) ? p.sections : null;
+  const slot = (p.slot ?? null) as Record<string, unknown> | null;
+  if (back === null || !secs || secs.length === 0 || secs.length > 12 || !slot) return null;
+  const sections: ShankProfile['sections'] = [];
+  for (let i = 0; i < secs.length; i++) {
+    const s = (secs[i] ?? {}) as Record<string, unknown>;
+    const last = i === secs.length - 1;
+    const d = pos(s.diameterMm);
+    const len = last ? null : pos(s.lengthMm);
+    const st = (s.step ?? null) as Record<string, unknown> | null;
+    const kind = st && STEP_KINDS.includes(st.kind as StepKind) ? (st.kind as StepKind) : null;
+    const stLen = st ? nonNeg(st.lengthMm) : null;
+    if (d === null || (!last && (len === null || !kind || stLen === null))) return null;
+    sections.push({
+      diameterMm: d,
+      lengthMm: len,
+      step: last ? null : { kind: kind!, lengthMm: stLen! },
+    });
+  }
+  const end = (e: unknown): { kind: SlotEndKind; lengthMm: number } | null => {
+    const o = (e ?? null) as Record<string, unknown> | null;
+    if (!o || !SLOT_END_KINDS.includes(o.kind as SlotEndKind)) return null;
+    const l = nonNeg(o.lengthMm);
+    return l === null ? null : { kind: o.kind as SlotEndKind, lengthMm: l };
+  };
+  const count = slot.count === 1 || slot.count === 2 ? slot.count : null;
+  const start = nonNeg(slot.startMm);
+  const length = pos(slot.lengthMm);
+  const section = pos(slot.sectionMm);
+  const sb = end(slot.back);
+  const sf = end(slot.front);
+  if (count === null || start === null || length === null || section === null || !sb || !sf)
+    return null;
+  const split = num(slot.splitTop);
+  return {
+    backChamferMm: back,
+    sections,
+    slot: {
+      count,
+      startMm: start,
+      lengthMm: length,
+      sectionMm: section,
+      ...(count === 2 && split !== null && split >= 0.05 && split <= 0.95
+        ? { splitTop: split }
+        : {}),
+      back: sb,
+      front: sf,
+    },
+  };
+}
+
+const profileField = (v: unknown): { profile?: ShankProfile } => {
+  const p = publicProfile(v);
+  return p ? { profile: p } : {};
+};
+
 /** Rebuilds attrs field by field, so nothing else stored in the JSON can leak. */
 function publicAttrs(raw: string): FamilyAttrs | null {
   let a: Record<string, unknown>;
@@ -72,7 +147,12 @@ function publicAttrs(raw: string): FamilyAttrs | null {
     rear: {
       step: typeof rear.step === 'boolean' ? rear.step : null,
       diameterMm: num(rear.diameterMm),
+      stubLengthMm: num(rear.stubLengthMm),
     },
+    collarEndMm: num(a.collarEndMm),
+    chiselEdge:
+      a.chiselEdge === 'parallel' || a.chiselEdge === 'perpendicular' ? a.chiselEdge : null,
+    ...profileField(a.profile),
   };
 }
 

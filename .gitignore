@@ -26,3 +26,5 @@ vega-catalog*.json
 
 # Shop catalog snapshot written at build time from D1 (public fields only, still not for git)
 apps/parts-shop/.catalog/
+apps/parts-shop/.renders/
+apps/parts-shop/.render-app/

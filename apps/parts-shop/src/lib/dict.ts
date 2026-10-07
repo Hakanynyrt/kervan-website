@@ -68,6 +68,11 @@ export interface Dict {
     email: string;
     whatsappText: (code: string) => string;
     measureNote: string;
+    renderNote: string;
+    renderAlt: (code: string, type: string) => string;
+    sideAlt: (code: string, type: string) => string;
+    rearAlt: (code: string) => string;
+    viewRear: string;
     marks: string;
   };
   footer: { legal: string; kvkk: string; marks: string };
@@ -168,6 +173,12 @@ export const DICT: Record<Lang, Dict> = {
         `Merhaba, ${code} kırıcı ucu için fiyat ve teslim süresi öğrenmek istiyorum.`,
       measureNote:
         'Ölçüler tablodaki gibidir. Sipariş vermeden önce eski ucunuzla ve kırıcınızın modeliyle karşılaştırın.',
+      renderNote: 'Temsili görsel: ölçülerden üretilmiştir. Ölçüler tablodaki gibidir.',
+      renderAlt: (code, type) =>
+        `${code} ${type} kırıcı ucu, ölçülerinden üretilmiş temsili görsel`,
+      sideAlt: (code, type) => `${code} ${type} kırıcı ucu, yandan görünüş (temsili)`,
+      rearAlt: (code) => `${code} kırıcı ucunun kama kanalı ve arka ucu, yakın görünüş (temsili)`,
+      viewRear: 'Kama kanalı ve arka uç',
       marks:
         'Kırıcı marka ve model adları yalnız uyumu belirtmek içindir; markalar sahiplerine aittir.',
     },
@@ -275,6 +286,12 @@ export const DICT: Record<Lang, Dict> = {
         `Hello, I would like the price and lead time for breaker tip ${code}.`,
       measureNote:
         'Dimensions are as in the table. Compare them with your old tip and your breaker model before ordering.',
+      renderNote: 'Illustration generated from the dimensions. The table is binding.',
+      renderAlt: (code, type) =>
+        `${code} ${type} breaker tip, illustration generated from its dimensions`,
+      sideAlt: (code, type) => `${code} ${type} breaker tip, side view (illustration)`,
+      rearAlt: (code) => `${code} breaker tip key slot and rear end, close-up (illustration)`,
+      viewRear: 'Key slot and rear end',
       marks: 'Breaker brand and model names only indicate fit; the marks belong to their owners.',
     },
     footer: {
