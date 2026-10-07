@@ -21,6 +21,18 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       return { ...page, title: m.listTitle, description: m.listDesc };
     case 'popular':
       return { ...page, title: m.popularTitle, description: m.popularDesc };
+    case 'brand':
+      return {
+        ...page,
+        title: m.brandTitle(model.brand),
+        description: m.brandDesc(model.brand, model.rows.length),
+      };
+    case 'parts':
+      return { ...page, title: m.partsTitle, description: m.partsDesc };
+    case 'part': {
+      const name = t.parts.items[model.part].name;
+      return { ...page, title: m.partTitle(name), description: m.partDesc(name) };
+    }
     case 'breaker': {
       const f = model.families[0];
       const d = fmtNum(f.attrs.diameterMm, lang);

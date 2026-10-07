@@ -12,7 +12,7 @@ import {
 } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { LIST_PATH, POPULAR_PATH } from '../lib/routes';
+import { LIST_PATH, PARTS_PATH, POPULAR_PATH } from '../lib/routes';
 import type { Lang } from '../types';
 
 export const FOCUS =
@@ -37,6 +37,11 @@ export default function Layout({ lang, path, t, demo, hasPopular, children }: Pr
   const corporate = lang === 'tr' ? 'https://kervanbreaker.com/' : 'https://kervanbreaker.com/en/';
   const nav = [
     { href: localePath(LIST_PATH, lang), label: t.nav.tips, current: path === LIST_PATH },
+    {
+      href: localePath(PARTS_PATH, lang),
+      label: t.nav.parts,
+      current: path.startsWith(PARTS_PATH),
+    },
     ...(hasPopular
       ? [
           {
@@ -49,7 +54,7 @@ export default function Layout({ lang, path, t, demo, hasPopular, children }: Pr
   ];
   return (
     <>
-      <div className="border-b border-hair bg-bg-soft font-sans text-xs text-ink-mid">
+      <div className="hidden border-b border-hair bg-bg-soft font-sans text-xs text-ink-mid sm:block">
         <Container className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-2">
           <span>
             {ORG_TRADING_NAME} · {t.top.tagline}
@@ -93,7 +98,7 @@ export default function Layout({ lang, path, t, demo, hasPopular, children }: Pr
                 {n.label}
               </a>
             ))}
-            <a href={corporate} className={`text-ink-mid hover:text-ink ${FOCUS}`}>
+            <a href={corporate} className={`hidden text-ink-mid hover:text-ink sm:inline ${FOCUS}`}>
               {t.nav.catalogSite}
             </a>
             <a
@@ -106,7 +111,7 @@ export default function Layout({ lang, path, t, demo, hasPopular, children }: Pr
             </a>
             <a
               href={whatsappHref(t.nav.quoteText)}
-              className={`rounded-sm bg-brand px-4 py-2 text-white hover:bg-brand-hi ${FOCUS}`}
+              className={`hidden rounded-sm bg-brand px-4 py-2 text-white hover:bg-brand-hi sm:inline-block ${FOCUS}`}
             >
               {t.nav.quote}
             </a>

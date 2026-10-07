@@ -1,6 +1,6 @@
 import TipProduct from '../components/TipProduct';
 import type { Dict } from '../lib/dict';
-import type { PageModel } from '../lib/routes';
+import { brandPath, type PageModel } from '../lib/routes';
 import type { Lang } from '../types';
 
 type Model = Extract<PageModel, { kind: 'breaker' }>;
@@ -10,7 +10,8 @@ export default function Breaker({ model, lang, t }: { model: Model; lang: Lang; 
   return (
     <TipProduct
       title={t.breaker.title(model.name)}
-      crumb={model.name}
+      crumb={model.model}
+      trail={[[model.brand, brandPath(model.brand)]]}
       quoteName={model.name}
       families={model.families}
       lang={lang}

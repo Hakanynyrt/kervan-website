@@ -2,6 +2,7 @@ export * from './types.ts';
 export * from './codes.ts';
 export * from './slug.ts';
 export * from './breakers.ts';
+export * from './breaker-display.ts';
 export * from './usage.ts';
 export * from './from-catalog.ts';
 export * from './sql.ts';

@@ -1,4 +1,10 @@
-import type { PublicCatalog, PublicFamily, TipType } from '@kervan/tips';
+import {
+  displayBreakers,
+  slugify,
+  type PublicCatalog,
+  type PublicFamily,
+  type TipType,
+} from '@kervan/tips';
 
 /** One breaker model and the tip it takes: the shop's product (card, list row, page). */
 export interface BreakerCard {
@@ -7,6 +13,8 @@ export interface BreakerCard {
   path: string;
   /** "Brand Model". */
   name: string;
+  brand: string;
+  model: string;
   diameterMm: number;
   types: TipType[];
   /** Render key of the first SKU that has one (see tip-img.ts). */
@@ -25,11 +33,23 @@ export type PageModel =
       demo: boolean;
       hasPopular: boolean;
     }
-  | { kind: 'list'; rows: BreakerCard[]; demo: boolean; hasPopular: boolean }
+  | { kind: 'list'; rows: BreakerCard[]; brands: BrandLink[]; demo: boolean; hasPopular: boolean }
+  | {
+      kind: 'brand';
+      brand: string;
+      rows: BreakerCard[];
+      brands: BrandLink[];
+      demo: boolean;
+      hasPopular: boolean;
+    }
+  | { kind: 'parts'; demo: boolean; hasPopular: boolean }
+  | { kind: 'part'; part: PartKey; demo: boolean; hasPopular: boolean }
   | { kind: 'popular'; cards: BreakerCard[]; demo: boolean; hasPopular: true }
   | {
       kind: 'breaker';
       name: string;
+      brand: string;
+      model: string;
       /** Tip families that fit this breaker (usually one). */
       families: PublicFamily[];
       demo: boolean;
@@ -37,6 +57,18 @@ export type PageModel =
     }
   | { kind: 'family'; family: PublicFamily; demo: boolean; hasPopular: boolean }
   | { kind: 'notFound' };
+
+export interface BrandLink {
+  name: string;
+  path: string;
+  count: number;
+}
+
+/** Spare-part groups besides tips (no catalogue data yet: quote by breaker model). */
+export const PART_KEYS = ['alt-govde', 'burc', 'kama', 'saplama', 'piston'] as const;
+export type PartKey = (typeof PART_KEYS)[number];
+export const PARTS_PATH = '/yedek-parca';
+export const partPath = (k: PartKey): string => `${PARTS_PATH}/${k}`;
 
 export interface BuiltPage {
   /** Neutral (Turkish) path. */
@@ -48,6 +80,7 @@ const FEATURED = 8;
 
 export const familyPath = (code: string): string => `/urun/${code.toLowerCase()}`;
 export const breakerPath = (slug: string): string => `/kirici/${slug}`;
+export const brandPath = (brand: string): string => `/marka/${slugify(brand)}`;
 export const LIST_PATH = '/kirici-ucu';
 export const POPULAR_PATH = '/cok-satanlar';
 
@@ -66,19 +99,32 @@ const byName = (a: BreakerCard, b: BreakerCard): number =>
  */
 export function buildPages(c: PublicCatalog): BuiltPage[] {
   const demo = c.demo === true;
-  const breakers = new Map<string, { name: string; families: PublicFamily[] }>();
+  // Breaker names as the catalogue spells them are cleaned up for display (one spelling per
+  // maker, lists split); entries that name no maker stay on their family pages only.
+  const breakers = new Map<
+    string,
+    { name: string; brand: string; model: string; families: PublicFamily[] }
+  >();
   for (const f of c.families)
-    for (const b of f.fits) {
-      const e = breakers.get(b.slug) ?? { name: breakerName(b), families: [] };
-      e.families.push(f);
-      breakers.set(b.slug, e);
-    }
+    for (const raw of f.fits)
+      for (const b of displayBreakers(raw.brand, raw.model)) {
+        const e = breakers.get(b.slug) ?? {
+          name: breakerName(b),
+          brand: b.brand,
+          model: b.model,
+          families: [],
+        };
+        if (!e.families.includes(f)) e.families.push(f);
+        breakers.set(b.slug, e);
+      }
   const cards: BreakerCard[] = [...breakers].map(([slug, e]) => {
     const f = e.families[0];
     return {
       slug,
       path: breakerPath(slug),
       name: e.name,
+      brand: e.brand,
+      model: e.model,
       diameterMm: f.attrs.diameterMm,
       types: [...new Set(e.families.flatMap((x) => x.skus.map((s) => s.tipType)))],
       image: e.families.flatMap((x) => x.skus).find((s) => s.image)?.image ?? null,
@@ -93,6 +139,11 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     .filter((x) => x.popularTier !== null)
     .sort((a, b) => tierRank(a.popularTier) - tierRank(b.popularTier) || byName(a, b));
   const hasPopular = popular.length > 0;
+  const byBrand = new Map<string, BreakerCard[]>();
+  for (const x of cards) byBrand.set(x.brand, [...(byBrand.get(x.brand) ?? []), x]);
+  const brands: BrandLink[] = [...byBrand]
+    .map(([name, rows]) => ({ name, path: brandPath(name), count: rows.length }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'tr'));
   // Home: one breaker per tip family, so the first screen is not eight names for one tip.
   const seen = new Set<string | null>();
   const featured = (hasPopular ? popular : cards).filter((x) => {
@@ -114,7 +165,16 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         hasPopular,
       },
     },
-    { path: LIST_PATH, model: { kind: 'list', rows: cards, demo, hasPopular } },
+    { path: LIST_PATH, model: { kind: 'list', rows: cards, brands, demo, hasPopular } },
+    ...[...byBrand].map(([brand, rows]) => ({
+      path: brandPath(brand),
+      model: { kind: 'brand' as const, brand, rows, brands, demo, hasPopular },
+    })),
+    { path: PARTS_PATH, model: { kind: 'parts' as const, demo, hasPopular } },
+    ...PART_KEYS.map((part) => ({
+      path: partPath(part),
+      model: { kind: 'part' as const, part, demo, hasPopular },
+    })),
     ...(hasPopular
       ? [
           {
@@ -128,6 +188,8 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       model: {
         kind: 'breaker' as const,
         name: e.name,
+        brand: e.brand,
+        model: e.model,
         families: e.families,
         demo,
         hasPopular,
