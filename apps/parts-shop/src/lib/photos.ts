@@ -184,6 +184,45 @@ const MONTABERT_ALT_GOVDE: SeriesHead[] = [
   { model: 'M 600', slug: 'm600', window: true },
   { model: 'M 700', slug: 'm700', window: true },
 ];
+/** Furukawa F, HB-G and HB front heads. */
+const FURUKAWA_ALT_GOVDE: SeriesHead[] = [
+  { model: 'F12', slug: 'f-12', window: true },
+  { model: 'F19', slug: 'f-19', window: true },
+  { model: 'F22', slug: 'f-22', window: true },
+  { model: 'F27', slug: 'f-27', window: true },
+  { model: 'F35', slug: 'f-35', window: true },
+  { model: 'F45', slug: 'f-45', window: true },
+  { model: 'F100', slug: 'f-100', window: true },
+  { model: 'HB5G', slug: 'hb-5-g', window: true },
+  { model: 'HB8G', slug: 'hb-8-g', window: true },
+  { model: 'HB15G', slug: 'hb-15-g', window: true },
+  { model: 'HB20G', slug: 'hb-20-g', window: true },
+  { model: 'HB30G', slug: 'hb-30-g', window: true },
+  { model: 'HB30G', slug: 'hb-30-g-eski', window: true, variant: 'oldType' },
+  { model: 'HB40G', slug: 'hb-40-g', window: true },
+  { model: 'HB200', slug: 'hb-200', window: true },
+  { model: 'HB1200', slug: 'hb-1200', window: true },
+];
+/** Okada OKB front heads. */
+const OKADA_ALT_GOVDE: SeriesHead[] = [
+  { model: 'OKB 304B', slug: '304b', window: true },
+  { model: 'OKB 308', slug: '308', window: true },
+  { model: 'OKB 310', slug: '310', window: true },
+  { model: 'OKB 312B', slug: '312b', window: true },
+  { model: 'OKB 316', slug: '316', window: true },
+];
+/** Toyo THBB front heads (the THBB 31 head is a turned bar with flats, no nut windows). */
+const TOYO_ALT_GOVDE: SeriesHead[] = [
+  { model: 'THBB 31', slug: '31', window: false },
+  { model: 'THBB 801', slug: '801', window: true },
+  { model: 'THBB 1400', slug: '1400', window: true },
+  { model: 'THBB 1401', slug: '1401', window: true },
+  { model: 'THBB 1600', slug: '1600', window: true },
+  { model: 'THBB 1600', slug: '1600-eski', window: true, variant: 'oldType' },
+  { model: 'THBB 2000', slug: '2000', window: true },
+  { model: 'THBB 3000', slug: '3000', window: true },
+  { model: 'THBB 5000', slug: '5000', window: true },
+];
 /** Tamrock (Rammer's owner from 1995, Sandvik since 1997): the HL 510 is a rock drill, not a breaker. */
 const TAMROCK_ALT_GOVDE: SeriesHead[] = [
   { model: 'HL 510', slug: 'hl510', window: false, kind: 'rockDrillHead' },
@@ -228,6 +267,9 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
     ...ATLAS_COPCO_ALT_GOVDE.map(seriesRender('Atlas Copco', 'atlas-copco')),
     ...SOOSAN_ALT_GOVDE.map(seriesRender('Soosan', 'soosan')),
     ...MONTABERT_ALT_GOVDE.map(seriesRender('Montabert', 'montabert')),
+    ...FURUKAWA_ALT_GOVDE.map(seriesRender('Furukawa', 'furukawa')),
+    ...OKADA_ALT_GOVDE.map(seriesRender('Okada', 'okada')),
+    ...TOYO_ALT_GOVDE.map(seriesRender('Toyo', 'toyo')),
     ...TAMROCK_ALT_GOVDE.map(seriesRender('Tamrock', 'tamrock')),
   ],
   burc: [
