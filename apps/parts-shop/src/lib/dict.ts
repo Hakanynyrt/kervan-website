@@ -183,7 +183,6 @@ export interface Dict {
   footer: {
     legal: string;
     docs: string;
-    marks: string;
     images: string;
     shop: string;
     company: string;
@@ -485,7 +484,6 @@ export const DICT: Record<Lang, Dict> = {
     footer: {
       legal: 'Üretici ve satıcı',
       docs: 'Yasal',
-      marks: 'Markalar sahiplerine aittir.',
       shop: 'Mağaza',
       company: 'Kurumsal',
       contact: 'İletişim',
@@ -791,7 +789,6 @@ export const DICT: Record<Lang, Dict> = {
     footer: {
       legal: 'Manufacturer and seller',
       docs: 'Legal',
-      marks: 'Marks belong to their owners.',
       shop: 'Shop',
       company: 'Company',
       contact: 'Contact',

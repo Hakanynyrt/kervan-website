@@ -192,7 +192,6 @@ export default function Layout({ lang, path, t, demo, hasPopular, children }: Pr
         <div className="border-t border-hair">
           <Container className="flex flex-col gap-1 py-5 font-sans text-xs text-ink-soft">
             <p className="m-0">{t.footer.images}</p>
-            <p className="m-0">{t.footer.marks}</p>
           </Container>
         </div>
       </footer>
