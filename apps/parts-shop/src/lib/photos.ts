@@ -129,6 +129,8 @@ const ATLAS_COPCO_ALT_GOVDE: SeriesHead[] = [
   { model: 'HB 2200', slug: 'hb-2200', window: false },
   { model: 'HB 2500', slug: 'hb-2500', window: false },
   { model: 'HB 3000', slug: 'hb-3000', window: false },
+  { model: 'TEX 700 / 900', slug: 'tex-900', window: false },
+  { model: 'TEX 1400', slug: 'tex-1400', window: true },
 ];
 /** Rammer E / G / S front heads (E68, modelled first, leads the strip with its 3D model). */
 const RAMMER_ALT_GOVDE: SeriesHead[] = [
@@ -223,6 +225,102 @@ const TOYO_ALT_GOVDE: SeriesHead[] = [
   { model: 'THBB 3000', slug: '3000', window: true },
   { model: 'THBB 5000', slug: '5000', window: true },
 ];
+/** NPK E and H series front heads (no corner nut windows). */
+const NPK_ALT_GOVDE: SeriesHead[] = [
+  { model: 'E-213A', slug: 'e-213a', window: false },
+  { model: 'E-216', slug: 'e-216', window: false },
+  { model: 'E-220', slug: 'e-220', window: false },
+  { model: 'H-2XA', slug: 'h-2xa', window: false },
+  { model: 'H-3XA', slug: 'h-3xa', window: false },
+  { model: 'H-7X', slug: 'h-7x', window: false },
+  { model: 'H-8XA', slug: 'h-8xa', window: false },
+  { model: 'H-10XB', slug: 'h-10xb', window: false },
+  { model: 'H-12X', slug: 'h-12x', window: false },
+  { model: 'H-16X', slug: 'h-16x', window: false },
+];
+/** Indeco MES front heads. */
+const INDECO_ALT_GOVDE: SeriesHead[] = [
+  { model: 'MES 621', slug: 'mes-621', window: true },
+  { model: 'MES 2000', slug: 'mes-2000', window: true },
+  { model: 'MES 2500', slug: 'mes-2500', window: true },
+  { model: 'MES 3000', slug: 'mes-3000', window: true },
+  { model: 'MES 3500', slug: 'mes-3500', window: true },
+  { model: 'MES 4000', slug: 'mes-4000', window: true },
+  { model: 'MES 7000', slug: 'mes-7000', window: true },
+];
+/** Daemo S front heads. */
+const DAEMO_ALT_GOVDE: SeriesHead[] = [
+  { model: 'S500', slug: 's-500', window: false },
+  { model: 'S2000', slug: 's-2000', window: true },
+  { model: 'S2200', slug: 's-2200', window: true },
+  { model: 'S2200 II', slug: 's-2200-ii', window: true },
+];
+/** Hanwoo RHB front heads. */
+const HANWOO_ALT_GOVDE: SeriesHead[] = [
+  { model: 'RHB 305V', slug: 'rhb-305v', window: false },
+  { model: 'RHB 320', slug: 'rhb-320', window: true },
+  { model: 'RHB 325', slug: 'rhb-325', window: true },
+  { model: 'RHB 330', slug: 'rhb-330', window: true },
+];
+/** DNB (Dainong) D and D-IIS front heads. */
+const DNB_ALT_GOVDE: SeriesHead[] = [
+  { model: 'D70', slug: 'd70', window: true },
+  { model: 'D70 IIS', slug: 'd70-iis', window: true },
+  { model: 'D110 IIS', slug: 'd110-iis', window: true },
+  { model: 'D130 IIS', slug: 'd130-iis', window: true },
+  { model: 'D160 IIS', slug: 'd160-iis', window: true },
+];
+/** Cat hydraulic hammer front heads. */
+const CAT_ALT_GOVDE: SeriesHead[] = [
+  { model: '115', slug: '115', window: true },
+  { model: '130', slug: '130', window: true },
+  { model: '140', slug: '140', window: true },
+  { model: '160', slug: '160', window: true },
+];
+/** MSB and MSB SAGA front heads. */
+const MSB_ALT_GOVDE: SeriesHead[] = [
+  { model: '200', slug: '200', window: true },
+  { model: '250', slug: '250', window: true },
+  { model: '300', slug: '300', window: true },
+  { model: '400', slug: '400', window: true },
+  { model: '450', slug: '450', window: true },
+  { model: '500', slug: '500', window: true },
+  { model: '550', slug: '550', window: true },
+  { model: 'MS 810', slug: '810', window: true },
+  { model: '900', slug: '900', window: true },
+  { model: 'SAGA 6000', slug: 'saga-6000', window: true },
+];
+/** Toku TNB front heads. */
+const TOKU_ALT_GOVDE: SeriesHead[] = [
+  { model: 'TNB-14E', slug: 'tnb-14e', window: false },
+  { model: 'TNB-150', slug: 'tnb-150', window: false },
+  { model: 'TNB-230', slug: 'tnb-230', window: false },
+];
+/** Kwanglim SG front heads. */
+const KWANGLIM_ALT_GOVDE: SeriesHead[] = [
+  { model: 'SG-800S', slug: 'sg-800s', window: true },
+  { model: 'SG-2100', slug: 'sg-2100', window: true },
+  { model: 'SG-2800', slug: 'sg-2800', window: true },
+];
+/** D&A front heads. */
+const DA_ALT_GOVDE: SeriesHead[] = [
+  { model: '1300', slug: '1300', window: false },
+  { model: '130V', slug: '130v', window: true },
+  { model: '200V', slug: '200v', window: true },
+  { model: '2200', slug: '2200', window: true },
+];
+/** Topa front heads. */
+const TOPA_ALT_GOVDE: SeriesHead[] = [
+  { model: '300', slug: '300', window: true },
+  { model: '1400', slug: '1400', window: true },
+];
+/** Mega front heads. */
+const MEGA_ALT_GOVDE: SeriesHead[] = [
+  { model: '130', slug: '130', window: true },
+  { model: '280', slug: '280', window: true },
+];
+/** Kent KHB front heads. */
+const KENT_ALT_GOVDE: SeriesHead[] = [{ model: 'KHB 150', slug: 'khb-150', window: true }];
 /** Tamrock (Rammer's owner from 1995, Sandvik since 1997): the HL 510 is a rock drill, not a breaker. */
 const TAMROCK_ALT_GOVDE: SeriesHead[] = [
   { model: 'HL 510', slug: 'hl510', window: false, kind: 'rockDrillHead' },
@@ -270,6 +368,19 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
     ...FURUKAWA_ALT_GOVDE.map(seriesRender('Furukawa', 'furukawa')),
     ...OKADA_ALT_GOVDE.map(seriesRender('Okada', 'okada')),
     ...TOYO_ALT_GOVDE.map(seriesRender('Toyo', 'toyo')),
+    ...NPK_ALT_GOVDE.map(seriesRender('NPK', 'npk')),
+    ...INDECO_ALT_GOVDE.map(seriesRender('Indeco', 'indeco')),
+    ...DAEMO_ALT_GOVDE.map(seriesRender('Daemo', 'daemo')),
+    ...HANWOO_ALT_GOVDE.map(seriesRender('Hanwoo', 'hanwoo')),
+    ...DNB_ALT_GOVDE.map(seriesRender('DNB', 'dnb')),
+    ...CAT_ALT_GOVDE.map(seriesRender('Cat', 'cat')),
+    ...MSB_ALT_GOVDE.map(seriesRender('MSB', 'msb')),
+    ...TOKU_ALT_GOVDE.map(seriesRender('Toku', 'toku')),
+    ...KWANGLIM_ALT_GOVDE.map(seriesRender('Kwanglim', 'kwanglim')),
+    ...DA_ALT_GOVDE.map(seriesRender('D&A', 'da')),
+    ...TOPA_ALT_GOVDE.map(seriesRender('Topa', 'topa')),
+    ...MEGA_ALT_GOVDE.map(seriesRender('Mega', 'mega')),
+    ...KENT_ALT_GOVDE.map(seriesRender('Kent', 'kent')),
     ...TAMROCK_ALT_GOVDE.map(seriesRender('Tamrock', 'tamrock')),
   ],
   burc: [
