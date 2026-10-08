@@ -459,7 +459,7 @@ export const DICT: Record<Lang, Dict> = {
         upperBushing: 'üst burç (merkezleme)',
         rockDrillHead: 'kaya delici ön kafası',
       },
-      renderVariant: { oldType: 'eski tip' },
+      renderVariant: { oldType: 'eski tip', roundNut: 'yuvarlak somunlu' },
       viewer: {
         open: '3B incele',
         close: 'Görsele dön',
@@ -772,7 +772,7 @@ export const DICT: Record<Lang, Dict> = {
         upperBushing: 'upper bushing',
         rockDrillHead: 'rock drill front head',
       },
-      renderVariant: { oldType: 'old type' },
+      renderVariant: { oldType: 'old type', roundNut: 'round nuts' },
       viewer: {
         open: 'View in 3D',
         close: 'Back to the picture',
