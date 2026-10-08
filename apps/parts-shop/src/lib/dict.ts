@@ -158,6 +158,7 @@ export interface Dict {
     renderCaption: (model: string, name: string) => string;
     renderView: Record<RenderView, string>;
     renderKind: Record<NonNullable<PartRender['kind']>, string>;
+    renderVariant: Record<NonNullable<PartRender['variant']>, string>;
     viewer: {
       open: string;
       close: string;
@@ -454,6 +455,7 @@ export const DICT: Record<Lang, Dict> = {
         assembly: 'burçları takılı montaj kesiti',
       },
       renderKind: { toolBushing: 'kafa burcu (alt burç)', upperBushing: 'üst burç (merkezleme)' },
+      renderVariant: { oldType: 'eski tip' },
       viewer: {
         open: '3B incele',
         close: 'Görsele dön',
@@ -762,6 +764,7 @@ export const DICT: Record<Lang, Dict> = {
         assembly: 'section with the bushings fitted',
       },
       renderKind: { toolBushing: 'tool bushing (lower bushing)', upperBushing: 'upper bushing' },
+      renderVariant: { oldType: 'old type' },
       viewer: {
         open: 'View in 3D',
         close: 'Back to the picture',
