@@ -156,7 +156,18 @@ export interface Dict {
     /** "Rammer E68 alt gövde". */
     renderCaption: (model: string, name: string) => string;
     renderView: Record<'front' | 'rear' | 'side' | 'detail', string>;
-    viewer: { open: string; close: string; hint: string; loading: string; error: string };
+    viewer: {
+      open: string;
+      close: string;
+      hint: string;
+      loading: string;
+      error: string;
+      cut: string;
+      cutOff: string;
+      cutLabel: string;
+      cutHint: string;
+    };
+    series: { title: (series: string) => string; hint: string; prev: string; next: string };
     quoteTitle: string;
     quoteBody: string;
     modelLabel: string;
@@ -445,6 +456,16 @@ export const DICT: Record<Lang, Dict> = {
         hint: 'Sürükleyerek çevirin, iki parmakla ya da tekerlekle yakınlaştırın; ok tuşlarıyla da çevrilir.',
         loading: '3B model yükleniyor…',
         error: '3B model açılamadı.',
+        cut: 'Kesit',
+        cutOff: 'Kesiti kapat',
+        cutLabel: 'Kesit konumu',
+        cutHint: 'Sürgüyü sağa sola kaydırın: parça baştan sona kesilerek iç yapısı görünür.',
+      },
+      series: {
+        title: (series) => `${series} modelleri`,
+        hint: 'Modeli seçmek için yana kaydırın.',
+        prev: 'Önceki model',
+        next: 'Sonraki model',
       },
       quoteTitle: 'Fiyat teklifi isteyin',
       quoteBody: 'Kırıcınızın marka ve modelini yazın; mesaja eklenir.',
@@ -741,6 +762,16 @@ export const DICT: Record<Lang, Dict> = {
         hint: 'Drag to turn, pinch or scroll to zoom; the arrow keys turn it too.',
         loading: 'Loading the 3D model…',
         error: 'The 3D model could not be opened.',
+        cut: 'Section',
+        cutOff: 'Hide the section',
+        cutLabel: 'Section position',
+        cutHint: 'Move the slider left and right to cut the part from end to end and see inside.',
+      },
+      series: {
+        title: (series) => `${series} models`,
+        hint: 'Swipe sideways to pick a model.',
+        prev: 'Previous model',
+        next: 'Next model',
       },
       quoteTitle: 'Request a quote',
       quoteBody: 'Type your breaker make and model; it goes into the message.',
