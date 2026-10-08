@@ -101,7 +101,10 @@ export function MissingModel({ t }: { t: Dict }) {
 /** Phones only: quote and call buttons fixed at the bottom of the screen. */
 export function StickyQuote({ text, t }: { text: string; t: Dict }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-20 flex gap-2 border-t border-hair bg-bg p-3 font-sans text-sm font-medium lg:hidden">
+    <div
+      data-sticky-bar
+      className="fixed inset-x-0 bottom-0 z-20 flex gap-2 border-t border-hair bg-bg p-3 font-sans text-sm font-medium lg:hidden"
+    >
       <a
         href={whatsappHref(text)}
         className={`flex-1 rounded-sm bg-whatsapp px-4 py-3 text-center text-white ${FOCUS}`}

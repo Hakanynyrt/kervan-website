@@ -56,3 +56,10 @@
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Phones: pages with the fixed quote bar (StickyQuote) keep the footer's last lines clear of it. */
+@media (width < 64rem) {
+  body:has([data-sticky-bar]) footer {
+    padding-bottom: 5rem;
+  }
+}
