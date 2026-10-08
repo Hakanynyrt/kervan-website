@@ -121,12 +121,17 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
   );
 }
 
+/** The breaker model a render fits, with its variant (e.g. old type) when it has one. */
+const renderModel = (r: PartRender, t: Dict) =>
+  r.variant ? `${r.model} (${t.parts.renderVariant[r.variant]})` : r.model;
+
 /** One modelled part: showcase picture (with "3B incele" when it has a 3D model), views, caption. */
 function RenderFigure({ r, name, t }: { r: PartRender; name: string; t: Dict }) {
   const [open3d, setOpen3d] = useState(false);
+  const model = renderModel(r, t);
   const caption = r.kind
-    ? `${r.model} ${t.parts.renderKind[r.kind]}`
-    : t.parts.renderCaption(r.model, name);
+    ? `${model} ${t.parts.renderKind[r.kind]}`
+    : t.parts.renderCaption(model, name);
   return (
     <figure className="m-0">
       {r.hero && (
@@ -231,7 +236,7 @@ function SeriesPicker({
         className="m-0 mt-3 flex list-none snap-x snap-mandatory gap-3 overflow-x-auto p-0 pb-3"
       >
         {list.map((r, k) => (
-          <li key={r.model} className="w-36 shrink-0 snap-start sm:w-40">
+          <li key={r.hero ?? r.model} className="w-36 shrink-0 snap-start sm:w-40">
             <button
               type="button"
               onClick={() => pick(k)}
@@ -250,14 +255,14 @@ function SeriesPicker({
                 />
               )}
               <span className="block px-2 py-1.5 font-sans text-sm font-semibold text-ink">
-                {r.model}
+                {renderModel(r, t)}
               </span>
             </button>
           </li>
         ))}
       </ul>
       <div className="mt-4">
-        <RenderFigure key={list[i].model} r={list[i]} name={part} t={t} />
+        <RenderFigure key={list[i].hero ?? list[i].model} r={list[i]} name={part} t={t} />
       </div>
     </section>
   );

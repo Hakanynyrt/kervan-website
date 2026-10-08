@@ -36,6 +36,8 @@ export interface PartRender {
   series?: string;
   /** Which bushing of the breaker (burç page): names it in the caption instead of the part name. */
   kind?: 'toolBushing' | 'upperBushing';
+  /** A superseded version of the same breaker's part, named in the caption through the dict. */
+  variant?: 'oldType';
   views: { base: string; view: RenderView }[];
 }
 
@@ -85,7 +87,15 @@ const mtbRender = (m: string): PartRender => {
   };
 };
 /** Krupp HM / AT front heads modelled from our drawings (HM 560 and HM 580 share one drawing). */
-const KRUPP_ALT_GOVDE: { model: string; slug: string; window: boolean }[] = [
+interface SeriesHead {
+  model: string;
+  slug: string;
+  window: boolean;
+  /** File version: a changed render gets a new number (images are cached immutable). */
+  v?: string;
+  variant?: PartRender['variant'];
+}
+const KRUPP_ALT_GOVDE: SeriesHead[] = [
   { model: 'HM 140', slug: 'hm-140', window: false },
   { model: 'HM 300', slug: 'hm-300', window: false },
   { model: 'HM 350', slug: 'hm-350', window: false },
@@ -96,7 +106,8 @@ const KRUPP_ALT_GOVDE: { model: string; slug: string; window: boolean }[] = [
   { model: 'HM 720', slug: 'hm-720', window: true },
   { model: 'HM 780', slug: 'hm-780', window: false },
   { model: 'HM 800', slug: 'hm-800', window: false },
-  { model: 'HM 900', slug: 'hm-900', window: true },
+  { model: 'HM 900', slug: 'hm-900', window: true, v: '02' },
+  { model: 'HM 900', slug: 'hm-900-eski', window: true, variant: 'oldType' },
   { model: 'HM 950', slug: 'hm-950', window: true },
   { model: 'HM 960', slug: 'hm-960', window: true },
   { model: 'HM 1000', slug: 'hm-1000', window: false },
@@ -109,20 +120,32 @@ const KRUPP_ALT_GOVDE: { model: string; slug: string; window: boolean }[] = [
   { model: 'HM 2600 Marathon', slug: 'hm-2600-marathon', window: false },
   { model: 'AT 220', slug: 'at-220', window: false },
 ];
-const kruppRender = ({ model, slug, window }: (typeof KRUPP_ALT_GOVDE)[number]): PartRender => {
-  const b = `/photos/parca/alt-govde-krupp-${slug}`;
-  return {
-    model: `Krupp ${model}`,
-    series: 'Krupp',
-    hero: `${b}-vitrin-01`,
-    views: [
-      { base: `${b}-on-01`, view: 'front' },
-      { base: `${b}-arka-01`, view: 'rear' },
-      { base: `${b}-yan-01`, view: 'side' },
-      ...(window ? [{ base: `${b}-pencere-01`, view: 'detail' as const }] : []),
-    ],
+/** Atlas Copco HB / MB front heads (the HB / MB names came after Atlas Copco bought Krupp's breaker
+ *  business in 2002; sold under Epiroc since 2018). MB 1000 followed the Krupp HM 680. */
+const ATLAS_COPCO_ALT_GOVDE: SeriesHead[] = [
+  { model: 'MB 1000 (Krupp HM 680)', slug: 'mb-1000', window: false },
+  { model: 'MB 1200', slug: 'mb-1200', window: false },
+  { model: 'HB 2200', slug: 'hb-2200', window: false },
+  { model: 'HB 2500', slug: 'hb-2500', window: false },
+  { model: 'HB 3000', slug: 'hb-3000', window: false },
+];
+const seriesRender =
+  (make: string, file: string) =>
+  ({ model, slug, window, v = '01', variant }: SeriesHead): PartRender => {
+    const b = `/photos/parca/alt-govde-${file}-${slug}`;
+    return {
+      model: `${make} ${model}`,
+      series: make,
+      variant,
+      hero: `${b}-vitrin-${v}`,
+      views: [
+        { base: `${b}-on-${v}`, view: 'front' },
+        { base: `${b}-arka-${v}`, view: 'rear' },
+        { base: `${b}-yan-${v}`, view: 'side' },
+        ...(window ? [{ base: `${b}-pencere-${v}`, view: 'detail' as const }] : []),
+      ],
+    };
   };
-};
 
 export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
   'alt-govde': [
@@ -139,7 +162,8 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
       ],
     },
     ...MTB_ALT_GOVDE.map(mtbRender),
-    ...KRUPP_ALT_GOVDE.map(kruppRender),
+    ...KRUPP_ALT_GOVDE.map(seriesRender('Krupp', 'krupp')),
+    ...ATLAS_COPCO_ALT_GOVDE.map(seriesRender('Atlas Copco', 'atlas-copco')),
   ],
   burc: [
     {
