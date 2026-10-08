@@ -201,7 +201,7 @@ function SeriesPicker({
       behavior: reduced ? 'auto' : 'smooth',
     });
   };
-  const id = `series-${series.toLowerCase()}`;
+  const id = `series-${series.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
   const arrow = `cursor-pointer rounded-sm border border-ink-soft bg-bg px-3 py-1.5 text-ink hover:bg-bg-warm ${FOCUS}`;
   return (
     <section aria-labelledby={id} className="mt-4 border-t border-hair pt-6">

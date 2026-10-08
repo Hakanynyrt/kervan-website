@@ -35,7 +35,7 @@ export interface PartRender {
   /** Breaker series: renders of one series share a sideways model picker (`<hero>-xs.webp` 320 px). */
   series?: string;
   /** Which bushing of the breaker (burç page): names it in the caption instead of the part name. */
-  kind?: 'toolBushing' | 'upperBushing';
+  kind?: 'toolBushing' | 'upperBushing' | 'rockDrillHead';
   /** A superseded version of the same breaker's part, named in the caption through the dict. */
   variant?: 'oldType';
   views: { base: string; view: RenderView }[];
@@ -94,6 +94,7 @@ interface SeriesHead {
   /** File version: a changed render gets a new number (images are cached immutable). */
   v?: string;
   variant?: PartRender['variant'];
+  kind?: PartRender['kind'];
 }
 const KRUPP_ALT_GOVDE: SeriesHead[] = [
   { model: 'HM 140', slug: 'hm-140', window: false },
@@ -129,14 +130,38 @@ const ATLAS_COPCO_ALT_GOVDE: SeriesHead[] = [
   { model: 'HB 2500', slug: 'hb-2500', window: false },
   { model: 'HB 3000', slug: 'hb-3000', window: false },
 ];
+/** Rammer E / G / S front heads (E68, modelled first, leads the strip with its 3D model). */
+const RAMMER_ALT_GOVDE: SeriesHead[] = [
+  { model: 'E64', slug: 'e64', window: true },
+  { model: 'E65', slug: 'e65', window: true },
+  { model: 'E66', slug: 'e66', window: true },
+  { model: 'E66 N', slug: 'e66n', window: true },
+  { model: 'G80', slug: 'g80', window: true },
+  { model: 'G88', slug: 'g88', window: false },
+  { model: 'G90', slug: 'g90', window: true },
+  { model: 'G100', slug: 'g100', window: true },
+  { model: 'S25', slug: 's25', window: true },
+  { model: 'S29', slug: 's29', window: true },
+  { model: 'S54', slug: 's54', window: true },
+  { model: 'S55', slug: 's55', window: true },
+  { model: 'S56', slug: 's56', window: true },
+  { model: 'S83', slug: 's83', window: true },
+  { model: 'S84', slug: 's84', window: true },
+  { model: 'S86', slug: 's86', window: true },
+];
+/** Tamrock (Rammer's owner from 1995, Sandvik since 1997): the HL 510 is a rock drill, not a breaker. */
+const TAMROCK_ALT_GOVDE: SeriesHead[] = [
+  { model: 'HL 510', slug: 'hl510', window: false, kind: 'rockDrillHead' },
+];
 const seriesRender =
   (make: string, file: string) =>
-  ({ model, slug, window, v = '01', variant }: SeriesHead): PartRender => {
+  ({ model, slug, window, v = '01', variant, kind }: SeriesHead): PartRender => {
     const b = `/photos/parca/alt-govde-${file}-${slug}`;
     return {
       model: `${make} ${model}`,
       series: make,
       variant,
+      kind,
       hero: `${b}-vitrin-${v}`,
       views: [
         { base: `${b}-on-${v}`, view: 'front' },
@@ -151,6 +176,7 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
   'alt-govde': [
     {
       model: 'Rammer E68',
+      series: 'Rammer',
       hero: '/photos/parca/alt-govde-rammer-e68-vitrin-01',
       model3d: '/models/alt-govde-rammer-e68-02.glb',
       views: [
@@ -161,9 +187,11 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
         { base: '/photos/parca/alt-govde-rammer-e68-montaj-kesit-01', view: 'assembly' },
       ],
     },
+    ...RAMMER_ALT_GOVDE.map(seriesRender('Rammer', 'rammer')),
     ...MTB_ALT_GOVDE.map(mtbRender),
     ...KRUPP_ALT_GOVDE.map(seriesRender('Krupp', 'krupp')),
     ...ATLAS_COPCO_ALT_GOVDE.map(seriesRender('Atlas Copco', 'atlas-copco')),
+    ...TAMROCK_ALT_GOVDE.map(seriesRender('Tamrock', 'tamrock')),
   ],
   burc: [
     {

@@ -454,7 +454,11 @@ export const DICT: Record<Lang, Dict> = {
         section: 'kesit görünüşü',
         assembly: 'burçları takılı montaj kesiti',
       },
-      renderKind: { toolBushing: 'kafa burcu (alt burç)', upperBushing: 'üst burç (merkezleme)' },
+      renderKind: {
+        toolBushing: 'kafa burcu (alt burç)',
+        upperBushing: 'üst burç (merkezleme)',
+        rockDrillHead: 'kaya delici ön kafası',
+      },
       renderVariant: { oldType: 'eski tip' },
       viewer: {
         open: '3B incele',
@@ -763,7 +767,11 @@ export const DICT: Record<Lang, Dict> = {
         section: 'section view',
         assembly: 'section with the bushings fitted',
       },
-      renderKind: { toolBushing: 'tool bushing (lower bushing)', upperBushing: 'upper bushing' },
+      renderKind: {
+        toolBushing: 'tool bushing (lower bushing)',
+        upperBushing: 'upper bushing',
+        rockDrillHead: 'rock drill front head',
+      },
       renderVariant: { oldType: 'old type' },
       viewer: {
         open: 'View in 3D',
