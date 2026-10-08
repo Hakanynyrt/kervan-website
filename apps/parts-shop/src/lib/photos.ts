@@ -167,6 +167,23 @@ const SOOSAN_ALT_GOVDE: SeriesHead[] = [
   { model: 'SB151 TS-P', slug: 'sb151tsp', window: true },
   { model: 'ST180', slug: 'st180', window: true },
 ];
+/** Montabert BRH / BRM / BRP / BRV and M front heads. */
+const MONTABERT_ALT_GOVDE: SeriesHead[] = [
+  { model: 'BRH 125', slug: 'brh125', window: true },
+  { model: 'BRH 250', slug: 'brh250', window: true },
+  { model: 'BRH 501', slug: 'brh501', window: true },
+  { model: 'BRH 570', slug: 'brh570', window: true },
+  { model: 'BRH 625', slug: 'brh625', window: true },
+  { model: 'BRM 900', slug: 'brm900', window: true },
+  { model: 'BRM 1200 V', slug: 'brm1200v', window: true },
+  { model: 'BRM 1600 V', slug: 'brm1600v', window: true },
+  { model: 'BRP 95', slug: 'brp95', window: true },
+  { model: 'BRV 32', slug: 'brv32', window: true },
+  { model: 'BRV 43', slug: 'brv43', window: true },
+  { model: 'BRV 45 V', slug: 'brv45v', window: true },
+  { model: 'M 600', slug: 'm600', window: true },
+  { model: 'M 700', slug: 'm700', window: true },
+];
 /** Tamrock (Rammer's owner from 1995, Sandvik since 1997): the HL 510 is a rock drill, not a breaker. */
 const TAMROCK_ALT_GOVDE: SeriesHead[] = [
   { model: 'HL 510', slug: 'hl510', window: false, kind: 'rockDrillHead' },
@@ -210,6 +227,7 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
     ...KRUPP_ALT_GOVDE.map(seriesRender('Krupp', 'krupp')),
     ...ATLAS_COPCO_ALT_GOVDE.map(seriesRender('Atlas Copco', 'atlas-copco')),
     ...SOOSAN_ALT_GOVDE.map(seriesRender('Soosan', 'soosan')),
+    ...MONTABERT_ALT_GOVDE.map(seriesRender('Montabert', 'montabert')),
     ...TAMROCK_ALT_GOVDE.map(seriesRender('Tamrock', 'tamrock')),
   ],
   burc: [
