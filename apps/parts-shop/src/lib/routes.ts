@@ -1,5 +1,8 @@
 import {
+  breakerGroupKey,
   displayBreakers,
+  fold,
+  preferredSpelling,
   slugify,
   type PublicCatalog,
   type PublicExtra,
@@ -7,6 +10,7 @@ import {
   type TipType,
 } from '@kervan/tips';
 import { LEGAL_KEYS, legalPath, type LegalKey } from './legal';
+import { partsForBreaker, tipLinksForPart, type PartLink } from './part-links';
 
 /** One breaker model and the tip it takes: the shop's product (card, list row, page). */
 export interface BreakerCard {
@@ -46,7 +50,14 @@ export type PageModel =
       hasPopular: boolean;
     }
   | { kind: 'parts'; demo: boolean; hasPopular: boolean }
-  | { kind: 'part'; part: PartKey; demo: boolean; hasPopular: boolean }
+  | {
+      kind: 'part';
+      part: PartKey;
+      /** Render anchor → tip page of the same breaker (when the shop has one). */
+      tipLinks: Record<string, string>;
+      demo: boolean;
+      hasPopular: boolean;
+    }
   | { kind: 'popular'; cards: BreakerCard[]; demo: boolean; hasPopular: true }
   | {
       kind: 'breaker';
@@ -57,6 +68,8 @@ export type PageModel =
       model: string;
       /** Tip families that fit this breaker (usually one). */
       families: PublicFamily[];
+      /** Other parts we model for this breaker (links to their cards). */
+      parts: PartLink[];
       demo: boolean;
       hasPopular: boolean;
     }
@@ -99,6 +112,73 @@ const tierRank = (t: 1 | 2 | null): number => t ?? 3;
 const byName = (a: BreakerCard, b: BreakerCard): number =>
   a.name.localeCompare(b.name, 'tr', { numeric: true });
 
+interface BreakerEntry {
+  name: string;
+  brand: string;
+  model: string;
+  families: PublicFamily[];
+  extra?: PublicExtra;
+}
+
+/**
+ * The breakers of a catalog, one per model: names as the catalogue spells them are cleaned up
+ * for display (one spelling per maker, lists split), spellings of one model that differ only
+ * by spaces, dashes or case ("F 2" / "F2") are one page under the spaced spelling, and the
+ * other spellings' slugs are listed for 301s. Entries that name no maker stay on their family
+ * pages only.
+ */
+export function groupBreakers(c: PublicCatalog): {
+  breakers: Map<string, BreakerEntry>;
+  redirects: [from: string, to: string][];
+} {
+  const groups = new Map<
+    string,
+    { brand: string; spellings: Map<string, string>; families: PublicFamily[]; extra?: PublicExtra }
+  >();
+  const add = (brand: string, model: string, slug: string) => {
+    const key = breakerGroupKey({ brand, model });
+    const g = groups.get(key) ?? { brand, spellings: new Map<string, string>(), families: [] };
+    if (!g.spellings.has(model)) g.spellings.set(model, slug);
+    groups.set(key, g);
+    return g;
+  };
+  for (const f of c.families)
+    for (const raw of f.fits)
+      for (const b of displayBreakers(raw.brand, raw.model)) {
+        const g = add(b.brand, b.model, b.slug);
+        if (!g.families.includes(f)) g.families.push(f);
+      }
+  // Extra products (sold by model, no geometry yet) unless the catalogue already has the model.
+  for (const x of c.extras ?? []) {
+    const key = breakerGroupKey(x);
+    if (groups.has(key)) continue;
+    const g = add(x.brand, x.model, x.slug);
+    g.extra = x;
+  }
+  const breakers = new Map<string, BreakerEntry>();
+  const redirects: [string, string][] = [];
+  for (const g of groups.values()) {
+    const model = preferredSpelling([...g.spellings.keys()]);
+    const slug = g.spellings.get(model)!;
+    for (const other of new Set(g.spellings.values()))
+      if (other !== slug) redirects.push([breakerPath(other), breakerPath(slug)]);
+    // Spellings that differ by other punctuation ("F.2") can still share a slug: one page.
+    const same = breakers.get(slug);
+    if (same) {
+      for (const f of g.families) if (!same.families.includes(f)) same.families.push(f);
+      continue;
+    }
+    breakers.set(slug, {
+      name: breakerName({ brand: g.brand, model }),
+      brand: g.brand,
+      model,
+      families: g.families,
+      ...(g.extra ? { extra: g.extra } : {}),
+    });
+  }
+  return { breakers, redirects };
+}
+
 /**
  * Every page of the site for one catalog. The product is the breaker model: one page per
  * breaker (its tip families behind a selector when there are several), cards and the list by
@@ -107,34 +187,7 @@ const byName = (a: BreakerCard, b: BreakerCard): number =>
  */
 export function buildPages(c: PublicCatalog): BuiltPage[] {
   const demo = c.demo === true;
-  // Breaker names as the catalogue spells them are cleaned up for display (one spelling per
-  // maker, lists split); entries that name no maker stay on their family pages only.
-  const breakers = new Map<
-    string,
-    { name: string; brand: string; model: string; families: PublicFamily[]; extra?: PublicExtra }
-  >();
-  for (const f of c.families)
-    for (const raw of f.fits)
-      for (const b of displayBreakers(raw.brand, raw.model)) {
-        const e = breakers.get(b.slug) ?? {
-          name: breakerName(b),
-          brand: b.brand,
-          model: b.model,
-          families: [],
-        };
-        if (!e.families.includes(f)) e.families.push(f);
-        breakers.set(b.slug, e);
-      }
-  // Extra products (sold by model, no geometry yet) unless the catalogue already has the model.
-  for (const x of c.extras ?? [])
-    if (!breakers.has(x.slug))
-      breakers.set(x.slug, {
-        name: breakerName(x),
-        brand: x.brand,
-        model: x.model,
-        families: [],
-        extra: x,
-      });
+  const { breakers } = groupBreakers(c);
   const cards: BreakerCard[] = [...breakers].map(([slug, e]) => {
     const f = e.families[0] as PublicFamily | undefined;
     if (!f)
@@ -165,6 +218,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     };
   });
   cards.sort(byName);
+  const tipPaths = new Map(cards.map((x) => [fold(x.name), x.path]));
   const popular = cards
     .filter((x) => x.popularTier !== null)
     .sort((a, b) => tierRank(a.popularTier) - tierRank(b.popularTier) || byName(a, b));
@@ -208,7 +262,13 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     })),
     ...PART_KEYS.map((part) => ({
       path: partPath(part),
-      model: { kind: 'part' as const, part, demo, hasPopular },
+      model: {
+        kind: 'part' as const,
+        part,
+        tipLinks: tipLinksForPart(part, tipPaths),
+        demo,
+        hasPopular,
+      },
     })),
     ...(hasPopular
       ? [
@@ -227,6 +287,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         brand: e.brand,
         model: e.model,
         families: e.families,
+        parts: partsForBreaker(e.name),
         demo,
         hasPopular,
       },

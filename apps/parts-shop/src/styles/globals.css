@@ -29,7 +29,20 @@
   --color-hair-strong: #8e959d;
   --radius-md: 8px;
   --radius-lg: 10px;
+  /* White 14 px text on the WhatsApp buttons: 5.21:1 (the shared #128c7e gives 4.14:1). */
+  --color-whatsapp: #0f7a6e;
+  /* Inter, then Arial scaled to Inter's metrics, so text does not jump when Inter loads. */
+  --font-sans: 'Inter', 'Inter Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color-scheme: light;
+}
+
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Arimo');
+  size-adjust: 107.12%;
+  ascent-override: 90.44%;
+  descent-override: 22.52%;
+  line-gap-override: 0%;
 }
 
 @layer base {

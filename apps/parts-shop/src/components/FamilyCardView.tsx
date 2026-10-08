@@ -23,9 +23,9 @@ export default function FamilyCardView({ c, lang, t }: { c: BreakerCard; lang: L
           className="block h-auto w-full bg-stage"
         />
       )}
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <span className="font-sans text-lg font-semibold text-ink">{c.name}</span>
-        <span className="mt-auto pt-2 font-sans text-sm font-medium text-brand-hi group-hover:underline">
+      <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
+        <span className="font-sans text-base font-semibold text-ink sm:text-lg">{c.name}</span>
+        <span className="mt-auto pt-1 font-sans text-sm font-medium text-brand-hi group-hover:underline sm:pt-2">
           {t.card.view} →
         </span>
       </div>

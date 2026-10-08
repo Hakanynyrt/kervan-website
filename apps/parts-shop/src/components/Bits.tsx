@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ORG_PHONE_E164 } from '@kervan/seo';
+import { MAX_QTY } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import type { Lang } from '../types';
@@ -79,17 +80,117 @@ export function Chips<T extends string>({
   );
 }
 
-export const QTY = ['1', '2', '5+'] as const;
-export type Qty = (typeof QTY)[number];
-
-/** "Model not listed / not sure": WhatsApp with a message to fill in. */
-export function MissingModel({ t }: { t: Dict }) {
+/**
+ * Quantity: − / number / + (product, part and cart pages). The field may be cleared while
+ * typing; a valid number counts at once, anything else is settled on blur or Enter (1 …
+ * MAX_QTY, with a note when it was capped).
+ */
+export function QtyStepper({
+  id,
+  value,
+  onChange,
+  label,
+  t,
+}: {
+  id: string;
+  value: number;
+  onChange: (n: number) => void;
+  /** Accessible name of the field (e.g. "Adet" or "Adet: Rammer E 68"). */
+  label: string;
+  t: Dict;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const [capped, setCapped] = useState(false);
+  const set = (n: number) => {
+    setCapped(n > MAX_QTY);
+    onChange(Math.max(1, Math.min(MAX_QTY, n)));
+  };
+  const commit = () => {
+    if (draft === null) return;
+    const n = parseInt(draft, 10);
+    if (Number.isFinite(n) && n > 0) set(n);
+    setDraft(null);
+  };
+  const btn = `inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-sm border border-ink-soft bg-bg text-lg text-ink hover:bg-bg-warm disabled:cursor-default disabled:opacity-50 ${FOCUS}`;
   return (
-    <section className="mt-12 rounded-md border border-hair bg-bg-soft p-6 font-sans">
+    <div className="font-sans">
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          aria-label={t.qty.less}
+          aria-controls={id}
+          disabled={value <= 1}
+          onClick={() => {
+            setDraft(null);
+            set(value - 1);
+          }}
+          className={btn}
+        >
+          <span aria-hidden="true">−</span>
+        </button>
+        <input
+          id={id}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          autoComplete="off"
+          value={draft ?? String(value)}
+          aria-label={label}
+          aria-describedby={capped ? `${id}-note` : undefined}
+          onChange={(e) => {
+            const v = e.target.value.replace(/\D/g, '').slice(0, 5);
+            setDraft(v);
+            const n = parseInt(v, 10);
+            if (n >= 1 && n <= MAX_QTY) {
+              setCapped(false);
+              onChange(n);
+            }
+          }}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') commit();
+          }}
+          className={`h-11 w-16 rounded-sm border border-ink-soft bg-bg text-center text-base text-ink tabular-nums ${FOCUS}`}
+        />
+        <button
+          type="button"
+          aria-label={t.qty.more}
+          aria-controls={id}
+          disabled={value >= MAX_QTY}
+          onClick={() => {
+            setDraft(null);
+            set(value + 1);
+          }}
+          className={btn}
+        >
+          <span aria-hidden="true">+</span>
+        </button>
+      </div>
+      {capped && (
+        <p id={`${id}-note`} role="status" className="m-0 mt-1 text-xs text-ink-mid">
+          {t.qty.clamped(MAX_QTY)}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** "Model not listed / not sure": WhatsApp with a message to fill in (the query when given). */
+export function MissingModel({
+  t,
+  query = '',
+  className = 'mt-12',
+}: {
+  t: Dict;
+  query?: string;
+  className?: string;
+}) {
+  return (
+    <section className={`rounded-md border border-hair bg-bg-soft p-6 font-sans ${className}`}>
       <h2 className="m-0 text-lg font-bold text-ink">{t.missing.title}</h2>
       <p className="m-0 mt-2 max-w-3xl text-sm text-ink-mid">{t.missing.body}</p>
       <a
-        href={whatsappHref(t.missing.text)}
+        href={whatsappHref(query ? t.missing.textFor(query) : t.missing.text)}
         className={`mt-4 inline-block rounded-sm bg-whatsapp px-5 py-3 text-sm font-medium text-white ${FOCUS}`}
       >
         {t.missing.button}
@@ -99,7 +200,7 @@ export function MissingModel({ t }: { t: Dict }) {
 }
 
 /** Phones only: quote and call buttons fixed at the bottom of the screen. */
-export function StickyQuote({ text, t }: { text: string; t: Dict }) {
+export function StickyQuote({ text, label, t }: { text: string; label?: string; t: Dict }) {
   return (
     <div
       data-sticky-bar
@@ -109,7 +210,7 @@ export function StickyQuote({ text, t }: { text: string; t: Dict }) {
         href={whatsappHref(text)}
         className={`flex-1 rounded-sm bg-whatsapp px-4 py-3 text-center text-white ${FOCUS}`}
       >
-        {t.family.whatsapp}
+        {label ?? t.family.whatsapp}
       </a>
       <a
         href={`tel:${ORG_PHONE_E164}`}
@@ -162,9 +263,21 @@ export function Terms({ t }: { t: Dict }) {
   );
 }
 
-/** "Images are for illustration" line under product pictures. */
-export function ImgNote({ t, className = '' }: { t: Dict; className?: string }) {
-  return <p className={`m-0 font-sans text-xs text-ink-mid ${className}`}>{t.imgNote}</p>;
+/** Line under product pictures: tip renders are illustrations, part renders come from our drawings. */
+export function ImgNote({
+  t,
+  kind = 'tip',
+  className = '',
+}: {
+  t: Dict;
+  kind?: 'tip' | 'render' | 'photo';
+  className?: string;
+}) {
+  return (
+    <p className={`m-0 font-sans text-xs text-ink-mid ${className}`}>
+      {kind === 'render' ? t.renderNote : kind === 'photo' ? t.photoNote : t.imgNote}
+    </p>
+  );
 }
 
 /** OEM / original-quality line under a product title. */
@@ -177,14 +290,18 @@ export function HeroImg({
   base,
   alt,
   className = '',
+  lazy = false,
 }: {
   base: string;
   alt: string;
   className?: string;
+  /** Below the first screen: let the browser defer it. */
+  lazy?: boolean;
 }) {
   return (
     <img
       src={`${base}-lg.webp`}
+      loading={lazy ? 'lazy' : undefined}
       srcSet={`${base}-sm.webp 800w, ${base}-lg.webp 1600w`}
       sizes="(min-width: 1024px) 820px, 100vw"
       width={1600}

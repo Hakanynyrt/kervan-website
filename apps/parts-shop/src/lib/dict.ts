@@ -32,6 +32,9 @@ export interface Dict {
     catalogSite: string;
     quote: string;
     quoteText: string;
+    /** Header quote message on a breaker page. */
+    quoteTextFor: (name: string) => string;
+    skip: string;
     parts: string;
     call: string;
     cart: string;
@@ -93,7 +96,24 @@ export interface Dict {
     quoteBody: string;
     whatsapp: string;
     email: string;
-    quoteText: (name: string, type: string, code: string, qty: string) => string;
+    /** Priced products: the box orders instead of asking for a quote. */
+    orderTitle: string;
+    orderBody: string;
+    orderWa: string;
+    orderMail: string;
+    /** Price on request: a quote request. */
+    quoteText: (name: string, type: string, code: string, qty: number, url: string) => string;
+    /** Priced: an order with the unit price the buyer saw. */
+    orderText: (
+      name: string,
+      type: string,
+      code: string,
+      qty: number,
+      price: string,
+      url: string,
+    ) => string;
+    /** Links to other parts we make for this breaker. */
+    partsTitle: string;
     renderAlt: (name: string, type: string) => string;
     sideAlt: (name: string, type: string) => string;
     rearAlt: (name: string) => string;
@@ -107,14 +127,26 @@ export interface Dict {
     count: (n: number) => string;
     brands: string;
     all: string;
+    /** Phones: the make chips behind a summary. */
+    changeMake: (n: number) => string;
+    didYouMean: (q: string) => string;
   };
-  missing: { title: string; body: string; button: string; text: string };
+  missing: {
+    title: string;
+    body: string;
+    button: string;
+    text: string;
+    textFor: (q: string) => string;
+  };
+  qty: { less: string; more: string; clamped: (max: number) => string };
   price: {
     label: string;
     fxNote: (date: string) => string;
     add: string;
     added: string;
     goCart: string;
+    /** Second, smaller figure next to the net price. */
+    inclVat: (money: string) => string;
   };
   cart: {
     title: string;
@@ -130,8 +162,11 @@ export interface Dict {
     vat: (pct: number) => string;
     totalNote: string;
     remove: (name: string) => string;
-    less: string;
-    more: string;
+    removeShort: string;
+    removed: (name: string) => string;
+    cleared: string;
+    undo: string;
+    subject: (first: string, more: number) => string;
     contactTitle: string;
     name: string;
     company: string;
@@ -143,6 +178,8 @@ export interface Dict {
     clear: string;
     info: string;
     message: (lines: string[], total: string, contact: string[]) => string;
+    /** One order line: name, type, code, qty × unit = line total, then the page link. */
+    line: (name: string, qty: number, unit: string, total: string | null, url: string) => string;
   };
   brand: { title: (brand: string) => string; lead: (n: number) => string };
   /** Sales terms shown on every product page: quality, shipping, payment, warranty. */
@@ -170,16 +207,28 @@ export interface Dict {
       cutLabel: string;
       cutHint: string;
     };
-    series: { title: (series: string) => string; hint: string; prev: string; next: string };
+    series: {
+      title: (series: string) => string;
+      hint: string;
+      prev: string;
+      next: string;
+      jump: string;
+    };
+    /** Under a part's caption: its breaker's tip page. */
+    tipLink: string;
+    /** Under a part's caption: WhatsApp quote for exactly that model. */
+    quoteThis: string;
     quoteTitle: string;
     quoteBody: string;
     modelLabel: string;
     modelPlaceholder: string;
-    text: (part: string, model: string, qty: string) => string;
+    text: (part: string, model: string, qty: number) => string;
     noPhoto: string;
   };
-  /** Under product pictures. */
+  /** Under product pictures: tip renders, part renders from our drawings, real stock photos. */
   imgNote: string;
+  renderNote: string;
+  photoNote: string;
   /** Quality line under every product title. */
   oem: string;
   legal: { nav: string; agree: string; and: string };
@@ -227,6 +276,8 @@ export const DICT: Record<Lang, Dict> = {
       catalogSite: 'Kurumsal',
       quote: 'Teklif iste',
       quoteText: 'Merhaba, kırıcı ucu için fiyat teklifi almak istiyorum.',
+      quoteTextFor: (name) => `Merhaba, ${name} kırıcı ucu için bilgi almak istiyorum.`,
+      skip: 'İçeriğe geç',
       parts: 'Yedek parçalar',
       call: 'Ara',
       cart: 'Palet',
@@ -274,7 +325,7 @@ export const DICT: Record<Lang, Dict> = {
         },
         {
           title: 'Stoktan aynı gün kargo',
-          body: 'Stoktaki uçlar siparişiniz onaylandığı gün kargoya verilir.',
+          body: 'Stoktaki uçlar ödemeniz bize ulaştığı gün kargoya verilir.',
         },
       ],
       sectors: {
@@ -342,8 +393,16 @@ export const DICT: Record<Lang, Dict> = {
       quoteBody: 'Kırıcınız ve seçtiğiniz uç mesaja yazılır; size hemen dönelim.',
       whatsapp: 'WhatsApp ile sor',
       email: 'E-posta gönder',
-      quoteText: (name, type, code, qty) =>
-        `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet sipariş vermek istiyorum.`,
+      orderTitle: 'Sipariş verin',
+      orderBody:
+        'Kırıcınız, seçtiğiniz uç, adet ve fiyat mesaja yazılır; ödeme ve kargo bilgisiyle size dönelim.',
+      orderWa: 'WhatsApp ile sipariş ver',
+      orderMail: 'E-posta ile sipariş ver',
+      quoteText: (name, type, code, qty, url) =>
+        `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet için fiyat teklifi almak istiyorum.\n${url}`,
+      orderText: (name, type, code, qty, price, url) =>
+        `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet sipariş vermek istiyorum (birim ${price}, KDV hariç).\n${url}`,
+      partsTitle: 'Bu kırıcı için ürettiğimiz parçalar',
       renderAlt: (name, type) => `${name} ${type} kırıcı ucu`,
       sideAlt: (name, type) => `${name} ${type} kırıcı ucu, yandan görünüş`,
       rearAlt: (name) => `${name} kırıcı ucunun kama kanalı ve arka ucu, yakın görünüş`,
@@ -357,12 +416,21 @@ export const DICT: Record<Lang, Dict> = {
       count: (n) => `${n} model`,
       brands: 'Markalar',
       all: 'Tüm markalar',
+      changeMake: (n) => `Marka değiştir (${n})`,
+      didYouMean: (q) => `Bunu mu demek istediniz: ${q}`,
     },
     missing: {
       title: 'Modeliniz listede yok mu, emin değil misiniz?',
       body: 'Kırıcınızın marka ve modelini, mümkünse ucun çapını ve bir fotoğrafını WhatsApp’tan gönderin; uyan ucu biz bulalım. Çap, ucun çalışan (ön) kısmında kumpasla ölçülür.',
       button: 'WhatsApp ile sor',
       text: 'Merhaba, kırıcımın markası/modeli: … Ölçtüğüm uç çapı: … mm. Fotoğraf ekliyorum.',
+      textFor: (q) =>
+        `Merhaba, kırıcımın markası/modeli: ${q}. Ölçtüğüm uç çapı: … mm. Fotoğraf ekliyorum.`,
+    },
+    qty: {
+      less: 'Bir azalt',
+      more: 'Bir artır',
+      clamped: (max) => `En fazla ${max} adet girilebilir; daha fazlası için bize yazın.`,
     },
     price: {
       label: 'Fiyat',
@@ -370,6 +438,7 @@ export const DICT: Record<Lang, Dict> = {
       add: 'Palete yükle',
       added: 'Palete yüklendi',
       goCart: 'Palete git',
+      inclVat: (money) => `KDV dahil ≈ ${money}`,
     },
     cart: {
       title: 'Palet',
@@ -380,13 +449,17 @@ export const DICT: Record<Lang, Dict> = {
       unit: 'Birim fiyat (KDV hariç)',
       lineTotal: 'Tutar',
       ask: 'Fiyat sorulacak',
-      total: 'Toplam (KDV dahil)',
+      total: 'Toplam (KDV dahil, kargo hariç)',
       subtotal: 'Ara toplam (KDV hariç)',
       vat: (pct) => `KDV (%${pct})`,
       totalNote: 'Fiyatı sorulacak ürünler toplama dahil değildir.',
       remove: (name) => `${name} ürününü paletten indir`,
-      less: 'Bir azalt',
-      more: 'Bir artır',
+      removeShort: 'Kaldır',
+      removed: (name) => `${name} paletten indirildi.`,
+      cleared: 'Palet boşaltıldı.',
+      undo: 'Geri al',
+      subject: (first, more) =>
+        `Sipariş talebi – magaza.kervanbreaker.com – ${first}${more ? ` (+${more})` : ''}`,
       contactTitle: 'İletişim bilgileriniz',
       name: 'Ad soyad',
       company: 'Firma',
@@ -396,14 +469,17 @@ export const DICT: Record<Lang, Dict> = {
       sendWa: 'Sipariş talebini WhatsApp ile gönder',
       sendMail: 'E-posta ile gönder',
       clear: 'Paleti boşalt',
-      info: 'Online ödeme henüz yok: sipariş talebinizi alınca size dönüyoruz; ödeme kredi kartı veya havale/EFT ile. Stoktaki ürünler aynı gün kargoya verilir; kargo ücreti alıcıya aittir. Bilgileriniz yalnız bu mesaja yazılır, sitede saklanmaz.',
+      info: 'Online ödeme henüz yok: sipariş talebinizi alınca size dönüyoruz; ödeme kredi kartı veya havale/EFT ile. Stoktaki ürünler ödemeniz bize ulaştığı gün kargoya verilir; kargo ücreti alıcıya aittir ve tutarı sipariş onayında bildirilir. Bilgileriniz yalnız bu mesaja yazılır, sitede saklanmaz.',
       message: (lines, total, contact) =>
         [
           'Merhaba, sipariş talebim:',
           ...lines,
+          '',
           total,
           ...(contact.length ? ['', ...contact] : []),
         ].join('\n'),
+      line: (name, qty, unit, total, url) =>
+        `- ${name}: ${qty} × ${unit}${total ? ` = ${total}` : ''}\n  ${url}`,
     },
     brand: {
       title: (brand) => `${brand} kırıcı uçları`,
@@ -413,7 +489,7 @@ export const DICT: Record<Lang, Dict> = {
       title: 'Satış koşulları',
       rows: [
         ['Kalite', 'OEM kalitesinde, orijinal ölçülerde'],
-        ['Kargo', 'Kargo ücreti alıcıya aittir'],
+        ['Kargo', 'Alıcıya aittir; tutarı sipariş onayında bildirilir'],
         ['Ödeme', 'Kredi kartı veya havale/EFT'],
         ['Garanti', 'Teslimden itibaren 3 ay, malzeme ve üretim hatalarına karşı'],
       ],
@@ -476,16 +552,23 @@ export const DICT: Record<Lang, Dict> = {
         hint: 'Modeli seçmek için yana kaydırın.',
         prev: 'Önceki model',
         next: 'Sonraki model',
+        jump: 'Markaya git',
       },
+      tipLink: 'Bu kırıcının ucu',
+      quoteThis: 'Bu model için teklif iste',
       quoteTitle: 'Fiyat teklifi isteyin',
       quoteBody: 'Kırıcınızın marka ve modelini yazın; mesaja eklenir.',
       modelLabel: 'Kırıcı marka ve modeli',
       modelPlaceholder: 'Ör. Furukawa HB 20G',
       text: (part, model, qty) =>
-        `Merhaba, ${model || '(kırıcı modeli)'} için ${part.toLocaleLowerCase('tr')}, ${qty} adet için fiyat almak istiyorum.`,
+        model
+          ? `Merhaba, ${model} için ${part.toLocaleLowerCase('tr')}, ${qty} adet için fiyat almak istiyorum.`
+          : `Merhaba, ${part.toLocaleLowerCase('tr')}, ${qty} adet için fiyat almak istiyorum. Kırıcımın marka ve modeli: …`,
       noPhoto: 'Fotoğraf yakında',
     },
     imgNote: 'Görseller temsilidir.',
+    renderNote: 'Kendi çizimlerimizden 3B görseller; temsilidir.',
+    photoNote: 'Atölyemizdeki stoktan, gerçek fotoğraflar.',
     oem: 'OEM / orijinal kalitesinde, orijinal ölçülerde üretilir.',
     legal: {
       nav: 'Yasal metinler',
@@ -532,7 +615,7 @@ export const DICT: Record<Lang, Dict> = {
       partTitle: (name) => `Breaker ${name.toLowerCase()} | Kervan Shop`,
       partDesc: (name) =>
         `Hydraulic breaker ${name.toLowerCase()} made by Kervan; quotes by breaker model.`,
-      cartTitle: 'Pallet | Kervan Shop',
+      cartTitle: 'Cart | Kervan Shop',
     },
     nav: {
       label: 'Main menu',
@@ -541,9 +624,11 @@ export const DICT: Record<Lang, Dict> = {
       catalogSite: 'Company',
       quote: 'Request a quote',
       quoteText: 'Hello, I would like a quote for a breaker tip.',
+      quoteTextFor: (name) => `Hello, I have a question about the tip for the ${name} breaker.`,
+      skip: 'Skip to content',
       parts: 'Spare parts',
       call: 'Call',
-      cart: 'Pallet',
+      cart: 'Cart',
       langLabel: 'Türkçe',
       langOther: 'TR',
     },
@@ -553,7 +638,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     banner: {
       preview:
-        'No online payment yet: send your pallet as an order request and we will get back to you.',
+        'No online payment yet: send your cart as an order request and we will get back to you.',
       demo: 'DEMO data: these products are not real.',
     },
     tip: {
@@ -589,7 +674,7 @@ export const DICT: Record<Lang, Dict> = {
         },
         {
           title: 'Ships from stock the same day',
-          body: 'Tips in stock ship the day your order is confirmed.',
+          body: 'Tips in stock ship the day your payment reaches us.',
         },
       ],
       sectors: {
@@ -653,8 +738,16 @@ export const DICT: Record<Lang, Dict> = {
       quoteBody: 'Your breaker and the tip you chose go into the message; we reply right away.',
       whatsapp: 'Ask on WhatsApp',
       email: 'Send an e-mail',
-      quoteText: (name, type, code, qty) =>
-        `Hello, I would like to order the ${type} tip${code ? ` (${code})` : ''} for the ${name}, quantity ${qty}.`,
+      orderTitle: 'Place an order',
+      orderBody:
+        'Your breaker, the tip, quantity and price go into the message; we reply with payment and shipping details.',
+      orderWa: 'Order on WhatsApp',
+      orderMail: 'Order by e-mail',
+      quoteText: (name, type, code, qty, url) =>
+        `Hello, I would like a quote for the ${type} tip${code ? ` (${code})` : ''} for the ${name}, quantity ${qty}.\n${url}`,
+      orderText: (name, type, code, qty, price, url) =>
+        `Hello, I would like to order the ${type} tip${code ? ` (${code})` : ''} for the ${name}, quantity ${qty} (unit ${price}, excl. VAT).\n${url}`,
+      partsTitle: 'Parts we make for this breaker',
       renderAlt: (name, type) => `${name} ${type} breaker tip`,
       sideAlt: (name, type) => `${name} ${type} breaker tip, side view`,
       rearAlt: (name) => `${name} breaker tip key slot and rear end, close-up`,
@@ -668,36 +761,50 @@ export const DICT: Record<Lang, Dict> = {
       count: (n) => `${n} models`,
       brands: 'Makes',
       all: 'All makes',
+      changeMake: (n) => `Change make (${n})`,
+      didYouMean: (q) => `Did you mean: ${q}`,
     },
     missing: {
       title: 'Model not listed, or not sure?',
       body: 'Send your breaker make and model, if possible the tip diameter and a photo, on WhatsApp; we will find the tip that fits. Measure the diameter with a caliper on the working (front) part of the tip.',
       button: 'Ask on WhatsApp',
       text: 'Hello, my breaker make/model: … Tip diameter I measured: … mm. Photo attached.',
+      textFor: (q) =>
+        `Hello, my breaker make/model: ${q}. Tip diameter I measured: … mm. Photo attached.`,
+    },
+    qty: {
+      less: 'One less',
+      more: 'One more',
+      clamped: (max) => `At most ${max} pieces; write to us for more.`,
     },
     price: {
       label: 'Price',
       fxNote: (date) => `TRY prices use the CBRT USD selling rate of ${date}.`,
-      add: 'Load onto pallet',
-      added: 'Loaded onto pallet',
-      goCart: 'Go to pallet',
+      add: 'Add to cart',
+      added: 'Added to cart',
+      goCart: 'Go to cart',
+      inclVat: (money) => `incl. VAT ≈ ${money}`,
     },
     cart: {
-      title: 'Pallet',
-      empty: 'Your pallet is empty.',
+      title: 'Cart',
+      empty: 'Your cart is empty.',
       browse: 'Browse breaker tips',
       product: 'Product',
       qty: 'Qty',
       unit: 'Unit price (excl. VAT)',
       lineTotal: 'Amount',
       ask: 'Price on request',
-      total: 'Total (incl. VAT)',
+      total: 'Total (incl. VAT, excl. shipping)',
       subtotal: 'Subtotal (excl. VAT)',
       vat: (pct) => `VAT (${pct}%)`,
       totalNote: 'Products priced on request are not in the total.',
-      remove: (name) => `Remove ${name} from the pallet`,
-      less: 'One less',
-      more: 'One more',
+      remove: (name) => `Remove ${name} from the cart`,
+      removeShort: 'Remove',
+      removed: (name) => `${name} removed from the cart.`,
+      cleared: 'Cart emptied.',
+      undo: 'Undo',
+      subject: (first, more) =>
+        `Order request – magaza.kervanbreaker.com – ${first}${more ? ` (+${more})` : ''}`,
       contactTitle: 'Your contact details',
       name: 'Name',
       company: 'Company',
@@ -706,15 +813,18 @@ export const DICT: Record<Lang, Dict> = {
       note: 'Note',
       sendWa: 'Send the order request on WhatsApp',
       sendMail: 'Send by e-mail',
-      clear: 'Empty the pallet',
-      info: 'No online payment yet: once we receive your request we get back to you; payment by credit card or bank transfer. Items in stock ship the same day; shipping is paid by the buyer. Your details only go into this message; the site does not store them.',
+      clear: 'Empty the cart',
+      info: 'No online payment yet: once we receive your request we get back to you; payment by credit card or bank transfer. Items in stock ship the day your payment reaches us; shipping is paid by the buyer and the amount is given in the order confirmation. Your details only go into this message; the site does not store them.',
       message: (lines, total, contact) =>
         [
           'Hello, my order request:',
           ...lines,
+          '',
           total,
           ...(contact.length ? ['', ...contact] : []),
         ].join('\n'),
+      line: (name, qty, unit, total, url) =>
+        `- ${name}: ${qty} × ${unit}${total ? ` = ${total}` : ''}\n  ${url}`,
     },
     brand: {
       title: (brand) => `${brand} breaker tips`,
@@ -724,7 +834,7 @@ export const DICT: Record<Lang, Dict> = {
       title: 'Terms of sale',
       rows: [
         ['Quality', 'OEM quality, original dimensions'],
-        ['Shipping', 'Paid by the buyer'],
+        ['Shipping', 'Paid by the buyer; the amount is given in the order confirmation'],
         ['Payment', 'Credit card or bank transfer'],
         ['Warranty', '3 months from delivery, against material and manufacturing defects'],
       ],
@@ -789,16 +899,23 @@ export const DICT: Record<Lang, Dict> = {
         hint: 'Swipe sideways to pick a model.',
         prev: 'Previous model',
         next: 'Next model',
+        jump: 'Jump to make',
       },
+      tipLink: 'Tip for this breaker',
+      quoteThis: 'Request a quote for this model',
       quoteTitle: 'Request a quote',
       quoteBody: 'Type your breaker make and model; it goes into the message.',
       modelLabel: 'Breaker make and model',
       modelPlaceholder: 'E.g. Furukawa HB 20G',
       text: (part, model, qty) =>
-        `Hello, I would like the price of ${part.toLowerCase()} for the ${model || '(breaker model)'}, quantity ${qty}.`,
+        model
+          ? `Hello, I would like the price of ${part.toLowerCase()} for the ${model}, quantity ${qty}.`
+          : `Hello, I would like the price of ${part.toLowerCase()}, quantity ${qty}. My breaker make and model: …`,
       noPhoto: 'Photo coming soon',
     },
     imgNote: 'Images are for illustration.',
+    renderNote: '3D images from our own drawings; for illustration.',
+    photoNote: 'Real photos of our stock at the plant.',
     oem: 'Made to OEM / original quality and original dimensions.',
     legal: {
       nav: 'Legal',

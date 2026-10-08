@@ -275,7 +275,7 @@ const EN: Record<LegalKey, LegalDoc> = {
       {
         h: 'Ordering and payment',
         p: [
-          'There is no online payment on the site. The pallet (cart) is sent to the Seller as an order request by WhatsApp or e-mail; the Seller confirms stock and price, and the contract is made when the buyer accepts the confirmation and pays. Payment by credit card or bank transfer; card details are never entered on or stored by this site.',
+          'There is no online payment on the site. The cart is sent to the Seller as an order request by WhatsApp or e-mail; the Seller confirms stock and price, and the contract is made when the buyer accepts the confirmation and pays. Payment by credit card or bank transfer; card details are never entered on or stored by this site.',
         ],
       },
       {
@@ -358,7 +358,7 @@ const EN: Record<LegalKey, LegalDoc> = {
       {
         h: 'Controller and data',
         p: [
-          `${SELLER.name}, ${SELLER.address}, is the data controller under Turkish Law No. 6698. The site has no accounts or forms, sets no cookies and stores no personal data; your pallet (cart) stays in your own browser. When you send an order request by WhatsApp or e-mail we receive what the message contains and your number or address; the confirmation also asks for delivery and invoice details. Cloudflare, which hosts the site, keeps technical logs such as IP addresses for security.`,
+          `${SELLER.name}, ${SELLER.address}, is the data controller under Turkish Law No. 6698. The site has no accounts or forms, sets no cookies and stores no personal data; your cart stays in your own browser. When you send an order request by WhatsApp or e-mail we receive what the message contains and your number or address; the confirmation also asks for delivery and invoice details. Cloudflare, which hosts the site, keeps technical logs such as IP addresses for security.`,
         ],
       },
       {

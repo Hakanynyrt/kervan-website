@@ -17,8 +17,14 @@ export default function App({ lang, path, model, fx }: PageProps) {
   const t = DICT[lang];
   const demo = model.kind !== 'notFound' && model.demo;
   const hasPopular = model.kind !== 'notFound' && model.hasPopular;
+  const quoteText =
+    model.kind === 'part'
+      ? t.parts.text(t.parts.items[model.part].name, '', 1)
+      : model.kind === 'breaker'
+        ? t.nav.quoteTextFor(model.name)
+        : undefined;
   return (
-    <Layout lang={lang} path={path} t={t} demo={demo} hasPopular={hasPopular}>
+    <Layout lang={lang} path={path} t={t} demo={demo} hasPopular={hasPopular} quoteText={quoteText}>
       {model.kind === 'home' && <Home model={model} lang={lang} t={t} />}
       {model.kind === 'list' && <TipList model={model} lang={lang} t={t} />}
       {model.kind === 'popular' && <Popular model={model} lang={lang} t={t} />}

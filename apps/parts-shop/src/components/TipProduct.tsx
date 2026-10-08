@@ -14,9 +14,11 @@ import type { Dict } from '../lib/dict';
 import { fmtMm, fmtNum } from '../lib/format';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
 import { addToCart } from '../lib/cart';
-import { fmtDate, fmtTry, fmtUsd } from '../lib/price';
-import { CART_PATH, LIST_PATH } from '../lib/routes';
+import { fmtDate, fmtTry, fmtUsd, vatOf } from '../lib/price';
+import { CART_PATH, LIST_PATH, partPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
+import { SITE } from '../lib/page-head';
+import type { PartLink } from '../lib/part-links';
 import { tipImg } from '../lib/tip-img';
 import type { Lang } from '../types';
 import {
@@ -27,10 +29,9 @@ import {
   OemLine,
   PageTitle,
   Photo,
-  QTY,
+  QtyStepper,
   StickyQuote,
   Terms,
-  type Qty,
 } from './Bits';
 import { FOCUS, whatsappHref } from './Layout';
 
@@ -57,6 +58,8 @@ interface Props {
   extra?: PublicExtra;
   /** Neutral path of this page (cart line link and id). */
   path: string;
+  /** Other parts we model for this breaker (cards on the part pages). */
+  parts?: PartLink[];
   fx: FxRate | null;
   lang: Lang;
   t: Dict;
@@ -86,6 +89,7 @@ export default function TipProduct({
   families,
   extra,
   path,
+  parts = [],
   fx,
   lang,
   t,
@@ -113,15 +117,32 @@ export default function TipProduct({
       });
   const types = TIP_TYPES.filter((x) => opts.has(x));
   const [type, setType] = useState<TipType>(types[0]);
-  const [qty, setQty] = useState<Qty>('1');
+  const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const opt = opts.get(type) ?? opts.get(types[0])!;
   const sku = opt.sku;
   const f = opt.family;
   const diameter = f ? f.attrs.diameterMm : (extra?.diameterMm ?? null);
   const tons = diameter === null ? null : carrierTons(diameter);
-  const text = tf.quoteText(quoteName, t.tip[opt.tipType], opt.code ?? '', qty);
+  const url = SITE + localePath(path, lang);
+  const order = opt.cents !== null;
+  const text =
+    opt.cents === null
+      ? tf.quoteText(quoteName, t.tip[opt.tipType], opt.code ?? '', qty, url)
+      : tf.orderText(
+          quoteName,
+          t.tip[opt.tipType],
+          opt.code ?? '',
+          qty,
+          fmtUsd(opt.cents, lang),
+          url,
+        );
   const tl = opt.cents === null ? null : fmtTry(opt.cents, fx, lang);
+  const gross = opt.cents === null ? null : opt.cents + vatOf(opt.cents);
+  const grossMoney =
+    gross === null
+      ? null
+      : [fmtUsd(gross, lang), fmtTry(gross, fx, lang)].filter(Boolean).join(' / ');
   const add = () => {
     addToCart(
       {
@@ -132,7 +153,7 @@ export default function TipProduct({
         path,
         cents: opt.cents,
       },
-      qty === '5+' ? 5 : Number(qty),
+      qty,
     );
     setAdded(true);
   };
@@ -143,10 +164,16 @@ export default function TipProduct({
       <Breadcrumb trail={[[t.nav.tips, LIST_PATH], ...trail]} current={crumb} lang={lang} t={t} />
       <PageTitle>{title}</PageTitle>
       <OemLine t={t} />
+      {opt.cents !== null && (
+        <p className="m-0 mt-2 font-sans text-base text-ink-mid tabular-nums lg:hidden">
+          <span className="font-semibold text-ink">{fmtUsd(opt.cents, lang)}</span>
+          {tl && ` · ${tl}`}
+        </p>
+      )}
 
       <div className="mt-6 grid gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
         {(sku?.image || f?.imageRear) && (
-          <div className="flex min-w-0 flex-col gap-4">
+          <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
             {sku?.image && (
               <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
                 <img
@@ -171,27 +198,44 @@ export default function TipProduct({
                     alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
                     loading="lazy"
                     decoding="async"
-                    className="block h-auto w-full"
+                    className="hidden h-auto w-full sm:block"
                   />
                 )}
               </figure>
             )}
-            {f?.imageRear && (
-              <figure className="m-0 max-w-sm overflow-hidden rounded-md border border-hair bg-stage">
-                <img
-                  src={tipImg(f.imageRear, 'sm')}
-                  width={480}
-                  height={320}
-                  alt={tf.rearAlt(quoteName)}
-                  loading="lazy"
-                  decoding="async"
-                  className="block h-auto w-full"
-                />
-                <figcaption className="border-t border-hair bg-bg px-3 py-2 font-sans text-sm text-ink">
-                  {tf.viewRear}
-                </figcaption>
-              </figure>
-            )}
+            {/* Phones: the side and rear views as two small pictures under the main one. */}
+            <div className="grid grid-cols-2 items-start gap-3 sm:block">
+              {sku?.imageSide && (
+                <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage sm:hidden">
+                  <img
+                    key={sku.imageSide}
+                    src={tipImg(sku.imageSide, 'sm')}
+                    width={600}
+                    height={200}
+                    alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
+                    loading="lazy"
+                    decoding="async"
+                    className="block h-24 w-full object-contain"
+                  />
+                </figure>
+              )}
+              {f?.imageRear && (
+                <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage sm:max-w-sm">
+                  <img
+                    src={tipImg(f.imageRear, 'sm')}
+                    width={480}
+                    height={320}
+                    alt={tf.rearAlt(quoteName)}
+                    loading="lazy"
+                    decoding="async"
+                    className="block h-24 w-full object-contain sm:h-auto"
+                  />
+                  <figcaption className="sr-only border-t border-hair bg-bg px-3 py-2 font-sans text-sm text-ink sm:not-sr-only sm:block">
+                    {tf.viewRear}
+                  </figcaption>
+                </figure>
+              )}
+            </div>
             <ImgNote t={t} />
           </div>
         )}
@@ -216,13 +260,18 @@ export default function TipProduct({
                 <p className="m-0 mt-1 text-3xl font-bold text-ink tabular-nums">
                   {fmtUsd(opt.cents, lang)}
                 </p>
+                {tl && (
+                  <p className="m-0 mt-1 text-lg font-semibold text-ink-mid tabular-nums">{tl}</p>
+                )}
+                {grossMoney && (
+                  <p className="m-0 mt-1 text-sm text-ink-soft tabular-nums">
+                    {t.price.inclVat(grossMoney)}
+                  </p>
+                )}
                 {tl && fx && (
-                  <>
-                    <p className="m-0 mt-1 text-lg font-semibold text-ink-mid tabular-nums">{tl}</p>
-                    <p className="m-0 mt-1 text-xs text-ink-soft">
-                      {t.price.fxNote(fmtDate(fx.date, lang))}
-                    </p>
-                  </>
+                  <p className="m-0 mt-1 text-xs text-ink-soft">
+                    {t.price.fxNote(fmtDate(fx.date, lang))}
+                  </p>
                 )}
               </>
             )}
@@ -248,15 +297,23 @@ export default function TipProduct({
           {tons && <p className="m-0 -mt-3 font-sans text-xs text-ink-soft">{tf.carrierNote}</p>}
 
           <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
-            <p className="m-0 font-sans text-lg font-bold text-ink">{tf.quoteTitle}</p>
-            <p className="m-0 mt-2 text-ink-mid">{tf.quoteBody}</p>
+            <p className="m-0 font-sans text-lg font-bold text-ink">
+              {order ? tf.orderTitle : tf.quoteTitle}
+            </p>
+            <p className="m-0 mt-2 text-ink-mid">{order ? tf.orderBody : tf.quoteBody}</p>
             <div className="mt-4">
-              <Chips
-                legend={tf.qty}
-                name="qty"
-                options={QTY.map((x) => ({ value: x, label: x }))}
+              <label htmlFor="qty" className="mb-2 block font-semibold text-ink">
+                {tf.qty}
+              </label>
+              <QtyStepper
+                id="qty"
                 value={qty}
-                onChange={setQty}
+                onChange={(n) => {
+                  setQty(n);
+                  setAdded(false);
+                }}
+                label={tf.qty}
+                t={t}
               />
             </div>
             <div className="mt-4 flex flex-col gap-3">
@@ -282,19 +339,42 @@ export default function TipProduct({
                 href={whatsappHref(text)}
                 className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
               >
-                {tf.whatsapp}
+                {order ? tf.orderWa : tf.whatsapp}
               </a>
               <a
                 href={mail}
                 className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
               >
-                {tf.email}
+                {order ? tf.orderMail : tf.email}
               </a>
             </div>
           </div>
           <Terms t={t} />
         </aside>
       </div>
+
+      {parts.length > 0 && (
+        <section
+          aria-labelledby="our-parts"
+          className="mt-12 rounded-md border border-hair bg-bg-soft p-5 font-sans"
+        >
+          <h2 id="our-parts" className="m-0 text-base font-bold text-ink">
+            {tf.partsTitle}
+          </h2>
+          <ul className="m-0 mt-3 flex list-none flex-wrap gap-2 p-0 text-sm">
+            {parts.map((x) => (
+              <li key={x.part}>
+                <a
+                  href={`${localePath(partPath(x.part), lang)}#${x.anchor}`}
+                  className={`inline-flex min-h-11 items-center rounded-sm border border-ink-soft bg-bg px-4 font-medium text-ink hover:bg-bg-warm ${FOCUS}`}
+                >
+                  {t.parts.items[x.part].name} →
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section aria-labelledby="stock" className="mt-12">
         <h2 id="stock" className="m-0 font-sans text-xl font-bold text-ink">
@@ -308,11 +388,11 @@ export default function TipProduct({
             </li>
           ))}
         </ul>
-        <ImgNote t={t} className="mt-2" />
+        <ImgNote t={t} kind="photo" className="mt-2" />
       </section>
 
       <MissingModel t={t} />
-      <StickyQuote text={text} t={t} />
+      <StickyQuote text={text} label={order ? tf.orderWa : undefined} t={t} />
     </Container>
   );
 }

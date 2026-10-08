@@ -22,10 +22,12 @@ interface Props {
   demo: boolean;
   /** The best-sellers page exists (the catalog has best-sellers). */
   hasPopular: boolean;
+  /** Header quote button's message (the page's product); the generic tip message without it. */
+  quoteText?: string;
   children: ReactNode;
 }
 
-export default function Layout({ lang, path, t, demo, hasPopular, children }: Props) {
+export default function Layout({ lang, path, t, demo, hasPopular, quoteText, children }: Props) {
   const other: Lang = lang === 'tr' ? 'en' : 'tr';
   const corporate = lang === 'tr' ? 'https://kervanbreaker.com/' : 'https://kervanbreaker.com/en/';
   const nav = [
@@ -47,6 +49,12 @@ export default function Layout({ lang, path, t, demo, hasPopular, children }: Pr
   ];
   return (
     <>
+      <a
+        href="#icerik"
+        className={`sr-only rounded-sm bg-brand px-4 py-2 font-sans text-sm font-medium text-white focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 ${FOCUS}`}
+      >
+        {t.nav.skip}
+      </a>
       <div className="hidden border-b border-hair bg-bg-soft font-sans text-xs text-ink-mid sm:block">
         <Container className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-2">
           <span>
@@ -98,13 +106,14 @@ export default function Layout({ lang, path, t, demo, hasPopular, children }: Pr
             <a
               href={localePath(path, other)}
               hrefLang={other}
+              lang={other}
               aria-label={t.nav.langLabel}
               className={`text-ink-mid hover:text-ink ${FOCUS}`}
             >
               {t.nav.langOther}
             </a>
             <a
-              href={whatsappHref(t.nav.quoteText)}
+              href={whatsappHref(quoteText ?? t.nav.quoteText)}
               className={`hidden rounded-sm bg-brand px-4 py-2 text-white hover:bg-brand-hi sm:inline-block ${FOCUS}`}
             >
               {t.nav.quote}
@@ -120,7 +129,9 @@ export default function Layout({ lang, path, t, demo, hasPopular, children }: Pr
           <Container className="py-2">{t.banner.demo}</Container>
         </div>
       )}
-      <main>{children}</main>
+      <main id="icerik" tabIndex={-1}>
+        {children}
+      </main>
       <footer className="mt-24 border-t border-hair bg-bg-soft">
         <Container className="grid gap-8 py-12 font-sans text-sm text-ink-mid sm:grid-cols-2 lg:grid-cols-5">
           <div>

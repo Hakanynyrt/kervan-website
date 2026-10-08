@@ -1,23 +1,12 @@
 import { useEffect, useState } from 'react';
+import { matches, rewriteQuery } from '@kervan/tips';
 import type { Dict } from '../lib/dict';
 import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
 import { LIST_PATH, type BrandLink, type BreakerCard } from '../lib/routes';
 import type { Lang } from '../types';
+import { MissingModel } from './Bits';
 import { FOCUS } from './Layout';
-
-/** "HB-20 G" and "hb20g" match: lower case, letters and digits only. */
-const squash = (s: string): string => s.toLocaleLowerCase('tr').replace(/[^\p{L}\d]+/gu, '');
-
-/** Every word of the query must appear in "brand model" (spaces and dashes ignored). */
-export function matches(q: string, name: string): boolean {
-  const n = squash(name);
-  return q
-    .split(/\s+/)
-    .map(squash)
-    .filter(Boolean)
-    .every((w) => n.includes(w));
-}
 
 /** Search box that sends the visitor to the full list with `?q=` (home page, brand pages). */
 export function SearchForm({ lang, t, value = '' }: { lang: Lang; t: Dict; value?: string }) {
@@ -48,38 +37,55 @@ export function SearchForm({ lang, t, value = '' }: { lang: Lang; t: Dict; value
 export function BrandChips({
   brands,
   current,
+  only,
   lang,
   t,
 }: {
   brands: BrandLink[];
   current?: string;
+  /** Phones: folded under the results; wide: the full grid above them (the page hides the other). */
+  only: 'phone' | 'wide';
   lang: Lang;
   t: Dict;
 }) {
-  return (
-    <nav aria-label={t.search.brands} className="font-sans text-sm">
-      <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-        <li>
+  const list = (
+    <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
+      <li>
+        <a
+          href={localePath(LIST_PATH, lang)}
+          aria-current={current ? undefined : 'page'}
+          className={`inline-block rounded-sm border px-3 py-1.5 ${current ? 'border-hair bg-bg text-ink hover:border-hair-strong' : 'border-brand bg-brand text-white'} ${FOCUS}`}
+        >
+          {t.search.all}
+        </a>
+      </li>
+      {brands.map((b) => (
+        <li key={b.path}>
           <a
-            href={localePath(LIST_PATH, lang)}
-            aria-current={current ? undefined : 'page'}
-            className={`inline-block rounded-sm border px-3 py-1.5 ${current ? 'border-hair bg-bg text-ink hover:border-hair-strong' : 'border-brand bg-brand text-white'} ${FOCUS}`}
+            href={localePath(b.path, lang)}
+            aria-current={b.name === current ? 'page' : undefined}
+            className={`inline-block rounded-sm border px-3 py-1.5 ${b.name === current ? 'border-brand bg-brand text-white' : 'border-hair bg-bg text-ink hover:border-hair-strong'} ${FOCUS}`}
           >
-            {t.search.all}
+            {b.name}
           </a>
         </li>
-        {brands.map((b) => (
-          <li key={b.path}>
-            <a
-              href={localePath(b.path, lang)}
-              aria-current={b.name === current ? 'page' : undefined}
-              className={`inline-block rounded-sm border px-3 py-1.5 ${b.name === current ? 'border-brand bg-brand text-white' : 'border-hair bg-bg text-ink hover:border-hair-strong'} ${FOCUS}`}
-            >
-              {b.name}
-            </a>
-          </li>
-        ))}
-      </ul>
+      ))}
+    </ul>
+  );
+  return (
+    <nav aria-label={t.search.brands} className="font-sans text-sm">
+      {only === 'phone' ? (
+        <details>
+          <summary
+            className={`inline-flex min-h-11 cursor-pointer items-center rounded-sm border border-ink-soft bg-bg px-4 font-medium text-ink ${FOCUS}`}
+          >
+            {t.search.changeMake(brands.length)}
+          </summary>
+          <div className="mt-3">{list}</div>
+        </details>
+      ) : (
+        list
+      )}
     </nav>
   );
 }
@@ -94,7 +100,18 @@ export function ModelTable({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang;
     const v = new URLSearchParams(window.location.search).get('q');
     if (v) setQ(v);
   }, []);
-  const shown = q.trim() ? rows.filter((r) => matches(q, r.name)) : rows;
+  const query = q.trim();
+  const shown = query ? rows.filter((r) => matches(query, r.name)) : rows;
+  // Nothing found: try the query with a misspelt make fixed and unknown words dropped.
+  const guess =
+    query && !shown.length
+      ? rewriteQuery(
+          query,
+          rows.map((r) => r.name),
+          [...new Set(rows.map((r) => r.brand))],
+        )
+      : null;
+  const near = guess ? rows.filter((r) => matches(guess, r.name)) : [];
   return (
     <div>
       <div className="flex flex-wrap items-center gap-3">
@@ -108,51 +125,68 @@ export function ModelTable({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang;
           onChange={(e) => setQ(e.target.value)}
           placeholder={t.search.placeholder}
           autoComplete="off"
-          className={`min-w-0 flex-1 rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft sm:max-w-md ${FOCUS}`}
+          className={`min-w-48 flex-1 rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft sm:max-w-md ${FOCUS}`}
         />
         <p className="m-0 font-sans text-sm text-ink-mid" aria-live="polite">
-          {shown.length ? t.search.count(shown.length) : t.search.none(q.trim())}
+          {shown.length ? t.search.count(shown.length) : t.search.none(query)}
         </p>
       </div>
-      {shown.length > 0 && (
-        <div className="mt-4 overflow-x-auto rounded-md border border-hair">
-          <table className="w-full border-collapse font-sans text-sm tabular-nums">
-            <thead className="bg-bg-soft text-left text-ink-mid">
-              <tr>
-                <th scope="col" className="px-4 py-3 font-medium">
-                  {t.list.model}
-                </th>
-                <th scope="col" className="px-4 py-3 font-medium">
-                  {t.list.diameter}
-                </th>
-                <th scope="col" className="hidden px-4 py-3 font-medium sm:table-cell">
-                  {t.list.types}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {shown.map((r) => (
-                <tr key={r.slug} className="border-t border-hair">
-                  <th scope="row" className="px-4 py-3 text-left font-medium">
-                    <a
-                      href={localePath(r.path, lang)}
-                      className={`text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
-                    >
-                      {r.name}
-                    </a>
-                  </th>
-                  <td className="px-4 py-3 text-ink">
-                    {r.diameterMm === null ? '—' : `Ø${fmtNum(r.diameterMm, lang)} mm`}
-                  </td>
-                  <td className="hidden px-4 py-3 text-ink sm:table-cell">
-                    {r.types.map((x) => t.tip[x]).join(', ')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {shown.length > 0 && <Table rows={shown} lang={lang} t={t} />}
+      {query && !shown.length && (
+        <>
+          {guess && near.length > 0 && (
+            <div className="mt-4">
+              <p className="m-0 font-sans text-base font-semibold text-ink">
+                {t.search.didYouMean(guess)}
+              </p>
+              <Table rows={near} lang={lang} t={t} />
+            </div>
+          )}
+          <MissingModel t={t} query={query} className="mt-6" />
+        </>
       )}
+    </div>
+  );
+}
+
+function Table({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang; t: Dict }) {
+  return (
+    <div className="mt-4 overflow-x-auto rounded-md border border-hair">
+      <table className="w-full border-collapse font-sans text-sm tabular-nums">
+        <thead className="bg-bg-soft text-left text-ink-mid">
+          <tr>
+            <th scope="col" className="px-4 py-3 font-medium">
+              {t.list.model}
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              {t.list.diameter}
+            </th>
+            <th scope="col" className="hidden px-4 py-3 font-medium sm:table-cell">
+              {t.list.types}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.slug} className="border-t border-hair">
+              <th scope="row" className="px-4 py-3 text-left font-medium">
+                <a
+                  href={localePath(r.path, lang)}
+                  className={`text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
+                >
+                  {r.name}
+                </a>
+              </th>
+              <td className="px-4 py-3 text-ink">
+                {r.diameterMm === null ? '—' : `Ø${fmtNum(r.diameterMm, lang)} mm`}
+              </td>
+              <td className="hidden px-4 py-3 text-ink sm:table-cell">
+                {r.types.map((x) => t.tip[x]).join(', ')}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
