@@ -42,7 +42,10 @@ export interface PartRender {
     | 'thrustUpperBushing'
     | 'oneBushing'
     | 'rockDrillThrustRing'
-    | 'rockDrillHead';
+    | 'rockDrillHead'
+    | 'retainerKey'
+    | 'tieRod'
+    | 'piston';
   /** Another version of the same breaker's part, named in the caption through the dict. */
   variant?: 'oldType' | 'newType' | 'roundNut' | 'autoGrease';
   views: { base: string; view: RenderView }[];
@@ -698,6 +701,54 @@ const bushingRender =
     };
   };
 
+/**
+ * The same 20 breaker models for kama, saplama and piston, modelled from our drawings (one sheet each:
+ * the tool pin / key, the through bolt "boy saplama", the impact piston). `file` names the pictures:
+ * `/photos/parca/<part>-<file>-<view>-01`.
+ */
+const PART_KIT: { make: string; model: string; file: string }[] = [
+  { make: 'Rammer', model: 'E64', file: 'rammer-e64' },
+  { make: 'Rammer', model: 'E66', file: 'rammer-e66' },
+  { make: 'Rammer', model: 'G80', file: 'rammer-g80' },
+  { make: 'Rammer', model: 'S25', file: 'rammer-s25' },
+  { make: 'Rammer', model: 'S84', file: 'rammer-s84' },
+  { make: 'MTB', model: '85', file: 'mtb-85' },
+  { make: 'MTB', model: '150', file: 'mtb-150' },
+  { make: 'MTB', model: '210', file: 'mtb-210' },
+  { make: 'Krupp', model: 'HM 560', file: 'krupp-hm-560' },
+  { make: 'Krupp', model: 'HM 720', file: 'krupp-hm-720' },
+  { make: 'Krupp', model: 'HM 960', file: 'krupp-hm-960' },
+  { make: 'Krupp', model: 'HM 1500', file: 'krupp-hm-1500' },
+  { make: 'Soosan', model: 'SB81 TS-P', file: 'soosan-sb81-ts-p' },
+  { make: 'Soosan', model: 'SB121 TS-P', file: 'soosan-sb121-ts-p' },
+  { make: 'Montabert', model: 'BRH 501', file: 'montabert-brh-501' },
+  { make: 'Montabert', model: 'BRV 32', file: 'montabert-brv-32' },
+  { make: 'Furukawa', model: 'F22', file: 'furukawa-f22' },
+  { make: 'Furukawa', model: 'HB20G', file: 'furukawa-hb20g' },
+  { make: 'Furukawa', model: 'HB30G', file: 'furukawa-hb30g' },
+  { make: 'NPK', model: 'H-7X', file: 'npk-h-7x' },
+];
+const VIEW_FILE: Record<RenderView, string> = {
+  front: 'on',
+  rear: 'arka',
+  side: 'yan',
+  section: 'kesit',
+  detail: 'pencere',
+  assembly: 'montaj-kesit',
+};
+const kitRender =
+  (part: string, kind: NonNullable<PartRender['kind']>, views: RenderView[]) =>
+  ({ make, model, file }: (typeof PART_KIT)[number]): PartRender => {
+    const b = `/photos/parca/${part}-${file}`;
+    return {
+      model: make === 'MTB' ? `MTB ${model}` : `${make} ${model}`,
+      series: make,
+      kind,
+      hero: `${b}-vitrin-01`,
+      views: views.map((view) => ({ base: `${b}-${VIEW_FILE[view]}-01`, view })),
+    };
+  };
+
 export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
   'alt-govde': [
     {
@@ -747,7 +798,7 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
     ...FURUKAWA_BURC.map(bushingRender('Furukawa')),
     ...TAMROCK_BURC.map(bushingRender('Tamrock')),
   ],
-  kama: [],
-  saplama: [],
-  piston: [],
+  kama: PART_KIT.map(kitRender('kama', 'retainerKey', ['front', 'rear', 'side'])),
+  saplama: PART_KIT.map(kitRender('saplama', 'tieRod', ['side', 'front'])),
+  piston: PART_KIT.map(kitRender('piston', 'piston', ['front', 'rear', 'side', 'section'])),
 };

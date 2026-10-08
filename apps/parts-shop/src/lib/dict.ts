@@ -540,6 +540,9 @@ export const DICT: Record<Lang, Dict> = {
         oneBushing: 'tek parça kafa-merkezleme-dayama burcu',
         rockDrillThrustRing: 'kaya delici dayama burcu',
         rockDrillHead: 'kaya delici ön kafası',
+        retainerKey: 'kama (tool pin)',
+        tieRod: 'boy saplama',
+        piston: 'piston',
       },
       renderKindShort: {
         toolBushing: 'Kafa burcu',
@@ -549,6 +552,9 @@ export const DICT: Record<Lang, Dict> = {
         oneBushing: 'Tek parça burç',
         rockDrillThrustRing: 'Dayama burcu',
         rockDrillHead: 'Kaya delici',
+        retainerKey: 'Kama',
+        tieRod: 'Boy saplama',
+        piston: 'Piston',
       },
       renderVariant: {
         oldType: 'eski tip',
@@ -905,6 +911,9 @@ export const DICT: Record<Lang, Dict> = {
         oneBushing: 'one-piece tool, upper and thrust bushing',
         rockDrillThrustRing: 'rock drill thrust ring',
         rockDrillHead: 'rock drill front head',
+        retainerKey: 'retainer key (tool pin)',
+        tieRod: 'through bolt',
+        piston: 'piston',
       },
       renderKindShort: {
         toolBushing: 'Tool bushing',
@@ -914,6 +923,9 @@ export const DICT: Record<Lang, Dict> = {
         oneBushing: 'One-piece',
         rockDrillThrustRing: 'Thrust ring',
         rockDrillHead: 'Rock drill',
+        retainerKey: 'Retainer key',
+        tieRod: 'Through bolt',
+        piston: 'Piston',
       },
       renderVariant: {
         oldType: 'old type',
