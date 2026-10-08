@@ -37,7 +37,7 @@ export interface PartRender {
   /** Which bushing of the breaker (burç page): names it in the caption instead of the part name. */
   kind?: 'toolBushing' | 'upperBushing' | 'rockDrillHead';
   /** A superseded version of the same breaker's part, named in the caption through the dict. */
-  variant?: 'oldType';
+  variant?: 'oldType' | 'roundNut';
   views: { base: string; view: RenderView }[];
 }
 
@@ -149,6 +149,24 @@ const RAMMER_ALT_GOVDE: SeriesHead[] = [
   { model: 'S84', slug: 's84', window: true },
   { model: 'S86', slug: 's86', window: true },
 ];
+/** Soosan SB (old type), SB TS-P and ST front heads; three TS-P models also come with round tie-rod nuts. */
+const SOOSAN_ALT_GOVDE: SeriesHead[] = [
+  { model: 'SB50 TS-P', slug: 'sb50tsp', window: true },
+  { model: 'SB60', slug: 'sb60', window: true },
+  { model: 'SB60 TS-P', slug: 'sb60tsp', window: true },
+  { model: 'SB60 TS-P', slug: 'sb60tsp-y', window: true, variant: 'roundNut' },
+  { model: 'SB70 TS-P', slug: 'sb70tsp', window: true },
+  { model: 'SB80', slug: 'sb80', window: true },
+  { model: 'SB81 TS-P', slug: 'sb81tsp', window: true },
+  { model: 'SB81 TS-P', slug: 'sb81tsp-y', window: true, variant: 'roundNut' },
+  { model: 'SB100 TS-P', slug: 'sb100tsp', window: true },
+  { model: 'SB121 TS-P', slug: 'sb121tsp', window: true },
+  { model: 'SB121 TS-P', slug: 'sb121tsp-y', window: true, variant: 'roundNut' },
+  { model: 'SB130 TS-P', slug: 'sb130tsp', window: true },
+  { model: 'SB150', slug: 'sb150', window: true },
+  { model: 'SB151 TS-P', slug: 'sb151tsp', window: true },
+  { model: 'ST180', slug: 'st180', window: true },
+];
 /** Tamrock (Rammer's owner from 1995, Sandvik since 1997): the HL 510 is a rock drill, not a breaker. */
 const TAMROCK_ALT_GOVDE: SeriesHead[] = [
   { model: 'HL 510', slug: 'hl510', window: false, kind: 'rockDrillHead' },
@@ -191,6 +209,7 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
     ...MTB_ALT_GOVDE.map(mtbRender),
     ...KRUPP_ALT_GOVDE.map(seriesRender('Krupp', 'krupp')),
     ...ATLAS_COPCO_ALT_GOVDE.map(seriesRender('Atlas Copco', 'atlas-copco')),
+    ...SOOSAN_ALT_GOVDE.map(seriesRender('Soosan', 'soosan')),
     ...TAMROCK_ALT_GOVDE.map(seriesRender('Tamrock', 'tamrock')),
   ],
   burc: [
