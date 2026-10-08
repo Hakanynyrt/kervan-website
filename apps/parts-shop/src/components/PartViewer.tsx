@@ -10,6 +10,8 @@ import type { Dict } from '../lib/dict';
 const EMBER = 0xe8431b;
 /** Cut face of the section view: a glowing, freshly cut ember tone (render-only colour). */
 const CUT = 0xd9552c;
+/** Cut face of parts fitted into the body (bushings, GLB nodes named `fitted…`): light steel. */
+const CUT_FITTED = 0xc9ccd1;
 /** Plane constant that clips nothing. */
 const NO_CUT = 1e3;
 
@@ -18,7 +20,8 @@ const NO_CUT = 1e3;
  * Drag to turn, pinch or wheel to zoom, arrow keys turn it from the keyboard. It turns slowly
  * by itself until touched, never under reduced motion, and draws only while on screen.
  * "Kesit" adds a slider that moves a cross-section plane from one end of the part to the other;
- * the cut face is drawn by the back faces behind the plane in one flat colour.
+ * the cut face is drawn by the back faces behind the plane in one flat colour (ember for the body,
+ * light steel for fitted parts such as bushings).
  */
 export default function PartViewer({ src, label, t }: { src: string; label: string; t: Dict }) {
   const box = useRef<HTMLDivElement>(null);
@@ -138,10 +141,13 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
           if (!m.isMesh) return;
           for (const x of ([] as THREE.Material[]).concat(m.material))
             x.clippingPlanes = [plane.current];
+          let fitted = false;
+          for (let a: THREE.Object3D | null = m; a; a = a.parent)
+            if (a.name.startsWith('fitted')) fitted = true;
           const cap = new THREE.Mesh(
             m.geometry,
             new THREE.MeshBasicMaterial({
-              color: CUT,
+              color: fitted ? CUT_FITTED : CUT,
               side: THREE.BackSide,
               clippingPlanes: [plane.current],
               toneMapped: false,
