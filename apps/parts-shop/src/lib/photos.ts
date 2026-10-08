@@ -81,6 +81,46 @@ const mtbRender = (m: string): PartRender => {
     ],
   };
 };
+/** Krupp HM / AT front heads modelled from our drawings (HM 560 and HM 580 share one drawing). */
+const KRUPP_ALT_GOVDE: { model: string; slug: string; window: boolean }[] = [
+  { model: 'HM 140', slug: 'hm-140', window: false },
+  { model: 'HM 300', slug: 'hm-300', window: false },
+  { model: 'HM 350', slug: 'hm-350', window: false },
+  { model: 'HM 550', slug: 'hm-550', window: false },
+  { model: 'HM 560 / 580', slug: 'hm-560', window: false },
+  { model: 'HM 600', slug: 'hm-600', window: true },
+  { model: 'HM 710', slug: 'hm-710', window: true },
+  { model: 'HM 720', slug: 'hm-720', window: true },
+  { model: 'HM 780', slug: 'hm-780', window: false },
+  { model: 'HM 800', slug: 'hm-800', window: false },
+  { model: 'HM 900', slug: 'hm-900', window: true },
+  { model: 'HM 950', slug: 'hm-950', window: true },
+  { model: 'HM 960', slug: 'hm-960', window: true },
+  { model: 'HM 1000', slug: 'hm-1000', window: false },
+  { model: 'HM 1500', slug: 'hm-1500', window: true },
+  { model: 'HM 2000', slug: 'hm-2000', window: true },
+  { model: 'HM 2000 Marathon', slug: 'hm-2000-marathon', window: true },
+  { model: 'HM 2100 Marathon', slug: 'hm-2100-marathon', window: true },
+  { model: 'HM 2300 Marathon', slug: 'hm-2300-marathon', window: false },
+  { model: 'HM 2500 Marathon', slug: 'hm-2500-marathon', window: true },
+  { model: 'HM 2600 Marathon', slug: 'hm-2600-marathon', window: false },
+  { model: 'AT 220', slug: 'at-220', window: false },
+];
+const kruppRender = ({ model, slug, window }: (typeof KRUPP_ALT_GOVDE)[number]): PartRender => {
+  const b = `/photos/parca/alt-govde-krupp-${slug}`;
+  return {
+    model: `Krupp ${model}`,
+    series: 'Krupp',
+    hero: `${b}-vitrin-01`,
+    views: [
+      { base: `${b}-on-01`, view: 'front' },
+      { base: `${b}-arka-01`, view: 'rear' },
+      { base: `${b}-yan-01`, view: 'side' },
+      ...(window ? [{ base: `${b}-pencere-01`, view: 'detail' as const }] : []),
+    ],
+  };
+};
+
 export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
   'alt-govde': [
     {
@@ -95,6 +135,7 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
       ],
     },
     ...MTB_ALT_GOVDE.map(mtbRender),
+    ...KRUPP_ALT_GOVDE.map(kruppRender),
   ],
   burc: [],
   kama: [],
