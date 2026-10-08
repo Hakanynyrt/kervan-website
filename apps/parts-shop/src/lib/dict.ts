@@ -1,6 +1,7 @@
 import type { TipType } from '@kervan/tips';
 import type { PartKey } from './routes';
 import type { Lang } from '../types';
+import type { PartRender, RenderView } from './photos';
 
 export interface Dict {
   meta: {
@@ -155,7 +156,8 @@ export interface Dict {
     photosAlt: (name: string) => string;
     /** "Rammer E68 alt gövde". */
     renderCaption: (model: string, name: string) => string;
-    renderView: Record<'front' | 'rear' | 'side' | 'detail', string>;
+    renderView: Record<RenderView, string>;
+    renderKind: Record<NonNullable<PartRender['kind']>, string>;
     viewer: {
       open: string;
       close: string;
@@ -448,7 +450,10 @@ export const DICT: Record<Lang, Dict> = {
         rear: 'arka görünüş',
         side: 'yan görünüş',
         detail: 'saplama somunu penceresi',
+        section: 'kesit görünüşü',
+        assembly: 'burçları takılı montaj kesiti',
       },
+      renderKind: { toolBushing: 'kafa burcu (alt burç)', upperBushing: 'üst burç (merkezleme)' },
       viewer: {
         open: '3B incele',
         close: 'Görsele dön',
@@ -753,7 +758,10 @@ export const DICT: Record<Lang, Dict> = {
         rear: 'rear view',
         side: 'side view',
         detail: 'tie-rod nut window',
+        section: 'section view',
+        assembly: 'section with the bushings fitted',
       },
+      renderKind: { toolBushing: 'tool bushing (lower bushing)', upperBushing: 'upper bushing' },
       viewer: {
         open: 'View in 3D',
         close: 'Back to the picture',

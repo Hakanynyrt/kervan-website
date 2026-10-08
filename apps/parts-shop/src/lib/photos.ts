@@ -24,6 +24,7 @@ export const PART_PHOTOS: Record<PartKey, readonly string[]> = {
  * 3D renders of parts we make, modelled from our drawings (studio light like the tip
  * renders), grouped by the breaker model they fit. Same files and naming as the photos.
  */
+export type RenderView = 'front' | 'rear' | 'side' | 'detail' | 'section' | 'assembly';
 export interface PartRender {
   /** Breaker make and model the part fits, shown as the caption. */
   model: string;
@@ -33,7 +34,9 @@ export interface PartRender {
   model3d?: string;
   /** Breaker series: renders of one series share a sideways model picker (`<hero>-xs.webp` 320 px). */
   series?: string;
-  views: { base: string; view: 'front' | 'rear' | 'side' | 'detail' }[];
+  /** Which bushing of the breaker (burç page): names it in the caption instead of the part name. */
+  kind?: 'toolBushing' | 'upperBushing';
+  views: { base: string; view: RenderView }[];
 }
 
 /** MTB front heads modelled from our drawings (we make every one of them). */
@@ -126,18 +129,42 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
     {
       model: 'Rammer E68',
       hero: '/photos/parca/alt-govde-rammer-e68-vitrin-01',
-      model3d: '/models/alt-govde-rammer-e68-01.glb',
+      model3d: '/models/alt-govde-rammer-e68-02.glb',
       views: [
         { base: '/photos/parca/alt-govde-rammer-e68-on-03', view: 'front' },
         { base: '/photos/parca/alt-govde-rammer-e68-arka-03', view: 'rear' },
         { base: '/photos/parca/alt-govde-rammer-e68-yan-03', view: 'side' },
         { base: '/photos/parca/alt-govde-rammer-e68-pencere-03', view: 'detail' },
+        { base: '/photos/parca/alt-govde-rammer-e68-montaj-kesit-01', view: 'assembly' },
       ],
     },
     ...MTB_ALT_GOVDE.map(mtbRender),
     ...KRUPP_ALT_GOVDE.map(kruppRender),
   ],
-  burc: [],
+  burc: [
+    {
+      model: 'Rammer E68',
+      kind: 'toolBushing',
+      hero: '/photos/parca/burc-rammer-e68-kafa-vitrin-01',
+      views: [
+        { base: '/photos/parca/burc-rammer-e68-kafa-on-01', view: 'front' },
+        { base: '/photos/parca/burc-rammer-e68-kafa-arka-01', view: 'rear' },
+        { base: '/photos/parca/burc-rammer-e68-kafa-yan-01', view: 'side' },
+        { base: '/photos/parca/burc-rammer-e68-kafa-kesit-01', view: 'section' },
+      ],
+    },
+    {
+      model: 'Rammer E68',
+      kind: 'upperBushing',
+      hero: '/photos/parca/burc-rammer-e68-ust-vitrin-01',
+      views: [
+        { base: '/photos/parca/burc-rammer-e68-ust-on-01', view: 'front' },
+        { base: '/photos/parca/burc-rammer-e68-ust-arka-01', view: 'rear' },
+        { base: '/photos/parca/burc-rammer-e68-ust-yan-01', view: 'side' },
+        { base: '/photos/parca/burc-rammer-e68-ust-kesit-01', view: 'section' },
+      ],
+    },
+  ],
   kama: [],
   saplama: [],
   piston: [],

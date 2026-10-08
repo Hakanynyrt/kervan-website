@@ -50,7 +50,7 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
         {pics && (
           <div className="flex min-w-0 flex-col gap-6">
             {solo.map((r) => (
-              <RenderFigure key={r.model} r={r} name={p.name} t={t} />
+              <RenderFigure key={r.hero ?? r.model} r={r} name={p.name} t={t} />
             ))}
             {[...series].map(([name, list]) => (
               <SeriesPicker key={name} series={name} list={list} part={p.name} t={t} />
@@ -124,7 +124,9 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
 /** One modelled part: showcase picture (with "3B incele" when it has a 3D model), views, caption. */
 function RenderFigure({ r, name, t }: { r: PartRender; name: string; t: Dict }) {
   const [open3d, setOpen3d] = useState(false);
-  const caption = t.parts.renderCaption(r.model, name);
+  const caption = r.kind
+    ? `${r.model} ${t.parts.renderKind[r.kind]}`
+    : t.parts.renderCaption(r.model, name);
   return (
     <figure className="m-0">
       {r.hero && (
