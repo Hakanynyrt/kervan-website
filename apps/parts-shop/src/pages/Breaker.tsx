@@ -28,6 +28,7 @@ export default function Breaker({
       quoteName={model.name}
       families={model.families}
       extra={model.extra}
+      parts={model.parts}
       path={path}
       fx={fx}
       lang={lang}

@@ -31,14 +31,14 @@ export const BREAKER_BRANDS: Record<string, readonly string[]> = {
   Italdem: ['taldem'],
   JAB: [],
   JCB: [],
-  Kanglim: [],
   Kent: [],
   Komac: [],
   Komatsu: [],
   Korota: [],
   Krupp: [],
   Kubota: [],
-  Kwanglim: [],
+  // "Kanglim" is a common misspelling of Kwanglim (the catalogue uses both).
+  Kwanglim: ['Kanglim'],
   Lifton: [],
   Mega: [],
   Montabert: ['IR Montabert', 'IR Montabert Montabert'],
@@ -177,4 +177,21 @@ export function displayBreakers(rawBrand: string, rawModel: string): Breaker[] {
     .map((m) => (MODEL_PREFIX[brand] ? m.replace(MODEL_PREFIX[brand], '') : m))
     .filter(Boolean)
     .map((m) => ({ brand, model: m, slug: `${slugify(brand)}/${slugify(m)}` }));
+}
+
+/**
+ * Grouping key of a breaker: the same make and the same model apart from spaces, dashes and
+ * case, so "Furukawa F 2" and "Furukawa F2" (two spellings in the catalogue) are one page.
+ * Other punctuation and every letter and digit still count: different models never merge.
+ */
+export const breakerGroupKey = (b: Pick<Breaker, 'brand' | 'model'>): string =>
+  `${slugify(b.brand)}/${b.model.toLocaleUpperCase('tr').replace(/[\s-]+/g, '')}`;
+
+/**
+ * The spelling shown for a model written several ways: the one with the most spaces
+ * ("F 2" over "F2", like the shop's other model names), then the first in A–Z order.
+ */
+export function preferredSpelling(models: readonly string[]): string {
+  const spaces = (m: string) => (m.match(/\s/g) ?? []).length;
+  return [...models].sort((a, b) => spaces(b) - spaces(a) || a.localeCompare(b, 'en'))[0];
 }

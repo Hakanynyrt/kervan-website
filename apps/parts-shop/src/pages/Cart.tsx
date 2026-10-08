@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import type { FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import { ORG_EMAIL } from '@kervan/seo';
-import { PageTitle } from '../components/Bits';
+import { PageTitle, QtyStepper } from '../components/Bits';
 import { FOCUS, whatsappHref } from '../components/Layout';
-import { CART_EVENT, MAX_QTY, readCart, writeCart, type CartItem } from '../lib/cart';
+import { CART_EVENT, readCart, writeCart, type CartItem } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { fmtDate, fmtTry, fmtUsd, VAT_PERCENT, vatOf } from '../lib/price';
 import { LEGAL, legalPath } from '../lib/legal';
 import { LIST_PATH } from '../lib/routes';
+import { SITE } from '../lib/page-head';
 import type { Lang } from '../types';
 
 const FIELDS = ['name', 'company', 'phone', 'city', 'note'] as const;
@@ -40,16 +41,20 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
       window.removeEventListener('storage', load);
     };
   }, []);
+  // The last removal (one line or the whole cart), undoable until the next change.
+  const [undo, setUndo] = useState<{ items: CartItem[]; msg: string } | null>(null);
   const update = (next: CartItem[]) => {
     setItems(next);
     writeCart(next);
   };
-  const setQty = (id: string, qty: number) =>
-    update(
-      (items ?? []).map((x) =>
-        x.id === id ? { ...x, qty: Math.max(1, Math.min(MAX_QTY, qty)) } : x,
-      ),
-    );
+  const setQty = (id: string, qty: number) => {
+    setUndo(null);
+    update((items ?? []).map((x) => (x.id === id ? { ...x, qty } : x)));
+  };
+  const remove = (next: CartItem[], msg: string) => {
+    setUndo({ items: items ?? [], msg });
+    update(next);
+  };
 
   const list = items ?? [];
   const totalCents = list.reduce((n, x) => n + (x.cents ?? 0) * x.qty, 0);
@@ -58,10 +63,16 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   const anyAsk = list.some((x) => x.cents === null);
   const money = (cents: number) =>
     [fmtUsd(cents, lang), fmtTry(cents, fx, lang)].filter(Boolean).join(' / ');
-  const lines = list.map(
-    (x) =>
-      `- ${x.name}, ${t.tip[x.tipType]}${x.code ? ` (${x.code})` : ''}: ${x.qty} × ${x.cents === null ? c.ask : fmtUsd(x.cents, lang)}`,
+  const lines = list.map((x) =>
+    c.line(
+      `${x.name}, ${t.tip[x.tipType]}${x.code ? ` (${x.code})` : ''}`,
+      x.qty,
+      x.cents === null ? c.ask : fmtUsd(x.cents, lang),
+      x.cents === null ? null : fmtUsd(x.cents * x.qty, lang),
+      SITE + localePath(x.path, lang),
+    ),
   );
+  const subject = list.length ? c.subject(list[0].name, list.length - 1) : c.title;
   const message = c.message(
     lines,
     [
@@ -75,6 +86,24 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   return (
     <Container className="py-12">
       <PageTitle>{c.title}</PageTitle>
+      {undo && (
+        <p
+          role="status"
+          className="m-0 mt-4 flex flex-wrap items-center gap-x-3 font-sans text-sm text-ink"
+        >
+          {undo.msg}
+          <button
+            type="button"
+            onClick={() => {
+              update(undo.items);
+              setUndo(null);
+            }}
+            className={`inline-flex min-h-11 cursor-pointer items-center font-medium text-brand-hi underline ${FOCUS}`}
+          >
+            {c.undo}
+          </button>
+        </p>
+      )}
       {items === null ? null : list.length === 0 ? (
         <div className="mt-6 font-sans">
           <p className="m-0 text-ink-mid">{c.empty}</p>
@@ -89,9 +118,9 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
         <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_24rem]">
           <div className="min-w-0">
             <ul className="m-0 list-none divide-y divide-hair border-y border-hair p-0 font-sans text-sm">
-              {list.map((x) => (
-                <li key={x.id} className="flex flex-wrap items-center gap-x-6 gap-y-3 py-4">
-                  <div className="min-w-0 flex-1">
+              {list.map((x, i) => (
+                <li key={x.id} className="flex flex-wrap items-center gap-x-4 gap-y-3 py-4">
+                  <div className="min-w-0 basis-full sm:basis-auto sm:flex-1">
                     <a
                       href={localePath(x.path, lang)}
                       className={`font-semibold text-ink hover:underline ${FOCUS}`}
@@ -103,44 +132,28 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                       {c.unit}: {x.cents === null ? c.ask : fmtUsd(x.cents, lang)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1" role="group" aria-label={c.qty}>
-                    <button
-                      type="button"
-                      aria-label={c.less}
-                      onClick={() => setQty(x.id, x.qty - 1)}
-                      className={`size-9 cursor-pointer rounded-sm border border-ink-soft bg-bg text-ink ${FOCUS}`}
-                    >
-                      −
-                    </button>
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      min={1}
-                      max={MAX_QTY}
-                      value={x.qty}
-                      aria-label={`${c.qty}: ${x.name}`}
-                      onChange={(e) => setQty(x.id, Number(e.target.value) || 1)}
-                      className={`h-9 w-16 rounded-sm border border-ink-soft bg-bg text-center text-ink tabular-nums ${FOCUS}`}
-                    />
-                    <button
-                      type="button"
-                      aria-label={c.more}
-                      onClick={() => setQty(x.id, x.qty + 1)}
-                      className={`size-9 cursor-pointer rounded-sm border border-ink-soft bg-bg text-ink ${FOCUS}`}
-                    >
-                      +
-                    </button>
-                  </div>
-                  <p className="m-0 w-28 text-right font-semibold text-ink tabular-nums">
+                  <QtyStepper
+                    id={`q-${i}`}
+                    value={x.qty}
+                    onChange={(n) => setQty(x.id, n)}
+                    label={`${c.qty}: ${x.name}`}
+                    t={t}
+                  />
+                  <p className="m-0 ml-auto min-w-24 text-right font-semibold text-ink tabular-nums">
                     {x.cents === null ? '—' : fmtUsd(x.cents * x.qty, lang)}
                   </p>
                   <button
                     type="button"
                     aria-label={c.remove(x.name)}
-                    onClick={() => update(list.filter((y) => y.id !== x.id))}
-                    className={`cursor-pointer text-ink-mid underline hover:text-ink ${FOCUS}`}
+                    onClick={() =>
+                      remove(
+                        list.filter((y) => y.id !== x.id),
+                        c.removed(x.name),
+                      )
+                    }
+                    className={`inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center text-ink-mid underline hover:text-ink ${FOCUS}`}
                   >
-                    ×
+                    {c.removeShort}
                   </button>
                 </li>
               ))}
@@ -159,9 +172,9 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                   </div>
                 ))}
               </dl>
-              <p className="m-0 mt-2 flex justify-between border-t border-hair pt-3 text-lg font-bold text-ink tabular-nums">
+              <p className="m-0 mt-2 flex justify-between gap-4 border-t border-hair pt-3 text-lg font-bold text-ink tabular-nums">
                 <span>{c.total}</span>
-                <span>{fmtUsd(grossCents, lang)}</span>
+                <span className="whitespace-nowrap">{fmtUsd(grossCents, lang)}</span>
               </p>
               {fmtTry(grossCents, fx, lang) && (
                 <p className="m-0 mt-1 text-right text-lg font-semibold text-ink tabular-nums">
@@ -176,8 +189,8 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
               {anyAsk && <p className="m-0 mt-2 text-sm text-ink-mid">{c.totalNote}</p>}
               <button
                 type="button"
-                onClick={() => update([])}
-                className={`mt-4 cursor-pointer text-sm text-ink-mid underline hover:text-ink ${FOCUS}`}
+                onClick={() => remove([], c.cleared)}
+                className={`mt-4 inline-flex min-h-11 cursor-pointer items-center text-sm text-ink-mid underline hover:text-ink ${FOCUS}`}
               >
                 {c.clear}
               </button>
@@ -246,7 +259,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                 {c.sendWa}
               </a>
               <a
-                href={`mailto:${ORG_EMAIL}?subject=${encodeURIComponent(c.title)}&body=${encodeURIComponent(message)}`}
+                href={`mailto:${ORG_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`}
                 className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
               >
                 {c.sendMail}

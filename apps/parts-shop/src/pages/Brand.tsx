@@ -14,11 +14,14 @@ export default function Brand({ model, lang, t }: { model: Model; lang: Lang; t:
       <Breadcrumb trail={[[t.nav.tips, LIST_PATH]]} current={model.brand} lang={lang} t={t} />
       <PageTitle>{t.brand.title(model.brand)}</PageTitle>
       <p className="m-0 mt-3 font-sans text-ink-mid">{t.brand.lead(model.rows.length)}</p>
-      <div className="mt-6">
-        <BrandChips brands={model.brands} current={model.brand} lang={lang} t={t} />
+      <div className="mt-6 hidden sm:block">
+        <BrandChips brands={model.brands} current={model.brand} only="wide" lang={lang} t={t} />
       </div>
-      <div className="mt-8">
+      <div className="mt-6 sm:mt-8">
         <ModelTable rows={model.rows} lang={lang} t={t} />
+      </div>
+      <div className="mt-8 sm:hidden">
+        <BrandChips brands={model.brands} current={model.brand} only="phone" lang={lang} t={t} />
       </div>
       <MissingModel t={t} />
     </Container>

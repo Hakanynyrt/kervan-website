@@ -66,7 +66,7 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
               {model.featuredArePopular ? h.morePopular : h.cta} →
             </a>
           </div>
-          <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:gap-4 lg:grid-cols-4">
             {model.featured.map((c) => (
               <li key={c.slug}>
                 <FamilyCardView c={c} lang={lang} t={t} />

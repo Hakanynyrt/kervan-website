@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { displayBreakers } from './breaker-display.ts';
+import { breakerGroupKey, displayBreakers, preferredSpelling } from './breaker-display.ts';
 
 const names = (b: string, m: string) => displayBreakers(b, m).map((x) => `${x.brand} | ${x.model}`);
 
@@ -40,4 +40,32 @@ test('MTB models drop the "MT" series prefix (owner)', () => {
   assert.deepEqual(names('MTB', 'MT36'), ['MTB | 36']);
   assert.deepEqual(names('MTB', 'GA 150'), ['MTB | GA 150']);
   assert.equal(displayBreakers('MTB', 'MT 170')[0].slug, 'mtb/170');
+});
+
+test('Kanglim is spelt Kwanglim (catalogue misspelling)', () => {
+  assert.deepEqual(names('KANGLIM', 'SG 1800'), ['Kwanglim | SG 1800']);
+  assert.deepEqual(names('KWANGLIM', 'SG 1800'), ['Kwanglim | SG 1800']);
+  assert.equal(
+    displayBreakers('KANGLIM', 'SG 1800')[0].slug,
+    displayBreakers('KWANGLIM', 'SG 1800')[0].slug,
+  );
+});
+
+test('breakerGroupKey folds spacing, dashes and case only', () => {
+  const k = (brand: string, model: string) => breakerGroupKey({ brand, model });
+  assert.equal(k('Furukawa', 'F 2'), k('Furukawa', 'F2'));
+  assert.equal(k('Montabert', 'M 60'), k('Montabert', 'M60'));
+  assert.equal(k('Rammer', 'S 26 N'), k('Rammer', 'S 26N'));
+  assert.equal(k('Italdem', 'K 80'), k('Italdem', 'k-80'));
+  // Different models stay apart.
+  assert.notEqual(k('Furukawa', 'F 2'), k('Furukawa', 'F 22'));
+  assert.notEqual(k('Furukawa', 'F 2'), k('Montabert', 'F 2'));
+  assert.notEqual(k('Rammer', 'S 26 N'), k('Rammer', 'S 26'));
+  assert.notEqual(k('Socomec', 'DMS 95 / 2'), k('Socomec', 'DMS 952'));
+});
+
+test('preferredSpelling keeps the spaced form', () => {
+  assert.equal(preferredSpelling(['F2', 'F 2']), 'F 2');
+  assert.equal(preferredSpelling(['S 26N', 'S 26 N']), 'S 26 N');
+  assert.equal(preferredSpelling(['M60']), 'M60');
 });

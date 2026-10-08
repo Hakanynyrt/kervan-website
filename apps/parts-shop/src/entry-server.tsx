@@ -6,7 +6,7 @@ import App from './App';
 import { pageHead } from './lib/page-head';
 import { LANGS, localePath } from './lib/locale-path';
 import type { PageProps } from './lib/page-props';
-import { buildPages } from './lib/routes';
+import { breakerPath, buildPages, groupBreakers } from './lib/routes';
 import type { Lang } from './types';
 
 /* Build-time only (scripts/prerender.mjs bundles this to dist-ssr/ and deletes it). */
@@ -57,4 +57,18 @@ export function prerender(catalog: PublicCatalog): PrerenderPage[] {
     });
   }
   return out;
+}
+
+/**
+ * 301 lines for dist/_redirects: breaker pages folded into another spelling of the same model
+ * ("/kirici/furukawa/f2" → "/kirici/furukawa/f-2"), in both languages.
+ */
+export function redirectLines(catalog: PublicCatalog): string[] {
+  const { breakers, redirects } = groupBreakers(catalog);
+  const pages = new Set([...breakers.keys()].map(breakerPath));
+  return redirects
+    .filter(([from]) => !pages.has(from))
+    .flatMap(([from, to]) =>
+      LANGS.map((lang) => `${localePath(from, lang)} ${localePath(to, lang)} 301`),
+    );
 }
