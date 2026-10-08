@@ -195,6 +195,8 @@ export interface Dict {
     renderCaption: (model: string, name: string) => string;
     renderView: Record<RenderView, string>;
     renderKind: Record<NonNullable<PartRender['kind']>, string>;
+    /** Under the model in a series strip, so the bushings of one breaker tell apart. */
+    renderKindShort: Record<NonNullable<PartRender['kind']>, string>;
     renderVariant: Record<NonNullable<PartRender['variant']>, string>;
     viewer: {
       open: string;
@@ -509,7 +511,7 @@ export const DICT: Record<Lang, Dict> = {
         },
         burc: {
           name: 'Burç',
-          body: 'Ucu yönlendiren alt ve üst burçlar. Aşınmış burç ucu erken kırar; uçla birlikte kontrol edin.',
+          body: 'Ucu yönlendiren kafa (alt) ve üst burçlar ile dayama burçları; bazı kırıcılarda dayama ve merkezleme tek parçadır. Aşınmış burç ucu erken kırar; uçla birlikte kontrol edin.',
         },
         kama: { name: 'Kama', body: 'Ucu gövdede tutan kamalar ve tutucu pimler.' },
         saplama: {
@@ -533,9 +535,27 @@ export const DICT: Record<Lang, Dict> = {
       renderKind: {
         toolBushing: 'kafa burcu (alt burç)',
         upperBushing: 'üst burç (merkezleme)',
+        thrustRing: 'dayama burcu',
+        thrustUpperBushing: 'dayama-merkezleme burcu',
+        oneBushing: 'tek parça kafa-merkezleme-dayama burcu',
+        rockDrillThrustRing: 'kaya delici dayama burcu',
         rockDrillHead: 'kaya delici ön kafası',
       },
-      renderVariant: { oldType: 'eski tip', roundNut: 'yuvarlak somunlu' },
+      renderKindShort: {
+        toolBushing: 'Kafa burcu',
+        upperBushing: 'Üst burç',
+        thrustRing: 'Dayama burcu',
+        thrustUpperBushing: 'Dayama-merkezleme',
+        oneBushing: 'Tek parça burç',
+        rockDrillThrustRing: 'Dayama burcu',
+        rockDrillHead: 'Kaya delici',
+      },
+      renderVariant: {
+        oldType: 'eski tip',
+        newType: 'yeni tip',
+        roundNut: 'yuvarlak somunlu',
+        autoGrease: 'otomatik yağlamalı',
+      },
       viewer: {
         open: '3B incele',
         close: 'Görsele dön',
@@ -854,7 +874,7 @@ export const DICT: Record<Lang, Dict> = {
         },
         burc: {
           name: 'Bushings',
-          body: 'Upper and lower bushings that guide the tip. A worn bushing breaks tips early; check both together.',
+          body: 'Tool (lower) and upper bushings that guide the tip, and thrust rings; on some breakers the thrust ring and upper bushing are one piece. A worn bushing breaks tips early; check them with the tip.',
         },
         kama: {
           name: 'Retainer keys',
@@ -880,9 +900,27 @@ export const DICT: Record<Lang, Dict> = {
       renderKind: {
         toolBushing: 'tool bushing (lower bushing)',
         upperBushing: 'upper bushing',
+        thrustRing: 'thrust ring',
+        thrustUpperBushing: 'thrust ring and upper bushing (one piece)',
+        oneBushing: 'one-piece tool, upper and thrust bushing',
+        rockDrillThrustRing: 'rock drill thrust ring',
         rockDrillHead: 'rock drill front head',
       },
-      renderVariant: { oldType: 'old type', roundNut: 'round nuts' },
+      renderKindShort: {
+        toolBushing: 'Tool bushing',
+        upperBushing: 'Upper bushing',
+        thrustRing: 'Thrust ring',
+        thrustUpperBushing: 'Thrust + upper',
+        oneBushing: 'One-piece',
+        rockDrillThrustRing: 'Thrust ring',
+        rockDrillHead: 'Rock drill',
+      },
+      renderVariant: {
+        oldType: 'old type',
+        newType: 'new type',
+        roundNut: 'round nuts',
+        autoGrease: 'auto-grease',
+      },
       viewer: {
         open: 'View in 3D',
         close: 'Back to the picture',

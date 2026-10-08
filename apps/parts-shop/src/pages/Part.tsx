@@ -390,6 +390,11 @@ function SeriesPicker({
               )}
               <span className="block px-2 py-1.5 font-sans text-sm font-semibold text-ink">
                 {renderModel(r, t)}
+                {r.kind && (
+                  <span className="block font-normal text-ink-mid">
+                    {t.parts.renderKindShort[r.kind]}
+                  </span>
+                )}
               </span>
             </button>
           </li>
