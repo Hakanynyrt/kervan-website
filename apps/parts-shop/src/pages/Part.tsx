@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { slugify } from '@kervan/tips';
+import { matches, rewriteQuery, slugify } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import { useReducedMotion } from '@kervan/motion';
 import { ORG_EMAIL } from '@kervan/seo';
@@ -7,6 +7,7 @@ import {
   Breadcrumb,
   HeroImg,
   ImgNote,
+  MissingModel,
   OemLine,
   PageTitle,
   Photo,
@@ -41,20 +42,70 @@ export interface Ctx {
   t: Dict;
 }
 
-/** One spare-part group: our stock photos and a quote by breaker model. */
+/** Pictures on the group page before a search: one per breaker series plus the solo renders, no names. */
+const SHOWCASE = 8;
+
+/** What the search box matches on: the make (series) and the model text of a render. */
+const renderName = (r: PartRender, t: Dict): string =>
+  `${r.series && !r.model.startsWith(r.series) ? `${r.series} ` : ''}${renderModel(r, t)}`;
+
+/**
+ * One spare-part group: a search by breaker make and model (owner: no make/model lists on
+ * the site), a nameless showcase of our renders until something is typed, the matching
+ * models' strips after, then our stock photos and a quote by breaker model.
+ */
 export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const p = t.parts.items[model.part];
   const [breaker, setBreaker] = useState('');
   // The model last filled in by picking a card: a later pick replaces it, typed text never.
   const picked = useRef('');
   const [qty, setQty] = useState(1);
+  const [q, setQ] = useState('');
   const text = t.parts.text(p.name, breaker.trim(), qty);
   const photos = PART_PHOTOS[model.part];
-  const renders = PART_RENDERS[model.part];
+  const all = PART_RENDERS[model.part];
+  // `?q=` from the home search, or `#<anchor>` (a model's link) opens that model's results.
+  useEffect(() => {
+    const v = new URLSearchParams(window.location.search).get('q');
+    if (v) {
+      setQ(v);
+      return;
+    }
+    const hash = decodeURIComponent(window.location.hash.slice(1));
+    const r = hash ? all.find((x) => renderAnchor(x) === hash) : undefined;
+    if (r) setQ(renderName(r, t));
+    // Only on load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const query = q.trim();
+  const names = all.map((r) => renderName(r, t));
+  const found = query ? all.filter((_, i) => matches(query, names[i])) : [];
+  // Nothing found: try the query with a misspelt make fixed and unknown words dropped.
+  const guess =
+    query && !found.length
+      ? rewriteQuery(query, names, [...new Set(all.map((r) => r.series ?? r.model))])
+      : null;
+  const renders = found.length
+    ? found
+    : guess
+      ? all.filter((_, i) => matches(guess, names[i]))
+      : [];
   const solo = renders.filter((r) => !r.series);
   const series = new Map<string, PartRender[]>();
   for (const r of renders) if (r.series) series.set(r.series, [...(series.get(r.series) ?? []), r]);
-  const pics = photos.length + renders.length > 0;
+  // Showcase: the first render of every series, then the solo ones, each picture once.
+  const showcase: PartRender[] = [];
+  const seenHero = new Set<string>();
+  for (const r of [
+    ...new Map(all.filter((r) => r.series).map((r) => [r.series, r])).values(),
+    ...all.filter((r) => !r.series),
+  ]) {
+    if (!r.hero || seenHero.has(r.hero)) continue;
+    seenHero.add(r.hero);
+    showcase.push(r);
+    if (showcase.length === SHOWCASE) break;
+  }
+  const pics = photos.length + all.length > 0;
   const ctx: Ctx = { part: model.part, name: p.name, qty, tipLinks: model.tipLinks ?? {}, lang, t };
   const onPick = (m: string) => {
     if (breaker.trim() === '' || breaker === picked.current) {
@@ -68,7 +119,32 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
       <PageTitle>{p.name}</PageTitle>
       <OemLine t={t} />
       <p className="m-0 mt-3 max-w-3xl font-sans text-ink-mid">{p.body}</p>
-      {series.size > 1 && (
+      {all.length > 0 && (
+        <div className="mt-6 flex max-w-2xl flex-wrap items-center gap-3">
+          <label className="sr-only" htmlFor="filter">
+            {t.search.label}
+          </label>
+          <input
+            id="filter"
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={t.search.placeholder}
+            autoComplete="off"
+            className={`min-w-48 flex-1 rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft ${FOCUS}`}
+          />
+          <p className="m-0 font-sans text-sm text-ink-mid" aria-live="polite">
+            {!query
+              ? t.search.hint
+              : found.length
+                ? t.search.count(found.length)
+                : guess && renders.length
+                  ? t.search.didYouMean(guess)
+                  : t.search.none(query)}
+          </p>
+        </div>
+      )}
+      {query && series.size > 1 && (
         <nav aria-label={t.parts.series.jump} className="mt-5 font-sans text-sm">
           <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
             {[...series.keys()].map((s) => (
@@ -90,6 +166,39 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
       >
         {pics && (
           <div className="flex min-w-0 flex-col gap-6">
+            {query && !renders.length && <MissingModel t={t} query={query} />}
+            {!query && showcase.length > 0 && (
+              <section aria-labelledby="showcase">
+                <h2 id="showcase" className="m-0 font-sans text-xl font-bold text-ink">
+                  {t.parts.showcase.title}
+                </h2>
+                <p className="m-0 mt-1 font-sans text-sm text-ink-mid">{t.parts.showcase.lead}</p>
+                <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 lg:grid-cols-4">
+                  {showcase.map((r, i) => (
+                    <li key={r.hero}>
+                      <a
+                        href={partItemUrl(model.part, r, lang)}
+                        aria-label={t.parts.showcase.alt(p.name, i + 1)}
+                        className={`block overflow-hidden rounded-md border border-hair bg-stage hover:border-hair-strong ${FOCUS}`}
+                      >
+                        <img
+                          src={`${r.hero}-xs.webp`}
+                          srcSet={`${r.hero}-xs.webp 320w, ${r.hero}-lg.webp 1600w`}
+                          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                          width={320}
+                          height={180}
+                          alt=""
+                          loading={i > 3 ? 'lazy' : undefined}
+                          decoding="async"
+                          className="block h-auto w-full"
+                        />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+                <ImgNote t={t} kind="render" className="mt-2" />
+              </section>
+            )}
             {solo.map((r) => (
               <RenderFigure key={r.hero ?? r.model} r={r} ctx={ctx} id={renderAnchor(r)} />
             ))}
