@@ -166,18 +166,40 @@ function profileRuns(s: TipSpec): Run[] {
   let workStart: number;
   const tip: Run[] = [];
   if (s.type === 'moil' || s.type === 'conical') {
-    const half = deg(s.angle! / 2);
+    // A two-stage moil: the main cone down to rMid, then the blunter point cone (s.point).
+    const half = deg((s.point ? s.point.angle2 : s.angle!) / 2);
     const rho = (s.type === 'moil' ? 0.06 : 0.1) * D; // blunted point radius
     const rt = rho * Math.cos(half);
     const yt = L - rho + rho * Math.sin(half);
-    workStart = yt - (R - rt) / Math.tan(half);
-    tip.push({
-      pts: [
-        [R, workStart],
-        [rt, yt],
-      ],
-      mat: MAT.GROUND,
-    });
+    if (s.point) {
+      const half1 = deg(s.angle! / 2);
+      const rm = Math.max(s.point.rMid, rt + 0.5);
+      const ym = yt - (rm - rt) / Math.tan(half);
+      workStart = ym - (R - rm) / Math.tan(half1);
+      tip.push({
+        pts: [
+          [R, workStart],
+          [rm, ym],
+        ],
+        mat: MAT.GROUND,
+      });
+      tip.push({
+        pts: [
+          [rm, ym],
+          [rt, yt],
+        ],
+        mat: MAT.GROUND,
+      });
+    } else {
+      workStart = yt - (R - rt) / Math.tan(half);
+      tip.push({
+        pts: [
+          [R, workStart],
+          [rt, yt],
+        ],
+        mat: MAT.GROUND,
+      });
+    }
     const cap: [number, number][] = [];
     for (let i = 0; i <= 12; i++) {
       const b = half + ((Math.PI / 2 - half) * i) / 12;

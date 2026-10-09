@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { rearSpec, renderSpec, specKey } from './render-spec.ts';
+import { MOIL_POINT_ANGLE, rearSpec, renderSpec, specKey } from './render-spec.ts';
 import type { FamilyAttrs, ShankProfile } from './types.ts';
 
 const attrs = (over: Partial<FamilyAttrs> = {}): FamilyAttrs => ({
@@ -164,4 +164,15 @@ test('uneven two-key slot: the cut depth is split between the key side and the f
   // shank Ø165, section 125 → 40 mm cut in total: 32 on the key side, 8 opposite.
   assert.equal(r.spec.slot.floor, 50.5);
   assert.equal(r.spec.slot.floorB, 74.5);
+});
+
+test('moil point in two stages: main cone to rMid, then the blunter point cone; other types have none', () => {
+  const sku = { lengthMm: { min: 1300, max: 1300 }, tipAngleDeg: null };
+  const m = renderSpec(attrs(), { ...sku, tipType: 'moil' })!.spec;
+  assert.ok(m.point);
+  assert.equal(m.point.angle2, MOIL_POINT_ANGLE);
+  assert.ok(m.point.rMid > 0 && m.point.rMid < m.D / 2);
+  assert.ok(m.point.angle2 > m.angle!);
+  assert.equal(renderSpec(attrs(), { ...sku, tipType: 'conical' })!.spec.point, undefined);
+  assert.equal(renderSpec(attrs(), { ...sku, tipType: 'chisel' })!.spec.point, undefined);
 });

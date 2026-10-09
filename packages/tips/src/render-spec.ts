@@ -11,6 +11,11 @@ import type {
 export const RENDER_VERSION = 11;
 
 /** Included angle (deg) when the data has none. Assumptions, labelled as such. */
+/** Moil point in two stages: the second, blunter cone starts at this fraction of the body radius. */
+export const MOIL_MID = 0.32;
+/** Included angle of the moil's second (point) cone. */
+export const MOIL_POINT_ANGLE = 60;
+
 export const DEFAULT_INCLUDED_ANGLE: Record<'moil' | 'conical' | 'chisel' | 'pyramid', number> = {
   moil: 28,
   conical: 60,
@@ -55,6 +60,11 @@ export interface TipSpec {
   };
   /** Included tip angle; null for blunt. */
   angle: number | null;
+  /**
+   * Moil only: the cone in two stages (owner). The main cone at `angle` runs from the body down
+   * to radius `rMid`, then a blunter cone at `angle2` runs to the point.
+   */
+  point?: { rMid: number; angle2: number };
   /** Chisel edge relative to the key slots. */
   chiselEdge: 'parallel' | 'perpendicular';
 }
@@ -219,6 +229,9 @@ export function renderSpec(
         chamfer: r1(Math.min(5, Math.max(1.5, 0.03 * 2 * rs))),
       },
       angle,
+      ...(type === 'moil'
+        ? { point: { rMid: r1(MOIL_MID * (D / 2)), angle2: MOIL_POINT_ANGLE } }
+        : {}),
       chiselEdge,
     },
     assumptions: A,
