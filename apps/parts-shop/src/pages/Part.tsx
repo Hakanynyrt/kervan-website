@@ -214,6 +214,7 @@ export function RenderFigure({
   id,
   lazy = false,
   item = false,
+  onWithB,
 }: {
   r: PartRender;
   ctx: Ctx;
@@ -222,6 +223,8 @@ export function RenderFigure({
   lazy?: boolean;
   /** On the part's own page: the page has the title and links, the caption only shares. */
   item?: boolean;
+  /** Tells the page when the Burçsuz / Burçlu choice changes (the page's quote names it). */
+  onWithB?: (withB: boolean) => void;
 }) {
   const { t } = ctx;
   const [open3d, setOpen3d] = useState(false);
@@ -255,6 +258,7 @@ export function RenderFigure({
               onClick={() => {
                 setWithB(on);
                 setOpen3d(false);
+                onWithB?.(on);
               }}
               className={`min-h-11 cursor-pointer px-4 font-medium first:rounded-l-sm last:rounded-r-sm aria-pressed:bg-ink aria-pressed:text-bg ${on ? 'border-l border-hair-strong' : ''} text-ink hover:bg-bg-warm aria-pressed:hover:bg-ink ${FOCUS}`}
             >

@@ -24,9 +24,15 @@ export default function PartItem({ model, lang, t }: { model: Model; lang: Lang;
   const p = t.parts.items[model.part];
   const [breaker, setBreaker] = useState(r ? renderModel(r, t) : '');
   const [qty, setQty] = useState(1);
+  // Front heads: the Burçsuz / Burçlu choice made in the figure goes into the quote message.
+  const [withB, setWithB] = useState(false);
   if (!r) return null;
   const caption = renderTitle(r, p.name, t);
-  const partName = r.kind ? t.parts.renderKind[r.kind] : p.name;
+  const partName = r.kind
+    ? t.parts.renderKind[r.kind]
+    : r.fitted
+      ? t.parts.fitted.name(p.name, withB)
+      : p.name;
   const text = t.parts.text(partName, breaker.trim(), qty);
   const ctx: Ctx = { part: model.part, name: p.name, qty, tipLinks: {}, lang, t };
   const related = model.related.flatMap((l) => {
@@ -49,7 +55,7 @@ export default function PartItem({ model, lang, t }: { model: Model; lang: Lang;
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
         <div className="flex min-w-0 flex-col gap-6">
-          <RenderFigure r={r} ctx={ctx} item />
+          <RenderFigure r={r} ctx={ctx} item onWithB={setWithB} />
           <ImgNote t={t} kind="render" />
           <nav aria-label={t.parts.item.linksLabel} className="font-sans text-sm">
             <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
