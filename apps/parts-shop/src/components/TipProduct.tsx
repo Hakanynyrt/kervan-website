@@ -183,9 +183,7 @@ export default function TipProduct({
               <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
                 <img
                   key={sku.image}
-                  src={tipImg(sku.image, 'md')}
-                  srcSet={`${tipImg(sku.image, 'sm')} 480w, ${tipImg(sku.image, 'md')} 800w`}
-                  sizes="(min-width: 1024px) 800px, 100vw"
+                  src={tipImg(sku.image)}
                   width={800}
                   height={533}
                   alt={tf.renderAlt(quoteName, t.tip[opt.tipType])}
@@ -195,9 +193,7 @@ export default function TipProduct({
                 {sku.imageSide && (
                   <img
                     key={sku.imageSide}
-                    src={tipImg(sku.imageSide, 'md')}
-                    srcSet={`${tipImg(sku.imageSide, 'sm')} 600w, ${tipImg(sku.imageSide, 'md')} 800w`}
-                    sizes="(min-width: 1024px) 800px, 100vw"
+                    src={tipImg(sku.imageSide)}
                     width={800}
                     height={267}
                     alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
@@ -214,7 +210,7 @@ export default function TipProduct({
                 <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage sm:hidden">
                   <img
                     key={sku.imageSide}
-                    src={tipImg(sku.imageSide, 'sm')}
+                    src={tipImg(sku.imageSide)}
                     width={600}
                     height={200}
                     alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
@@ -227,7 +223,7 @@ export default function TipProduct({
               {f?.imageRear && (
                 <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage sm:max-w-sm">
                   <img
-                    src={tipImg(f.imageRear, 'sm')}
+                    src={tipImg(f.imageRear)}
                     width={480}
                     height={320}
                     alt={tf.rearAlt(quoteName)}

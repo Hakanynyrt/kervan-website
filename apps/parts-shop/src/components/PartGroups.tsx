@@ -95,9 +95,7 @@ export function PartGroups({
                   />
                 ) : lead && tips?.image ? (
                   <img
-                    src={tipImg(tips.image, 'md')}
-                    srcSet={`${tipImg(tips.image, 'sm')} 480w, ${tipImg(tips.image, 'md')} 800w`}
-                    sizes="(min-width: 1024px) 760px, (min-width: 640px) 50vw, 100vw"
+                    src={tipImg(tips.image)}
                     width={800}
                     height={533}
                     alt=""
