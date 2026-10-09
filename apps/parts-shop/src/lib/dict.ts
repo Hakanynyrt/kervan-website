@@ -30,11 +30,14 @@ export interface Dict {
     popular: string;
     catalogSite: string;
     quote: string;
+    /** The header quote button on phones. */
+    quoteShort: string;
     quoteText: string;
     /** Header quote message on a breaker page. */
     quoteTextFor: (name: string) => string;
     skip: string;
-    parts: string;
+    /** Short group names for the category bar (tips first, then PART_KEYS). */
+    groups: { tips: string } & Record<PartKey, string>;
     call: string;
     cart: string;
     langLabel: string;
@@ -59,13 +62,6 @@ export interface Dict {
     heroCaption: (caption: string) => string;
     heroMore: string;
     allGroups: string;
-    stats: {
-      label: string;
-      models: string;
-      makes: string;
-      heads: string;
-      parts: string;
-    };
     makes: {
       title: string;
       lead: string;
@@ -221,7 +217,6 @@ export interface Dict {
     /** Count line on a product-group card (computed from the renders or the catalogue). */
     groupCount: (models: number, makes: number) => string;
     groupsTitle: string;
-    stats: { parts: string; models: string; makes: string };
     fitNote: string;
     plant: { title: string; lead: string; note: string; items: { caption: string; alt: string }[] };
     photosAlt: (name: string) => string;
@@ -323,10 +318,20 @@ export const DICT: Record<Lang, Dict> = {
       popular: 'Çok satanlar',
       catalogSite: 'Kurumsal',
       quote: 'Teklif iste',
+      quoteShort: 'Teklif',
       quoteText: 'Merhaba, kırıcı yedek parçası için fiyat teklifi almak istiyorum.',
       quoteTextFor: (name) => `Merhaba, ${name} kırıcı ucu için bilgi almak istiyorum.`,
       skip: 'İçeriğe geç',
-      parts: 'Yedek parçalar',
+      groups: {
+        tips: 'Uç',
+        'alt-govde': 'Alt gövde',
+        burc: 'Burç',
+        kama: 'Kama',
+        saplama: 'Saplama',
+        piston: 'Piston',
+        akumulator: 'Akümülatör',
+        'asinma-plakasi': 'Aşınma plakası',
+      },
       call: 'Ara',
       cart: 'Palet',
       langLabel: 'English',
@@ -365,13 +370,6 @@ export const DICT: Record<Lang, Dict> = {
       heroCaption: (c) => `${c} · kendi çizimimizden modellenmiş görsel`,
       heroMore: 'Diğer parçalar',
       allGroups: 'Tüm yedek parçalar',
-      stats: {
-        label: 'Rakamlarla Kervan Mağaza',
-        models: 'kırıcı modeline uç',
-        makes: 'kırıcı markası',
-        heads: 'kırıcı modeline alt gövde',
-        parts: 'kırıcı modeline çizimden modellenmiş parça',
-      },
       makes: {
         title: 'Uyumlu kırıcı markaları',
         lead: 'Kırıcınızın markasını seçin, o markanın modellerini görün.',
@@ -621,11 +619,6 @@ export const DICT: Record<Lang, Dict> = {
       view: 'İncele',
       groupCount: (m, k) => `${m} kırıcı modeli · ${k} marka`,
       groupsTitle: 'Ürün grupları',
-      stats: {
-        parts: 'çizimden modellenmiş parça',
-        models: 'kırıcı modeli',
-        makes: 'kırıcı markası',
-      },
       fitNote:
         'Ürünlerimiz Kervan Makina üretimidir; marka ve model adları yalnızca uyumu belirtir.',
       plant: {
@@ -795,10 +788,20 @@ export const DICT: Record<Lang, Dict> = {
       popular: 'Best sellers',
       catalogSite: 'Company',
       quote: 'Request a quote',
+      quoteShort: 'Quote',
       quoteText: 'Hello, I would like a quote for a breaker spare part.',
       quoteTextFor: (name) => `Hello, I have a question about the tip for the ${name} breaker.`,
       skip: 'Skip to content',
-      parts: 'Spare parts',
+      groups: {
+        tips: 'Tips',
+        'alt-govde': 'Front heads',
+        burc: 'Bushings',
+        kama: 'Keys',
+        saplama: 'Tie rods',
+        piston: 'Pistons',
+        akumulator: 'Accumulator',
+        'asinma-plakasi': 'Wear plates',
+      },
       call: 'Call',
       cart: 'Cart',
       langLabel: 'Türkçe',
@@ -837,13 +840,6 @@ export const DICT: Record<Lang, Dict> = {
       heroCaption: (c) => `${c} · rendered from our own drawing`,
       heroMore: 'Other parts',
       allGroups: 'All spare parts',
-      stats: {
-        label: 'Kervan shop in numbers',
-        models: 'breaker models with a listed tip',
-        makes: 'breaker makes',
-        heads: 'breaker models with a front head',
-        parts: 'breaker models with parts rendered from our drawings',
-      },
       makes: {
         title: 'Compatible breaker makes',
         lead: 'Pick your breaker’s make to see its models.',
@@ -1093,11 +1089,6 @@ export const DICT: Record<Lang, Dict> = {
       groupCount: (m, k) =>
         `${m} breaker ${m === 1 ? 'model' : 'models'} · ${k} ${k === 1 ? 'make' : 'makes'}`,
       groupsTitle: 'Product groups',
-      stats: {
-        parts: 'parts modelled from our drawings',
-        models: 'breaker models',
-        makes: 'breaker makes',
-      },
       fitNote: 'Our products are made by Kervan Makina; make and model names only show the fit.',
       plant: {
         title: 'Our plant',
