@@ -697,6 +697,7 @@ export const DICT: Record<Lang, Dict> = {
         typeL: 'L tipi',
         typeT: 'T tipi',
         oilGroove: 'yağ kanallı',
+        greasingHole: 'yağlama delikli',
       },
       viewer: {
         open: '3B incele',
@@ -1176,6 +1177,7 @@ export const DICT: Record<Lang, Dict> = {
         typeL: 'L type',
         typeT: 'T type',
         oilGroove: 'oil grooves',
+        greasingHole: 'greasing hole',
       },
       viewer: {
         open: 'View in 3D',

@@ -66,7 +66,8 @@ export interface PartRender {
     | 'typeE'
     | 'typeL'
     | 'typeT'
-    | 'oilGroove';
+    | 'oilGroove'
+    | 'greasingHole';
   views: { base: string; view: RenderView }[];
 }
 
@@ -462,6 +463,12 @@ const MTB_BURC: Bushing[] = [
   { model: '150', file: 'mtb-150-ust', kind: 'upperBushing' },
   { model: '150', file: 'mtb-150-dayama-y', kind: 'thrustRing', variant: 'typeY' },
   { model: '150', file: 'mtb-150-dayama-e', kind: 'thrustRing', variant: 'typeE' },
+  {
+    model: '150',
+    file: 'mtb-150-dayama-yaglama-delikli',
+    kind: 'thrustRing',
+    variant: 'greasingHole',
+  },
   { model: '170', file: 'mtb-170-kafa', kind: 'toolBushing' },
   { model: '170', file: 'mtb-170-ust', kind: 'upperBushing' },
   { model: '170', file: 'mtb-170-dayama-y', kind: 'thrustRing', variant: 'typeY' },
@@ -491,6 +498,7 @@ const MTB_BURC: Bushing[] = [
   { model: '360', file: 'mtb-360-kafa', kind: 'toolBushing' },
   { model: '360', file: 'mtb-360-ust', kind: 'upperBushing' },
   { model: '360', file: 'mtb-360-dayama-y', kind: 'thrustRing', variant: 'typeY' },
+  { model: '360', file: 'mtb-360-dayama-e', kind: 'thrustRing', variant: 'typeE' },
   { model: '500', file: 'mtb-500-kafa', kind: 'toolBushing' },
   { model: '500', file: 'mtb-500-ust', kind: 'thrustRing' },
   { model: '700', file: 'mtb-700-kafa', kind: 'toolBushing' },
@@ -639,7 +647,7 @@ const SOOSAN_BURC: Bushing[] = [
 const MONTABERT_BURC: Bushing[] = [
   { model: 'BRH 125', file: 'montabert-brh-125-kafa', kind: 'toolBushing' },
   { model: 'BRH 250', file: 'montabert-brh-250-kafa', kind: 'toolBushing' },
-  { model: 'BRH 250', file: 'montabert-brh-250-ust', kind: 'thrustRing' },
+  { model: 'BRH 250', file: 'montabert-brh-250-dayama', kind: 'thrustRing' },
   { model: 'BRH 270', file: 'montabert-brh-270-kafa', kind: 'toolBushing' },
   { model: 'BRH 501', file: 'montabert-brh-501-kafa', kind: 'toolBushing' },
   { model: 'BRH 501', file: 'montabert-brh-501-ust', kind: 'thrustRing' },
@@ -802,6 +810,12 @@ const INDECO_BURC: Bushing[] = [
   },
   { model: 'MES 4000', file: 'indeco-mes-4000-kafa', kind: 'toolBushing' },
   { model: 'MES 4000', file: 'indeco-mes-4000-ust', kind: 'thrustRing' },
+  {
+    model: 'MES 4000',
+    file: 'indeco-mes-4000-dayama-eski',
+    kind: 'thrustRing',
+    variant: 'oldType',
+  },
   { model: 'MES 7000', file: 'indeco-mes-7000-kafa', kind: 'toolBushing' },
   { model: 'MES 7000', file: 'indeco-mes-7000-ust', kind: 'spacerBushing' },
   { model: 'MES 7000', file: 'indeco-mes-7000-dayama', kind: 'thrustRing' },
