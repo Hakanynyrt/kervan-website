@@ -2,48 +2,22 @@ import { Container } from '@kervan/ui';
 import { Breadcrumb, PageTitle } from '../components/Bits';
 import { PartGroups } from '../components/PartGroups';
 import type { Dict } from '../lib/dict';
-import { fmtNum } from '../lib/format';
-import { PART_RENDERS, PLANT_PHOTOS, renderStats } from '../lib/photos';
-import { PART_KEYS, type PageModel } from '../lib/routes';
+import { PLANT_PHOTOS } from '../lib/photos';
+import type { PageModel } from '../lib/routes';
 import type { Lang } from '../types';
 
 type Model = Extract<PageModel, { kind: 'parts' }>;
 
 /** Every product group: tips and the other breaker parts we make, then our plant. */
 export default function Parts({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
-  // Renders across every part group (tip counts are on the tips card).
-  const all = renderStats(PART_KEYS.flatMap((k) => PART_RENDERS[k]));
-  const figures: [number, string][] = [
-    [all.parts, t.parts.stats.parts],
-    [all.models, t.parts.stats.models],
-    [all.makes, t.parts.stats.makes],
-  ];
   return (
     <>
       <section className="border-b border-hair bg-bg-soft">
         <Container className="py-10">
           <Breadcrumb trail={[]} current={t.parts.title} lang={lang} t={t} />
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-            <div>
-              <PageTitle>{t.parts.title}</PageTitle>
-              <p className="m-0 mt-3 max-w-3xl font-sans text-ink-mid">{t.parts.lead}</p>
-            </div>
-            <div>
-              <dl className="m-0 grid grid-cols-3 gap-px overflow-hidden rounded-sm border border-hair bg-hair">
-                {figures.map(([n, label]) => (
-                  <div key={label} className="flex flex-col-reverse bg-bg px-3 py-4 sm:px-5">
-                    <dt className="font-sans text-sm text-ink-mid">{label}</dt>
-                    <dd className="m-0 font-sans text-2xl font-bold tabular-nums text-ink">
-                      {fmtNum(n, lang)}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-              <p className="m-0 mt-3 max-w-3xl font-sans text-xs text-ink-soft">
-                {t.parts.fitNote}
-              </p>
-            </div>
-          </div>
+          <PageTitle>{t.parts.title}</PageTitle>
+          <p className="m-0 mt-3 max-w-3xl font-sans text-ink-mid">{t.parts.lead}</p>
+          <p className="m-0 mt-3 max-w-3xl font-sans text-xs text-ink-soft">{t.parts.fitNote}</p>
         </Container>
       </section>
       <Container className="py-12">

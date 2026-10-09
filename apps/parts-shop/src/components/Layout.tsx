@@ -1,9 +1,17 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { Container } from '@kervan/ui';
 import { ORG_EMAIL, ORG_PHONE, ORG_PHONE_E164, ORG_TRADING_NAME } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { CART_PATH, PARTS_PATH, POPULAR_PATH, TIP_PATHS } from '../lib/routes';
+import {
+  CART_PATH,
+  LIST_PATH,
+  PART_KEYS,
+  PARTS_PATH,
+  partPath,
+  POPULAR_PATH,
+  TIP_PATHS,
+} from '../lib/routes';
 import { LEGAL, LEGAL_KEYS, legalPath, SELLER } from '../lib/legal';
 import { CartLink } from './CartLink';
 import type { Lang } from '../types';
@@ -38,14 +46,30 @@ interface Props {
 
 export default function Layout({ lang, path, t, demo, hasPopular, quoteText, children }: Props) {
   const other: Lang = lang === 'tr' ? 'en' : 'tr';
+  const barRef = useRef<HTMLUListElement>(null);
+  // Phones: the category bar scrolls sideways; bring the current group into view.
+  useEffect(() => {
+    const bar = barRef.current;
+    const cur = bar?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (bar && cur && bar.scrollWidth > bar.clientWidth)
+      bar.scrollLeft = cur.offsetLeft - (bar.clientWidth - cur.offsetWidth) / 2;
+  }, []);
   const corporate = lang === 'tr' ? 'https://kervanbreaker.com/' : 'https://kervanbreaker.com/en/';
-  const nav = [
-    // Tips are one spare-part group: their pages count as "Yedek parçalar" too.
+  // Category bar: every product group by name (tips first; owner: no umbrella "Yedek parçalar").
+  const groups = [
     {
-      href: localePath(PARTS_PATH, lang),
-      label: t.nav.parts,
-      current: path.startsWith(PARTS_PATH) || TIP_PATHS.some((p) => path.startsWith(p)),
+      href: localePath(LIST_PATH, lang),
+      label: t.nav.groups.tips,
+      current: TIP_PATHS.some((p) => path.startsWith(p)),
     },
+    ...PART_KEYS.map((k) => ({
+      href: localePath(partPath(k), lang),
+      label: t.nav.groups[k],
+      current: path === partPath(k),
+    })),
+  ];
+  const nav = [
+    ...groups,
     ...(hasPopular
       ? [
           {
@@ -69,7 +93,7 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
           <span className="hidden sm:inline">
             {ORG_TRADING_NAME} · {t.top.tagline}
           </span>
-          <span className="flex gap-4">
+          <span className="flex flex-1 justify-between gap-4 sm:flex-none">
             <a
               href={`tel:${ORG_PHONE_E164}`}
               className={`font-medium text-ink hover:text-brand-hi ${FOCUS}`}
@@ -79,12 +103,24 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
             <a href={`mailto:${ORG_EMAIL}`} className={`hidden hover:text-ink sm:inline ${FOCUS}`}>
               {ORG_EMAIL}
             </a>
+            <a
+              href={localePath(path, other)}
+              hrefLang={other}
+              lang={other}
+              aria-label={t.nav.langLabel}
+              className={`font-medium text-ink hover:text-brand-hi sm:hidden ${FOCUS}`}
+            >
+              {t.nav.langOther}
+            </a>
           </span>
         </Container>
       </div>
       <header className="border-b border-hair bg-bg">
-        <Container className="flex flex-wrap items-center gap-x-4 gap-y-3 py-3 sm:gap-x-10 sm:py-4">
-          <a href={localePath('/', lang)} className={`flex items-center gap-3 ${FOCUS}`}>
+        <Container className="flex items-center gap-x-3 py-3 sm:gap-x-10 sm:py-4">
+          <a
+            href={localePath('/', lang)}
+            className={`flex shrink-0 items-center gap-2 sm:gap-3 ${FOCUS}`}
+          >
             <img
               src="/logo-krv-128.webp"
               alt=""
@@ -93,38 +129,16 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
               className="size-10 rounded-sm"
             />
             <span className="flex flex-col leading-tight">
-              <span className="font-sans text-lg font-bold text-ink">{ORG_TRADING_NAME}</span>
+              <span className="whitespace-nowrap font-sans text-base font-bold text-ink sm:text-lg">
+                {ORG_TRADING_NAME}
+              </span>
               <span className="hidden font-sans text-xs text-ink-mid sm:inline">{t.top.shop}</span>
             </span>
           </a>
-          <nav
-            aria-label={t.nav.label}
-            className="order-3 flex w-full gap-x-6 overflow-x-auto border-t border-hair pt-3 font-sans text-[15px] font-semibold sm:order-none sm:w-auto sm:border-t-0 sm:pt-0"
-          >
-            {nav.map((n) => (
-              <a
-                key={n.href}
-                href={n.href}
-                aria-current={n.current ? 'page' : undefined}
-                className={`shrink-0 whitespace-nowrap text-ink hover:text-brand-hi aria-[current=page]:text-brand-hi aria-[current=page]:underline aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-[10px] ${FOCUS_INSET}`}
-              >
-                {n.label}
-              </a>
-            ))}
-            <a
-              href={localePath(path, other)}
-              hrefLang={other}
-              lang={other}
-              aria-label={t.nav.langLabel}
-              className={`ml-auto shrink-0 text-sm font-normal text-ink-mid hover:text-ink sm:hidden ${FOCUS_INSET}`}
-            >
-              {t.nav.langOther}
-            </a>
-          </nav>
           <div
             role="group"
             aria-label={t.nav.tools}
-            className="ml-auto flex items-center gap-x-4 font-sans text-sm sm:gap-x-5"
+            className="ml-auto flex items-center gap-x-2.5 font-sans text-sm sm:gap-x-5"
           >
             <a href={corporate} className={`hidden text-ink-mid hover:text-ink lg:inline ${FOCUS}`}>
               {t.nav.catalogSite}
@@ -134,19 +148,43 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
               hrefLang={other}
               lang={other}
               aria-label={t.nav.langLabel}
-              className={`hidden border-l border-hair pl-5 text-ink-mid sm:inline hover:text-ink ${FOCUS}`}
+              className={`hidden border-l border-hair pl-5 text-ink-mid hover:text-ink sm:inline ${FOCUS}`}
             >
               {t.nav.langOther}
             </a>
             <CartLink lang={lang} t={t} current={path === CART_PATH} />
             <a
               href={whatsappHref(quoteText ?? t.nav.quoteText)}
-              className={`inline-block rounded-sm bg-brand px-3 py-2 font-medium text-white sm:px-4 hover:bg-brand-hi ${FOCUS}`}
+              className={`inline-block whitespace-nowrap rounded-sm bg-brand px-3 py-2 font-medium text-white sm:px-4 hover:bg-brand-hi ${FOCUS}`}
             >
-              {t.nav.quote}
+              <span className="sm:hidden">{t.nav.quoteShort}</span>
+              <span className="hidden sm:inline">{t.nav.quote}</span>
             </a>
           </div>
         </Container>
+        <nav aria-label={t.nav.label} className="border-t border-hair">
+          <Container>
+            <ul
+              ref={barRef}
+              className="-mx-6 my-0 flex list-none gap-x-1 overflow-x-auto py-0 px-4 font-sans text-[15px] font-semibold [scrollbar-width:none] sm:-mx-2 sm:flex-wrap sm:gap-x-2 sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden"
+            >
+              {nav.map((n, i) => (
+                <li
+                  key={n.href}
+                  className={`shrink-0 ${i === groups.length ? 'ml-2 border-l border-hair pl-2 sm:ml-auto sm:border-l-0 sm:pl-0' : ''}`}
+                >
+                  <a
+                    href={n.href}
+                    aria-current={n.current ? 'page' : undefined}
+                    className={`flex min-h-11 items-center whitespace-nowrap border-b-2 border-transparent px-2 text-ink hover:text-brand-hi aria-[current=page]:border-brand aria-[current=page]:text-brand-hi ${FOCUS_INSET}`}
+                  >
+                    {n.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </Container>
+        </nav>
       </header>
       <div className="border-b border-hair bg-bg-soft font-sans text-[13px] text-ink-mid">
         <Container className="flex items-start gap-x-2.5 py-2">
@@ -219,6 +257,11 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
                   </a>
                 </li>
               ))}
+              <li>
+                <a href={localePath(PARTS_PATH, lang)} className={`hover:text-ink ${FOCUS}`}>
+                  {t.home.allGroups}
+                </a>
+              </li>
               <li>
                 <a href={localePath(CART_PATH, lang)} className={`hover:text-ink ${FOCUS}`}>
                   {t.nav.cart}

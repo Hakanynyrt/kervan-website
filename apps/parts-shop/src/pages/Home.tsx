@@ -5,12 +5,10 @@ import { SearchForm } from '../components/ModelSearch';
 import { PartGroups } from '../components/PartGroups';
 import { FOCUS, FOCUS_INSET, whatsappHref } from '../components/Layout';
 import type { Dict } from '../lib/dict';
-import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
-import { PART_RENDERS, renderStats, STOCK_TIP_PHOTOS } from '../lib/photos';
+import { PART_RENDERS, STOCK_TIP_PHOTOS } from '../lib/photos';
 import {
   LIST_PATH,
-  PART_KEYS,
   PARTS_PATH,
   POPULAR_PATH,
   partPath,
@@ -28,8 +26,6 @@ const LEAD =
 const THUMB_KEYS: PartKey[] = ['burc', 'piston', 'kama'];
 const THUMBS = THUMB_KEYS.map((k) => ({ k, hero: PART_RENDERS[k].find((r) => r.hero)?.hero }));
 /** Breaker models, not renders (old-type / round-nut variants count once), as on the group cards. */
-const HEAD_MODELS = renderStats(PART_RENDERS['alt-govde']).models;
-const PART_MODELS = renderStats(PART_KEYS.flatMap((k) => PART_RENDERS[k])).models;
 const MAKES_SHOWN = 12;
 
 /** One heading pattern for every home section: h2, optional lead, optional link on the right. */
@@ -67,17 +63,6 @@ function SectionHead({
 export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const h = t.home;
   const leadCaption = t.parts.renderCaption(LEAD.model, t.parts.items['alt-govde'].name);
-  // Every number is computed: catalogue counts (left out for the DEMO catalogue) and renders.
-  const stats: [number, string][] = [
-    ...(model.demo
-      ? []
-      : ([
-          [model.total, h.stats.models],
-          [model.brands.length, h.stats.makes],
-        ] as [number, string][])),
-    [HEAD_MODELS, h.stats.heads],
-    [PART_MODELS, h.stats.parts],
-  ];
   const makes = [...model.brands]
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'tr'))
     .slice(0, MAKES_SHOWN)
@@ -92,7 +77,7 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
     <>
       <section className="border-b border-hair bg-bg-soft">
         <Container className="py-12 md:py-16">
-          <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14">
+          <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14">
             <div>
               <h1 className="m-0 font-sans text-4xl font-bold leading-tight text-ink md:text-5xl">
                 {h.title}
@@ -167,23 +152,8 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
         </Container>
       </section>
 
-      <section aria-label={h.stats.label} className="border-b border-hair bg-bg">
+      <div className="border-b border-hair bg-bg">
         <Container>
-          <dl
-            className={`m-0 grid grid-cols-2 border-b border-hair ${stats.length === 4 ? 'lg:grid-cols-4' : ''}`}
-          >
-            {stats.map(([n, label], i) => (
-              <div
-                key={label}
-                className={`flex flex-col-reverse justify-end border-hair py-6 pr-4 font-sans ${i % 2 ? 'border-l pl-4 lg:pl-6' : ''} ${i === 2 ? 'lg:border-l lg:pl-6' : ''} ${stats.length === 4 && i < 2 ? 'border-b lg:border-b-0' : ''}`}
-              >
-                <dt className="text-sm text-ink-mid">{label}</dt>
-                <dd className="m-0 mt-1 text-3xl font-bold tabular-nums text-ink">
-                  {fmtNum(n, lang)}
-                </dd>
-              </div>
-            ))}
-          </dl>
           <ul className="m-0 grid list-none grid-cols-1 gap-px p-0 sm:grid-cols-2 lg:grid-cols-4">
             {h.trust.map((x) => (
               <li key={x.title} className="py-4 font-sans sm:py-6 sm:pr-6">
@@ -193,7 +163,7 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
             ))}
           </ul>
         </Container>
-      </section>
+      </div>
 
       {makes.length > 0 && (
         <section aria-labelledby="makes" className="border-b border-hair bg-bg-soft">
