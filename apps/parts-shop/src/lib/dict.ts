@@ -370,7 +370,7 @@ export const DICT: Record<Lang, Dict> = {
       langLabel: 'English',
       langOther: 'EN',
       tools: 'Hızlı erişim',
-      theme: { label: 'Tema', auto: 'Güneşe göre', light: 'Açık', dark: 'Koyu' },
+      theme: { label: 'Tema', auto: 'Otomatik', light: 'Açık', dark: 'Koyu' },
     },
     top: {
       tagline: 'Hidrolik kırıcı yedek parça üreticisi',
@@ -874,7 +874,7 @@ export const DICT: Record<Lang, Dict> = {
       langLabel: 'Türkçe',
       langOther: 'TR',
       tools: 'Quick links',
-      theme: { label: 'Theme', auto: 'By the sun', light: 'Light', dark: 'Dark' },
+      theme: { label: 'Theme', auto: 'Auto', light: 'Light', dark: 'Dark' },
     },
     top: {
       tagline: 'Hydraulic breaker spare parts maker',
