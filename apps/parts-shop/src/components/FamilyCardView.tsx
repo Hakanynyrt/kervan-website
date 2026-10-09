@@ -20,7 +20,7 @@ export default function FamilyCardView({ c, lang, t }: { c: BreakerCard; lang: L
           height={320}
           loading="lazy"
           decoding="async"
-          className="block h-auto w-full bg-stage"
+          className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain"
         />
       )}
       <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">

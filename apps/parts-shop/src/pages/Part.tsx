@@ -232,6 +232,7 @@ function RenderFigure({
               base={v.base}
               alt={`${caption}, ${t.parts.renderView[v.view]}`}
               lazy={lazy || i > 0}
+              single
             />
           </li>
         ))}

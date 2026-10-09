@@ -10,7 +10,19 @@ import {
   type TipType,
 } from '@kervan/tips';
 import { LEGAL_KEYS, legalPath, type LegalKey } from './legal';
-import { partsForBreaker, tipLinksForPart, type PartLink } from './part-links';
+import { partsForBreaker, renderAnchor, tipLinksForPart, type PartLink } from './part-links';
+import { PART_RENDERS, type PartRender } from './photos';
+import type { TipGroupStats } from '../types';
+
+/** A part we model for a best-selling breaker (the best-sellers page). */
+export interface PopularPart extends PartLink {
+  /** Best-selling breaker it is listed for ("Brand Model"). */
+  breaker: string;
+  /** Render name (the drawing's model text) and showcase picture base, if any. */
+  model: string;
+  hero: string | null;
+  kind: PartRender['kind'] | null;
+}
 
 /** One breaker model and the tip it takes: the shop's product (card, list row, page). */
 export interface BreakerCard {
@@ -37,6 +49,9 @@ export type PageModel =
       /** More best-sellers than shown: link to the best-sellers page. */
       morePopular: boolean;
       total: number;
+      /** Every catalogue make (home: numbers strip and compatible-makes row). */
+      brands: BrandLink[];
+      tips: TipGroupStats;
       demo: boolean;
       hasPopular: boolean;
     }
@@ -49,7 +64,7 @@ export type PageModel =
       demo: boolean;
       hasPopular: boolean;
     }
-  | { kind: 'parts'; demo: boolean; hasPopular: boolean }
+  | { kind: 'parts'; tips: TipGroupStats; demo: boolean; hasPopular: boolean }
   | {
       kind: 'part';
       part: PartKey;
@@ -58,7 +73,14 @@ export type PageModel =
       demo: boolean;
       hasPopular: boolean;
     }
-  | { kind: 'popular'; cards: BreakerCard[]; demo: boolean; hasPopular: true }
+  | {
+      kind: 'popular';
+      cards: BreakerCard[];
+      /** Parts we model for the best-selling breakers (not sales data), best-seller order. */
+      parts: PopularPart[];
+      demo: boolean;
+      hasPopular: true;
+    }
   | {
       kind: 'breaker';
       name: string;
@@ -85,7 +107,15 @@ export interface BrandLink {
 }
 
 /** Spare-part groups besides tips (no catalogue data yet: quote by breaker model). */
-export const PART_KEYS = ['alt-govde', 'burc', 'kama', 'saplama', 'piston'] as const;
+export const PART_KEYS = [
+  'alt-govde',
+  'burc',
+  'kama',
+  'saplama',
+  'piston',
+  'akumulator',
+  'asinma-plakasi',
+] as const;
 export type PartKey = (typeof PART_KEYS)[number];
 export const PARTS_PATH = '/yedek-parca';
 export const CART_PATH = '/palet';
@@ -104,13 +134,42 @@ export const breakerPath = (slug: string): string => `/kirici/${slug}`;
 export const brandPath = (brand: string): string => `/marka/${slugify(brand)}`;
 export const LIST_PATH = '/kirici-ucu';
 export const POPULAR_PATH = '/cok-satanlar';
+/** Path prefixes of the tip pages (one spare-part group, listed under "Yedek parçalar"). */
+export const TIP_PATHS = [LIST_PATH, '/kirici/', '/marka/', '/urun/'];
 
 export const breakerName = (b: { brand: string; model: string }): string =>
   `${b.brand} ${b.model}`.trim();
 
+/** The parts we model for the best-selling breakers, in their order, each render once. */
+function popularParts(cards: BreakerCard[]): PopularPart[] {
+  const seen = new Set<string>();
+  const out: PopularPart[] = [];
+  for (const c of cards)
+    for (const l of partsForBreaker(c.name)) {
+      const key = `${l.part}#${l.anchor}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const r = PART_RENDERS[l.part].find((x) => renderAnchor(x) === l.anchor);
+      if (!r) continue;
+      out.push({
+        ...l,
+        breaker: c.name,
+        model: r.model,
+        hero: r.hero ?? null,
+        kind: r.kind ?? null,
+      });
+    }
+  return out;
+}
+
 const tierRank = (t: 1 | 2 | null): number => t ?? 3;
 const byName = (a: BreakerCard, b: BreakerCard): number =>
   a.name.localeCompare(b.name, 'tr', { numeric: true });
+/** Best-sellers: by tier, then working diameter (small to large, unknown last), not A–Z. */
+const byPopularity = (a: BreakerCard, b: BreakerCard): number =>
+  tierRank(a.popularTier) - tierRank(b.popularTier) ||
+  (a.diameterMm ?? Infinity) - (b.diameterMm ?? Infinity) ||
+  byName(a, b);
 
 interface BreakerEntry {
   name: string;
@@ -219,9 +278,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
   });
   cards.sort(byName);
   const tipPaths = new Map(cards.map((x) => [fold(x.name), x.path]));
-  const popular = cards
-    .filter((x) => x.popularTier !== null)
-    .sort((a, b) => tierRank(a.popularTier) - tierRank(b.popularTier) || byName(a, b));
+  const popular = cards.filter((x) => x.popularTier !== null).sort(byPopularity);
   const hasPopular = popular.length > 0;
   const byBrand = new Map<string, BreakerCard[]>();
   for (const x of cards) byBrand.set(x.brand, [...(byBrand.get(x.brand) ?? []), x]);
@@ -236,6 +293,12 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     seen.add(k);
     return true;
   });
+  // Tips product-group card: counts and the first featured render (best-seller first).
+  const tips: TipGroupStats = {
+    models: cards.length,
+    makes: byBrand.size,
+    image: featured.find((x) => x.image)?.image ?? null,
+  };
   return [
     {
       path: '/',
@@ -245,6 +308,8 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         featuredArePopular: hasPopular,
         morePopular: popular.length > FEATURED,
         total: cards.length,
+        brands,
+        tips,
         demo,
         hasPopular,
       },
@@ -254,7 +319,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       path: brandPath(brand),
       model: { kind: 'brand' as const, brand, rows, brands, demo, hasPopular },
     })),
-    { path: PARTS_PATH, model: { kind: 'parts' as const, demo, hasPopular } },
+    { path: PARTS_PATH, model: { kind: 'parts' as const, tips, demo, hasPopular } },
     { path: CART_PATH, model: { kind: 'cart' as const, demo, hasPopular } },
     ...LEGAL_KEYS.map((doc) => ({
       path: legalPath(doc),
@@ -274,7 +339,13 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       ? [
           {
             path: POPULAR_PATH,
-            model: { kind: 'popular' as const, cards: popular, demo, hasPopular: true as const },
+            model: {
+              kind: 'popular' as const,
+              cards: popular,
+              parts: popularParts(popular),
+              demo,
+              hasPopular: true as const,
+            },
           },
         ]
       : []),

@@ -223,12 +223,23 @@ export function StickyQuote({ text, label, t }: { text: string; label?: string; 
 }
 
 /** A 4:3 photo from public/photos (see lib/photos.ts). */
-export function Photo({ base, alt, lazy = true }: { base: string; alt: string; lazy?: boolean }) {
+export function Photo({
+  base,
+  alt,
+  lazy = true,
+  single = false,
+}: {
+  base: string;
+  alt: string;
+  lazy?: boolean;
+  /** A part render: published in one size only (`-lg`), to keep the deployment under Pages' file limit. */
+  single?: boolean;
+}) {
   return (
     <img
-      src={`${base}-sm.webp`}
-      srcSet={`${base}-sm.webp 480w, ${base}-lg.webp 960w`}
-      sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+      src={`${base}-${single ? 'lg' : 'sm'}.webp`}
+      srcSet={single ? undefined : `${base}-sm.webp 480w, ${base}-lg.webp 960w`}
+      sizes={single ? undefined : '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw'}
       width={480}
       height={360}
       alt={alt}
@@ -285,7 +296,7 @@ export function OemLine({ t }: { t: Dict }) {
   return <p className="m-0 mt-2 font-sans text-base font-semibold text-ink">{t.oem}</p>;
 }
 
-/** 16:9 showcase picture (`<base>-sm.webp` 800 px, `<base>-lg.webp` 1600 px) on the dark stage. */
+/** 16:9 showcase picture (`<base>-lg.webp`, 1600 px, the only size published) on the dark stage. */
 export function HeroImg({
   base,
   alt,
@@ -302,8 +313,6 @@ export function HeroImg({
     <img
       src={`${base}-lg.webp`}
       loading={lazy ? 'lazy' : undefined}
-      srcSet={`${base}-sm.webp 800w, ${base}-lg.webp 1600w`}
-      sizes="(min-width: 1024px) 820px, 100vw"
       width={1600}
       height={900}
       alt={alt}
