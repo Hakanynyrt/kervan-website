@@ -84,7 +84,13 @@ export interface Dict {
   };
   card: { view: string };
   breaker: { title: (name: string) => string };
-  popular: { title: string; lead: string };
+  popular: {
+    title: string;
+    lead: string;
+    tips: string;
+    parts: string;
+    partsLead: string;
+  };
   list: {
     title: string;
     lead: string;
@@ -431,7 +437,11 @@ export const DICT: Record<Lang, Dict> = {
     },
     popular: {
       title: 'Çok satanlar',
-      lead: 'En çok sipariş edilen kırıcı uçları.',
+      lead: 'En çok sipariş edilen kırıcı uçları ve aynı kırıcılar için ürettiğimiz yedek parçalar.',
+      tips: 'Kırıcı ucu',
+      parts: 'Çok satan kırıcılar için yedek parçalar',
+      partsLead:
+        'Ucu en çok sipariş edilen kırıcı modelleri için ürettiğimiz parçalar; parça satış sıralaması değildir.',
     },
     family: {
       kicker: (d) => `Ø${d} mm hidrolik kırıcı ucu`,
@@ -895,7 +905,11 @@ export const DICT: Record<Lang, Dict> = {
     },
     popular: {
       title: 'Best sellers',
-      lead: 'The most ordered breaker tips.',
+      lead: 'The most ordered breaker tips and the spare parts we make for the same breakers.',
+      tips: 'Breaker tips',
+      parts: 'Spare parts for the best-selling breakers',
+      partsLead:
+        'Parts we make for the breaker models whose tips are ordered most; not a ranking of part sales.',
     },
     family: {
       kicker: (d) => `Ø${d} mm hydraulic breaker tip`,

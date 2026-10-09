@@ -10,8 +10,19 @@ import {
   type TipType,
 } from '@kervan/tips';
 import { LEGAL_KEYS, legalPath, type LegalKey } from './legal';
-import { partsForBreaker, tipLinksForPart, type PartLink } from './part-links';
+import { partsForBreaker, renderAnchor, tipLinksForPart, type PartLink } from './part-links';
+import { PART_RENDERS, type PartRender } from './photos';
 import type { TipGroupStats } from '../types';
+
+/** A part we model for a best-selling breaker (the best-sellers page). */
+export interface PopularPart extends PartLink {
+  /** Best-selling breaker it is listed for ("Brand Model"). */
+  breaker: string;
+  /** Render name (the drawing's model text) and showcase picture base, if any. */
+  model: string;
+  hero: string | null;
+  kind: PartRender['kind'] | null;
+}
 
 /** One breaker model and the tip it takes: the shop's product (card, list row, page). */
 export interface BreakerCard {
@@ -62,7 +73,14 @@ export type PageModel =
       demo: boolean;
       hasPopular: boolean;
     }
-  | { kind: 'popular'; cards: BreakerCard[]; demo: boolean; hasPopular: true }
+  | {
+      kind: 'popular';
+      cards: BreakerCard[];
+      /** Parts we model for the best-selling breakers (not sales data), best-seller order. */
+      parts: PopularPart[];
+      demo: boolean;
+      hasPopular: true;
+    }
   | {
       kind: 'breaker';
       name: string;
@@ -121,6 +139,28 @@ export const TIP_PATHS = [LIST_PATH, '/kirici/', '/marka/', '/urun/'];
 
 export const breakerName = (b: { brand: string; model: string }): string =>
   `${b.brand} ${b.model}`.trim();
+
+/** The parts we model for the best-selling breakers, in their order, each render once. */
+function popularParts(cards: BreakerCard[]): PopularPart[] {
+  const seen = new Set<string>();
+  const out: PopularPart[] = [];
+  for (const c of cards)
+    for (const l of partsForBreaker(c.name)) {
+      const key = `${l.part}#${l.anchor}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const r = PART_RENDERS[l.part].find((x) => renderAnchor(x) === l.anchor);
+      if (!r) continue;
+      out.push({
+        ...l,
+        breaker: c.name,
+        model: r.model,
+        hero: r.hero ?? null,
+        kind: r.kind ?? null,
+      });
+    }
+  return out;
+}
 
 const tierRank = (t: 1 | 2 | null): number => t ?? 3;
 const byName = (a: BreakerCard, b: BreakerCard): number =>
@@ -299,7 +339,13 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       ? [
           {
             path: POPULAR_PATH,
-            model: { kind: 'popular' as const, cards: popular, demo, hasPopular: true as const },
+            model: {
+              kind: 'popular' as const,
+              cards: popular,
+              parts: popularParts(popular),
+              demo,
+              hasPopular: true as const,
+            },
           },
         ]
       : []),
