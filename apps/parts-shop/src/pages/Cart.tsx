@@ -4,12 +4,13 @@ import { Container } from '@kervan/ui';
 import { ORG_EMAIL } from '@kervan/seo';
 import { PageTitle, QtyStepper } from '../components/Bits';
 import { FOCUS, whatsappHref } from '../components/Layout';
+import { PartGroups } from '../components/PartGroups';
 import { CART_EVENT, readCart, writeCart, type CartItem } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { fmtDate, fmtTry, fmtUsd, VAT_PERCENT, vatOf } from '../lib/price';
 import { LEGAL, legalPath } from '../lib/legal';
-import { LIST_PATH } from '../lib/routes';
+import { LIST_PATH, PARTS_PATH } from '../lib/routes';
 import { SITE } from '../lib/page-head';
 import type { Lang } from '../types';
 
@@ -105,15 +106,32 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
         </p>
       )}
       {items === null ? null : list.length === 0 ? (
-        <div className="mt-6 font-sans">
-          <p className="m-0 text-ink-mid">{c.empty}</p>
-          <a
-            href={localePath(LIST_PATH, lang)}
-            className={`mt-4 inline-block rounded-sm bg-brand px-5 py-3 text-sm font-medium text-white hover:bg-brand-hi ${FOCUS}`}
-          >
-            {c.browse}
-          </a>
-        </div>
+        <>
+          <div className="mt-6 rounded-sm border border-hair bg-bg-soft p-6 font-sans sm:flex sm:items-center sm:justify-between sm:gap-6">
+            <div>
+              <p className="m-0 text-lg font-semibold text-ink">{c.empty}</p>
+              <p className="m-0 mt-1 text-sm text-ink-mid">{c.emptyBody}</p>
+            </div>
+            <div className="mt-4 flex shrink-0 flex-wrap gap-3 sm:mt-0">
+              <a
+                href={localePath(LIST_PATH, lang)}
+                className={`inline-block rounded-sm bg-brand px-5 py-3 text-sm font-medium text-white hover:bg-brand-hi ${FOCUS}`}
+              >
+                {c.browse}
+              </a>
+              <a
+                href={localePath(PARTS_PATH, lang)}
+                className={`inline-block rounded-sm border border-hair-strong bg-bg px-5 py-3 text-sm font-medium text-ink hover:border-ink ${FOCUS}`}
+              >
+                {c.browseParts}
+              </a>
+            </div>
+          </div>
+          <h2 className="m-0 mt-10 font-sans text-xl font-bold text-ink">{t.parts.title}</h2>
+          <div className="mt-4">
+            <PartGroups lang={lang} t={t} compact />
+          </div>
+        </>
       ) : (
         <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_24rem]">
           <div className="min-w-0">
@@ -269,6 +287,38 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
           </aside>
         </div>
       )}
+      <section
+        id="siparis-adimlari"
+        aria-labelledby="steps-h"
+        className="mt-14 scroll-mt-6 border-t border-hair pt-10 font-sans"
+      >
+        <h2 id="steps-h" className="m-0 text-xl font-bold text-ink">
+          {c.steps.title}
+        </h2>
+        <ol className="m-0 mt-6 grid list-none gap-4 p-0 sm:grid-cols-3">
+          {c.steps.items.map((s, i) => (
+            <li key={s.h} className="rounded-sm border border-hair bg-bg p-5">
+              <span
+                aria-hidden="true"
+                className="flex size-8 items-center justify-center rounded-sm bg-bg-warm text-sm font-bold text-ink"
+              >
+                {i + 1}
+              </span>
+              <p className="m-0 mt-3 font-semibold text-ink">{s.h}</p>
+              <p className="m-0 mt-1 text-sm text-ink-mid">{s.p}</p>
+            </li>
+          ))}
+        </ol>
+        <p className="m-0 mt-4 text-xs text-ink-soft">
+          {c.steps.note}{' '}
+          <a
+            href={localePath(legalPath('on-bilgilendirme'), lang)}
+            className={`underline hover:text-ink ${FOCUS}`}
+          >
+            {LEGAL[lang]['on-bilgilendirme'].title}
+          </a>
+        </p>
+      </section>
     </Container>
   );
 }

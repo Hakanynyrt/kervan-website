@@ -32,7 +32,7 @@ export interface LegalDoc {
   sections: LegalSection[];
 }
 
-const UPDATED = '2026-10-07';
+export const UPDATED = '2026-10-07';
 
 const sellerTr: LegalSection = {
   h: 'Satıcı bilgileri',
@@ -378,3 +378,9 @@ const EN: Record<LegalKey, LegalDoc> = {
 };
 
 export const LEGAL: Record<Lang, Record<LegalKey, LegalDoc>> = { tr: TR, en: EN };
+
+/** Section anchor on a legal page (index-based: ASCII and stable). */
+export const legalAnchor = (i: number): string => `m${i + 1}`;
+
+/** The seller-details section (drawn as a definition list on the page). */
+export const isSellerSection = (s: LegalSection): boolean => s === sellerTr || s === sellerEn;

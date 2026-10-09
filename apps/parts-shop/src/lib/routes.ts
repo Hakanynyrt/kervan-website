@@ -11,6 +11,7 @@ import {
 } from '@kervan/tips';
 import { LEGAL_KEYS, legalPath, type LegalKey } from './legal';
 import { partsForBreaker, tipLinksForPart, type PartLink } from './part-links';
+import type { TipGroupStats } from '../types';
 
 /** One breaker model and the tip it takes: the shop's product (card, list row, page). */
 export interface BreakerCard {
@@ -37,6 +38,9 @@ export type PageModel =
       /** More best-sellers than shown: link to the best-sellers page. */
       morePopular: boolean;
       total: number;
+      /** Every catalogue make (home: numbers strip and compatible-makes row). */
+      brands: BrandLink[];
+      tips: TipGroupStats;
       demo: boolean;
       hasPopular: boolean;
     }
@@ -49,7 +53,7 @@ export type PageModel =
       demo: boolean;
       hasPopular: boolean;
     }
-  | { kind: 'parts'; demo: boolean; hasPopular: boolean }
+  | { kind: 'parts'; tips: TipGroupStats; demo: boolean; hasPopular: boolean }
   | {
       kind: 'part';
       part: PartKey;
@@ -244,6 +248,12 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     seen.add(k);
     return true;
   });
+  // Tips product-group card: counts and the first featured render (best-seller first).
+  const tips: TipGroupStats = {
+    models: cards.length,
+    makes: byBrand.size,
+    image: featured.find((x) => x.image)?.image ?? null,
+  };
   return [
     {
       path: '/',
@@ -253,6 +263,8 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         featuredArePopular: hasPopular,
         morePopular: popular.length > FEATURED,
         total: cards.length,
+        brands,
+        tips,
         demo,
         hasPopular,
       },
@@ -262,7 +274,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       path: brandPath(brand),
       model: { kind: 'brand' as const, brand, rows, brands, demo, hasPopular },
     })),
-    { path: PARTS_PATH, model: { kind: 'parts' as const, demo, hasPopular } },
+    { path: PARTS_PATH, model: { kind: 'parts' as const, tips, demo, hasPopular } },
     { path: CART_PATH, model: { kind: 'cart' as const, demo, hasPopular } },
     ...LEGAL_KEYS.map((doc) => ({
       path: legalPath(doc),

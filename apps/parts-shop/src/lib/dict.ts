@@ -40,9 +40,11 @@ export interface Dict {
     cart: string;
     langLabel: string;
     langOther: string;
+    /** Header utility group (language, cart, quote). */
+    tools: string;
   };
   top: { tagline: string; shop: string };
-  banner: { preview: string; demo: string };
+  banner: { label: string; preview: string; demo: string; how: string };
   tip: Record<TipType, string>;
   home: {
     title: string;
@@ -54,6 +56,24 @@ export interface Dict {
     morePopular: string;
     groups: string;
     count: (n: number) => string;
+    /** Under the hero composite: what the picture is. */
+    heroCaption: (caption: string) => string;
+    heroMore: string;
+    allGroups: string;
+    stats: {
+      label: string;
+      models: string;
+      makes: string;
+      heads: string;
+      parts: (groups: number) => string;
+    };
+    makes: {
+      title: string;
+      lead: string;
+      all: (n: number) => string;
+      count: (n: number) => string;
+      note: string;
+    };
     trust: { title: string; body: string }[];
     sectors: {
       title: string;
@@ -151,7 +171,11 @@ export interface Dict {
   cart: {
     title: string;
     empty: string;
+    emptyBody: string;
     browse: string;
+    browseParts: string;
+    /** Static ordering guide (#siparis-adimlari). */
+    steps: { title: string; items: { h: string; p: string }[]; note: string };
     product: string;
     qty: string;
     unit: string;
@@ -190,6 +214,12 @@ export interface Dict {
     tips: { name: string; body: string };
     items: Record<PartKey, { name: string; body: string }>;
     view: string;
+    /** Count line on a product-group card (computed from the renders or the catalogue). */
+    groupCount: (models: number, makes: number) => string;
+    groupsTitle: string;
+    stats: { parts: string; models: string; makes: string };
+    fitNote: string;
+    plant: { title: string; lead: string; note: string; items: { caption: string; alt: string }[] };
     photosAlt: (name: string) => string;
     /** "Rammer E68 alt gövde". */
     renderCaption: (model: string, name: string) => string;
@@ -233,7 +263,16 @@ export interface Dict {
   photoNote: string;
   /** Quality line under every product title. */
   oem: string;
-  legal: { nav: string; agree: string; and: string };
+  legal: {
+    nav: string;
+    agree: string;
+    and: string;
+    toc: string;
+    updated: (date: string) => string;
+    /** EN only: the Turkish text is binding. */
+    binding: string;
+    others: string;
+  };
   footer: {
     legal: string;
     docs: string;
@@ -241,8 +280,11 @@ export interface Dict {
     shop: string;
     company: string;
     contact: string;
+    about: string;
+    fit: string;
+    fax: string;
   };
-  notFound: { title: string; body: string; home: string };
+  notFound: { title: string; body: string; home: string; ask: string };
 }
 
 export const DICT: Record<Lang, Dict> = {
@@ -286,13 +328,17 @@ export const DICT: Record<Lang, Dict> = {
       cart: 'Palet',
       langLabel: 'English',
       langOther: 'EN',
+      tools: 'Hızlı erişim',
     },
     top: {
       tagline: 'Hidrolik kırıcı ucu ve yedek parça üreticisi',
       shop: 'Kırıcı yedek parça mağazası',
     },
     banner: {
-      preview: 'Online ödeme henüz yok: paletinizi sipariş talebi olarak gönderin, size dönelim.',
+      label: 'Sipariş talebi:',
+      preview:
+        'online ödeme henüz yok; paletinizi WhatsApp veya e-posta ile gönderin, size dönelim.',
+      how: 'Nasıl sipariş verilir?',
       demo: 'DEMO verisi: bu ürünler gerçek değildir.',
     },
     tip: {
@@ -313,6 +359,23 @@ export const DICT: Record<Lang, Dict> = {
       morePopular: 'Tüm çok satanlar',
       groups: 'Ürün gruplarımız',
       count: (n) => `${n} kırıcı modeli`,
+      heroCaption: (c) => `${c} · kendi çizimimizden modellenmiş görsel`,
+      heroMore: 'Diğer parçalar',
+      allGroups: 'Tüm yedek parçalar',
+      stats: {
+        label: 'Rakamlarla Kervan Mağaza',
+        models: 'kırıcı modeline uç',
+        makes: 'kırıcı markası',
+        heads: 'kırıcı modeline alt gövde',
+        parts: (groups) => `kırıcı modeline yedek parça, ${groups} grupta`,
+      },
+      makes: {
+        title: 'Uyumlu kırıcı markaları',
+        lead: 'Kırıcınızın markasını seçin, o markanın modellerini görün.',
+        all: (n) => `Tüm markalar (${n})`,
+        count: (n) => `${n} model`,
+        note: 'Ürünlerimiz Kervan Makina üretimidir, kırıcı üreticisinin orijinal parçası değildir; marka ve model adları yalnızca uyumu belirtir.',
+      },
       trust: [
         {
           title: 'Kendi üretimimiz',
@@ -446,7 +509,27 @@ export const DICT: Record<Lang, Dict> = {
     cart: {
       title: 'Palet',
       empty: 'Paletiniz boş.',
+      emptyBody: 'Kırıcı modelinize göre uç veya yedek parça seçin, “Palete yükle” ile ekleyin.',
       browse: 'Kırıcı uçlarına göz atın',
+      browseParts: 'Yedek parçalar',
+      steps: {
+        title: 'Sipariş nasıl verilir?',
+        items: [
+          {
+            h: 'Ürünü seçin',
+            p: 'Kırıcı marka ve modelinizi arayın, uç tipini seçip palete yükleyin.',
+          },
+          {
+            h: 'Talebi gönderin',
+            p: 'Paleti WhatsApp veya e-posta ile sipariş talebi olarak gönderin; bilgileriniz yalnızca bu mesaja yazılır.',
+          },
+          {
+            h: 'Onay ve kargo',
+            p: 'Toplam bedel, kargo ve ödeme bilgilerini içeren sipariş onayını gönderiyoruz; stoktaki ürünler aynı gün kargoya verilir.',
+          },
+        ],
+        note: 'Ayrıntılar:',
+      },
       product: 'Ürün',
       qty: 'Adet',
       unit: 'Birim fiyat (KDV hariç)',
@@ -530,6 +613,32 @@ export const DICT: Record<Lang, Dict> = {
         },
       },
       view: 'İncele',
+      groupCount: (m, k) => `${m} kırıcı modeli · ${k} marka`,
+      groupsTitle: 'Ürün grupları',
+      stats: {
+        parts: 'çizimden modellenmiş parça',
+        models: 'kırıcı modeli',
+        makes: 'kırıcı markası',
+      },
+      fitNote:
+        'Ürünlerimiz Kervan Makina üretimidir; marka ve model adları yalnızca uyumu belirtir.',
+      plant: {
+        title: 'Tesisimiz',
+        lead: 'Parçalarımızı Kartepe’deki tesisimizde işliyor, ısıl işlemini kendi fırınlarımızda yapıyoruz.',
+        note: 'Fotoğraflar tesisimizde çekilmiştir.',
+        items: [
+          { caption: 'CNC tezgâhında işleme', alt: 'Kervan tesisinde CNC tezgâhında parça işleme' },
+          {
+            caption: 'Isıl işlem holü ve fırınlarımız',
+            alt: 'Kervan ısıl işlem holünde kuyu tipi fırınlar ve işlenmiş parçalar',
+          },
+          { caption: 'Raflardaki burç stoğumuz', alt: 'Kervan tesisinde raflarda kırıcı burçları' },
+          {
+            caption: 'Uç stoğumuz: stoktan aynı gün kargo',
+            alt: 'Kervan tesisinde sehpalarda kırıcı uçları',
+          },
+        ],
+      },
       photosAlt: (name) =>
         `Kervan atölyesinde stoktaki kırıcı ${name.toLocaleLowerCase('tr')} parçaları`,
       renderCaption: (model, name) => `${model} ${name.toLocaleLowerCase('tr')}`,
@@ -623,6 +732,10 @@ export const DICT: Record<Lang, Dict> = {
       nav: 'Yasal metinler',
       agree: 'Sipariş talebi göndererek aşağıdaki metinleri okuduğunuzu kabul edersiniz:',
       and: 've',
+      toc: 'İçindekiler',
+      updated: (d) => `Son güncelleme: ${d}`,
+      binding: '',
+      others: 'Diğer yasal metinler',
     },
     footer: {
       legal: 'Üretici ve satıcı',
@@ -630,13 +743,18 @@ export const DICT: Record<Lang, Dict> = {
       shop: 'Mağaza',
       company: 'Kurumsal',
       contact: 'İletişim',
+      about:
+        'Kartepe / Kocaeli’de hidrolik kırıcı ucu ve yedek parça üretimi; ısıl işlem kendi tesisimizde.',
+      fit: 'Kırıcı marka ve model adları yalnızca uyumu belirtir; ürünlerimiz kırıcı üreticisinin orijinal parçası değildir.',
+      fax: 'Faks',
       images:
         '© Kervan Makina. Ürün görselleri Kervan Makina’ya aittir, temsilidir; izinsiz kullanılamaz.',
     },
     notFound: {
-      title: 'Sayfa bulunamadı',
-      body: 'Aradığınız sayfa yok ya da taşındı.',
+      title: 'Sayfa bulunamadı (404)',
+      body: 'Aradığınız sayfa yok ya da taşındı. Kırıcı modelinizi arayın veya ürün gruplarımıza göz atın.',
       home: 'Ana sayfaya dön',
+      ask: 'WhatsApp’tan sorun',
     },
   },
   en: {
@@ -680,14 +798,17 @@ export const DICT: Record<Lang, Dict> = {
       cart: 'Cart',
       langLabel: 'Türkçe',
       langOther: 'TR',
+      tools: 'Quick links',
     },
     top: {
       tagline: 'Hydraulic breaker tip and spare parts maker',
       shop: 'Breaker spare parts shop',
     },
     banner: {
+      label: 'Order request:',
       preview:
-        'No online payment yet: send your cart as an order request and we will get back to you.',
+        'no online payment yet; send your cart by WhatsApp or e-mail and we will get back to you.',
+      how: 'How to order',
       demo: 'DEMO data: these products are not real.',
     },
     tip: {
@@ -708,6 +829,23 @@ export const DICT: Record<Lang, Dict> = {
       morePopular: 'All best sellers',
       groups: 'Our product groups',
       count: (n) => `${n} breaker models`,
+      heroCaption: (c) => `${c} · rendered from our own drawing`,
+      heroMore: 'Other parts',
+      allGroups: 'All spare parts',
+      stats: {
+        label: 'Kervan shop in numbers',
+        models: 'breaker models with a listed tip',
+        makes: 'breaker makes',
+        heads: 'breaker models with a front head',
+        parts: (groups) => `breaker models with spare parts in ${groups} groups`,
+      },
+      makes: {
+        title: 'Compatible breaker makes',
+        lead: 'Pick your breaker’s make to see its models.',
+        all: (n) => `All makes (${n})`,
+        count: (n) => `${n} models`,
+        note: 'Our products are made by Kervan Makina and are not the breaker maker’s original parts; make and model names only show the fit.',
+      },
       trust: [
         {
           title: 'Our own production',
@@ -837,7 +975,27 @@ export const DICT: Record<Lang, Dict> = {
     cart: {
       title: 'Cart',
       empty: 'Your cart is empty.',
+      emptyBody: 'Choose a tip or spare part by breaker model and add it with “Add to cart”.',
       browse: 'Browse breaker tips',
+      browseParts: 'Spare parts',
+      steps: {
+        title: 'How to order',
+        items: [
+          {
+            h: 'Choose the part',
+            p: 'Search your breaker make and model, pick the tip type and add it to the cart.',
+          },
+          {
+            h: 'Send the request',
+            p: 'Send the cart as an order request by WhatsApp or e-mail; your details only go into that message.',
+          },
+          {
+            h: 'Confirmation and shipping',
+            p: 'We send an order confirmation with the total, shipping and payment details; stock items ship the same day.',
+          },
+        ],
+        note: 'Details:',
+      },
       product: 'Product',
       qty: 'Qty',
       unit: 'Unit price (excl. VAT)',
@@ -924,6 +1082,38 @@ export const DICT: Record<Lang, Dict> = {
         },
       },
       view: 'View',
+      groupCount: (m, k) =>
+        `${m} breaker ${m === 1 ? 'model' : 'models'} · ${k} ${k === 1 ? 'make' : 'makes'}`,
+      groupsTitle: 'Product groups',
+      stats: {
+        parts: 'parts modelled from our drawings',
+        models: 'breaker models',
+        makes: 'breaker makes',
+      },
+      fitNote: 'Our products are made by Kervan Makina; make and model names only show the fit.',
+      plant: {
+        title: 'Our plant',
+        lead: 'We machine our parts in our plant in Kartepe and heat-treat them in our own furnaces.',
+        note: 'Photos taken at our plant.',
+        items: [
+          {
+            caption: 'CNC machining',
+            alt: 'Machining a part on a CNC machine at the Kervan plant',
+          },
+          {
+            caption: 'Heat-treatment hall and furnaces',
+            alt: 'Pit furnaces and machined parts in the Kervan heat-treatment hall',
+          },
+          {
+            caption: 'Bushing stock on the shelves',
+            alt: 'Breaker bushings on shelves at the Kervan plant',
+          },
+          {
+            caption: 'Tip stock: same-day shipping from stock',
+            alt: 'Breaker tips on racks at the Kervan plant',
+          },
+        ],
+      },
       photosAlt: (name) => `${name} in stock at the Kervan plant`,
       renderCaption: (model, name) => `${model} ${name.toLowerCase()}`,
       renderView: {
@@ -1016,6 +1206,10 @@ export const DICT: Record<Lang, Dict> = {
       nav: 'Legal',
       agree: 'By sending an order request you confirm you have read:',
       and: 'and',
+      toc: 'Contents',
+      updated: (d) => `Last updated: ${d}`,
+      binding: 'This is a translation; the Turkish text is binding.',
+      others: 'Other legal texts',
     },
     footer: {
       legal: 'Manufacturer and seller',
@@ -1023,13 +1217,18 @@ export const DICT: Record<Lang, Dict> = {
       shop: 'Shop',
       company: 'Company',
       contact: 'Contact',
+      about:
+        'Hydraulic breaker tips and spare parts made in Kartepe / Kocaeli, heat-treated in our own plant.',
+      fit: 'Breaker make and model names only show the fit; our products are not the breaker maker’s original parts.',
+      fax: 'Fax',
       images:
         '© Kervan Makina. Product images belong to Kervan Makina and are illustrations; do not use without permission.',
     },
     notFound: {
-      title: 'Page not found',
-      body: 'The page does not exist or has moved.',
+      title: 'Page not found (404)',
+      body: 'The page does not exist or has moved. Search your breaker model or browse our product groups.',
       home: 'Back to the home page',
+      ask: 'Ask on WhatsApp',
     },
   },
 };
