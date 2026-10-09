@@ -18,6 +18,8 @@ export const PART_PHOTOS: Record<PartKey, readonly string[]> = {
   kama: [],
   saplama: [],
   piston: ['/photos/parca/piston-01'],
+  akumulator: [],
+  'asinma-plakasi': [],
 };
 
 /**
@@ -46,7 +48,13 @@ export interface PartRender {
     | 'rockDrillHead'
     | 'retainerKey'
     | 'tieRod'
-    | 'piston';
+    | 'piston'
+    | 'retainerPin'
+    | 'sideBolt'
+    | 'accumulatorUpper'
+    | 'accumulatorLower'
+    | 'accumulatorBolt'
+    | 'wearPlate';
   /** Another version of the same breaker's part, named in the caption through the dict. */
   variant?: 'oldType' | 'newType' | 'roundNut' | 'autoGrease';
   views: { base: string; view: RenderView }[];
@@ -1044,6 +1052,562 @@ const kitRender =
     };
   };
 
+/**
+ * More parts modelled from our drawings, one drawing each (`/photos/parca/<file>-<view>-01`):
+ * retainer pins and side bolts join the kama and saplama pages, accumulator parts and wear plates
+ * have their own pages. Wear plates are rendered standing on their long edge.
+ */
+interface OtherPart {
+  make: string;
+  model: string;
+  file: string;
+  kind: NonNullable<PartRender['kind']>;
+  views: RenderView[];
+}
+const RETAINER_PINS: OtherPart[] = [
+  {
+    make: 'Furukawa',
+    model: 'F22',
+    file: 'tutucupim-furukawa-f-22',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Furukawa',
+    model: 'HB20G',
+    file: 'tutucupim-furukawa-hb-20-g',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 1500',
+    file: 'tutucupim-krupp-hm-1500',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 560',
+    file: 'tutucupim-krupp-hm-560',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 720',
+    file: 'tutucupim-krupp-hm-720-721-722',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 960',
+    file: 'tutucupim-krupp-hm-960-961-962',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'MTB',
+    model: '210',
+    file: 'tutucupim-mtb-mtb-210',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'MTB',
+    model: '85',
+    file: 'tutucupim-mtb-mtb-85',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Rammer',
+    model: 'E64',
+    file: 'tutucupim-rammer-e-64',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Rammer',
+    model: 'E66',
+    file: 'tutucupim-rammer-e-66',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Rammer',
+    model: 'G80',
+    file: 'tutucupim-rammer-g-80',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Rammer',
+    model: 'S84',
+    file: 'tutucupim-rammer-s-84',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Soosan',
+    model: 'SB81 TS-P',
+    file: 'tutucupim-soosan-sb-81-ts-p',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Soosan',
+    model: 'SB121 TS-P',
+    file: 'tutucupim-soosan-sb-121-ts-p',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Atlas Copco',
+    model: 'MB 1700',
+    file: 'tutucupim-atlas-copco-mb-1700',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Cat',
+    model: '115',
+    file: 'tutucupim-cat-cat-115',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Cat',
+    model: '130',
+    file: 'tutucupim-cat-cat-130',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'D&A',
+    model: '1300',
+    file: 'tutucupim-da-d-a-1300',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+];
+const SIDE_BOLTS: OtherPart[] = [
+  {
+    make: 'Furukawa',
+    model: 'HB20G',
+    file: 'yansaplama-furukawa-hb-20-g',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Furukawa',
+    model: 'HB30G',
+    file: 'yansaplama-furukawa-hb-30-g',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 560',
+    file: 'yansaplama-krupp-hm-560',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Soosan',
+    model: 'SB81 TS-P',
+    file: 'yansaplama-soosan-sb-81-ts-p',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Daemo',
+    model: 'S500',
+    file: 'yansaplama-daemo-daemo-s-500',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Daemo',
+    model: 'S2200',
+    file: 'yansaplama-daemo-daemo-s-2200',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Furukawa',
+    model: 'HB10G',
+    file: 'yansaplama-furukawa-hb-10-g',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Furukawa',
+    model: 'HB15G',
+    file: 'yansaplama-furukawa-hb-15-g',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Furukawa',
+    model: 'HB200',
+    file: 'yansaplama-furukawa-hb-200',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Furukawa',
+    model: 'HB2000',
+    file: 'yansaplama-furukawa-hb-2000',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Furukawa',
+    model: 'HB40G',
+    file: 'yansaplama-furukawa-hb-40-g',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Furukawa',
+    model: 'HB8G',
+    file: 'yansaplama-furukawa-hb-8-g',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Indeco',
+    model: 'HP 600',
+    file: 'yansaplama-indeco-mes-series',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 300',
+    file: 'yansaplama-krupp-hm-300-301-305',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 550',
+    file: 'yansaplama-krupp-hm-550-551-555',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Toyo',
+    model: 'THBB 1600',
+    file: 'yansaplama-toyo-toyo-1600-dhb-1605',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Toku',
+    model: 'TNB-14E',
+    file: 'yansaplama-toku-toku-tnb-14e-czk-155',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Toku',
+    model: 'TNB-150',
+    file: 'yansaplama-toku-toku-tnb-150',
+    kind: 'sideBolt',
+    views: ['side', 'front'],
+  },
+];
+const ACCUMULATOR_PARTS: OtherPart[] = [
+  {
+    make: 'Furukawa',
+    model: 'HB20G',
+    file: 'akumulator-furukawa-hb-20-g-akumulator-tupu-alt',
+    kind: 'accumulatorLower',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Furukawa',
+    model: 'HB20G',
+    file: 'akumulator-furukawa-hb-20-g-akumulator-tupu-ust',
+    kind: 'accumulatorUpper',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Furukawa',
+    model: 'HB30G',
+    file: 'akumulator-furukawa-hb-30-g-akumulator-tupu-saplamasi',
+    kind: 'accumulatorBolt',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Furukawa',
+    model: 'HB30G',
+    file: 'akumulator-furukawa-hb-30-g-akumulator-tupu-alt',
+    kind: 'accumulatorLower',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 1500',
+    file: 'akumulator-krupp-hm-1500-akumultor-tupu-alt',
+    kind: 'accumulatorLower',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 1500',
+    file: 'akumulator-krupp-hm-1500-akumultor-tupu-ust',
+    kind: 'accumulatorUpper',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 720',
+    file: 'akumulator-krupp-hm-720-721-722-akumulator-saplamasi',
+    kind: 'accumulatorBolt',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 960',
+    file: 'akumulator-krupp-hm-960-961-962-akumulator-tupu-alt',
+    kind: 'accumulatorLower',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 960',
+    file: 'akumulator-krupp-hm-960-961-962-akumulator-tupu-ust',
+    kind: 'accumulatorUpper',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Montabert',
+    model: 'BRH 501',
+    file: 'akumulator-montabert-brh-501-brh-501-akumulator-alt-tupu',
+    kind: 'accumulatorLower',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Montabert',
+    model: 'BRH 501',
+    file: 'akumulator-montabert-brh-501-brh-501-akumulator-saplamasi',
+    kind: 'accumulatorBolt',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'MTB',
+    model: '210',
+    file: 'akumulator-mtb-mtb-210-01-1h020080-akumulator-tupu-ust',
+    kind: 'accumulatorUpper',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'MTB',
+    model: '210',
+    file: 'akumulator-mtb-mtb-210-01-1h020090-akumulator-tupu-alt',
+    kind: 'accumulatorLower',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'MTB',
+    model: '85',
+    file: 'akumulator-mtb-mtb-85-ust-akumulator-tupu',
+    kind: 'accumulatorUpper',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'MTB',
+    model: '85',
+    file: 'akumulator-mtb-mtb-85-alt-akumulator-tupu',
+    kind: 'accumulatorLower',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Rammer',
+    model: 'E64',
+    file: 'akumulator-rammer-e-64-akumulutor-saplamasi',
+    kind: 'accumulatorBolt',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Rammer',
+    model: 'E66',
+    file: 'akumulator-rammer-e-66-akumulator-saplamasi',
+    kind: 'accumulatorBolt',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Rammer',
+    model: 'G80',
+    file: 'akumulator-rammer-g-80-akumulator-saplamasi',
+    kind: 'accumulatorBolt',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Rammer',
+    model: 'S25',
+    file: 'akumulator-rammer-s-25-akumulator-saplamasi',
+    kind: 'accumulatorBolt',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'Rammer',
+    model: 'S25',
+    file: 'akumulator-rammer-s-25-hp-akumulator-tupu-kucuk-ust',
+    kind: 'accumulatorUpper',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+];
+const WEAR_PLATES: OtherPart[] = [
+  {
+    make: 'Krupp',
+    model: 'HM 1500',
+    file: 'asinma-krupp-hm-1500',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 560',
+    file: 'asinma-krupp-hm-560',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 720',
+    file: 'asinma-krupp-hm-720-721-722',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Krupp',
+    model: 'HM 960',
+    file: 'asinma-krupp-hm-960-961-962',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Montabert',
+    model: 'BRH 501',
+    file: 'asinma-montabert-brh-501',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Montabert',
+    model: 'BRV 32',
+    file: 'asinma-montabert-brv-32',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'MTB',
+    model: '85',
+    file: 'asinma-mtb-mtb-85',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Rammer',
+    model: 'E64',
+    file: 'asinma-rammer-e-64',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Rammer',
+    model: 'S84',
+    file: 'asinma-rammer-s-84',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Atlas Copco',
+    model: 'HB 2200',
+    file: 'asinma-atlas-copco-hb-2200',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Atlas Copco',
+    model: 'HB 2500',
+    file: 'asinma-atlas-copco-hb-2500',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Atlas Copco',
+    model: 'MB 1000 (Krupp HM 680)',
+    file: 'asinma-atlas-copco-mb-1000-hm-680',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Atlas Copco',
+    model: 'MB 1200',
+    file: 'asinma-atlas-copco-mb-1200',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Atlas Copco',
+    model: 'MB 1700',
+    file: 'asinma-atlas-copco-mb-1700',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Cat',
+    model: '115',
+    file: 'asinma-cat-cat-115',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Cat',
+    model: '130',
+    file: 'asinma-cat-cat-130',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Cat',
+    model: '140',
+    file: 'asinma-cat-cat-140',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'D&A',
+    model: '2200',
+    file: 'asinma-da-d-a-2200',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+  {
+    make: 'Daemo',
+    model: 'S2000',
+    file: 'asinma-daemo-daemo-s-2000',
+    kind: 'wearPlate',
+    views: ['side', 'front', 'rear'],
+  },
+];
+const otherRender = ({ make, model, file, kind, views }: OtherPart): PartRender => {
+  const b = `/photos/parca/${file}`;
+  return {
+    model: make === 'MTB' ? `MTB ${model}` : `${make} ${model}`,
+    series: make,
+    kind,
+    hero: `${b}-vitrin-01`,
+    views: views.map((view) => ({ base: `${b}-${VIEW_FILE[view]}-01`, view })),
+  };
+};
+
 export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
   'alt-govde': [
     {
@@ -1115,7 +1679,15 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
     ...TAMROCK_BURC.map(bushingRender('Tamrock')),
     ...ATLAS_COPCO_COP_BURC.map(bushingRender('Atlas Copco COP')),
   ],
-  kama: PART_KIT.map(kitRender('kama', 'retainerKey', ['front', 'rear', 'side'])),
-  saplama: PART_KIT.map(kitRender('saplama', 'tieRod', ['side', 'front'])),
+  kama: [
+    ...PART_KIT.map(kitRender('kama', 'retainerKey', ['front', 'rear', 'side'])),
+    ...RETAINER_PINS.map(otherRender),
+  ],
+  saplama: [
+    ...PART_KIT.map(kitRender('saplama', 'tieRod', ['side', 'front'])),
+    ...SIDE_BOLTS.map(otherRender),
+  ],
   piston: PART_KIT.map(kitRender('piston', 'piston', ['front', 'rear', 'side', 'section'])),
+  akumulator: ACCUMULATOR_PARTS.map(otherRender),
+  'asinma-plakasi': WEAR_PLATES.map(otherRender),
 };

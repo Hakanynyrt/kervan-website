@@ -265,7 +265,8 @@ export const DICT: Record<Lang, Dict> = {
       brandTitle: (brand) => `${brand} kırıcı uçları | Kervan Mağaza`,
       brandDesc: (brand, n) => `${brand} hidrolik kırıcılar için Kervan uçları: ${n} model.`,
       partsTitle: 'Kırıcı yedek parçaları | Kervan Mağaza',
-      partsDesc: 'Hidrolik kırıcı ucu, alt gövde, burç, kama, saplama ve piston: Kervan üretimi.',
+      partsDesc:
+        'Hidrolik kırıcı ucu, alt gövde, burç, kama, saplama, piston, akümülatör parçaları ve aşınma plakası: Kervan üretimi.',
       partTitle: (name) => `Kırıcı ${name.toLocaleLowerCase('tr')} | Kervan Mağaza`,
       partDesc: (name) =>
         `Hidrolik kırıcı ${name.toLocaleLowerCase('tr')}: Kervan üretimi, kırıcınızın modeline göre teklif.`,
@@ -499,7 +500,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     parts: {
       title: 'Kırıcı yedek parçaları',
-      lead: 'Kırıcı ucunun yanında alt gövde, burç, kama, saplama ve piston da üretip satıyoruz. Kırıcınızın marka ve modelini yazın, fiyatı hemen iletelim.',
+      lead: 'Kırıcı ucunun yanında alt gövde, burç, kama, saplama, piston, akümülatör parçaları ve aşınma plakası da üretip satıyoruz. Kırıcınızın marka ve modelini yazın, fiyatı hemen iletelim.',
       tips: {
         name: 'Kırıcı ucu',
         body: 'Keski, sivri, küt, piramit ve konik uçlar; kırıcı modeline göre.',
@@ -519,6 +520,14 @@ export const DICT: Record<Lang, Dict> = {
           body: 'Kırıcı gövdesini bir arada tutan saplamalar, somun ve pullarıyla.',
         },
         piston: { name: 'Piston', body: 'Kırıcının darbe pistonu; kırıcı modeline göre.' },
+        akumulator: {
+          name: 'Akümülatör parçaları',
+          body: 'Akümülatör üst ve alt kapakları ile akümülatör saplamaları.',
+        },
+        'asinma-plakasi': {
+          name: 'Aşınma plakası',
+          body: 'Kırıcı gövdesini kutu içinde koruyan aşınma plakaları.',
+        },
       },
       view: 'İncele',
       photosAlt: (name) =>
@@ -544,6 +553,12 @@ export const DICT: Record<Lang, Dict> = {
         retainerKey: 'kama (tool pin)',
         tieRod: 'boy saplama',
         piston: 'piston',
+        retainerPin: 'kama tutucu pim',
+        sideBolt: 'yan saplama',
+        accumulatorUpper: 'akümülatör üst kapağı',
+        accumulatorLower: 'akümülatör alt kapağı',
+        accumulatorBolt: 'akümülatör saplaması',
+        wearPlate: 'aşınma plakası',
       },
       renderKindShort: {
         toolBushing: 'Kafa burcu',
@@ -557,6 +572,12 @@ export const DICT: Record<Lang, Dict> = {
         retainerKey: 'Kama',
         tieRod: 'Boy saplama',
         piston: 'Piston',
+        retainerPin: 'Tutucu pim',
+        sideBolt: 'Yan saplama',
+        accumulatorUpper: 'Üst kapak',
+        accumulatorLower: 'Alt kapak',
+        accumulatorBolt: 'Saplama',
+        wearPlate: 'Aşınma plakası',
       },
       renderVariant: {
         oldType: 'eski tip',
@@ -639,7 +660,7 @@ export const DICT: Record<Lang, Dict> = {
       brandDesc: (brand, n) => `Kervan tips for ${brand} hydraulic breakers: ${n} models.`,
       partsTitle: 'Breaker spare parts | Kervan Shop',
       partsDesc:
-        'Hydraulic breaker tips, front heads, bushings, retainer keys, tie rods and pistons made by Kervan.',
+        'Hydraulic breaker tips, front heads, bushings, retainer keys, tie rods, pistons, accumulator parts and wear plates made by Kervan.',
       partTitle: (name) => `Breaker ${name.toLowerCase()} | Kervan Shop`,
       partDesc: (name) =>
         `Hydraulic breaker ${name.toLowerCase()} made by Kervan; quotes by breaker model.`,
@@ -870,7 +891,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     parts: {
       title: 'Breaker spare parts',
-      lead: 'Besides tips we make and sell front heads, bushings, retainer keys, tie rods and pistons. Send your breaker make and model and we reply with the price right away.',
+      lead: 'Besides tips we make and sell front heads, bushings, retainer keys, tie rods, pistons, accumulator parts and wear plates. Send your breaker make and model and we reply with the price right away.',
       tips: {
         name: 'Breaker tips',
         body: 'Chisel, moil, blunt, pyramid and conical tips, by breaker model.',
@@ -893,6 +914,14 @@ export const DICT: Record<Lang, Dict> = {
           body: 'Tie rods that hold the breaker body together, with nuts and washers.',
         },
         piston: { name: 'Pistons', body: 'The breaker’s impact piston, by breaker model.' },
+        akumulator: {
+          name: 'Accumulator parts',
+          body: 'Accumulator covers (upper and lower) and accumulator bolts.',
+        },
+        'asinma-plakasi': {
+          name: 'Wear plates',
+          body: 'Wear plates that protect the breaker body inside its box.',
+        },
       },
       view: 'View',
       photosAlt: (name) => `${name} in stock at the Kervan plant`,
@@ -917,6 +946,12 @@ export const DICT: Record<Lang, Dict> = {
         retainerKey: 'retainer key (tool pin)',
         tieRod: 'through bolt',
         piston: 'piston',
+        retainerPin: 'retainer pin',
+        sideBolt: 'side bolt',
+        accumulatorUpper: 'accumulator cover',
+        accumulatorLower: 'accumulator bottom',
+        accumulatorBolt: 'accumulator bolt',
+        wearPlate: 'wear plate',
       },
       renderKindShort: {
         toolBushing: 'Tool bushing',
@@ -930,6 +965,12 @@ export const DICT: Record<Lang, Dict> = {
         retainerKey: 'Retainer key',
         tieRod: 'Through bolt',
         piston: 'Piston',
+        retainerPin: 'Retainer pin',
+        sideBolt: 'Side bolt',
+        accumulatorUpper: 'Cover',
+        accumulatorLower: 'Bottom',
+        accumulatorBolt: 'Bolt',
+        wearPlate: 'Wear plate',
       },
       renderVariant: {
         oldType: 'old type',

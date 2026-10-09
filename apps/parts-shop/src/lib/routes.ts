@@ -85,7 +85,15 @@ export interface BrandLink {
 }
 
 /** Spare-part groups besides tips (no catalogue data yet: quote by breaker model). */
-export const PART_KEYS = ['alt-govde', 'burc', 'kama', 'saplama', 'piston'] as const;
+export const PART_KEYS = [
+  'alt-govde',
+  'burc',
+  'kama',
+  'saplama',
+  'piston',
+  'akumulator',
+  'asinma-plakasi',
+] as const;
 export type PartKey = (typeof PART_KEYS)[number];
 export const PARTS_PATH = '/yedek-parca';
 export const CART_PATH = '/palet';
