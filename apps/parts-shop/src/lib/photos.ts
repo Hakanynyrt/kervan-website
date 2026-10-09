@@ -1686,6 +1686,20 @@ const otherRender = ({ make, model, file, kind, views }: OtherPart): PartRender 
  * `/photos/parca/alt-govde-<slug>-burclu-{vitrin,on,arka,yan,montaj-kesit}-01`, slug as in the head's hero.
  */
 const FITTED = new Set<string>([
+  'krupp-hm-1000',
+  'krupp-hm-1500',
+  'krupp-hm-2000',
+  'krupp-hm-2000-marathon',
+  'krupp-hm-2100-marathon',
+  'krupp-hm-2300-marathon',
+  'krupp-hm-2500-marathon',
+  'krupp-hm-2600-marathon',
+  'krupp-hm-950',
+  'krupp-hm-960',
+  'okada-304b',
+  'okada-308',
+  'okada-310',
+  'okada-316',
   'rammer-e64',
   'rammer-e65',
   'rammer-e66',
@@ -1701,6 +1715,13 @@ const FITTED = new Set<string>([
   'rammer-s83',
   'rammer-s84',
   'rammer-s86',
+  'toyo-1400',
+  'toyo-1401',
+  'toyo-1600',
+  'toyo-1600-eski',
+  'toyo-2000',
+  'toyo-3000',
+  'toyo-801',
 ]);
 const withFitted = (r: PartRender): PartRender => {
   const slug = r.hero?.match(/^\/photos\/parca\/alt-govde-(.+)-vitrin-[^-]+$/)?.[1];
