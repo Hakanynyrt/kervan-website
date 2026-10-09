@@ -1693,26 +1693,6 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
   'asinma-plakasi': WEAR_PLATES.map(otherRender),
 };
 
-/** Make of a render for counting: the series is the make; the rock-drill COP rings count as Atlas Copco. */
-export const renderMake = (r: PartRender): string =>
-  (r.series ?? r.model.split(' ')[0]).replace(/ COP$/, '');
-
-export interface RenderStats {
-  /** Renders (drawings modelled). */
-  parts: number;
-  /** Distinct breaker models. */
-  models: number;
-  /** Distinct breaker makes. */
-  makes: number;
-}
-
-/** Counts shown on the product-group cards and /yedek-parca, computed from the renders. */
-export const renderStats = (rs: readonly PartRender[]): RenderStats => ({
-  parts: rs.length,
-  models: new Set(rs.map((r) => r.model)).size,
-  makes: new Set(rs.map(renderMake)).size,
-});
-
 /** Our own plant photos (/yedek-parca "Tesisimiz"), 4:5, `-sm` 480 px and `-lg` 960 px. */
 export const PLANT_PHOTOS = [
   '/photos/tesis/cnc-isleme-01',

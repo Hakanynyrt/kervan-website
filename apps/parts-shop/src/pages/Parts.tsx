@@ -24,7 +24,7 @@ export default function Parts({ model, lang, t }: { model: Model; lang: Lang; t:
         <h2 id="groups" className="m-0 mb-6 font-sans text-2xl font-bold text-ink">
           {t.parts.groupsTitle}
         </h2>
-        <PartGroups tips={model.tips} demo={model.demo} lang={lang} t={t} />
+        <PartGroups tips={model.tips} lang={lang} t={t} />
 
         <section aria-labelledby="plant" className="mt-14 border-t border-hair pt-12">
           <h2 id="plant" className="m-0 font-sans text-2xl font-bold text-ink">

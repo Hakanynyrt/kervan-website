@@ -1,6 +1,6 @@
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { PART_RENDERS, renderStats, STOCK_TIP_PHOTOS } from '../lib/photos';
+import { PART_RENDERS, STOCK_TIP_PHOTOS } from '../lib/photos';
 import { LIST_PATH, PART_KEYS, partPath } from '../lib/routes';
 import { tipImg } from '../lib/tip-img';
 import type { Lang, TipGroupStats } from '../types';
@@ -8,23 +8,20 @@ import { FOCUS } from './Layout';
 
 /**
  * Tiles for the product groups: breaker tips first (a wide lead tile on large screens), then
- * the other parts. Every tile has the same 16:9 dark-stage picture frame and a count line
- * computed from the renders (parts) or the page model (tips). `compact` is the small variant
- * for the empty cart and the 404 page: thumbnails and names only, no numbers.
+ * the other parts. Every tile has the same 16:9 dark-stage picture frame, the group name and
+ * its description; no counts (owner). `compact` is the small variant for the empty cart and the
+ * 404 page: thumbnails and names only.
  */
 export function PartGroups({
   lang,
   t,
   tips,
-  demo = false,
   compact = false,
 }: {
   lang: Lang;
   t: Dict;
-  /** Build-time tip counts and render; without it the tips tile shows our stock photo. */
+  /** Build-time tip render; without it the tips tile shows our stock photo. */
   tips?: TipGroupStats;
-  /** DEMO catalogue: its tip counts are not real, so the tips tile shows none. */
-  demo?: boolean;
   compact?: boolean;
 }) {
   const stock = STOCK_TIP_PHOTOS[0];
@@ -33,19 +30,14 @@ export function PartGroups({
       key: 'tips',
       path: LIST_PATH,
       hero: undefined as string | undefined,
-      count: tips && !demo ? t.parts.groupCount(tips.models, tips.makes) : null,
       ...t.parts.tips,
     },
-    ...PART_KEYS.map((k) => {
-      const s = renderStats(PART_RENDERS[k]);
-      return {
-        key: k as string,
-        path: partPath(k),
-        hero: PART_RENDERS[k].find((r) => r.hero)?.hero,
-        count: s.models > 0 ? t.parts.groupCount(s.models, s.makes) : null,
-        ...t.parts.items[k],
-      };
-    }),
+    ...PART_KEYS.map((k) => ({
+      key: k as string,
+      path: partPath(k),
+      hero: PART_RENDERS[k].find((r) => r.hero)?.hero,
+      ...t.parts.items[k],
+    })),
   ];
 
   if (compact)
@@ -129,11 +121,6 @@ export function PartGroups({
               </div>
               <div className={`flex flex-1 flex-col p-4 ${lead ? 'lg:justify-center lg:p-6' : ''}`}>
                 <h3 className="m-0 font-sans text-lg font-semibold text-ink">{g.name}</h3>
-                {g.count && (
-                  <p className="m-0 mt-1 font-sans text-sm font-medium tabular-nums text-ink-soft">
-                    {g.count}
-                  </p>
-                )}
                 <p className="m-0 mt-2 font-sans text-sm text-ink-mid">{g.body}</p>
                 <div className={`mt-auto pt-4 ${lead ? 'lg:mt-6' : ''}`}>
                   <span className="block border-t border-hair pt-3 font-sans text-sm font-medium text-brand-hi group-hover:underline">

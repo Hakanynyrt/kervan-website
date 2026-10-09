@@ -206,7 +206,7 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
             title={h.groups}
             link={{ href: localePath(PARTS_PATH, lang), label: h.allGroups }}
           />
-          <PartGroups tips={model.tips} demo={model.demo} lang={lang} t={t} />
+          <PartGroups tips={model.tips} lang={lang} t={t} />
         </Container>
       </section>
 
