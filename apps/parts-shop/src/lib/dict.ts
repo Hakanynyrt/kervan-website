@@ -23,6 +23,9 @@ export interface Dict {
     partsDesc: string;
     partTitle: (name: string) => string;
     partDesc: (name: string) => string;
+    /** One modelled part's own page: caption = "Montabert BRV 32 piston". */
+    partItemTitle: (caption: string) => string;
+    partItemDesc: (caption: string) => string;
     cartTitle: string;
   };
   nav: {
@@ -248,6 +251,20 @@ export interface Dict {
     tipLink: string;
     /** Under a part's caption: WhatsApp quote for exactly that model. */
     quoteThis: string;
+    /** One modelled part's own page (linkable, shareable). */
+    item: {
+      /** Group page card → the part's own page. */
+      pageLink: string;
+      share: string;
+      copied: string;
+      /** Clipboard unavailable: show the address to copy by hand. */
+      copyFailed: (url: string) => string;
+      whatsappSend: string;
+      /** Back to the group page: "Tüm piston modelleri". */
+      back: (group: string) => string;
+      related: string;
+      linksLabel: string;
+    };
     /** Front heads sold with or without their bushings and pins. */
     fitted: {
       label: string;
@@ -318,6 +335,9 @@ export const DICT: Record<Lang, Dict> = {
       partTitle: (name) => `Kırıcı ${name.toLocaleLowerCase('tr')} | Kervan Mağaza`,
       partDesc: (name) =>
         `Hidrolik kırıcı ${name.toLocaleLowerCase('tr')}: Kervan üretimi, kırıcınızın modeline göre teklif.`,
+      partItemTitle: (caption) => `${caption} | Kervan Mağaza`,
+      partItemDesc: (caption) =>
+        `${caption}: Kervan üretimi hidrolik kırıcı yedek parçası. Fiyat teklifi için yazın.`,
       cartTitle: 'Palet | Kervan Mağaza',
     },
     nav: {
@@ -727,6 +747,16 @@ export const DICT: Record<Lang, Dict> = {
       },
       tipLink: 'Bu kırıcının ucu',
       quoteThis: 'Bu model için teklif iste',
+      item: {
+        pageLink: 'Parça sayfası',
+        share: 'Bağlantıyı paylaş',
+        copied: 'Bağlantı kopyalandı',
+        copyFailed: (url) => `Bağlantıyı kopyalayın: ${url}`,
+        whatsappSend: "Bu parçayı WhatsApp'ta gönder",
+        back: (group) => `Tüm ${group.toLocaleLowerCase('tr')} modelleri`,
+        related: 'Bu kırıcı için ürettiğimiz diğer parçalar',
+        linksLabel: 'Parça bağlantıları',
+      },
       fitted: {
         label: 'Seçenek',
         without: 'Burçsuz',
@@ -802,6 +832,9 @@ export const DICT: Record<Lang, Dict> = {
       partTitle: (name) => `Breaker ${name.toLowerCase()} | Kervan Shop`,
       partDesc: (name) =>
         `Hydraulic breaker ${name.toLowerCase()} made by Kervan; quotes by breaker model.`,
+      partItemTitle: (caption) => `${caption} | Kervan Shop`,
+      partItemDesc: (caption) =>
+        `${caption}: hydraulic breaker spare part made by Kervan. Write to us for a quote.`,
       cartTitle: 'Cart | Kervan Shop',
     },
     nav: {
@@ -1214,6 +1247,16 @@ export const DICT: Record<Lang, Dict> = {
       },
       tipLink: 'Tip for this breaker',
       quoteThis: 'Request a quote for this model',
+      item: {
+        pageLink: 'Part page',
+        share: 'Share link',
+        copied: 'Link copied',
+        copyFailed: (url) => `Copy the link: ${url}`,
+        whatsappSend: 'Send this part on WhatsApp',
+        back: (group) => `All ${group.toLowerCase()} models`,
+        related: 'Other parts we make for this breaker',
+        linksLabel: 'Part links',
+      },
       fitted: {
         label: 'Option',
         without: 'Without bushings',

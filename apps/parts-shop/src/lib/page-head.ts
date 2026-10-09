@@ -3,6 +3,8 @@ import { DICT } from './dict';
 import { LEGAL } from './legal';
 import { localePath } from './locale-path';
 import { fmtNum } from './format';
+import { renderTitle } from './part-caption';
+import { findRender } from './part-links';
 import type { PageProps } from './page-props';
 
 export const SITE = 'https://magaza.kervanbreaker.com';
@@ -39,6 +41,19 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
     case 'part': {
       const name = t.parts.items[model.part].name;
       return { ...page, title: m.partTitle(name), description: m.partDesc(name) };
+    }
+    case 'partItem': {
+      // Link previews (WhatsApp, Telegram) show this part's own picture and caption.
+      const r = findRender(model.part, model.anchor);
+      const name = t.parts.items[model.part].name;
+      const caption = r ? renderTitle(r, name, t) : name;
+      const pic = r?.hero ?? r?.views[0]?.base;
+      return {
+        ...page,
+        title: m.partItemTitle(caption),
+        description: m.partItemDesc(caption),
+        ...(pic ? { ogImage: `${SITE}${pic}-lg.webp` } : {}),
+      };
     }
     case 'breaker': {
       const f = model.families[0] as (typeof model.families)[number] | undefined;

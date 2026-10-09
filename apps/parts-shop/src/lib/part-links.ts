@@ -39,6 +39,33 @@ export function partsForBreaker(name: string): PartLink[] {
   return cached.get(fold(name)) ?? [];
 }
 
+/** The render of one part page behind an anchor (its item page), if any. */
+export const findRender = (part: PartKey, anchor: string): PartRender | undefined =>
+  PART_RENDERS[part].find((r) => renderAnchor(r) === anchor);
+
+/**
+ * For one part's item page: the other parts we model for the same breaker(s), each linking to
+ * its own item page: the other renders of this group first (e.g. the other bushings of one
+ * breaker), then one per other group.
+ */
+export function relatedParts(part: PartKey, r: PartRender): PartLink[] {
+  cached ??= partIndex();
+  const self = renderAnchor(r);
+  const keys = new Set(breakerKeys(r.model));
+  const out: PartLink[] = [];
+  const add = (l: PartLink) => {
+    if (
+      !(l.part === part && l.anchor === self) &&
+      !out.some((x) => x.anchor === l.anchor && x.part === l.part)
+    )
+      out.push(l);
+  };
+  for (const x of PART_RENDERS[part])
+    if (breakerKeys(x.model).some((k) => keys.has(k))) add({ part, anchor: renderAnchor(x) });
+  for (const k of keys) for (const l of cached.get(k) ?? []) if (l.part !== part) add(l);
+  return out;
+}
+
 /**
  * For one part page: render anchor → the tip page of the same breaker, when the shop has one.
  * `tipPaths` maps folded breaker names to their tip page paths.

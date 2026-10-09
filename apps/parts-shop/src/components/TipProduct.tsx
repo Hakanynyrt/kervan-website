@@ -15,7 +15,7 @@ import { fmtMm, fmtNum } from '../lib/format';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
 import { addToCart } from '../lib/cart';
 import { fmtDate, fmtTry, fmtUsd, vatOf } from '../lib/price';
-import { CART_PATH, LIST_PATH, PARTS_PATH, partPath } from '../lib/routes';
+import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
 import { SITE } from '../lib/page-head';
 import type { PartLink } from '../lib/part-links';
@@ -370,7 +370,7 @@ export default function TipProduct({
             {parts.map((x) => (
               <li key={x.part}>
                 <a
-                  href={`${localePath(partPath(x.part), lang)}#${x.anchor}`}
+                  href={localePath(partItemPath(x.part, x.anchor), lang)}
                   className={`inline-flex min-h-11 items-center rounded-sm border border-ink-soft bg-bg px-4 font-medium text-ink hover:bg-bg-warm ${FOCUS}`}
                 >
                   {t.parts.items[x.part].name} →

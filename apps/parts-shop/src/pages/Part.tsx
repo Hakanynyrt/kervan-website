@@ -15,11 +15,14 @@ import {
   Terms,
 } from '../components/Bits';
 import { FOCUS, whatsappHref } from '../components/Layout';
+import ShareLinks from '../components/ShareLinks';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
+import { SITE } from '../lib/page-head';
+import { renderModel, renderTitle } from '../lib/part-caption';
 import { renderAnchor } from '../lib/part-links';
 import { PART_PHOTOS, PART_RENDERS, type PartRender } from '../lib/photos';
-import { PARTS_PATH, type PageModel } from '../lib/routes';
+import { PARTS_PATH, partItemPath, type PageModel, type PartKey } from '../lib/routes';
 import type { Lang } from '../types';
 
 type Model = Extract<PageModel, { kind: 'part' }>;
@@ -29,7 +32,8 @@ const PartViewer = lazy(() => import('../components/PartViewer'));
 const seriesId = (series: string) => `series-${slugify(series)}`;
 
 /** What a render's caption and quote need from the page. */
-interface Ctx {
+export interface Ctx {
+  part: PartKey;
   name: string;
   qty: number;
   tipLinks: Record<string, string>;
@@ -51,7 +55,7 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
   const series = new Map<string, PartRender[]>();
   for (const r of renders) if (r.series) series.set(r.series, [...(series.get(r.series) ?? []), r]);
   const pics = photos.length + renders.length > 0;
-  const ctx: Ctx = { name: p.name, qty, tipLinks: model.tipLinks ?? {}, lang, t };
+  const ctx: Ctx = { part: model.part, name: p.name, qty, tipLinks: model.tipLinks ?? {}, lang, t };
   const onPick = (m: string) => {
     if (breaker.trim() === '' || breaker === picked.current) {
       picked.current = m;
@@ -119,45 +123,15 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
           </div>
         )}
         <aside className={pics ? 'lg:col-start-2' : undefined}>
-          <div className="lg:sticky lg:top-6">
-            <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
-              <p className="m-0 text-lg font-bold text-ink">{t.parts.quoteTitle}</p>
-              <p className="m-0 mt-2 text-ink-mid">{t.parts.quoteBody}</p>
-              <label htmlFor="breaker" className="mt-4 block font-semibold text-ink">
-                {t.parts.modelLabel}
-              </label>
-              <input
-                id="breaker"
-                type="text"
-                value={breaker}
-                onChange={(e) => setBreaker(e.target.value)}
-                placeholder={t.parts.modelPlaceholder}
-                autoComplete="off"
-                className={`mt-2 w-full rounded-sm border border-ink-soft bg-bg px-3 py-2.5 text-base text-ink placeholder:text-ink-soft ${FOCUS}`}
-              />
-              <label htmlFor="qty" className="mb-2 mt-4 block font-semibold text-ink">
-                {t.family.qty}
-              </label>
-              <QtyStepper id="qty" value={qty} onChange={setQty} label={t.family.qty} t={t} />
-              <div className="mt-4 flex flex-col gap-3">
-                <a
-                  href={whatsappHref(text)}
-                  className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
-                >
-                  {t.family.whatsapp}
-                </a>
-                <a
-                  href={`mailto:${ORG_EMAIL}?subject=${encodeURIComponent(breaker.trim() ? `${p.name} – ${breaker.trim()}` : p.name)}&body=${encodeURIComponent(text)}`}
-                  className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
-                >
-                  {t.family.email}
-                </a>
-              </div>
-            </div>
-            <div className="mt-6">
-              <Terms t={t} />
-            </div>
-          </div>
+          <QuotePanel
+            name={p.name}
+            breaker={breaker}
+            setBreaker={setBreaker}
+            qty={qty}
+            setQty={setQty}
+            text={text}
+            t={t}
+          />
         </aside>
       </div>
       <StickyQuote text={text} t={t} />
@@ -165,25 +139,89 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
   );
 }
 
-/** The breaker model a render fits, with its variant (e.g. old type) when it has one. */
-const renderModel = (r: PartRender, t: Dict) =>
-  r.variant ? `${r.model} (${t.parts.renderVariant[r.variant]})` : r.model;
+/** Quote by breaker model (prefilled message for WhatsApp and e-mail), sticky on wide screens. */
+export function QuotePanel({
+  name,
+  breaker,
+  setBreaker,
+  qty,
+  setQty,
+  text,
+  t,
+}: {
+  name: string;
+  breaker: string;
+  setBreaker: (v: string) => void;
+  qty: number;
+  setQty: (v: number) => void;
+  text: string;
+  t: Dict;
+}) {
+  return (
+    <div className="lg:sticky lg:top-6">
+      <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
+        <p className="m-0 text-lg font-bold text-ink">{t.parts.quoteTitle}</p>
+        <p className="m-0 mt-2 text-ink-mid">{t.parts.quoteBody}</p>
+        <label htmlFor="breaker" className="mt-4 block font-semibold text-ink">
+          {t.parts.modelLabel}
+        </label>
+        <input
+          id="breaker"
+          type="text"
+          value={breaker}
+          onChange={(e) => setBreaker(e.target.value)}
+          placeholder={t.parts.modelPlaceholder}
+          autoComplete="off"
+          className={`mt-2 w-full rounded-sm border border-ink-soft bg-bg px-3 py-2.5 text-base text-ink placeholder:text-ink-soft ${FOCUS}`}
+        />
+        <label htmlFor="qty" className="mb-2 mt-4 block font-semibold text-ink">
+          {t.family.qty}
+        </label>
+        <QtyStepper id="qty" value={qty} onChange={setQty} label={t.family.qty} t={t} />
+        <div className="mt-4 flex flex-col gap-3">
+          <a
+            href={whatsappHref(text)}
+            className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
+          >
+            {t.family.whatsapp}
+          </a>
+          <a
+            href={`mailto:${ORG_EMAIL}?subject=${encodeURIComponent(breaker.trim() ? `${name} – ${breaker.trim()}` : name)}&body=${encodeURIComponent(text)}`}
+            className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
+          >
+            {t.family.email}
+          </a>
+        </div>
+      </div>
+      <div className="mt-6">
+        <Terms t={t} />
+      </div>
+    </div>
+  );
+}
+
+/** Absolute address of a part's own page (what the share button copies). */
+export const partItemUrl = (part: PartKey, r: PartRender, lang: Lang): string =>
+  SITE + localePath(partItemPath(part, renderAnchor(r)), lang);
 
 /**
  * One modelled part: showcase picture (with "3B incele" when it has a 3D model), views,
  * caption, then a quote for exactly this model and its breaker's tip page when the shop has one.
  */
-function RenderFigure({
+export function RenderFigure({
   r,
   ctx,
   id,
   lazy = false,
+  item = false,
 }: {
   r: PartRender;
   ctx: Ctx;
   id?: string;
   /** Further down the page: every picture may load lazily. */
   lazy?: boolean;
+  /** On the part's own page: the page has the title and links, the caption only shares. */
+  item?: boolean;
 }) {
   const { t } = ctx;
   const [open3d, setOpen3d] = useState(false);
@@ -192,10 +230,15 @@ function RenderFigure({
   const shown = withB && r.fitted ? r.fitted : { hero: r.hero, views: r.views };
   const model = renderModel(r, t);
   const partName = r.fitted ? t.parts.fitted.name(ctx.name, withB) : ctx.name;
-  const caption = r.kind
-    ? `${model} ${t.parts.renderKind[r.kind]}`
-    : t.parts.renderCaption(model, partName);
+  const caption = renderTitle(r, partName, t);
   const tip = ctx.tipLinks[renderAnchor(r)];
+  const share = (
+    <ShareLinks
+      url={partItemUrl(ctx.part, r, ctx.lang)}
+      title={renderTitle(r, ctx.name, t)}
+      t={t}
+    />
+  );
   return (
     <figure id={id} className="m-0 scroll-mt-4">
       {r.fitted && (
@@ -266,27 +309,45 @@ function RenderFigure({
           </li>
         ))}
       </ul>
-      <figcaption className="mt-2 font-sans">
-        <span className="block text-base font-semibold text-ink">{caption}</span>
-        <span className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm">
-          <a
-            href={whatsappHref(
-              t.parts.text(r.kind ? t.parts.renderKind[r.kind] : partName, model, ctx.qty),
-            )}
-            className={`inline-flex min-h-11 items-center font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
-          >
-            {t.parts.quoteThis}
-          </a>
-          {tip && (
+      {item ? (
+        <figcaption className="mt-3 font-sans text-sm">{share}</figcaption>
+      ) : (
+        <figcaption className="mt-2 font-sans">
+          <span className="block text-base font-semibold text-ink">
             <a
-              href={localePath(tip, ctx.lang)}
+              href={localePath(partItemPath(ctx.part, renderAnchor(r)), ctx.lang)}
+              className={`hover:text-brand-hi hover:underline ${FOCUS}`}
+            >
+              {caption}
+            </a>
+          </span>
+          <span className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+            <a
+              href={whatsappHref(
+                t.parts.text(r.kind ? t.parts.renderKind[r.kind] : partName, model, ctx.qty),
+              )}
               className={`inline-flex min-h-11 items-center font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
             >
-              {t.parts.tipLink} →
+              {t.parts.quoteThis}
             </a>
-          )}
-        </span>
-      </figcaption>
+            {tip && (
+              <a
+                href={localePath(tip, ctx.lang)}
+                className={`inline-flex min-h-11 items-center font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
+              >
+                {t.parts.tipLink} →
+              </a>
+            )}
+            <a
+              href={localePath(partItemPath(ctx.part, renderAnchor(r)), ctx.lang)}
+              className={`inline-flex min-h-11 items-center font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
+            >
+              {t.parts.item.pageLink} →
+            </a>
+          </span>
+          <span className="mt-1 block text-sm">{share}</span>
+        </figcaption>
+      )}
     </figure>
   );
 }

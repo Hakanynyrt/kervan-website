@@ -4,7 +4,7 @@ import { FOCUS } from '../components/Layout';
 import { SearchForm } from '../components/ModelSearch';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { PART_KEYS, partPath, type PageModel } from '../lib/routes';
+import { PART_KEYS, partItemPath, partPath, type PageModel } from '../lib/routes';
 import type { Lang } from '../types';
 
 type Model = Extract<PageModel, { kind: 'popular' }>;
@@ -54,7 +54,7 @@ export default function Popular({ model, lang, t }: { model: Model; lang: Lang; 
                 {items.map((x) => (
                   <li key={x.anchor}>
                     <a
-                      href={`${localePath(partPath(k), lang)}#${x.anchor}`}
+                      href={localePath(partItemPath(k, x.anchor), lang)}
                       className={`group flex h-full flex-col overflow-hidden rounded-sm border border-hair bg-bg hover:border-hair-strong ${FOCUS}`}
                     >
                       <div className="aspect-video border-b border-hair bg-stage">

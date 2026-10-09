@@ -65,7 +65,7 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
     ...PART_KEYS.map((k) => ({
       href: localePath(partPath(k), lang),
       label: t.nav.groups[k],
-      current: path === partPath(k),
+      current: path === partPath(k) || path.startsWith(`${partPath(k)}/`),
     })),
   ];
   const nav = [
