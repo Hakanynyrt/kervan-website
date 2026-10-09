@@ -30,7 +30,7 @@ export type RenderView = 'front' | 'rear' | 'side' | 'detail' | 'section' | 'ass
 export interface PartRender {
   /** Breaker make and model the part fits, shown as the caption. */
   model: string;
-  /** Showcase picture, 16:9 (`<base>-sm.webp` 800 px, `-lg.webp` 1600 px): page lead and card. */
+  /** Showcase picture, 16:9 (`<base>-lg.webp` 1600 px; renders publish only `-lg` views): page lead and card. */
   hero?: string;
   /** Interactive 3D model (GLB, metres), opened on demand in PartViewer. */
   model3d?: string;

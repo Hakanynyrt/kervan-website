@@ -28,7 +28,7 @@ export function PartGroups({ lang, t }: { lang: Lang; t: Dict }) {
           >
             {g.hero ? (
               <img
-                src={`${g.hero}-sm.webp`}
+                src={`${g.hero}-lg.webp`}
                 width={480}
                 height={360}
                 alt=""
