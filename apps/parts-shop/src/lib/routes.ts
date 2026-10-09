@@ -125,6 +125,11 @@ export const breakerName = (b: { brand: string; model: string }): string =>
 const tierRank = (t: 1 | 2 | null): number => t ?? 3;
 const byName = (a: BreakerCard, b: BreakerCard): number =>
   a.name.localeCompare(b.name, 'tr', { numeric: true });
+/** Best-sellers: by tier, then working diameter (small to large, unknown last), not A–Z. */
+const byPopularity = (a: BreakerCard, b: BreakerCard): number =>
+  tierRank(a.popularTier) - tierRank(b.popularTier) ||
+  (a.diameterMm ?? Infinity) - (b.diameterMm ?? Infinity) ||
+  byName(a, b);
 
 interface BreakerEntry {
   name: string;
@@ -233,9 +238,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
   });
   cards.sort(byName);
   const tipPaths = new Map(cards.map((x) => [fold(x.name), x.path]));
-  const popular = cards
-    .filter((x) => x.popularTier !== null)
-    .sort((a, b) => tierRank(a.popularTier) - tierRank(b.popularTier) || byName(a, b));
+  const popular = cards.filter((x) => x.popularTier !== null).sort(byPopularity);
   const hasPopular = popular.length > 0;
   const byBrand = new Map<string, BreakerCard[]>();
   for (const x of cards) byBrand.set(x.brand, [...(byBrand.get(x.brand) ?? []), x]);
