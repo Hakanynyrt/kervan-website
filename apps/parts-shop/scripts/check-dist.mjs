@@ -20,6 +20,17 @@ const walk = (d) => {
 };
 walk(DIST);
 
+// Cloudflare Pages takes at most 20,000 files per deployment; fail here, with the count, rather
+// than at the deploy step. The margin leaves room for the tip renders still to come.
+const MAX_FILES = 19000;
+let total = 0;
+const count = (d) => {
+  for (const e of fs.readdirSync(d, { withFileTypes: true }))
+    if (e.isDirectory()) count(path.join(d, e.name));
+    else total++;
+};
+count(DIST);
+
 const problems = [];
 let pages = 0;
 for (const f of files) {
@@ -32,8 +43,9 @@ for (const f of files) {
     if (!s.includes('id="kv-page"')) problems.push(`${rel}: no page props`);
   }
 }
+if (total > MAX_FILES) problems.push(`dist: ${total} files, more than ${MAX_FILES} (Pages limit 20,000)`);
 if (problems.length) {
   process.stderr.write(`check-dist: ${problems.length} problem(s)\n${problems.slice(0, 20).join('\n')}\n`);
   process.exit(1);
 }
-process.stdout.write(`check-dist: ${pages} pages ok\n`);
+process.stdout.write(`check-dist: ${pages} pages ok, ${total} files\n`);

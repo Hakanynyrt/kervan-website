@@ -14,7 +14,7 @@ export default function FamilyCardView({ c, lang, t }: { c: BreakerCard; lang: L
     >
       {c.image && (
         <img
-          src={tipImg(c.image, 'sm')}
+          src={tipImg(c.image)}
           alt=""
           width={480}
           height={320}

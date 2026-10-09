@@ -56,13 +56,15 @@ try {
     const pub = path.join(renders, 'pub');
     fs.mkdirSync(pub, { recursive: true });
     const copy = async (key) => {
-      const src = { sm: `${key}-sm.webp`, md: `${key}-lg.webp` };
+      // One published size (md, 800 px): Pages allows at most 20,000 files per deployment, and the
+      // small size saved only ~3 KB an image.
+      const src = { md: `${key}-lg.webp` };
       if (!Object.values(src).every((n) => fs.existsSync(path.join(renders, n)))) return false;
       for (const [size, n] of Object.entries(src)) {
         const name = `${key}-${size}-${PUB}.webp`;
         const cached = path.join(pub, name);
         if (!fs.existsSync(cached))
-          await publishImage(path.join(renders, n), cached, size === 'md' ? MD_WIDTH : null);
+          await publishImage(path.join(renders, n), cached, MD_WIDTH);
         fs.copyFileSync(cached, path.join(DIST, 'tips', name));
         images++;
       }

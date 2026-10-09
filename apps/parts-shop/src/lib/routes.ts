@@ -10,7 +10,13 @@ import {
   type TipType,
 } from '@kervan/tips';
 import { LEGAL_KEYS, legalPath, type LegalKey } from './legal';
-import { partsForBreaker, renderAnchor, tipLinksForPart, type PartLink } from './part-links';
+import {
+  partsForBreaker,
+  relatedParts,
+  renderAnchor,
+  tipLinksForPart,
+  type PartLink,
+} from './part-links';
 import { PART_RENDERS, type PartRender } from './photos';
 import type { TipGroupStats } from '../types';
 
@@ -74,6 +80,19 @@ export type PageModel =
       hasPopular: boolean;
     }
   | {
+      /** One modelled part (a render of a part page) on its own page, so it can be linked and shared. */
+      kind: 'partItem';
+      part: PartKey;
+      /** renderAnchor of the render (PART_RENDERS[part]); also the last path segment. */
+      anchor: string;
+      /** Tip page of the same breaker, when the shop has one. */
+      tipLink: string | null;
+      /** Other parts we model for the same breaker (their item pages). */
+      related: PartLink[];
+      demo: boolean;
+      hasPopular: boolean;
+    }
+  | {
       kind: 'popular';
       cards: BreakerCard[];
       /** Parts we model for the best-selling breakers (not sales data), best-seller order. */
@@ -120,6 +139,8 @@ export type PartKey = (typeof PART_KEYS)[number];
 export const PARTS_PATH = '/yedek-parca';
 export const CART_PATH = '/palet';
 export const partPath = (k: PartKey): string => `${PARTS_PATH}/${k}`;
+/** Item page of one modelled part: "/yedek-parca/piston/montabert-brv-32-piston". */
+export const partItemPath = (k: PartKey, anchor: string): string => `${partPath(k)}/${anchor}`;
 
 export interface BuiltPage {
   /** Neutral (Turkish) path. */
@@ -297,7 +318,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
   const tips: TipGroupStats = {
     image: featured.find((x) => x.image)?.image ?? null,
   };
-  return [
+  const pages: BuiltPage[] = [
     {
       path: '/',
       model: {
@@ -333,6 +354,24 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         hasPopular,
       },
     })),
+    ...PART_KEYS.flatMap((part) => {
+      const tipLinks = tipLinksForPart(part, tipPaths);
+      return PART_RENDERS[part].map((r) => {
+        const anchor = renderAnchor(r);
+        return {
+          path: partItemPath(part, anchor),
+          model: {
+            kind: 'partItem' as const,
+            part,
+            anchor,
+            tipLink: tipLinks[anchor] ?? null,
+            related: relatedParts(part, r),
+            demo,
+            hasPopular,
+          },
+        };
+      });
+    }),
     ...(hasPopular
       ? [
           {
@@ -366,4 +405,11 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       model: { kind: 'family' as const, family, demo, hasPopular },
     })),
   ];
+  // Item pages are named after renderAnchor: two renders with one anchor would share a URL.
+  const paths = new Set<string>();
+  for (const p of pages) {
+    if (paths.has(p.path)) throw new Error(`buildPages: duplicate path ${p.path}`);
+    paths.add(p.path);
+  }
+  return pages;
 }
