@@ -42,6 +42,7 @@ export interface PartRender {
     | 'upperBushing'
     | 'thrustRing'
     | 'thrustUpperBushing'
+    | 'spacerBushing'
     | 'oneBushing'
     | 'toolUpperBushing'
     | 'rockDrillThrustRing'
@@ -56,7 +57,17 @@ export interface PartRender {
     | 'accumulatorBolt'
     | 'wearPlate';
   /** Another version of the same breaker's part, named in the caption through the dict. */
-  variant?: 'oldType' | 'newType' | 'roundNut' | 'autoGrease';
+  variant?:
+    | 'oldType'
+    | 'newType'
+    | 'roundNut'
+    | 'autoGrease'
+    | 'typeY'
+    | 'typeE'
+    | 'typeL'
+    | 'typeT'
+    | 'oilGroove'
+    | 'greasingHole';
   views: { base: string; view: RenderView }[];
 }
 
@@ -380,6 +391,7 @@ const RAMMER_BURC: Bushing[] = [
   { model: 'E64', file: 'rammer-e-64-ust', kind: 'thrustRing' },
   { model: 'E65', file: 'rammer-e-65-kafa', kind: 'toolBushing' },
   { model: 'E65', file: 'rammer-e-65-ust', kind: 'upperBushing' },
+  { model: 'E65', file: 'rammer-e65-dayama', kind: 'thrustRing' },
   { model: 'E66', file: 'rammer-e-66-kafa', kind: 'toolBushing' },
   { model: 'E66', file: 'rammer-e-66-ust', kind: 'thrustRing' },
   { model: 'E68', file: 'rammer-e68-kafa', kind: 'toolBushing' },
@@ -406,12 +418,14 @@ const RAMMER_BURC: Bushing[] = [
   { model: 'S29', file: 'rammer-s-29-kafa', kind: 'toolBushing' },
   { model: 'S29', file: 'rammer-s-29-ust', kind: 'thrustUpperBushing' },
   { model: 'S52', file: 'rammer-s-52-kafa', kind: 'toolBushing' },
+  { model: 'S52', file: 'rammer-s52-dayama', kind: 'thrustRing' },
   { model: 'S54', file: 'rammer-s-54-kafa', kind: 'toolBushing' },
   { model: 'S54', file: 'rammer-s-54-ust', kind: 'thrustRing' },
   { model: 'S55', file: 'rammer-s-55-kafa', kind: 'toolBushing' },
   { model: 'S55', file: 'rammer-s-55-ust', kind: 'thrustRing' },
   { model: 'S56', file: 'rammer-s-56-kafa', kind: 'toolBushing' },
   { model: 'S56', file: 'rammer-s-56-ust', kind: 'thrustRing' },
+  { model: 'S56', file: 'rammer-s56-dayama-yag-kanalli', kind: 'thrustRing', variant: 'oilGroove' },
   { model: 'S82', file: 'rammer-s-82-kafa', kind: 'toolBushing' },
   { model: 'S82', file: 'rammer-s-82-ust', kind: 'thrustRing' },
   { model: 'S83', file: 'rammer-s-83-kafa', kind: 'toolBushing' },
@@ -420,6 +434,7 @@ const RAMMER_BURC: Bushing[] = [
   { model: 'S84', file: 'rammer-s-84-ust', kind: 'thrustRing' },
   { model: 'S86', file: 'rammer-s-86-kafa', kind: 'toolBushing' },
   { model: 'S86', file: 'rammer-s-86-ust', kind: 'upperBushing' },
+  { model: 'S86', file: 'rammer-s86-dayama', kind: 'thrustRing' },
 ];
 const MTB_BURC: Bushing[] = [
   { model: '15', file: 'mtb-15-kafa', kind: 'toolBushing' },
@@ -429,6 +444,7 @@ const MTB_BURC: Bushing[] = [
   { model: '30', file: 'mtb-30-ust', kind: 'thrustUpperBushing' },
   { model: '36', file: 'mtb-36-kafa', kind: 'toolBushing' },
   { model: '36', file: 'mtb-36-ust', kind: 'upperBushing' },
+  { model: '36', file: 'mtb-36-dayama', kind: 'thrustRing' },
   { model: '40', file: 'mtb-40-kafa', kind: 'toolBushing' },
   { model: '40', file: 'mtb-40-ust', kind: 'thrustUpperBushing' },
   { model: '45', file: 'mtb-45-kafa', kind: 'toolBushing' },
@@ -439,28 +455,50 @@ const MTB_BURC: Bushing[] = [
   { model: '85', file: 'mtb-85-ust', kind: 'thrustUpperBushing' },
   { model: '120', file: 'mtb-120-kafa', kind: 'toolBushing' },
   { model: '120', file: 'mtb-120-ust', kind: 'upperBushing' },
+  { model: '120', file: 'mtb-120-dayama-y', kind: 'thrustRing', variant: 'typeY' },
+  { model: '120', file: 'mtb-120-dayama-e', kind: 'thrustRing', variant: 'typeE' },
   { model: '125', file: 'mtb-125-kafa', kind: 'toolBushing' },
   { model: '125', file: 'mtb-125-ust', kind: 'thrustRing' },
   { model: '150', file: 'mtb-150-kafa', kind: 'toolBushing' },
   { model: '150', file: 'mtb-150-ust', kind: 'upperBushing' },
+  { model: '150', file: 'mtb-150-dayama-y', kind: 'thrustRing', variant: 'typeY' },
+  { model: '150', file: 'mtb-150-dayama-e', kind: 'thrustRing', variant: 'typeE' },
+  {
+    model: '150',
+    file: 'mtb-150-dayama-yaglama-delikli',
+    kind: 'thrustRing',
+    variant: 'greasingHole',
+  },
   { model: '170', file: 'mtb-170-kafa', kind: 'toolBushing' },
   { model: '170', file: 'mtb-170-ust', kind: 'upperBushing' },
+  { model: '170', file: 'mtb-170-dayama-y', kind: 'thrustRing', variant: 'typeY' },
+  { model: '170', file: 'mtb-170-dayama-e', kind: 'thrustRing', variant: 'typeE' },
   { model: '210', file: 'mtb-210-kafa', kind: 'toolBushing' },
   { model: '210', file: 'mtb-210-ust', kind: 'upperBushing' },
+  { model: '210', file: 'mtb-210-dayama-y', kind: 'thrustRing', variant: 'typeY' },
+  { model: '210', file: 'mtb-210-dayama-e', kind: 'thrustRing', variant: 'typeE' },
   { model: '210 II', file: 'mtb-210-ii-kafa', kind: 'toolBushing' },
   { model: '210 II', file: 'mtb-210-ii-ust', kind: 'upperBushing' },
+  { model: '210 II', file: 'mtb-210-ii-dayama', kind: 'thrustRing' },
   { model: '220', file: 'mtb-220-kafa', kind: 'toolBushing' },
   { model: '220', file: 'mtb-220-ust', kind: 'thrustRing' },
   { model: '250', file: 'mtb-250-kafa', kind: 'toolBushing' },
   { model: '250', file: 'mtb-250-ust', kind: 'upperBushing' },
+  { model: '250', file: 'mtb-250-dayama', kind: 'thrustRing' },
   { model: '270', file: 'mtb-270-kafa', kind: 'toolBushing' },
+  { model: '270', file: 'mtb-270-dayama', kind: 'thrustRing' },
   { model: '275', file: 'mtb-275-kafa', kind: 'toolBushing' },
   { model: '275', file: 'mtb-275-ust', kind: 'upperBushing' },
   { model: '275', file: 'mtb-275-1-kafa', kind: 'toolBushing', variant: 'autoGrease' },
+  { model: '275', file: 'mtb-275-dayama-y', kind: 'thrustRing', variant: 'typeY' },
+  { model: '275', file: 'mtb-275-dayama-e', kind: 'thrustRing', variant: 'typeE' },
   { model: '275 II', file: 'mtb-275-ii-kafa', kind: 'toolBushing' },
   { model: '275 II', file: 'mtb-275-ii-ust', kind: 'upperBushing' },
+  { model: '275 II', file: 'mtb-275-ii-dayama', kind: 'thrustRing' },
   { model: '360', file: 'mtb-360-kafa', kind: 'toolBushing' },
   { model: '360', file: 'mtb-360-ust', kind: 'upperBushing' },
+  { model: '360', file: 'mtb-360-dayama-y', kind: 'thrustRing', variant: 'typeY' },
+  { model: '360', file: 'mtb-360-dayama-e', kind: 'thrustRing', variant: 'typeE' },
   { model: '500', file: 'mtb-500-kafa', kind: 'toolBushing' },
   { model: '500', file: 'mtb-500-ust', kind: 'thrustRing' },
   { model: '700', file: 'mtb-700-kafa', kind: 'toolBushing' },
@@ -491,6 +529,7 @@ const KRUPP_BURC: Bushing[] = [
   { model: 'HM 700 / 701 / 702', file: 'krupp-hm-700-701-702-kafa', kind: 'toolBushing' },
   { model: 'HM 700 / 701 / 702', file: 'krupp-hm-700-701-702-ust', kind: 'thrustRing' },
   { model: 'HM 710 / 711 / 712', file: 'krupp-hm-710-711-712-kafa', kind: 'toolBushing' },
+  { model: 'HM 710 / 711 / 712', file: 'krupp-hm-710-dayama', kind: 'thrustRing' },
   { model: 'HM 720 / 721 / 722', file: 'krupp-hm-720-721-722-kafa', kind: 'toolBushing' },
   { model: 'HM 720 / 721 / 722', file: 'krupp-hm-720-721-722-ust', kind: 'thrustRing' },
   { model: 'HM 780', file: 'krupp-hm-780-kafa', kind: 'toolBushing' },
@@ -511,6 +550,7 @@ const KRUPP_BURC: Bushing[] = [
   { model: 'HM 1500', file: 'krupp-hm-1500-ust', kind: 'thrustRing' },
   { model: 'HM 1500 Marathon', file: 'krupp-hm-1500-marathon-kafa', kind: 'toolBushing' },
   { model: 'HM 1500 Marathon', file: 'krupp-hm-1500-marathon-ust', kind: 'upperBushing' },
+  { model: 'HM 1500 Marathon', file: 'krupp-hm-1500-marathon-dayama', kind: 'thrustRing' },
   { model: 'HM 2000', file: 'krupp-hm-2000-kafa', kind: 'toolBushing' },
   { model: 'HM 2000', file: 'krupp-hm-2000-ust', kind: 'thrustRing' },
   {
@@ -529,6 +569,7 @@ const KRUPP_BURC: Bushing[] = [
   { model: 'HM 2000 Marathon', file: 'krupp-hm-2000-marathon-ust', kind: 'upperBushing' },
   { model: 'HM 2100 Marathon', file: 'krupp-hm-2100-marathon-kafa', kind: 'toolBushing' },
   { model: 'HM 2100 Marathon', file: 'krupp-hm-2100-marathon-ust', kind: 'upperBushing' },
+  { model: 'HM 2100 Marathon', file: 'krupp-hm-2100-marathon-dayama', kind: 'thrustRing' },
   { model: 'HM 2300 Marathon', file: 'krupp-hm-2300-marathon-kafa', kind: 'toolBushing' },
   { model: 'HM 2300 Marathon', file: 'krupp-hm-2300-marathon-ust', kind: 'thrustRing' },
   { model: 'HM 2500 Marathon', file: 'krupp-hm-2500-marathon-kafa', kind: 'toolBushing' },
@@ -575,6 +616,7 @@ const SOOSAN_BURC: Bushing[] = [
   { model: 'SB45 TS-P', file: 'soosan-sb-45-ts-p-ust', kind: 'thrustUpperBushing' },
   { model: 'SB50', file: 'soosan-sb-50-kafa', kind: 'toolBushing' },
   { model: 'SB50', file: 'soosan-sb-50-ust', kind: 'upperBushing' },
+  { model: 'SB50', file: 'soosan-sb50-dayama', kind: 'thrustRing' },
   { model: 'SB50 TS-P', file: 'soosan-sb-50-ts-p-kafa', kind: 'toolBushing' },
   { model: 'SB50 TS-P', file: 'soosan-sb-50-ts-p-ust', kind: 'thrustUpperBushing' },
   { model: 'SB60', file: 'soosan-sb-60-kafa', kind: 'toolBushing' },
@@ -605,12 +647,15 @@ const SOOSAN_BURC: Bushing[] = [
 const MONTABERT_BURC: Bushing[] = [
   { model: 'BRH 125', file: 'montabert-brh-125-kafa', kind: 'toolBushing' },
   { model: 'BRH 250', file: 'montabert-brh-250-kafa', kind: 'toolBushing' },
-  { model: 'BRH 250', file: 'montabert-brh-250-ust', kind: 'thrustRing' },
+  { model: 'BRH 250', file: 'montabert-brh-250-dayama', kind: 'thrustRing' },
   { model: 'BRH 270', file: 'montabert-brh-270-kafa', kind: 'toolBushing' },
   { model: 'BRH 501', file: 'montabert-brh-501-kafa', kind: 'toolBushing' },
   { model: 'BRH 501', file: 'montabert-brh-501-ust', kind: 'thrustRing' },
+  { model: 'BRH 501', file: 'montabert-brh-501-dayama-t', kind: 'thrustRing', variant: 'typeT' },
   { model: 'BRH 570', file: 'montabert-brh-570-kafa', kind: 'toolBushing' },
   { model: 'BRH 570', file: 'montabert-brh-570-ust', kind: 'upperBushing' },
+  { model: 'BRH 570', file: 'montabert-brh-570-dayama-l', kind: 'thrustRing', variant: 'typeL' },
+  { model: 'BRH 570', file: 'montabert-brh-570-dayama-t', kind: 'thrustRing', variant: 'typeT' },
   { model: 'BRH 620', file: 'montabert-brh-620-kafa', kind: 'toolBushing' },
   { model: 'BRH 620', file: 'montabert-brh-620-ust', kind: 'thrustRing' },
   { model: 'BRH 625', file: 'montabert-brh-625-kafa', kind: 'toolBushing' },
@@ -687,6 +732,7 @@ const FURUKAWA_BURC: Bushing[] = [
   { model: 'HB20G', file: 'furukawa-hb-20-g-ust', kind: 'thrustRing' },
   { model: 'HB30G', file: 'furukawa-hb-30-g-kafa', kind: 'toolBushing' },
   { model: 'HB30G', file: 'furukawa-hb-30-g-ust', kind: 'thrustRing' },
+  { model: 'HB30G', file: 'furukawa-hb-30-g-dayama-eski', kind: 'thrustRing', variant: 'oldType' },
   { model: 'HB40G', file: 'furukawa-hb-40-g-kafa', kind: 'toolBushing' },
   { model: 'HB40G', file: 'furukawa-hb-40-g-ust', kind: 'thrustRing' },
   { model: 'HB50G', file: 'furukawa-hb-50-g-kafa', kind: 'toolBushing' },
@@ -724,6 +770,7 @@ const NPK_BURC: Bushing[] = [
   { model: 'H-8XA', file: 'npk-h-8-x-a-ust', kind: 'thrustRing' },
   { model: 'H-10XB', file: 'npk-h-10-x-b-kafa', kind: 'toolBushing' },
   { model: 'H-10XB', file: 'npk-h-10-x-b-ust', kind: 'upperBushing' },
+  { model: 'H-10XB', file: 'npk-h-10xb-dayama', kind: 'thrustRing' },
   { model: 'H-12X', file: 'npk-h-12-x-kafa', kind: 'toolBushing' },
   { model: 'H-12X', file: 'npk-h-12-x-ust', kind: 'thrustRing' },
   { model: 'H-14X', file: 'npk-h-14-x-kafa', kind: 'toolBushing' },
@@ -755,10 +802,23 @@ const INDECO_BURC: Bushing[] = [
   { model: 'MES 3000', file: 'indeco-mes-3000-ust', kind: 'thrustRing' },
   { model: 'MES 3500', file: 'indeco-mes-3500-kafa', kind: 'toolBushing' },
   { model: 'MES 3500', file: 'indeco-mes-3500-ust', kind: 'thrustRing' },
+  {
+    model: 'MES 3500',
+    file: 'indeco-mes-3500-dayama-eski',
+    kind: 'thrustRing',
+    variant: 'oldType',
+  },
   { model: 'MES 4000', file: 'indeco-mes-4000-kafa', kind: 'toolBushing' },
   { model: 'MES 4000', file: 'indeco-mes-4000-ust', kind: 'thrustRing' },
+  {
+    model: 'MES 4000',
+    file: 'indeco-mes-4000-dayama-eski',
+    kind: 'thrustRing',
+    variant: 'oldType',
+  },
   { model: 'MES 7000', file: 'indeco-mes-7000-kafa', kind: 'toolBushing' },
-  { model: 'MES 7000', file: 'indeco-mes-7000-ust', kind: 'thrustRing' },
+  { model: 'MES 7000', file: 'indeco-mes-7000-ust', kind: 'spacerBushing' },
+  { model: 'MES 7000', file: 'indeco-mes-7000-dayama', kind: 'thrustRing' },
 ];
 const DAEMO_BURC: Bushing[] = [
   { model: 'DMB 230V', file: 'daemo-s-2300-v-kafa', kind: 'toolBushing' },
@@ -824,12 +884,15 @@ const CAT_BURC: Bushing[] = [
 const MSB_BURC: Bushing[] = [
   { model: '200', file: 'msb-200-kafa', kind: 'toolBushing' },
   { model: '200', file: 'msb-200-ust', kind: 'upperBushing' },
+  { model: '200', file: 'msb-200-dayama', kind: 'thrustRing' },
   { model: '250', file: 'msb-250-kafa', kind: 'toolBushing' },
   { model: '250', file: 'msb-250-ust', kind: 'thrustRing' },
   { model: '300', file: 'msb-300-kafa', kind: 'toolBushing' },
   { model: '300', file: 'msb-300-ust', kind: 'upperBushing' },
+  { model: '300', file: 'msb-300-dayama', kind: 'thrustRing' },
   { model: '400', file: 'msb-400-kafa', kind: 'toolBushing' },
   { model: '400', file: 'msb-400-ust', kind: 'upperBushing' },
+  { model: '400', file: 'msb-400-dayama', kind: 'thrustRing' },
   { model: '450', file: 'msb-450-kafa', kind: 'toolBushing' },
   { model: '450', file: 'msb-450-ust', kind: 'upperBushing' },
   { model: '500', file: 'msb-500-kafa', kind: 'toolBushing' },
@@ -885,6 +948,7 @@ const D_A_BURC: Bushing[] = [
   { model: '1800', file: 'da-d-a-1800-kafa', kind: 'toolBushing' },
   { model: '1800', file: 'da-d-a-1800-ust', kind: 'thrustUpperBushing' },
   { model: '2200', file: 'da-d-a-2200-kafa', kind: 'toolBushing' },
+  { model: '2200', file: 'da-d-a-2200-dayama', kind: 'thrustUpperBushing' },
   { model: '3000', file: 'da-d-a-3000-kafa', kind: 'toolBushing' },
   { model: '3600', file: 'da-d-a-3600-kafa', kind: 'toolBushing' },
 ];
@@ -969,6 +1033,12 @@ const TABE_BURC: Bushing[] = [
   { model: 'AGB 16', file: 'tabe-agb-16-ust', kind: 'thrustRing' },
   { model: 'AGB 375', file: 'tabe-agb-375-kafa', kind: 'oneBushing' },
 ];
+const KOMAC_BURC: Bushing[] = [
+  { model: '300', file: 'komac-300-dayama', kind: 'thrustRing' },
+  { model: '2000', file: 'komac-2000-dayama', kind: 'thrustRing' },
+  { model: '3500', file: 'komac-3500-dayama', kind: 'thrustRing' },
+];
+const EURORAM_BURC: Bushing[] = [{ model: '115', file: 'euroram-115-dayama', kind: 'thrustRing' }];
 const ARROWHEAD_BURC: Bushing[] = [
   { model: 'HB-6T', file: 'arrowhead-arrow-head-hb-6t-kafa', kind: 'toolBushing' },
   { model: 'HB-6T', file: 'arrowhead-arrow-head-hb-6t-ust', kind: 'upperBushing' },
@@ -1677,6 +1747,8 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
     ...LIFTON_BURC.map(bushingRender('Lifton')),
     ...TABE_BURC.map(bushingRender('Tabe')),
     ...ARROWHEAD_BURC.map(bushingRender('Arrowhead')),
+    ...KOMAC_BURC.map(bushingRender('Komac')),
+    ...EURORAM_BURC.map(bushingRender('Euroram')),
     ...TAMROCK_BURC.map(bushingRender('Tamrock')),
     ...ATLAS_COPCO_COP_BURC.map(bushingRender('Atlas Copco COP')),
   ],
