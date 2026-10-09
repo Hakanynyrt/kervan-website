@@ -1685,7 +1685,23 @@ const otherRender = ({ make, model, file, kind, views }: OtherPart): PartRender 
  * Front heads with a "burçlu" picture set (bushings and pins fitted, modelled from our drawings):
  * `/photos/parca/alt-govde-<slug>-burclu-{vitrin,on,arka,yan,montaj-kesit}-01`, slug as in the head's hero.
  */
-const FITTED = new Set<string>([]);
+const FITTED = new Set<string>([
+  'rammer-e64',
+  'rammer-e65',
+  'rammer-e66',
+  'rammer-e68',
+  'rammer-g100',
+  'rammer-g80',
+  'rammer-g88',
+  'rammer-g90',
+  'rammer-s25',
+  'rammer-s29',
+  'rammer-s54',
+  'rammer-s55',
+  'rammer-s83',
+  'rammer-s84',
+  'rammer-s86',
+]);
 const withFitted = (r: PartRender): PartRender => {
   const slug = r.hero?.match(/^\/photos\/parca\/alt-govde-(.+)-vitrin-[^-]+$/)?.[1];
   if (!slug || !FITTED.has(slug)) return r;
