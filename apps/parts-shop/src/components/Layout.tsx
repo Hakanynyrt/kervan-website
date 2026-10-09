@@ -14,6 +14,7 @@ import {
 } from '../lib/routes';
 import { LEGAL, LEGAL_KEYS, legalPath, SELLER } from '../lib/legal';
 import { CartLink } from './CartLink';
+import { ThemeSelect } from './ThemeSelect';
 import type { Lang } from '../types';
 
 export const FOCUS =
@@ -84,7 +85,7 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
     <>
       <a
         href="#icerik"
-        className={`sr-only rounded-sm bg-brand px-4 py-2 font-sans text-sm font-medium text-white focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 ${FOCUS}`}
+        className={`sr-only rounded-sm bg-brand px-4 py-2 font-sans text-sm font-medium text-on-brand focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 ${FOCUS}`}
       >
         {t.nav.skip}
       </a>
@@ -152,10 +153,11 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
             >
               {t.nav.langOther}
             </a>
+            <ThemeSelect t={t} />
             <CartLink lang={lang} t={t} current={path === CART_PATH} />
             <a
               href={whatsappHref(quoteText ?? t.nav.quoteText)}
-              className={`inline-block whitespace-nowrap rounded-sm bg-brand px-3 py-2 font-medium text-white sm:px-4 hover:bg-brand-hi ${FOCUS}`}
+              className={`inline-block whitespace-nowrap rounded-sm bg-brand px-3 py-2 font-medium text-on-brand sm:px-4 hover:bg-brand-hi ${FOCUS}`}
             >
               <span className="sm:hidden">{t.nav.quoteShort}</span>
               <span className="hidden sm:inline">{t.nav.quote}</span>
@@ -213,7 +215,7 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
         </Container>
       </div>
       {demo && (
-        <div className="bg-brand font-sans text-sm font-medium text-white">
+        <div className="bg-brand font-sans text-sm font-medium text-on-brand">
           <Container className="py-2">{t.banner.demo}</Container>
         </div>
       )}

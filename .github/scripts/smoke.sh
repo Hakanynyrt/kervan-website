@@ -80,5 +80,15 @@ else
   echo "FAIL  X-Robots-Tag '$robots'  https://magaza.kervanbreaker.com/  (want noindex)"
   fail=1
 fi
+# The night-theme middleware answers every page (day / night by the request's location,
+# unknown without coordinates); no header means the Pages Function did not run.
+sun=$("${CURL[@]}" -o /dev/null -D - https://magaza.kervanbreaker.com/ | tr -d '\r' |
+  awk -F': ' 'tolower($1) == "x-kv-sun" { print $2 }')
+if [[ $sun == day || $sun == night || $sun == unknown ]]; then
+  echo "ok    X-Kv-Sun '$sun'  https://magaza.kervanbreaker.com/"
+else
+  echo "FAIL  X-Kv-Sun '$sun'  https://magaza.kervanbreaker.com/  (middleware not running)"
+  fail=1
+fi
 
 exit $fail

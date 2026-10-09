@@ -89,7 +89,7 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
               <div className="mt-8 flex flex-wrap gap-3 font-sans text-sm font-medium">
                 <a
                   href={localePath(PARTS_PATH, lang)}
-                  className={`rounded-sm bg-brand px-6 py-3 text-white hover:bg-brand-hi ${FOCUS}`}
+                  className={`rounded-sm bg-brand px-6 py-3 text-on-brand hover:bg-brand-hi ${FOCUS}`}
                 >
                   {h.allGroups}
                 </a>

@@ -283,7 +283,7 @@ export function RenderFigure({
                 <button
                   type="button"
                   onClick={() => setOpen3d(true)}
-                  className={`absolute bottom-3 right-3 cursor-pointer rounded-sm bg-brand px-4 py-2.5 font-sans text-sm font-medium text-white hover:bg-brand-hi ${FOCUS}`}
+                  className={`absolute bottom-3 right-3 cursor-pointer rounded-sm bg-brand px-4 py-2.5 font-sans text-sm font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
                 >
                   {t.parts.viewer.open}
                 </button>

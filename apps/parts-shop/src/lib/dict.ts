@@ -47,6 +47,8 @@ export interface Dict {
     langOther: string;
     /** Header utility group (language, cart, quote). */
     tools: string;
+    /** Theme select: the sun decides (auto), or the visitor. */
+    theme: { label: string; auto: string; light: string; dark: string };
   };
   top: { tagline: string; shop: string };
   banner: { label: string; preview: string; demo: string; how: string };
@@ -364,6 +366,7 @@ export const DICT: Record<Lang, Dict> = {
       langLabel: 'English',
       langOther: 'EN',
       tools: 'Hızlı erişim',
+      theme: { label: 'Tema', auto: 'Güneşe göre', light: 'Açık', dark: 'Koyu' },
     },
     top: {
       tagline: 'Hidrolik kırıcı yedek parça üreticisi',
@@ -861,6 +864,7 @@ export const DICT: Record<Lang, Dict> = {
       langLabel: 'Türkçe',
       langOther: 'TR',
       tools: 'Quick links',
+      theme: { label: 'Theme', auto: 'By the sun', light: 'Light', dark: 'Dark' },
     },
     top: {
       tagline: 'Hydraulic breaker spare parts maker',

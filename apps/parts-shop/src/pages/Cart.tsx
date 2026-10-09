@@ -114,7 +114,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
             </div>
             <a
               href={localePath(PARTS_PATH, lang)}
-              className={`mt-4 inline-block shrink-0 rounded-sm bg-brand px-5 py-3 text-sm font-medium text-white hover:bg-brand-hi sm:mt-0 ${FOCUS}`}
+              className={`mt-4 inline-block shrink-0 rounded-sm bg-brand px-5 py-3 text-sm font-medium text-on-brand hover:bg-brand-hi sm:mt-0 ${FOCUS}`}
             >
               {c.browse}
             </a>

@@ -61,7 +61,7 @@ export function Chips<T extends string>({
             key={o.value}
             className={`cursor-pointer rounded-sm border px-4 py-2 font-sans text-sm font-medium has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand has-[:focus-visible]:outline-offset-2 ${
               o.value === value
-                ? 'border-brand bg-brand text-white'
+                ? 'border-brand bg-brand text-on-brand'
                 : 'border-ink-soft bg-bg text-ink hover:bg-bg-warm'
             }`}
           >

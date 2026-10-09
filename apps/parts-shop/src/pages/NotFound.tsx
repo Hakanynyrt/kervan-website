@@ -20,7 +20,7 @@ export default function NotFound({ lang, t }: { lang: Lang; t: Dict }) {
       <div className="mt-6 flex flex-wrap gap-3 font-sans text-sm">
         <a
           href={localePath('/', lang)}
-          className={`rounded-sm bg-brand px-5 py-3 font-medium text-white hover:bg-brand-hi ${FOCUS}`}
+          className={`rounded-sm bg-brand px-5 py-3 font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
         >
           {t.notFound.home}
         </a>

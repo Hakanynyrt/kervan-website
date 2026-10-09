@@ -26,7 +26,7 @@ export function SearchForm({ lang, t, value = '' }: { lang: Lang; t: Dict; value
       />
       <button
         type="submit"
-        className={`rounded-sm bg-brand px-5 py-3 font-sans text-sm font-medium text-white hover:bg-brand-hi ${FOCUS}`}
+        className={`rounded-sm bg-brand px-5 py-3 font-sans text-sm font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
       >
         {t.search.button}
       </button>
@@ -54,7 +54,7 @@ export function BrandChips({
         <a
           href={localePath(LIST_PATH, lang)}
           aria-current={current ? undefined : 'page'}
-          className={`inline-block rounded-sm border px-3 py-1.5 ${current ? 'border-hair bg-bg text-ink hover:border-hair-strong' : 'border-brand bg-brand text-white'} ${FOCUS}`}
+          className={`inline-block rounded-sm border px-3 py-1.5 ${current ? 'border-hair bg-bg text-ink hover:border-hair-strong' : 'border-brand bg-brand text-on-brand'} ${FOCUS}`}
         >
           {t.search.all}
         </a>
@@ -64,7 +64,7 @@ export function BrandChips({
           <a
             href={localePath(b.path, lang)}
             aria-current={b.name === current ? 'page' : undefined}
-            className={`inline-block rounded-sm border px-3 py-1.5 ${b.name === current ? 'border-brand bg-brand text-white' : 'border-hair bg-bg text-ink hover:border-hair-strong'} ${FOCUS}`}
+            className={`inline-block rounded-sm border px-3 py-1.5 ${b.name === current ? 'border-brand bg-brand text-on-brand' : 'border-hair bg-bg text-ink hover:border-hair-strong'} ${FOCUS}`}
           >
             {b.name}
           </a>
