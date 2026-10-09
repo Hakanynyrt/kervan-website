@@ -116,6 +116,8 @@ export const breakerPath = (slug: string): string => `/kirici/${slug}`;
 export const brandPath = (brand: string): string => `/marka/${slugify(brand)}`;
 export const LIST_PATH = '/kirici-ucu';
 export const POPULAR_PATH = '/cok-satanlar';
+/** Path prefixes of the tip pages (one spare-part group, listed under "Yedek parçalar"). */
+export const TIP_PATHS = [LIST_PATH, '/kirici/', '/marka/', '/urun/'];
 
 export const breakerName = (b: { brand: string; model: string }): string =>
   `${b.brand} ${b.model}`.trim();

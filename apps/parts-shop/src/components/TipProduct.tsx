@@ -15,7 +15,7 @@ import { fmtMm, fmtNum } from '../lib/format';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
 import { addToCart } from '../lib/cart';
 import { fmtDate, fmtTry, fmtUsd, vatOf } from '../lib/price';
-import { CART_PATH, LIST_PATH, partPath } from '../lib/routes';
+import { CART_PATH, LIST_PATH, PARTS_PATH, partPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
 import { SITE } from '../lib/page-head';
 import type { PartLink } from '../lib/part-links';
@@ -161,7 +161,12 @@ export default function TipProduct({
 
   return (
     <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">
-      <Breadcrumb trail={[[t.nav.tips, LIST_PATH], ...trail]} current={crumb} lang={lang} t={t} />
+      <Breadcrumb
+        trail={[[t.parts.title, PARTS_PATH], [t.parts.tips.name, LIST_PATH], ...trail]}
+        current={crumb}
+        lang={lang}
+        t={t}
+      />
       <PageTitle>{title}</PageTitle>
       <OemLine t={t} />
       {opt.cents !== null && (

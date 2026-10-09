@@ -27,7 +27,6 @@ export interface Dict {
   };
   nav: {
     label: string;
-    tips: string;
     popular: string;
     catalogSite: string;
     quote: string;
@@ -65,7 +64,7 @@ export interface Dict {
       models: string;
       makes: string;
       heads: string;
-      parts: (groups: number) => string;
+      parts: string;
     };
     makes: {
       title: string;
@@ -173,7 +172,6 @@ export interface Dict {
     empty: string;
     emptyBody: string;
     browse: string;
-    browseParts: string;
     /** Static ordering guide (#siparis-adimlari). */
     steps: { title: string; items: { h: string; p: string }[]; note: string };
     product: string;
@@ -291,9 +289,9 @@ export const DICT: Record<Lang, Dict> = {
   tr: {
     meta: {
       siteName: 'Kervan Mağaza',
-      homeTitle: 'Hidrolik kırıcı uçları | Kervan Mağaza',
+      homeTitle: 'Hidrolik kırıcı yedek parçaları | Kervan Mağaza',
       homeDesc:
-        'Kervan üretimi hidrolik kırıcı uçları: kırıcınızın marka ve modeline göre uç, fiyat teklifi.',
+        'Kervan üretimi hidrolik kırıcı yedek parçaları: kırıcı ucu, alt gövde, burç, kama, saplama, piston ve daha fazlası; kırıcınızın marka ve modeline göre.',
       listTitle: 'Tüm kırıcı uçları | Kervan Mağaza',
       listDesc: 'Marka ve modele göre tüm Kervan kırıcı uçları: çalışma çapı ve uç tipleri.',
       familyTitle: (code, d) => `${code} kırıcı ucu Ø${d} | Kervan Mağaza`,
@@ -316,11 +314,10 @@ export const DICT: Record<Lang, Dict> = {
     },
     nav: {
       label: 'Ana menü',
-      tips: 'Kırıcı uçları',
       popular: 'Çok satanlar',
       catalogSite: 'Kurumsal',
       quote: 'Teklif iste',
-      quoteText: 'Merhaba, kırıcı ucu için fiyat teklifi almak istiyorum.',
+      quoteText: 'Merhaba, kırıcı yedek parçası için fiyat teklifi almak istiyorum.',
       quoteTextFor: (name) => `Merhaba, ${name} kırıcı ucu için bilgi almak istiyorum.`,
       skip: 'İçeriğe geç',
       parts: 'Yedek parçalar',
@@ -331,7 +328,7 @@ export const DICT: Record<Lang, Dict> = {
       tools: 'Hızlı erişim',
     },
     top: {
-      tagline: 'Hidrolik kırıcı ucu ve yedek parça üreticisi',
+      tagline: 'Hidrolik kırıcı yedek parça üreticisi',
       shop: 'Kırıcı yedek parça mağazası',
     },
     banner: {
@@ -350,12 +347,12 @@ export const DICT: Record<Lang, Dict> = {
       asphalt: 'Asfalt',
     },
     home: {
-      title: 'Hidrolik kırıcı ucu ve yedek parçaları',
-      lead: 'Kendi tezgâhımızda işlenen, kendi tesisimizde ısıl işlem gören uçlar. Ölçüleri karşılaştırın, kırıcınıza uyan ucu seçin. Stoktan aynı gün kargo.',
-      cta: 'Tüm uçlar',
+      title: 'Hidrolik kırıcı yedek parçaları',
+      lead: 'Kırıcı ucu, alt gövde, burç, kama, saplama, piston ve diğer parçalar: kendi tezgâhımızda işlenir, çelik parçalar kendi tesisimizde ısıl işlem görür. Kırıcınızın marka ve modelini arayın, uyan parçayı seçin. Stoktan aynı gün kargo.',
+      cta: 'Tüm kırıcı uçları',
       ctaQuote: 'Teklif iste',
       popular: 'Çok satanlar',
-      featured: 'Uçlar',
+      featured: 'Kırıcı ucu',
       morePopular: 'Tüm çok satanlar',
       groups: 'Ürün gruplarımız',
       count: (n) => `${n} kırıcı modeli`,
@@ -367,7 +364,7 @@ export const DICT: Record<Lang, Dict> = {
         models: 'kırıcı modeline uç',
         makes: 'kırıcı markası',
         heads: 'kırıcı modeline alt gövde',
-        parts: (groups) => `kırıcı modeline yedek parça, ${groups} grupta`,
+        parts: 'kırıcı modeline çizimden modellenmiş parça',
       },
       makes: {
         title: 'Uyumlu kırıcı markaları',
@@ -510,8 +507,7 @@ export const DICT: Record<Lang, Dict> = {
       title: 'Palet',
       empty: 'Paletiniz boş.',
       emptyBody: 'Kırıcı modelinize göre uç veya yedek parça seçin, “Palete yükle” ile ekleyin.',
-      browse: 'Kırıcı uçlarına göz atın',
-      browseParts: 'Yedek parçalar',
+      browse: 'Yedek parçalara göz atın',
       steps: {
         title: 'Sipariş nasıl verilir?',
         items: [
@@ -583,7 +579,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     parts: {
       title: 'Kırıcı yedek parçaları',
-      lead: 'Kırıcı ucunun yanında alt gövde, burç, kama, saplama, piston, akümülatör parçaları ve aşınma plakası da üretip satıyoruz. Kırıcınızın marka ve modelini yazın, fiyatı hemen iletelim.',
+      lead: 'Kırıcı ucu, alt gövde, burç, kama, saplama, piston, akümülatör parçaları ve aşınma plakası üretip satıyoruz. Kırıcınızın marka ve modelini yazın, fiyatı hemen iletelim.',
       tips: {
         name: 'Kırıcı ucu',
         body: 'Keski, sivri, küt, piramit ve konik uçlar; kırıcı modeline göre.',
@@ -744,7 +740,7 @@ export const DICT: Record<Lang, Dict> = {
       company: 'Kurumsal',
       contact: 'İletişim',
       about:
-        'Kartepe / Kocaeli’de hidrolik kırıcı ucu ve yedek parça üretimi; ısıl işlem kendi tesisimizde.',
+        'Kartepe / Kocaeli’de hidrolik kırıcı yedek parça üretimi; ısıl işlem kendi tesisimizde.',
       fit: 'Kırıcı marka ve model adları yalnızca uyumu belirtir; ürünlerimiz kırıcı üreticisinin orijinal parçası değildir.',
       fax: 'Faks',
       images:
@@ -760,9 +756,9 @@ export const DICT: Record<Lang, Dict> = {
   en: {
     meta: {
       siteName: 'Kervan Shop',
-      homeTitle: 'Hydraulic breaker tips | Kervan Shop',
+      homeTitle: 'Hydraulic breaker spare parts | Kervan Shop',
       homeDesc:
-        'Hydraulic breaker tips made by Kervan: find the tip for your breaker make and model.',
+        'Hydraulic breaker spare parts made by Kervan: tips, front heads, bushings, retainer keys, tie rods, pistons and more, by breaker make and model.',
       listTitle: 'All breaker tips | Kervan Shop',
       listDesc:
         'All Kervan breaker tips by breaker make and model: working diameter and tip types.',
@@ -786,11 +782,10 @@ export const DICT: Record<Lang, Dict> = {
     },
     nav: {
       label: 'Main menu',
-      tips: 'Breaker tips',
       popular: 'Best sellers',
       catalogSite: 'Company',
       quote: 'Request a quote',
-      quoteText: 'Hello, I would like a quote for a breaker tip.',
+      quoteText: 'Hello, I would like a quote for a breaker spare part.',
       quoteTextFor: (name) => `Hello, I have a question about the tip for the ${name} breaker.`,
       skip: 'Skip to content',
       parts: 'Spare parts',
@@ -801,7 +796,7 @@ export const DICT: Record<Lang, Dict> = {
       tools: 'Quick links',
     },
     top: {
-      tagline: 'Hydraulic breaker tip and spare parts maker',
+      tagline: 'Hydraulic breaker spare parts maker',
       shop: 'Breaker spare parts shop',
     },
     banner: {
@@ -820,12 +815,12 @@ export const DICT: Record<Lang, Dict> = {
       asphalt: 'Asphalt',
     },
     home: {
-      title: 'Hydraulic breaker tips and spare parts',
-      lead: 'Machined on our own lathes and heat-treated in our own plant. Compare the dimensions, pick the tip for your breaker. Ships from stock the same day.',
-      cta: 'All tips',
+      title: 'Hydraulic breaker spare parts',
+      lead: 'Tips, front heads, bushings, retainer keys, tie rods, pistons and other parts, machined on our own lathes, the steel ones heat-treated in our own plant. Search your breaker make and model and pick the part that fits. Ships from stock the same day.',
+      cta: 'All breaker tips',
       ctaQuote: 'Request a quote',
       popular: 'Best sellers',
-      featured: 'Tips',
+      featured: 'Breaker tips',
       morePopular: 'All best sellers',
       groups: 'Our product groups',
       count: (n) => `${n} breaker models`,
@@ -837,7 +832,7 @@ export const DICT: Record<Lang, Dict> = {
         models: 'breaker models with a listed tip',
         makes: 'breaker makes',
         heads: 'breaker models with a front head',
-        parts: (groups) => `breaker models with spare parts in ${groups} groups`,
+        parts: 'breaker models with parts rendered from our drawings',
       },
       makes: {
         title: 'Compatible breaker makes',
@@ -976,8 +971,7 @@ export const DICT: Record<Lang, Dict> = {
       title: 'Cart',
       empty: 'Your cart is empty.',
       emptyBody: 'Choose a tip or spare part by breaker model and add it with “Add to cart”.',
-      browse: 'Browse breaker tips',
-      browseParts: 'Spare parts',
+      browse: 'Browse spare parts',
       steps: {
         title: 'How to order',
         items: [
@@ -1049,7 +1043,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     parts: {
       title: 'Breaker spare parts',
-      lead: 'Besides tips we make and sell front heads, bushings, retainer keys, tie rods, pistons, accumulator parts and wear plates. Send your breaker make and model and we reply with the price right away.',
+      lead: 'We make and sell breaker tips, front heads, bushings, retainer keys, tie rods, pistons, accumulator parts and wear plates. Send your breaker make and model and we reply with the price right away.',
       tips: {
         name: 'Breaker tips',
         body: 'Chisel, moil, blunt, pyramid and conical tips, by breaker model.',
@@ -1218,7 +1212,7 @@ export const DICT: Record<Lang, Dict> = {
       company: 'Company',
       contact: 'Contact',
       about:
-        'Hydraulic breaker tips and spare parts made in Kartepe / Kocaeli, heat-treated in our own plant.',
+        'Hydraulic breaker spare parts made in Kartepe / Kocaeli, heat-treated in our own plant.',
       fit: 'Breaker make and model names only show the fit; our products are not the breaker maker’s original parts.',
       fax: 'Fax',
       images:

@@ -10,7 +10,7 @@ import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { fmtDate, fmtTry, fmtUsd, VAT_PERCENT, vatOf } from '../lib/price';
 import { LEGAL, legalPath } from '../lib/legal';
-import { LIST_PATH, PARTS_PATH } from '../lib/routes';
+import { PARTS_PATH } from '../lib/routes';
 import { SITE } from '../lib/page-head';
 import type { Lang } from '../types';
 
@@ -112,20 +112,12 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
               <p className="m-0 text-lg font-semibold text-ink">{c.empty}</p>
               <p className="m-0 mt-1 text-sm text-ink-mid">{c.emptyBody}</p>
             </div>
-            <div className="mt-4 flex shrink-0 flex-wrap gap-3 sm:mt-0">
-              <a
-                href={localePath(LIST_PATH, lang)}
-                className={`inline-block rounded-sm bg-brand px-5 py-3 text-sm font-medium text-white hover:bg-brand-hi ${FOCUS}`}
-              >
-                {c.browse}
-              </a>
-              <a
-                href={localePath(PARTS_PATH, lang)}
-                className={`inline-block rounded-sm border border-hair-strong bg-bg px-5 py-3 text-sm font-medium text-ink hover:border-ink ${FOCUS}`}
-              >
-                {c.browseParts}
-              </a>
-            </div>
+            <a
+              href={localePath(PARTS_PATH, lang)}
+              className={`mt-4 inline-block shrink-0 rounded-sm bg-brand px-5 py-3 text-sm font-medium text-white hover:bg-brand-hi sm:mt-0 ${FOCUS}`}
+            >
+              {c.browse}
+            </a>
           </div>
           <h2 className="m-0 mt-10 font-sans text-xl font-bold text-ink">{t.parts.title}</h2>
           <div className="mt-4">

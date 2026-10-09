@@ -76,7 +76,7 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
           [model.brands.length, h.stats.makes],
         ] as [number, string][])),
     [HEAD_MODELS, h.stats.heads],
-    [PART_MODELS, h.stats.parts(PART_KEYS.length)],
+    [PART_MODELS, h.stats.parts],
   ];
   const makes = [...model.brands]
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'tr'))
@@ -103,10 +103,10 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
               </div>
               <div className="mt-8 flex flex-wrap gap-3 font-sans text-sm font-medium">
                 <a
-                  href={localePath(LIST_PATH, lang)}
+                  href={localePath(PARTS_PATH, lang)}
                   className={`rounded-sm bg-brand px-6 py-3 text-white hover:bg-brand-hi ${FOCUS}`}
                 >
-                  {h.cta} · {h.count(model.total)}
+                  {h.allGroups}
                 </a>
                 <a
                   href={whatsappHref(t.nav.quoteText)}
@@ -229,7 +229,18 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
         </section>
       )}
 
-      <section aria-labelledby="featured" className="bg-bg">
+      <section aria-labelledby="groups" className="bg-bg">
+        <Container className="py-14 md:py-16">
+          <SectionHead
+            id="groups"
+            title={h.groups}
+            link={{ href: localePath(PARTS_PATH, lang), label: h.allGroups }}
+          />
+          <PartGroups tips={model.tips} demo={model.demo} lang={lang} t={t} />
+        </Container>
+      </section>
+
+      <section aria-labelledby="featured" className="border-y border-hair bg-bg-soft">
         <Container className="py-14 md:py-16">
           <SectionHead
             id="featured"
@@ -279,17 +290,6 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
               </div>
             </div>
           )}
-        </Container>
-      </section>
-
-      <section aria-labelledby="groups" className="border-y border-hair bg-bg-soft">
-        <Container className="py-14 md:py-16">
-          <SectionHead
-            id="groups"
-            title={h.groups}
-            link={{ href: localePath(PARTS_PATH, lang), label: h.allGroups }}
-          />
-          <PartGroups tips={model.tips} demo={model.demo} lang={lang} t={t} />
         </Container>
       </section>
 

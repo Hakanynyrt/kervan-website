@@ -3,7 +3,7 @@ import { Container } from '@kervan/ui';
 import { ORG_EMAIL, ORG_PHONE, ORG_PHONE_E164, ORG_TRADING_NAME } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { CART_PATH, LIST_PATH, PARTS_PATH, POPULAR_PATH } from '../lib/routes';
+import { CART_PATH, PARTS_PATH, POPULAR_PATH, TIP_PATHS } from '../lib/routes';
 import { LEGAL, LEGAL_KEYS, legalPath, SELLER } from '../lib/legal';
 import { CartLink } from './CartLink';
 import type { Lang } from '../types';
@@ -40,11 +40,11 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
   const other: Lang = lang === 'tr' ? 'en' : 'tr';
   const corporate = lang === 'tr' ? 'https://kervanbreaker.com/' : 'https://kervanbreaker.com/en/';
   const nav = [
-    { href: localePath(LIST_PATH, lang), label: t.nav.tips, current: path === LIST_PATH },
+    // Tips are one spare-part group: their pages count as "Yedek parçalar" too.
     {
       href: localePath(PARTS_PATH, lang),
       label: t.nav.parts,
-      current: path.startsWith(PARTS_PATH),
+      current: path.startsWith(PARTS_PATH) || TIP_PATHS.some((p) => path.startsWith(p)),
     },
     ...(hasPopular
       ? [
