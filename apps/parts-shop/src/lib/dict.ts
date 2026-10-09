@@ -215,7 +215,6 @@ export interface Dict {
     items: Record<PartKey, { name: string; body: string }>;
     view: string;
     /** Count line on a product-group card (computed from the renders or the catalogue). */
-    groupCount: (models: number, makes: number) => string;
     groupsTitle: string;
     fitNote: string;
     plant: { title: string; lead: string; note: string; items: { caption: string; alt: string }[] };
@@ -617,7 +616,6 @@ export const DICT: Record<Lang, Dict> = {
         },
       },
       view: 'İncele',
-      groupCount: (m, k) => `${m} kırıcı modeli · ${k} marka`,
       groupsTitle: 'Ürün grupları',
       fitNote:
         'Ürünlerimiz Kervan Makina üretimidir; marka ve model adları yalnızca uyumu belirtir.',
@@ -1086,8 +1084,6 @@ export const DICT: Record<Lang, Dict> = {
         },
       },
       view: 'View',
-      groupCount: (m, k) =>
-        `${m} breaker ${m === 1 ? 'model' : 'models'} · ${k} ${k === 1 ? 'make' : 'makes'}`,
       groupsTitle: 'Product groups',
       fitNote: 'Our products are made by Kervan Makina; make and model names only show the fit.',
       plant: {

@@ -293,10 +293,8 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     seen.add(k);
     return true;
   });
-  // Tips product-group card: counts and the first featured render (best-seller first).
+  // Tips product-group card: the first featured render (best-seller first).
   const tips: TipGroupStats = {
-    models: cards.length,
-    makes: byBrand.size,
     image: featured.find((x) => x.image)?.image ?? null,
   };
   return [
