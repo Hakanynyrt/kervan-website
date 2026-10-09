@@ -248,6 +248,14 @@ export interface Dict {
     tipLink: string;
     /** Under a part's caption: WhatsApp quote for exactly that model. */
     quoteThis: string;
+    /** Front heads sold with or without their bushings and pins. */
+    fitted: {
+      label: string;
+      without: string;
+      with: string;
+      withNote: string;
+      name: (part: string, withB: boolean) => string;
+    };
     quoteTitle: string;
     quoteBody: string;
     modelLabel: string;
@@ -719,6 +727,13 @@ export const DICT: Record<Lang, Dict> = {
       },
       tipLink: 'Bu kırıcının ucu',
       quoteThis: 'Bu model için teklif iste',
+      fitted: {
+        label: 'Seçenek',
+        without: 'Burçsuz',
+        with: 'Burçlu',
+        withNote: 'Burçlar ve pimler takılı',
+        name: (part, withB) => `${withB ? 'burçlu' : 'burçsuz'} ${part.toLocaleLowerCase('tr')}`,
+      },
       quoteTitle: 'Fiyat teklifi isteyin',
       quoteBody: 'Kırıcınızın marka ve modelini yazın; mesaja eklenir.',
       modelLabel: 'Kırıcı marka ve modeli',
@@ -1199,6 +1214,14 @@ export const DICT: Record<Lang, Dict> = {
       },
       tipLink: 'Tip for this breaker',
       quoteThis: 'Request a quote for this model',
+      fitted: {
+        label: 'Option',
+        without: 'Without bushings',
+        with: 'With bushings',
+        withNote: 'Bushings and pins fitted',
+        name: (part, withB) =>
+          `${part.toLowerCase()} ${withB ? 'with' : 'without'} bushings and pins`,
+      },
       quoteTitle: 'Request a quote',
       quoteBody: 'Type your breaker make and model; it goes into the message.',
       modelLabel: 'Breaker make and model',

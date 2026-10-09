@@ -187,14 +187,43 @@ function RenderFigure({
 }) {
   const { t } = ctx;
   const [open3d, setOpen3d] = useState(false);
+  // Front heads: Burçsuz (the plain head, also the prerendered state) or Burçlu (bushings and pins fitted).
+  const [withB, setWithB] = useState(false);
+  const shown = withB && r.fitted ? r.fitted : { hero: r.hero, views: r.views };
   const model = renderModel(r, t);
+  const partName = r.fitted ? t.parts.fitted.name(ctx.name, withB) : ctx.name;
   const caption = r.kind
     ? `${model} ${t.parts.renderKind[r.kind]}`
-    : t.parts.renderCaption(model, ctx.name);
+    : t.parts.renderCaption(model, partName);
   const tip = ctx.tipLinks[renderAnchor(r)];
   return (
     <figure id={id} className="m-0 scroll-mt-4">
-      {r.hero && (
+      {r.fitted && (
+        <div
+          role="group"
+          aria-label={t.parts.fitted.label}
+          className="mb-3 inline-flex rounded-sm border border-hair-strong font-sans text-sm"
+        >
+          {[false, true].map((on) => (
+            <button
+              key={String(on)}
+              type="button"
+              aria-pressed={withB === on}
+              onClick={() => {
+                setWithB(on);
+                setOpen3d(false);
+              }}
+              className={`min-h-11 cursor-pointer px-4 font-medium first:rounded-l-sm last:rounded-r-sm aria-pressed:bg-ink aria-pressed:text-bg ${on ? 'border-l border-hair-strong' : ''} text-ink hover:bg-bg-warm aria-pressed:hover:bg-ink ${FOCUS}`}
+            >
+              {on ? t.parts.fitted.with : t.parts.fitted.without}
+            </button>
+          ))}
+        </div>
+      )}
+      {r.fitted && withB && (
+        <p className="m-0 mb-3 font-sans text-sm text-ink-mid">{t.parts.fitted.withNote}</p>
+      )}
+      {shown.hero && (
         <div className="mb-4">
           {open3d && r.model3d ? (
             <Suspense fallback={<div className="aspect-video w-full rounded-md bg-stage" />}>
@@ -202,7 +231,7 @@ function RenderFigure({
             </Suspense>
           ) : (
             <div className="relative">
-              <HeroImg base={r.hero} alt={caption} lazy={lazy} />
+              <HeroImg base={shown.hero} alt={caption} lazy={lazy} />
               {r.model3d && (
                 <button
                   type="button"
@@ -226,8 +255,8 @@ function RenderFigure({
         </div>
       )}
       <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2">
-        {r.views.map((v, i) => (
-          <li key={v.base} className={i === 0 && !r.hero ? 'sm:col-span-2' : undefined}>
+        {shown.views.map((v, i) => (
+          <li key={v.base} className={i === 0 && !shown.hero ? 'sm:col-span-2' : undefined}>
             <Photo
               base={v.base}
               alt={`${caption}, ${t.parts.renderView[v.view]}`}
@@ -242,7 +271,7 @@ function RenderFigure({
         <span className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm">
           <a
             href={whatsappHref(
-              t.parts.text(r.kind ? t.parts.renderKind[r.kind] : ctx.name, model, ctx.qty),
+              t.parts.text(r.kind ? t.parts.renderKind[r.kind] : partName, model, ctx.qty),
             )}
             className={`inline-flex min-h-11 items-center font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
           >

@@ -34,6 +34,8 @@ export interface PartRender {
   hero?: string;
   /** Interactive 3D model (GLB, metres), opened on demand in PartViewer. */
   model3d?: string;
+  /** Front heads: the same head with its bushings and pins fitted ("burçlu"), shown by the Burçsuz / Burçlu switch. */
+  fitted?: { hero: string; views: { base: string; view: RenderView }[] };
   /** Breaker series: renders of one series share a sideways model picker (`<hero>-xs.webp` 320 px). */
   series?: string;
   /** Which bushing of the breaker (burç page): names it in the caption instead of the part name. */
@@ -1679,45 +1681,70 @@ const otherRender = ({ make, model, file, kind, views }: OtherPart): PartRender 
   };
 };
 
-export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
-  'alt-govde': [
-    {
-      model: 'Rammer E68',
-      series: 'Rammer',
-      hero: '/photos/parca/alt-govde-rammer-e68-vitrin-01',
-      model3d: '/models/alt-govde-rammer-e68-03.glb',
+/**
+ * Front heads with a "burçlu" picture set (bushings and pins fitted, modelled from our drawings):
+ * `/photos/parca/alt-govde-<slug>-burclu-{vitrin,on,arka,yan,montaj-kesit}-01`, slug as in the head's hero.
+ */
+const FITTED = new Set<string>([]);
+const withFitted = (r: PartRender): PartRender => {
+  const slug = r.hero?.match(/^\/photos\/parca\/alt-govde-(.+)-vitrin-[^-]+$/)?.[1];
+  if (!slug || !FITTED.has(slug)) return r;
+  const b = `/photos/parca/alt-govde-${slug}-burclu`;
+  return {
+    ...r,
+    fitted: {
+      hero: `${b}-vitrin-01`,
       views: [
-        { base: '/photos/parca/alt-govde-rammer-e68-on-03', view: 'front' },
-        { base: '/photos/parca/alt-govde-rammer-e68-arka-03', view: 'rear' },
-        { base: '/photos/parca/alt-govde-rammer-e68-yan-03', view: 'side' },
-        { base: '/photos/parca/alt-govde-rammer-e68-pencere-03', view: 'detail' },
-        { base: '/photos/parca/alt-govde-rammer-e68-montaj-kesit-02', view: 'assembly' },
+        { base: `${b}-on-01`, view: 'front' },
+        { base: `${b}-arka-01`, view: 'rear' },
+        { base: `${b}-yan-01`, view: 'side' },
+        { base: `${b}-montaj-kesit-01`, view: 'assembly' },
       ],
     },
-    ...RAMMER_ALT_GOVDE.map(seriesRender('Rammer', 'rammer')),
-    ...MTB_ALT_GOVDE.map(mtbRender),
-    ...KRUPP_ALT_GOVDE.map(seriesRender('Krupp', 'krupp')),
-    ...ATLAS_COPCO_ALT_GOVDE.map(seriesRender('Atlas Copco', 'atlas-copco')),
-    ...SOOSAN_ALT_GOVDE.map(seriesRender('Soosan', 'soosan')),
-    ...MONTABERT_ALT_GOVDE.map(seriesRender('Montabert', 'montabert')),
-    ...FURUKAWA_ALT_GOVDE.map(seriesRender('Furukawa', 'furukawa')),
-    ...OKADA_ALT_GOVDE.map(seriesRender('Okada', 'okada')),
-    ...TOYO_ALT_GOVDE.map(seriesRender('Toyo', 'toyo')),
-    ...NPK_ALT_GOVDE.map(seriesRender('NPK', 'npk')),
-    ...INDECO_ALT_GOVDE.map(seriesRender('Indeco', 'indeco')),
-    ...DAEMO_ALT_GOVDE.map(seriesRender('Daemo', 'daemo')),
-    ...HANWOO_ALT_GOVDE.map(seriesRender('Hanwoo', 'hanwoo')),
-    ...DNB_ALT_GOVDE.map(seriesRender('DNB', 'dnb')),
-    ...CAT_ALT_GOVDE.map(seriesRender('Cat', 'cat')),
-    ...MSB_ALT_GOVDE.map(seriesRender('MSB', 'msb')),
-    ...TOKU_ALT_GOVDE.map(seriesRender('Toku', 'toku')),
-    ...KWANGLIM_ALT_GOVDE.map(seriesRender('Kwanglim', 'kwanglim')),
-    ...DA_ALT_GOVDE.map(seriesRender('D&A', 'da')),
-    ...TOPA_ALT_GOVDE.map(seriesRender('Topa', 'topa')),
-    ...MEGA_ALT_GOVDE.map(seriesRender('Mega', 'mega')),
-    ...KENT_ALT_GOVDE.map(seriesRender('Kent', 'kent')),
-    ...TAMROCK_ALT_GOVDE.map(seriesRender('Tamrock', 'tamrock')),
-  ],
+  };
+};
+
+export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
+  'alt-govde': (
+    [
+      {
+        model: 'Rammer E68',
+        series: 'Rammer',
+        hero: '/photos/parca/alt-govde-rammer-e68-vitrin-01',
+        model3d: '/models/alt-govde-rammer-e68-03.glb',
+        views: [
+          { base: '/photos/parca/alt-govde-rammer-e68-on-03', view: 'front' },
+          { base: '/photos/parca/alt-govde-rammer-e68-arka-03', view: 'rear' },
+          { base: '/photos/parca/alt-govde-rammer-e68-yan-03', view: 'side' },
+          { base: '/photos/parca/alt-govde-rammer-e68-pencere-03', view: 'detail' },
+          { base: '/photos/parca/alt-govde-rammer-e68-montaj-kesit-02', view: 'assembly' },
+        ],
+      },
+      ...RAMMER_ALT_GOVDE.map(seriesRender('Rammer', 'rammer')),
+      ...MTB_ALT_GOVDE.map(mtbRender),
+      ...KRUPP_ALT_GOVDE.map(seriesRender('Krupp', 'krupp')),
+      ...ATLAS_COPCO_ALT_GOVDE.map(seriesRender('Atlas Copco', 'atlas-copco')),
+      ...SOOSAN_ALT_GOVDE.map(seriesRender('Soosan', 'soosan')),
+      ...MONTABERT_ALT_GOVDE.map(seriesRender('Montabert', 'montabert')),
+      ...FURUKAWA_ALT_GOVDE.map(seriesRender('Furukawa', 'furukawa')),
+      ...OKADA_ALT_GOVDE.map(seriesRender('Okada', 'okada')),
+      ...TOYO_ALT_GOVDE.map(seriesRender('Toyo', 'toyo')),
+      ...NPK_ALT_GOVDE.map(seriesRender('NPK', 'npk')),
+      ...INDECO_ALT_GOVDE.map(seriesRender('Indeco', 'indeco')),
+      ...DAEMO_ALT_GOVDE.map(seriesRender('Daemo', 'daemo')),
+      ...HANWOO_ALT_GOVDE.map(seriesRender('Hanwoo', 'hanwoo')),
+      ...DNB_ALT_GOVDE.map(seriesRender('DNB', 'dnb')),
+      ...CAT_ALT_GOVDE.map(seriesRender('Cat', 'cat')),
+      ...MSB_ALT_GOVDE.map(seriesRender('MSB', 'msb')),
+      ...TOKU_ALT_GOVDE.map(seriesRender('Toku', 'toku')),
+      ...KWANGLIM_ALT_GOVDE.map(seriesRender('Kwanglim', 'kwanglim')),
+      ...DA_ALT_GOVDE.map(seriesRender('D&A', 'da')),
+      ...TOPA_ALT_GOVDE.map(seriesRender('Topa', 'topa')),
+      ...MEGA_ALT_GOVDE.map(seriesRender('Mega', 'mega')),
+      ...KENT_ALT_GOVDE.map(seriesRender('Kent', 'kent')),
+      ...TAMROCK_ALT_GOVDE.map(seriesRender('Tamrock', 'tamrock')),
+    ] satisfies PartRender[]
+  ).map(withFitted),
   burc: [
     ...RAMMER_BURC.map(bushingRender('Rammer')),
     ...MTB_BURC.map(bushingRender('MTB')),
