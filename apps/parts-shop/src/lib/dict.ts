@@ -428,8 +428,7 @@ export const DICT: Record<Lang, Dict> = {
       count: (n) => `${n} kırıcı modeli`,
       pick: {
         alt: 'Bir hidrolik kırıcının ürettiğimiz parçaları yan yana: akümülatör, saplamalar, piston, burçlar, alt gövde, kama, aşınma plakaları ve kırıcı ucu',
-        caption:
-          'Ürettiğimiz parçalar, kendi çizimlerimizden modellenmiş görsel. Bir parçaya tıklayın, kırıcınızı yazın.',
+        caption: 'Ürettiğimiz parçalar, 3B görsel. Bir parçaya tıklayın, kırıcınızı yazın.',
         listLabel: 'Parça seçin',
         tips: 'Kırıcı ucu',
         label: (x) => `${x}: kırıcınızın markası ve modeli`,
@@ -519,7 +518,7 @@ export const DICT: Record<Lang, Dict> = {
       stockAlt: (i) => `Kervan atölyesinde stoktaki kırıcı uçları (${i})`,
       groovedTitle: 'Toz kanallı uçlar',
       groovedNote:
-        'Bu kırıcı için ürettiğimiz toz kanallı uçlar, kendi çizimimizden modellenmiş görseller. Fiyat için teklif isteyin.',
+        'Bu kırıcı için ürettiğimiz toz kanallı uçlar; görseller 3B modeldir. Fiyat için teklif isteyin.',
       groovedAlt: (type) =>
         type ? `Toz kanallı ${type.toLocaleLowerCase('tr')} uç` : 'Toz kanallı kırıcı ucu',
       angle: 'Uç açısı',
@@ -923,7 +922,7 @@ export const DICT: Record<Lang, Dict> = {
       },
       showcase: {
         title: 'Ürettiklerimizden',
-        lead: 'Kendi çizimlerimizden modellenmiş parçalar. Marka ve modelinizi yazınca o kırıcının parçaları açılır.',
+        lead: 'Ürettiğimiz parçalardan örnekler. Marka ve modelinizi yazınca o kırıcının parçaları açılır.',
         alt: (part, i) => `${part} örneği ${i}`,
       },
       tipLink: 'Bu kırıcının ucu',
@@ -956,7 +955,7 @@ export const DICT: Record<Lang, Dict> = {
       noPhoto: 'Fotoğraf yakında',
     },
     imgNote: 'Görseller temsilidir.',
-    renderNote: 'Kendi çizimlerimizden 3B görseller; temsilidir.',
+    renderNote: '3B görseller; temsilidir.',
     photoNote: 'Atölyemizdeki stoktan, gerçek fotoğraflar.',
     oem: 'OEM / orijinal kalitesinde, orijinalle aynı üretilir.',
     legal: {
@@ -1076,8 +1075,7 @@ export const DICT: Record<Lang, Dict> = {
       count: (n) => `${n} breaker models`,
       pick: {
         alt: 'The parts we make for a hydraulic breaker, side by side: accumulator, tie rods, piston, bushings, front head, key, wear plates and tool',
-        caption:
-          'The parts we make, modelled from our own drawings. Pick a part, then type your breaker.',
+        caption: 'The parts we make, as 3D images. Pick a part, then type your breaker.',
         listLabel: 'Pick a part',
         tips: 'Breaker tool',
         label: (x) => `${x}: your breaker's make and model`,
@@ -1163,7 +1161,7 @@ export const DICT: Record<Lang, Dict> = {
       stockAlt: (i) => `Breaker tips in stock at the Kervan plant (${i})`,
       groovedTitle: 'Tools with dust grooves',
       groovedNote:
-        'Tools with dust grooves we make for this breaker, rendered from our own drawing. Ask for a quote.',
+        'Tools with dust grooves we make for this breaker; the pictures are 3D models. Ask for a quote.',
       groovedAlt: (type) =>
         type ? `${type} tool with dust grooves` : 'Breaker tool with dust grooves',
       angle: 'Tip angle',
@@ -1574,7 +1572,7 @@ export const DICT: Record<Lang, Dict> = {
       },
       showcase: {
         title: 'Some of what we make',
-        lead: 'Parts modelled from our own drawings. Type your make and model to open that breaker’s parts.',
+        lead: 'Examples of the parts we make. Type your make and model to open that breaker’s parts.',
         alt: (part, i) => `${part} example ${i}`,
       },
       tipLink: 'Tip for this breaker',
@@ -1608,7 +1606,7 @@ export const DICT: Record<Lang, Dict> = {
       noPhoto: 'Photo coming soon',
     },
     imgNote: 'Images are for illustration.',
-    renderNote: '3D images from our own drawings; for illustration.',
+    renderNote: '3D images; for illustration.',
     photoNote: 'Real photos of our stock at the plant.',
     oem: 'Made to OEM / original quality, identical to the original.',
     legal: {

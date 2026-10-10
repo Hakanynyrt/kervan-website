@@ -1753,8 +1753,18 @@ const WEAR_PLATES: OtherPart[] = [
   },
 ];
 /** Nuts, washers, pins, plugs, buffers and plates (`small-parts.ts`): hero plus side, front and rear. */
+/**
+ * Small parts publish few files (Pages' 20,000-file limit, see check-dist): the hero, plus the side
+ * view for plates and buffers; round pins, washers, nuts and plugs show everything in the hero.
+ */
 const smallRender = ({ make, model, file, kind, variant }: SmallPart): PartRender => ({
-  ...otherRender({ make, model, file, kind, views: ['side', 'front', 'rear'] }),
+  ...otherRender({
+    make,
+    model,
+    file,
+    kind,
+    views: /^(asinma|takoz|saplama-takim)-/.test(file) ? ['side'] : [],
+  }),
   ...(variant ? { variant } : {}),
 });
 const otherRender = ({ make, model, file, kind, views }: OtherPart): PartRender => {
@@ -2020,10 +2030,7 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
   saplama: [
     ...PART_KIT.map(kitRender('saplama', 'tieRod', ['side', 'front'])),
     ...SIDE_BOLTS.map(otherRender),
-    ...ROD_SETS.map((p) => ({
-      ...smallRender(p),
-      views: smallRender(p).views.filter((v) => v.view !== 'rear'),
-    })),
+    ...ROD_SETS.map(smallRender),
     ...SMALL_PARTS.saplama.map(smallRender),
   ],
   piston: PART_KIT.map(kitRender('piston', 'piston', ['front', 'rear', 'side', 'section'])),

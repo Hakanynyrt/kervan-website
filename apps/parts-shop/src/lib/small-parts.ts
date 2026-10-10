@@ -1,5 +1,5 @@
 /** Generated from the owner's drawings (nuts, washers, pins, plugs, buffers, wear plates): one render each,
- *  `/photos/parca/<file>-{vitrin,yan,on,arka}-01`. Names come from the drawing titles (`kind`), never part numbers. */
+ *  `/photos/parca/<file>-vitrin-01` (and `-yan-01` for plates and buffers). Names come from the drawing titles (`kind`), never part numbers. */
 import type { PartRender } from './photos';
 
 export interface SmallPart {

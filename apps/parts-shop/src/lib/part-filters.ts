@@ -83,6 +83,9 @@ export const PART_FILTERS: Partial<Record<PartKey, [PartFilter, readonly Kind[]]
   ],
 };
 
+/** The chip a group page opens on (owner: the burç tab opens on the bushing sets). */
+export const DEFAULT_FILTER: Partial<Record<PartKey, PartFilter>> = { burc: 'sets' };
+
 /** The filters a group page offers: only those with at least one render. */
 export const filtersFor = (part: PartKey, all: readonly PartRender[]) =>
   (PART_FILTERS[part] ?? []).filter(([, kinds]) =>

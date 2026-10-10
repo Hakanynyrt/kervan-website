@@ -21,7 +21,7 @@ import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { SITE } from '../lib/page-head';
 import { renderModel, renderTitle } from '../lib/part-caption';
-import { filtersFor, inFilter, type PartFilter } from '../lib/part-filters';
+import { DEFAULT_FILTER, filtersFor, inFilter, type PartFilter } from '../lib/part-filters';
 import { renderAnchor } from '../lib/part-links';
 import { PART_PHOTOS, PART_RENDERS, type PartRender } from '../lib/photos';
 import { PARTS_PATH, partItemPath, type PageModel, type PartKey } from '../lib/routes';
@@ -67,19 +67,25 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
   const every = PART_RENDERS[model.part];
   // "Parça türü" chips: narrow the search and the showcase to some kinds (e.g. 3'ü bir arada burçlar).
   const filters = filtersFor(model.part, every);
-  const [filter, setFilter] = useState<PartFilter | null>(null);
+  const [filter, setFilter] = useState<PartFilter | null>(
+    filters.some(([f]) => f === DEFAULT_FILTER[model.part]) ? DEFAULT_FILTER[model.part]! : null,
+  );
   const kinds = filters.find(([f]) => f === filter)?.[1];
   const all = kinds ? every.filter((r) => inFilter(r, kinds)) : every;
   // `?q=` from the home search, or `#<anchor>` (a model's link) opens that model's results.
   useEffect(() => {
     const v = new URLSearchParams(window.location.search).get('q');
     if (v) {
+      setFilter(null);
       setQ(v);
       return;
     }
     const hash = decodeURIComponent(window.location.hash.slice(1));
     const r = hash ? every.find((x) => renderAnchor(x) === hash) : undefined;
-    if (r) setQ(renderName(r, t));
+    if (r) {
+      setFilter(null);
+      setQ(renderName(r, t));
+    }
     // Only on load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
