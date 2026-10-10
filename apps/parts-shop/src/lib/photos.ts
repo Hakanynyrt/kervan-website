@@ -1120,7 +1120,11 @@ const VIEW_FILE: Record<RenderView, string> = {
  * MALZEMESİ: PU SH80" / "POLİÜRETAN", moulded in the "lastik kalıbı"; owner: nearly every MTB
  * rod gets it). Rendered in the wear plates' yellow PU (the coating covers the collar's chamfers too, owner: "biz öyle yapıyoruz"), version 03, captioned "PU kaplamalı".
  */
-const PU_COATED_SAPLAMA: Record<string, string> = { 'mtb-85': '03', 'mtb-150': '03', 'mtb-210': '03' };
+const PU_COATED_SAPLAMA: Record<string, string> = {
+  'mtb-85': '03',
+  'mtb-150': '03',
+  'mtb-210': '03',
+};
 const kitRender =
   (part: string, kind: NonNullable<PartRender['kind']>, views: RenderView[]) =>
   ({ make, model, file }: (typeof PART_KIT)[number]): PartRender => {
