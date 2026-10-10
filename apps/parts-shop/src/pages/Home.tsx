@@ -1,30 +1,17 @@
 import { Container } from '@kervan/ui';
 import { Photo } from '../components/Bits';
 import FamilyCardView from '../components/FamilyCardView';
-import { SearchForm } from '../components/ModelSearch';
+import ExplodedPicker from '../components/ExplodedPicker';
 import { PartGroups } from '../components/PartGroups';
 import { FOCUS, FOCUS_INSET, whatsappHref } from '../components/Layout';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { PART_RENDERS, STOCK_TIP_PHOTOS } from '../lib/photos';
-import {
-  LIST_PATH,
-  PARTS_PATH,
-  POPULAR_PATH,
-  partPath,
-  type PageModel,
-  type PartKey,
-} from '../lib/routes';
+import { STOCK_TIP_PHOTOS } from '../lib/photos';
+import { LIST_PATH, PARTS_PATH, POPULAR_PATH, type PageModel } from '../lib/routes';
 import type { Lang } from '../types';
 
 type Model = Extract<PageModel, { kind: 'home' }>;
 
-/** Hero composite: the front head with the 3D model (Rammer E68), then three part thumbnails. */
-const LEAD =
-  PART_RENDERS['alt-govde'].find((r) => r.model3d && r.hero) ??
-  PART_RENDERS['alt-govde'].find((r) => r.hero)!;
-const THUMB_KEYS: PartKey[] = ['burc', 'piston', 'kama'];
-const THUMBS = THUMB_KEYS.map((k) => ({ k, hero: PART_RENDERS[k].find((r) => r.hero)?.hero }));
 /** Breaker models, not renders (old-type / round-nut variants count once), as on the group cards. */
 const MAKES_SHOWN = 12;
 
@@ -62,7 +49,6 @@ function SectionHead({
 
 export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const h = t.home;
-  const leadCaption = t.parts.renderCaption(LEAD.model, t.parts.items['alt-govde'].name);
   const makes = [...model.brands]
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'tr'))
     .slice(0, MAKES_SHOWN)
@@ -76,78 +62,31 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
   return (
     <>
       <section className="border-b border-hair bg-bg-soft">
-        <Container className="py-12 md:py-16">
-          <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14">
-            <div>
+        <Container className="py-10 md:py-14">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-x-10 lg:gap-y-8">
+            <div className="max-w-3xl">
               <h1 className="m-0 font-sans text-4xl font-bold leading-tight text-ink md:text-5xl">
                 {h.title}
               </h1>
-              <p className="m-0 mt-5 max-w-xl font-sans text-lg text-ink-mid">{h.lead}</p>
-              <div className="mt-8 max-w-xl">
-                <SearchForm lang={lang} t={t} />
-              </div>
-              <div className="mt-8 flex flex-wrap gap-3 font-sans text-sm font-medium">
-                <a
-                  href={localePath(PARTS_PATH, lang)}
-                  className={`rounded-sm bg-brand px-6 py-3 text-on-brand hover:bg-brand-hi ${FOCUS}`}
-                >
-                  {h.allGroups}
-                </a>
-                <a
-                  href={whatsappHref(t.nav.quoteText)}
-                  className={`rounded-sm border border-ink-soft bg-bg px-6 py-3 text-ink hover:bg-bg-warm ${FOCUS}`}
-                >
-                  {h.ctaQuote}
-                </a>
-              </div>
+              <p className="m-0 mt-4 font-sans text-lg text-ink-mid">{h.lead}</p>
             </div>
-            <figure className="m-0">
-              <div className="overflow-hidden rounded-md border border-hair bg-stage">
-                <a
-                  href={localePath(partPath('alt-govde'), lang)}
-                  className={`block ${FOCUS_INSET}`}
-                >
-                  <img
-                    src={`${LEAD.hero}-lg.webp`}
-                    width={1600}
-                    height={900}
-                    alt={leadCaption}
-                    fetchPriority="high"
-                    decoding="async"
-                    className="block aspect-video h-auto w-full"
-                  />
-                </a>
-                <nav aria-label={h.heroMore}>
-                  <ul className="m-0 grid list-none grid-cols-3 divide-x divide-ink-mid/40 border-t border-ink-mid/40 p-0">
-                    {THUMBS.map(({ k, hero }) => (
-                      <li key={k}>
-                        <a
-                          href={localePath(partPath(k), lang)}
-                          className={`block p-2 hover:bg-ink ${FOCUS_INSET}`}
-                        >
-                          {hero && (
-                            <img
-                              src={`${hero}-xs.webp`}
-                              width={320}
-                              height={180}
-                              alt=""
-                              decoding="async"
-                              className="block aspect-video h-auto w-full"
-                            />
-                          )}
-                          <span className="block px-1 pt-1.5 font-sans text-xs font-medium text-white">
-                            {t.parts.items[k].name}
-                          </span>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-              </div>
-              <figcaption className="mt-2 font-sans text-xs text-ink-soft">
-                {h.heroCaption(leadCaption)}
-              </figcaption>
-            </figure>
+            <div className="order-last flex flex-wrap gap-3 font-sans text-sm font-medium lg:order-none">
+              <a
+                href={localePath(PARTS_PATH, lang)}
+                className={`rounded-sm border border-ink-soft bg-bg px-5 py-3 text-ink hover:bg-bg-warm ${FOCUS}`}
+              >
+                {h.allGroups}
+              </a>
+              <a
+                href={whatsappHref(t.nav.quoteText)}
+                className={`rounded-sm border border-ink-soft bg-bg px-5 py-3 text-ink hover:bg-bg-warm ${FOCUS}`}
+              >
+                {h.ctaQuote}
+              </a>
+            </div>
+            <div className="lg:col-span-2">
+              <ExplodedPicker lang={lang} t={t} />
+            </div>
           </div>
         </Container>
       </section>
