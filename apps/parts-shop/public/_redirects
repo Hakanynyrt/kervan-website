@@ -5,3 +5,7 @@
 # The cart was renamed "palet" (owner); keep old links working.
 /sepet /palet 301
 /en/sepet /en/palet 301
+
+# The Krupp HM 1500 body dowel moved from the tie rods to the front heads (owner).
+/yedek-parca/saplama/krupp-hm-1500-bodydowel /yedek-parca/alt-govde/krupp-hm-1500-bodydowel 301
+/en/yedek-parca/saplama/krupp-hm-1500-bodydowel /en/yedek-parca/alt-govde/krupp-hm-1500-bodydowel 301

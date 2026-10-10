@@ -66,7 +66,11 @@ export interface TipSpec {
    * Moil only: the cone in two stages (owner). The main cone at `angle` runs from the body down
    * to radius `rMid`, then a blunter cone at `angle2` runs to the point.
    */
-  point?: { rMid: number; angle2: number };
+  point?: {
+    rMid: number;
+    angle2: number;
+    /** Radius of a flat end face (none: a rounded point). */ flat?: number;
+  };
   /** Chisel edge relative to the key slots. */
   chiselEdge: 'parallel' | 'perpendicular';
 }

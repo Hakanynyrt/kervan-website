@@ -583,7 +583,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     search: {
       label: 'Kırıcı modeli ara',
-      placeholder: 'Ör. HB 20G, MB 700, Furukawa F22',
+      placeholder: 'Kırıcınızın marka ve modeli, ör. Furukawa HB 20G',
       button: 'Ara',
       none: (q) => `"${q}" için model bulunamadı.`,
       count: (n) => `${n} model`,
@@ -1273,7 +1273,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     search: {
       label: 'Search breaker model',
-      placeholder: 'E.g. HB 20G, MB 700, Furukawa F22',
+      placeholder: 'Your breaker make and model, e.g. Furukawa HB 20G',
       button: 'Search',
       none: (q) => `No model found for "${q}".`,
       count: (n) => `${n} models`,

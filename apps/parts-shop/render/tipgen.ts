@@ -200,12 +200,54 @@ function profileRuns(s: TipSpec): Run[] {
         mat: MAT.GROUND,
       });
     }
-    const cap: [number, number][] = [];
-    for (let i = 0; i <= 12; i++) {
-      const b = half + ((Math.PI / 2 - half) * i) / 12;
-      cap.push([rho * Math.cos(b), L - rho + rho * Math.sin(b)]);
+    if (s.point?.flat) {
+      // Flat end (our drawings: Ø0.2 × D with about R 0.05 × D at the edge): the point cone stops at
+      // the edge round, then the end face. Replaces the spherical cap.
+      tip.length = 0;
+      const half1 = deg(s.angle! / 2);
+      const rf = s.point.flat,
+        re = 0.05 * D;
+      const phi = Math.PI / 2 - half; // turn from the cone onto the end face
+      const t = re * Math.tan(phi / 2);
+      const rc = rf + t; // sharp corner of cone and face
+      const dir: [number, number] = [-Math.sin(half), Math.cos(half)]; // along the cone, inwards
+      const T1: [number, number] = [rc - t * dir[0], L - t * dir[1]];
+      const rm = Math.max(s.point.rMid, T1[0] + 0.5);
+      const ym = T1[1] - (rm - T1[0]) / Math.tan(half);
+      workStart = ym - (R - rm) / Math.tan(half1);
+      tip.push({
+        pts: [
+          [R, workStart],
+          [rm, ym],
+        ],
+        mat: MAT.GROUND,
+      });
+      tip.push({ pts: [[rm, ym], T1], mat: MAT.GROUND });
+      const arc: [number, number][] = [];
+      for (let i = 0; i <= 8; i++) {
+        const u = i / 8,
+          v = 1 - u;
+        arc.push([
+          v * v * T1[0] + 2 * u * v * rc + u * u * rf,
+          v * v * T1[1] + 2 * u * v * L + u * u * L,
+        ]);
+      }
+      tip.push({ pts: arc, mat: MAT.GROUND, smooth: true });
+      tip.push({
+        pts: [
+          [rf, L],
+          [0, L],
+        ],
+        mat: MAT.GROUND,
+      });
+    } else {
+      const cap: [number, number][] = [];
+      for (let i = 0; i <= 12; i++) {
+        const b = half + ((Math.PI / 2 - half) * i) / 12;
+        cap.push([rho * Math.cos(b), L - rho + rho * Math.sin(b)]);
+      }
+      tip.push({ pts: cap, mat: MAT.GROUND, smooth: true });
     }
-    tip.push({ pts: cap, mat: MAT.GROUND, smooth: true });
   } else if (s.type === 'blunt') {
     const c = 0.07 * D;
     workStart = L - c;
