@@ -581,7 +581,8 @@ function wedgePrism(s: TipSpec, e: number): THREE.BufferGeometry {
   const th = Math.tan(deg(s.angle! / 2));
   const W = maxRadius(s) + 60;
   const yW = s.L - (W - e / 2) / th;
-  const xk = Math.max(0.3, e / 2 - th);
+  // Where the flat sits 1 mm past the end (y = L + 1): half the land less 1 mm × the face slope.
+  const xk = Math.max(0.3, e / 2 - 1 * th);
   const sh = new THREE.Shape();
   sh.moveTo(-W, -60);
   sh.lineTo(W, -60);
@@ -620,7 +621,9 @@ export function buildTip(s: TipSpec, materials: THREE.Material[], segs = 160): T
   }
 
   if (s.type === 'chisel' || s.type === 'pyramid') {
-    const e = Math.max(3, 0.03 * s.D); // edge land
+    // Edge land; a pyramid ends in a wider square land, like OEM points (about 0.06 × D, 4 mm min).
+    // Only pyramids change: their angle is in the spec, so their render keys change with it.
+    const e = s.type === 'pyramid' ? Math.max(4, 0.06 * s.D) : Math.max(3, 0.03 * s.D);
     const wedge = wedgePrism(s, e);
     // Default flats face ±X, so the edge runs along Z: perpendicular to the slot faces.
     const base = s.chiselEdge === 'parallel' ? Math.PI / 2 : 0;

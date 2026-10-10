@@ -7,6 +7,8 @@
 /* Dark stage behind the tip renders: their ember rim light is made for a dark background. */
 @theme {
   --color-stage: #141416;
+  /* Gallery frame: the renders' own edge tone, so the bands round a 16:9 picture blend in. */
+  --color-stage-deep: #0e0e0f;
   /* Text on bg-brand buttons: white on the light theme's dark ember, ink on the night theme's light one. */
   --color-on-brand: #ffffff;
 }
@@ -150,4 +152,36 @@
 :root[data-kv-open] .kv-open-spots {
   opacity: 0;
   pointer-events: none;
+}
+/* Picture, part list, search stacked; on lg+ the list is a column left of the picture that opens
+   slowly once the breaker has come apart (owner: "kırıcı dağıldıktan sonra yavaşça açılsın"). */
+.kv-pick {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem 0;
+}
+.kv-pick-side {
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1) 350ms;
+}
+:root[data-kv-open] .kv-pick-side {
+  opacity: 0;
+  visibility: hidden;
+}
+@media (min-width: 64rem) {
+  .kv-pick {
+    grid-template-columns: 13.5rem minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    column-gap: 1.25rem;
+    align-items: start;
+    transition:
+      grid-template-columns 1100ms cubic-bezier(0.22, 1, 0.36, 1),
+      column-gap 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  :root[data-kv-open] .kv-pick {
+    grid-template-columns: 0rem minmax(0, 1fr);
+    column-gap: 0;
+  }
+  .kv-pick-side {
+    overflow: hidden;
+  }
 }

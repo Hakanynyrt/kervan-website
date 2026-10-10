@@ -245,7 +245,7 @@ export function Photo({
       alt={alt}
       loading={lazy ? 'lazy' : undefined}
       decoding="async"
-      className="block h-auto w-full rounded-md border border-hair bg-bg-warm"
+      className={`block h-auto w-full rounded-md border border-hair ${single ? 'bg-stage' : 'bg-bg-warm'}`}
     />
   );
 }
@@ -304,31 +304,5 @@ export function OemLine({ t, kit = false }: { t: Dict; kit?: boolean }) {
     <p className="m-0 mt-2 font-sans text-base font-semibold text-ink">
       {kit ? t.parts.kit.oem : t.oem}
     </p>
-  );
-}
-
-/** 16:9 showcase picture (`<base>-lg.webp`, 1600 px, the only size published) on the dark stage. */
-export function HeroImg({
-  base,
-  alt,
-  className = '',
-  lazy = false,
-}: {
-  base: string;
-  alt: string;
-  className?: string;
-  /** Below the first screen: let the browser defer it. */
-  lazy?: boolean;
-}) {
-  return (
-    <img
-      src={`${base}-lg.webp`}
-      loading={lazy ? 'lazy' : undefined}
-      width={1600}
-      height={900}
-      alt={alt}
-      decoding="async"
-      className={`block h-auto w-full rounded-md border border-hair bg-stage ${className}`}
-    />
   );
 }
