@@ -1,5 +1,5 @@
 import { REPAIR_KITS, type RepairKit } from './repair-kits';
-import { ROD_SETS, SMALL_PARTS, WEAR_SETS, type SmallPart } from './small-parts';
+import { BUSHING_SETS, ROD_SETS, SMALL_PARTS, WEAR_SETS, type SmallPart } from './small-parts';
 import type { PartKey } from './routes';
 
 /**
@@ -110,7 +110,8 @@ export interface PartRender {
     | 'upperBushingPin'
     | 'upperBushingPinPlug'
     | 'tieRodSet'
-    | 'wearPlateSet';
+    | 'wearPlateSet'
+    | 'bushingSet';
   /** Another version of the same breaker's part, named in the caption through the dict. */
   variant?:
     | 'oldType'
@@ -2008,6 +2009,7 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
     ...EURORAM_BURC.map(bushingRender('Euroram')),
     ...TAMROCK_BURC.map(bushingRender('Tamrock')),
     ...ATLAS_COPCO_COP_BURC.map(bushingRender('Atlas Copco COP')),
+    ...BUSHING_SETS.map((p) => ({ ...smallRender(p), series: p.make, views: [] })),
     ...SMALL_PARTS.burc.map(smallRender),
   ],
   kama: [

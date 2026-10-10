@@ -22,6 +22,7 @@ export type PartFilter =
 
 export const PART_FILTERS: Partial<Record<PartKey, [PartFilter, readonly Kind[]][]>> = {
   burc: [
+    ['sets', ['bushingSet']],
     ['toolBushing', ['toolBushing']],
     ['upperBushing', ['upperBushing']],
     ['thrustRing', ['thrustRing', 'spacerBushing', 'rockDrillThrustRing']],

@@ -771,6 +771,7 @@ export const DICT: Record<Lang, Dict> = {
         allRoundWearPlate: 'üst-alt-yan aşınma plakası',
         tieRodSet: 'boy saplama takımı (somun ve pullarıyla)',
         wearPlateSet: 'aşınma plakası ve takoz seti',
+        bushingSet: 'burç takımı',
       },
       renderKindShort: {
         toolBushing: 'Kafa burcu',
@@ -827,6 +828,7 @@ export const DICT: Record<Lang, Dict> = {
         allRoundWearPlate: 'Aşınma plakası',
         tieRodSet: 'Somunlu takım',
         wearPlateSet: 'Set',
+        bushingSet: 'Burç takımı',
       },
       filter: {
         label: 'Parça türü',
@@ -1415,6 +1417,7 @@ export const DICT: Record<Lang, Dict> = {
         allRoundWearPlate: 'top, bottom and side wear plate',
         tieRodSet: 'through bolt set (with nuts and washers)',
         wearPlateSet: 'wear plate and buffer set',
+        bushingSet: 'bushing set',
       },
       renderKindShort: {
         toolBushing: 'Tool bushing',
@@ -1471,6 +1474,7 @@ export const DICT: Record<Lang, Dict> = {
         allRoundWearPlate: 'Wear plate',
         tieRodSet: 'Set with nuts',
         wearPlateSet: 'Set',
+        bushingSet: 'Bushing set',
       },
       filter: {
         label: 'Part type',
