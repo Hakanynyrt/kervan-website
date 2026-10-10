@@ -12,7 +12,7 @@ import { Container } from '@kervan/ui';
 import { ORG_EMAIL } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
 import { fmtMm, fmtNum } from '../lib/format';
-import { STOCK_TIP_PHOTOS } from '../lib/photos';
+import { STOCK_TIP_PHOTOS, type GROOVED_TOOLS } from '../lib/photos';
 import { addToCart } from '../lib/cart';
 import { fmtDate, fmtTry, fmtUsd, vatOf } from '../lib/price';
 import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
@@ -60,6 +60,8 @@ interface Props {
   path: string;
   /** Other parts we model for this breaker (cards on the part pages). */
   parts?: PartLink[];
+  /** Tools with dust grooves we model for this breaker (renders), shown before our stock photos. */
+  grooved?: (typeof GROOVED_TOOLS)[number][];
   fx: FxRate | null;
   lang: Lang;
   t: Dict;
@@ -90,6 +92,7 @@ export default function TipProduct({
   extra,
   path,
   parts = [],
+  grooved = [],
   fx,
   lang,
   t,
@@ -374,6 +377,38 @@ export default function TipProduct({
               </li>
             ))}
           </ul>
+        </section>
+      )}
+
+      {grooved.length > 0 && (
+        <section aria-labelledby="grooved" className="mt-12">
+          <h2 id="grooved" className="m-0 font-sans text-xl font-bold text-ink">
+            {tf.groovedTitle}
+          </h2>
+          <p className="m-0 mt-1 font-sans text-sm text-ink-mid">{tf.groovedNote}</p>
+          <ul className="m-0 mt-4 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-3">
+            {grooved.map((g) => (
+              <li key={g.base}>
+                <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
+                  <img
+                    src={`${g.base}-vitrin-01-lg.webp`}
+                    srcSet={`${g.base}-vitrin-01-xs.webp 320w, ${g.base}-vitrin-01-lg.webp 1600w`}
+                    sizes="(min-width: 640px) 33vw, 100vw"
+                    width={1600}
+                    height={900}
+                    alt={tf.groovedAlt(g.tipType ? t.tip[g.tipType] : null)}
+                    loading="lazy"
+                    decoding="async"
+                    className="block aspect-video h-auto w-full"
+                  />
+                  <figcaption className="bg-bg px-3 py-2 font-sans text-sm font-medium text-ink">
+                    {tf.groovedAlt(g.tipType ? t.tip[g.tipType] : null)}
+                  </figcaption>
+                </figure>
+              </li>
+            ))}
+          </ul>
+          <ImgNote t={t} kind="render" className="mt-2" />
         </section>
       )}
 

@@ -25,8 +25,9 @@ const BASE = '/photos/parca/acilis';
 const FINAL = `${BASE}-acik-01`;
 const KABIN = 36;
 const FRAMES = 48;
-const src = (kind: 'kabin' | 'kare', i: number, size: 'sm' | 'lg') =>
-  `${BASE}-${kind}-01-${String(i).padStart(2, '0')}-${size}.webp`;
+/** One size only (1600 px) for every screen: the frames count against Pages' file limit. */
+const src = (kind: 'kabin' | 'kare', i: number) =>
+  `${BASE}-${kind}-01-${String(i).padStart(2, '0')}-lg.webp`;
 /** Timeline (ms): pause on the housed breaker, housing slide, cylinder fade, opening. */
 const HOLD = 500;
 const SLIDE = 1200;
@@ -105,11 +106,10 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
         /* storage blocked: it plays again next time */
       }
     };
-    const size = window.matchMedia('(min-width: 1024px)').matches ? 'lg' : 'sm';
     const load = (kind: 'kabin' | 'kare', n: number) =>
       Array.from({ length: n }, (_, i) => {
         const im = new Image();
-        im.src = src(kind, i, size);
+        im.src = src(kind, i);
         return im;
       });
     const kabin = load('kabin', KABIN);
@@ -204,9 +204,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
           {/* The breaker in its housing, shown only while the opening is pending (lazy: never fetched
               otherwise), and the canvas the frames play on. */}
           <img
-            src={src('kabin', 0, 'lg')}
-            srcSet={`${src('kabin', 0, 'sm')} 1000w, ${src('kabin', 0, 'lg')} 1600w`}
-            sizes="(min-width: 1024px) 1200px, 100vw"
+            src={src('kabin', 0)}
             width={W}
             height={H}
             alt=""

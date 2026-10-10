@@ -21,6 +21,7 @@ import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { SITE } from '../lib/page-head';
 import { renderModel, renderTitle } from '../lib/part-caption';
+import { DEFAULT_FILTER, filtersFor, inFilter, type PartFilter } from '../lib/part-filters';
 import { renderAnchor } from '../lib/part-links';
 import { PART_PHOTOS, PART_RENDERS, type PartRender } from '../lib/photos';
 import { PARTS_PATH, partItemPath, type PageModel, type PartKey } from '../lib/routes';
@@ -63,17 +64,28 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
   const [q, setQ] = useState('');
   const text = t.parts.text(p.name, breaker.trim(), qty);
   const photos = PART_PHOTOS[model.part];
-  const all = PART_RENDERS[model.part];
+  const every = PART_RENDERS[model.part];
+  // "Parça türü" chips: narrow the search and the showcase to some kinds (e.g. 3'ü bir arada burçlar).
+  const filters = filtersFor(model.part, every);
+  const [filter, setFilter] = useState<PartFilter | null>(
+    filters.some(([f]) => f === DEFAULT_FILTER[model.part]) ? DEFAULT_FILTER[model.part]! : null,
+  );
+  const kinds = filters.find(([f]) => f === filter)?.[1];
+  const all = kinds ? every.filter((r) => inFilter(r, kinds)) : every;
   // `?q=` from the home search, or `#<anchor>` (a model's link) opens that model's results.
   useEffect(() => {
     const v = new URLSearchParams(window.location.search).get('q');
     if (v) {
+      setFilter(null);
       setQ(v);
       return;
     }
     const hash = decodeURIComponent(window.location.hash.slice(1));
-    const r = hash ? all.find((x) => renderAnchor(x) === hash) : undefined;
-    if (r) setQ(renderName(r, t));
+    const r = hash ? every.find((x) => renderAnchor(x) === hash) : undefined;
+    if (r) {
+      setFilter(null);
+      setQ(renderName(r, t));
+    }
     // Only on load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -142,6 +154,24 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
                   ? t.search.didYouMean(guess)
                   : t.search.none(query)}
           </p>
+        </div>
+      )}
+      {filters.length > 1 && (
+        <div role="group" aria-label={t.parts.filter.label} className="mt-4 font-sans text-sm">
+          <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
+            {[null, ...filters.map(([f]) => f)].map((f) => (
+              <li key={f ?? 'all'}>
+                <button
+                  type="button"
+                  aria-pressed={filter === f}
+                  onClick={() => setFilter(f)}
+                  className={`inline-flex min-h-11 items-center rounded-sm border px-3 ${filter === f ? 'border-brand bg-brand text-on-brand' : 'border-hair bg-bg text-ink hover:border-hair-strong'} ${FOCUS}`}
+                >
+                  {f ? t.parts.filter.items[f] : t.parts.filter.all}
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
       {query && series.size > 1 && (
