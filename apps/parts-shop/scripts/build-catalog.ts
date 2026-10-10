@@ -12,8 +12,11 @@ import { fileURLToPath } from 'node:url';
 import {
   demoCatalog,
   publicExtras,
+  publicPartPrices,
   toPublicCatalog,
   type ExtraRow,
+  type PartPrice,
+  type PartPriceRow,
   type FamilyRow,
   type FxRate,
   type FitRow,
@@ -28,6 +31,25 @@ const log = (s: string) => process.stdout.write(`build-catalog: ${s}\n`);
 const FAMILIES_SQL = 'SELECT id, code, attrs, popular_tier FROM families WHERE published = 1';
 const SKUS_SQL =
   'SELECT s.family_id, s.code, s.tip_type, s.length_min_mm, s.length_max_mm, s.weight_min_kg, s.weight_max_kg, s.tip_angle_deg, s.price_usd_net_cents, s.stock_qty, s.lead_time_days FROM skus s JOIN families f ON f.id = s.family_id WHERE s.published = 1 AND f.published = 1';
+/** Invented part prices for SHOP_DEMO_PART_PRICES=1 (local look at the UI; not real prices). */
+const DEMO_PART_PRICES: PartPrice[] = [
+  ['Rammer', 'E68', 'KAFA_BURCU', 9900],
+  ['Rammer', 'E68', 'MERKEZLEME', 4500],
+  ['Rammer', 'E68', 'DAYAMA', 11100],
+  ['Rammer', 'E68', 'BURC_TAKIMI', 24000],
+  ['Rammer', 'E68', 'ALT_GOVDE', 199900],
+  ['MTB', '65', 'KAFA_BURCU', 6100],
+].map(([brand, model, type, cents]) => ({
+  brand: brand as string,
+  model: model as string,
+  type: type as PartPrice['type'],
+  variant: null,
+  item: null,
+  cents: cents as number,
+}));
+
+const PART_PRICES_SQL =
+  "SELECT brand, model, part_type, variant, item, price_usd_net_cents FROM part_prices WHERE batch = (SELECT value FROM settings WHERE key = 'part_prices_batch')";
 const EXTRAS_SQL =
   'SELECT brand, model, slug, tip_types, diameter_mm, price_usd_net_cents FROM extra_products WHERE published = 1 ORDER BY brand, model';
 const FITS_SQL =
@@ -70,7 +92,7 @@ function write(c: PublicCatalog, what: string) {
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, JSON.stringify(c));
   log(
-    `${what}: ${c.families.length} families, ${c.families.reduce((n, f) => n + f.skus.length, 0)} SKUs`,
+    `${what}: ${c.families.length} families, ${c.families.reduce((n, f) => n + f.skus.length, 0)} SKUs, ${c.partPrices?.length ?? 0} part price rows`,
   );
 }
 
@@ -90,6 +112,12 @@ if (db && process.env.CLOUDFLARE_API_TOKEN) {
     } catch {
       c.extras = [];
     }
+    // Part prices come with migration 0003 and the first parts sheet; until then none.
+    try {
+      c.partPrices = publicPartPrices(query<PartPriceRow>(db, PART_PRICES_SQL));
+    } catch {
+      c.partPrices = [];
+    }
     // An empty D1 (before the first import) must not ship an empty shop: DEMO, or fail on main.
     if (c.families.length === 0) throw new Error('empty catalog');
     write(c, 'D1');
@@ -107,6 +135,19 @@ if (db && process.env.CLOUDFLARE_API_TOKEN) {
   log('keeping the existing snapshot');
 } else {
   write(demoCatalog(), 'DEMO');
+}
+
+// Local look at the price UI: a few invented part prices. Never in CI (GitHub sets CI).
+if (
+  process.env.SHOP_DEMO_PART_PRICES === '1' &&
+  !required &&
+  !process.env.CI &&
+  fs.existsSync(OUT)
+) {
+  const c = JSON.parse(fs.readFileSync(OUT, 'utf8')) as PublicCatalog;
+  c.partPrices = DEMO_PART_PRICES;
+  fs.writeFileSync(OUT, JSON.stringify(c));
+  log(`DEMO part prices: ${DEMO_PART_PRICES.length} rows (local only)`);
 }
 
 // The TRY prices follow the rate of the build day (the shop rebuilds every morning).

@@ -8,7 +8,17 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 const DIST = path.join(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), 'dist');
-const FORBIDDEN = [/\bvega\b/i, /\bVT\d{7}\b/, /private_ref/, /private_notes/, /cost_try/];
+const FORBIDDEN = [
+  /\bvega\b/i,
+  /\bVT\d{7}\b/,
+  /private_ref/,
+  /private_notes/,
+  /cost_try/,
+  // D1 column / table names of the part prices: only resolved per-page prices may ship.
+  /price_usd_net_cents/,
+  /part_prices/,
+  /part_type/,
+];
 
 const files = [];
 const walk = (d) => {

@@ -17,6 +17,7 @@ import {
   tipLinksForPart,
   type PartLink,
 } from './part-links';
+import { groupPrices, resolvePartPrices } from './part-prices';
 import { PART_RENDERS, type PartRender } from './photos';
 import type { TipGroupStats } from '../types';
 
@@ -79,6 +80,8 @@ export type PageModel =
       part: PartKey;
       /** Render anchor → tip page of the same breaker (when the shop has one). */
       tipLinks: Record<string, string>;
+      /** Render anchor (`anchor#b` = burçlu head) → net USD cents, priced renders only. */
+      prices: Record<string, number>;
       demo: boolean;
       hasPopular: boolean;
     }
@@ -92,6 +95,9 @@ export type PageModel =
       tipLink: string | null;
       /** Other parts we model for the same breaker (their item pages). */
       related: PartLink[];
+      /** Net USD cents of this render, and of its burçlu state (front heads); null = quote. */
+      price: number | null;
+      priceFitted: number | null;
       demo: boolean;
       hasPopular: boolean;
     }
@@ -344,6 +350,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
   const tipPaths = new Map(cards.map((x) => [fold(x.name), x.path]));
   const popular = cards.filter((x) => x.popularTier !== null).sort(byPopularity);
   const hasPopular = popular.length > 0;
+  const partPrices = resolvePartPrices(c.partPrices ?? []);
   const byBrand = new Map<string, BreakerCard[]>();
   for (const x of cards) byBrand.set(x.brand, [...(byBrand.get(x.brand) ?? []), x]);
   const brands: BrandLink[] = [...byBrand]
@@ -393,6 +400,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         kind: 'part' as const,
         part,
         tipLinks: tipLinksForPart(part, tipPaths),
+        prices: groupPrices(partPrices, part),
         demo,
         hasPopular,
       },
@@ -409,6 +417,8 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
             anchor,
             tipLink: tipLinks[anchor] ?? null,
             related: relatedParts(part, r),
+            price: partPrices.get(`${part}/${anchor}`) ?? null,
+            priceFitted: partPrices.get(`${part}/${anchor}#b`) ?? null,
             demo,
             hasPopular,
           },

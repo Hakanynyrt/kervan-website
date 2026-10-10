@@ -12,6 +12,7 @@ import {
   type SlotEndKind,
   type StepKind,
 } from './types.ts';
+import { PART_ITEM, partTypeOf, type PartPrice } from './part-prices.ts';
 
 /** `SELECT id, code, attrs, popular_tier FROM families WHERE published = 1` */
 export interface FamilyRow {
@@ -67,6 +68,37 @@ export function publicExtras(rows: readonly ExtraRow[]): PublicExtra[] {
       diameterMm: d !== null && d > 0 ? d : null,
       priceUsdNetCents: p !== null && p > 0 ? Math.round(p) : null,
     });
+  }
+  return out;
+}
+
+/** Active part price batch: `SELECT brand, model, part_type, variant, item, price_usd_net_cents FROM part_prices WHERE batch = (active)` */
+export interface PartPriceRow {
+  brand: string | null;
+  model: string | null;
+  part_type: string | null;
+  variant: string | null;
+  item: string | null;
+  price_usd_net_cents: number | null;
+}
+
+/** Whitelists the part price rows field by field; malformed rows are dropped, never guessed. */
+export function publicPartPrices(rows: readonly PartPriceRow[]): PartPrice[] {
+  const out: PartPrice[] = [];
+  for (const r of rows) {
+    const c = num(r.price_usd_net_cents);
+    const cents = c !== null && Number.isInteger(c) && c > 0 ? c : null;
+    if (r.item) {
+      if (PART_ITEM.test(r.item))
+        out.push({ brand: null, model: null, type: null, variant: null, item: r.item, cents });
+      continue;
+    }
+    const type = r.part_type ? partTypeOf(r.part_type) : null;
+    if (!r.brand || !r.model || !type) continue;
+    if (isHiddenBreaker({ brand: r.brand, model: r.model })) continue;
+    if (r.variant && !/^[A-Za-z0-9]{1,20}$/.test(r.variant)) continue;
+    const variant = r.variant || null;
+    out.push({ brand: r.brand, model: r.model, type, variant, item: null, cents });
   }
   return out;
 }

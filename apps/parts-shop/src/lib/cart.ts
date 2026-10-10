@@ -10,7 +10,10 @@ export interface CartItem {
   id: string;
   /** Breaker make and model. */
   name: string;
-  tipType: TipType;
+  /** Tips: the tip type (named through the dict). */
+  tipType?: TipType;
+  /** Spare parts: the part's name as shown when it was added (e.g. "kafa burcu (alt burç)"). */
+  label?: string;
   /** Kervan SKU code (for our order handling), null for an extra product. */
   code: string | null;
   /** Neutral path of the product page. */

@@ -43,8 +43,8 @@ export default function App({ lang, path, model, fx }: PageProps) {
       {model.kind === 'popular' && <Popular model={model} lang={lang} t={t} />}
       {model.kind === 'brand' && <Brand model={model} lang={lang} t={t} />}
       {model.kind === 'parts' && <Parts model={model} lang={lang} t={t} />}
-      {model.kind === 'part' && <Part model={model} lang={lang} t={t} />}
-      {model.kind === 'partItem' && <PartItem model={model} lang={lang} t={t} />}
+      {model.kind === 'part' && <Part model={model} fx={fx} lang={lang} t={t} />}
+      {model.kind === 'partItem' && <PartItem model={model} fx={fx} lang={lang} t={t} />}
       {model.kind === 'breaker' && <Breaker model={model} path={path} fx={fx} lang={lang} t={t} />}
       {model.kind === 'family' && <Family model={model} path={path} fx={fx} lang={lang} t={t} />}
       {model.kind === 'cart' && <Cart fx={fx} lang={lang} t={t} />}

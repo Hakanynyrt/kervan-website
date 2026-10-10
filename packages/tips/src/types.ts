@@ -1,3 +1,4 @@
+import type { PartPrice } from './part-prices.ts';
 /** Working-end types the shop sells. */
 export type TipType = 'chisel' | 'moil' | 'blunt' | 'pyramid' | 'conical' | 'asphalt';
 
@@ -162,5 +163,7 @@ export interface PublicCatalog {
   demo?: boolean;
   families: PublicFamily[];
   extras?: PublicExtra[];
+  /** Spare-part prices of the active batch (matched to renders at build time). */
+  partPrices?: PartPrice[];
   fx?: FxRate | null;
 }

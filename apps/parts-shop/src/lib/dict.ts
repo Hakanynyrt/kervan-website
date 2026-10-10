@@ -306,6 +306,18 @@ export interface Dict {
       linksLabel: string;
     };
     /** Front heads sold with or without their bushings and pins. */
+    /** Priced parts: order instead of a quote. */
+    order: {
+      title: string;
+      body: string;
+      wa: string;
+      mail: string;
+      delivery: string;
+      /** The order message (unit price as shown, net). */
+      text: (part: string, breaker: string, qty: number, price: string, url: string) => string;
+      /** Under a priced part: a quote for another breaker on the group page. */
+      other: string;
+    };
     fitted: {
       label: string;
       without: string;
@@ -963,6 +975,16 @@ export const DICT: Record<Lang, Dict> = {
         back: (group) => `Tüm ${group.toLocaleLowerCase('tr')} modelleri`,
         related: 'Bu kırıcı için ürettiğimiz diğer parçalar',
         linksLabel: 'Parça bağlantıları',
+      },
+      order: {
+        title: 'Sipariş verin',
+        body: 'Parça, adet ve fiyat mesaja yazılır; ödeme ve kargo bilgisiyle size dönelim.',
+        wa: 'WhatsApp ile sipariş ver',
+        mail: 'E-posta ile sipariş ver',
+        delivery: 'Stoktan aynı gün kargo',
+        text: (part, breaker, qty, price, url) =>
+          `Merhaba, ${breaker} ${part}, ${qty} adet sipariş vermek istiyorum (birim ${price}, KDV hariç).\n${url}`,
+        other: 'Başka bir kırıcı için teklif isteyin',
       },
       fitted: {
         label: 'Seçenek',
@@ -1630,6 +1652,16 @@ export const DICT: Record<Lang, Dict> = {
         back: (group) => `All ${group.toLowerCase()} models`,
         related: 'Other parts we make for this breaker',
         linksLabel: 'Part links',
+      },
+      order: {
+        title: 'Order',
+        body: 'The part, quantity and price go into the message; we reply with payment and shipping details.',
+        wa: 'Order on WhatsApp',
+        mail: 'Order by e-mail',
+        delivery: 'Ships from stock the same day',
+        text: (part, breaker, qty, price, url) =>
+          `Hello, I would like to order ${qty} × ${breaker} ${part} (unit ${price}, excl. VAT).\n${url}`,
+        other: 'Request a quote for another breaker',
       },
       fitted: {
         label: 'Option',
