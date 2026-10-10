@@ -117,7 +117,7 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
     <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">
       <Breadcrumb trail={[[t.parts.title, PARTS_PATH]]} current={p.name} lang={lang} t={t} />
       <PageTitle>{p.name}</PageTitle>
-      <OemLine t={t} />
+      <OemLine t={t} kit={model.part === 'tamir-takimi'} />
       <p className="m-0 mt-3 max-w-3xl font-sans text-ink-mid">{p.body}</p>
       {all.length > 0 && (
         <div className="mt-6 flex max-w-2xl flex-wrap items-center gap-3">
@@ -196,7 +196,11 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
                     </li>
                   ))}
                 </ul>
-                <ImgNote t={t} kind="render" className="mt-2" />
+                <ImgNote
+                  t={t}
+                  kind={model.part === 'tamir-takimi' ? 'kit' : 'render'}
+                  className="mt-2"
+                />
               </section>
             )}
             {solo.map((r) => (
@@ -212,7 +216,9 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
                 lazy={solo.length > 0 || k > 0}
               />
             ))}
-            {renders.length > 0 && <ImgNote t={t} kind="render" />}
+            {renders.length > 0 && (
+              <ImgNote t={t} kind={model.part === 'tamir-takimi' ? 'kit' : 'render'} />
+            )}
             {photos.length > 0 && (
               <div>
                 <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2">
@@ -422,6 +428,7 @@ export function RenderFigure({
           </li>
         ))}
       </ul>
+      {r.kit && <KitTable items={r.kit} t={t} lang={ctx.lang} />}
       {item ? (
         <figcaption className="mt-3 font-sans text-sm">{share}</figcaption>
       ) : (
@@ -462,6 +469,47 @@ export function RenderFigure({
         </figcaption>
       )}
     </figure>
+  );
+}
+
+/** A repair kit's contents: part and quantity (owner: no sizes, they are our know-how). */
+function KitTable({
+  items,
+  t,
+  lang,
+}: {
+  items: NonNullable<PartRender['kit']>;
+  t: Dict;
+  lang: Lang;
+}) {
+  const k = t.parts.kit;
+  return (
+    <div className="mt-5">
+      <h3 className="m-0 font-sans text-base font-bold text-ink">{k.title}</h3>
+      <div className="mt-2 overflow-x-auto rounded-md border border-hair">
+        <table className="w-full border-collapse font-sans text-sm tabular-nums">
+          <thead className="bg-bg-soft text-left text-ink-mid">
+            <tr>
+              <th scope="col" className="px-3 py-2 font-medium">
+                {k.part}
+              </th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">
+                {k.qty}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((x, i) => (
+              <tr key={i} className="border-t border-hair">
+                <td className="px-3 py-2 text-ink">{lang === 'tr' ? x.name : k.type[x.type]}</td>
+                <td className="px-3 py-2 text-right text-ink">{x.qty}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="m-0 mt-2 font-sans text-xs text-ink-soft">{k.note}</p>
+    </div>
   );
 }
 

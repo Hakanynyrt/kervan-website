@@ -251,6 +251,17 @@ export interface Dict {
       next: string;
       jump: string;
     };
+    /** Repair kits: the contents table under the pictures. */
+    kit: {
+      title: string;
+      part: string;
+      qty: string;
+      note: string;
+      /** Under the title instead of the OEM line: kits are put together, not made by us. */
+      oem: string;
+      renderNote: string;
+      type: Record<import('./photos').KitItemType, string>;
+    };
     /** Group page before a search: a few renders with no make or model named. */
     showcase: { title: string; lead: string; alt: (part: string, i: number) => string };
     /** Under a part's caption: its breaker's tip page. */
@@ -364,6 +375,7 @@ export const DICT: Record<Lang, Dict> = {
         piston: 'Piston',
         akumulator: 'Akümülatör',
         'asinma-plakasi': 'Aşınma plakası',
+        'tamir-takimi': 'Tamir takımı',
       },
       call: 'Ara',
       cart: 'Palet',
@@ -650,6 +662,10 @@ export const DICT: Record<Lang, Dict> = {
           name: 'Aşınma plakası',
           body: 'Kırıcı gövdesini kutu içinde koruyan aşınma plakaları.',
         },
+        'tamir-takimi': {
+          name: 'Tamir takımı',
+          body: 'Kırıcı modeline göre sızdırmazlık takımı: o-ringler, keçeler, toz keçeleri, destek ve teflon ringler; içeriği ve ölçüleriyle.',
+        },
       },
       view: 'İncele',
       groupsTitle: 'Ürün grupları',
@@ -682,6 +698,7 @@ export const DICT: Record<Lang, Dict> = {
         detail: 'saplama somunu penceresi',
         section: 'kesit görünüşü',
         assembly: 'burçları takılı montaj kesiti',
+        top: 'üstten görünüş',
       },
       renderKind: {
         toolBushing: 'kafa burcu (alt burç)',
@@ -702,6 +719,7 @@ export const DICT: Record<Lang, Dict> = {
         accumulatorLower: 'akümülatör alt kapağı',
         accumulatorBolt: 'akümülatör saplaması',
         wearPlate: 'aşınma plakası',
+        repairKit: 'tamir takımı',
       },
       renderKindShort: {
         toolBushing: 'Kafa burcu',
@@ -722,6 +740,7 @@ export const DICT: Record<Lang, Dict> = {
         accumulatorLower: 'Alt kapak',
         accumulatorBolt: 'Saplama',
         wearPlate: 'Aşınma plakası',
+        repairKit: 'Tamir takımı',
       },
       renderVariant: {
         oldType: 'eski tip',
@@ -753,6 +772,28 @@ export const DICT: Record<Lang, Dict> = {
         prev: 'Önceki model',
         next: 'Sonraki model',
         jump: 'Markaya git',
+      },
+      kit: {
+        title: 'Takımın içeriği',
+        part: 'Parça',
+        qty: 'Adet',
+        note: 'Takım, kırıcınızın modeline göre eksiksiz hazırlanır; teklifte modeli belirtmeniz yeterli.',
+        oem: 'Kırıcı modeline göre eksiksiz hazırlanan sızdırmazlık takımı.',
+        renderNote: 'Görseller 3B modeldir; temsilidir.',
+        type: {
+          oring: 'O-ring',
+          backup: 'Destek ringi',
+          stepseal: 'Basamaklı keçe',
+          rodseal: 'Keçe (nutring)',
+          wiper: 'Toz keçesi',
+          gasseal: 'Gaz keçesi',
+          guidering: 'Kılavuz ring',
+          teflonring: 'Teflon ring',
+          bondedseal: 'Sızdırmazlık pulu',
+          plug: 'Tapa',
+          valve: 'Valf',
+          other: 'Diğer',
+        },
       },
       showcase: {
         title: 'Ürettiklerimizden',
@@ -869,6 +910,7 @@ export const DICT: Record<Lang, Dict> = {
         piston: 'Pistons',
         akumulator: 'Accumulator',
         'asinma-plakasi': 'Wear plates',
+        'tamir-takimi': 'Repair kits',
       },
       call: 'Call',
       cart: 'Cart',
@@ -1154,6 +1196,10 @@ export const DICT: Record<Lang, Dict> = {
           name: 'Wear plates',
           body: 'Wear plates that protect the breaker body inside its box.',
         },
+        'tamir-takimi': {
+          name: 'Repair kits',
+          body: 'Seal kits by breaker model: o-rings, rod seals, wipers, back-up and PTFE rings, with their contents and sizes.',
+        },
       },
       view: 'View',
       groupsTitle: 'Product groups',
@@ -1190,6 +1236,7 @@ export const DICT: Record<Lang, Dict> = {
         detail: 'tie-rod nut window',
         section: 'section view',
         assembly: 'section with the bushings fitted',
+        top: 'top view',
       },
       renderKind: {
         toolBushing: 'tool bushing (lower bushing)',
@@ -1210,6 +1257,7 @@ export const DICT: Record<Lang, Dict> = {
         accumulatorLower: 'accumulator bottom',
         accumulatorBolt: 'accumulator bolt',
         wearPlate: 'wear plate',
+        repairKit: 'repair kit',
       },
       renderKindShort: {
         toolBushing: 'Tool bushing',
@@ -1230,6 +1278,7 @@ export const DICT: Record<Lang, Dict> = {
         accumulatorLower: 'Bottom',
         accumulatorBolt: 'Bolt',
         wearPlate: 'Wear plate',
+        repairKit: 'Repair kit',
       },
       renderVariant: {
         oldType: 'old type',
@@ -1261,6 +1310,28 @@ export const DICT: Record<Lang, Dict> = {
         prev: 'Previous model',
         next: 'Next model',
         jump: 'Jump to make',
+      },
+      kit: {
+        title: 'Kit contents',
+        part: 'Part',
+        qty: 'Qty',
+        note: 'The kit is put together complete for your breaker model; just name the model in your request.',
+        oem: 'A complete seal kit put together for the breaker model.',
+        renderNote: 'Pictures are 3D models; for illustration.',
+        type: {
+          oring: 'O-ring',
+          backup: 'Back-up ring',
+          stepseal: 'Step seal',
+          rodseal: 'Rod seal',
+          wiper: 'Wiper',
+          gasseal: 'Gas seal',
+          guidering: 'Guide ring',
+          teflonring: 'PTFE ring',
+          bondedseal: 'Bonded seal',
+          plug: 'Plug',
+          valve: 'Valve',
+          other: 'Other',
+        },
       },
       showcase: {
         title: 'Some of what we make',

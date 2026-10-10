@@ -1,3 +1,4 @@
+import { REPAIR_KITS, type RepairKit } from './repair-kits';
 import type { PartKey } from './routes';
 
 /**
@@ -20,13 +21,28 @@ export const PART_PHOTOS: Record<PartKey, readonly string[]> = {
   piston: ['/photos/parca/piston-01'],
   akumulator: [],
   'asinma-plakasi': [],
+  'tamir-takimi': [],
 };
 
 /**
  * 3D renders of parts we make, modelled from our drawings (studio light like the tip
  * renders), grouped by the breaker model they fit. Same files and naming as the photos.
  */
-export type RenderView = 'front' | 'rear' | 'side' | 'detail' | 'section' | 'assembly';
+export type RenderView = 'front' | 'rear' | 'side' | 'detail' | 'section' | 'assembly' | 'top';
+/** One line of a repair (seal) kit. */
+export type KitItemType =
+  | 'oring'
+  | 'backup'
+  | 'stepseal'
+  | 'rodseal'
+  | 'wiper'
+  | 'gasseal'
+  | 'guidering'
+  | 'teflonring'
+  | 'bondedseal'
+  | 'plug'
+  | 'valve'
+  | 'other';
 export interface PartRender {
   /** Breaker make and model the part fits, shown as the caption. */
   model: string;
@@ -57,7 +73,8 @@ export interface PartRender {
     | 'accumulatorUpper'
     | 'accumulatorLower'
     | 'accumulatorBolt'
-    | 'wearPlate';
+    | 'wearPlate'
+    | 'repairKit';
   /** Another version of the same breaker's part, named in the caption through the dict. */
   variant?:
     | 'oldType'
@@ -72,6 +89,8 @@ export interface PartRender {
     | 'greasingHole'
     | 'puCoated';
   views: { base: string; view: RenderView }[];
+  /** Repair kits: the kit's contents (name, sizes, quantity), shown as a table under the pictures. */
+  kit?: RepairKit['items'];
 }
 
 /** MTB front heads modelled from our drawings (we make every one of them). */
@@ -1114,6 +1133,7 @@ const VIEW_FILE: Record<RenderView, string> = {
   section: 'kesit',
   detail: 'pencere',
   assembly: 'montaj-kesit',
+  top: 'ustten',
 };
 /**
  * MTB tie rods carry a cast polyurethane coating on their grooved collars (the sheets: "KAPLAMA
@@ -1950,7 +1970,24 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
   piston: PART_KIT.map(kitRender('piston', 'piston', ['front', 'rear', 'side', 'section'])),
   akumulator: ACCUMULATOR_PARTS.map(otherRender),
   'asinma-plakasi': WEAR_PLATES.map(otherRender),
+  'tamir-takimi': REPAIR_KITS.map(kitPartRender),
 };
+
+/**
+ * Repair (seal) kits from the owner's kit lists (`repair-kits.ts`, generated): one render per kit,
+ * every seal modelled from its listed sizes and laid out flat (`-vitrin` 16:9, `-ustten` 4:3).
+ */
+function kitPartRender(k: RepairKit): PartRender {
+  const b = `/photos/parca/${k.file}`;
+  return {
+    model: `${k.make} ${k.models.join(' / ')}${k.variant ? ` (${k.variant})` : ''}`,
+    series: k.make,
+    kind: 'repairKit',
+    hero: `${b}-vitrin-01`,
+    views: [{ base: `${b}-ustten-01`, view: 'top' }],
+    kit: k.items,
+  };
+}
 
 /** Our own plant photos (/yedek-parca "Tesisimiz"), 4:5, `-sm` 480 px and `-lg` 960 px. */
 export const PLANT_PHOTOS = [

@@ -281,19 +281,30 @@ export function ImgNote({
   className = '',
 }: {
   t: Dict;
-  kind?: 'tip' | 'render' | 'photo';
+  kind?: 'tip' | 'render' | 'photo' | 'kit';
   className?: string;
 }) {
   return (
     <p className={`m-0 font-sans text-xs text-ink-mid ${className}`}>
-      {kind === 'render' ? t.renderNote : kind === 'photo' ? t.photoNote : t.imgNote}
+      {kind === 'render'
+        ? t.renderNote
+        : kind === 'kit'
+          ? t.parts.kit.renderNote
+          : kind === 'photo'
+            ? t.photoNote
+            : t.imgNote}
     </p>
   );
 }
 
 /** OEM / original-quality line under a product title. */
-export function OemLine({ t }: { t: Dict }) {
-  return <p className="m-0 mt-2 font-sans text-base font-semibold text-ink">{t.oem}</p>;
+/** Repair kits are put together for the breaker, not made by us: their own line (`kit`). */
+export function OemLine({ t, kit = false }: { t: Dict; kit?: boolean }) {
+  return (
+    <p className="m-0 mt-2 font-sans text-base font-semibold text-ink">
+      {kit ? t.parts.kit.oem : t.oem}
+    </p>
+  );
 }
 
 /** 16:9 showcase picture (`<base>-lg.webp`, 1600 px, the only size published) on the dark stage. */
