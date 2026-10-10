@@ -64,9 +64,15 @@ export interface Dict {
     morePopular: string;
     groups: string;
     count: (n: number) => string;
-    /** Under the hero composite: what the picture is. */
-    heroCaption: (caption: string) => string;
-    heroMore: string;
+    /** Opening: our parts of one breaker side by side, pick a part, then type the breaker. */
+    pick: {
+      alt: string;
+      caption: string;
+      listLabel: string;
+      tips: string;
+      label: (part: string) => string;
+      open: (part: string) => string;
+    };
     allGroups: string;
     makes: {
       title: string;
@@ -416,8 +422,15 @@ export const DICT: Record<Lang, Dict> = {
       morePopular: 'Tüm çok satanlar',
       groups: 'Ürün gruplarımız',
       count: (n) => `${n} kırıcı modeli`,
-      heroCaption: (c) => `${c} · kendi çizimimizden modellenmiş görsel`,
-      heroMore: 'Diğer parçalar',
+      pick: {
+        alt: 'Bir hidrolik kırıcının ürettiğimiz parçaları yan yana: akümülatör, saplamalar, piston, burçlar, alt gövde, kama, aşınma plakaları ve kırıcı ucu',
+        caption:
+          'Ürettiğimiz parçalar, kendi çizimlerimizden modellenmiş görsel. Bir parçaya tıklayın, kırıcınızı yazın.',
+        listLabel: 'Parça seçin',
+        tips: 'Kırıcı ucu',
+        label: (x) => `${x}: kırıcınızın markası ve modeli`,
+        open: (x) => `${x} sayfasına git`,
+      },
       allGroups: 'Tüm yedek parçalar',
       makes: {
         title: 'Uyumlu kırıcı markaları',
@@ -1045,8 +1058,15 @@ export const DICT: Record<Lang, Dict> = {
       morePopular: 'All best sellers',
       groups: 'Our product groups',
       count: (n) => `${n} breaker models`,
-      heroCaption: (c) => `${c} · rendered from our own drawing`,
-      heroMore: 'Other parts',
+      pick: {
+        alt: 'The parts we make for a hydraulic breaker, side by side: accumulator, tie rods, piston, bushings, front head, key, wear plates and tool',
+        caption:
+          'The parts we make, modelled from our own drawings. Pick a part, then type your breaker.',
+        listLabel: 'Pick a part',
+        tips: 'Breaker tool',
+        label: (x) => `${x}: your breaker's make and model`,
+        open: (x) => `Go to the ${x.toLowerCase()} page`,
+      },
       allGroups: 'All spare parts',
       makes: {
         title: 'Compatible breaker makes',

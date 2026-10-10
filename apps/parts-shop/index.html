@@ -24,6 +24,26 @@
         var m = document.querySelector('meta[name="theme-color"]');
         if (m) m.setAttribute('content', dark ? '#1c1f23' : '#FFFFFF');
       })();
+      // Home opening (src/components/ExplodedPicker.tsx): once per session, for visitors without
+      // reduced motion; the component clears the mark, and this timer does if it never runs.
+      (function () {
+        var h = document.documentElement;
+        try {
+          if (
+            /^\/(en\/?)?$/.test(location.pathname) &&
+            !navigator.webdriver &&
+            !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+            !sessionStorage.getItem('kv_open_played')
+          ) {
+            h.setAttribute('data-kv-open', '1');
+            setTimeout(function () {
+              if (!window.__kvOpen) h.removeAttribute('data-kv-open');
+            }, 6000);
+          }
+        } catch (e) {
+          /* storage blocked: no opening */
+        }
+      })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

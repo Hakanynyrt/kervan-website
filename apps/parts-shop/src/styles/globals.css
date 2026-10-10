@@ -124,3 +124,30 @@
     padding-bottom: 5rem;
   }
 }
+
+/* Home opening (ExplodedPicker): <html data-kv-open> is set before paint by index.html when the
+   opening will play (assembled frame first, final picture and callouts hidden), 'play' while the
+   frames run on the canvas; without the mark the final picture shows. */
+.kv-open-first,
+.kv-open-canvas {
+  display: none;
+}
+:root[data-kv-open] .kv-open-first {
+  display: block;
+}
+:root[data-kv-open='play'] .kv-open-first {
+  display: none;
+}
+:root[data-kv-open='play'] .kv-open-canvas {
+  display: block;
+}
+:root[data-kv-open] .kv-open-final {
+  visibility: hidden;
+}
+.kv-open-spots {
+  transition: opacity 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root[data-kv-open] .kv-open-spots {
+  opacity: 0;
+  pointer-events: none;
+}
