@@ -1,3 +1,4 @@
+import { REDRAWN } from './redrawn';
 import { REPAIR_KITS, type RepairKit } from './repair-kits';
 import { BUSHING_SETS, ROD_SETS, SMALL_PARTS, WEAR_SETS, type SmallPart } from './small-parts';
 import type { PartKey } from './routes';
@@ -1946,7 +1947,7 @@ const withFitted = (r: PartRender): PartRender => {
   };
 };
 
-export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
+const DRAWN: Record<PartKey, readonly PartRender[]> = {
   'alt-govde': (
     [
       {
@@ -2043,6 +2044,23 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
   ],
   'tamir-takimi': REPAIR_KITS.map(kitPartRender),
 };
+
+/** `/photos/parca/<stem>-<view>-<NN>`: the stem and view of a published render picture. */
+const VERSIONED = /^\/photos\/parca\/(.+)-(vitrin|on|arka|yan|kesit|pencere)-\d\d$/;
+/** A re-rendered picture keeps its name with the new file version from `REDRAWN` (images are cached immutable). */
+const redrawn = (base: string): string => {
+  const m = VERSIONED.exec(base);
+  const v = m && REDRAWN[m[1]];
+  return v ? `/photos/parca/${m[1]}-${m[2]}-${v}` : base;
+};
+const revise = (r: PartRender): PartRender => ({
+  ...r,
+  ...(r.hero ? { hero: redrawn(r.hero) } : {}),
+  views: r.views.map((x) => ({ ...x, base: redrawn(x.base) })),
+});
+export const PART_RENDERS = Object.fromEntries(
+  Object.entries(DRAWN).map(([k, list]) => [k, list.map(revise)]),
+) as unknown as Record<PartKey, readonly PartRender[]>;
 
 /**
  * Repair (seal) kits from the owner's kit lists (`repair-kits.ts`, generated): one render per kit,
