@@ -27,7 +27,7 @@ export function CartLink({ lang, t, current }: { lang: Lang; t: Dict; current: b
     >
       {t.nav.cart}
       {n > 0 && (
-        <span className="rounded-sm bg-brand px-1.5 text-xs font-semibold text-white tabular-nums">
+        <span className="rounded-sm bg-brand px-1.5 text-xs font-semibold text-on-brand tabular-nums">
           {n}
         </span>
       )}

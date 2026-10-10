@@ -4,6 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FFFFFF" />
+    <script>
+      // Theme picked by hand (header "Tema") wins over the sun; applied before paint. Keep the
+      // key and the colours in sync with src/components/ThemeSelect.tsx and globals.css.
+      (function () {
+        var h = document.documentElement;
+        try {
+          var t = localStorage.getItem('kv_theme');
+          if (t === 'dark' || t === 'light') h.setAttribute('data-theme', t);
+        } catch (e) {
+          /* storage blocked: the sun decides */
+        }
+        var dark =
+          h.getAttribute('data-theme') === 'dark' ||
+          (h.getAttribute('data-theme') !== 'light' &&
+            (h.getAttribute('data-sun') === 'night' ||
+              (!h.hasAttribute('data-sun') &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches)));
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', dark ? '#1c1f23' : '#FFFFFF');
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

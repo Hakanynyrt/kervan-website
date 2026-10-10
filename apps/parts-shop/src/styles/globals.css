@@ -7,6 +7,8 @@
 /* Dark stage behind the tip renders: their ember rim light is made for a dark background. */
 @theme {
   --color-stage: #141416;
+  /* Text on bg-brand buttons: white on the light theme's dark ember, ink on the night theme's light one. */
+  --color-on-brand: #ffffff;
 }
 
 /*
@@ -34,6 +36,52 @@
   /* Inter, then Arial scaled to Inter's metrics, so text does not jump when Inter loads. */
   --font-sans: 'Inter', 'Inter Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color-scheme: light;
+}
+
+/*
+ * Night theme. The edge middleware (functions/_middleware.ts) marks the page
+ * `<html data-sun="night">` once the sun is down where the visitor is; the header's theme
+ * select (localStorage `kv_theme`, applied by the inline script in index.html before paint)
+ * overrides it with `data-theme`. Without the edge mark (local dev) the device setting decides.
+ * Same contrast rules: ink-soft 4.71:1, brand 4.87:1 and hair-strong 3.24:1 on bg-warm; the
+ * ink-coloured text on brand buttons 5.96:1. The stage panel keeps #141416 (the renders are
+ * composited on it), so the page bg sits a step lighter and the panels still read as panels.
+ */
+/* Unlayered, like the light :root block above, so these win by specificity. */
+:root[data-theme='dark'],
+:root[data-sun='night']:not([data-theme='light']) {
+  --color-bg: #1c1f23;
+  --color-bg-soft: #23272c;
+  --color-bg-warm: #2a2f35;
+  --color-ink: #e9e7e2;
+  --color-ink-mid: #bdb9b1;
+  --color-ink-soft: #9d9890;
+  --color-brand: #ff6e47;
+  --color-brand-hi: #ff8463;
+  --color-brand-lo: #f0673f;
+  --color-brand-soft: rgba(255, 110, 71, 0.14);
+  --color-hair: #343940;
+  --color-hair-strong: #767d86;
+  --color-on-brand: #1c1f23;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-sun]):not([data-theme='light']) {
+    --color-bg: #1c1f23;
+    --color-bg-soft: #23272c;
+    --color-bg-warm: #2a2f35;
+    --color-ink: #e9e7e2;
+    --color-ink-mid: #bdb9b1;
+    --color-ink-soft: #9d9890;
+    --color-brand: #ff6e47;
+    --color-brand-hi: #ff8463;
+    --color-brand-lo: #f0673f;
+    --color-brand-soft: rgba(255, 110, 71, 0.14);
+    --color-hair: #343940;
+    --color-hair-strong: #767d86;
+    --color-on-brand: #1c1f23;
+    color-scheme: dark;
+  }
 }
 
 @font-face {

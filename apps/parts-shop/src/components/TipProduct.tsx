@@ -321,7 +321,7 @@ export default function TipProduct({
               <button
                 type="button"
                 onClick={add}
-                className={`cursor-pointer rounded-sm bg-brand px-5 py-3 text-center font-medium text-white hover:bg-brand-hi ${FOCUS}`}
+                className={`cursor-pointer rounded-sm bg-brand px-5 py-3 text-center font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
               >
                 {t.price.add}
               </button>

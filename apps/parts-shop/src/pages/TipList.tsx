@@ -1,6 +1,6 @@
 import { Container } from '@kervan/ui';
 import { Breadcrumb, MissingModel, PageTitle } from '../components/Bits';
-import { BrandChips, ModelTable } from '../components/ModelSearch';
+import { ModelTable } from '../components/ModelSearch';
 import type { Dict } from '../lib/dict';
 import { PARTS_PATH, type PageModel } from '../lib/routes';
 import type { Lang } from '../types';
@@ -18,14 +18,8 @@ export default function TipList({ model, lang, t }: { model: Model; lang: Lang; 
       />
       <PageTitle>{t.list.title}</PageTitle>
       <p className="m-0 mt-3 font-sans text-ink-mid">{t.list.lead}</p>
-      <div className="mt-6 hidden sm:block">
-        <BrandChips brands={model.brands} only="wide" lang={lang} t={t} />
-      </div>
-      <div className="mt-6 sm:mt-8">
+      <div className="mt-6">
         <ModelTable rows={model.rows} lang={lang} t={t} />
-      </div>
-      <div className="mt-8 sm:hidden">
-        <BrandChips brands={model.brands} only="phone" lang={lang} t={t} />
       </div>
       <MissingModel t={t} />
     </Container>

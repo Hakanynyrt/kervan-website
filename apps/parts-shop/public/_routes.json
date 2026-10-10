@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "description": "Pages Functions (the night-mode middleware) run only for page requests; the immutable assets are served straight from the CDN.",
+  "include": ["/*"],
+  "exclude": [
+    "/assets/*",
+    "/photos/*",
+    "/tips/*",
+    "/models/*",
+    "/sister/*",
+    "/favicon-32.png",
+    "/apple-touch-icon.png",
+    "/logo-krv-128.webp",
+    "/robots.txt",
+    "/sitemap.xml"
+  ]
+}

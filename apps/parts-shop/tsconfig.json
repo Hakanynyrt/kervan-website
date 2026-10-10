@@ -4,5 +4,12 @@
     "moduleDetection": "force",
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "render", "scripts/**/*.ts", "vite.config.ts", "vite.render.config.ts"]
+  "include": [
+    "src",
+    "render",
+    "functions",
+    "scripts/**/*.ts",
+    "vite.config.ts",
+    "vite.render.config.ts"
+  ]
 }

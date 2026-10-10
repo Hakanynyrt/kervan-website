@@ -26,7 +26,7 @@ export function SearchForm({ lang, t, value = '' }: { lang: Lang; t: Dict; value
       />
       <button
         type="submit"
-        className={`rounded-sm bg-brand px-5 py-3 font-sans text-sm font-medium text-white hover:bg-brand-hi ${FOCUS}`}
+        className={`rounded-sm bg-brand px-5 py-3 font-sans text-sm font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
       >
         {t.search.button}
       </button>
@@ -54,7 +54,7 @@ export function BrandChips({
         <a
           href={localePath(LIST_PATH, lang)}
           aria-current={current ? undefined : 'page'}
-          className={`inline-block rounded-sm border px-3 py-1.5 ${current ? 'border-hair bg-bg text-ink hover:border-hair-strong' : 'border-brand bg-brand text-white'} ${FOCUS}`}
+          className={`inline-block rounded-sm border px-3 py-1.5 ${current ? 'border-hair bg-bg text-ink hover:border-hair-strong' : 'border-brand bg-brand text-on-brand'} ${FOCUS}`}
         >
           {t.search.all}
         </a>
@@ -64,7 +64,7 @@ export function BrandChips({
           <a
             href={localePath(b.path, lang)}
             aria-current={b.name === current ? 'page' : undefined}
-            className={`inline-block rounded-sm border px-3 py-1.5 ${b.name === current ? 'border-brand bg-brand text-white' : 'border-hair bg-bg text-ink hover:border-hair-strong'} ${FOCUS}`}
+            className={`inline-block rounded-sm border px-3 py-1.5 ${b.name === current ? 'border-brand bg-brand text-on-brand' : 'border-hair bg-bg text-ink hover:border-hair-strong'} ${FOCUS}`}
           >
             {b.name}
           </a>
@@ -91,8 +91,9 @@ export function BrandChips({
 }
 
 /**
- * The breaker table with a live filter. Prerendered unfiltered; after hydration the box
- * filters as you type and picks up `?q=` from the home page's search.
+ * The breaker search: nothing is listed until something is typed (owner: no make/model
+ * lists on the site; whoever looks for one types it). The box filters as you type and picks
+ * up `?q=` from the home page's search.
  */
 export function ModelTable({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang; t: Dict }) {
   const [q, setQ] = useState('');
@@ -101,7 +102,7 @@ export function ModelTable({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang;
     if (v) setQ(v);
   }, []);
   const query = q.trim();
-  const shown = query ? rows.filter((r) => matches(query, r.name)) : rows;
+  const shown = query ? rows.filter((r) => matches(query, r.name)) : [];
   // Nothing found: try the query with a misspelt make fixed and unknown words dropped.
   const guess =
     query && !shown.length
@@ -128,7 +129,11 @@ export function ModelTable({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang;
           className={`min-w-48 flex-1 rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft sm:max-w-md ${FOCUS}`}
         />
         <p className="m-0 font-sans text-sm text-ink-mid" aria-live="polite">
-          {shown.length ? t.search.count(shown.length) : t.search.none(query)}
+          {!query
+            ? t.search.hint
+            : shown.length
+              ? t.search.count(shown.length)
+              : t.search.none(query)}
         </p>
       </div>
       {shown.length > 0 && <Table rows={shown} lang={lang} t={t} />}

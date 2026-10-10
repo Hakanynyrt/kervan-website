@@ -47,6 +47,8 @@ export interface Dict {
     langOther: string;
     /** Header utility group (language, cart, quote). */
     tools: string;
+    /** Theme select: the sun decides (auto), or the visitor. */
+    theme: { label: string; auto: string; light: string; dark: string };
   };
   top: { tagline: string; shop: string };
   banner: { label: string; preview: string; demo: string; how: string };
@@ -154,6 +156,8 @@ export interface Dict {
     /** Phones: the make chips behind a summary. */
     changeMake: (n: number) => string;
     didYouMean: (q: string) => string;
+    /** Under an empty search box: nothing is listed until something is typed. */
+    hint: string;
   };
   missing: {
     title: string;
@@ -247,6 +251,8 @@ export interface Dict {
       next: string;
       jump: string;
     };
+    /** Group page before a search: a few renders with no make or model named. */
+    showcase: { title: string; lead: string; alt: (part: string, i: number) => string };
     /** Under a part's caption: its breaker's tip page. */
     tipLink: string;
     /** Under a part's caption: WhatsApp quote for exactly that model. */
@@ -364,6 +370,7 @@ export const DICT: Record<Lang, Dict> = {
       langLabel: 'English',
       langOther: 'EN',
       tools: 'Hızlı erişim',
+      theme: { label: 'Tema', auto: 'Otomatik', light: 'Açık', dark: 'Koyu' },
     },
     top: {
       tagline: 'Hidrolik kırıcı yedek parça üreticisi',
@@ -455,14 +462,14 @@ export const DICT: Record<Lang, Dict> = {
     breaker: { title: (name) => `${name} kırıcı ucu` },
     list: {
       title: 'Tüm kırıcı uçları',
-      lead: 'Kırıcınızın marka ve modelini bulun. En çok sipariş edilenler ayrı sayfada.',
+      lead: 'Kırıcınızın marka ve modelini yazın. En çok sipariş edilenler ayrı sayfada.',
       model: 'Kırıcı',
       diameter: 'Çalışma çapı',
       types: 'Uç tipleri',
     },
     popular: {
       title: 'Çok satanlar',
-      lead: 'En çok sipariş edilen kırıcı uçları ve aynı kırıcılar için ürettiğimiz yedek parçalar.',
+      lead: 'En çok sipariş edilen kırıcı uçları ve aynı kırıcılar için ürettiğimiz yedek parçalar, karışık.',
       tips: 'Kırıcı ucu',
       parts: 'Çok satan kırıcılar için yedek parçalar',
       partsLead:
@@ -516,6 +523,7 @@ export const DICT: Record<Lang, Dict> = {
       all: 'Tüm markalar',
       changeMake: (n) => `Marka değiştir (${n})`,
       didYouMean: (q) => `Bunu mu demek istediniz: ${q}`,
+      hint: 'Kırıcınızın marka ve modelini yazın; uyan ürünler burada listelenir.',
     },
     missing: {
       title: 'Modeliniz listede yok mu, emin değil misiniz?',
@@ -726,6 +734,7 @@ export const DICT: Record<Lang, Dict> = {
         typeT: 'T tipi',
         oilGroove: 'yağ kanallı',
         greasingHole: 'yağlama delikli',
+        puCoated: 'PU kaplamalı',
       },
       viewer: {
         open: '3B incele',
@@ -744,6 +753,11 @@ export const DICT: Record<Lang, Dict> = {
         prev: 'Önceki model',
         next: 'Sonraki model',
         jump: 'Markaya git',
+      },
+      showcase: {
+        title: 'Ürettiklerimizden',
+        lead: 'Kendi çizimlerimizden modellenmiş parçalar. Marka ve modelinizi yazınca o kırıcının parçaları açılır.',
+        alt: (part, i) => `${part} örneği ${i}`,
       },
       tipLink: 'Bu kırıcının ucu',
       quoteThis: 'Bu model için teklif iste',
@@ -861,6 +875,7 @@ export const DICT: Record<Lang, Dict> = {
       langLabel: 'Türkçe',
       langOther: 'TR',
       tools: 'Quick links',
+      theme: { label: 'Theme', auto: 'Auto', light: 'Light', dark: 'Dark' },
     },
     top: {
       tagline: 'Hydraulic breaker spare parts maker',
@@ -948,14 +963,14 @@ export const DICT: Record<Lang, Dict> = {
     breaker: { title: (name) => `${name} breaker tip` },
     list: {
       title: 'All breaker tips',
-      lead: 'Find your breaker make and model. The most ordered tips have their own page.',
+      lead: 'Type your breaker make and model. The most ordered tips have their own page.',
       model: 'Breaker',
       diameter: 'Working diameter',
       types: 'Tip types',
     },
     popular: {
       title: 'Best sellers',
-      lead: 'The most ordered breaker tips and the spare parts we make for the same breakers.',
+      lead: 'The most ordered breaker tips and the spare parts we make for the same breakers, mixed.',
       tips: 'Breaker tips',
       parts: 'Spare parts for the best-selling breakers',
       partsLead:
@@ -1009,6 +1024,7 @@ export const DICT: Record<Lang, Dict> = {
       all: 'All makes',
       changeMake: (n) => `Change make (${n})`,
       didYouMean: (q) => `Did you mean: ${q}`,
+      hint: 'Type your breaker make and model; the matching products are listed here.',
     },
     missing: {
       title: 'Model not listed, or not sure?',
@@ -1226,6 +1242,7 @@ export const DICT: Record<Lang, Dict> = {
         typeT: 'T type',
         oilGroove: 'oil grooves',
         greasingHole: 'greasing hole',
+        puCoated: 'PU-coated',
       },
       viewer: {
         open: 'View in 3D',
@@ -1244,6 +1261,11 @@ export const DICT: Record<Lang, Dict> = {
         prev: 'Previous model',
         next: 'Next model',
         jump: 'Jump to make',
+      },
+      showcase: {
+        title: 'Some of what we make',
+        lead: 'Parts modelled from our own drawings. Type your make and model to open that breaker’s parts.',
+        alt: (part, i) => `${part} example ${i}`,
       },
       tipLink: 'Tip for this breaker',
       quoteThis: 'Request a quote for this model',

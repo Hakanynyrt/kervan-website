@@ -30,6 +30,9 @@ export interface PopularPart extends PartLink {
   kind: PartRender['kind'] | null;
 }
 
+/** The best-sellers page: tips and parts in one mixed grid (owner: all products, mixed). */
+export type PopularItem = { kind: 'tip'; card: BreakerCard } | { kind: 'part'; part: PopularPart };
+
 /** One breaker model and the tip it takes: the shop's product (card, list row, page). */
 export interface BreakerCard {
   slug: string;
@@ -94,6 +97,8 @@ export type PageModel =
     }
   | {
       kind: 'popular';
+      /** 25–30 best-selling tips and the parts we model for the same breakers, mixed. */
+      items: PopularItem[];
       cards: BreakerCard[];
       /** Parts we model for the best-selling breakers (not sales data), best-seller order. */
       parts: PopularPart[];
@@ -181,6 +186,43 @@ function popularParts(cards: BreakerCard[]): PopularPart[] {
       });
     }
   return out;
+}
+
+/** The best-sellers page shows this many items: tips and parts, mixed, order reshuffled by the daily build. */
+const POPULAR_ITEMS = 28;
+
+/** Deterministic shuffle (mulberry32 over a string seed), so the prerender and the hydration agree. */
+function shuffled<T>(list: T[], seed: string): T[] {
+  let h = 1779033703 ^ seed.length;
+  for (let i = 0; i < seed.length; i++) {
+    h = Math.imul(h ^ seed.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  let a = h >>> 0;
+  const rand = () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const out = [...list];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/** Best-sellers page items: half tips, half parts (the other side fills a short half), mixed. */
+function popularItems(cards: BreakerCard[], parts: PopularPart[], seed: string): PopularItem[] {
+  const half = Math.ceil(POPULAR_ITEMS / 2);
+  const nParts = Math.min(parts.length, Math.max(half, POPULAR_ITEMS - cards.length));
+  const nTips = Math.min(cards.length, POPULAR_ITEMS - nParts);
+  const items: PopularItem[] = [
+    ...cards.slice(0, nTips).map((card) => ({ kind: 'tip' as const, card })),
+    ...parts.slice(0, nParts).map((part) => ({ kind: 'part' as const, part })),
+  ];
+  return shuffled(items, seed);
 }
 
 const tierRank = (t: 1 | 2 | null): number => t ?? 3;
@@ -378,6 +420,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
             path: POPULAR_PATH,
             model: {
               kind: 'popular' as const,
+              items: popularItems(popular, popularParts(popular), c.fx?.date ?? 'kervan'),
               cards: popular,
               parts: popularParts(popular),
               demo,
