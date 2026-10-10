@@ -25,7 +25,8 @@ export default function PartItem({ model, lang, t }: { model: Model; lang: Lang;
   const [breaker, setBreaker] = useState(r ? renderModel(r, t) : '');
   const [qty, setQty] = useState(1);
   // Front heads: the Burçsuz / Burçlu choice made in the figure goes into the quote message.
-  const [withB, setWithB] = useState(false);
+  // Front heads open Burçlu (owner), as RenderFigure does.
+  const [withB, setWithB] = useState(!!r?.fitted);
   if (!r) return null;
   const caption = renderTitle(r, p.name, t);
   const partName = r.kind

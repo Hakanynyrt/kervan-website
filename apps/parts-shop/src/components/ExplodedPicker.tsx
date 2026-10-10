@@ -185,9 +185,11 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
   };
   const lit = (g: Group) => g === sel || g === hover;
 
+  // lg+: the part list stands on the left of the picture, opening slowly once the breaker has
+  // come apart (CSS `.kv-pick`); phones keep picture, list, search one under the other.
   return (
-    <div>
-      <figure className="kv-open m-0 overflow-hidden rounded-md border border-hair bg-stage">
+    <div className="kv-pick">
+      <figure className="kv-open m-0 min-w-0 overflow-hidden rounded-md border border-hair bg-stage lg:col-start-2 lg:row-start-1">
         <div className="relative">
           <picture>
             <source media="(max-width: 1023px)" srcSet={`${FINAL}-sm.webp`} />
@@ -282,8 +284,11 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
         </figcaption>
       </figure>
 
-      <nav aria-label={p.listLabel} className="mt-4">
-        <ol className="m-0 grid list-none grid-cols-2 gap-2 p-0 font-sans text-sm sm:flex sm:flex-wrap">
+      <nav
+        aria-label={p.listLabel}
+        className="kv-pick-side lg:col-start-1 lg:row-span-2 lg:row-start-1"
+      >
+        <ol className="m-0 grid list-none grid-cols-2 gap-2 p-0 font-sans text-sm sm:flex sm:flex-wrap lg:grid lg:grid-cols-1 lg:gap-1.5">
           {GROUPS.map((g, i) => (
             <li key={g}>
               <a
@@ -292,7 +297,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
                 onMouseEnter={() => setHover(g)}
                 onMouseLeave={() => setHover(null)}
                 aria-current={g === sel ? 'true' : undefined}
-                className={`flex h-full items-center gap-2 rounded-sm border px-3 py-2 sm:py-1.5 ${g === sel ? 'border-brand bg-brand text-on-brand' : 'border-hair bg-bg text-ink hover:border-hair-strong'} ${FOCUS}`}
+                className={`flex h-full items-center gap-2 rounded-sm border px-3 py-2 whitespace-nowrap sm:py-1.5 ${g === sel ? 'border-brand bg-brand text-on-brand' : 'border-hair bg-bg text-ink hover:border-hair-strong'} ${FOCUS}`}
               >
                 {i < SPOTS.length && (
                   <span className="tabular-nums text-xs opacity-75">{i + 1}</span>
@@ -308,7 +313,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
         action={localePath(groupPath(sel), lang)}
         method="get"
         role="search"
-        className="mt-5 rounded-md border border-hair bg-bg p-4 md:p-5"
+        className="min-w-0 rounded-md border border-hair bg-bg p-4 md:p-5 lg:col-start-2 lg:row-start-2"
       >
         <label htmlFor="pick-q" className="block font-sans text-base font-semibold text-ink">
           {p.label(name(sel))}

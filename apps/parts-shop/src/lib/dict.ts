@@ -246,6 +246,16 @@ export interface Dict {
     renderVariant: Record<NonNullable<PartRender['variant']>, string>;
     /** "Parça türü" chips on a group page (`part-filters.ts`). */
     filter: { label: string; all: string; items: Record<PartFilter, string> };
+    /** RenderGallery: a part's pictures in one frame with thumbnails. */
+    gallery: {
+      label: string;
+      prev: string;
+      next: string;
+      count: (i: number, n: number) => string;
+      hero: string;
+      heroShort: string;
+      short: Record<RenderView, string>;
+    };
     viewer: {
       open: string;
       close: string;
@@ -276,7 +286,7 @@ export interface Dict {
       type: Record<import('./photos').KitItemType, string>;
     };
     /** Group page before a search: a few renders with no make or model named. */
-    showcase: { title: string; lead: string; alt: (part: string, i: number) => string };
+    showcase: { title: string; lead: string };
     /** Under a part's caption: its breaker's tip page. */
     tipLink: string;
     /** Under a part's caption: WhatsApp quote for exactly that model. */
@@ -670,7 +680,7 @@ export const DICT: Record<Lang, Dict> = {
         },
         burc: {
           name: 'Burç',
-          body: 'Ucu yönlendiren kafa (alt) ve üst burçlar ile dayama burçları; bazı kırıcılarda dayama ve merkezleme tek parçadır. Aşınmış burç ucu erken kırar; uçla birlikte kontrol edin.',
+          body: 'Ucu yönlendiren kafa (alt) burçları, merkezlemeler ve dayama burçları; bazı kırıcılarda dayama ve merkezleme tek parçadır. Aşınmış burç ucu erken kırar; uçla birlikte kontrol edin.',
         },
         kama: { name: 'Kama', body: 'Ucu gövdede tutan kamalar ve tutucu pimler.' },
         saplama: {
@@ -726,7 +736,7 @@ export const DICT: Record<Lang, Dict> = {
       },
       renderKind: {
         toolBushing: 'kafa burcu (alt burç)',
-        upperBushing: 'üst burç (merkezleme)',
+        upperBushing: 'merkezleme',
         thrustRing: 'dayama burcu',
         thrustUpperBushing: 'dayama-merkezleme burcu',
         spacerBushing: 'dayama ara burcu',
@@ -783,7 +793,7 @@ export const DICT: Record<Lang, Dict> = {
       },
       renderKindShort: {
         toolBushing: 'Kafa burcu',
-        upperBushing: 'Üst burç',
+        upperBushing: 'Merkezleme',
         thrustRing: 'Dayama burcu',
         thrustUpperBushing: 'Dayama-merkezleme',
         spacerBushing: 'Dayama ara burcu',
@@ -843,13 +853,14 @@ export const DICT: Record<Lang, Dict> = {
         all: 'Tümü',
         items: {
           toolBushing: 'Kafa burcu',
-          upperBushing: 'Üst burç (merkezleme)',
+          upperBushing: 'Merkezleme',
           thrustRing: 'Dayama burcu',
           oneBushing: "3'ü bir arada burç",
           twoInOne: 'İkisi bir arada burç',
           pins: 'Pimler',
           plugs: 'Pim tapaları',
-          rods: 'Saplamalar',
+          rods: 'Boy saplamalar',
+          sideBolts: 'Yan saplamalar ve pulları',
           nuts: 'Somunlar',
           washers: 'Pul ve burçlar',
           keys: 'Kamalar',
@@ -879,6 +890,23 @@ export const DICT: Record<Lang, Dict> = {
         no2: 'No. 2',
         no3: 'No. 3',
         no4: 'No. 4',
+      },
+      gallery: {
+        label: 'Görünümler',
+        prev: 'Önceki görünüm',
+        next: 'Sonraki görünüm',
+        count: (i, n) => `${i} / ${n}`,
+        hero: 'genel görünüş',
+        heroShort: 'Genel',
+        short: {
+          front: 'Ön',
+          rear: 'Arka',
+          side: 'Yan',
+          detail: 'Pencere',
+          section: 'Kesit',
+          assembly: 'Montaj kesiti',
+          top: 'Üstten',
+        },
       },
       viewer: {
         open: '3B incele',
@@ -923,7 +951,6 @@ export const DICT: Record<Lang, Dict> = {
       showcase: {
         title: 'Ürettiklerimizden',
         lead: 'Ürettiğimiz parçalardan örnekler. Marka ve modelinizi yazınca o kırıcının parçaları açılır.',
-        alt: (part, i) => `${part} örneği ${i}`,
       },
       tipLink: 'Bu kırıcının ucu',
       quoteThis: 'Bu model için teklif iste',
@@ -1499,7 +1526,8 @@ export const DICT: Record<Lang, Dict> = {
           twoInOne: 'Two-in-one bushings',
           pins: 'Pins',
           plugs: 'Pin plugs',
-          rods: 'Bolts',
+          rods: 'Through bolts',
+          sideBolts: 'Side bolts and washers',
           nuts: 'Nuts',
           washers: 'Washers and bushes',
           keys: 'Retainer keys',
@@ -1529,6 +1557,23 @@ export const DICT: Record<Lang, Dict> = {
         no2: 'No. 2',
         no3: 'No. 3',
         no4: 'No. 4',
+      },
+      gallery: {
+        label: 'Views',
+        prev: 'Previous view',
+        next: 'Next view',
+        count: (i, n) => `${i} / ${n}`,
+        hero: 'general view',
+        heroShort: 'General',
+        short: {
+          front: 'Front',
+          rear: 'Rear',
+          side: 'Side',
+          detail: 'Window',
+          section: 'Section',
+          assembly: 'Assembly',
+          top: 'Top',
+        },
       },
       viewer: {
         open: 'View in 3D',
@@ -1573,7 +1618,6 @@ export const DICT: Record<Lang, Dict> = {
       showcase: {
         title: 'Some of what we make',
         lead: 'Examples of the parts we make. Type your make and model to open that breaker’s parts.',
-        alt: (part, i) => `${part} example ${i}`,
       },
       tipLink: 'Tip for this breaker',
       quoteThis: 'Request a quote for this model',

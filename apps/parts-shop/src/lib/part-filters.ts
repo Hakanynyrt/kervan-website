@@ -13,6 +13,7 @@ export type PartFilter =
   | 'pins'
   | 'plugs'
   | 'rods'
+  | 'sideBolts'
   | 'nuts'
   | 'washers'
   | 'keys'
@@ -42,9 +43,11 @@ export const PART_FILTERS: Partial<Record<PartKey, [PartFilter, readonly Kind[]]
   ],
   saplama: [
     ['sets', ['tieRodSet']],
-    ['rods', ['tieRod', 'sideBolt', 'bodyDowel']],
+    ['rods', ['tieRod', 'bodyDowel']],
     ['nuts', ['tieRodNut', 'tieRodUpperNut', 'tieRodLowerNut']],
-    ['washers', ['tieRodWasher', 'tieRodBush', 'sideBoltWasher']],
+    ['washers', ['tieRodWasher', 'tieRodBush']],
+    // Owner: "yan saplamalar için saplama kısmında ayrı kısım aç".
+    ['sideBolts', ['sideBolt', 'sideBoltWasher']],
   ],
   kama: [
     ['keys', ['retainerKey']],

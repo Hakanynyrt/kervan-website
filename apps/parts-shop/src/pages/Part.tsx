@@ -5,7 +5,6 @@ import { useReducedMotion } from '@kervan/motion';
 import { ORG_EMAIL } from '@kervan/seo';
 import {
   Breadcrumb,
-  HeroImg,
   ImgNote,
   MissingModel,
   OemLine,
@@ -16,6 +15,7 @@ import {
   Terms,
 } from '../components/Bits';
 import { FOCUS, whatsappHref } from '../components/Layout';
+import RenderGallery from '../components/RenderGallery';
 import ShareLinks from '../components/ShareLinks';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
@@ -52,7 +52,7 @@ const renderName = (r: PartRender, t: Dict): string =>
 
 /**
  * One spare-part group: a search by breaker make and model (owner: no make/model lists on
- * the site), a nameless showcase of our renders until something is typed, the matching
+ * the site), a captioned showcase of our renders until something is typed, the matching
  * models' strips after, then our stock photos and a quote by breaker model.
  */
 export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
@@ -208,8 +208,7 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
                     <li key={r.hero}>
                       <a
                         href={partItemUrl(model.part, r, lang)}
-                        aria-label={t.parts.showcase.alt(p.name, i + 1)}
-                        className={`block overflow-hidden rounded-md border border-hair bg-stage hover:border-hair-strong ${FOCUS}`}
+                        className={`group block h-full overflow-hidden rounded-md border border-hair bg-bg hover:border-hair-strong ${FOCUS}`}
                       >
                         <img
                           src={`${r.hero}-xs.webp`}
@@ -220,8 +219,11 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
                           alt=""
                           loading={i > 3 ? 'lazy' : undefined}
                           decoding="async"
-                          className="block h-auto w-full"
+                          className="block h-auto w-full bg-stage"
                         />
+                        <span className="block px-2.5 py-2 font-sans text-sm leading-snug font-medium text-ink group-hover:underline">
+                          {renderTitle(r, p.name, t)}
+                        </span>
                       </a>
                     </li>
                   ))}
@@ -373,9 +375,10 @@ export function RenderFigure({
 }) {
   const { t } = ctx;
   const [open3d, setOpen3d] = useState(false);
-  // Front heads: Burçsuz (the plain head, also the prerendered state) or Burçlu (bushings and pins fitted).
-  const [withB, setWithB] = useState(false);
-  const shown = withB && r.fitted ? r.fitted : { hero: r.hero, views: r.views };
+  // Front heads: Burçlu (bushings and pins fitted; owner: opens so, also the prerendered state) or Burçsuz.
+  const [withB, setWithB] = useState(!!r.fitted);
+  const shown: { hero?: string; views: PartRender['views'] } =
+    withB && r.fitted ? r.fitted : { hero: r.hero, views: r.views };
   const model = renderModel(r, t);
   const partName = r.fitted ? t.parts.fitted.name(ctx.name, withB) : ctx.name;
   const caption = renderTitle(r, partName, t);
@@ -389,75 +392,75 @@ export function RenderFigure({
   );
   return (
     <figure id={id} className="m-0 scroll-mt-4">
-      {r.fitted && (
-        <div
-          role="group"
-          aria-label={t.parts.fitted.label}
-          className="mb-3 inline-flex rounded-sm border border-hair-strong font-sans text-sm"
-        >
-          {[false, true].map((on) => (
-            <button
-              key={String(on)}
-              type="button"
-              aria-pressed={withB === on}
-              onClick={() => {
-                setWithB(on);
-                setOpen3d(false);
-                onWithB?.(on);
-              }}
-              className={`min-h-11 cursor-pointer px-4 font-medium first:rounded-l-sm last:rounded-r-sm aria-pressed:bg-ink aria-pressed:text-bg ${on ? 'border-l border-hair-strong' : ''} text-ink hover:bg-bg-warm aria-pressed:hover:bg-ink ${FOCUS}`}
-            >
-              {on ? t.parts.fitted.with : t.parts.fitted.without}
-            </button>
-          ))}
-        </div>
-      )}
-      {r.fitted && withB && (
-        <p className="m-0 mb-3 font-sans text-sm text-ink-mid">{t.parts.fitted.withNote}</p>
-      )}
-      {shown.hero && (
+      {open3d && r.model3d ? (
         <div className="mb-4">
-          {open3d && r.model3d ? (
-            <Suspense fallback={<div className="aspect-video w-full rounded-md bg-stage" />}>
-              <PartViewer src={r.model3d} label={caption} t={t} />
-            </Suspense>
-          ) : (
-            <div className="relative">
-              <HeroImg base={shown.hero} alt={caption} lazy={lazy} />
-              {r.model3d && (
-                <button
-                  type="button"
-                  onClick={() => setOpen3d(true)}
-                  className={`absolute bottom-3 right-3 cursor-pointer rounded-sm bg-brand px-4 py-2.5 font-sans text-sm font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
-                >
-                  {t.parts.viewer.open}
-                </button>
-              )}
-            </div>
-          )}
-          {open3d && (
-            <button
-              type="button"
-              onClick={() => setOpen3d(false)}
-              className={`mt-2 cursor-pointer font-sans text-sm text-ink-mid underline hover:text-ink ${FOCUS}`}
-            >
-              {t.parts.viewer.close}
-            </button>
-          )}
+          <Suspense fallback={<div className="aspect-video w-full rounded-md bg-stage" />}>
+            <PartViewer src={r.model3d} label={caption} t={t} />
+          </Suspense>
+          <button
+            type="button"
+            onClick={() => setOpen3d(false)}
+            className={`mt-2 cursor-pointer font-sans text-sm text-ink-mid underline hover:text-ink ${FOCUS}`}
+          >
+            {t.parts.viewer.close}
+          </button>
         </div>
+      ) : (
+        <RenderGallery
+          // Burçsuz / Burçlu swaps the whole set: start again at its first picture.
+          key={withB ? 'b' : 'p'}
+          items={[
+            ...(shown.hero ? [{ base: shown.hero, view: 'hero' as const }] : []),
+            ...shown.views,
+          ]}
+          caption={caption}
+          lazy={lazy}
+          t={t}
+          overlay={(k) =>
+            r.model3d &&
+            k === 0 && (
+              <button
+                type="button"
+                onClick={() => setOpen3d(true)}
+                className={`absolute right-3 bottom-3 cursor-pointer rounded-sm bg-brand px-4 py-2.5 font-sans text-sm font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
+              >
+                {t.parts.viewer.open}
+              </button>
+            )
+          }
+          below={
+            // Owner: the Burçsuz / Burçlu choice goes under the picture, not above it.
+            r.fitted && (
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:mt-3">
+                <div
+                  role="group"
+                  aria-label={t.parts.fitted.label}
+                  className="inline-flex rounded-sm border border-hair-strong font-sans text-sm"
+                >
+                  {[false, true].map((on) => (
+                    <button
+                      key={String(on)}
+                      type="button"
+                      aria-pressed={withB === on}
+                      onClick={() => {
+                        setWithB(on);
+                        setOpen3d(false);
+                        onWithB?.(on);
+                      }}
+                      className={`min-h-11 cursor-pointer px-4 font-medium first:rounded-l-sm last:rounded-r-sm aria-pressed:bg-ink aria-pressed:text-bg ${on ? 'border-l border-hair-strong' : ''} text-ink hover:bg-bg-warm aria-pressed:hover:bg-ink ${FOCUS}`}
+                    >
+                      {on ? t.parts.fitted.with : t.parts.fitted.without}
+                    </button>
+                  ))}
+                </div>
+                {withB && (
+                  <p className="m-0 font-sans text-sm text-ink-mid">{t.parts.fitted.withNote}</p>
+                )}
+              </div>
+            )
+          }
+        />
       )}
-      <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2">
-        {shown.views.map((v, i) => (
-          <li key={v.base} className={i === 0 && !shown.hero ? 'sm:col-span-2' : undefined}>
-            <Photo
-              base={v.base}
-              alt={`${caption}, ${t.parts.renderView[v.view]}`}
-              lazy={lazy || i > 0}
-              single
-            />
-          </li>
-        ))}
-      </ul>
       {r.kit && <KitTable items={r.kit} t={t} lang={ctx.lang} />}
       {item ? (
         <figcaption className="mt-3 font-sans text-sm">{share}</figcaption>

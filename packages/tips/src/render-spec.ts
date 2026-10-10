@@ -20,7 +20,9 @@ export const DEFAULT_INCLUDED_ANGLE: Record<'moil' | 'conical' | 'chisel' | 'pyr
   moil: 28,
   conical: 60,
   chisel: 45,
-  pyramid: 40,
+  // Face to face (what a side view square to a face shows). About 26-30° on OEM pyramid points
+  // (Rammer's own render): faces about 2 × D long. Was 40°, too blunt (owner asked to check).
+  pyramid: 30,
 };
 
 /** One axisymmetric section of the tool: radius r from y0 to y1 (step into the next included). */

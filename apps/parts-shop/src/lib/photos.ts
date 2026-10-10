@@ -51,8 +51,10 @@ export interface PartRender {
   hero?: string;
   /** Interactive 3D model (GLB, metres), opened on demand in PartViewer. */
   model3d?: string;
-  /** Front heads: the same head with its bushings and pins fitted ("burçlu"), shown by the Burçsuz / Burçlu switch. */
-  fitted?: { hero: string; views: { base: string; view: RenderView }[] };
+  /** Front heads: the same head with its bushings and pins fitted ("burçlu"), shown by the Burçsuz / Burçlu switch.
+   *  No hero: the 16:9 burçlu picture was a section, and the section must not come first (owner);
+   *  the front view leads, the assembly section comes last. */
+  fitted?: { views: { base: string; view: RenderView }[] };
   /** Breaker series: renders of one series share a sideways model picker (`<hero>-xs.webp` 320 px). */
   series?: string;
   /** Which bushing of the breaker (burç page): names it in the caption instead of the part name. */
@@ -1780,7 +1782,7 @@ const otherRender = ({ make, model, file, kind, views }: OtherPart): PartRender 
 
 /**
  * Front heads with a "burçlu" picture set (bushings and pins fitted, modelled from our drawings):
- * `/photos/parca/alt-govde-<slug>-burclu-{vitrin,on,arka,yan,montaj-kesit}-01`, slug as in the head's hero.
+ * `/photos/parca/alt-govde-<slug>-burclu-{on,arka,yan,montaj-kesit}-01` (front view first, section last: owner, the section is never the first picture), slug as in the head's hero.
  */
 const FITTED = new Set<string>([
   'atlas-copco-hb-2200',
@@ -1934,7 +1936,6 @@ const withFitted = (r: PartRender): PartRender => {
   return {
     ...r,
     fitted: {
-      hero: `${b}-vitrin-01`,
       views: [
         { base: `${b}-on-01`, view: 'front' },
         { base: `${b}-arka-01`, view: 'rear' },
