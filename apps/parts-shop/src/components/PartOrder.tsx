@@ -16,11 +16,14 @@ export function PartPriceLine({
   cents,
   fx,
   lang,
+  note,
   className = '',
 }: {
   cents: number;
   fx: FxRate | null;
   lang: Lang;
+  /** What the price covers, when it is more than the part (tie rods: nuts and washers). */
+  note?: string | null;
   className?: string;
 }) {
   const tl = fmtTry(cents, fx, lang);
@@ -28,9 +31,14 @@ export function PartPriceLine({
     <p className={`m-0 font-sans tabular-nums ${className}`}>
       <span className="font-semibold text-ink">{fmtUsd(cents, lang)}</span>
       {tl && <span className="text-ink-mid"> · {tl}</span>}
+      {note && <span className="block text-sm font-normal text-ink-mid">{note}</span>}
     </p>
   );
 }
+
+/** Tie rods are sold as a set with their nuts and washers (owner): say so next to a bare rod's price (the set's name already says it). */
+export const priceNote = (kind: string | undefined, t: Dict): string | null =>
+  kind === 'tieRod' ? t.parts.order.withNuts : null;
 
 /** The order message of a priced part, as the WhatsApp / e-mail links and the sticky bar send it. */
 export const partOrderText = (
@@ -59,6 +67,7 @@ export function PartOrder({
   fx,
   lang,
   t,
+  note,
 }: {
   /** Cart line id: the item path, plus `#b` for a burçlu head. */
   id: string;
@@ -73,6 +82,8 @@ export function PartOrder({
   fx: FxRate | null;
   lang: Lang;
   t: Dict;
+  /** What the price covers, when it is more than the part (see priceNote). */
+  note?: string | null;
 }) {
   const [added, setAdded] = useState(false);
   const o = t.parts.order;
@@ -86,6 +97,7 @@ export function PartOrder({
         <p className="m-0 text-sm text-ink-mid">{t.price.label}</p>
         <p className="m-0 mt-1 text-3xl font-bold text-ink tabular-nums">{fmtUsd(cents, lang)}</p>
         {tl && <p className="m-0 mt-1 text-lg font-semibold text-ink-mid tabular-nums">{tl}</p>}
+        {note && <p className="m-0 mt-1 text-sm text-ink">{note}</p>}
         <p className="m-0 mt-1 text-sm text-ink-soft tabular-nums">{t.price.inclVat(grossMoney)}</p>
         {tl && fx && (
           <p className="m-0 mt-1 text-xs text-ink-soft">{t.price.fxNote(fmtDate(fx.date, lang))}</p>

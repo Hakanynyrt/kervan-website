@@ -3,7 +3,7 @@ import type { FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import { Breadcrumb, ImgNote, OemLine, PageTitle, StickyQuote } from '../components/Bits';
 import { FOCUS } from '../components/Layout';
-import { PartOrder, PartPriceLine, partOrderText } from '../components/PartOrder';
+import { PartOrder, PartPriceLine, partOrderText, priceNote } from '../components/PartOrder';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { renderModel, renderTitle } from '../lib/part-caption';
@@ -70,7 +70,13 @@ export default function PartItem({
       <PageTitle>{caption}</PageTitle>
       <OemLine t={t} kit={model.part === 'tamir-takimi'} />
       {cents !== null && (
-        <PartPriceLine cents={cents} fx={fx} lang={lang} className="mt-2 text-lg lg:hidden" />
+        <PartPriceLine
+          cents={cents}
+          fx={fx}
+          lang={lang}
+          note={priceNote(r.kind, t)}
+          className="mt-2 text-lg lg:hidden"
+        />
       )}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
@@ -129,6 +135,7 @@ export default function PartItem({
               fx={fx}
               lang={lang}
               t={t}
+              note={priceNote(r.kind, t)}
             />
           ) : (
             <QuotePanel
