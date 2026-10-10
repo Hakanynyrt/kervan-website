@@ -1,13 +1,16 @@
 name: Shop prices
 
 # Manual: the owner's price sheet → D1 kervan-shop (SKU prices, extra products, alias breaker
-# names), then a shop redeploy. Paste the sheet (JSON, see PriceSheet in packages/tips/src/sql.ts)
-# into the input. It never enters the repository, and this public repo's logs print counts only.
+# names), then a shop redeploy. Paste the ENCRYPTED sheet (enc:v1:…, made with
+# apps/parts-shop/scripts/sheet-crypt.ts and the key in secret SHOP_SHEET_KEY; JSON inside, see
+# PriceSheet in packages/tips/src/sql.ts) into the input. The input is never put in an env
+# variable (step logs print env values, and this repo's logs are public): it is read from the
+# event file. Plain JSON is refused. Logs print counts only.
 on:
   workflow_dispatch:
     inputs:
       sheet:
-        description: 'Price sheet (JSON)'
+        description: 'Price sheet (encrypted, enc:v1:…)'
         required: true
 
 concurrency:
@@ -26,7 +29,6 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_SHOP_DATA_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       DB: kervan-shop
-      SHEET: ${{ inputs.sheet }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -41,7 +43,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check configuration
-        run: test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::secret CLOUDFLARE_SHOP_DATA_TOKEN is not set"; exit 1; }
+        env:
+          SHOP_SHEET_KEY: ${{ secrets.SHOP_SHEET_KEY }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::secret CLOUDFLARE_SHOP_DATA_TOKEN is not set"; exit 1; }
+          test -n "$SHOP_SHEET_KEY" || { echo "::error::secret SHOP_SHEET_KEY is not set"; exit 1; }
 
       - name: Apply schema
         run: |
@@ -50,12 +56,14 @@ jobs:
           done
 
       - name: Write prices (output kept out of the log)
+        env:
+          SHOP_SHEET_KEY: ${{ secrets.SHOP_SHEET_KEY }}
         run: |
           set -euo pipefail
           D="$RUNNER_TEMP/prices"
           mkdir -p "$D"
-          printf '%s' "$SHEET" > "$D/sheet.json"
-          node --experimental-strip-types --no-warnings apps/parts-shop/scripts/shop-prices.ts "$D/sheet.json" "$D/prices.sql"
+          jq -r '.inputs.sheet' "$GITHUB_EVENT_PATH" > "$D/sheet.txt"
+          node --experimental-strip-types --no-warnings apps/parts-shop/scripts/shop-prices.ts "$D/sheet.txt" "$D/prices.sql"
           pnpm exec wrangler d1 execute "$DB" --remote --yes --file "$D/prices.sql" > /dev/null
           rm -rf "$D"
 
