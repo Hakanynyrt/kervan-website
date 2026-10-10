@@ -116,6 +116,10 @@ export interface Dict {
     stockTitle: string;
     stockNote: string;
     stockAlt: (i: number) => string;
+    /** Tools with dust grooves we model for the breaker (`GROOVED_TOOLS`). */
+    groovedTitle: string;
+    groovedNote: string;
+    groovedAlt: (type: string | null) => string;
     angle: string;
     availability: string;
     inStock: (n: number) => string;
@@ -513,6 +517,11 @@ export const DICT: Record<Lang, Dict> = {
       stockTitle: 'Stoğumuzdan',
       stockNote: 'Atölyemizdeki stoktan kırıcı uçları.',
       stockAlt: (i) => `Kervan atölyesinde stoktaki kırıcı uçları (${i})`,
+      groovedTitle: 'Toz kanallı uçlar',
+      groovedNote:
+        'Bu kırıcı için ürettiğimiz toz kanallı uçlar, kendi çizimimizden modellenmiş görseller. Fiyat için teklif isteyin.',
+      groovedAlt: (type) =>
+        type ? `Toz kanallı ${type.toLocaleLowerCase('tr')} uç` : 'Toz kanallı kırıcı ucu',
       angle: 'Uç açısı',
       availability: 'Durum',
       inStock: (n) => (n >= 10 ? 'Stokta (10+)' : `Stokta (${n})`),
@@ -1152,6 +1161,11 @@ export const DICT: Record<Lang, Dict> = {
       stockTitle: 'From our stock',
       stockNote: 'Breaker tips in stock at our plant.',
       stockAlt: (i) => `Breaker tips in stock at the Kervan plant (${i})`,
+      groovedTitle: 'Tools with dust grooves',
+      groovedNote:
+        'Tools with dust grooves we make for this breaker, rendered from our own drawing. Ask for a quote.',
+      groovedAlt: (type) =>
+        type ? `${type} tool with dust grooves` : 'Breaker tool with dust grooves',
       angle: 'Tip angle',
       availability: 'Availability',
       inStock: (n) => (n >= 10 ? 'In stock (10+)' : `In stock (${n})`),

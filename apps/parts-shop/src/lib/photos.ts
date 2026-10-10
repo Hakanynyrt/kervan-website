@@ -2059,3 +2059,18 @@ export const PLANT_PHOTOS = [
   '/photos/tesis/burc-stok-01',
   '/photos/tesis/uc-stok-01',
 ] as const;
+
+/**
+ * Tools with dust grooves ("toz kanallı"), modelled from our drawings: shown on the breaker's tip
+ * page next to the catalogue tips (`/photos/parca/uc-<breaker>-grooved-tool-<type>-…-01`).
+ */
+export const GROOVED_TOOLS: readonly {
+  breaker: string;
+  /** Null when the drawing names no tip type. */
+  tipType: 'moil' | 'conical' | null;
+  base: string;
+}[] = [
+  { breaker: 'MTB 700', tipType: null, base: '/photos/parca/uc-mtb-700-grooved-tool' },
+  { breaker: 'MTB 700', tipType: 'moil', base: '/photos/parca/uc-mtb-700-grooved-tool-moil' },
+  { breaker: 'MTB 700', tipType: 'conical', base: '/photos/parca/uc-mtb-700-grooved-tool-conical' },
+];
