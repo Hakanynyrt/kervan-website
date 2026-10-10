@@ -15,17 +15,27 @@ import {
   Terms,
 } from '../components/Bits';
 import { FOCUS, whatsappHref } from '../components/Layout';
-import { PartPriceLine, priceNote } from '../components/PartOrder';
+import { PartPriceLine, partOrderText, priceNote } from '../components/PartOrder';
 import RenderGallery from '../components/RenderGallery';
 import ShareLinks from '../components/ShareLinks';
+import { addToCart } from '../lib/cart';
 import type { Dict } from '../lib/dict';
+import type { ListedPart } from '../lib/listed-parts';
 import { localePath } from '../lib/locale-path';
 import { SITE } from '../lib/page-head';
 import { renderModel, renderTitle } from '../lib/part-caption';
 import { DEFAULT_FILTER, filtersFor, inFilter, type PartFilter } from '../lib/part-filters';
 import { renderAnchor } from '../lib/part-links';
+import { kindPartType } from '../lib/part-prices';
 import { PART_PHOTOS, PART_RENDERS, type PartRender } from '../lib/photos';
-import { PARTS_PATH, partItemPath, type PageModel, type PartKey } from '../lib/routes';
+import {
+  CART_PATH,
+  PARTS_PATH,
+  partItemPath,
+  partPath,
+  type PageModel,
+  type PartKey,
+} from '../lib/routes';
 import type { Lang } from '../types';
 
 type Model = Extract<PageModel, { kind: 'part' }>;
@@ -116,6 +126,15 @@ export default function Part({
     : guess
       ? all.filter((_, i) => matches(guess, names[i]))
       : [];
+  // Priced parts of breakers we have not modelled: shown only for a search, like the renders.
+  const types = kinds ? new Set(kinds.map(kindPartType)) : null;
+  const listedAll = (model.listed ?? []).filter((l) => !types || types.has(l.type));
+  const listedFound = query ? listedAll.filter((l) => matches(query, l.breaker)) : [];
+  const listed = listedFound.length
+    ? listedFound
+    : !found.length && guess
+      ? listedAll.filter((l) => matches(guess, l.breaker))
+      : [];
   const solo = renders.filter((r) => !r.series);
   const series = new Map<string, PartRender[]>();
   for (const r of renders) if (r.series) series.set(r.series, [...(series.get(r.series) ?? []), r]);
@@ -171,9 +190,9 @@ export default function Part({
           <p className="m-0 font-sans text-sm text-ink-mid" aria-live="polite">
             {!query
               ? t.search.hint
-              : found.length
-                ? t.search.count(found.length)
-                : guess && renders.length
+              : found.length + listedFound.length
+                ? t.search.count(found.length + listedFound.length)
+                : guess && (renders.length || listed.length)
                   ? t.search.didYouMean(guess)
                   : t.search.none(query)}
           </p>
@@ -219,7 +238,7 @@ export default function Part({
       >
         {pics && (
           <div className="flex min-w-0 flex-col gap-6">
-            {query && !renders.length && <MissingModel t={t} query={query} />}
+            {query && !renders.length && !listed.length && <MissingModel t={t} query={query} />}
             {!query && showcase.length > 0 && (
               <section aria-labelledby="showcase">
                 <h2 id="showcase" className="m-0 font-sans text-xl font-bold text-ink">
@@ -274,6 +293,7 @@ export default function Part({
             {renders.length > 0 && (
               <ImgNote t={t} kind={model.part === 'tamir-takimi' ? 'kit' : 'render'} />
             )}
+            {listed.length > 0 && <ListedParts list={listed} ctx={ctx} />}
             {photos.length > 0 && (
               <div>
                 <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2">
@@ -306,6 +326,109 @@ export default function Part({
       </div>
       <StickyQuote text={text} t={t} />
     </Container>
+  );
+}
+
+/**
+ * Parts the owner sells for breakers we have not modelled (owner: "listede fiyatı olanları da
+ * siteye ekle, örnek görsel kullan"): the same part of the nearest-sized modelled breaker as a
+ * labelled representative picture, the price, "Palete yükle" and a WhatsApp order.
+ */
+function ListedParts({ list, ctx }: { list: ListedPart[]; ctx: Ctx }) {
+  const { t } = ctx;
+  return (
+    <section aria-labelledby="listed">
+      <h2 id="listed" className="m-0 font-sans text-xl font-bold text-ink">
+        {t.parts.listed.title}
+      </h2>
+      <p className="m-0 mt-1 max-w-2xl font-sans text-sm text-ink-mid">{t.parts.listed.lead}</p>
+      <ul className="m-0 mt-4 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2">
+        {list.map((l) => (
+          <li key={`${l.breaker}|${l.type}`}>
+            <ListedCard l={l} ctx={ctx} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function ListedCard({ l, ctx }: { l: ListedPart; ctx: Ctx }) {
+  const { t, lang } = ctx;
+  const [added, setAdded] = useState(false);
+  const label = t.parts.listed.type[l.type] ?? ctx.name;
+  const path = partPath(ctx.part);
+  const link = `inline-flex min-h-11 items-center font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`;
+  return (
+    <figure className="m-0 flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg">
+      <div className="relative">
+        <img
+          src={`${l.sample}-xs.webp`}
+          srcSet={`${l.sample}-xs.webp 320w, ${l.sample}-lg.webp 1600w`}
+          sizes="(min-width: 640px) 30vw, 100vw"
+          width={320}
+          height={180}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="block h-auto w-full bg-stage"
+        />
+        <span className="absolute left-2 top-2 rounded-sm bg-bg/90 px-2 py-0.5 font-sans text-xs text-ink">
+          {t.parts.listed.sample}
+        </span>
+      </div>
+      <figcaption className="flex flex-1 flex-col px-3 pb-3 pt-2 font-sans">
+        <span className="block text-base font-semibold text-ink">
+          {l.breaker} {label}
+        </span>
+        <PartPriceLine
+          cents={l.cents}
+          fx={ctx.fx}
+          lang={lang}
+          note={l.type === 'BOY_SAPLAMA' ? t.parts.order.withNuts : null}
+          className="mt-1 text-base"
+        />
+        <span className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-1 pt-2 text-sm">
+          <button
+            type="button"
+            onClick={() => {
+              addToCart(
+                {
+                  id: `listed:${ctx.part}/${slugify(l.breaker)}/${l.type}`,
+                  name: l.breaker,
+                  label,
+                  code: null,
+                  path,
+                  cents: l.cents,
+                },
+                1,
+              );
+              setAdded(true);
+            }}
+            className={`min-h-11 cursor-pointer rounded-sm bg-brand px-4 font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
+          >
+            {t.price.add}
+          </button>
+          <a
+            href={whatsappHref(partOrderText(t, lang, label, l.breaker, 1, l.cents, path))}
+            className={link}
+          >
+            {t.parts.order.wa}
+          </a>
+        </span>
+        {added && (
+          <p className="m-0 mt-1 text-sm text-ink" role="status">
+            {t.price.added} ·{' '}
+            <a
+              href={localePath(CART_PATH, lang)}
+              className={`font-medium text-brand-hi underline ${FOCUS}`}
+            >
+              {t.price.goCart}
+            </a>
+          </p>
+        )}
+      </figcaption>
+    </figure>
   );
 }
 

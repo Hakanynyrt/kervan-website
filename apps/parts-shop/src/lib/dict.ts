@@ -305,7 +305,14 @@ export interface Dict {
       related: string;
       linksLabel: string;
     };
-    /** Front heads sold with or without their bushings and pins. */
+    /** Priced parts of breakers we have not modelled: a search shows them with a sample picture. */
+    listed: {
+      title: string;
+      lead: string;
+      sample: string;
+      /** The owner's part types (PART_TYPES codes), as a part name. */
+      type: Record<string, string>;
+    };
     /** Priced parts: order instead of a quote. */
     order: {
       title: string;
@@ -320,6 +327,7 @@ export interface Dict {
       /** Tie rods are sold as a set (owner): the price includes the nuts and washers. */
       withNuts: string;
     };
+    /** Front heads sold with or without their bushings and pins. */
     fitted: {
       label: string;
       without: string;
@@ -977,6 +985,25 @@ export const DICT: Record<Lang, Dict> = {
         back: (group) => `Tüm ${group.toLocaleLowerCase('tr')} modelleri`,
         related: 'Bu kırıcı için ürettiğimiz diğer parçalar',
         linksLabel: 'Parça bağlantıları',
+      },
+      listed: {
+        title: 'Satıştaki parçalar',
+        lead: 'Bu kırıcı için sattığımız parçalar. Resimler temsilidir: aynı parçanın benzer boydaki bir kırıcı için yaptığımız örneği.',
+        sample: 'Temsili görsel',
+        type: {
+          ALT_GOVDE: 'alt gövde (burçlu)',
+          KAFA_BURCU: 'kafa burcu (alt burç)',
+          MERKEZLEME: 'merkezleme',
+          DAYAMA: 'dayama burcu',
+          MERKEZLEME_DAYAMA: 'dayama-merkezleme burcu',
+          BURC_TAKIMI: 'burç takımı',
+          KAMA: 'kama',
+          KAMA_PIMI: 'kama pimi',
+          BOY_SAPLAMA: 'boy saplama',
+          YAN_SAPLAMA: 'yan saplama',
+          PISTON: 'piston',
+          TAMIR_TAKIMI: 'tamir takımı',
+        },
       },
       order: {
         title: 'Sipariş verin',
@@ -1655,6 +1682,25 @@ export const DICT: Record<Lang, Dict> = {
         back: (group) => `All ${group.toLowerCase()} models`,
         related: 'Other parts we make for this breaker',
         linksLabel: 'Part links',
+      },
+      listed: {
+        title: 'Parts we sell',
+        lead: 'Parts we sell for this breaker. Pictures are representative: the same part we make for a breaker of similar size.',
+        sample: 'Representative picture',
+        type: {
+          ALT_GOVDE: 'front head (with bushings)',
+          KAFA_BURCU: 'tool bushing (lower bushing)',
+          MERKEZLEME: 'upper bushing',
+          DAYAMA: 'thrust ring',
+          MERKEZLEME_DAYAMA: 'thrust ring and upper bushing',
+          BURC_TAKIMI: 'bushing set',
+          KAMA: 'retainer key',
+          KAMA_PIMI: 'retainer pin',
+          BOY_SAPLAMA: 'through bolt',
+          YAN_SAPLAMA: 'side bolt',
+          PISTON: 'piston',
+          TAMIR_TAKIMI: 'seal kit',
+        },
       },
       order: {
         title: 'Order',

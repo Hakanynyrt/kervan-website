@@ -17,6 +17,7 @@ import {
   tipLinksForPart,
   type PartLink,
 } from './part-links';
+import { listedParts, type ListedPart } from './listed-parts';
 import { groupPrices, resolvePartPrices } from './part-prices';
 import { PART_RENDERS, type PartRender } from './photos';
 import type { TipGroupStats } from '../types';
@@ -82,6 +83,8 @@ export type PageModel =
       tipLinks: Record<string, string>;
       /** Render anchor (`anchor#b` = burçlu head) → net USD cents, priced renders only. */
       prices: Record<string, number>;
+      /** Priced parts of breakers we have not modelled (shown on a search, sample picture). */
+      listed: ListedPart[];
       demo: boolean;
       hasPopular: boolean;
     }
@@ -351,6 +354,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
   const popular = cards.filter((x) => x.popularTier !== null).sort(byPopularity);
   const hasPopular = popular.length > 0;
   const partPrices = resolvePartPrices(c.partPrices ?? []);
+  const listed = listedParts(c);
   const byBrand = new Map<string, BreakerCard[]>();
   for (const x of cards) byBrand.set(x.brand, [...(byBrand.get(x.brand) ?? []), x]);
   const brands: BrandLink[] = [...byBrand]
@@ -401,6 +405,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         part,
         tipLinks: tipLinksForPart(part, tipPaths),
         prices: groupPrices(partPrices, part),
+        listed: listed[part] ?? [],
         demo,
         hasPopular,
       },

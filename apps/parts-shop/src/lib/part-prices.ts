@@ -67,6 +67,9 @@ const KIND_TYPE = {
   accumulatorDowel: null,
 } as const satisfies Record<Kind, PartTypeCode | null>;
 
+/** The owner's part type of a render kind (null: never priced by a type row). */
+export const kindPartType = (k: Kind): PartTypeCode | null => KIND_TYPE[k];
+
 /** A render (or a front head's burçlu state, `#b`) that can carry a price. */
 interface Candidate {
   /** `<part>/<anchor>` or `<part>/<anchor>#b`. */
