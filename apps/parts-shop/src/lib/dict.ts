@@ -426,7 +426,7 @@ export const DICT: Record<Lang, Dict> = {
       trust: [
         {
           title: 'Kendi üretimimiz',
-          body: 'Kartepe’deki tesisimizde, orijinal ölçülerde ve OEM kalitesinde işlenir; aracı yoktur.',
+          body: 'Kartepe’deki tesisimizde, orijinalle aynı ve OEM kalitesinde işlenir; aracı yoktur.',
         },
         {
           title: 'Kendi ısıl işlemimiz',
@@ -625,7 +625,7 @@ export const DICT: Record<Lang, Dict> = {
     terms: {
       title: 'Satış koşulları',
       rows: [
-        ['Kalite', 'OEM kalitesinde, orijinal ölçülerde'],
+        ['Kalite', 'OEM kalitesinde, orijinalle aynı'],
         ['Kargo', 'Alıcıya aittir; tutarı sipariş onayında bildirilir'],
         ['Ödeme', 'Kredi kartı veya havale/EFT'],
         ['Garanti', 'Teslimden itibaren 3 ay, malzeme ve üretim hatalarına karşı'],
@@ -832,7 +832,7 @@ export const DICT: Record<Lang, Dict> = {
     imgNote: 'Görseller temsilidir.',
     renderNote: 'Kendi çizimlerimizden 3B görseller; temsilidir.',
     photoNote: 'Atölyemizdeki stoktan, gerçek fotoğraflar.',
-    oem: 'OEM / orijinal kalitesinde, orijinal ölçülerde üretilir.',
+    oem: 'OEM / orijinal kalitesinde, orijinalle aynı üretilir.',
     legal: {
       nav: 'Yasal metinler',
       agree: 'Sipariş talebi göndererek aşağıdaki metinleri okuduğunuzu kabul edersiniz:',
@@ -961,7 +961,7 @@ export const DICT: Record<Lang, Dict> = {
       trust: [
         {
           title: 'Our own production',
-          body: 'Machined in our plant in Kartepe, Türkiye, to original dimensions and OEM quality; no middlemen.',
+          body: 'Machined in our plant in Kartepe, Türkiye, identical to the original, to OEM quality; no middlemen.',
         },
         {
           title: 'Our own heat treatment',
@@ -1156,7 +1156,7 @@ export const DICT: Record<Lang, Dict> = {
     terms: {
       title: 'Terms of sale',
       rows: [
-        ['Quality', 'OEM quality, original dimensions'],
+        ['Quality', 'OEM quality, identical to the original'],
         ['Shipping', 'Paid by the buyer; the amount is given in the order confirmation'],
         ['Payment', 'Credit card or bank transfer'],
         ['Warranty', '3 months from delivery, against material and manufacturing defects'],
@@ -1371,7 +1371,7 @@ export const DICT: Record<Lang, Dict> = {
     imgNote: 'Images are for illustration.',
     renderNote: '3D images from our own drawings; for illustration.',
     photoNote: 'Real photos of our stock at the plant.',
-    oem: 'Made to OEM / original quality and original dimensions.',
+    oem: 'Made to OEM / original quality, identical to the original.',
     legal: {
       nav: 'Legal',
       agree: 'By sending an order request you confirm you have read:',
