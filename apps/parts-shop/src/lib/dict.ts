@@ -317,6 +317,8 @@ export interface Dict {
       text: (part: string, breaker: string, qty: number, price: string, url: string) => string;
       /** Under a priced part: a quote for another breaker on the group page. */
       other: string;
+      /** Tie rods are sold as a set (owner): the price includes the nuts and washers. */
+      withNuts: string;
     };
     fitted: {
       label: string;
@@ -985,6 +987,7 @@ export const DICT: Record<Lang, Dict> = {
         text: (part, breaker, qty, price, url) =>
           `Merhaba, ${breaker} ${part}, ${qty} adet sipariş vermek istiyorum (birim ${price}, KDV hariç).\n${url}`,
         other: 'Başka bir kırıcı için teklif isteyin',
+        withNuts: 'Somun ve pullarıyla birlikte, takım olarak',
       },
       fitted: {
         label: 'Seçenek',
@@ -1662,6 +1665,7 @@ export const DICT: Record<Lang, Dict> = {
         text: (part, breaker, qty, price, url) =>
           `Hello, I would like to order ${qty} × ${breaker} ${part} (unit ${price}, excl. VAT).\n${url}`,
         other: 'Request a quote for another breaker',
+        withNuts: 'Sold as a set, with its nuts and washers',
       },
       fitted: {
         label: 'Option',

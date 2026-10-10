@@ -15,7 +15,7 @@ import {
   Terms,
 } from '../components/Bits';
 import { FOCUS, whatsappHref } from '../components/Layout';
-import { PartPriceLine } from '../components/PartOrder';
+import { PartPriceLine, priceNote } from '../components/PartOrder';
 import RenderGallery from '../components/RenderGallery';
 import ShareLinks from '../components/ShareLinks';
 import type { Dict } from '../lib/dict';
@@ -500,7 +500,13 @@ export function RenderFigure({
             </a>
           </span>
           {cents !== undefined && (
-            <PartPriceLine cents={cents} fx={ctx.fx} lang={ctx.lang} className="mt-1 text-base" />
+            <PartPriceLine
+              cents={cents}
+              fx={ctx.fx}
+              lang={ctx.lang}
+              note={priceNote(r.kind, t)}
+              className="mt-1 text-base"
+            />
           )}
           <span className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm">
             {cents !== undefined ? (
