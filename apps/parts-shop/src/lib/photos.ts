@@ -69,7 +69,8 @@ export interface PartRender {
     | 'typeL'
     | 'typeT'
     | 'oilGroove'
-    | 'greasingHole';
+    | 'greasingHole'
+    | 'puCoated';
   views: { base: string; view: RenderView }[];
 }
 
@@ -1114,16 +1115,25 @@ const VIEW_FILE: Record<RenderView, string> = {
   detail: 'pencere',
   assembly: 'montaj-kesit',
 };
+/**
+ * MTB tie rods carry a cast polyurethane coating on their grooved collars (the sheets: "KAPLAMA
+ * MALZEMESİ: PU SH80" / "POLİÜRETAN", moulded in the "lastik kalıbı"; owner: nearly every MTB
+ * rod gets it). Rendered in the wear plates' yellow PU (the coating covers the collar's chamfers too, owner: "biz öyle yapıyoruz"), version 03, captioned "PU kaplamalı".
+ */
+const PU_COATED_SAPLAMA: Record<string, string> = { 'mtb-85': '03', 'mtb-150': '03', 'mtb-210': '03' };
 const kitRender =
   (part: string, kind: NonNullable<PartRender['kind']>, views: RenderView[]) =>
   ({ make, model, file }: (typeof PART_KIT)[number]): PartRender => {
     const b = `/photos/parca/${part}-${file}`;
+    const pu = part === 'saplama' ? PU_COATED_SAPLAMA[file] : undefined;
+    const v = pu ?? '01';
     return {
       model: make === 'MTB' ? `MTB ${model}` : `${make} ${model}`,
       series: make,
       kind,
-      hero: `${b}-vitrin-01`,
-      views: views.map((view) => ({ base: `${b}-${VIEW_FILE[view]}-01`, view })),
+      ...(pu ? { variant: 'puCoated' as const } : {}),
+      hero: `${b}-vitrin-${v}`,
+      views: views.map((view) => ({ base: `${b}-${VIEW_FILE[view]}-${v}`, view })),
     };
   };
 

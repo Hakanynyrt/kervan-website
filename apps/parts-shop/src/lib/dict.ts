@@ -734,6 +734,7 @@ export const DICT: Record<Lang, Dict> = {
         typeT: 'T tipi',
         oilGroove: 'yağ kanallı',
         greasingHole: 'yağlama delikli',
+        puCoated: 'PU kaplamalı',
       },
       viewer: {
         open: '3B incele',
@@ -1241,6 +1242,7 @@ export const DICT: Record<Lang, Dict> = {
         typeT: 'T type',
         oilGroove: 'oil grooves',
         greasingHole: 'greasing hole',
+        puCoated: 'PU-coated',
       },
       viewer: {
         open: 'View in 3D',
