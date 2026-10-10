@@ -619,3 +619,83 @@ export const SMALL_PARTS: Record<
     },
   ],
 };
+
+/** Tie rods with their nuts and washers (`saplama-takim-<kit>[-<nut shape>]`), one per nut shape. */
+export const ROD_SETS: readonly SmallPart[] = [
+  { make: 'Furukawa', model: 'F22', file: 'saplama-takim-furukawa-f22', kind: 'tieRodSet' },
+  { make: 'Furukawa', model: 'HB20G', file: 'saplama-takim-furukawa-hb20g', kind: 'tieRodSet' },
+  { make: 'Furukawa', model: 'HB30G', file: 'saplama-takim-furukawa-hb30g', kind: 'tieRodSet' },
+  { make: 'Krupp', model: 'HM 1500', file: 'saplama-takim-krupp-hm-1500', kind: 'tieRodSet' },
+  { make: 'Krupp', model: 'HM 560', file: 'saplama-takim-krupp-hm-560', kind: 'tieRodSet' },
+  { make: 'Krupp', model: 'HM 720', file: 'saplama-takim-krupp-hm-720', kind: 'tieRodSet' },
+  { make: 'Krupp', model: 'HM 960', file: 'saplama-takim-krupp-hm-960', kind: 'tieRodSet' },
+  {
+    make: 'Montabert',
+    model: 'BRH 501',
+    file: 'saplama-takim-montabert-brh-501',
+    kind: 'tieRodSet',
+  },
+  { make: 'Montabert', model: 'BRV 32', file: 'saplama-takim-montabert-brv-32', kind: 'tieRodSet' },
+  { make: 'MTB', model: '150', file: 'saplama-takim-mtb-150', kind: 'tieRodSet' },
+  { make: 'Rammer', model: 'E64', file: 'saplama-takim-rammer-e64', kind: 'tieRodSet' },
+  { make: 'Rammer', model: 'E66', file: 'saplama-takim-rammer-e66', kind: 'tieRodSet' },
+  {
+    make: 'Rammer',
+    model: 'E66',
+    file: 'saplama-takim-rammer-e66-newtype',
+    kind: 'tieRodSet',
+    variant: 'newType',
+  },
+  { make: 'Rammer', model: 'G80', file: 'saplama-takim-rammer-g80', kind: 'tieRodSet' },
+  { make: 'Rammer', model: 'S25', file: 'saplama-takim-rammer-s25', kind: 'tieRodSet' },
+  { make: 'Rammer', model: 'S84', file: 'saplama-takim-rammer-s84', kind: 'tieRodSet' },
+  {
+    make: 'Soosan',
+    model: 'SB121 TS-P',
+    file: 'saplama-takim-soosan-sb121-ts-p-newtype',
+    kind: 'tieRodSet',
+    variant: 'newType',
+  },
+  {
+    make: 'Soosan',
+    model: 'SB121 TS-P',
+    file: 'saplama-takim-soosan-sb121-ts-p-trilobe',
+    kind: 'tieRodSet',
+    variant: 'triLobe',
+  },
+  {
+    make: 'Soosan',
+    model: 'SB121 TS-P',
+    file: 'saplama-takim-soosan-sb121-ts-p-roundshape',
+    kind: 'tieRodSet',
+    variant: 'roundShape',
+  },
+];
+
+/** Wear plates and buffers of one breaker in one picture (`asinma-set-<kit>`), hero only. */
+export const WEAR_SETS: readonly SmallPart[] = [
+  { make: 'Furukawa', model: 'F22', file: 'asinma-set-furukawa-f22', kind: 'wearPlateSet' },
+  { make: 'Krupp', model: 'HM 1500', file: 'asinma-set-krupp-hm-1500', kind: 'wearPlateSet' },
+  { make: 'Krupp', model: 'HM 560', file: 'asinma-set-krupp-hm-560', kind: 'wearPlateSet' },
+  { make: 'Krupp', model: 'HM 720', file: 'asinma-set-krupp-hm-720', kind: 'wearPlateSet' },
+  { make: 'Krupp', model: 'HM 960', file: 'asinma-set-krupp-hm-960', kind: 'wearPlateSet' },
+  {
+    make: 'Montabert',
+    model: 'BRH 501',
+    file: 'asinma-set-montabert-brh-501',
+    kind: 'wearPlateSet',
+  },
+  { make: 'Montabert', model: 'BRV 32', file: 'asinma-set-montabert-brv-32', kind: 'wearPlateSet' },
+  { make: 'MTB', model: '150', file: 'asinma-set-mtb-150', kind: 'wearPlateSet' },
+  { make: 'MTB', model: '210', file: 'asinma-set-mtb-210', kind: 'wearPlateSet' },
+  { make: 'MTB', model: '210 II', file: 'asinma-set-mtb-210-ii', kind: 'wearPlateSet' },
+  { make: 'Rammer', model: 'E64', file: 'asinma-set-rammer-e64', kind: 'wearPlateSet' },
+  { make: 'Rammer', model: 'G80', file: 'asinma-set-rammer-g80', kind: 'wearPlateSet' },
+  { make: 'Rammer', model: 'S84', file: 'asinma-set-rammer-s84', kind: 'wearPlateSet' },
+  {
+    make: 'Soosan',
+    model: 'SB121 TS-P',
+    file: 'asinma-set-soosan-sb121-ts-p',
+    kind: 'wearPlateSet',
+  },
+];

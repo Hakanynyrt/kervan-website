@@ -1,5 +1,5 @@
 import { REPAIR_KITS, type RepairKit } from './repair-kits';
-import { SMALL_PARTS, type SmallPart } from './small-parts';
+import { ROD_SETS, SMALL_PARTS, WEAR_SETS, type SmallPart } from './small-parts';
 import type { PartKey } from './routes';
 
 /**
@@ -108,7 +108,9 @@ export interface PartRender {
     | 'topBufferPlate'
     | 'topWearPlate'
     | 'upperBushingPin'
-    | 'upperBushingPinPlug';
+    | 'upperBushingPinPlug'
+    | 'tieRodSet'
+    | 'wearPlateSet';
   /** Another version of the same breaker's part, named in the caption through the dict. */
   variant?:
     | 'oldType'
@@ -2016,12 +2018,17 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
   saplama: [
     ...PART_KIT.map(kitRender('saplama', 'tieRod', ['side', 'front'])),
     ...SIDE_BOLTS.map(otherRender),
+    ...ROD_SETS.map((p) => ({
+      ...smallRender(p),
+      views: smallRender(p).views.filter((v) => v.view !== 'rear'),
+    })),
     ...SMALL_PARTS.saplama.map(smallRender),
   ],
   piston: PART_KIT.map(kitRender('piston', 'piston', ['front', 'rear', 'side', 'section'])),
   akumulator: [...ACCUMULATOR_PARTS.map(otherRender), ...SMALL_PARTS.akumulator.map(smallRender)],
   'asinma-plakasi': [
     ...WEAR_PLATES.map(otherRender),
+    ...WEAR_SETS.map((p) => ({ ...smallRender(p), views: [] })),
     ...SMALL_PARTS['asinma-plakasi'].map(smallRender),
   ],
   'tamir-takimi': REPAIR_KITS.map(kitPartRender),

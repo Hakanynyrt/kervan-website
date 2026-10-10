@@ -17,7 +17,8 @@ export type PartFilter =
   | 'washers'
   | 'keys'
   | 'plates'
-  | 'buffers';
+  | 'buffers'
+  | 'sets';
 
 export const PART_FILTERS: Partial<Record<PartKey, [PartFilter, readonly Kind[]][]>> = {
   burc: [
@@ -39,6 +40,7 @@ export const PART_FILTERS: Partial<Record<PartKey, [PartFilter, readonly Kind[]]
     ['plugs', ['toolBushingPinPlug', 'upperBushingPinPlug']],
   ],
   saplama: [
+    ['sets', ['tieRodSet']],
     ['rods', ['tieRod', 'sideBolt', 'bodyDowel']],
     ['nuts', ['tieRodNut', 'tieRodUpperNut', 'tieRodLowerNut']],
     ['washers', ['tieRodWasher', 'tieRodBush', 'sideBoltWasher']],
@@ -61,6 +63,7 @@ export const PART_FILTERS: Partial<Record<PartKey, [PartFilter, readonly Kind[]]
     ['plugs', ['keyPinPlug']],
   ],
   'asinma-plakasi': [
+    ['sets', ['wearPlateSet']],
     [
       'plates',
       ['wearPlate', 'topWearPlate', 'sideWearPlate', 'frontWearPlate', 'allRoundWearPlate'],
