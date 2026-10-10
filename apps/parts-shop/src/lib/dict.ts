@@ -251,6 +251,17 @@ export interface Dict {
       next: string;
       jump: string;
     };
+    /** Repair kits: the contents table under the pictures. */
+    kit: {
+      title: string;
+      part: string;
+      qty: string;
+      note: string;
+      /** Under the title instead of the OEM line: kits are put together, not made by us. */
+      oem: string;
+      renderNote: string;
+      type: Record<import('./photos').KitItemType, string>;
+    };
     /** Group page before a search: a few renders with no make or model named. */
     showcase: { title: string; lead: string; alt: (part: string, i: number) => string };
     /** Under a part's caption: its breaker's tip page. */
@@ -364,6 +375,7 @@ export const DICT: Record<Lang, Dict> = {
         piston: 'Piston',
         akumulator: 'Akümülatör',
         'asinma-plakasi': 'Aşınma plakası',
+        'tamir-takimi': 'Tamir takımı',
       },
       call: 'Ara',
       cart: 'Palet',
@@ -414,7 +426,7 @@ export const DICT: Record<Lang, Dict> = {
       trust: [
         {
           title: 'Kendi üretimimiz',
-          body: 'Kartepe’deki tesisimizde, orijinal ölçülerde ve OEM kalitesinde işlenir; aracı yoktur.',
+          body: 'Kartepe’deki tesisimizde, orijinalle aynı ve OEM kalitesinde işlenir; aracı yoktur.',
         },
         {
           title: 'Kendi ısıl işlemimiz',
@@ -613,7 +625,7 @@ export const DICT: Record<Lang, Dict> = {
     terms: {
       title: 'Satış koşulları',
       rows: [
-        ['Kalite', 'OEM kalitesinde, orijinal ölçülerde'],
+        ['Kalite', 'OEM kalitesinde, orijinalle aynı'],
         ['Kargo', 'Alıcıya aittir; tutarı sipariş onayında bildirilir'],
         ['Ödeme', 'Kredi kartı veya havale/EFT'],
         ['Garanti', 'Teslimden itibaren 3 ay, malzeme ve üretim hatalarına karşı'],
@@ -650,6 +662,10 @@ export const DICT: Record<Lang, Dict> = {
           name: 'Aşınma plakası',
           body: 'Kırıcı gövdesini kutu içinde koruyan aşınma plakaları.',
         },
+        'tamir-takimi': {
+          name: 'Tamir takımı',
+          body: 'Kırıcı modeline göre sızdırmazlık takımı: o-ringler, keçeler, toz keçeleri, destek ve teflon ringler; içeriği ve ölçüleriyle.',
+        },
       },
       view: 'İncele',
       groupsTitle: 'Ürün grupları',
@@ -682,6 +698,7 @@ export const DICT: Record<Lang, Dict> = {
         detail: 'saplama somunu penceresi',
         section: 'kesit görünüşü',
         assembly: 'burçları takılı montaj kesiti',
+        top: 'üstten görünüş',
       },
       renderKind: {
         toolBushing: 'kafa burcu (alt burç)',
@@ -702,6 +719,7 @@ export const DICT: Record<Lang, Dict> = {
         accumulatorLower: 'akümülatör alt kapağı',
         accumulatorBolt: 'akümülatör saplaması',
         wearPlate: 'aşınma plakası',
+        repairKit: 'tamir takımı',
       },
       renderKindShort: {
         toolBushing: 'Kafa burcu',
@@ -722,6 +740,7 @@ export const DICT: Record<Lang, Dict> = {
         accumulatorLower: 'Alt kapak',
         accumulatorBolt: 'Saplama',
         wearPlate: 'Aşınma plakası',
+        repairKit: 'Tamir takımı',
       },
       renderVariant: {
         oldType: 'eski tip',
@@ -753,6 +772,28 @@ export const DICT: Record<Lang, Dict> = {
         prev: 'Önceki model',
         next: 'Sonraki model',
         jump: 'Markaya git',
+      },
+      kit: {
+        title: 'Takımın içeriği',
+        part: 'Parça',
+        qty: 'Adet',
+        note: 'Takım, kırıcınızın modeline göre eksiksiz hazırlanır; teklifte modeli belirtmeniz yeterli.',
+        oem: 'Kırıcı modeline göre eksiksiz hazırlanan sızdırmazlık takımı.',
+        renderNote: 'Görseller 3B modeldir; temsilidir.',
+        type: {
+          oring: 'O-ring',
+          backup: 'Destek ringi',
+          stepseal: 'Basamaklı keçe',
+          rodseal: 'Keçe (nutring)',
+          wiper: 'Toz keçesi',
+          gasseal: 'Gaz keçesi',
+          guidering: 'Kılavuz ring',
+          teflonring: 'Teflon ring',
+          bondedseal: 'Sızdırmazlık pulu',
+          plug: 'Tapa',
+          valve: 'Valf',
+          other: 'Diğer',
+        },
       },
       showcase: {
         title: 'Ürettiklerimizden',
@@ -791,7 +832,7 @@ export const DICT: Record<Lang, Dict> = {
     imgNote: 'Görseller temsilidir.',
     renderNote: 'Kendi çizimlerimizden 3B görseller; temsilidir.',
     photoNote: 'Atölyemizdeki stoktan, gerçek fotoğraflar.',
-    oem: 'OEM / orijinal kalitesinde, orijinal ölçülerde üretilir.',
+    oem: 'OEM / orijinal kalitesinde, orijinalle aynı üretilir.',
     legal: {
       nav: 'Yasal metinler',
       agree: 'Sipariş talebi göndererek aşağıdaki metinleri okuduğunuzu kabul edersiniz:',
@@ -869,6 +910,7 @@ export const DICT: Record<Lang, Dict> = {
         piston: 'Pistons',
         akumulator: 'Accumulator',
         'asinma-plakasi': 'Wear plates',
+        'tamir-takimi': 'Repair kits',
       },
       call: 'Call',
       cart: 'Cart',
@@ -919,7 +961,7 @@ export const DICT: Record<Lang, Dict> = {
       trust: [
         {
           title: 'Our own production',
-          body: 'Machined in our plant in Kartepe, Türkiye, to original dimensions and OEM quality; no middlemen.',
+          body: 'Machined in our plant in Kartepe, Türkiye, identical to the original, to OEM quality; no middlemen.',
         },
         {
           title: 'Our own heat treatment',
@@ -1114,7 +1156,7 @@ export const DICT: Record<Lang, Dict> = {
     terms: {
       title: 'Terms of sale',
       rows: [
-        ['Quality', 'OEM quality, original dimensions'],
+        ['Quality', 'OEM quality, identical to the original'],
         ['Shipping', 'Paid by the buyer; the amount is given in the order confirmation'],
         ['Payment', 'Credit card or bank transfer'],
         ['Warranty', '3 months from delivery, against material and manufacturing defects'],
@@ -1154,6 +1196,10 @@ export const DICT: Record<Lang, Dict> = {
           name: 'Wear plates',
           body: 'Wear plates that protect the breaker body inside its box.',
         },
+        'tamir-takimi': {
+          name: 'Repair kits',
+          body: 'Seal kits by breaker model: o-rings, rod seals, wipers, back-up and PTFE rings, with their contents and sizes.',
+        },
       },
       view: 'View',
       groupsTitle: 'Product groups',
@@ -1190,6 +1236,7 @@ export const DICT: Record<Lang, Dict> = {
         detail: 'tie-rod nut window',
         section: 'section view',
         assembly: 'section with the bushings fitted',
+        top: 'top view',
       },
       renderKind: {
         toolBushing: 'tool bushing (lower bushing)',
@@ -1210,6 +1257,7 @@ export const DICT: Record<Lang, Dict> = {
         accumulatorLower: 'accumulator bottom',
         accumulatorBolt: 'accumulator bolt',
         wearPlate: 'wear plate',
+        repairKit: 'repair kit',
       },
       renderKindShort: {
         toolBushing: 'Tool bushing',
@@ -1230,6 +1278,7 @@ export const DICT: Record<Lang, Dict> = {
         accumulatorLower: 'Bottom',
         accumulatorBolt: 'Bolt',
         wearPlate: 'Wear plate',
+        repairKit: 'Repair kit',
       },
       renderVariant: {
         oldType: 'old type',
@@ -1261,6 +1310,28 @@ export const DICT: Record<Lang, Dict> = {
         prev: 'Previous model',
         next: 'Next model',
         jump: 'Jump to make',
+      },
+      kit: {
+        title: 'Kit contents',
+        part: 'Part',
+        qty: 'Qty',
+        note: 'The kit is put together complete for your breaker model; just name the model in your request.',
+        oem: 'A complete seal kit put together for the breaker model.',
+        renderNote: 'Pictures are 3D models; for illustration.',
+        type: {
+          oring: 'O-ring',
+          backup: 'Back-up ring',
+          stepseal: 'Step seal',
+          rodseal: 'Rod seal',
+          wiper: 'Wiper',
+          gasseal: 'Gas seal',
+          guidering: 'Guide ring',
+          teflonring: 'PTFE ring',
+          bondedseal: 'Bonded seal',
+          plug: 'Plug',
+          valve: 'Valve',
+          other: 'Other',
+        },
       },
       showcase: {
         title: 'Some of what we make',
@@ -1300,7 +1371,7 @@ export const DICT: Record<Lang, Dict> = {
     imgNote: 'Images are for illustration.',
     renderNote: '3D images from our own drawings; for illustration.',
     photoNote: 'Real photos of our stock at the plant.',
-    oem: 'Made to OEM / original quality and original dimensions.',
+    oem: 'Made to OEM / original quality, identical to the original.',
     legal: {
       nav: 'Legal',
       agree: 'By sending an order request you confirm you have read:',

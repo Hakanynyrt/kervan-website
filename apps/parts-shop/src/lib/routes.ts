@@ -139,6 +139,7 @@ export const PART_KEYS = [
   'piston',
   'akumulator',
   'asinma-plakasi',
+  'tamir-takimi',
 ] as const;
 export type PartKey = (typeof PART_KEYS)[number];
 export const PARTS_PATH = '/yedek-parca';

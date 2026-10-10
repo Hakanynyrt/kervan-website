@@ -51,12 +51,12 @@ export default function PartItem({ model, lang, t }: { model: Model; lang: Lang;
         t={t}
       />
       <PageTitle>{caption}</PageTitle>
-      <OemLine t={t} />
+      <OemLine t={t} kit={model.part === 'tamir-takimi'} />
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
         <div className="flex min-w-0 flex-col gap-6">
           <RenderFigure r={r} ctx={ctx} item onWithB={setWithB} />
-          <ImgNote t={t} kind="render" />
+          <ImgNote t={t} kind={model.part === 'tamir-takimi' ? 'kit' : 'render'} />
           <nav aria-label={t.parts.item.linksLabel} className="font-sans text-sm">
             <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
               <li>
