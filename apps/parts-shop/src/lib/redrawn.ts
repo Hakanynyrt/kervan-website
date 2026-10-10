@@ -4,9 +4,18 @@
  * changed render always gets a new name).
  */
 export const REDRAWN: Record<string, string> = {
-  // Soosan SB121 TS-P round nut: a barrel (cross-bore) nut, Ø95 from the head's seat (no drawing of the nut).
-  'saplama-takim-soosan-sb121-ts-p-roundshape': '02',
-  'somun-soosan-sb121-ts-p-tie-rod-lower-nut-round-nut': '02',
+  // Soosan SB121 TS-P round nut: a cross-bore balta nut like the MTB 150's (owner), Ø95 from the head's
+  // seat, its outer end cut flush with the head's two corner faces (no drawing of the nut).
+  // Rod sets: the rod's wrench end is the upper end (owner), so the upper nut sits there.
+  'saplama-takim-soosan-sb121-ts-p-roundshape': '03',
+  'somun-soosan-sb121-ts-p-tie-rod-lower-nut-round-nut': '03',
+  'saplama-takim-furukawa-hb20g': '02',
+  'saplama-takim-furukawa-f22': '02',
+  'saplama-takim-soosan-sb121-ts-p-newtype': '02',
+  'saplama-takim-soosan-sb121-ts-p-trilobe': '02',
+  'saplama-takim-furukawa-hb30g': '02',
+  // Rammer S84 kama: the 30° × 12.7 lead-in drawn as a ramp (was four steps).
+  'kama-rammer-s84': '02',
   // Chamfers (pah) checked against every drawing: holes, bore mouths, ends and threads as drawn.
   'akumulator-furukawa-hb-20-g-akumulator-tupu-alt': '02',
   'akumulator-furukawa-hb-20-g-akumulator-tupu-ust': '02',

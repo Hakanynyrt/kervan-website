@@ -1986,6 +1986,7 @@ const DRAWN: Record<PartKey, readonly PartRender[]> = {
       ...MEGA_ALT_GOVDE.map(seriesRender('Mega', 'mega')),
       ...KENT_ALT_GOVDE.map(seriesRender('Kent', 'kent')),
       ...TAMROCK_ALT_GOVDE.map(seriesRender('Tamrock', 'tamrock')),
+      ...SMALL_PARTS['alt-govde'].map(smallRender),
     ] satisfies PartRender[]
   ).map(withFitted),
   burc: [
