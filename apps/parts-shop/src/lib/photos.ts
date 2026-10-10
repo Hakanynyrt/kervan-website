@@ -1,4 +1,5 @@
 import { REPAIR_KITS, type RepairKit } from './repair-kits';
+import { SMALL_PARTS, type SmallPart } from './small-parts';
 import type { PartKey } from './routes';
 
 /**
@@ -74,7 +75,40 @@ export interface PartRender {
     | 'accumulatorLower'
     | 'accumulatorBolt'
     | 'wearPlate'
-    | 'repairKit';
+    | 'repairKit'
+    | 'accumulatorDowel'
+    | 'allRoundWearPlate'
+    | 'bodyDowel'
+    | 'bottomBuffer'
+    | 'bottomBufferPlate'
+    | 'bufferGuide'
+    | 'frontWearPlate'
+    | 'keyPinHolder'
+    | 'keyPinPlug'
+    | 'keyPinRetainer'
+    | 'keyPinRubber'
+    | 'keyPinWasher'
+    | 'keyUpperPin'
+    | 'lowerRetainerPin'
+    | 'retainerLockPin'
+    | 'sideBoltWasher'
+    | 'sideBuffer'
+    | 'sideWearPlate'
+    | 'springPin'
+    | 'tieRodBush'
+    | 'tieRodLowerNut'
+    | 'tieRodNut'
+    | 'tieRodUpperNut'
+    | 'tieRodWasher'
+    | 'toolBushingPin'
+    | 'toolBushingPinPlug'
+    | 'toolBushingPinRetainer'
+    | 'toolUpperPin'
+    | 'topBuffer'
+    | 'topBufferPlate'
+    | 'topWearPlate'
+    | 'upperBushingPin'
+    | 'upperBushingPinPlug';
   /** Another version of the same breaker's part, named in the caption through the dict. */
   variant?:
     | 'oldType'
@@ -87,7 +121,16 @@ export interface PartRender {
     | 'typeT'
     | 'oilGroove'
     | 'greasingHole'
-    | 'puCoated';
+    | 'puCoated'
+    | 'pu'
+    | 'rubber'
+    | 'city'
+    | 'roundShape'
+    | 'triLobe'
+    | 'no1'
+    | 'no2'
+    | 'no3'
+    | 'no4';
   views: { base: string; view: RenderView }[];
   /** Repair kits: the kit's contents (name, sizes, quantity), shown as a table under the pictures. */
   kit?: RepairKit['items'];
@@ -1706,6 +1749,11 @@ const WEAR_PLATES: OtherPart[] = [
     views: ['side', 'front', 'rear'],
   },
 ];
+/** Nuts, washers, pins, plugs, buffers and plates (`small-parts.ts`): hero plus side, front and rear. */
+const smallRender = ({ make, model, file, kind, variant }: SmallPart): PartRender => ({
+  ...otherRender({ make, model, file, kind, views: ['side', 'front', 'rear'] }),
+  ...(variant ? { variant } : {}),
+});
 const otherRender = ({ make, model, file, kind, views }: OtherPart): PartRender => {
   const b = `/photos/parca/${file}`;
   return {
@@ -1958,18 +2006,24 @@ export const PART_RENDERS: Record<PartKey, readonly PartRender[]> = {
     ...EURORAM_BURC.map(bushingRender('Euroram')),
     ...TAMROCK_BURC.map(bushingRender('Tamrock')),
     ...ATLAS_COPCO_COP_BURC.map(bushingRender('Atlas Copco COP')),
+    ...SMALL_PARTS.burc.map(smallRender),
   ],
   kama: [
     ...PART_KIT.map(kitRender('kama', 'retainerKey', ['front', 'rear', 'side'])),
     ...RETAINER_PINS.map(otherRender),
+    ...SMALL_PARTS.kama.map(smallRender),
   ],
   saplama: [
     ...PART_KIT.map(kitRender('saplama', 'tieRod', ['side', 'front'])),
     ...SIDE_BOLTS.map(otherRender),
+    ...SMALL_PARTS.saplama.map(smallRender),
   ],
   piston: PART_KIT.map(kitRender('piston', 'piston', ['front', 'rear', 'side', 'section'])),
-  akumulator: ACCUMULATOR_PARTS.map(otherRender),
-  'asinma-plakasi': WEAR_PLATES.map(otherRender),
+  akumulator: [...ACCUMULATOR_PARTS.map(otherRender), ...SMALL_PARTS.akumulator.map(smallRender)],
+  'asinma-plakasi': [
+    ...WEAR_PLATES.map(otherRender),
+    ...SMALL_PARTS['asinma-plakasi'].map(smallRender),
+  ],
   'tamir-takimi': REPAIR_KITS.map(kitPartRender),
 };
 
