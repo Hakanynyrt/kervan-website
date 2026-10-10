@@ -35,5 +35,5 @@ try {
 const sql = toPricesSql(sheet, new Date().toISOString(), (b, m) => `${slugify(b)}/${slugify(m)}`);
 fs.writeFileSync(outFile, sql);
 process.stdout.write(
-  `shop-prices: ${Object.keys(sheet.prices).length} prices, ${sheet.extras?.length ?? 0} extras, ${sheet.aliases?.length ?? 0} aliases\n`,
+  `shop-prices: ${Object.keys(sheet.prices).length} prices, ${sheet.extras?.length ?? 0} extras, ${sheet.aliases?.length ?? 0} aliases, ${sheet.parts ? `${sheet.parts.length} part rows (new batch)` : sheet.rollbackParts ? 'part prices rolled back' : 'part prices unchanged'}\n`,
 );

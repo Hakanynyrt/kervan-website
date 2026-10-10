@@ -1,4 +1,5 @@
 import type { ImportFamily } from './from-catalog.ts';
+import { normalisePartRows, type PartSheetRow } from './part-prices.ts';
 
 /** SQLite literal. Strings are single-quoted with '' escaping; non-finite numbers become NULL. */
 export function sqlValue(v: string | number | null | undefined): string {
@@ -53,6 +54,13 @@ export interface PriceSheet {
   }[];
   /** Extra breaker names for existing tip families (e.g. a newer model name). */
   aliases?: { brand: string; model: string; families: string[] }[];
+  /**
+   * Spare-part prices (see part-prices.ts). Present = the COMPLETE list: it becomes a new batch
+   * that replaces the active one. Absent = part prices untouched.
+   */
+  parts?: PartSheetRow[];
+  /** true = switch back to the previous part price batch (with an empty `prices`). */
+  rollbackParts?: boolean;
 }
 
 const CODE = /^KU\d+(?:\.\d+)?-\d{2}-[CMBPKA]$/;
@@ -93,6 +101,7 @@ export function toPricesSql(
       `INSERT INTO extra_products (brand, model, slug, tip_types, diameter_mm, price_usd_net_cents, updated_at) VALUES (${q(e.brand)}, ${q(e.model)}, ${q(slugOf(e.brand, e.model))}, ${q(JSON.stringify(e.types))}, ${q(d)}, ${q(c)}, ${q(now)}) ON CONFLICT(slug) DO UPDATE SET brand = excluded.brand, model = excluded.model, tip_types = excluded.tip_types, diameter_mm = excluded.diameter_mm, price_usd_net_cents = excluded.price_usd_net_cents, updated_at = excluded.updated_at;`,
     );
   }
+  const parts = sheet.parts === undefined ? null : normalisePartRows(sheet.parts);
   for (const a of sheet.aliases ?? []) {
     if (!a.brand || !a.model || !a.families?.every((f) => FAMILY.test(f)))
       throw new Error('bad alias row');
@@ -104,6 +113,28 @@ export function toPricesSql(
       out.push(
         `INSERT OR IGNORE INTO fitments (family_id, breaker_id) SELECT f.id, b.id FROM families f, breakers b WHERE f.code = ${q(f)} AND b.slug = ${q(slug)};`,
       );
+  }
+  if (parts && sheet.rollbackParts) throw new Error('parts and rollbackParts together');
+  const prev = "(SELECT value FROM settings WHERE key = 'part_prices_batch_prev')";
+  if (parts) {
+    for (const r of parts)
+      out.push(
+        `INSERT INTO part_prices (batch, brand, model, part_type, variant, item, price_usd_net_cents, updated_at) VALUES (${q(now)}, ${q(r.brand)}, ${q(r.model)}, ${q(r.type)}, ${q(r.variant)}, ${q(r.item)}, ${q(r.cents)}, ${q(now)});`,
+      );
+    // Switch last: until here the build keeps reading the old batch. Keep the old one for a
+    // rollback, drop anything older.
+    out.push(
+      `INSERT OR REPLACE INTO settings (key, value) SELECT 'part_prices_batch_prev', value FROM settings WHERE key = 'part_prices_batch';`,
+      `INSERT OR REPLACE INTO settings (key, value) VALUES ('part_prices_batch', ${q(now)});`,
+      `DELETE FROM part_prices WHERE batch NOT IN (${q(now)}, COALESCE(${prev}, ''));`,
+    );
+  } else if (sheet.rollbackParts) {
+    out.push(
+      `INSERT OR REPLACE INTO settings (key, value) SELECT 'part_prices_rollback', value FROM settings WHERE key = 'part_prices_batch';`,
+      `INSERT OR REPLACE INTO settings (key, value) SELECT 'part_prices_batch', value FROM settings WHERE key = 'part_prices_batch_prev';`,
+      `INSERT OR REPLACE INTO settings (key, value) SELECT 'part_prices_batch_prev', value FROM settings WHERE key = 'part_prices_rollback';`,
+      `DELETE FROM settings WHERE key = 'part_prices_rollback';`,
+    );
   }
   return `${out.join('\n')}\n`;
 }

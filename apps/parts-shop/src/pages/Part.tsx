@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { matches, rewriteQuery, slugify } from '@kervan/tips';
+import { matches, rewriteQuery, slugify, type FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import { useReducedMotion } from '@kervan/motion';
 import { ORG_EMAIL } from '@kervan/seo';
@@ -15,6 +15,7 @@ import {
   Terms,
 } from '../components/Bits';
 import { FOCUS, whatsappHref } from '../components/Layout';
+import { PartPriceLine } from '../components/PartOrder';
 import RenderGallery from '../components/RenderGallery';
 import ShareLinks from '../components/ShareLinks';
 import type { Dict } from '../lib/dict';
@@ -39,6 +40,9 @@ export interface Ctx {
   name: string;
   qty: number;
   tipLinks: Record<string, string>;
+  /** Render anchor (`anchor#b` = burçlu head) → net USD cents (owner's prices). */
+  prices: Record<string, number>;
+  fx: FxRate | null;
   lang: Lang;
   t: Dict;
 }
@@ -55,7 +59,17 @@ const renderName = (r: PartRender, t: Dict): string =>
  * the site), a captioned showcase of our renders until something is typed, the matching
  * models' strips after, then our stock photos and a quote by breaker model.
  */
-export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
+export default function Part({
+  model,
+  fx,
+  lang,
+  t,
+}: {
+  model: Model;
+  fx: FxRate | null;
+  lang: Lang;
+  t: Dict;
+}) {
   const p = t.parts.items[model.part];
   const [breaker, setBreaker] = useState('');
   // The model last filled in by picking a card: a later pick replaces it, typed text never.
@@ -118,7 +132,16 @@ export default function Part({ model, lang, t }: { model: Model; lang: Lang; t: 
     if (showcase.length === SHOWCASE) break;
   }
   const pics = photos.length + all.length > 0;
-  const ctx: Ctx = { part: model.part, name: p.name, qty, tipLinks: model.tipLinks ?? {}, lang, t };
+  const ctx: Ctx = {
+    part: model.part,
+    name: p.name,
+    qty,
+    tipLinks: model.tipLinks ?? {},
+    prices: model.prices ?? {},
+    fx,
+    lang,
+    t,
+  };
   const onPick = (m: string) => {
     if (breaker.trim() === '' || breaker === picked.current) {
       picked.current = m;
@@ -383,6 +406,8 @@ export function RenderFigure({
   const partName = r.fitted ? t.parts.fitted.name(ctx.name, withB) : ctx.name;
   const caption = renderTitle(r, partName, t);
   const tip = ctx.tipLinks[renderAnchor(r)];
+  // Priced (owner's rows): the burçlu head has its own price; the item page takes the order.
+  const cents = ctx.prices[`${renderAnchor(r)}${r.fitted && withB ? '#b' : ''}`];
   const share = (
     <ShareLinks
       url={partItemUrl(ctx.part, r, ctx.lang)}
@@ -474,15 +499,28 @@ export function RenderFigure({
               {caption}
             </a>
           </span>
+          {cents !== undefined && (
+            <PartPriceLine cents={cents} fx={ctx.fx} lang={ctx.lang} className="mt-1 text-base" />
+          )}
           <span className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm">
-            <a
-              href={whatsappHref(
-                t.parts.text(r.kind ? t.parts.renderKind[r.kind] : partName, model, ctx.qty),
-              )}
-              className={`inline-flex min-h-11 items-center font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
-            >
-              {t.parts.quoteThis}
-            </a>
+            {cents !== undefined ? (
+              // Priced: the order happens on the part's own page (price, quantity, palet).
+              <a
+                href={localePath(partItemPath(ctx.part, renderAnchor(r)), ctx.lang)}
+                className={`inline-flex min-h-11 items-center font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
+              >
+                {t.parts.order.title} →
+              </a>
+            ) : (
+              <a
+                href={whatsappHref(
+                  t.parts.text(r.kind ? t.parts.renderKind[r.kind] : partName, model, ctx.qty),
+                )}
+                className={`inline-flex min-h-11 items-center font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
+              >
+                {t.parts.quoteThis}
+              </a>
+            )}
             {tip && (
               <a
                 href={localePath(tip, ctx.lang)}
@@ -491,12 +529,14 @@ export function RenderFigure({
                 {t.parts.tipLink} →
               </a>
             )}
-            <a
-              href={localePath(partItemPath(ctx.part, renderAnchor(r)), ctx.lang)}
-              className={`inline-flex min-h-11 items-center font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
-            >
-              {t.parts.item.pageLink} →
-            </a>
+            {cents === undefined && (
+              <a
+                href={localePath(partItemPath(ctx.part, renderAnchor(r)), ctx.lang)}
+                className={`inline-flex min-h-11 items-center font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
+              >
+                {t.parts.item.pageLink} →
+              </a>
+            )}
           </span>
           <span className="mt-1 block text-sm">{share}</span>
         </figcaption>

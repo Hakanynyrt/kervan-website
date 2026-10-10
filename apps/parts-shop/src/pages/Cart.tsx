@@ -58,6 +58,8 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   };
 
   const list = items ?? [];
+  // Tips name their type through the dict; spare parts carry the label they were added with.
+  const lineLabel = (x: CartItem) => (x.tipType ? t.tip[x.tipType] : (x.label ?? ''));
   const totalCents = list.reduce((n, x) => n + (x.cents ?? 0) * x.qty, 0);
   const vatCents = vatOf(totalCents);
   const grossCents = totalCents + vatCents;
@@ -66,7 +68,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
     [fmtUsd(cents, lang), fmtTry(cents, fx, lang)].filter(Boolean).join(' / ');
   const lines = list.map((x) =>
     c.line(
-      `${x.name}, ${t.tip[x.tipType]}${x.code ? ` (${x.code})` : ''}`,
+      `${x.name}, ${lineLabel(x)}${x.code ? ` (${x.code})` : ''}`,
       x.qty,
       x.cents === null ? c.ask : fmtUsd(x.cents, lang),
       x.cents === null ? null : fmtUsd(x.cents * x.qty, lang),
@@ -137,7 +139,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                     >
                       {x.name}
                     </a>
-                    <p className="m-0 text-ink-mid">{t.tip[x.tipType]}</p>
+                    <p className="m-0 text-ink-mid">{lineLabel(x)}</p>
                     <p className="m-0 text-ink-mid tabular-nums">
                       {c.unit}: {x.cents === null ? c.ask : fmtUsd(x.cents, lang)}
                     </p>

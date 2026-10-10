@@ -5,6 +5,7 @@ export * from './breakers.ts';
 export * from './breaker-display.ts';
 export * from './usage.ts';
 export * from './from-catalog.ts';
+export * from './part-prices.ts';
 export * from './sql.ts';
 export * from './public.ts';
 export * from './demo.ts';

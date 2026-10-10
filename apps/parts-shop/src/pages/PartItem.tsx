@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import type { FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import { Breadcrumb, ImgNote, OemLine, PageTitle, StickyQuote } from '../components/Bits';
 import { FOCUS } from '../components/Layout';
+import { PartOrder, PartPriceLine, partOrderText } from '../components/PartOrder';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { renderModel, renderTitle } from '../lib/part-caption';
@@ -19,7 +21,17 @@ const LINK = `inline-flex min-h-11 items-center rounded-sm border border-ink-sof
  * can be linked and shared: the group page's picture block, a quote for this breaker, links back
  * to the group, to this breaker's tip and to the other parts we make for it.
  */
-export default function PartItem({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
+export default function PartItem({
+  model,
+  fx,
+  lang,
+  t,
+}: {
+  model: Model;
+  fx: FxRate | null;
+  lang: Lang;
+  t: Dict;
+}) {
   const r = findRender(model.part, model.anchor);
   const p = t.parts.items[model.part];
   const [breaker, setBreaker] = useState(r ? renderModel(r, t) : '');
@@ -35,7 +47,11 @@ export default function PartItem({ model, lang, t }: { model: Model; lang: Lang;
       ? t.parts.fitted.name(p.name, withB)
       : p.name;
   const text = t.parts.text(partName, breaker.trim(), qty);
-  const ctx: Ctx = { part: model.part, name: p.name, qty, tipLinks: {}, lang, t };
+  // Priced (owner's rows): order instead of a quote; a burçlu head carries its own price.
+  const fittedNow = !!r.fitted && withB;
+  const cents = fittedNow ? model.priceFitted : model.price;
+  const itemPath = partItemPath(model.part, model.anchor);
+  const ctx: Ctx = { part: model.part, name: p.name, qty, tipLinks: {}, prices: {}, fx, lang, t };
   const related = model.related.flatMap((l) => {
     const x = findRender(l.part, l.anchor);
     return x ? [{ l, x }] : [];
@@ -53,6 +69,9 @@ export default function PartItem({ model, lang, t }: { model: Model; lang: Lang;
       />
       <PageTitle>{caption}</PageTitle>
       <OemLine t={t} kit={model.part === 'tamir-takimi'} />
+      {cents !== null && (
+        <PartPriceLine cents={cents} fx={fx} lang={lang} className="mt-2 text-lg lg:hidden" />
+      )}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
         <div className="flex min-w-0 flex-col gap-6">
@@ -98,18 +117,49 @@ export default function PartItem({ model, lang, t }: { model: Model; lang: Lang;
           )}
         </div>
         <aside className="lg:col-start-2">
-          <QuotePanel
-            name={partName}
-            breaker={breaker}
-            setBreaker={setBreaker}
-            qty={qty}
-            setQty={setQty}
-            text={text}
-            t={t}
-          />
+          {cents !== null ? (
+            <PartOrder
+              id={fittedNow ? `${itemPath}#b` : itemPath}
+              breaker={renderModel(r, t)}
+              label={partName.toLocaleLowerCase(lang === 'tr' ? 'tr' : 'en')}
+              cents={cents}
+              path={itemPath}
+              qty={qty}
+              setQty={setQty}
+              fx={fx}
+              lang={lang}
+              t={t}
+            />
+          ) : (
+            <QuotePanel
+              name={partName}
+              breaker={breaker}
+              setBreaker={setBreaker}
+              qty={qty}
+              setQty={setQty}
+              text={text}
+              t={t}
+            />
+          )}
         </aside>
       </div>
-      <StickyQuote text={text} t={t} />
+      {cents !== null ? (
+        <StickyQuote
+          text={partOrderText(
+            t,
+            lang,
+            partName.toLocaleLowerCase(lang === 'tr' ? 'tr' : 'en'),
+            renderModel(r, t),
+            qty,
+            cents,
+            itemPath,
+          )}
+          label={t.parts.order.wa}
+          t={t}
+        />
+      ) : (
+        <StickyQuote text={text} t={t} />
+      )}
     </Container>
   );
 }
