@@ -100,7 +100,7 @@ const TR: Record<LegalKey, LegalDoc> = {
       {
         h: 'Garanti ve şikâyetler',
         p: [
-          'Ürünler teslimden itibaren 3 ay süreyle malzeme ve üretim (ısıl işlem dahil) hatalarına karşı garantilidir. Normal aşınma, boşta vuruş, ucu levye gibi kullanma, yanal veya eğik vuruş, aşınmış burç ile çalışma, yağlamasız kullanma ve yanlış uç seçiminden doğan hasarlar garanti dışıdır. Tüketicinin 6502 sayılı Kanun’dan doğan ayıplı mal hakları saklıdır.',
+          'Ürünler teslimden itibaren 2 ay süreyle malzeme ve üretim (ısıl işlem dahil) hatalarına karşı garantilidir. Normal aşınma, boşta vuruş, ucu levye gibi kullanma, yanal veya eğik vuruş, aşınmış burç ile çalışma, yağlamasız kullanma ve yanlış uç seçiminden doğan hasarlar garanti dışıdır. Tüketicinin 6502 sayılı Kanun’dan doğan ayıplı mal hakları saklıdır.',
           `Talep ve şikâyetlerinizi ${SELLER.email} adresine veya ${SELLER.phone} numarasına iletebilirsiniz.`,
           'Tüketici uyuşmazlıklarında, Ticaret Bakanlığı’nca her yıl belirlenen parasal sınırlar içinde Alıcı’nın veya Satıcı’nın yerleşim yerindeki tüketici hakem heyetine, bu sınırların üzerinde tüketici mahkemesine başvurulabilir.',
         ],
@@ -155,7 +155,7 @@ const TR: Record<LegalKey, LegalDoc> = {
       {
         h: 'Garanti ve ayıplı mal',
         p: [
-          'Ürünler teslimden itibaren 3 ay süreyle malzeme ve üretim (ısıl işlem dahil) hatalarına karşı garantilidir. Normal aşınma ve hatalı kullanımdan doğan hasarlar garanti dışıdır. İnceleme için kırık parça ve fotoğrafları istenir. Tüketici olan Alıcı’nın 6502 sayılı Kanun’un 11. maddesindeki seçimlik hakları saklıdır.',
+          'Ürünler teslimden itibaren 2 ay süreyle malzeme ve üretim (ısıl işlem dahil) hatalarına karşı garantilidir. Normal aşınma ve hatalı kullanımdan doğan hasarlar garanti dışıdır. İnceleme için kırık parça ve fotoğrafları istenir. Tüketici olan Alıcı’nın 6502 sayılı Kanun’un 11. maddesindeki seçimlik hakları saklıdır.',
         ],
       },
       {
@@ -195,7 +195,7 @@ const TR: Record<LegalKey, LegalDoc> = {
       {
         h: 'Hatalı veya hasarlı ürün',
         p: [
-          'Ürün size hasarlı ya da yanlış ulaştıysa veya malzeme ya da üretim hatası taşıyorsa, fotoğraflarıyla birlikte bize bildirin. Garanti süresi teslimden itibaren 3 aydır. Hatalı ürünlerde gönderim ve iade masrafları bize aittir; ürünü onarır, değiştirir veya bedelini iade ederiz.',
+          'Ürün size hasarlı ya da yanlış ulaştıysa veya malzeme ya da üretim hatası taşıyorsa, fotoğraflarıyla birlikte bize bildirin. Garanti süresi teslimden itibaren 2 aydır. Hatalı ürünlerde gönderim ve iade masrafları bize aittir; ürünü onarır, değiştirir veya bedelini iade ederiz.',
           'Normal aşınma, boşta vuruş, ucu levye gibi kullanma, yanal veya eğik vuruş, aşınmış burç ile çalışma, yağlamasız kullanma ve yanlış uç seçiminden doğan hasarlar garanti kapsamında değildir.',
         ],
       },
@@ -287,7 +287,7 @@ const EN: Record<LegalKey, LegalDoc> = {
       {
         h: 'Right of withdrawal, warranty, complaints',
         p: [
-          'Consumers may withdraw within 14 days of delivery without giving a reason (see “Returns and withdrawal”); items made to the buyer’s own specification are excluded. The products carry a 3-month warranty from delivery against material and manufacturing (including heat treatment) defects; wear and misuse are not covered. Consumers’ statutory rights are not affected.',
+          'Consumers may withdraw within 14 days of delivery without giving a reason (see “Returns and withdrawal”); items made to the buyer’s own specification are excluded. The products carry a 2-month warranty from delivery against material and manufacturing (including heat treatment) defects; wear and misuse are not covered. Consumers’ statutory rights are not affected.',
           `Complaints: ${SELLER.email}, ${SELLER.phone}. Consumer disputes go to the consumer arbitration committee or consumer court as provided by Turkish law.`,
         ],
       },
@@ -319,7 +319,7 @@ const EN: Record<LegalKey, LegalDoc> = {
       {
         h: 'Warranty and disputes',
         p: [
-          '3-month warranty from delivery against material and manufacturing defects; consumers’ statutory rights for defective goods are reserved. Consumer disputes: consumer arbitration committees and consumer courts; disputes with businesses: the courts of Kocaeli.',
+          '2-month warranty from delivery against material and manufacturing defects; consumers’ statutory rights for defective goods are reserved. Consumer disputes: consumer arbitration committees and consumer courts; disputes with businesses: the courts of Kocaeli.',
         ],
       },
     ],
@@ -344,7 +344,7 @@ const EN: Record<LegalKey, LegalDoc> = {
       {
         h: 'Faulty or damaged items',
         p: [
-          'Tell us with photos if an item arrives damaged or wrong or has a material or manufacturing defect (warranty: 3 months from delivery). For faulty items we pay the shipping both ways and repair, replace or refund. Wear and misuse (blank firing, prying, side strikes, worn bushing, no grease, wrong tip) are not covered.',
+          'Tell us with photos if an item arrives damaged or wrong or has a material or manufacturing defect (warranty: 2 months from delivery). For faulty items we pay the shipping both ways and repair, replace or refund. Wear and misuse (blank firing, prying, side strikes, worn bushing, no grease, wrong tip) are not covered.',
         ],
       },
       { h: 'Contact', p: [sellerEn.p[0], sellerEn.p[3], sellerEn.p[4]] },
