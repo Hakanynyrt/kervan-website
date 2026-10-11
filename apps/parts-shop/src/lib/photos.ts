@@ -31,6 +31,8 @@ export const PART_PHOTOS: Record<PartKey, readonly string[]> = {
  * renders), grouped by the breaker model they fit. Same files and naming as the photos.
  */
 export type RenderView = 'front' | 'rear' | 'side' | 'detail' | 'section' | 'assembly' | 'top';
+/** Seal-kit pictures carry each part's quantity (×N); version 02 added the labels (files are cached immutable). */
+const KIT_V = '02';
 /** One line of a repair (seal) kit. */
 export type KitItemType =
   | 'oring'
@@ -138,7 +140,7 @@ export interface PartRender {
     | 'no3'
     | 'no4';
   views: { base: string; view: RenderView }[];
-  /** Repair kits: the kit's contents (name, sizes, quantity), shown as a table under the pictures. */
+  /** Repair kits: the kit's contents (name and quantity, never sizes), shown as a table under the pictures. */
   kit?: RepairKit['items'];
 }
 
@@ -976,7 +978,7 @@ const MSB_BURC: Bushing[] = [
   { model: '700', file: 'msb-700-kafa', kind: 'toolBushing' },
   { model: '700', file: 'msb-700-ust', kind: 'thrustRing' },
   { model: '750', file: 'msb-750-kafa', kind: 'toolBushing' },
-  { model: '750', file: 'msb-750-ust', kind: 'thrustRing' },
+  { model: '750 / 800', file: 'msb-750-ust', kind: 'thrustRing' },
   { model: '800', file: 'msb-800-kafa', kind: 'toolBushing' },
   { model: '900', file: 'msb-900-ust', kind: 'thrustRing' },
   { model: 'MS 810', file: 'msb-810-kafa', kind: 'toolBushing' },
@@ -1082,6 +1084,8 @@ const TOYO_BURC: Bushing[] = [
   { model: 'THBB 2000', file: 'toyo-2000-dhb-2305-ust', kind: 'thrustUpperBushing' },
   { model: 'THBB 3000', file: 'toyo-3000-dhb-3205-kafa', kind: 'toolBushing' },
   { model: 'THBB 3000', file: 'toyo-3000-dhb-3205-ust', kind: 'thrustRing' },
+  { model: 'THBB 5000', file: 'toyo-5000-dhb-5205-kafa', kind: 'toolBushing' },
+  { model: 'THBB 5000', file: 'toyo-5000-dhb-5205-ust', kind: 'upperBushing' },
 ];
 const ATLAS_COPCO_COP_BURC: Bushing[] = [
   { model: 'COP 1032', file: 'atlas-copco-cop-1032-ust', kind: 'rockDrillThrustRing' },
@@ -1346,6 +1350,13 @@ const RETAINER_PINS: OtherPart[] = [
     make: 'D&A',
     model: '1300',
     file: 'tutucupim-da-d-a-1300',
+    kind: 'retainerPin',
+    views: ['side', 'front'],
+  },
+  {
+    make: 'Montabert',
+    model: 'BRH 625',
+    file: 'tutucupim-montabert-brh-625',
     kind: 'retainerPin',
     views: ['side', 'front'],
   },
@@ -2076,8 +2087,8 @@ function kitPartRender(k: RepairKit): PartRender {
     model: `${k.make} ${k.models.join(' / ')}${k.variant ? ` (${k.variant})` : ''}`,
     series: k.make,
     kind: 'repairKit',
-    hero: `${b}-vitrin-01`,
-    views: [{ base: `${b}-ustten-01`, view: 'top' }],
+    hero: `${b}-vitrin-${KIT_V}`,
+    views: [{ base: `${b}-ustten-${KIT_V}`, view: 'top' }],
     kit: k.items,
   };
 }
