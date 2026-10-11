@@ -2079,6 +2079,21 @@ export const PART_RENDERS = Object.fromEntries(
 ) as unknown as Record<PartKey, readonly PartRender[]>;
 
 /**
+ * Pictures for the product-group tiles (home page, /yedek-parca), owner's picks: a flat key,
+ * the PU-coated MTB tie-rod set, a wear-plate set and a fitted (burçlu) front head. Groups not
+ * listed use their first render. `contain` = a 4:3 picture shown whole in the 16:9 frame; `xs`
+ * = a 320 px thumbnail exists for the compact tiles (else they load the large file).
+ */
+export const GROUP_COVERS: Partial<
+  Record<PartKey, { base: string; contain?: boolean; xs?: boolean }>
+> = {
+  'alt-govde': { base: '/photos/parca/alt-govde-mtb-220-burclu-on-01', contain: true },
+  kama: { base: '/photos/parca/kama-mtb-150-vitrin-02', xs: true },
+  saplama: { base: '/photos/parca/saplama-takim-mtb-150-vitrin-01', xs: true },
+  'asinma-plakasi': { base: '/photos/parca/asinma-set-mtb-150-vitrin-01', xs: true },
+};
+
+/**
  * Repair (seal) kits from the owner's kit lists (`repair-kits.ts`, generated): one render per kit,
  * every seal modelled from its listed sizes and laid out flat (`-vitrin` 16:9, `-ustten` 4:3).
  */
