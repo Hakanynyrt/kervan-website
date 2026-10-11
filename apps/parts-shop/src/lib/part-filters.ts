@@ -37,6 +37,7 @@ export const PART_FILTERS: Partial<Record<PartKey, [PartFilter, readonly Kind[]]
         'toolUpperPin',
         'keyUpperPin',
         'upperBushingPin',
+        'bodyDowel',
       ],
     ],
     ['plugs', ['toolBushingPinPlug', 'upperBushingPinPlug']],

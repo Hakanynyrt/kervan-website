@@ -14,10 +14,7 @@ export const SMALL_PARTS: Record<
   'alt-govde' | 'saplama' | 'kama' | 'burc' | 'asinma-plakasi' | 'akumulator',
   readonly SmallPart[]
 > = {
-  // The body dowel centres the cylinder on the front head (owner: on the alt gövde page, not with the tie rods).
-  'alt-govde': [
-    { make: 'Krupp', model: 'HM 1500', file: 'pim-krupp-hm-1500-body-dowel', kind: 'bodyDowel' },
-  ],
+  'alt-govde': [],
   saplama: [
     { make: 'Rammer', model: 'E64', file: 'somun-rammer-e64-tie-rod-nut', kind: 'tieRodNut' },
     { make: 'Rammer', model: 'E66', file: 'somun-rammer-e66-tie-rod-nut', kind: 'tieRodNut' },
@@ -287,6 +284,9 @@ export const SMALL_PARTS: Record<
     { make: 'Furukawa', model: 'F22', file: 'tapa-furukawa-f22-key-pin-plug', kind: 'keyPinPlug' },
   ],
   burc: [
+    // The body dowel centres the cylinder on the front head (owner: with the pins on the burç page,
+    // not with the tie rods or the front heads).
+    { make: 'Krupp', model: 'HM 1500', file: 'pim-krupp-hm-1500-body-dowel', kind: 'bodyDowel' },
     {
       make: 'Rammer',
       model: 'E64',
