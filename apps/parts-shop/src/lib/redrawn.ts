@@ -14,6 +14,8 @@ export const REDRAWN: Record<string, string> = {
   'saplama-takim-soosan-sb121-ts-p-newtype': '02',
   'saplama-takim-soosan-sb121-ts-p-trilobe': '02',
   'saplama-takim-furukawa-hb30g': '02',
+  // MTB 210 II tie-rod nut: a Ø100 × 105 cross-bore balta nut (was drawn as a block).
+  'somun-mtb-210-ii-tie-rod-nut': '02',
   // Rammer S84 kama: the 30° × 12.7 lead-in drawn as a ramp (was four steps).
   'kama-rammer-s84': '02',
   // Chamfers (pah) checked against every drawing: holes, bore mouths, ends and threads as drawn.

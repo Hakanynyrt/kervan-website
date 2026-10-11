@@ -9,3 +9,41 @@
 # The Krupp HM 1500 body dowel moved from the tie rods to the front heads (owner).
 /yedek-parca/saplama/krupp-hm-1500-bodydowel /yedek-parca/alt-govde/krupp-hm-1500-bodydowel 301
 /en/yedek-parca/saplama/krupp-hm-1500-bodydowel /en/yedek-parca/alt-govde/krupp-hm-1500-bodydowel 301
+
+# MTB 210 II is shown as "MTB 215 / 210 II" (owner: the same breaker); old item links.
+/yedek-parca/akumulator/mtb-210-ii-accumulatordowel /yedek-parca/akumulator/mtb-215-210-ii-accumulatordowel 301
+/en/yedek-parca/akumulator/mtb-210-ii-accumulatordowel /en/yedek-parca/akumulator/mtb-215-210-ii-accumulatordowel 301
+/yedek-parca/alt-govde/mtb-210-ii /yedek-parca/alt-govde/mtb-215-210-ii 301
+/en/yedek-parca/alt-govde/mtb-210-ii /en/yedek-parca/alt-govde/mtb-215-210-ii 301
+/yedek-parca/asinma-plakasi/mtb-210-ii-bottombuffer /yedek-parca/asinma-plakasi/mtb-215-210-ii-bottombuffer 301
+/en/yedek-parca/asinma-plakasi/mtb-210-ii-bottombuffer /en/yedek-parca/asinma-plakasi/mtb-215-210-ii-bottombuffer 301
+/yedek-parca/asinma-plakasi/mtb-210-ii-frontwearplate /yedek-parca/asinma-plakasi/mtb-215-210-ii-frontwearplate 301
+/en/yedek-parca/asinma-plakasi/mtb-210-ii-frontwearplate /en/yedek-parca/asinma-plakasi/mtb-215-210-ii-frontwearplate 301
+/yedek-parca/asinma-plakasi/mtb-210-ii-sidebuffer /yedek-parca/asinma-plakasi/mtb-215-210-ii-sidebuffer 301
+/en/yedek-parca/asinma-plakasi/mtb-210-ii-sidebuffer /en/yedek-parca/asinma-plakasi/mtb-215-210-ii-sidebuffer 301
+/yedek-parca/asinma-plakasi/mtb-210-ii-sidewearplate /yedek-parca/asinma-plakasi/mtb-215-210-ii-sidewearplate 301
+/en/yedek-parca/asinma-plakasi/mtb-210-ii-sidewearplate /en/yedek-parca/asinma-plakasi/mtb-215-210-ii-sidewearplate 301
+/yedek-parca/asinma-plakasi/mtb-210-ii-topwearplate /yedek-parca/asinma-plakasi/mtb-215-210-ii-topwearplate 301
+/en/yedek-parca/asinma-plakasi/mtb-210-ii-topwearplate /en/yedek-parca/asinma-plakasi/mtb-215-210-ii-topwearplate 301
+/yedek-parca/asinma-plakasi/mtb-210-ii-wearplateset /yedek-parca/asinma-plakasi/mtb-215-210-ii-wearplateset 301
+/en/yedek-parca/asinma-plakasi/mtb-210-ii-wearplateset /en/yedek-parca/asinma-plakasi/mtb-215-210-ii-wearplateset 301
+/yedek-parca/burc/mtb-210-ii-no1-upperbushingpin /yedek-parca/burc/mtb-215-210-ii-no1-upperbushingpin 301
+/en/yedek-parca/burc/mtb-210-ii-no1-upperbushingpin /en/yedek-parca/burc/mtb-215-210-ii-no1-upperbushingpin 301
+/yedek-parca/burc/mtb-210-ii-no2-upperbushingpin /yedek-parca/burc/mtb-215-210-ii-no2-upperbushingpin 301
+/en/yedek-parca/burc/mtb-210-ii-no2-upperbushingpin /en/yedek-parca/burc/mtb-215-210-ii-no2-upperbushingpin 301
+/yedek-parca/burc/mtb-210-ii-thrustring /yedek-parca/burc/mtb-215-210-ii-thrustring 301
+/en/yedek-parca/burc/mtb-210-ii-thrustring /en/yedek-parca/burc/mtb-215-210-ii-thrustring 301
+/yedek-parca/burc/mtb-210-ii-toolbushing /yedek-parca/burc/mtb-215-210-ii-toolbushing 301
+/en/yedek-parca/burc/mtb-210-ii-toolbushing /en/yedek-parca/burc/mtb-215-210-ii-toolbushing 301
+/yedek-parca/burc/mtb-210-ii-toolbushingpin /yedek-parca/burc/mtb-215-210-ii-toolbushingpin 301
+/en/yedek-parca/burc/mtb-210-ii-toolbushingpin /en/yedek-parca/burc/mtb-215-210-ii-toolbushingpin 301
+/yedek-parca/burc/mtb-210-ii-toolbushingpinplug /yedek-parca/burc/mtb-215-210-ii-toolbushingpinplug 301
+/en/yedek-parca/burc/mtb-210-ii-toolbushingpinplug /en/yedek-parca/burc/mtb-215-210-ii-toolbushingpinplug 301
+/yedek-parca/burc/mtb-210-ii-upperbushing /yedek-parca/burc/mtb-215-210-ii-upperbushing 301
+/en/yedek-parca/burc/mtb-210-ii-upperbushing /en/yedek-parca/burc/mtb-215-210-ii-upperbushing 301
+/yedek-parca/kama/mtb-210-ii-keypinplug /yedek-parca/kama/mtb-215-210-ii-keypinplug 301
+/en/yedek-parca/kama/mtb-210-ii-keypinplug /en/yedek-parca/kama/mtb-215-210-ii-keypinplug 301
+/yedek-parca/kama/mtb-210-ii-retainerpin /yedek-parca/kama/mtb-215-210-ii-retainerpin 301
+/en/yedek-parca/kama/mtb-210-ii-retainerpin /en/yedek-parca/kama/mtb-215-210-ii-retainerpin 301
+/yedek-parca/saplama/mtb-210-ii-tierodnut /yedek-parca/saplama/mtb-215-210-ii-tierodnut 301
+/en/yedek-parca/saplama/mtb-210-ii-tierodnut /en/yedek-parca/saplama/mtb-215-210-ii-tierodnut 301
