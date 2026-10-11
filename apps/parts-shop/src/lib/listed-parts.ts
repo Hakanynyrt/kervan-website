@@ -32,6 +32,14 @@ const TYPE_GROUP: Partial<Record<PartTypeCode, PartKey>> = {
   YAN_SAPLAMA: 'saplama',
   PISTON: 'piston',
   TAMIR_TAKIMI: 'tamir-takimi',
+  ASINMA_PLAKASI: 'asinma-plakasi',
+  ASINMA_SETI: 'asinma-plakasi',
+  TAKOZ_TEPE: 'asinma-plakasi',
+  TAKOZ_YAN: 'asinma-plakasi',
+  TAKOZ_ALT: 'asinma-plakasi',
+  AKU_UST: 'akumulator',
+  AKU_ALT: 'akumulator',
+  AKU_SAPLAMA: 'akumulator',
 };
 
 /** Render's part type within its group (front heads without a kind are ALT_GOVDE). */
