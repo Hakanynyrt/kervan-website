@@ -152,6 +152,9 @@ export interface Dict {
     /** Links to other parts we make for this breaker. */
     partsTitle: string;
     renderAlt: (name: string, type: string) => string;
+    /** Extra products: caption and alt of the sample picture (another breaker's tip). */
+    sample: (name: string) => string;
+    sampleAlt: (name: string) => string;
     sideAlt: (name: string, type: string) => string;
     rearAlt: (name: string) => string;
     viewRear: string;
@@ -577,6 +580,8 @@ export const DICT: Record<Lang, Dict> = {
         `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet sipariş vermek istiyorum (birim ${price}, KDV hariç).\n${url}`,
       partsTitle: 'Bu kırıcı için ürettiğimiz parçalar',
       renderAlt: (name, type) => `${name} ${type} kırıcı ucu`,
+      sample: (name) => `Temsili görsel: ${name} ucu`,
+      sampleAlt: (name) => `Temsili görsel, ${name} kırıcı ucu`,
       sideAlt: (name, type) => `${name} ${type} kırıcı ucu, yandan görünüş`,
       rearAlt: (name) => `${name} kırıcı ucunun kama kanalı ve arka ucu, yakın görünüş`,
       viewRear: 'Kama kanalı ve arka uç',
@@ -1275,6 +1280,8 @@ export const DICT: Record<Lang, Dict> = {
         `Hello, I would like to order the ${type} tip${code ? ` (${code})` : ''} for the ${name}, quantity ${qty} (unit ${price}, excl. VAT).\n${url}`,
       partsTitle: 'Parts we make for this breaker',
       renderAlt: (name, type) => `${name} ${type} breaker tip`,
+      sample: (name) => `Sample picture: the ${name} tip`,
+      sampleAlt: (name) => `Sample picture, ${name} breaker tip`,
       sideAlt: (name, type) => `${name} ${type} breaker tip, side view`,
       rearAlt: (name) => `${name} breaker tip key slot and rear end, close-up`,
       viewRear: 'Key slot and rear end',
