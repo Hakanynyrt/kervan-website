@@ -4,6 +4,21 @@
  * changed render always gets a new name).
  */
 export const REDRAWN: Record<string, string> = {
+  // Tie rods: the wrench hex (anahtar ağzı) at the upper end, as the drawings dimension it (AA / across
+  // flats), was missing on these rods and their sets; MTB 85 also gets its PU coating back.
+  'saplama-takim-rammer-e64': '02',
+  'saplama-takim-rammer-e66': '02',
+  'saplama-takim-rammer-e66-newtype': '02',
+  'saplama-takim-rammer-g80': '02',
+  'saplama-takim-rammer-s25': '02',
+  'saplama-takim-rammer-s84': '02',
+  'saplama-rammer-e64': '02',
+  'saplama-rammer-e66': '03',
+  'saplama-rammer-g80': '03',
+  'saplama-rammer-s25': '03',
+  'saplama-rammer-s84': '03',
+  'saplama-mtb-85': '05',
+  'saplama-mtb-210': '04',
   // Soosan SB121 TS-P round nut: a cross-bore balta nut like the MTB 150's (owner), Ø95 from the head's
   // seat, its outer end cut flush with the head's two corner faces (no drawing of the nut).
   // Rod sets: the rod's wrench end is the upper end (owner), so the upper nut sits there.
@@ -419,9 +434,6 @@ export const REDRAWN: Record<string, string> = {
   'saplama-krupp-hm-1500': '02',
   'saplama-krupp-hm-720': '02',
   'saplama-krupp-hm-960': '02',
-  'saplama-rammer-e66': '02',
-  'saplama-rammer-g80': '02',
-  'saplama-rammer-s25': '02',
   'tutucupim-atlas-copco-mb-1700': '02',
   'tutucupim-krupp-hm-560': '02',
   'yansaplama-furukawa-hb-10-g': '02',
@@ -566,6 +578,4 @@ export const REDRAWN: Record<string, string> = {
   'piston-mtb-150': '02',
   'piston-montabert-brh-501': '02',
   'yansaplama-indeco-mes-series': '02',
-  'saplama-mtb-85': '04',
-  'saplama-rammer-s84': '02',
 };

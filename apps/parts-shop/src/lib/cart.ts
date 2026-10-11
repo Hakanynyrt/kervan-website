@@ -12,7 +12,7 @@ export interface CartItem {
   name: string;
   /** Tips: the tip type (named through the dict). */
   tipType?: TipType;
-  /** Spare parts: the part's name as shown when it was added (e.g. "kafa burcu (alt burç)"). */
+  /** Spare parts: the part's name as shown when it was added (e.g. "kafa burcu"). */
   label?: string;
   /** Kervan SKU code (for our order handling), null for an extra product. */
   code: string | null;

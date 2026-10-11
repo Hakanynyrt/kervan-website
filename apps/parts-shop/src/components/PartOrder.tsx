@@ -73,7 +73,7 @@ export function PartOrder({
   id: string;
   /** Breaker make and model ("Rammer E68"). */
   breaker: string;
-  /** The part ("kafa burcu (alt burç)"). */
+  /** The part ("kafa burcu"). */
   label: string;
   cents: number;
   path: string;

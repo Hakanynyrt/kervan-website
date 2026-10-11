@@ -1,6 +1,6 @@
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { PART_RENDERS, STOCK_TIP_PHOTOS } from '../lib/photos';
+import { GROUP_COVERS, PART_RENDERS, STOCK_TIP_PHOTOS } from '../lib/photos';
 import { LIST_PATH, PART_KEYS, partPath } from '../lib/routes';
 import { tipImg } from '../lib/tip-img';
 import type { Lang, TipGroupStats } from '../types';
@@ -30,12 +30,16 @@ export function PartGroups({
       key: 'tips',
       path: LIST_PATH,
       hero: undefined as string | undefined,
+      contain: false,
+      xs: true,
       ...t.parts.tips,
     },
     ...PART_KEYS.map((k) => ({
       key: k as string,
       path: partPath(k),
-      hero: PART_RENDERS[k].find((r) => r.hero)?.hero,
+      hero: GROUP_COVERS[k]?.base ?? PART_RENDERS[k].find((r) => r.hero)?.hero,
+      contain: GROUP_COVERS[k]?.contain ?? false,
+      xs: GROUP_COVERS[k] ? (GROUP_COVERS[k].xs ?? false) : true,
       ...t.parts.items[k],
     })),
   ];
@@ -51,13 +55,13 @@ export function PartGroups({
             >
               <div className="relative aspect-video border-b border-hair bg-stage">
                 <img
-                  src={g.hero ? `${g.hero}-xs.webp` : `${stock}-sm.webp`}
+                  src={g.hero ? `${g.hero}-${g.xs ? 'xs' : 'lg'}.webp` : `${stock}-sm.webp`}
                   width={320}
                   height={180}
                   alt=""
                   loading="lazy"
                   decoding="async"
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className={`absolute inset-0 h-full w-full ${g.contain ? 'object-contain' : 'object-cover'}`}
                 />
               </div>
               <span className="p-3 font-sans text-sm font-semibold text-ink group-hover:text-brand-hi">
@@ -91,7 +95,7 @@ export function PartGroups({
                     alt=""
                     loading="lazy"
                     decoding="async"
-                    className="absolute inset-0 h-full w-full object-cover"
+                    className={`absolute inset-0 h-full w-full ${g.contain ? 'object-contain' : 'object-cover'}`}
                   />
                 ) : lead && tips?.image ? (
                   <img
