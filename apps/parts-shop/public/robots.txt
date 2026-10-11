@@ -1,3 +1,7 @@
-# M1 preview: not for search engines yet (M4 opens it).
+# Open to search engines. The cart (/palet) and 404 pages are crawlable but carry meta robots
+# noindex: a Disallow here would hide that tag from crawlers.
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /cdn-cgi/
+
+Sitemap: https://kiriciparca.com/sitemap.xml

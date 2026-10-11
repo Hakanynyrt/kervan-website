@@ -6,7 +6,10 @@ import type { PartRender, RenderView } from './photos';
 
 export interface Dict {
   meta: {
+    /** og:site_name. */
     siteName: string;
+    /** Brand after the "|" in page titles (the maker people search for). */
+    brand: string;
     homeTitle: string;
     homeDesc: string;
     listTitle: string;
@@ -23,10 +26,12 @@ export interface Dict {
     partsTitle: string;
     partsDesc: string;
     partTitle: (name: string) => string;
-    partDesc: (name: string) => string;
+    /** `kit`: repair kits are put together for the breaker, not made by us. */
+    partDesc: (name: string, kit: boolean) => string;
     /** One modelled part's own page: caption = "Montabert BRV 32 piston". */
     partItemTitle: (caption: string) => string;
-    partItemDesc: (caption: string) => string;
+    /** `priced`: the page shows a price (order), else a quote. */
+    partItemDesc: (caption: string, o: { kit: boolean; priced: boolean }) => string;
     cartTitle: string;
   };
   nav: {
@@ -404,31 +409,39 @@ export const DICT: Record<Lang, Dict> = {
   tr: {
     meta: {
       siteName: 'Kervan Mağaza',
-      homeTitle: 'Hidrolik kırıcı yedek parçaları | Kervan Mağaza',
+      brand: 'Kervan Makina',
+      homeTitle: 'Kırıcı yedek parça ve kırıcı ucu | Kervan Makina',
       homeDesc:
-        'Kervan üretimi hidrolik kırıcı yedek parçaları: kırıcı ucu, alt gövde, burç, kama, saplama, piston ve daha fazlası; kırıcınızın marka ve modeline göre.',
-      listTitle: 'Tüm kırıcı uçları | Kervan Mağaza',
-      listDesc: 'Marka ve modele göre tüm Kervan kırıcı uçları: çalışma çapı ve uç tipleri.',
-      familyTitle: (code, d) => `${code} kırıcı ucu Ø${d} | Kervan Mağaza`,
-      familyDesc: (code, d, types) => `${code}: Ø${d} mm kırıcı ucu (${types}).`,
-      breakerTitle: (name, d) => `${name} kırıcı ucu${d ? ` Ø${d}` : ''} | Kervan Mağaza`,
+        'Hidrolik kırıcı yedek parça: kırıcı ucu, alt gövde, burç, kama, saplama, piston, akümülatör parçaları, aşınma plakası ve tamir takımı, kırıcınızın marka ve modeline göre. Stoktan aynı gün kargo.',
+      listTitle: 'Kırıcı ucu: marka ve modele göre | Kervan Makina',
+      listDesc:
+        'Hidrolik kırıcı ucu: kırıcınızın marka ve modelini yazın, çalışma çapı ve uç tipleriyle Kervan üretimi ucu bulun. Stoktan aynı gün kargo.',
+      familyTitle: (code, d) => `${code} kırıcı ucu Ø${d} mm | Kervan Makina`,
+      familyDesc: (code, d, types) =>
+        `${code}: Ø${d} mm hidrolik kırıcı ucu (${types}). Kervan üretimi kırıcı yedek parça; stoktan aynı gün kargo.`,
+      breakerTitle: (name, d) => `${name} kırıcı ucu${d ? ` Ø${d}` : ''} | Kervan Makina`,
       breakerDesc: (name, d, types) =>
-        `${name} hidrolik kırıcı için Kervan ucu: ${d ? `Ø${d} mm, ` : ''}${types}.`,
-      notFoundTitle: 'Sayfa bulunamadı | Kervan Mağaza',
-      popularTitle: 'Çok satan kırıcı uçları | Kervan Mağaza',
-      popularDesc: 'En çok sipariş edilen Kervan kırıcı uçları, kırıcı marka ve modeline göre.',
-      brandTitle: (brand) => `${brand} kırıcı uçları | Kervan Mağaza`,
-      brandDesc: (brand, n) => `${brand} hidrolik kırıcılar için Kervan uçları: ${n} model.`,
-      partsTitle: 'Kırıcı yedek parçaları | Kervan Mağaza',
+        `${name} hidrolik kırıcı ucu: ${d ? `Ø${d} mm, ` : ''}${types}. Kervan üretimi kırıcı yedek parça; stoktan aynı gün kargo.`,
+      notFoundTitle: 'Sayfa bulunamadı | Kervan Makina',
+      popularTitle: 'Çok satan kırıcı uçları ve yedek parçalar | Kervan Makina',
+      popularDesc:
+        'En çok sipariş edilen kırıcı uçları ve aynı kırıcılar için ürettiğimiz yedek parçalar, kırıcı marka ve modeline göre.',
+      brandTitle: (brand) => `${brand} kırıcı ucu | Kervan Makina`,
+      brandDesc: (brand, n) =>
+        `${brand} hidrolik kırıcı ucu: ${n} ${brand} kırıcı modeli için Kervan üretimi uç, çalışma çapı ve uç tipleri. Stoktan aynı gün kargo.`,
+      partsTitle: 'Hidrolik kırıcı yedek parçaları | Kervan Makina',
       partsDesc:
-        'Hidrolik kırıcı ucu, alt gövde, burç, kama, saplama, piston, akümülatör parçaları ve aşınma plakası: Kervan üretimi.',
-      partTitle: (name) => `Kırıcı ${name.toLocaleLowerCase('tr')} | Kervan Mağaza`,
-      partDesc: (name) =>
-        `Hidrolik kırıcı ${name.toLocaleLowerCase('tr')}: Kervan üretimi, kırıcınızın modeline göre teklif.`,
-      partItemTitle: (caption) => `${caption} | Kervan Mağaza`,
-      partItemDesc: (caption) =>
-        `${caption}: Kervan üretimi hidrolik kırıcı yedek parçası. Fiyat teklifi için yazın.`,
-      cartTitle: 'Palet | Kervan Mağaza',
+        'Hidrolik kırıcı yedek parçaları: kırıcı ucu, alt gövde, burç, kama, saplama, piston, akümülatör parçaları, aşınma plakası ve tamir takımı, kırıcınızın marka ve modeline göre.',
+      partTitle: (name) =>
+        `Kırıcı ${name.toLocaleLowerCase('tr')}: marka ve modele göre | Kervan Makina`,
+      partDesc: (name, kit) =>
+        kit
+          ? 'Hidrolik kırıcı tamir takımı: kırıcınızın modeline göre eksiksiz hazırlanan sızdırmazlık takımı. Marka ve modelinizi yazın.'
+          : `Hidrolik kırıcı ${name.toLocaleLowerCase('tr')}: Kervan üretimi kırıcı yedek parça, kırıcınızın marka ve modeline göre. Marka ve modelinizi yazın.`,
+      partItemTitle: (caption) => `${caption} | Kervan Makina`,
+      partItemDesc: (caption, { kit, priced }) =>
+        `${caption}: ${kit ? 'kırıcı modeline göre hazırlanan sızdırmazlık takımı' : 'Kervan üretimi hidrolik kırıcı yedek parçası'}. ${priced ? 'Fiyatı sayfada, stoktan aynı gün kargo.' : 'Fiyat teklifi için yazın.'}`,
+      cartTitle: 'Palet | Kervan Makina',
     },
     nav: {
       label: 'Ana menü',
@@ -1133,32 +1146,38 @@ export const DICT: Record<Lang, Dict> = {
   en: {
     meta: {
       siteName: 'Kervan Shop',
-      homeTitle: 'Hydraulic breaker spare parts | Kervan Shop',
+      brand: 'Kervan Makina',
+      homeTitle: 'Hydraulic breaker spare parts and tips | Kervan Makina',
       homeDesc:
-        'Hydraulic breaker spare parts made by Kervan: tips, front heads, bushings, retainer keys, tie rods, pistons and more, by breaker make and model.',
-      listTitle: 'All breaker tips | Kervan Shop',
+        'Hydraulic breaker spare parts: tips, front heads, bushings, retainer keys, tie rods, pistons, accumulator parts, wear plates and repair kits, by breaker make and model. Same-day shipping from stock.',
+      listTitle: 'Breaker tips by make and model | Kervan Makina',
       listDesc:
-        'All Kervan breaker tips by breaker make and model: working diameter and tip types.',
-      familyTitle: (code, d) => `${code} breaker tip Ø${d} | Kervan Shop`,
-      familyDesc: (code, d, types) => `${code}: Ø${d} mm breaker tip (${types}).`,
-      breakerTitle: (name, d) => `${name} breaker tip${d ? ` Ø${d}` : ''} | Kervan Shop`,
+        'Hydraulic breaker tips: type your breaker make and model to find the Kervan tip, with working diameter and tip types. Same-day shipping from stock.',
+      familyTitle: (code, d) => `${code} breaker tip Ø${d} mm | Kervan Makina`,
+      familyDesc: (code, d, types) =>
+        `${code}: Ø${d} mm hydraulic breaker tip (${types}). Breaker spare part made by Kervan; same-day shipping from stock.`,
+      breakerTitle: (name, d) => `${name} breaker tip${d ? ` Ø${d}` : ''} | Kervan Makina`,
       breakerDesc: (name, d, types) =>
-        `Kervan tip for the ${name} hydraulic breaker: ${d ? `Ø${d} mm, ` : ''}${types}.`,
-      notFoundTitle: 'Page not found | Kervan Shop',
-      popularTitle: 'Best-selling breaker tips | Kervan Shop',
-      popularDesc: 'The most ordered Kervan breaker tips, by breaker make and model.',
-      brandTitle: (brand) => `${brand} breaker tips | Kervan Shop`,
-      brandDesc: (brand, n) => `Kervan tips for ${brand} hydraulic breakers: ${n} models.`,
-      partsTitle: 'Breaker spare parts | Kervan Shop',
+        `${name} hydraulic breaker tip: ${d ? `Ø${d} mm, ` : ''}${types}. Breaker spare part made by Kervan; same-day shipping from stock.`,
+      notFoundTitle: 'Page not found | Kervan Makina',
+      popularTitle: 'Best-selling breaker tips and spare parts | Kervan Makina',
+      popularDesc:
+        'The most ordered breaker tips and the parts we make for the same breakers, by breaker make and model.',
+      brandTitle: (brand) => `${brand} breaker tips | Kervan Makina`,
+      brandDesc: (brand, n) =>
+        `${brand} hydraulic breaker tips: Kervan tips for ${n} ${brand} breaker models, with working diameter and tip types. Same-day shipping from stock.`,
+      partsTitle: 'Hydraulic breaker spare parts | Kervan Makina',
       partsDesc:
-        'Hydraulic breaker tips, front heads, bushings, retainer keys, tie rods, pistons, accumulator parts and wear plates made by Kervan.',
-      partTitle: (name) => `Breaker ${name.toLowerCase()} | Kervan Shop`,
-      partDesc: (name) =>
-        `Hydraulic breaker ${name.toLowerCase()} made by Kervan; quotes by breaker model.`,
-      partItemTitle: (caption) => `${caption} | Kervan Shop`,
-      partItemDesc: (caption) =>
-        `${caption}: hydraulic breaker spare part made by Kervan. Write to us for a quote.`,
-      cartTitle: 'Cart | Kervan Shop',
+        'Hydraulic breaker spare parts: tips, front heads, bushings, retainer keys, tie rods, pistons, accumulator parts, wear plates and repair kits, by breaker make and model.',
+      partTitle: (name) => `Breaker ${name.toLowerCase()} by make and model | Kervan Makina`,
+      partDesc: (name, kit) =>
+        kit
+          ? 'Hydraulic breaker repair kits: complete seal kits put together for your breaker model. Type your make and model.'
+          : `Hydraulic breaker ${name.toLowerCase()} made by Kervan, by breaker make and model. Type your make and model.`,
+      partItemTitle: (caption) => `${caption} | Kervan Makina`,
+      partItemDesc: (caption, { kit, priced }) =>
+        `${caption}: ${kit ? 'seal kit put together for the breaker model' : 'hydraulic breaker spare part made by Kervan'}. ${priced ? 'Price on the page, same-day shipping from stock.' : 'Write to us for a quote.'}`,
+      cartTitle: 'Cart | Kervan Makina',
     },
     nav: {
       label: 'Main menu',

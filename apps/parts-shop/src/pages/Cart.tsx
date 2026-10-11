@@ -11,7 +11,7 @@ import { localePath } from '../lib/locale-path';
 import { fmtDate, fmtTry, fmtUsd, VAT_PERCENT, vatOf } from '../lib/price';
 import { LEGAL, legalPath } from '../lib/legal';
 import { PARTS_PATH } from '../lib/routes';
-import { SITE } from '../lib/page-head';
+import { SITE } from '../lib/site';
 import type { Lang } from '../types';
 
 const FIELDS = ['name', 'company', 'phone', 'city', 'note'] as const;
