@@ -70,16 +70,25 @@ preflight "$RFQ" https://kervanbreaker.com yes
 preflight "$RFQ" https://www.kervanbreaker.com yes
 preflight "$RFQ" https://evil.example no
 
-# Parts shop (M1 preview): up, and still closed to search engines.
+# Parts shop: up, and open to search engines (no noindex header; robots.txt names the sitemap).
 check https://kiriciparca.com/ 200 text/html
 robots=$("${CURL[@]}" -o /dev/null -D - https://kiriciparca.com/ | tr -d '\r' |
   awk -F': ' 'tolower($1) == "x-robots-tag" { print $2 }')
-if [[ $robots == *noindex* ]]; then
+if [[ $robots != *noindex* ]]; then
   echo "ok    X-Robots-Tag '$robots'  https://kiriciparca.com/"
 else
-  echo "FAIL  X-Robots-Tag '$robots'  https://kiriciparca.com/  (want noindex)"
+  echo "FAIL  X-Robots-Tag '$robots'  https://kiriciparca.com/  (want no noindex)"
   fail=1
 fi
+robotstxt=$("${CURL[@]}" https://kiriciparca.com/robots.txt | tr -d '\r')
+if grep -qx 'Sitemap: https://kiriciparca.com/sitemap.xml' <<<"$robotstxt"; then
+  echo "ok    robots.txt names the sitemap  https://kiriciparca.com/robots.txt"
+else
+  echo "FAIL  robots.txt has no 'Sitemap: https://kiriciparca.com/sitemap.xml' line"
+  fail=1
+fi
+# Any XML content type (application/xml or text/xml).
+check https://kiriciparca.com/sitemap.xml 200 ''
 # The old shop hosts 301 to the new domain, path kept (zone Redirect Rules).
 for old in https://magaza.kervanbreaker.com https://shop.kervanbreaker.com https://www.kiriciparca.com; do
   loc=$("${CURL[@]}" -o /dev/null -D - "$old/kirici-ucu" | tr -d '\r' |

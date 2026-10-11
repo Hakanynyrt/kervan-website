@@ -4,6 +4,8 @@ export {
   website,
   service,
   product,
+  shopProduct,
+  productWebPage,
   breadcrumbList,
   itemList,
   type BreadcrumbItem,
@@ -11,6 +13,7 @@ export {
   type BuildWebsiteOpts,
   type BuildServiceOpts,
   type BuildProductOpts,
+  type BuildShopProductOpts,
   type BuildItemListOpts,
 } from './jsonld.js';
 
@@ -19,6 +22,7 @@ export {
   buildHeadTags,
   injectHead,
   buildSitemapXml,
+  buildSitemapIndexXml,
   ogLocale,
   escapeHtml,
   jsonForScript,

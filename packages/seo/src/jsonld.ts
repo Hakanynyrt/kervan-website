@@ -156,6 +156,101 @@ export function product({
   } as const;
 }
 
+interface BuildShopProductOpts {
+  /** Absolute URL of the product page (its canonical). */
+  url: string;
+  name: string;
+  description?: string;
+  /** Absolute image URL (the page's hero / og:image). */
+  image?: string;
+  /** Brand of the product itself (the maker), e.g. "Kervan Makina". */
+  brand: string;
+  category?: string;
+  /** Public product code; only one the site already shows. */
+  sku?: string;
+  /** The price exactly as the page shows it; omit when the page only takes quotes. */
+  offer?: {
+    /** Decimal string, e.g. "125.00". */
+    price: string;
+    priceCurrency: string;
+    /** The shown price excludes VAT. */
+    valueAddedTaxIncluded?: boolean;
+  };
+}
+
+/** A schema.org Product with a real Offer: only for a page that shows that price. Never adds
+ *  ratings or reviews. */
+export function shopProduct({
+  url,
+  name,
+  description,
+  image,
+  brand,
+  category,
+  sku,
+  offer,
+}: BuildShopProductOpts) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name,
+    ...(description ? { description } : {}),
+    url,
+    ...(image ? { image } : {}),
+    brand: { '@type': 'Brand', name: brand },
+    ...(category ? { category } : {}),
+    ...(sku ? { sku } : {}),
+    ...(offer
+      ? {
+          offers: {
+            '@type': 'Offer',
+            url,
+            price: offer.price,
+            priceCurrency: offer.priceCurrency,
+            availability: 'https://schema.org/InStock',
+            itemCondition: 'https://schema.org/NewCondition',
+            ...(offer.valueAddedTaxIncluded === undefined
+              ? {}
+              : {
+                  priceSpecification: {
+                    '@type': 'UnitPriceSpecification',
+                    price: offer.price,
+                    priceCurrency: offer.priceCurrency,
+                    valueAddedTaxIncluded: offer.valueAddedTaxIncluded,
+                  },
+                }),
+          },
+        }
+      : {}),
+  } as const;
+}
+
+/** A product page without a shown price, as a WebPage (a Product needs offers or real reviews,
+ *  else Search Console lists it as an invalid item). */
+export function productWebPage({
+  url,
+  name,
+  description,
+  image,
+  brand,
+  category,
+  sku,
+  publisherId,
+}: Omit<BuildShopProductOpts, 'offer'> & { publisherId?: string }) {
+  const keywords = [name, category, brand, sku].filter(Boolean).join(', ');
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name,
+    ...(description ? { description } : {}),
+    url,
+    ...(image ? { primaryImageOfPage: { '@type': 'ImageObject', url: image } } : {}),
+    about: { '@type': 'Thing', name },
+    keywords,
+    ...(publisherId ? { publisher: { '@id': publisherId } } : {}),
+  } as const;
+}
+
 interface BreadcrumbItem {
   name: string;
   url: string;
@@ -209,5 +304,6 @@ export type {
   BuildWebsiteOpts,
   BuildServiceOpts,
   BuildProductOpts,
+  BuildShopProductOpts,
   BuildItemListOpts,
 };

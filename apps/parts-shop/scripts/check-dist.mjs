@@ -1,7 +1,11 @@
-// Last build step: fails the build if a page could leak or be indexed.
-// - every HTML page has meta robots noindex and the embedded page props;
+// Last build step: fails the build if a page could leak, or is indexed (or hidden) by mistake.
+// - every HTML page has the embedded page props;
+// - only the cart (/palet) and 404 pages carry meta robots noindex, and they must; every other
+//   page is indexable, has a self canonical on SITE and is listed in the sitemap, and its
+//   JSON-LD parses;
 // - no file in dist/ contains a forbidden string (third-party catalogue names or part
-//   numbers, private D1 columns). M4 changes the noindex rule, never the forbidden list.
+//   numbers, private D1 columns);
+// - at most MAX_FILES files (Pages limit).
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -41,21 +45,57 @@ const count = (d) => {
 };
 count(DIST);
 
+const SITE = 'https://kiriciparca.com';
+// Pages kept out of search results (src/lib/page-head.ts NOINDEX_KINDS): cart and 404.
+const NOINDEX_PAGES = /^(en\/)?(404|palet)\.html$/;
+// Every <loc> of the sitemap (sitemap.xml, or its children when it is an index).
+const sitemapLocs = new Set();
+for (const f of files)
+  if (/^sitemap(-\d+)?\.xml$/.test(path.basename(f)) && path.dirname(f) === DIST)
+    for (const m of fs.readFileSync(f, 'utf8').matchAll(/<url>\s*<loc>([^<]+)<\/loc>/g))
+      sitemapLocs.add(m[1]);
+const urlOf = (rel) => {
+  const p = rel.replace(/\\/g, '/').replace(/\.html$/, '');
+  return p === 'index' ? `${SITE}/` : p === 'en/index' ? `${SITE}/en/` : `${SITE}/${p}`;
+};
+
 const problems = [];
 let pages = 0;
+let indexable = 0;
 for (const f of files) {
   const s = fs.readFileSync(f, 'utf8');
   const rel = path.relative(DIST, f);
   for (const re of FORBIDDEN) if (re.test(s)) problems.push(`${rel}: forbidden ${re}`);
   if (f.endsWith('.html')) {
     pages++;
-    if (!s.includes('<meta name="robots" content="noindex, nofollow"')) problems.push(`${rel}: no noindex`);
     if (!s.includes('id="kv-page"')) problems.push(`${rel}: no page props`);
+    for (const m of s.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+      try {
+        JSON.parse(m[1]);
+      } catch {
+        problems.push(`${rel}: JSON-LD does not parse`);
+      }
+    }
+    const noindex = /<meta name="robots" content="[^"]*noindex/.test(s);
+    if (NOINDEX_PAGES.test(rel.replace(/\\/g, '/'))) {
+      if (!noindex) problems.push(`${rel}: should be noindex`);
+      continue;
+    }
+    indexable++;
+    if (noindex) problems.push(`${rel}: indexable page has noindex`);
+    const url = urlOf(rel);
+    if (!s.includes(`<link rel="canonical" href="${url}" />`))
+      problems.push(`${rel}: no self canonical ${url}`);
+    if (!sitemapLocs.has(url)) problems.push(`${rel}: not in the sitemap`);
   }
 }
+if (sitemapLocs.size !== indexable)
+  problems.push(`sitemap: ${sitemapLocs.size} URLs for ${indexable} indexable pages`);
 if (total > MAX_FILES) problems.push(`dist: ${total} files, more than ${MAX_FILES} (Pages limit 20,000)`);
 if (problems.length) {
   process.stderr.write(`check-dist: ${problems.length} problem(s)\n${problems.slice(0, 20).join('\n')}\n`);
   process.exit(1);
 }
-process.stdout.write(`check-dist: ${pages} pages ok, ${total} files\n`);
+process.stdout.write(
+  `check-dist: ${pages} pages ok (${indexable} indexable, all in the sitemap), ${total} files\n`,
+);

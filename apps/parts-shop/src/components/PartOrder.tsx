@@ -4,7 +4,7 @@ import type { FxRate } from '@kervan/tips';
 import { addToCart } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { SITE } from '../lib/page-head';
+import { SITE } from '../lib/site';
 import { fmtDate, fmtTry, fmtUsd, vatOf } from '../lib/price';
 import { CART_PATH } from '../lib/routes';
 import type { Lang } from '../types';

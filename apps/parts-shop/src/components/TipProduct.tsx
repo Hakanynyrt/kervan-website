@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import {
   carrierTons,
   isTipType,
-  TIP_TYPES,
   type FxRate,
   type PublicExtra,
   type PublicFamily,
@@ -19,9 +18,10 @@ import { addToCart } from '../lib/cart';
 import { fmtDate, fmtTry, fmtUsd, vatOf } from '../lib/price';
 import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
-import { SITE } from '../lib/page-head';
+import { SITE } from '../lib/site';
 import type { PartLink } from '../lib/part-links';
 import { tipImg } from '../lib/tip-img';
+import { tipOptions } from '../lib/tip-options';
 import type { Lang } from '../types';
 import {
   Breadcrumb,
@@ -71,15 +71,6 @@ interface Props {
   t: Dict;
 }
 
-/** One choice of the type selector: a catalogue SKU, or a type of an extra product. */
-interface Option {
-  tipType: TipType;
-  sku: PublicSku | null;
-  family: PublicFamily | null;
-  code: string | null;
-  cents: number | null;
-}
-
 /**
  * Product page body. One tip-type selector for every type the breaker takes; a type comes
  * from the first tip family that has it (the Kervan code only goes into the quote message).
@@ -103,27 +94,7 @@ export default function TipProduct({
   t,
 }: Props) {
   const tf = t.family;
-  const opts = new Map<TipType, Option>();
-  for (const f of families)
-    for (const s of f.skus)
-      if (!opts.has(s.tipType))
-        opts.set(s.tipType, {
-          tipType: s.tipType,
-          sku: s,
-          family: f,
-          code: s.code,
-          cents: s.priceUsdNetCents,
-        });
-  for (const x of extra?.tipTypes ?? [])
-    if (!opts.has(x))
-      opts.set(x, {
-        tipType: x,
-        sku: null,
-        family: null,
-        code: null,
-        cents: extra!.priceUsdNetCents,
-      });
-  const types = TIP_TYPES.filter((x) => opts.has(x));
+  const { opts, types } = tipOptions(families, extra);
   const [type, setType] = useState<TipType>(types[0]);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);

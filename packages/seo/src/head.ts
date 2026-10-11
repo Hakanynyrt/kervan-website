@@ -212,3 +212,23 @@ export function buildSitemapXml(entries: SitemapEntry[]): string {
     '',
   ].join('\n');
 }
+
+/** Sitemap index (sitemapindex) pointing at child sitemaps, for sites over the 50,000-URL
+ *  limit of a single sitemap. */
+export function buildSitemapIndexXml(sitemaps: { loc: string; lastmod?: string }[]): string {
+  const x = escapeHtml;
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...sitemaps.map((s) =>
+      [
+        '  <sitemap>',
+        `    <loc>${x(s.loc)}</loc>`,
+        ...(s.lastmod ? [`    <lastmod>${x(s.lastmod)}</lastmod>`] : []),
+        '  </sitemap>',
+      ].join('\n'),
+    ),
+    '</sitemapindex>',
+    '',
+  ].join('\n');
+}

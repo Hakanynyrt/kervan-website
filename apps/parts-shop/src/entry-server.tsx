@@ -1,9 +1,14 @@
 import { StrictMode } from 'react';
 import { renderToString } from 'react-dom/server';
-import { buildHeadTags } from '@kervan/seo';
+import {
+  buildHeadTags,
+  buildSitemapIndexXml,
+  buildSitemapXml,
+  type SitemapEntry,
+} from '@kervan/seo';
 import type { PublicCatalog } from '@kervan/tips';
 import App from './App';
-import { pageHead } from './lib/page-head';
+import { isIndexable, pageHead, SITE } from './lib/page-head';
 import { LANGS, localePath } from './lib/locale-path';
 import type { PageProps } from './lib/page-props';
 import { breakerPath, buildPages, groupBreakers } from './lib/routes';
@@ -20,6 +25,8 @@ export interface PrerenderPage {
   headTags: string;
   appHtml: string;
   props: PageProps;
+  /** Listed in the sitemap (everything but the cart and 404). */
+  indexable: boolean;
 }
 
 /** "/" → index.html, "/en/" → en/index.html, "/urun/ku135-07" → urun/ku135-07.html. */
@@ -45,6 +52,7 @@ export function prerender(catalog: PublicCatalog): PrerenderPage[] {
         headTags: buildHeadTags(pageHead(props)),
         appHtml: render(props),
         props,
+        indexable: isIndexable(props),
       });
     }
     const nf: PageProps = { lang, path: '/', model: { kind: 'notFound' }, fx: null };
@@ -54,6 +62,7 @@ export function prerender(catalog: PublicCatalog): PrerenderPage[] {
       headTags: buildHeadTags(pageHead(nf)),
       appHtml: render(nf),
       props: nf,
+      indexable: false,
     });
   }
   return out;
@@ -71,4 +80,43 @@ export function redirectLines(catalog: PublicCatalog): string[] {
     .flatMap(([from, to]) =>
       LANGS.map((lang) => `${localePath(from, lang)} ${localePath(to, lang)} 301`),
     );
+}
+
+/** URLs per sitemap file; the protocol allows 50,000. */
+const SITEMAP_MAX = 45000;
+
+/**
+ * sitemap.xml for every indexable page in both languages, each with its hreflang alternates
+ * (tr, en, x-default = tr). One file while it fits (the Pages file limit); past SITEMAP_MAX
+ * URLs, sitemap-1.xml, sitemap-2.xml, … and sitemap.xml becomes their index.
+ */
+export function sitemapFiles(
+  pages: PrerenderPage[],
+  lastmod: string,
+): { file: string; xml: string }[] {
+  const entries: SitemapEntry[] = pages
+    .filter((p) => p.indexable)
+    .map((p) => ({
+      loc: SITE + localePath(p.props.path, p.lang),
+      lastmod,
+      alternates: {
+        tr: SITE + localePath(p.props.path, 'tr'),
+        en: SITE + localePath(p.props.path, 'en'),
+      },
+    }));
+  if (entries.length <= SITEMAP_MAX)
+    return [{ file: 'sitemap.xml', xml: buildSitemapXml(entries) }];
+  const files: { file: string; xml: string }[] = [];
+  for (let i = 0; i < entries.length; i += SITEMAP_MAX)
+    files.push({
+      file: `sitemap-${files.length + 1}.xml`,
+      xml: buildSitemapXml(entries.slice(i, i + SITEMAP_MAX)),
+    });
+  return [
+    {
+      file: 'sitemap.xml',
+      xml: buildSitemapIndexXml(files.map((f) => ({ loc: `${SITE}/${f.file}`, lastmod }))),
+    },
+    ...files,
+  ];
 }

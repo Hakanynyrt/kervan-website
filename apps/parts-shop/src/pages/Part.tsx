@@ -23,7 +23,7 @@ import { addToCart } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import type { ListedPart } from '../lib/listed-parts';
 import { localePath } from '../lib/locale-path';
-import { SITE } from '../lib/page-head';
+import { SITE } from '../lib/site';
 import { renderModel, renderTitle } from '../lib/part-caption';
 import { DEFAULT_FILTER, filtersFor, inFilter, type PartFilter } from '../lib/part-filters';
 import { renderAnchor } from '../lib/part-links';
