@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ORG_EMAIL } from '@kervan/seo';
 import type { FxRate } from '@kervan/tips';
+import { ORDER_CONVERSION } from '../lib/ads';
 import { addToCart } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
@@ -142,12 +143,14 @@ export function PartOrder({
           )}
           <a
             href={whatsappHref(text)}
+            {...ORDER_CONVERSION}
             className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
           >
             {o.wa}
           </a>
           <a
             href={`mailto:${ORG_EMAIL}?subject=${encodeURIComponent(`${breaker} ${label}`)}&body=${encodeURIComponent(text)}`}
+            {...ORDER_CONVERSION}
             className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
           >
             {o.mail}

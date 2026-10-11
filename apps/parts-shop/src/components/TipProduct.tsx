@@ -10,6 +10,7 @@ import {
 } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import { ORG_EMAIL } from '@kervan/seo';
+import { ORDER_CONVERSION } from '../lib/ads';
 import type { Dict } from '../lib/dict';
 import { fmtMm, fmtNum } from '../lib/format';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
@@ -359,12 +360,14 @@ export default function TipProduct({
               )}
               <a
                 href={whatsappHref(text)}
+                {...ORDER_CONVERSION}
                 className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
               >
                 {order ? tf.orderWa : tf.whatsapp}
               </a>
               <a
                 href={mail}
+                {...ORDER_CONVERSION}
                 className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
               >
                 {order ? tf.orderMail : tf.email}

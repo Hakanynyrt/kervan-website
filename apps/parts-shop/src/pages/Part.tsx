@@ -19,6 +19,7 @@ import { FOCUS, whatsappHref } from '../components/Layout';
 import { PartPriceLine, partOrderText, priceNote } from '../components/PartOrder';
 import RenderGallery from '../components/RenderGallery';
 import ShareLinks from '../components/ShareLinks';
+import { ORDER_CONVERSION } from '../lib/ads';
 import { addToCart } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import type { ListedPart } from '../lib/listed-parts';
@@ -446,6 +447,7 @@ function ListedCard({ l, ctx }: { l: ListedPart; ctx: Ctx }) {
           </button>
           <a
             href={whatsappHref(partOrderText(t, lang, label, l.breaker, 1, l.cents, path))}
+            {...ORDER_CONVERSION}
             className={link}
           >
             {t.parts.order.wa}
@@ -509,12 +511,14 @@ export function QuotePanel({
         <div className="mt-4 flex flex-col gap-3">
           <a
             href={whatsappHref(text)}
+            {...ORDER_CONVERSION}
             className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
           >
             {t.family.whatsapp}
           </a>
           <a
             href={`mailto:${ORG_EMAIL}?subject=${encodeURIComponent(breaker.trim() ? `${name} – ${breaker.trim()}` : name)}&body=${encodeURIComponent(text)}`}
+            {...ORDER_CONVERSION}
             className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
           >
             {t.family.email}

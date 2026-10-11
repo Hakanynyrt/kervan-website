@@ -13,7 +13,9 @@ import {
   TIP_PATHS,
 } from '../lib/routes';
 import { LEGAL, LEGAL_KEYS, legalPath, SELLER } from '../lib/legal';
+import { CONSENT_OPEN_EVENT } from '../lib/ads';
 import { CartLink } from './CartLink';
+import { ConsentBanner } from './ConsentBanner';
 import { ThemeSelect } from './ThemeSelect';
 import type { Lang } from '../types';
 
@@ -296,6 +298,15 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
                   </a>
                 </li>
               ))}
+              <li>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new Event(CONSENT_OPEN_EVENT))}
+                  className={`cursor-pointer p-0 text-left hover:text-ink ${FOCUS}`}
+                >
+                  {t.footer.cookies}
+                </button>
+              </li>
             </ul>
           </div>
           <div>
@@ -329,6 +340,7 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
           </Container>
         </div>
       </footer>
+      <ConsentBanner lang={lang} t={t} />
     </>
   );
 }

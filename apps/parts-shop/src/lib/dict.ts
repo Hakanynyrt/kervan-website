@@ -401,7 +401,11 @@ export interface Dict {
     about: string;
     fit: string;
     fax: string;
+    /** Reopens the cookie banner (ConsentBanner). */
+    cookies: string;
   };
+  /** Cookie banner for Google Ads measurement (ConsentBanner). */
+  consent: { title: string; body: string; accept: string; reject: string; policy: string };
   notFound: { title: string; body: string; home: string; ask: string };
 }
 
@@ -1135,6 +1139,14 @@ export const DICT: Record<Lang, Dict> = {
       fax: 'Faks',
       images:
         '© Kervan Makina. Ürün görselleri Kervan Makina’ya aittir, temsilidir; izinsiz kullanılamaz.',
+      cookies: 'Çerez tercihleri',
+    },
+    consent: {
+      title: 'Çerez tercihi',
+      body: 'Reklamlarımızın işe yarayıp yaramadığını ölçmek için Google Ads çerezlerini kullanmak istiyoruz. Bu çerezler yalnızca kabul ederseniz yüklenir ve veriler Google’a (yurt dışına) aktarılır. Reddederseniz site ve sipariş aynen çalışır.',
+      accept: 'Kabul et',
+      reject: 'Reddet',
+      policy: 'Ayrıntılar',
     },
     notFound: {
       title: 'Sayfa bulunamadı (404)',
@@ -1875,6 +1887,14 @@ export const DICT: Record<Lang, Dict> = {
       fax: 'Fax',
       images:
         '© Kervan Makina. Product images belong to Kervan Makina and are illustrations; do not use without permission.',
+      cookies: 'Cookie preferences',
+    },
+    consent: {
+      title: 'Cookie preference',
+      body: 'We would like to use Google Ads cookies to measure whether our ads work. They load only if you accept, and the data is transferred to Google (abroad). If you decline, the site and ordering work exactly the same.',
+      accept: 'Accept',
+      reject: 'Decline',
+      policy: 'Details',
     },
     notFound: {
       title: 'Page not found (404)',
