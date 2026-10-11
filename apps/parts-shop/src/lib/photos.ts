@@ -31,6 +31,8 @@ export const PART_PHOTOS: Record<PartKey, readonly string[]> = {
  * renders), grouped by the breaker model they fit. Same files and naming as the photos.
  */
 export type RenderView = 'front' | 'rear' | 'side' | 'detail' | 'section' | 'assembly' | 'top';
+/** Seal-kit pictures carry each part's quantity (×N); version 02 added the labels (files are cached immutable). */
+const KIT_V = '02';
 /** One line of a repair (seal) kit. */
 export type KitItemType =
   | 'oring'
@@ -2085,8 +2087,8 @@ function kitPartRender(k: RepairKit): PartRender {
     model: `${k.make} ${k.models.join(' / ')}${k.variant ? ` (${k.variant})` : ''}`,
     series: k.make,
     kind: 'repairKit',
-    hero: `${b}-vitrin-01`,
-    views: [{ base: `${b}-ustten-01`, view: 'top' }],
+    hero: `${b}-vitrin-${KIT_V}`,
+    views: [{ base: `${b}-ustten-${KIT_V}`, view: 'top' }],
     kit: k.items,
   };
 }
