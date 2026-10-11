@@ -720,7 +720,7 @@ export const DICT: Record<Lang, Dict> = {
         },
         'tamir-takimi': {
           name: 'Tamir takımı',
-          body: 'Kırıcı modeline göre sızdırmazlık takımı: o-ringler, keçeler, toz keçeleri, destek ve teflon ringler; içeriği ve ölçüleriyle.',
+          body: 'Kırıcı modeline göre sızdırmazlık takımı: o-ringler, keçeler, toz keçeleri, destek ve teflon ringler; içerik listesiyle.',
         },
       },
       view: 'İncele',
@@ -1421,7 +1421,7 @@ export const DICT: Record<Lang, Dict> = {
         },
         'tamir-takimi': {
           name: 'Repair kits',
-          body: 'Seal kits by breaker model: o-rings, rod seals, wipers, back-up and PTFE rings, with their contents and sizes.',
+          body: 'Seal kits by breaker model: o-rings, rod seals, wipers, back-up and PTFE rings, with a list of contents.',
         },
       },
       view: 'View',

@@ -126,7 +126,7 @@ export function ModelTable({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang;
           onChange={(e) => setQ(e.target.value)}
           placeholder={t.search.placeholder}
           autoComplete="off"
-          className={`min-w-48 flex-1 rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft sm:max-w-md ${FOCUS}`}
+          className={`min-w-0 flex-[1_1_22rem] rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft sm:max-w-md ${FOCUS}`}
         />
         <p className="m-0 font-sans text-sm text-ink-mid" aria-live="polite">
           {!query
@@ -147,9 +147,14 @@ export function ModelTable({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang;
               <Table rows={near} lang={lang} t={t} />
             </div>
           )}
-          <MissingModel t={t} query={query} className="mt-6" />
         </>
       )}
+      {/* the pages' one "model not listed" box: with the typed model when the search found nothing */}
+      <MissingModel
+        t={t}
+        query={query && !shown.length ? query : ''}
+        className={query && !shown.length ? 'mt-6' : 'mt-12'}
+      />
     </div>
   );
 }

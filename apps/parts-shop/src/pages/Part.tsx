@@ -185,7 +185,7 @@ export default function Part({
             onChange={(e) => setQ(e.target.value)}
             placeholder={t.search.placeholder}
             autoComplete="off"
-            className={`min-w-48 flex-1 rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft ${FOCUS}`}
+            className={`min-w-0 flex-[1_1_22rem] rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft ${FOCUS}`}
           />
           <p className="m-0 font-sans text-sm text-ink-mid" aria-live="polite">
             {!query

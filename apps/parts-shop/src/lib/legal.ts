@@ -113,39 +113,39 @@ const TR: Record<LegalKey, LegalDoc> = {
     desc: 'magaza.kervanbreaker.com üzerinden verilen siparişlerde geçerli satış sözleşmesi.',
     sections: [
       {
-        h: '1. Taraflar',
+        h: 'Taraflar',
         p: [
           `Satıcı: ${SELLER.name}, ${SELLER.address}, ${SELLER.tax}, telefon ${SELLER.phone}, e-posta ${SELLER.email}.`,
           'Alıcı: Sipariş talebini gönderen ve sipariş onayında adı, adresi ve iletişim bilgileri yazan gerçek veya tüzel kişi.',
         ],
       },
       {
-        h: '2. Konu',
+        h: 'Konu',
         p: [
           'Bu sözleşme, Alıcı’nın magaza.kervanbreaker.com üzerinden talep ettiği ve Satıcı’nın sipariş onayında cinsi, miktarı, vergiler dahil satış bedeli, kargo ücreti ve ödeme şekli yazılı ürünlerin satışı ve teslimine ilişkin hak ve yükümlülükleri 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği uyarınca düzenler.',
         ],
       },
       {
-        h: '3. Sözleşmenin kurulması',
+        h: 'Sözleşmenin kurulması',
         p: [
           'Alıcı, sipariş talebini göndermeden önce ön bilgilendirme formunu okuyup anladığını kabul eder. Sözleşme, Satıcı’nın gönderdiği sipariş onayının Alıcı tarafından onaylanması ve ödemenin yapılmasıyla kurulur. Satıcı, sözleşmenin kurulmasından sonra bu sözleşmeyi ve ön bilgilendirme formunu kalıcı veri saklayıcısıyla (e-posta veya mesaj) Alıcı’ya iletir.',
         ],
       },
       {
-        h: '4. Ödeme',
+        h: 'Ödeme',
         p: [
           'Bedel, sipariş onayında bildirilen yöntemle kredi kartı veya banka havalesi/EFT ile ödenir. Havale/EFT’de açıklamaya sipariş onayındaki ad veya firma adı yazılmalıdır. Kargo ücreti Alıcı’ya aittir.',
         ],
       },
       {
-        h: '5. Teslimat',
+        h: 'Teslimat',
         p: [
           'Stoktaki ürünler ödemenin Satıcı’ya ulaştığı gün kargoya verilir. Diğer ürünlerde teslim süresi sipariş onayında bildirilir ve 30 günü geçemez. Satıcı bu sürede teslim edemeyeceğini anlarsa Alıcı’ya bildirir; Alıcı sözleşmeyi feshedebilir ve ödediği bedel 14 gün içinde iade edilir.',
           'Ürün, kargo firmasına teslimle birlikte Alıcı’nın talep ettiği adrese gönderilir. Tüketici olan Alıcı açısından ürün, kendisine veya gösterdiği kişiye teslim edilinceye kadar oluşan kayıp ve hasardan Satıcı sorumludur.',
         ],
       },
       {
-        h: '6. Cayma hakkı',
+        h: 'Cayma hakkı',
         p: [
           'Tüketici olan Alıcı, ürünü teslim aldığı günden itibaren 14 gün içinde gerekçe göstermeden cayabilir. Cayma bildirimi bu süre içinde e-posta, WhatsApp veya yazılı olarak Satıcı’ya yapılır. Alıcı, bildirimden itibaren 10 gün içinde ürünü Satıcı’ya geri gönderir. Satıcı, bildirimin ulaşmasından itibaren 14 gün içinde ürün bedelini ve tahsil edilen teslim masrafını ödeme yöntemine uygun şekilde iade eder.',
           'Satıcı’nın iade için belirttiği kargo firmasıyla yapılan gönderimde iade kargo ücreti Satıcı’ya aittir. Ürünün olağan kullanımı dışında kullanılmasından doğan değer kaybından Alıcı sorumludur.',
@@ -153,19 +153,19 @@ const TR: Record<LegalKey, LegalDoc> = {
         ],
       },
       {
-        h: '7. Garanti ve ayıplı mal',
+        h: 'Garanti ve ayıplı mal',
         p: [
           'Ürünler teslimden itibaren 3 ay süreyle malzeme ve üretim (ısıl işlem dahil) hatalarına karşı garantilidir. Normal aşınma ve hatalı kullanımdan doğan hasarlar garanti dışıdır. İnceleme için kırık parça ve fotoğrafları istenir. Tüketici olan Alıcı’nın 6502 sayılı Kanun’un 11. maddesindeki seçimlik hakları saklıdır.',
         ],
       },
       {
-        h: '8. Uyuşmazlıklar',
+        h: 'Uyuşmazlıklar',
         p: [
           'Tüketici uyuşmazlıklarında, her yıl belirlenen parasal sınırlar içinde tüketici hakem heyetleri, bu sınırların üzerinde tüketici mahkemeleri yetkilidir. Tacir alıcılarla uyuşmazlıklarda Kocaeli mahkemeleri ve icra daireleri yetkilidir.',
         ],
       },
       {
-        h: '9. Yürürlük',
+        h: 'Yürürlük',
         p: [
           `Bu sözleşme, sipariş onayıyla birlikte yürürlüğe girer. Metin en son ${UPDATED} tarihinde güncellenmiştir.`,
         ],
@@ -299,25 +299,25 @@ const EN: Record<LegalKey, LegalDoc> = {
     sections: [
       { h: 'Note', p: [BINDING] },
       {
-        h: '1. Parties and subject',
+        h: 'Parties and subject',
         p: [
           `Seller: ${SELLER.name}, ${SELLER.address}, ${SELLER.tax}. Buyer: the person or company named in the order confirmation. The contract covers the sale and delivery of the items, quantities and prices in the order confirmation under Turkish Consumer Protection Law No. 6502 and the Distance Contracts Regulation.`,
         ],
       },
       {
-        h: '2. Formation, payment and delivery',
+        h: 'Formation, payment and delivery',
         p: [
           'The contract is made when the buyer accepts the Seller’s order confirmation and pays by credit card or bank transfer. Shipping is paid by the buyer. Items in stock ship the day payment arrives; others within the time in the confirmation and never later than 30 days. The Seller sends this contract and the pre-contract information to the buyer by e-mail or message.',
         ],
       },
       {
-        h: '3. Withdrawal',
+        h: 'Withdrawal',
         p: [
           'A consumer buyer may withdraw within 14 days of delivery by notifying the Seller and returns the item within 10 days of the notice. Returns through the carrier named by the Seller are free; the Seller refunds the price and the delivery cost within 14 days of the notice. Items made to the buyer’s specification and purchases by businesses are excluded.',
         ],
       },
       {
-        h: '4. Warranty and disputes',
+        h: 'Warranty and disputes',
         p: [
           '3-month warranty from delivery against material and manufacturing defects; consumers’ statutory rights for defective goods are reserved. Consumer disputes: consumer arbitration committees and consumer courts; disputes with businesses: the courts of Kocaeli.',
         ],

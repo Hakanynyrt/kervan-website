@@ -1,5 +1,5 @@
 import { Container } from '@kervan/ui';
-import { Breadcrumb, MissingModel, PageTitle } from '../components/Bits';
+import { Breadcrumb, PageTitle } from '../components/Bits';
 import { ModelTable } from '../components/ModelSearch';
 import type { Dict } from '../lib/dict';
 import { PARTS_PATH, type PageModel } from '../lib/routes';
@@ -21,7 +21,6 @@ export default function TipList({ model, lang, t }: { model: Model; lang: Lang; 
       <div className="mt-6">
         <ModelTable rows={model.rows} lang={lang} t={t} />
       </div>
-      <MissingModel t={t} />
     </Container>
   );
 }
