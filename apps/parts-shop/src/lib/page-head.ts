@@ -7,7 +7,7 @@ import { renderTitle } from './part-caption';
 import { findRender } from './part-links';
 import type { PageProps } from './page-props';
 
-export const SITE = 'https://magaza.kervanbreaker.com';
+export const SITE = 'https://kiriciparca.com';
 
 /** Head for one page. M1: every page is noindex (M4 removes `robots` for indexable pages). */
 export function pageHead({ lang, path, model }: PageProps): HeadInput {

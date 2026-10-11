@@ -1,6 +1,7 @@
-# magaza.kervanbreaker.com — no SPA fallback: every page is a prerendered file and
-# unknown paths get the nearest 404.html with HTTP 404. (shop.kervanbreaker.com → magaza
-# is a Cloudflare Redirect Rule on the zone; Pages cannot match the host here.)
+# kiriciparca.com — no SPA fallback: every page is a prerendered file and
+# unknown paths get the nearest 404.html with HTTP 404. (www.kiriciparca.com and the old
+# magaza. / shop.kervanbreaker.com hosts → kiriciparca.com are Cloudflare Redirect Rules
+# on their zones; Pages cannot match the host here.)
 
 # The cart was renamed "palet" (owner); keep old links working.
 /sepet /palet 301

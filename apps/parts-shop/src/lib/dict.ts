@@ -708,7 +708,7 @@ export const DICT: Record<Lang, Dict> = {
       cleared: 'Palet boşaltıldı.',
       undo: 'Geri al',
       subject: (first, more) =>
-        `Sipariş talebi – magaza.kervanbreaker.com – ${first}${more ? ` (+${more})` : ''}`,
+        `Sipariş talebi – kiriciparca.com – ${first}${more ? ` (+${more})` : ''}`,
       contactTitle: 'İletişim bilgileriniz',
       name: 'Ad soyad',
       company: 'Firma',
@@ -1434,7 +1434,7 @@ export const DICT: Record<Lang, Dict> = {
       cleared: 'Cart emptied.',
       undo: 'Undo',
       subject: (first, more) =>
-        `Order request – magaza.kervanbreaker.com – ${first}${more ? ` (+${more})` : ''}`,
+        `Order request – kiriciparca.com – ${first}${more ? ` (+${more})` : ''}`,
       contactTitle: 'Your contact details',
       name: 'Name',
       company: 'Company',

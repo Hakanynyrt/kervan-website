@@ -19,7 +19,7 @@ export const SELLER = {
   fax: '0 (262) 371 10 04',
   mobile: ORG_PHONE,
   email: ORG_EMAIL,
-  web: 'magaza.kervanbreaker.com',
+  web: 'kiriciparca.com',
 } as const;
 
 export interface LegalSection {
@@ -110,7 +110,7 @@ const TR: Record<LegalKey, LegalDoc> = {
   },
   'mesafeli-satis': {
     title: 'Mesafeli satış sözleşmesi',
-    desc: 'magaza.kervanbreaker.com üzerinden verilen siparişlerde geçerli satış sözleşmesi.',
+    desc: 'kiriciparca.com üzerinden verilen siparişlerde geçerli satış sözleşmesi.',
     sections: [
       {
         h: 'Taraflar',
@@ -122,7 +122,7 @@ const TR: Record<LegalKey, LegalDoc> = {
       {
         h: 'Konu',
         p: [
-          'Bu sözleşme, Alıcı’nın magaza.kervanbreaker.com üzerinden talep ettiği ve Satıcı’nın sipariş onayında cinsi, miktarı, vergiler dahil satış bedeli, kargo ücreti ve ödeme şekli yazılı ürünlerin satışı ve teslimine ilişkin hak ve yükümlülükleri 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği uyarınca düzenler.',
+          'Bu sözleşme, Alıcı’nın kiriciparca.com üzerinden talep ettiği ve Satıcı’nın sipariş onayında cinsi, miktarı, vergiler dahil satış bedeli, kargo ücreti ve ödeme şekli yazılı ürünlerin satışı ve teslimine ilişkin hak ve yükümlülükleri 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği uyarınca düzenler.',
         ],
       },
       {
@@ -204,7 +204,7 @@ const TR: Record<LegalKey, LegalDoc> = {
   },
   kvkk: {
     title: 'Kişisel verilerin korunması (KVKK) aydınlatma metni',
-    desc: 'magaza.kervanbreaker.com’da kişisel verilerin nasıl işlendiği.',
+    desc: 'kiriciparca.com’da kişisel verilerin nasıl işlendiği.',
     sections: [
       {
         h: 'Veri sorumlusu',
@@ -295,7 +295,7 @@ const EN: Record<LegalKey, LegalDoc> = {
   },
   'mesafeli-satis': {
     title: 'Distance sales contract',
-    desc: 'The sales contract for orders placed through magaza.kervanbreaker.com.',
+    desc: 'The sales contract for orders placed through kiriciparca.com.',
     sections: [
       { h: 'Note', p: [BINDING] },
       {
@@ -352,7 +352,7 @@ const EN: Record<LegalKey, LegalDoc> = {
   },
   kvkk: {
     title: 'Privacy notice (KVKK)',
-    desc: 'How personal data is handled on magaza.kervanbreaker.com.',
+    desc: 'How personal data is handled on kiriciparca.com.',
     sections: [
       { h: 'Note', p: [BINDING] },
       {
