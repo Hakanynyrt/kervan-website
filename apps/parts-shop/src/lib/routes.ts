@@ -1,5 +1,6 @@
 import {
   breakerGroupKey,
+  byPopularity,
   displayBreakers,
   fold,
   preferredSpelling,
@@ -19,7 +20,8 @@ import {
 } from './part-links';
 import { listedParts, type ListedPart } from './listed-parts';
 import { groupPrices, resolvePartPrices } from './part-prices';
-import { PART_RENDERS, type PartRender } from './photos';
+import { groovedFor } from './grooved';
+import { GROOVED_TOOLS, PART_RENDERS, type PartRender } from './photos';
 import type { TipGroupStats } from '../types';
 
 /** A part we model for a best-selling breaker (the best-sellers page). */
@@ -50,6 +52,8 @@ export interface BreakerCard {
   /** Render key of the first SKU that has one (see tip-img.ts). */
   image: string | null;
   popularTier: 1 | 2 | null;
+  /** We model a tool with dust grooves for this breaker (`groovedFor`). */
+  grooved?: true;
 }
 
 export type PageModel =
@@ -240,11 +244,6 @@ function popularItems(cards: BreakerCard[], parts: PopularPart[], seed: string):
 const tierRank = (t: 1 | 2 | null): number => t ?? 3;
 const byName = (a: BreakerCard, b: BreakerCard): number =>
   a.name.localeCompare(b.name, 'tr', { numeric: true });
-/** Best-sellers: by tier, then working diameter (small to large, unknown last), not A–Z. */
-const byPopularity = (a: BreakerCard, b: BreakerCard): number =>
-  tierRank(a.popularTier) - tierRank(b.popularTier) ||
-  (a.diameterMm ?? Infinity) - (b.diameterMm ?? Infinity) ||
-  byName(a, b);
 
 interface BreakerEntry {
   name: string;
@@ -377,6 +376,18 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     };
   });
   cards.sort(byName);
+  // Tools with dust grooves: a badge on the list rows, linking to the product page's section.
+  const groovedSeen = new Set<string>();
+  for (const x of cards) {
+    const g = groovedFor(x.name);
+    if (!g.length) continue;
+    x.grooved = true;
+    for (const t of g) groovedSeen.add(t.breaker);
+  }
+  if (!demo)
+    for (const b of new Set(GROOVED_TOOLS.map((g) => g.breaker)))
+      if (!groovedSeen.has(b))
+        console.warn(`buildPages: grooved tools of "${b}" match no breaker of the catalog`);
   const tipPaths = new Map(cards.map((x) => [fold(x.name), x.path]));
   const popular = cards.filter((x) => x.popularTier !== null).sort(byPopularity);
   const hasPopular = popular.length > 0;
@@ -414,10 +425,21 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         hasPopular,
       },
     },
-    { path: LIST_PATH, model: { kind: 'list', rows: cards, brands, demo, hasPopular } },
+    // Search results: best-sellers first, then working diameter (owner: never A–Z).
+    {
+      path: LIST_PATH,
+      model: { kind: 'list', rows: [...cards].sort(byPopularity), brands, demo, hasPopular },
+    },
     ...[...byBrand].map(([brand, rows]) => ({
       path: brandPath(brand),
-      model: { kind: 'brand' as const, brand, rows, brands, demo, hasPopular },
+      model: {
+        kind: 'brand' as const,
+        brand,
+        rows: [...rows].sort(byPopularity),
+        brands,
+        demo,
+        hasPopular,
+      },
     })),
     { path: PARTS_PATH, model: { kind: 'parts' as const, tips, demo, hasPopular } },
     { path: CART_PATH, model: { kind: 'cart' as const, demo, hasPopular } },

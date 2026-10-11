@@ -105,6 +105,11 @@ export interface Dict {
     model: string;
     diameter: string;
     types: string;
+    /** One sentence under the lead: we make tools with dust grooves for some breakers (no model named). */
+    groovedHint: string;
+    /** Badge on a result row whose breaker has tools with dust grooves; link to the section. */
+    groovedBadge: string;
+    groovedBadgeLabel: (name: string) => string;
   };
   family: {
     kicker: (d: string) => string;
@@ -120,6 +125,8 @@ export interface Dict {
     groovedTitle: string;
     groovedNote: string;
     groovedAlt: (type: string | null) => string;
+    /** Line under the type selector, jumping to the dust-groove section. */
+    groovedJump: string;
     angle: string;
     availability: string;
     inStock: (n: number) => string;
@@ -172,13 +179,31 @@ export interface Dict {
     didYouMean: (q: string) => string;
     /** Under an empty search box: nothing is listed until something is typed. */
     hint: string;
+    /** Results narrowed by the filters: n of the total the typed search found. */
+    countFiltered: (n: number, total: number) => string;
+    /** Narrowing filters, shown only for a typed search's results. */
+    filter: {
+      label: string;
+      type: string;
+      carrier: string;
+      /** Diameter band `from` ≤ Ø < `below` mm (0 / Infinity at the ends), with tonnage when known. */
+      band: (from: number, below: number, tons: { min: number; max: number } | null) => string;
+      /** Short form for the WhatsApp message. */
+      bandShort: (from: number, below: number, tons: { min: number; max: number } | null) => string;
+      grooved: string;
+      all: string;
+      clear: string;
+      /** The filters leave nothing of the n results the typed search found. */
+      none: (n: number) => string;
+    };
   };
   missing: {
     title: string;
     body: string;
     button: string;
     text: string;
-    textFor: (q: string) => string;
+    /** `filters`: a short summary of the narrowing filters, if any. */
+    textFor: (q: string, filters?: string) => string;
   };
   qty: { less: string; more: string; clamped: (max: number) => string };
   price: {
@@ -532,6 +557,9 @@ export const DICT: Record<Lang, Dict> = {
       model: 'Kırıcı',
       diameter: 'Çalışma çapı',
       types: 'Uç tipleri',
+      groovedHint: 'Bazı kırıcılar için toz kanallı uç da yapıyoruz; kırıcınızı yazın.',
+      groovedBadge: 'Toz kanallı',
+      groovedBadgeLabel: (name) => `${name} için toz kanallı uçlar`,
     },
     popular: {
       title: 'Çok satanlar',
@@ -556,6 +584,7 @@ export const DICT: Record<Lang, Dict> = {
         'Bu kırıcı için ürettiğimiz toz kanallı uçlar; görseller 3B modeldir. Fiyat için teklif isteyin.',
       groovedAlt: (type) =>
         type ? `Toz kanallı ${type.toLocaleLowerCase('tr')} uç` : 'Toz kanallı kırıcı ucu',
+      groovedJump: 'Bu kırıcı için toz kanallı uçlar da var →',
       angle: 'Uç açısı',
       availability: 'Durum',
       inStock: (n) => (n >= 10 ? 'Stokta (10+)' : `Stokta (${n})`),
@@ -597,14 +626,36 @@ export const DICT: Record<Lang, Dict> = {
       changeMake: (n) => `Marka değiştir (${n})`,
       didYouMean: (q) => `Bunu mu demek istediniz: ${q}`,
       hint: 'Kırıcınızın marka ve modelini yazın; uyan ürünler burada listelenir.',
+      countFiltered: (n, total) => `${n} model (${total} sonuçtan)`,
+      filter: {
+        label: 'Sonuçları daralt',
+        type: 'Uç tipi',
+        carrier: 'Uç çapı · ekskavatör (yaklaşık)',
+        band: (from, below, tons) =>
+          from === 0
+            ? `Ø${below} mm altı`
+            : below === Infinity
+              ? `Ø${from} mm ve üstü`
+              : `Ø${from}–${below - 1} mm${tons ? ` · yaklaşık ${tons.min}–${tons.max} t` : ''}`,
+        bandShort: (from, below, tons) =>
+          from === 0
+            ? `Ø${below} altı`
+            : below === Infinity
+              ? `Ø${from} ve üstü`
+              : `${tons ? `~${tons.min}–${tons.max} t, ` : ''}Ø${from}–${below - 1}`,
+        grooved: 'Toz kanallı',
+        all: 'Tümü',
+        clear: 'Filtreleri temizle',
+        none: (n) => `Bu seçimlerle sonuç yok (yazdığınızla ${n} sonuç var).`,
+      },
     },
     missing: {
       title: 'Modeliniz listede yok mu, emin değil misiniz?',
       body: 'Kırıcınızın marka ve modelini, mümkünse ucun çapını ve bir fotoğrafını WhatsApp’tan gönderin; uyan ucu biz bulalım. Çap, ucun çalışan (ön) kısmında kumpasla ölçülür.',
       button: 'WhatsApp ile sor',
       text: 'Merhaba, kırıcımın markası/modeli: … Ölçtüğüm uç çapı: … mm. Fotoğraf ekliyorum.',
-      textFor: (q) =>
-        `Merhaba, kırıcımın markası/modeli: ${q}. Ölçtüğüm uç çapı: … mm. Fotoğraf ekliyorum.`,
+      textFor: (q, filters) =>
+        `Merhaba, kırıcımın markası/modeli: ${q}.${filters ? ` Seçimlerim: ${filters}.` : ''} Ölçtüğüm uç çapı: … mm. Fotoğraf ekliyorum.`,
     },
     qty: {
       less: 'Bir azalt',
@@ -1232,6 +1283,9 @@ export const DICT: Record<Lang, Dict> = {
       model: 'Breaker',
       diameter: 'Working diameter',
       types: 'Tip types',
+      groovedHint: 'For some breakers we also make tools with dust grooves; type your breaker.',
+      groovedBadge: 'Dust grooves',
+      groovedBadgeLabel: (name) => `Tools with dust grooves for the ${name}`,
     },
     popular: {
       title: 'Best sellers',
@@ -1256,6 +1310,7 @@ export const DICT: Record<Lang, Dict> = {
         'Tools with dust grooves we make for this breaker; the pictures are 3D models. Ask for a quote.',
       groovedAlt: (type) =>
         type ? `${type} tool with dust grooves` : 'Breaker tool with dust grooves',
+      groovedJump: 'Tools with dust grooves are also available for this breaker →',
       angle: 'Tip angle',
       availability: 'Availability',
       inStock: (n) => (n >= 10 ? 'In stock (10+)' : `In stock (${n})`),
@@ -1297,14 +1352,36 @@ export const DICT: Record<Lang, Dict> = {
       changeMake: (n) => `Change make (${n})`,
       didYouMean: (q) => `Did you mean: ${q}`,
       hint: 'Type your breaker make and model; the matching products are listed here.',
+      countFiltered: (n, total) => `${n} models (of ${total} results)`,
+      filter: {
+        label: 'Narrow the results',
+        type: 'Tip type',
+        carrier: 'Tip diameter · excavator (approx.)',
+        band: (from, below, tons) =>
+          from === 0
+            ? `Under Ø${below} mm`
+            : below === Infinity
+              ? `Ø${from} mm and up`
+              : `Ø${from}–${below - 1} mm${tons ? ` · approx. ${tons.min}–${tons.max} t` : ''}`,
+        bandShort: (from, below, tons) =>
+          from === 0
+            ? `under Ø${below}`
+            : below === Infinity
+              ? `Ø${from} and up`
+              : `${tons ? `~${tons.min}–${tons.max} t, ` : ''}Ø${from}–${below - 1}`,
+        grooved: 'Dust grooves',
+        all: 'All',
+        clear: 'Clear filters',
+        none: (n) => `No results with these choices (your search found ${n}).`,
+      },
     },
     missing: {
       title: 'Model not listed, or not sure?',
       body: 'Send your breaker make and model, if possible the tip diameter and a photo, on WhatsApp; we will find the tip that fits. Measure the diameter with a caliper on the working (front) part of the tip.',
       button: 'Ask on WhatsApp',
       text: 'Hello, my breaker make/model: … Tip diameter I measured: … mm. Photo attached.',
-      textFor: (q) =>
-        `Hello, my breaker make/model: ${q}. Tip diameter I measured: … mm. Photo attached.`,
+      textFor: (q, filters) =>
+        `Hello, my breaker make/model: ${q}.${filters ? ` My choices: ${filters}.` : ''} Tip diameter I measured: … mm. Photo attached.`,
     },
     qty: {
       less: 'One less',

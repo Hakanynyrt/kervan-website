@@ -11,3 +11,4 @@ export * from './public.ts';
 export * from './demo.ts';
 export * from './render-spec.ts';
 export * from './search.ts';
+export * from './tip-filter.ts';

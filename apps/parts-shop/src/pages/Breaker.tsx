@@ -1,7 +1,7 @@
-import { breakerKeys, type FxRate } from '@kervan/tips';
+import type { FxRate } from '@kervan/tips';
 import TipProduct from '../components/TipProduct';
 import type { Dict } from '../lib/dict';
-import { GROOVED_TOOLS } from '../lib/photos';
+import { groovedFor } from '../lib/grooved';
 import { brandPath, type PageModel } from '../lib/routes';
 import type { Lang } from '../types';
 
@@ -21,8 +21,7 @@ export default function Breaker({
   lang: Lang;
   t: Dict;
 }) {
-  const keys = new Set(breakerKeys(model.name));
-  const grooved = GROOVED_TOOLS.filter((g) => breakerKeys(g.breaker).some((k) => keys.has(k)));
+  const grooved = groovedFor(model.name);
   return (
     <TipProduct
       title={t.breaker.title(model.name)}

@@ -18,6 +18,8 @@ export default function TipList({ model, lang, t }: { model: Model; lang: Lang; 
       />
       <PageTitle>{t.list.title}</PageTitle>
       <p className="m-0 mt-3 font-sans text-ink-mid">{t.list.lead}</p>
+      {/* Owner: no model named here; the badge shows on a typed search's results. */}
+      <p className="m-0 mt-2 font-sans text-sm text-ink-mid">{t.list.groovedHint}</p>
       <div className="mt-6">
         <ModelTable rows={model.rows} lang={lang} t={t} />
       </div>
