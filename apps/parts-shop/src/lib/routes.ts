@@ -119,6 +119,8 @@ export type PageModel =
       name: string;
       /** Set for a product sold by model without catalogue geometry (families is empty). */
       extra?: PublicExtra;
+      /** Extra products: the tip of the same maker's nearest-sized breaker, shown as a sample picture. */
+      sample?: { name: string; family: PublicFamily };
       brand: string;
       model: string;
       /** Tip families that fit this breaker (usually one). */
@@ -312,6 +314,31 @@ export function groupBreakers(c: PublicCatalog): {
 }
 
 /**
+ * A sample tip picture for a breaker sold by model without catalogue geometry (an extra product):
+ * the tip of the same maker's breaker nearest in working diameter (a tie takes the smaller one),
+ * shown labelled as a sample. None without a diameter or a pictured tip of that maker.
+ */
+function sampleFor(
+  e: BreakerEntry,
+  breakers: Map<string, BreakerEntry>,
+): { name: string; family: PublicFamily } | null {
+  const d = e.extra?.diameterMm;
+  if (!d) return null;
+  let best: { name: string; family: PublicFamily; gap: number; dm: number } | null = null;
+  for (const o of breakers.values()) {
+    if (o === e || o.brand !== e.brand) continue;
+    for (const f of o.families) {
+      if (!f.skus.some((x) => x.image)) continue;
+      const dm = f.attrs.diameterMm,
+        gap = Math.abs(dm - d);
+      if (!best || gap < best.gap || (gap === best.gap && dm < best.dm))
+        best = { name: o.name, family: f, gap, dm };
+    }
+  }
+  return best && best.gap <= 15 ? { name: best.name, family: best.family } : null;
+}
+
+/**
  * Every page of the site for one catalog. The product is the breaker model: one page per
  * breaker (its tip families behind a selector when there are several), cards and the list by
  * breaker. Family pages stay for the permanent codes and for tips with no listed breaker.
@@ -451,6 +478,10 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         kind: 'breaker' as const,
         name: e.name,
         ...(e.extra ? { extra: e.extra } : {}),
+        ...(() => {
+          const sample = e.families.length ? null : sampleFor(e, breakers);
+          return sample ? { sample } : {};
+        })(),
         brand: e.brand,
         model: e.model,
         families: e.families,

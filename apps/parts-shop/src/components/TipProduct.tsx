@@ -56,6 +56,8 @@ interface Props {
   families: PublicFamily[];
   /** A product sold by model without catalogue geometry (then `families` is empty). */
   extra?: PublicExtra;
+  /** Extra products: a nearby tip shown as a labelled sample picture. */
+  sample?: { name: string; family: PublicFamily };
   /** Neutral path of this page (cart line link and id). */
   path: string;
   /** Other parts we model for this breaker (cards on the part pages). */
@@ -90,6 +92,7 @@ export default function TipProduct({
   trail = [],
   families,
   extra,
+  sample,
   path,
   parts = [],
   grooved = [],
@@ -126,6 +129,11 @@ export default function TipProduct({
   const sku = opt.sku;
   const f = opt.family;
   const diameter = f ? f.attrs.diameterMm : (extra?.diameterMm ?? null);
+  const sampleSku = sku?.image
+    ? null
+    : (sample?.family.skus.find((x) => x.tipType === opt.tipType && x.image) ??
+      sample?.family.skus.find((x) => x.image) ??
+      null);
   const tons = diameter === null ? null : carrierTons(diameter);
   const url = SITE + localePath(path, lang);
   const order = opt.cents !== null;
@@ -180,6 +188,25 @@ export default function TipProduct({
       )}
 
       <div className="mt-6 grid gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
+        {sampleSku?.image && sample && (
+          <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
+            <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
+              <img
+                key={sampleSku.image}
+                src={tipImg(sampleSku.image)}
+                width={800}
+                height={533}
+                alt={tf.sampleAlt(sample.name)}
+                decoding="async"
+                className="block h-auto w-full"
+              />
+              <figcaption className="border-t border-hair bg-bg px-3 py-2 font-sans text-sm text-ink">
+                {tf.sample(sample.name)}
+              </figcaption>
+            </figure>
+            <ImgNote t={t} />
+          </div>
+        )}
         {(sku?.image || f?.imageRear) && (
           <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
             {sku?.image && (

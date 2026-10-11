@@ -31,6 +31,7 @@ export default function Breaker({
       quoteName={model.name}
       families={model.families}
       extra={model.extra}
+      sample={model.sample}
       parts={model.parts}
       grooved={grooved}
       path={path}

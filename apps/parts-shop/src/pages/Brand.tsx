@@ -1,5 +1,5 @@
 import { Container } from '@kervan/ui';
-import { Breadcrumb, MissingModel, PageTitle } from '../components/Bits';
+import { Breadcrumb, PageTitle } from '../components/Bits';
 import { BrandChips, ModelTable } from '../components/ModelSearch';
 import type { Dict } from '../lib/dict';
 import { LIST_PATH, PARTS_PATH, type PageModel } from '../lib/routes';
@@ -31,7 +31,6 @@ export default function Brand({ model, lang, t }: { model: Model; lang: Lang; t:
       <div className="mt-8 sm:hidden">
         <BrandChips brands={model.brands} current={model.brand} only="phone" lang={lang} t={t} />
       </div>
-      <MissingModel t={t} />
     </Container>
   );
 }
