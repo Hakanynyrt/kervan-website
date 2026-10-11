@@ -1086,6 +1086,7 @@ const TOYO_BURC: Bushing[] = [
   { model: 'THBB 3000', file: 'toyo-3000-dhb-3205-ust', kind: 'thrustRing' },
   { model: 'THBB 5000', file: 'toyo-5000-dhb-5205-kafa', kind: 'toolBushing' },
   { model: 'THBB 5000', file: 'toyo-5000-dhb-5205-ust', kind: 'upperBushing' },
+  { model: 'THBB 5000', file: 'toyo-5000-dhb-5205-dayama', kind: 'thrustRing' },
 ];
 const ATLAS_COPCO_COP_BURC: Bushing[] = [
   { model: 'COP 1032', file: 'atlas-copco-cop-1032-ust', kind: 'rockDrillThrustRing' },
