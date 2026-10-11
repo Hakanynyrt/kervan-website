@@ -707,7 +707,7 @@ export const DICT: Record<Lang, Dict> = {
         },
         burc: {
           name: 'Burç',
-          body: 'Ucu yönlendiren kafa (alt) burçları, merkezlemeler ve dayama burçları; bazı kırıcılarda dayama ve merkezleme tek parçadır. Aşınmış burç ucu erken kırar; uçla birlikte kontrol edin.',
+          body: 'Ucu yönlendiren kafa burçları, merkezlemeler ve dayama burçları; bazı kırıcılarda dayama ve merkezleme tek parçadır. Aşınmış burç ucu erken kırar; uçla birlikte kontrol edin.',
         },
         kama: { name: 'Kama', body: 'Ucu gövdede tutan kamalar ve tutucu pimler.' },
         saplama: {
@@ -762,7 +762,7 @@ export const DICT: Record<Lang, Dict> = {
         top: 'üstten görünüş',
       },
       renderKind: {
-        toolBushing: 'kafa burcu (alt burç)',
+        toolBushing: 'kafa burcu',
         upperBushing: 'merkezleme',
         thrustRing: 'dayama burcu',
         thrustUpperBushing: 'dayama-merkezleme burcu',
@@ -997,7 +997,7 @@ export const DICT: Record<Lang, Dict> = {
         sample: 'Temsili görsel',
         type: {
           ALT_GOVDE: 'alt gövde (burçlu)',
-          KAFA_BURCU: 'kafa burcu (alt burç)',
+          KAFA_BURCU: 'kafa burcu',
           MERKEZLEME: 'merkezleme',
           DAYAMA: 'dayama burcu',
           MERKEZLEME_DAYAMA: 'dayama-merkezleme burcu',
@@ -1407,7 +1407,7 @@ export const DICT: Record<Lang, Dict> = {
         },
         burc: {
           name: 'Bushings',
-          body: 'Tool (lower) and upper bushings that guide the tip, and thrust rings; on some breakers the thrust ring and upper bushing are one piece. A worn bushing breaks tips early; check them with the tip.',
+          body: 'Tool bushings and upper bushings that guide the tip, and thrust rings; on some breakers the thrust ring and upper bushing are one piece. A worn bushing breaks tips early; check them with the tip.',
         },
         kama: {
           name: 'Retainer keys',
@@ -1469,7 +1469,7 @@ export const DICT: Record<Lang, Dict> = {
         top: 'top view',
       },
       renderKind: {
-        toolBushing: 'tool bushing (lower bushing)',
+        toolBushing: 'tool bushing',
         upperBushing: 'upper bushing',
         thrustRing: 'thrust ring',
         thrustUpperBushing: 'thrust ring and upper bushing (one piece)',
@@ -1704,7 +1704,7 @@ export const DICT: Record<Lang, Dict> = {
         sample: 'Representative picture',
         type: {
           ALT_GOVDE: 'front head (with bushings)',
-          KAFA_BURCU: 'tool bushing (lower bushing)',
+          KAFA_BURCU: 'tool bushing',
           MERKEZLEME: 'upper bushing',
           DAYAMA: 'thrust ring',
           MERKEZLEME_DAYAMA: 'thrust ring and upper bushing',
