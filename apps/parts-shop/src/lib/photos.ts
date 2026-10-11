@@ -1986,6 +1986,7 @@ const DRAWN: Record<PartKey, readonly PartRender[]> = {
       ...MEGA_ALT_GOVDE.map(seriesRender('Mega', 'mega')),
       ...KENT_ALT_GOVDE.map(seriesRender('Kent', 'kent')),
       ...TAMROCK_ALT_GOVDE.map(seriesRender('Tamrock', 'tamrock')),
+      ...SMALL_PARTS['alt-govde'].map(smallRender),
     ] satisfies PartRender[]
   ).map(withFitted),
   burc: [
@@ -2053,8 +2054,11 @@ const redrawn = (base: string): string => {
   const v = m && REDRAWN[m[1]];
   return v ? `/photos/parca/${m[1]}-${m[2]}-${v}` : base;
 };
+/** Display names that differ from the drawings' (owner: "MTB 210 II ile MTB 215 aynı modeller"). Files keep their names. */
+const MODEL_NAME: Record<string, string> = { 'MTB 210 II': 'MTB 215 / 210 II' };
 const revise = (r: PartRender): PartRender => ({
   ...r,
+  model: MODEL_NAME[r.model] ?? r.model,
   ...(r.hero ? { hero: redrawn(r.hero) } : {}),
   views: r.views.map((x) => ({ ...x, base: redrawn(x.base) })),
 });

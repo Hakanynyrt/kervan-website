@@ -3,7 +3,7 @@ import { Photo } from '../components/Bits';
 import FamilyCardView from '../components/FamilyCardView';
 import ExplodedPicker from '../components/ExplodedPicker';
 import { PartGroups } from '../components/PartGroups';
-import { FOCUS, FOCUS_INSET, whatsappHref } from '../components/Layout';
+import { FOCUS, whatsappHref } from '../components/Layout';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
@@ -13,7 +13,6 @@ import type { Lang } from '../types';
 type Model = Extract<PageModel, { kind: 'home' }>;
 
 /** Breaker models, not renders (old-type / round-nut variants count once), as on the group cards. */
-const MAKES_SHOWN = 12;
 
 /** One heading pattern for every home section: h2, optional lead, optional link on the right. */
 function SectionHead({
@@ -49,10 +48,6 @@ function SectionHead({
 
 export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const h = t.home;
-  const makes = [...model.brands]
-    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'tr'))
-    .slice(0, MAKES_SHOWN)
-    .sort((a, b) => a.name.localeCompare(b.name, 'tr'));
   const withImages = model.featured.length > 0 && model.featured.every((c) => c.image !== null);
   const tipsLink = {
     href: localePath(model.featuredArePopular ? POPULAR_PATH : LIST_PATH, lang),
@@ -103,40 +98,6 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
           </ul>
         </Container>
       </div>
-
-      {makes.length > 0 && (
-        <section aria-labelledby="makes" className="border-b border-hair bg-bg-soft">
-          <Container className="py-10">
-            <SectionHead
-              id="makes"
-              title={h.makes.title}
-              lead={h.makes.lead}
-              link={{
-                href: localePath(LIST_PATH, lang),
-                label: h.makes.all(model.brands.length),
-              }}
-            />
-            <ul className="m-0 grid list-none grid-cols-2 gap-px overflow-hidden rounded-md border border-hair bg-hair p-0 sm:grid-cols-3 lg:grid-cols-6">
-              {makes.map((b) => (
-                <li key={b.path}>
-                  <a
-                    href={localePath(b.path, lang)}
-                    className={`group flex h-20 flex-col items-center justify-center gap-1 bg-bg px-3 text-center font-sans hover:bg-bg-warm ${FOCUS_INSET}`}
-                  >
-                    <span className="text-sm font-bold uppercase tracking-[0.12em] text-ink-mid group-hover:text-ink">
-                      {b.name}
-                    </span>
-                    {!model.demo && (
-                      <span className="text-xs text-ink-soft">{h.makes.count(b.count)}</span>
-                    )}
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <p className="m-0 mt-4 max-w-3xl font-sans text-xs text-ink-soft">{h.makes.note}</p>
-          </Container>
-        </section>
-      )}
 
       <section aria-labelledby="groups" className="bg-bg">
         <Container className="py-14 md:py-16">
