@@ -6,10 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 pnpm + Turborepo monorepo for Kervan Makina's websites:
 
-| App                    | Domain                                     | Cloudflare Pages project |
-| ---------------------- | ------------------------------------------ | ------------------------ |
-| `apps/heat-treatment/` | kervanheat.com + www (fason ısıl işlem)    | `kervan-heat-treatment`  |
-| `apps/breaker-parts/`  | kervanbreaker.com + www (kırıcı parçaları) | `kervan-breaker-parts`   |
+| App                    | Domain                                       | Cloudflare Pages project |
+| ---------------------- | -------------------------------------------- | ------------------------ |
+| `apps/heat-treatment/` | kervanheat.com + www (fason ısıl işlem)      | `kervan-heat-treatment`  |
+| `apps/breaker-parts/`  | kervanbreaker.com + www (kırıcı parçaları)   | `kervan-breaker-parts`   |
 | `apps/parts-shop/`     | kiriciparca.com (www., magaza., shop. → 301) | `kervan-parts-shop`      |
 
 All apps are Vite 5 + React 18 + TypeScript + Tailwind v4 + Framer Motion, sharing code through `packages/*`.
