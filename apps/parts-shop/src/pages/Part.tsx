@@ -13,6 +13,7 @@ import {
   QtyStepper,
   StickyQuote,
   Terms,
+  chipClass,
 } from '../components/Bits';
 import { FOCUS, whatsappHref } from '../components/Layout';
 import { PartPriceLine, partOrderText, priceNote } from '../components/PartOrder';
@@ -28,6 +29,7 @@ import { DEFAULT_FILTER, filtersFor, inFilter, type PartFilter } from '../lib/pa
 import { renderAnchor } from '../lib/part-links';
 import { kindPartType } from '../lib/part-prices';
 import { PART_PHOTOS, PART_RENDERS, type PartRender } from '../lib/photos';
+import { replaceSearch } from '../lib/url-state';
 import {
   CART_PATH,
   PARTS_PATH,
@@ -59,6 +61,8 @@ export interface Ctx {
 
 /** Pictures on the group page before a search: one per breaker series plus the solo renders, no names. */
 const SHOWCASE = 8;
+/** `?tur=` value for "every kind" (the "Tümü" chip). */
+const TUR_ALL = 'tumu';
 
 /** What the search box matches on: the make (series) and the model text of a render. */
 const renderName = (r: PartRender, t: Dict): string =>
@@ -91,23 +95,39 @@ export default function Part({
   const every = PART_RENDERS[model.part];
   // "Parça türü" chips: narrow the search and the showcase to some kinds (e.g. 3'ü bir arada burçlar).
   const filters = filtersFor(model.part, every);
-  const [filter, setFilter] = useState<PartFilter | null>(
-    filters.some(([f]) => f === DEFAULT_FILTER[model.part]) ? DEFAULT_FILTER[model.part]! : null,
-  );
+  const defaultFilter = filters.some(([f]) => f === DEFAULT_FILTER[model.part])
+    ? DEFAULT_FILTER[model.part]!
+    : null;
+  const [filter, setFilter] = useState<PartFilter | null>(defaultFilter);
   const kinds = filters.find(([f]) => f === filter)?.[1];
   const all = kinds ? every.filter((r) => inFilter(r, kinds)) : every;
-  // `?q=` from the home search, or `#<anchor>` (a model's link) opens that model's results.
+  // The chip picked is written to `?tur=` (shareable); `tumu` = every kind on a page whose
+  // default chip is another one. Only a click writes it, never the page load.
+  const pickFilter = (f: PartFilter | null) => {
+    setFilter(f);
+    replaceSearch((sp) => {
+      if (f === defaultFilter) sp.delete('tur');
+      else sp.set('tur', f ?? TUR_ALL);
+    });
+  };
+  // `?q=` from the home search, or `#<anchor>` (a model's link) opens that model's results in
+  // every kind, unless the link names a kind with `?tur=` (validated against this page's chips).
   useEffect(() => {
-    const v = new URLSearchParams(window.location.search).get('q');
+    const sp = new URLSearchParams(window.location.search);
+    const tur = sp.get('tur');
+    const named = tur === TUR_ALL ? null : filters.find(([f]) => f === tur)?.[0];
+    const explicit = named !== undefined;
+    if (explicit) setFilter(named);
+    const v = sp.get('q');
     if (v) {
-      setFilter(null);
+      if (!explicit) setFilter(null);
       setQ(v);
       return;
     }
     const hash = decodeURIComponent(window.location.hash.slice(1));
     const r = hash ? every.find((x) => renderAnchor(x) === hash) : undefined;
     if (r) {
-      setFilter(null);
+      if (!explicit) setFilter(null);
       setQ(renderName(r, t));
     }
     // Only on load.
@@ -206,8 +226,8 @@ export default function Part({
                 <button
                   type="button"
                   aria-pressed={filter === f}
-                  onClick={() => setFilter(f)}
-                  className={`inline-flex min-h-11 items-center rounded-sm border px-3 ${filter === f ? 'border-brand bg-brand text-on-brand' : 'border-hair bg-bg text-ink hover:border-hair-strong'} ${FOCUS}`}
+                  onClick={() => pickFilter(f)}
+                  className={chipClass(filter === f)}
                 >
                   {f ? t.parts.filter.items[f] : t.parts.filter.all}
                 </button>

@@ -9,19 +9,48 @@ import type { Range } from './types.ts';
  *  Ø156 30-45 t · Furukawa HB40G Ø160 32-44 t · Atlas Copco HB 3600 Ø170 35-63 t · Montabert V57
  *  Ø170 35-60 t · V67 Ø202 50-80 t. Bands are the union of the points inside them, so the range
  *  is deliberately wide. Below Ø75 and above Ø209 there is no data, hence no estimate. */
-const BANDS: { from: number; to: number; min: number; max: number }[] = [
-  { from: 75, to: 99.99, min: 4, max: 10 },
-  { from: 100, to: 114.99, min: 10, max: 14 },
-  { from: 115, to: 129.99, min: 15, max: 25 },
-  { from: 130, to: 144.99, min: 16, max: 26 },
-  { from: 145, to: 154.99, min: 20, max: 40 },
-  { from: 155, to: 164.99, min: 30, max: 45 },
-  { from: 165, to: 179.99, min: 35, max: 63 },
-  { from: 180, to: 209.99, min: 50, max: 88 },
+export type CarrierBandKey =
+  | 'lt75'
+  | '75-99'
+  | '100-114'
+  | '115-129'
+  | '130-144'
+  | '145-154'
+  | '155-164'
+  | '165-179'
+  | '180-209'
+  | 'ge210';
+
+/** A working-diameter band: `from` ≤ Ø < `below` (mm), with its rough carrier weight if known. */
+export interface CarrierBand {
+  key: CarrierBandKey;
+  from: number;
+  below: number;
+  /** Carrier (excavator) weight in t; null where there is no data (below Ø75, Ø210 and up). */
+  tons: Range | null;
+}
+
+/** Every band, small to large; they cover every diameter without gaps or overlaps. */
+export const CARRIER_BANDS: readonly CarrierBand[] = [
+  { key: 'lt75', from: 0, below: 75, tons: null },
+  { key: '75-99', from: 75, below: 100, tons: { min: 4, max: 10 } },
+  { key: '100-114', from: 100, below: 115, tons: { min: 10, max: 14 } },
+  { key: '115-129', from: 115, below: 130, tons: { min: 15, max: 25 } },
+  { key: '130-144', from: 130, below: 145, tons: { min: 16, max: 26 } },
+  { key: '145-154', from: 145, below: 155, tons: { min: 20, max: 40 } },
+  { key: '155-164', from: 155, below: 165, tons: { min: 30, max: 45 } },
+  { key: '165-179', from: 165, below: 180, tons: { min: 35, max: 63 } },
+  { key: '180-209', from: 180, below: 210, tons: { min: 50, max: 88 } },
+  { key: 'ge210', from: 210, below: Infinity, tons: null },
 ];
 
+/** The band of a working diameter; null when the diameter is unknown. */
+export function carrierBand(diameterMm: number | null): CarrierBand | null {
+  if (diameterMm == null || !Number.isFinite(diameterMm) || diameterMm < 0) return null;
+  return CARRIER_BANDS.find((b) => diameterMm >= b.from && diameterMm < b.below) ?? null;
+}
+
 export function carrierTons(diameterMm: number | null): Range | null {
-  if (diameterMm == null) return null;
-  const b = BANDS.find((x) => diameterMm >= x.from && diameterMm <= x.to);
-  return b ? { min: b.min, max: b.max } : null;
+  const t = carrierBand(diameterMm)?.tons;
+  return t ? { min: t.min, max: t.max } : null;
 }

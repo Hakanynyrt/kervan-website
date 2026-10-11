@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   carrierTons,
+  isTipType,
   TIP_TYPES,
   type FxRate,
   type PublicExtra,
@@ -12,7 +13,8 @@ import { Container } from '@kervan/ui';
 import { ORG_EMAIL } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
 import { fmtMm, fmtNum } from '../lib/format';
-import { STOCK_TIP_PHOTOS, type GROOVED_TOOLS } from '../lib/photos';
+import { STOCK_TIP_PHOTOS } from '../lib/photos';
+import type { GroovedTool } from '../lib/grooved';
 import { addToCart } from '../lib/cart';
 import { fmtDate, fmtTry, fmtUsd, vatOf } from '../lib/price';
 import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
@@ -63,7 +65,7 @@ interface Props {
   /** Other parts we model for this breaker (cards on the part pages). */
   parts?: PartLink[];
   /** Tools with dust grooves we model for this breaker (renders), shown before our stock photos. */
-  grooved?: (typeof GROOVED_TOOLS)[number][];
+  grooved?: GroovedTool[];
   fx: FxRate | null;
   lang: Lang;
   t: Dict;
@@ -125,6 +127,14 @@ export default function TipProduct({
   const [type, setType] = useState<TipType>(types[0]);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  // `?tip=` from a filtered search result preselects that type (after hydration; the
+  // prerender always shows the first type).
+  useEffect(() => {
+    const v = new URLSearchParams(window.location.search).get('tip');
+    if (isTipType(v) && opts.has(v)) setType(v);
+    // Only on load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const opt = opts.get(type) ?? opts.get(types[0])!;
   const sku = opt.sku;
   const f = opt.family;
@@ -282,6 +292,16 @@ export default function TipProduct({
               setAdded(false);
             }}
           />
+          {grooved.length > 0 && (
+            <p className="m-0 -mt-3 font-sans text-sm">
+              <a
+                href="#toz-kanalli"
+                className={`font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
+              >
+                {tf.groovedJump}
+              </a>
+            </p>
+          )}
           <div className="font-sans">
             <p className="m-0 text-sm text-ink-mid">{t.price.label}</p>
             {opt.cents === null ? (
@@ -408,7 +428,7 @@ export default function TipProduct({
       )}
 
       {grooved.length > 0 && (
-        <section aria-labelledby="grooved" className="mt-12">
+        <section id="toz-kanalli" aria-labelledby="grooved" className="mt-12 scroll-mt-6">
           <h2 id="grooved" className="m-0 font-sans text-xl font-bold text-ink">
             {tf.groovedTitle}
           </h2>

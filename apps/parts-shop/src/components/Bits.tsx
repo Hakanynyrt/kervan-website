@@ -6,6 +6,10 @@ import { localePath } from '../lib/locale-path';
 import type { Lang } from '../types';
 import { FOCUS, whatsappHref } from './Layout';
 
+/** A toggle chip of a filter row (`aria-pressed` buttons): part kinds, tip search filters. */
+export const chipClass = (active: boolean): string =>
+  `inline-flex min-h-11 cursor-pointer items-center rounded-sm border px-3 ${active ? 'border-brand bg-brand text-on-brand' : 'border-hair bg-bg text-ink hover:border-hair-strong'} ${FOCUS}`;
+
 /** Home / … / current page. `trail` is [label, neutral path] pairs before the current page. */
 export function Breadcrumb({
   trail,
@@ -179,10 +183,13 @@ export function QtyStepper({
 export function MissingModel({
   t,
   query = '',
+  filters = '',
   className = 'mt-12',
 }: {
   t: Dict;
   query?: string;
+  /** Short summary of the search's narrowing filters, added to the message. */
+  filters?: string;
   className?: string;
 }) {
   return (
@@ -190,7 +197,7 @@ export function MissingModel({
       <h2 className="m-0 text-lg font-bold text-ink">{t.missing.title}</h2>
       <p className="m-0 mt-2 max-w-3xl text-sm text-ink-mid">{t.missing.body}</p>
       <a
-        href={whatsappHref(query ? t.missing.textFor(query) : t.missing.text)}
+        href={whatsappHref(query ? t.missing.textFor(query, filters) : t.missing.text)}
         className={`mt-4 inline-block rounded-sm bg-whatsapp px-5 py-3 text-sm font-medium text-white ${FOCUS}`}
       >
         {t.missing.button}
