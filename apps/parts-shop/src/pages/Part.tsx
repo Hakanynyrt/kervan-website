@@ -246,29 +246,44 @@ export default function Part({
                 </h2>
                 <p className="m-0 mt-1 font-sans text-sm text-ink-mid">{t.parts.showcase.lead}</p>
                 <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 lg:grid-cols-4">
-                  {showcase.map((r, i) => (
-                    <li key={r.hero}>
-                      <a
-                        href={partItemUrl(model.part, r, lang)}
-                        className={`group block h-full overflow-hidden rounded-md border border-hair bg-bg hover:border-hair-strong ${FOCUS}`}
-                      >
-                        <img
-                          src={`${r.hero}-xs.webp`}
-                          srcSet={`${r.hero}-xs.webp 320w, ${r.hero}-lg.webp 1600w`}
-                          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                          width={320}
-                          height={180}
-                          alt=""
-                          loading={i > 3 ? 'lazy' : undefined}
-                          decoding="async"
-                          className="block h-auto w-full bg-stage"
-                        />
-                        <span className="block px-2.5 py-2 font-sans text-sm leading-snug font-medium text-ink group-hover:underline">
-                          {renderTitle(r, p.name, t)}
-                        </span>
-                      </a>
-                    </li>
-                  ))}
+                  {showcase.map((r, i) => {
+                    // Same price as the item page: a front head opens Burçlu there (its own price).
+                    const b = !!r.fitted && ctx.prices[`${renderAnchor(r)}#b`] !== undefined;
+                    const cents = ctx.prices[`${renderAnchor(r)}${b ? '#b' : ''}`];
+                    return (
+                      <li key={r.hero}>
+                        <a
+                          href={partItemUrl(model.part, r, lang)}
+                          className={`group block h-full overflow-hidden rounded-md border border-hair bg-bg hover:border-hair-strong ${FOCUS}`}
+                        >
+                          <img
+                            src={`${r.hero}-xs.webp`}
+                            srcSet={`${r.hero}-xs.webp 320w, ${r.hero}-lg.webp 1600w`}
+                            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                            width={320}
+                            height={180}
+                            alt=""
+                            loading={i > 3 ? 'lazy' : undefined}
+                            decoding="async"
+                            className="block h-auto w-full bg-stage"
+                          />
+                          <span className="block px-2.5 pt-2 font-sans text-sm leading-snug font-medium text-ink group-hover:underline">
+                            {renderTitle(r, b ? t.parts.fitted.name(p.name, true) : p.name, t)}
+                          </span>
+                          {cents !== undefined && (
+                            <PartPriceLine
+                              cents={cents}
+                              fx={ctx.fx}
+                              lang={lang}
+                              note={priceNote(r.kind, t)}
+                              className="px-2.5 pt-1 text-sm"
+                            />
+                          )}
+                          <span aria-hidden="true" className="block h-2" />
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ul>
                 <ImgNote
                   t={t}
