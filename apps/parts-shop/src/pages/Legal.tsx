@@ -47,7 +47,7 @@ export default function Legal({ doc, lang, t }: { doc: LegalKey; lang: Lang; t: 
             {d.sections.map((s, i) => (
               <li key={s.h}>
                 <a
-                  href={`#${legalAnchor(i)}`}
+                  href={`#${s.id ?? legalAnchor(i)}`}
                   className={`-ml-px block border-l-2 border-transparent pl-3 text-ink-mid hover:border-ink hover:text-ink ${FOCUS}`}
                 >
                   {i + 1}. {s.h}
@@ -60,7 +60,7 @@ export default function Legal({ doc, lang, t }: { doc: LegalKey; lang: Lang; t: 
           {d.sections.map((s, i) => (
             <section
               key={s.h}
-              id={legalAnchor(i)}
+              id={s.id ?? legalAnchor(i)}
               className="mt-8 scroll-mt-6 border-t border-hair pt-6 first:mt-0 first:border-t-0 first:pt-0"
             >
               <h2 className="m-0 text-base font-bold text-ink">

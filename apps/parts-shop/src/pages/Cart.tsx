@@ -5,6 +5,7 @@ import { ORG_EMAIL } from '@kervan/seo';
 import { PageTitle, QtyStepper } from '../components/Bits';
 import { FOCUS, whatsappHref } from '../components/Layout';
 import { PartGroups } from '../components/PartGroups';
+import { ORDER_CONVERSION } from '../lib/ads';
 import { CART_EVENT, readCart, writeCart, type CartItem } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
@@ -266,12 +267,14 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
             <div className="mt-3 flex flex-col gap-3">
               <a
                 href={whatsappHref(message)}
+                {...ORDER_CONVERSION}
                 className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
               >
                 {c.sendWa}
               </a>
               <a
                 href={`mailto:${ORG_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`}
+                {...ORDER_CONVERSION}
                 className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
               >
                 {c.sendMail}
