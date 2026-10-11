@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Production smoke probe for kervanheat.com + kervanbreaker.com + magaza.kervanbreaker.com.
+# Production smoke probe for kervanheat.com + kervanbreaker.com + kiriciparca.com.
 #
 # Read-only: GET and OPTIONS only. Never POST to /api/rfq — a valid POST
 # sends real email notifications.
@@ -71,23 +71,34 @@ preflight "$RFQ" https://www.kervanbreaker.com yes
 preflight "$RFQ" https://evil.example no
 
 # Parts shop (M1 preview): up, and still closed to search engines.
-check https://magaza.kervanbreaker.com/ 200 text/html
-robots=$("${CURL[@]}" -o /dev/null -D - https://magaza.kervanbreaker.com/ | tr -d '\r' |
+check https://kiriciparca.com/ 200 text/html
+robots=$("${CURL[@]}" -o /dev/null -D - https://kiriciparca.com/ | tr -d '\r' |
   awk -F': ' 'tolower($1) == "x-robots-tag" { print $2 }')
 if [[ $robots == *noindex* ]]; then
-  echo "ok    X-Robots-Tag '$robots'  https://magaza.kervanbreaker.com/"
+  echo "ok    X-Robots-Tag '$robots'  https://kiriciparca.com/"
 else
-  echo "FAIL  X-Robots-Tag '$robots'  https://magaza.kervanbreaker.com/  (want noindex)"
+  echo "FAIL  X-Robots-Tag '$robots'  https://kiriciparca.com/  (want noindex)"
   fail=1
 fi
+# The old shop hosts 301 to the new domain, path kept (zone Redirect Rules).
+for old in https://magaza.kervanbreaker.com https://shop.kervanbreaker.com https://www.kiriciparca.com; do
+  loc=$("${CURL[@]}" -o /dev/null -D - "$old/kirici-ucu" | tr -d '\r' |
+    awk -F': ' 'tolower($1) == "location" { print $2 }')
+  if [[ $loc == https://kiriciparca.com/kirici-ucu ]]; then
+    echo "ok    301 $old/kirici-ucu -> $loc"
+  else
+    echo "FAIL  $old/kirici-ucu -> '$loc'  (want https://kiriciparca.com/kirici-ucu)"
+    fail=1
+  fi
+done
 # The night-theme middleware answers every page (day / night by the request's location,
 # unknown without coordinates); no header means the Pages Function did not run.
-sun=$("${CURL[@]}" -o /dev/null -D - https://magaza.kervanbreaker.com/ | tr -d '\r' |
+sun=$("${CURL[@]}" -o /dev/null -D - https://kiriciparca.com/ | tr -d '\r' |
   awk -F': ' 'tolower($1) == "x-kv-sun" { print $2 }')
 if [[ $sun == day || $sun == night || $sun == unknown ]]; then
-  echo "ok    X-Kv-Sun '$sun'  https://magaza.kervanbreaker.com/"
+  echo "ok    X-Kv-Sun '$sun'  https://kiriciparca.com/"
 else
-  echo "FAIL  X-Kv-Sun '$sun'  https://magaza.kervanbreaker.com/  (middleware not running)"
+  echo "FAIL  X-Kv-Sun '$sun'  https://kiriciparca.com/  (middleware not running)"
   fail=1
 fi
 

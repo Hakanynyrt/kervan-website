@@ -19,7 +19,7 @@ const PUB = 'p1';
 const MD_WIDTH = 800;
 const OWNER = 'Kervan Makina';
 const RIGHTS = `© ${OWNER}. Tüm hakları saklıdır / All rights reserved.`;
-const WEB = 'https://magaza.kervanbreaker.com/';
+const WEB = 'https://kiriciparca.com/';
 const XMP = `<?xpacket begin="\uFEFF" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/" xmlns:xmpRights="http://ns.adobe.com/xap/1.0/rights/" xmlns:plus="http://ns.useplus.org/ldf/xmp/1.0/">

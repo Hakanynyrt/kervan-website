@@ -203,7 +203,7 @@ jobs:
             --commit-hash=${{ github.sha }}
 
   deploy-parts-shop:
-    name: magaza.kervanbreaker.com
+    name: kiriciparca.com
     needs: [changes, verify]
     if: >-
       !cancelled() && needs.verify.result == 'success' && (
