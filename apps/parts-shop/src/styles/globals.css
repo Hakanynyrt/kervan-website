@@ -171,10 +171,22 @@
    dikey kırıcı"). The picture keeps its own pixels and is turned as one block, so the canvas, the
    callouts and the pointer boxes turn with it; the numbers are turned back to read upright. */
 @media (max-width: 39.999rem) {
+  /* While the opening plays the picture takes the whole width (the breaker in the middle); once
+     it has come apart the column narrows, the breaker slides left and the list opens on the right. */
   .kv-pick {
-    grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr);
+    grid-template-columns: 9.5rem minmax(0, 1fr);
     column-gap: 0.75rem;
     align-items: start;
+    transition:
+      grid-template-columns 1100ms cubic-bezier(0.22, 1, 0.36, 1),
+      column-gap 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  :root[data-kv-open] .kv-pick {
+    grid-template-columns: 100% minmax(0, 1fr);
+    column-gap: 0;
+  }
+  .kv-pick-side {
+    overflow: hidden;
   }
   .kv-open-turn {
     --kv-len: min(60svh, 32rem);
