@@ -1,13 +1,14 @@
 import { motion } from 'framer-motion';
 import { SectionHeading } from '@kervan/ui';
 import { fadeUp, inViewOnce, staggerContainer, useReducedMotion } from '@kervan/motion';
-import type { DictBlock } from '../types';
+import type { DictBlock, Lang } from '../types';
 
 interface Props {
   t: DictBlock;
+  lang: Lang;
 }
 
-export default function Services({ t }: Props) {
+export default function Services({ t, lang }: Props) {
   // Static (prerendered) mode and reduced motion render the final state.
   const reduce = useReducedMotion();
   return (
@@ -49,7 +50,24 @@ export default function Services({ t }: Props) {
                     aria-hidden="true"
                     className="mt-2 w-1 h-1 bg-brand rounded-full flex-shrink-0"
                   />
-                  <span>{b}</span>
+                  {typeof b === 'string' ? (
+                    <span>{b}</span>
+                  ) : (
+                    // Sister site: same tab, no rel, underlined so it is not told apart by colour only.
+                    <span>
+                      {b.label}:{' '}
+                      <a
+                        href={b.href}
+                        hrefLang={lang}
+                        className="group focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+                      >
+                        {/* Styled on the span: the global `a` rule is unlayered and outranks utilities. */}
+                        <span className="text-ink underline underline-offset-2 group-hover:text-brand-hi transition-colors">
+                          {b.site}
+                        </span>
+                      </a>
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>

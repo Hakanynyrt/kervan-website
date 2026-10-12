@@ -5,6 +5,7 @@
 
 export const KERVAN_HEAT_URL = 'https://kervanheat.com';
 export const KERVAN_BREAKER_URL = 'https://kervanbreaker.com';
+export const KERVAN_SHOP_URL = 'https://kiriciparca.com';
 
 export const ORG_LEGAL_NAME = 'Kervan Isıl İşlem San. Tic. Ltd. Şti.';
 export const ORG_TRADING_NAME = 'Kervan Makina';
@@ -20,6 +21,11 @@ export const ORG_STREET = 'Uzunçiftlik Mah. Sadun Atığ Cad. No:112/A';
 
 export const ORG_INSTAGRAM = 'https://www.instagram.com/kervanmakina/';
 
-/** Both domains' canonical base URLs in one array — used as `sameAs` so
- *  each Organization JSON-LD instance references its sibling site. */
-export const ORG_SAME_AS = [KERVAN_HEAT_URL, KERVAN_BREAKER_URL, ORG_INSTAGRAM] as const;
+/** All three sites' canonical base URLs in one array — used as `sameAs` so
+ *  each Organization JSON-LD instance references its sibling sites. */
+export const ORG_SAME_AS = [
+  KERVAN_HEAT_URL,
+  KERVAN_BREAKER_URL,
+  KERVAN_SHOP_URL,
+  ORG_INSTAGRAM,
+] as const;

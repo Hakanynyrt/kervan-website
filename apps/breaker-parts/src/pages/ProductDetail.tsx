@@ -5,6 +5,8 @@ import { PRODUCT_BY_SLUG } from '../data/products';
 import { BRANDS } from '../data/brands';
 import type { DictBlock, Lang } from '../types';
 import { localePath } from '../lib/locale-path';
+import { SHOP_PATH } from '../lib/shop';
+import ShopLink from '../components/ShopLink';
 
 interface Props {
   t: DictBlock;
@@ -34,6 +36,7 @@ export default function ProductDetail({ t, lang }: Props) {
 
   const loc = product[lang];
   const quoteHref = localePath(`/iletisim?part=${encodeURIComponent(product.slug)}`, lang);
+  const shopPath = SHOP_PATH[product.slug];
 
   return (
     <>
@@ -154,6 +157,14 @@ export default function ProductDetail({ t, lang }: Props) {
               >
                 {t.productDetail.quoteCta}
               </Link>
+              {shopPath && (
+                <ShopLink
+                  lang={lang}
+                  path={shopPath}
+                  text={t.shop.productCta}
+                  className="self-start"
+                />
+              )}
             </motion.div>
           </div>
         </div>

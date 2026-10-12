@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { fadeUp, inViewOnce, useReducedMotion } from '@kervan/motion';
 import ProductGrid from '../sections/ProductGrid';
+import ShopLink from '../components/ShopLink';
 import type { DictBlock, Lang } from '../types';
 
 interface Props {
@@ -39,6 +40,9 @@ export default function Products({ t, lang }: Props) {
         </motion.div>
 
         <ProductGrid lang={lang} />
+        <div className="max-w-[1280px] mx-auto px-6 md:px-8 mt-10 md:mt-12">
+          <ShopLink lang={lang} path="/yedek-parca" text={t.shop.listCta} />
+        </div>
       </section>
     </>
   );

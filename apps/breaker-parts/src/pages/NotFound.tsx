@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { useLocalePath } from '../lib/locale-path';
+import { useLocale, useLocalePath } from '../lib/locale-path';
+import ShopLink from '../components/ShopLink';
 import type { DictBlock } from '../types';
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 
 export default function NotFound({ t }: Props) {
   const to = useLocalePath();
+  const lang = useLocale();
   return (
     <>
       <section className="min-h-[70dvh] flex flex-col justify-center items-center pt-32 pb-16 text-center px-6">
@@ -21,6 +23,7 @@ export default function NotFound({ t }: Props) {
         >
           {t.notFound.cta} →
         </Link>
+        <ShopLink lang={lang} path="/yedek-parca" text={t.shop.notFoundCta} className="mt-8" />
       </section>
     </>
   );

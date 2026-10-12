@@ -26,6 +26,15 @@ export const DICT: Dict = {
       site: 'kervanheat.com',
       href: 'https://kervanheat.com/',
     },
+    shop: {
+      nav: 'Mağaza',
+      navSr: '(kiriciparca.com)',
+      productCta: 'Mağazada kırıcınıza göre bulun',
+      listCta: 'Mağazada kırıcınıza göre bulun',
+      brandsCta: 'Kırıcınızın parçalarını mağazada arayın',
+      notFoundCta: 'Bir parça mı arıyorsunuz?',
+      contactLabel: 'Online mağaza',
+    },
     opening: {
       scroll: 'kaydır',
     },
@@ -75,6 +84,7 @@ export const DICT: Dict = {
       ],
     },
     productsPage: {
+      detail: 'Detay',
       eyebrow: 'Ürünler',
       title: 'Dokuz aile.\nHer kırıcının ihtiyacı.',
       aside:
@@ -474,6 +484,7 @@ export const DICT: Dict = {
       error: "Bir sorun oldu. +90 531 669 37 34'ü arayabilirsin.",
       address: 'Uzunçiftlik Mah. Sadun Atığ Cad. No:112/A\nKartepe · Kocaeli',
       phoneLabel: 'Telefon',
+      addressLabel: 'Adres',
       whatsappLabel: 'WhatsApp',
       emailLabel: 'E-posta',
       instagramLabel: 'Instagram',
@@ -547,6 +558,15 @@ export const DICT: Dict = {
       site: 'kervanheat.com',
       href: 'https://kervanheat.com/en/',
     },
+    shop: {
+      nav: 'Shop',
+      navSr: '(kiriciparca.com)',
+      productCta: 'Find it for your breaker in our shop',
+      listCta: 'Find parts for your breaker in our shop',
+      brandsCta: 'Search parts for your breaker in our shop',
+      notFoundCta: 'Looking for a part?',
+      contactLabel: 'Online shop',
+    },
     opening: {
       scroll: 'scroll',
     },
@@ -597,6 +617,7 @@ export const DICT: Dict = {
       ],
     },
     productsPage: {
+      detail: 'Details',
       eyebrow: 'Products',
       title: 'Nine families.\nWhat every hammer needs.',
       aside:
@@ -998,6 +1019,7 @@ export const DICT: Dict = {
       error: 'Something went wrong. You can call +90 531 669 37 34.',
       address: 'Uzunçiftlik Mah. Sadun Atığ Cad. No:112/A\nKartepe · Kocaeli · Türkiye',
       phoneLabel: 'Phone',
+      addressLabel: 'Address',
       whatsappLabel: 'WhatsApp',
       emailLabel: 'Email',
       instagramLabel: 'Instagram',

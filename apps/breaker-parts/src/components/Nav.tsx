@@ -4,6 +4,7 @@ import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Lang, DictBlock } from '../types';
 import { localePath, stripLang } from '../lib/locale-path';
+import { shopUrl } from '../lib/shop';
 import { rememberLang } from '../lib/use-lang';
 import { SisterSiteStrip } from '@kervan/ui';
 
@@ -101,6 +102,15 @@ export default function Nav({ lang, t, techAuthed }: Props) {
     </Link>
   );
 
+  // The sister shop (kiriciparca.com): same tab, no rel, like the sister-site strip.
+  const renderShopLink = (className: string, onClick?: () => void) => (
+    <a key="shop" href={shopUrl('/', lang)} hrefLang={lang} onClick={onClick} className={className}>
+      {t.shop.nav}
+      <span aria-hidden="true"> ↗</span>
+      <span className="sr-only"> {t.shop.navSr}</span>
+    </a>
+  );
+
   return (
     <header
       className={
@@ -134,6 +144,8 @@ export default function Nav({ lang, t, techAuthed }: Props) {
         <nav className="hidden md:flex items-center gap-10 font-sans text-sm">
           {links.map((l) => renderLink(l.hash, l.label))}
           {techAuthed && renderTechLink()}
+          {/* Hidden below lg so the md row does not overflow; the footer and product pages link it. */}
+          {renderShopLink('hidden lg:inline text-ink-mid hover:text-ink transition-colors')}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -201,6 +213,9 @@ export default function Nav({ lang, t, techAuthed }: Props) {
             <div className="px-6 py-4 flex flex-col gap-4 font-serif text-2xl">
               {links.map((l) => renderLink(l.hash, l.label, () => setOpen(false)))}
               {techAuthed && renderTechLink(() => setOpen(false))}
+              {renderShopLink('text-ink-mid hover:text-ink transition-colors', () =>
+                setOpen(false),
+              )}
               <Link
                 to={to('/#contact')}
                 onClick={() => setOpen(false)}

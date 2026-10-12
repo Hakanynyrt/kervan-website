@@ -107,7 +107,8 @@ export const DICT: Dict = {
           bullets: [
             'Keski, piston, burç, tamir kiti',
             'Aynı tesis, aynı disiplin',
-            'Vitrin: kervanbreaker.com',
+            { label: 'Katalog', site: 'kervanbreaker.com', href: 'https://kervanbreaker.com/' },
+            { label: 'Online mağaza', site: 'kiriciparca.com', href: 'https://kiriciparca.com/' },
           ],
         },
       ],
@@ -315,7 +316,12 @@ export const DICT: Dict = {
           bullets: [
             'Chisel, piston, bushing, repair kit',
             'Same shop, same discipline',
-            'Catalogue: kervanbreaker.com',
+            {
+              label: 'Catalogue',
+              site: 'kervanbreaker.com',
+              href: 'https://kervanbreaker.com/en/',
+            },
+            { label: 'Online shop', site: 'kiriciparca.com', href: 'https://kiriciparca.com/en/' },
           ],
         },
       ],
