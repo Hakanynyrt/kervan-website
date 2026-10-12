@@ -96,13 +96,24 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     const root = document.documentElement;
     if (!root.hasAttribute('data-kv-open')) return;
     (window as unknown as { __kvOpen?: boolean }).__kvOpen = true;
-    // Only the picture shows during the opening: bring it to the middle of the screen (CSS moves it
-    // back when the opening mark goes).
+    // Only the breaker shows during the opening, frameless and large: scale the picture (the
+    // upright one on phones) to fill most of the screen and centre it (CSS turns it back to its
+    // place when the opening mark goes).
     const fig = canvas.current?.closest('figure');
-    if (fig) {
-      const r = fig.getBoundingClientRect();
-      const top = Math.max(16, (window.innerHeight - r.height) / 2);
-      fig.style.setProperty('--kv-dy', `${Math.round(top - r.top)}px`);
+    const pic = canvas.current?.parentElement;
+    if (fig && pic) {
+      const f = fig.getBoundingClientRect();
+      const p = pic.getBoundingClientRect();
+      const k = Math.max(
+        1,
+        Math.min((window.innerWidth * 0.96) / p.width, (window.innerHeight * 0.9) / p.height),
+      );
+      const ox = p.left + p.width / 2 - f.left;
+      const oy = p.top + p.height / 2 - f.top;
+      fig.style.transformOrigin = `${ox}px ${oy}px`;
+      fig.style.setProperty('--kv-dx', `${Math.round(window.innerWidth / 2 - (f.left + ox))}px`);
+      fig.style.setProperty('--kv-dy', `${Math.round(window.innerHeight / 2 - (f.top + oy))}px`);
+      fig.style.setProperty('--kv-k', k.toFixed(3));
     }
     let cancelled = false;
     let raf = 0;
