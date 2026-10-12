@@ -115,5 +115,12 @@ export function loadAdsTag(): void {
 /** No-op unless the tag was loaded (i.e. the visitor consented). */
 export function trackConversion(kind: Conversion): void {
   if (!loaded || !window.gtag) return;
-  window.gtag('event', 'conversion', { send_to: SEND_TO[kind], value: 1.0, currency: 'TRY' });
+  // A tel: / wa.me link may leave the page at once: send with the beacon transport, which
+  // the browser delivers even after the page is gone.
+  window.gtag('event', 'conversion', {
+    send_to: SEND_TO[kind],
+    value: 1.0,
+    currency: 'TRY',
+    transport_type: 'beacon',
+  });
 }
