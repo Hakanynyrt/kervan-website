@@ -1,0 +1,70 @@
+# Shared platform
+
+<!-- Moved verbatim from CLAUDE.md (which points here). Keep it current: read it before working on this area and update it with the change. -->
+
+## Packages
+
+- **`@kervan/ui`** (`packages/ui`) — design tokens (`src/tokens.css`, a Tailwind v4 `@theme` block, plus TS mirrors in `src/tokens/`) and base components (`Button`, `Card`, `Container`, `SectionHeading`, `Marquee`, …). `SisterSiteStrip` is the sister-site band at the top of both fixed headers (kervanheat.com ↔ kervanbreaker.com): the first child of `<header>` in each app's `Nav.tsx`, copy from the dict (`sister`, typed `SisterSiteCopy`), a 3:2 thumbnail from the app's `public/sister/` (new filename to replace, cached immutable), same tab, no `rel`. Once the page scrolls the header slides up by `--kv-strip-h` (defined in each app's `globals.css`), so the stuck header is unchanged; heat-treatment's Hero and breaker-parts' `<main>` add the same variable to their top offset — keep them in sync. Both apps' `src/styles/globals.css` do `@import "tailwindcss"; @import "@kervan/ui/tokens.css";`.
+- **`@kervan/motion`** (`packages/motion`) — shared Framer Motion variants (`fadeUp`, `staggerContainer`, `inViewOnce`, …), `ScrollReveal`, `useParallaxSlow`, a re-export of `useReducedMotion` (true in static mode, see Motion) and the static-mode pieces (`StaticMotionProvider`, `useStaticMotion`, `isAnimatedClient`, the `js-anim` inline script).
+- **`@kervan/seo`** (`packages/seo`) — `PageMeta`, `JsonLd` and JSON-LD builders. Used by breaker-parts. `KERVAN_HEAT_URL` / `KERVAN_BREAKER_URL` / `KERVAN_SHOP_URL` (the shop's `SITE`) and `ORG_SAME_AS` (all three sites + Instagram): every site's Organization `sameAs` names the other two.
+- **`@kervan/tips`** (`packages/tips`) — pure, unit-tested tip logic shared by the shop and breaker-parts: tip types and labels, Kervan codes (`codes.ts`), Turkish-safe `slugify`, breaker-name parsing, carrier tonnage bands (`usage.ts`, moved from breaker-parts' `vega-usage.ts`, which now delegates), the owner-catalog → shop mapping (`from-catalog.ts`), the D1 import SQL (`sql.ts`), the public projection (`public.ts`) and the DEMO catalog. Imports inside the package use explicit `.ts` extensions so Node can run it without a build.
+
+## Deploying
+
+- `.github/workflows/deploy.yml` deploys with `wrangler pages deploy`. Every deploy waits for the `verify` job (`pnpm typecheck` + `pnpm lint` + `pnpm format:check` + `pnpm test`), so keep all four green.
+- Push to `main` → production deploy of **all** apps, then `.github/scripts/smoke.sh` (GET/OPTIONS probe of the live sites). `main` runs are never cancelled mid-deploy.
+- PR → Pages preview (`https://<branch>.<project>.pages.dev`) of the changed apps only: `dorny/paths-filter` maps `apps/<app>/**` (plus the root `public/` assets that app symlinks) to that app; `packages/**`, the lockfile, root configs or the workflow itself → both. Fork PRs and Dependabot runs get no Actions secrets, so they only run `verify` (test an action bump's deploy by running the workflow manually on the Dependabot branch).
+- Redeploy without a commit (e.g. after changing a Pages env var): Actions → Deploy → **Run workflow**, pick `both` (heat + breaker) / `all` (+ shop) / `heat-treatment` / `breaker-parts` / `parts-shop` (on `main` = production).
+- `.github/workflows/uptime.yml` runs the same smoke probe every 15 minutes.
+- Cloudflare Web Analytics (cookie-free) is on for both sites. kervanbreaker.com: enabled on the Pages project, which adds the beacon at deploy time, so turning it on or changing it only takes effect on the next deploy. kervanheat.com: automatic setup on the zone (beacon injected at the edge), in normal mode (EU visitors are counted).
+- The Pages projects are **not** connected to Cloudflare's git integration — GitHub Actions is the only deployer. Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
+- Custom domains are bound to the Pages projects (proxied CNAME → `<project>.pages.dev`). The old `kervan-website` Worker is gone from the repo and has no routes or custom domains.
+
+## RFQ flow
+
+- Both Contact forms POST `multipart/form-data` to the heat-treatment function, with a hidden `hp_ref` honeypot (filled with something that is not the visitor's own name/email/phone/company → the message is dropped with `emailStatus.status: 'honeypot'`; browser autofill copying the visitor's own data into it is let through). The legacy field name `website` is ignored. There is no consent checkbox; the footer links to the KVKK notice.
+- The function checks the `Origin` header by exact match (`allowedOrigin()`: both domains + www, plus previews of our own two Pages projects, `*.kervan-heat-treatment.pages.dev` / `*.kervan-breaker-parts.pages.dev` — never a bare `.pages.dev` suffix), then email format; it sends email via Brevo → Resend → MailChannels fallback (email is the only notification channel). It tags each request with its source site.
+- Env vars live **only** on the `kervan-heat-treatment` Pages project (Production + Preview): `BREVO_API_KEY`, `MAIL_TO`, `MAIL_FROM`, optional fallbacks `RESEND_API_KEY` / `MAILCHANNELS_DKIM_*`. breaker-parts needs none. Pages env changes take effect on the next deploy.
+- The response is `{ ok, emailSent, delivered, emailStatus }`; `emailStatus` is a diagnostic `{ transport, status }` (HTTP status of the last attempt, `'error'` on a thrown fetch, `'honeypot'` when the hidden field was filled) and never carries a body or key. `delivered` is true only when an email went out (Brevo 8 s timeout); all three forms show success only when `delivered` is true (older servers without it fall back to `emailSent`). The public contact address is `ORG_EMAIL` in `@kervan/seo` (`info@kervanheat.com`) everywhere, including both KVKK pages.
+- Adding a new domain that posts the form means updating `ALLOWED_ORIGINS` (or `PREVIEW_ORIGIN` for a new Pages project).
+
+## Google Ads measurement (heat-treatment and parts-shop, consent-gated)
+
+- Same design and the same Google Ads account in both apps (`src/lib/ads.ts` + `src/components/ConsentBanner.tsx` in each; keep them in sync). heat-treatment: gtag.js (`AW-16701476208`) is injected **only after** the visitor clicks "Kabul et" in the cookie banner (choice in `localStorage('kv_ads_consent_v1')`; bump the suffix to ask again if the purpose changes). Declined or undecided ⇒ no request to Google, no cookie. Bots/headless/webdriver never see the banner. The footer "Çerez tercihleri" button reopens it (`kv:consent-open`).
+- Conversions (`trackConversion`, no-op without consent): RFQ form success (`delivered`), clicks on any `tel:` link and on WhatsApp links. The send_to labels live in `ads.ts`. Conversion events use `transport_type: 'beacon'`: a `tel:` or same-tab `wa.me` link leaves the page at once, and a normal request is then lost (a Tag Assistant test showed it on the shop).
+- Consent mode: the tag loads only after consent, with ad_storage/ad_user_data/analytics_storage defaulted to `denied` and immediately updated to `granted`; ad_personalization is always denied (no remarketing). Withdrawing consent sends a `denied` update at once (`revokeAdsConsent`) and the tag is not loaded on later pages. Phone/WhatsApp clicks are caught by one capture-phase listener on `document` (`conversionForHref`: `tel:`, any href containing `wa.me` or `whatsapp`). The heat-treatment `kvkk.html` describes this (sections 05 and 09, `#cerezler`); the breaker copy keeps the older, still-accurate wording.
+- **parts-shop:** the same `AW-16701476208` tag, consent key `kv_ads_consent_v1` (localStorage is per origin, so the shop asks on its own) and, for now, heat-treatment's conversion labels (`form` / `phone` / `whatsapp`): the shop reuses them until the owner creates shop-specific conversion actions, then only `SEND_TO` in `apps/parts-shop/src/lib/ads.ts` changes. `phone` / `whatsapp` come from the same capture-phase listener; `form` = an order or quote request sent: links spread with `ORDER_CONVERSION` (`data-kv-conversion="form"`: the palet's WhatsApp / e-mail buttons, `PartOrder`, `TipProduct`, the part `QuotePanel` and the "Satıştaki parçalar" WhatsApp order); one click counts one conversion: an order link only `form` (a WhatsApp order is not also `whatsapp`, so Ads never counts an order twice), other `tel:` / WhatsApp links `phone` / `whatsapp`. The banner (light/night tokens, `rounded-sm`, no motion) mounts once in `Layout` after hydration, so the prerender has no banner and hydration is unchanged; the footer's "Yasal" column has the "Çerez tercihleri" button. The shop KVKK (`legal.ts`, TR + EN) has the section "Çerezler ve reklam ölçümü" with the fixed anchor `#cerezler` (`LegalSection.id`). It says we send Google no order content, name or contact details: keep automatic enhanced conversions (user-provided data collection) off for this tag in the Google Ads account.
+
+## Owner-only "Teknik Bilgiler" (login)
+
+- A single-owner login protects the technical-info tab **on both sites** (separate cookies and separate Pages secrets per project; the two domains cannot share a session). **The text must never be in the repo (it is public), `dict.ts` or the JS bundle** — it lives in the Pages secret `TECH_CONTENT` (JSON `{ "tr": {…}, "en": {…} }`) and is only returned by `GET /api/tech/content` for a valid session.
+- Server (identical in both apps apart from the allowed hostnames in `_lib/tech-auth.ts` — keep them in sync): `functions/_lib/tech-auth.ts` + `functions/api/tech/{login,logout,session,content}.ts` (HMAC-signed `__Host-kv_tech` cookie, HttpOnly/Secure/SameSite=Strict, 4 h absolute expiry). Only the custom hostnames are allowed, never `*.pages.dev`. It **fails closed**: missing/short secrets ⇒ login 503, content 401. Every response is `no-store` + `noindex`.
+- Secrets (Pages → Variables and Secrets, as Secrets, per project; use different values or leave unset in Preview): `TECH_PASSWORD` (≥16 chars), `SESSION_SECRET` (≥32 chars), `TECH_CONTENT`; optional `SESSION_VERSION` (bump + redeploy to revoke all sessions). Changing any of them needs a redeploy.
+- Client: `src/lib/use-tech-auth.ts`; the tab is hidden unless the server confirmed a session. breaker-parts also has a hidden pointer-only entry: the single mint-coloured star circling behind the 3D chisel on `/` (`Scene.tsx`, `onSecret`) navigates to `/teknik-bilgiler`. It is a shortcut only — the page stays password-protected and reachable by URL (the keyboard path). heat-treatment: the login form is reachable only at `/#giris`. breaker-parts: `/teknik-bilgiler` is a `noindex` shell showing the login form or the content, and is not in the sitemap.
+- Local testing: put test secrets in `apps/<app>/.dev.vars` (gitignored) and run `wrangler pages dev` from the app directory.
+- Never POST to `/api/tech/login` from CI or probes; `smoke.sh` only checks that anonymous `GET /api/tech/content` returns JSON 401.
+
+## i18n
+
+- TR is primary, EN secondary. Strings (incl. page titles/meta descriptions) live in each app's `src/lib/dict.ts`.
+- The URL is the only source of language: `/…` = Turkish, `/en/…` = English (breaker keeps Turkish slugs: `/en/urunler/keski`). No redirect by browser language. The toggle links to the same page in the other language and writes `localStorage('kv_lang')`; a legacy `?lang=` is sent to the matching URL client-side (`location.replace`, after hydration).
+- The `kv_lang` key is shared between the two sites on purpose — keep it identical in both apps.
+- Each page has its own `<html lang>`, title, description, og tags, JSON-LD `inLanguage`, a self canonical and reciprocal `hreflang` tr / en / x-default (= TR).
+
+## Prerender, 404, sitemap, robots
+
+- `build` = `tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs`. The script writes one full-text `index.html` per route and language (`dist/…/index.html`, `dist/en/…/index.html`) plus `404.html` (noindex), the generated `sitemap.xml`, then deletes `dist-ssr/`. It never calls `/api/tech/*` or reads `TECH_CONTENT`; `/teknik-bilgiler` (+ `/en/`) is prerendered as a noindex shell without content and is not in the sitemap.
+- No SPA fallback in either app: Pages serves the nearest `404.html` with HTTP 404 for unknown paths; Pages Functions (`/api/*`) still take precedence.
+- `sitemap.xml` lists only canonical, indexable pages in both languages with `xhtml:link` hreflang alternates; `<lastmod>` is the last git commit date of the page's files, so the deploy jobs check out with `fetch-depth: 0` (build date only if git is unavailable). Do not add a static `public/sitemap.xml`.
+- `robots.txt`: allow all, `Disallow: /api/`, sitemap link. KVKK is canonical at `/kvkk` (Pages 308s `/kvkk.html`); link and list `/kvkk`.
+- All user-facing text goes through the dict, including `aria-label`s.
+
+## Shared media at the repo root
+
+- Root `public/` now holds only shared media: `photos/` (symlinked as `apps/heat-treatment/public/photos`), `videos/` (symlinked by both apps) and `kirici-uc.glb` (symlinked by breaker-parts). `deploy.yml`'s `paths-filter` watches these paths. Do not delete or move them without updating the symlinks and the filter.
+- The old `kervan-website` Worker (`src/worker/`, root `wrangler.jsonc`, the Babel-in-browser root site) was removed; its RFQ logic lives in `functions/api/rfq.ts`. The Worker itself is deleted in the Cloudflare dashboard.
+
+## Media
+
+- Photos are cached for 1 year as immutable (`_headers`). To replace an image, use a **new filename** (`-02`, `-v2`), not an overwrite.
+- Slot directories and size limits are documented in `README.md` ("Medya ekleme").
