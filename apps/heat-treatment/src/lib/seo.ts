@@ -1,6 +1,7 @@
 import {
   KERVAN_BREAKER_URL,
   KERVAN_HEAT_URL,
+  KERVAN_SHOP_URL,
   ORG_COUNTRY,
   ORG_EMAIL,
   ORG_INSTAGRAM,
@@ -45,7 +46,7 @@ function organization() {
     alternateName: SITE_NAME,
     url: SITE,
     logo: `${SITE}/logo-krv-128.png`,
-    sameAs: [KERVAN_BREAKER_URL, ORG_INSTAGRAM],
+    sameAs: [KERVAN_BREAKER_URL, KERVAN_SHOP_URL, ORG_INSTAGRAM],
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: ORG_PHONE,

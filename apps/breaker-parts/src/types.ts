@@ -49,6 +49,23 @@ export interface DictBlock {
   };
   /** Top strip of the fixed header linking to the heat-treatment sister site. */
   sister: SisterSiteCopy;
+  /** Links to the sister shop kiriciparca.com. */
+  shop: {
+    /** Header menu entry. */
+    nav: string;
+    /** Screen-reader-only tail of the menu entry, naming the other site. */
+    navSr: string;
+    /** Product page link sentence. */
+    productCta: string;
+    /** Products page link sentence. */
+    listCta: string;
+    /** Compatibility (brands) page link sentence. */
+    brandsCta: string;
+    /** 404 page link sentence. */
+    notFoundCta: string;
+    /** Contact page info label. */
+    contactLabel: string;
+  };
   opening: {
     scroll: string;
   };
@@ -71,6 +88,8 @@ export interface DictBlock {
     eyebrow: string;
     title: string;
     aside: string;
+    /** Card link label in the product grid. */
+    detail: string;
   };
   chisels: {
     eyebrow: string;
@@ -314,6 +333,7 @@ export interface DictBlock {
     error: string;
     address: string;
     phoneLabel: string;
+    addressLabel: string;
     whatsappLabel: string;
     emailLabel: string;
     instagramLabel: string;

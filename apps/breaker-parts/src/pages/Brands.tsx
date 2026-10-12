@@ -2,6 +2,8 @@ import { motion } from 'framer-motion';
 import { fadeUp, inViewOnce, staggerContainer, useReducedMotion } from '@kervan/motion';
 import { BRANDS } from '../data/brands';
 import type { DictBlock } from '../types';
+import { useLocale } from '../lib/locale-path';
+import ShopLink from '../components/ShopLink';
 
 interface Props {
   t: DictBlock;
@@ -9,6 +11,7 @@ interface Props {
 
 export default function Brands({ t }: Props) {
   const reduce = useReducedMotion();
+  const lang = useLocale();
   return (
     <>
       <section className="pt-32 pb-16 md:pt-40 md:pb-24">
@@ -60,6 +63,9 @@ export default function Brands({ t }: Props) {
             </motion.li>
           ))}
         </motion.ul>
+        <div className="max-w-[1280px] mx-auto px-6 md:px-8 mt-10 md:mt-12">
+          <ShopLink lang={lang} path="/kirici-ucu" text={t.shop.brandsCta} />
+        </div>
       </section>
     </>
   );

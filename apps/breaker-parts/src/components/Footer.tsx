@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { ORG_EMAIL } from '@kervan/seo';
 import type { DictBlock } from '../types';
-import { useLocalePath } from '../lib/locale-path';
+import { useLocale, useLocalePath } from '../lib/locale-path';
+import { shopUrl } from '../lib/shop';
 
 interface Props {
   t: DictBlock;
@@ -9,6 +10,7 @@ interface Props {
 
 export default function Footer({ t }: Props) {
   const to = useLocalePath();
+  const lang = useLocale();
   return (
     // relative + z-[1]: always above the fixed 3D scene layer (z-0).
     <footer className="relative z-[1] border-t border-hair">
@@ -45,13 +47,16 @@ export default function Footer({ t }: Props) {
               <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
             </svg>
           </a>
+          {/* Sister sites: same tab, no rel, like the sister-site strip. */}
           <a
-            href="https://kervanheat.com"
-            target="_blank"
-            rel="noopener noreferrer"
+            href={lang === 'en' ? 'https://kervanheat.com/en/' : 'https://kervanheat.com/'}
+            hrefLang={lang}
             className="hover:text-ink transition-colors"
           >
             kervanheat.com
+          </a>
+          <a href={shopUrl('/', lang)} hrefLang={lang} className="hover:text-ink transition-colors">
+            kiriciparca.com
           </a>
           <a href="/kvkk" className="hover:text-ink transition-colors">
             {t.footer.kvkk}

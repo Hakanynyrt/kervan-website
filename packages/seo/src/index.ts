@@ -41,6 +41,7 @@ export { PageMeta } from './PageMeta.js';
 export {
   KERVAN_HEAT_URL,
   KERVAN_BREAKER_URL,
+  KERVAN_SHOP_URL,
   ORG_LEGAL_NAME,
   ORG_TRADING_NAME,
   ORG_PHONE,

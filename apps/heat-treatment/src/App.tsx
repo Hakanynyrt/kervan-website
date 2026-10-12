@@ -37,14 +37,14 @@ export default function App({ lang }: Props) {
       <Nav lang={lang} t={t} techAuthed={tech.state === 'authed'} />
       <main>
         <Hero t={t} />
-        <Services t={t} />
+        <Services t={t} lang={lang} />
         <TechnicalCapacity t={t} />
         <TechInfo t={t} lang={lang} tech={tech} />
         <Craft t={t} />
         <About t={t} />
         <Contact t={t} />
       </main>
-      <Footer t={t} />
+      <Footer t={t} lang={lang} />
 
       {(!isStatic || clientReady) && <WhatsAppFAB />}
       <ConsentBanner t={t.consent} />

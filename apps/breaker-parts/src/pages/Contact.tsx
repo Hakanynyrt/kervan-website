@@ -5,6 +5,7 @@ import { ORG_EMAIL } from '@kervan/seo';
 import { fadeUp, inViewOnce, useReducedMotion, useStaticMotion } from '@kervan/motion';
 import { PRODUCT_BY_SLUG } from '../data/products';
 import type { DictBlock, Lang } from '../types';
+import { shopUrl } from '../lib/shop';
 
 interface Props {
   t: DictBlock;
@@ -111,10 +112,22 @@ export default function Contact({ t, lang }: Props) {
                 ),
               },
               {
-                label: 'Adres',
+                label: t.contact.addressLabel,
                 value: <span className="whitespace-pre-line">{t.contact.address}</span>,
               },
               { label: t.contact.hoursLabel, value: t.contact.hours },
+              {
+                label: t.shop.contactLabel,
+                value: (
+                  <a
+                    href={shopUrl('/', lang)}
+                    hrefLang={lang}
+                    className="hover:text-brand transition-colors"
+                  >
+                    kiriciparca.com
+                  </a>
+                ),
+              },
             ].map((row, i) => (
               <div key={i} className="flex flex-col gap-1.5">
                 <dt className="font-sans text-xs tracking-widest uppercase text-ink-soft">

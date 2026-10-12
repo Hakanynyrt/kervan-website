@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { fadeUp, inViewOnce, staggerContainer, useReducedMotion } from '@kervan/motion';
 import { localePath } from '../lib/locale-path';
 import { PRODUCTS } from '../data/products';
+import { DICT } from '../lib/dict';
 import type { Lang } from '../types';
 
 interface Props {
@@ -51,7 +52,7 @@ export default function ProductGrid({ lang, limit }: Props) {
                   {loc.tagline}
                 </p>
                 <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand mt-2 inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-                  Detay <span aria-hidden="true">→</span>
+                  {DICT[lang].productsPage.detail} <span aria-hidden="true">→</span>
                 </span>
               </div>
             </Link>

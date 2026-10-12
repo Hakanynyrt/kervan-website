@@ -12,12 +12,19 @@ export interface Stat {
   l: string;
 }
 
+/** A bullet that names a sister site: "<label>: <site>", the site linked. */
+export interface ServiceLink {
+  label: string;
+  site: string;
+  href: string;
+}
+
 export interface ServiceItem {
   /** Numeric prefix shown as eyebrow (e.g. "01"). */
   index: string;
   name: string;
   body: string;
-  bullets: string[];
+  bullets: (string | ServiceLink)[];
 }
 
 export interface CapacityItem {

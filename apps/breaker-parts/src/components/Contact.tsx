@@ -78,7 +78,7 @@ export default function Contact({ t }: Props) {
               ),
             },
             {
-              label: 'Adres',
+              label: t.contact.addressLabel,
               value: <span className="whitespace-pre-line">{t.contact.address}</span>,
             },
             { label: t.contact.hoursLabel, value: t.contact.hours },

@@ -1,11 +1,14 @@
-import type { DictBlock } from '../types';
+import { KERVAN_BREAKER_URL, KERVAN_SHOP_URL } from '@kervan/seo';
+import type { DictBlock, Lang } from '../types';
 import { CONSENT_OPEN_EVENT } from '../lib/ads';
 
 interface Props {
   t: DictBlock;
+  lang: Lang;
 }
 
-export default function Footer({ t }: Props) {
+export default function Footer({ t, lang }: Props) {
+  const home = lang === 'en' ? '/en/' : '/';
   return (
     <footer className="border-t border-hair">
       <div className="max-w-[1280px] mx-auto px-8 py-12 flex flex-col md:flex-row gap-6 md:gap-12 items-start md:items-center justify-between">
@@ -42,6 +45,21 @@ export default function Footer({ t }: Props) {
               <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
               <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
             </svg>
+          </a>
+          {/* Sister sites: same tab, no rel, like the sister-site strip. */}
+          <a
+            href={KERVAN_BREAKER_URL + home}
+            hrefLang={lang}
+            className="hover:text-ink transition-colors"
+          >
+            kervanbreaker.com
+          </a>
+          <a
+            href={KERVAN_SHOP_URL + home}
+            hrefLang={lang}
+            className="hover:text-ink transition-colors"
+          >
+            kiriciparca.com
           </a>
           <a href="/kvkk" className="hover:text-ink transition-colors">
             {t.footer.kvkk}
