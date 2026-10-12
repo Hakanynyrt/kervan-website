@@ -34,6 +34,8 @@ const SLIDE = 1200;
 const FADE = 350;
 const OPEN = 900;
 const OPEN_KEY = 'kv_open_played';
+/** Width of the opening frames in their own pixels (`-lg`). */
+const FRAME_PX = 1600;
 
 /** Picture size in render pixels (the boxes and callouts below are in the same pixels). */
 const W = 2864;
@@ -98,27 +100,45 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     (window as unknown as { __kvOpen?: boolean }).__kvOpen = true;
     // Only the breaker shows during the opening, frameless and large: scale the picture (the
     // upright one on phones) to fill most of the screen and centre it (CSS turns it back to its
-    // place when the opening mark goes).
+    // place when the opening mark goes). Measured again if the screen turns or resizes.
     const fig = canvas.current?.closest('figure');
     const pic = canvas.current?.parentElement;
-    if (fig && pic) {
+    const place = (instant: boolean) => {
+      if (!fig || !pic) return;
+      if (instant) {
+        // Measure the untransformed layout box.
+        fig.style.transition = 'none';
+        fig.style.setProperty('--kv-dx', '0px');
+        fig.style.setProperty('--kv-dy', '0px');
+        fig.style.setProperty('--kv-k', '1');
+      }
       const f = fig.getBoundingClientRect();
       const p = pic.getBoundingClientRect();
-      const k = Math.max(
-        1,
-        Math.min((window.innerWidth * 0.96) / p.width, (window.innerHeight * 0.9) / p.height),
-      );
+      // clientWidth leaves out a classic scrollbar, so the breaker sits on the visible centre.
+      const vw = document.documentElement.clientWidth;
+      const vh = document.documentElement.clientHeight;
+      // The frames are 1600 px wide: no more than 1.5× their own pixels, or they turn soft.
+      const long = Math.max(p.width, p.height);
+      const sharp = (FRAME_PX * 1.5) / Math.max(1, window.devicePixelRatio || 1) / long;
+      const k = Math.max(1, Math.min((vw * 0.96) / p.width, (vh * 0.9) / p.height, sharp));
       const ox = p.left + p.width / 2 - f.left;
       const oy = p.top + p.height / 2 - f.top;
       fig.style.transformOrigin = `${ox}px ${oy}px`;
-      fig.style.setProperty('--kv-dx', `${Math.round(window.innerWidth / 2 - (f.left + ox))}px`);
-      fig.style.setProperty('--kv-dy', `${Math.round(window.innerHeight / 2 - (f.top + oy))}px`);
+      fig.style.setProperty('--kv-dx', `${Math.round(vw / 2 - (f.left + ox))}px`);
+      fig.style.setProperty('--kv-dy', `${Math.round(vh / 2 - (f.top + oy))}px`);
       fig.style.setProperty('--kv-k', k.toFixed(3));
-    }
+      if (instant) {
+        void fig.offsetWidth;
+        fig.style.transition = '';
+      }
+    };
+    place(false);
+    const onResize = () => place(true);
+    window.addEventListener('resize', onResize);
     let cancelled = false;
     let raf = 0;
-    let seen: IntersectionObserver | undefined;
     const finish = () => {
+      window.removeEventListener('resize', onResize);
       root.removeAttribute('data-kv-open');
       try {
         sessionStorage.setItem(OPEN_KEY, '1');
@@ -150,12 +170,6 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
         c.width = imgs[0].naturalWidth;
         c.height = imgs[0].naturalHeight;
         ctx.drawImage(imgs[0], 0, 0);
-        // Play only once the picture is in view, so a visitor who has to scroll to it (phones)
-        // still sees the breaker come apart; until then the assembled frame stays.
-        const play = () => {
-          root.setAttribute('data-kv-open', 'play');
-          raf = requestAnimationFrame(step);
-        };
         let start = 0;
         const at = (p: number, n: number) => Math.min(n - 1, Math.max(0, Math.floor(p * n)));
         const step = (now: number) => {
@@ -178,17 +192,9 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
           }
           raf = requestAnimationFrame(step);
         };
-        if (typeof IntersectionObserver === 'undefined') return play();
-        seen = new IntersectionObserver(
-          (entries) => {
-            if (!entries.some((e) => e.isIntersecting)) return;
-            seen?.disconnect();
-            if (!cancelled) play();
-          },
-          { threshold: 0.5 },
-        );
-        // The canvas itself is hidden until it plays: watch the picture around it.
-        seen.observe(c.closest('figure') ?? c);
+        // The picture is already in the middle of the screen: play.
+        root.setAttribute('data-kv-open', 'play');
+        raf = requestAnimationFrame(step);
       })
       .catch(() => {
         window.clearTimeout(giveUp);
@@ -196,7 +202,7 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
       });
     return () => {
       cancelled = true;
-      seen?.disconnect();
+      window.removeEventListener('resize', onResize);
       cancelAnimationFrame(raf);
       window.clearTimeout(giveUp);
     };

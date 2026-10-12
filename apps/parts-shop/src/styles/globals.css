@@ -146,13 +146,21 @@
 :root[data-kv-open] .kv-open-final {
   visibility: hidden;
 }
-.kv-open-spots {
-  /* After the picture has shrunk back to its place (900 ms), so the numbers never show oversized. */
-  transition: opacity 400ms cubic-bezier(0.22, 1, 0.36, 1) 800ms;
+:root {
+  /* How long the opening picture takes to shrink back to its place. */
+  --kv-shrink: 900ms;
+}
+/* The numbers and the caption come in only once the picture is back to its own size, so they
+   never show oversized; hidden (not just transparent) until then, so a tap cannot pick a part. */
+.kv-open-spots,
+.kv-open figcaption {
+  transition:
+    opacity 400ms cubic-bezier(0.22, 1, 0.36, 1) var(--kv-shrink),
+    visibility 0s linear var(--kv-shrink);
 }
 :root[data-kv-open] .kv-open-spots {
   opacity: 0;
-  pointer-events: none;
+  visibility: hidden;
 }
 /* Only the breaker shows while the opening plays (owner: "açılışta sadece kırıcı gözüksün, diğer
    bilgiler sonra"): the page goes dark, every element beside the picture's line of ancestors is
@@ -169,8 +177,22 @@ body :has(.kv-open) {
 :root[data-kv-open] {
   background-color: var(--color-stage);
 }
-:root[data-kv-open] body {
+/* The scaled picture may reach past the sides; kept clipped on the home page (not only while the
+   mark is set) so it cannot pan the page while it shrinks back. On <main>, not <body>: body's
+   overflow is handed to the viewport, which does not clip. */
+main:has(.kv-open) {
   overflow-x: clip;
+}
+/* The frames' ember floor glow ends at the image edge: fade the edges into the page. */
+:root[data-kv-open] .kv-open-pic {
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent),
+    linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent),
+    linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+  mask-composite: intersect;
 }
 :root[data-kv-open] body :has(.kv-open) {
   background-color: transparent;
@@ -188,7 +210,7 @@ body :has(.kv-open) {
 }
 .kv-open {
   transition:
-    transform 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform var(--kv-shrink) cubic-bezier(0.22, 1, 0.36, 1),
     background-color 700ms cubic-bezier(0.22, 1, 0.36, 1),
     border-color 700ms cubic-bezier(0.22, 1, 0.36, 1);
 }
