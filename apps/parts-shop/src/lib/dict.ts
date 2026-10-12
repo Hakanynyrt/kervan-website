@@ -129,7 +129,7 @@ export interface Dict {
     /** Tools with dust grooves we model for the breaker (`GROOVED_TOOLS`). */
     groovedTitle: string;
     groovedNote: string;
-    groovedAlt: (type: string | null) => string;
+    groovedAlt: (type: string, special?: boolean) => string;
     /** Line under the type selector, jumping to the dust-groove section. */
     groovedJump: string;
     angle: string;
@@ -599,8 +599,8 @@ export const DICT: Record<Lang, Dict> = {
       groovedTitle: 'Toz kanallı uçlar',
       groovedNote:
         'Bu kırıcı için ürettiğimiz toz kanallı uçlar; görseller 3B modeldir. Fiyat için teklif isteyin.',
-      groovedAlt: (type) =>
-        type ? `Toz kanallı ${type.toLocaleLowerCase('tr')} uç` : 'Toz kanallı kırıcı ucu',
+      groovedAlt: (type, special) =>
+        `Toz kanallı ${special ? 'özel ' : ''}${type.toLocaleLowerCase('tr')} uç`,
       groovedJump: 'Bu kırıcı için toz kanallı uçlar da var →',
       angle: 'Uç açısı',
       availability: 'Durum',
@@ -1339,8 +1339,8 @@ export const DICT: Record<Lang, Dict> = {
       groovedTitle: 'Tools with dust grooves',
       groovedNote:
         'Tools with dust grooves we make for this breaker; the pictures are 3D models. Ask for a quote.',
-      groovedAlt: (type) =>
-        type ? `${type} tool with dust grooves` : 'Breaker tool with dust grooves',
+      groovedAlt: (type, special) =>
+        `${special ? 'Special ' : ''}${special ? type.toLowerCase() : type} tool with dust grooves`,
       groovedJump: 'Tools with dust grooves are also available for this breaker →',
       angle: 'Tip angle',
       availability: 'Availability',

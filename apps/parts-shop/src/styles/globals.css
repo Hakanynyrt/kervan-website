@@ -153,6 +153,39 @@
   opacity: 0;
   pointer-events: none;
 }
+/* Only the breaker shows while the opening plays (owner: "açılışta sadece kırıcı gözüksün, diğer
+   bilgiler sonra"): the page goes dark, every element beside the picture's line of ancestors is
+   hidden, the picture is moved to the middle of the screen (`--kv-dy`, set by the component), and
+   all of it fades back in once the breaker has come apart. Browsers without :has() keep the page. */
+html,
+body :has(.kv-open) {
+  transition:
+    background-color 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root[data-kv-open] {
+  background-color: var(--color-stage-deep);
+}
+:root[data-kv-open] body :has(.kv-open) {
+  background-color: transparent;
+  border-color: transparent;
+}
+:has(.kv-open) > :not(:has(.kv-open)):not(.kv-open) {
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1) 250ms,
+    visibility 0s;
+}
+:root[data-kv-open] :has(.kv-open) > :not(:has(.kv-open)):not(.kv-open),
+:root[data-kv-open] .kv-open figcaption {
+  opacity: 0;
+  visibility: hidden;
+}
+.kv-open {
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root[data-kv-open] .kv-open {
+  transform: translateY(var(--kv-dy, 0px));
+}
 /* Picture, part list, search stacked; on lg+ the list is a column left of the picture that opens
    slowly once the breaker has come apart (owner: "kırıcı dağıldıktan sonra yavaşça açılsın"). */
 .kv-pick {
@@ -166,6 +199,50 @@
 :root[data-kv-open] .kv-pick-side {
   opacity: 0;
   visibility: hidden;
+}
+/* Phones: the breaker stands upright, tip down, with the numbered list beside it (owner: "mobilde
+   dikey kırıcı"). The picture keeps its own pixels and is turned as one block, so the canvas, the
+   callouts and the pointer boxes turn with it; the numbers are turned back to read upright. */
+@media (max-width: 39.999rem) {
+  /* While the opening plays the picture takes the whole width (the breaker in the middle); once
+     it has come apart the column narrows, the breaker slides left and the list opens on the right. */
+  .kv-pick {
+    grid-template-columns: 9.5rem minmax(0, 1fr);
+    column-gap: 0.75rem;
+    align-items: start;
+    transition:
+      grid-template-columns 1100ms cubic-bezier(0.22, 1, 0.36, 1),
+      column-gap 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  :root[data-kv-open] .kv-pick {
+    grid-template-columns: 100% minmax(0, 1fr);
+    column-gap: 0;
+  }
+  .kv-pick-side {
+    overflow: hidden;
+  }
+  .kv-open-turn {
+    --kv-len: min(60svh, 32rem);
+    position: relative;
+    height: var(--kv-len);
+  }
+  .kv-open-pic {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--kv-len);
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+  .kv-open-spots text {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: rotate(-90deg);
+    font-size: 64px;
+  }
+  /* The picture is drawn smaller here: bigger number discs keep them readable and tappable. */
+  .kv-open-spots .kv-num {
+    r: 58px;
+  }
 }
 @media (min-width: 64rem) {
   .kv-pick {

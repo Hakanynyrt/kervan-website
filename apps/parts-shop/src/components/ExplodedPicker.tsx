@@ -96,8 +96,17 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     const root = document.documentElement;
     if (!root.hasAttribute('data-kv-open')) return;
     (window as unknown as { __kvOpen?: boolean }).__kvOpen = true;
+    // Only the picture shows during the opening: bring it to the middle of the screen (CSS moves it
+    // back when the opening mark goes).
+    const fig = canvas.current?.closest('figure');
+    if (fig) {
+      const r = fig.getBoundingClientRect();
+      const top = Math.max(16, (window.innerHeight - r.height) / 2);
+      fig.style.setProperty('--kv-dy', `${Math.round(top - r.top)}px`);
+    }
     let cancelled = false;
     let raf = 0;
+    let seen: IntersectionObserver | undefined;
     const finish = () => {
       root.removeAttribute('data-kv-open');
       try {
@@ -130,7 +139,12 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
         c.width = imgs[0].naturalWidth;
         c.height = imgs[0].naturalHeight;
         ctx.drawImage(imgs[0], 0, 0);
-        root.setAttribute('data-kv-open', 'play');
+        // Play only once the picture is in view, so a visitor who has to scroll to it (phones)
+        // still sees the breaker come apart; until then the assembled frame stays.
+        const play = () => {
+          root.setAttribute('data-kv-open', 'play');
+          raf = requestAnimationFrame(step);
+        };
         let start = 0;
         const at = (p: number, n: number) => Math.min(n - 1, Math.max(0, Math.floor(p * n)));
         const step = (now: number) => {
@@ -153,7 +167,17 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
           }
           raf = requestAnimationFrame(step);
         };
-        raf = requestAnimationFrame(step);
+        if (typeof IntersectionObserver === 'undefined') return play();
+        seen = new IntersectionObserver(
+          (entries) => {
+            if (!entries.some((e) => e.isIntersecting)) return;
+            seen?.disconnect();
+            if (!cancelled) play();
+          },
+          { threshold: 0.5 },
+        );
+        // The canvas itself is hidden until it plays: watch the picture around it.
+        seen.observe(c.closest('figure') ?? c);
       })
       .catch(() => {
         window.clearTimeout(giveUp);
@@ -161,6 +185,7 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
       });
     return () => {
       cancelled = true;
+      seen?.disconnect();
       cancelAnimationFrame(raf);
       window.clearTimeout(giveUp);
     };
@@ -190,93 +215,96 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
   return (
     <div className="kv-pick">
       <figure className="kv-open m-0 min-w-0 overflow-hidden rounded-md border border-hair bg-stage lg:col-start-2 lg:row-start-1">
-        <div className="relative">
-          <picture>
-            <source media="(max-width: 1023px)" srcSet={`${FINAL}-sm.webp`} />
+        {/* Phones turn the picture upright, tip down (CSS `.kv-open-turn`). */}
+        <div className="kv-open-turn">
+          <div className="kv-open-pic relative">
+            <picture>
+              <source media="(max-width: 1023px)" srcSet={`${FINAL}-sm.webp`} />
+              <img
+                src={`${FINAL}-lg.webp`}
+                width={W}
+                height={H}
+                alt={p.alt}
+                fetchPriority="high"
+                decoding="async"
+                className="kv-open-final block h-auto w-full"
+              />
+            </picture>
+            {/* The breaker in its housing, shown only while the opening is pending (lazy: never fetched
+              otherwise), and the canvas the frames play on. */}
             <img
-              src={`${FINAL}-lg.webp`}
+              src={src('kabin', 0)}
               width={W}
               height={H}
-              alt={p.alt}
-              fetchPriority="high"
+              alt=""
+              loading="lazy"
               decoding="async"
-              className="kv-open-final block h-auto w-full"
+              className="kv-open-first absolute inset-0 h-full w-full"
             />
-          </picture>
-          {/* The breaker in its housing, shown only while the opening is pending (lazy: never fetched
-              otherwise), and the canvas the frames play on. */}
-          <img
-            src={src('kabin', 0)}
-            width={W}
-            height={H}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className="kv-open-first absolute inset-0 h-full w-full"
-          />
-          <canvas
-            ref={canvas}
-            aria-hidden="true"
-            className="kv-open-canvas absolute inset-0 h-full w-full"
-          />
-
-          <div className="kv-open-spots">
-            <svg
+            <canvas
+              ref={canvas}
               aria-hidden="true"
-              viewBox={`0 0 ${W} ${H}`}
-              className="pointer-events-none absolute inset-0 h-full w-full"
-            >
-              {SPOTS.map(({ g, at, to }, i) => (
-                <g
-                  key={g}
-                  className={lit(g) ? 'text-brand-hi' : 'text-white/75'}
-                  stroke="currentColor"
-                  fill="currentColor"
-                >
-                  <line x1={at[0]} y1={at[1]} x2={to[0]} y2={to[1]} strokeWidth={3} />
-                  <circle cx={to[0]} cy={to[1]} r={7} stroke="none" />
-                  <circle
-                    cx={at[0]}
-                    cy={at[1]}
-                    r={30}
-                    strokeWidth={4}
-                    className={lit(g) ? 'fill-brand-hi' : 'fill-stage'}
-                  />
-                  <text
-                    x={at[0]}
-                    y={at[1]}
-                    dy="0.36em"
-                    textAnchor="middle"
-                    stroke="none"
-                    fontSize={34}
-                    fontWeight={600}
-                    className={`font-sans ${lit(g) ? 'fill-stage' : 'fill-white'}`}
+              className="kv-open-canvas absolute inset-0 h-full w-full"
+            />
+
+            <div className="kv-open-spots">
+              <svg
+                aria-hidden="true"
+                viewBox={`0 0 ${W} ${H}`}
+                className="pointer-events-none absolute inset-0 h-full w-full"
+              >
+                {SPOTS.map(({ g, at, to }, i) => (
+                  <g
+                    key={g}
+                    className={lit(g) ? 'text-brand-hi' : 'text-white/75'}
+                    stroke="currentColor"
+                    fill="currentColor"
                   >
-                    {i + 1}
-                  </text>
-                </g>
-              ))}
-            </svg>
-            {SPOTS.map(({ g, boxes }, i) => (
-              <div key={g} onMouseEnter={() => setHover(g)} onMouseLeave={() => setHover(null)}>
-                {boxes.map((b, j) => (
-                  <a
-                    key={j}
-                    href={localePath(groupPath(g), lang)}
-                    onClick={pick(g)}
-                    // One tab stop per part: the extra boxes are pointer targets only.
-                    tabIndex={j === 0 ? undefined : -1}
-                    aria-hidden={j === 0 ? undefined : true}
-                    aria-label={j === 0 ? `${i + 1}. ${name(g)}` : undefined}
-                    aria-current={j === 0 && g === sel ? 'true' : undefined}
-                    onFocus={() => setHover(g)}
-                    onBlur={() => setHover(null)}
-                    style={boxStyle(b)}
-                    className={`absolute rounded-sm border-2 ${lit(g) ? 'border-brand-hi' : 'border-transparent'} focus-visible:outline-none`}
-                  />
+                    <line x1={at[0]} y1={at[1]} x2={to[0]} y2={to[1]} strokeWidth={3} />
+                    <circle cx={to[0]} cy={to[1]} r={7} stroke="none" />
+                    <circle
+                      cx={at[0]}
+                      cy={at[1]}
+                      r={30}
+                      strokeWidth={4}
+                      className={`kv-num ${lit(g) ? 'fill-brand-hi' : 'fill-stage'}`}
+                    />
+                    <text
+                      x={at[0]}
+                      y={at[1]}
+                      dy="0.36em"
+                      textAnchor="middle"
+                      stroke="none"
+                      fontSize={34}
+                      fontWeight={600}
+                      className={`font-sans ${lit(g) ? 'fill-stage' : 'fill-white'}`}
+                    >
+                      {i + 1}
+                    </text>
+                  </g>
                 ))}
-              </div>
-            ))}
+              </svg>
+              {SPOTS.map(({ g, boxes }, i) => (
+                <div key={g} onMouseEnter={() => setHover(g)} onMouseLeave={() => setHover(null)}>
+                  {boxes.map((b, j) => (
+                    <a
+                      key={j}
+                      href={localePath(groupPath(g), lang)}
+                      onClick={pick(g)}
+                      // One tab stop per part: the extra boxes are pointer targets only.
+                      tabIndex={j === 0 ? undefined : -1}
+                      aria-hidden={j === 0 ? undefined : true}
+                      aria-label={j === 0 ? `${i + 1}. ${name(g)}` : undefined}
+                      aria-current={j === 0 && g === sel ? 'true' : undefined}
+                      onFocus={() => setHover(g)}
+                      onBlur={() => setHover(null)}
+                      style={boxStyle(b)}
+                      className={`absolute rounded-sm border-2 ${lit(g) ? 'border-brand-hi' : 'border-transparent'} focus-visible:outline-none`}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
         <figcaption className="border-t border-white/15 px-4 py-2 font-sans text-xs text-white/70">
@@ -288,7 +316,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
         aria-label={p.listLabel}
         className="kv-pick-side lg:col-start-1 lg:row-span-2 lg:row-start-1"
       >
-        <ol className="m-0 grid list-none grid-cols-2 gap-2 p-0 font-sans text-sm sm:flex sm:flex-wrap lg:grid lg:grid-cols-1 lg:gap-1.5">
+        <ol className="m-0 grid list-none grid-cols-1 gap-2 p-0 font-sans text-sm sm:flex sm:flex-wrap lg:grid lg:grid-cols-1 lg:gap-1.5">
           {GROUPS.map((g, i) => (
             <li key={g}>
               <a
@@ -313,7 +341,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
         action={localePath(groupPath(sel), lang)}
         method="get"
         role="search"
-        className="min-w-0 rounded-md border border-hair bg-bg p-4 md:p-5 lg:col-start-2 lg:row-start-2"
+        className="col-span-full min-w-0 rounded-md border border-hair bg-bg p-4 md:p-5 lg:col-span-1 lg:col-start-2 lg:row-start-2"
       >
         <label htmlFor="pick-q" className="block font-sans text-base font-semibold text-ink">
           {p.label(name(sel))}
