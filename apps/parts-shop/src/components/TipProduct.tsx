@@ -9,7 +9,6 @@ import {
   type TipType,
 } from '@kervan/tips';
 import { Container } from '@kervan/ui';
-import { ORG_EMAIL } from '@kervan/seo';
 import { ORDER_CONVERSION } from '../lib/ads';
 import type { Dict } from '../lib/dict';
 import { fmtMm, fmtNum } from '../lib/format';
@@ -19,7 +18,6 @@ import { addToCart } from '../lib/cart';
 import { fmtDate, fmtTry, fmtUsd, vatOf } from '../lib/price';
 import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
-import { SITE } from '../lib/site';
 import type { PartLink } from '../lib/part-links';
 import { tipImg } from '../lib/tip-img';
 import { tipOptions } from '../lib/tip-options';
@@ -37,6 +35,7 @@ import {
   Terms,
 } from './Bits';
 import { FOCUS, whatsappHref } from './Layout';
+import { ORDER_EMAIL, SITE } from '../lib/site';
 
 function availabilityText(s: PublicSku, t: Dict): string {
   const a = s.availability;
@@ -150,7 +149,7 @@ export default function TipProduct({
     );
     setAdded(true);
   };
-  const mail = `mailto:${ORG_EMAIL}?subject=${encodeURIComponent(quoteName)}&body=${encodeURIComponent(text)}`;
+  const mail = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(quoteName)}&body=${encodeURIComponent(text)}`;
 
   return (
     <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">

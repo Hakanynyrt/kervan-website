@@ -1,16 +1,15 @@
 import { useState } from 'react';
-import { ORG_EMAIL } from '@kervan/seo';
 import type { FxRate } from '@kervan/tips';
 import { ORDER_CONVERSION } from '../lib/ads';
 import { addToCart } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { SITE } from '../lib/site';
 import { fmtDate, fmtTry, fmtUsd, vatOf } from '../lib/price';
 import { CART_PATH } from '../lib/routes';
 import type { Lang } from '../types';
 import { QtyStepper, Terms } from './Bits';
 import { FOCUS, whatsappHref } from './Layout';
+import { ORDER_EMAIL, SITE } from '../lib/site';
 
 /** "1.850 USD · 81.000 TL": one line under a priced part (group page, phones). */
 export function PartPriceLine({
@@ -149,7 +148,7 @@ export function PartOrder({
             {o.wa}
           </a>
           <a
-            href={`mailto:${ORG_EMAIL}?subject=${encodeURIComponent(`${breaker} ${label}`)}&body=${encodeURIComponent(text)}`}
+            href={`mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(`${breaker} ${label}`)}&body=${encodeURIComponent(text)}`}
             {...ORDER_CONVERSION}
             className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
           >

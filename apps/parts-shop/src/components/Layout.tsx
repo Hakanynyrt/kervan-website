@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Container } from '@kervan/ui';
-import { ORG_EMAIL, ORG_PHONE, ORG_PHONE_E164, ORG_TRADING_NAME } from '@kervan/seo';
+import { ORG_PHONE, ORG_PHONE_E164, ORG_TRADING_NAME } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import {
@@ -18,6 +18,7 @@ import { CartLink } from './CartLink';
 import { ConsentBanner } from './ConsentBanner';
 import { ThemeSelect } from './ThemeSelect';
 import type { Lang } from '../types';
+import { SHOP_EMAIL } from '../lib/site';
 
 export const FOCUS =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2';
@@ -103,8 +104,8 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
             >
               {ORG_PHONE}
             </a>
-            <a href={`mailto:${ORG_EMAIL}`} className={`hidden hover:text-ink sm:inline ${FOCUS}`}>
-              {ORG_EMAIL}
+            <a href={`mailto:${SHOP_EMAIL}`} className={`hidden hover:text-ink sm:inline ${FOCUS}`}>
+              {SHOP_EMAIL}
             </a>
             <a
               href={localePath(path, other)}
@@ -326,8 +327,8 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
                 {t.footer.fax}: {SELLER.fax}
               </li>
               <li>
-                <a href={`mailto:${ORG_EMAIL}`} className={`hover:text-ink ${FOCUS}`}>
-                  {ORG_EMAIL}
+                <a href={`mailto:${SHOP_EMAIL}`} className={`hover:text-ink ${FOCUS}`}>
+                  {SHOP_EMAIL}
                 </a>
               </li>
             </ul>
