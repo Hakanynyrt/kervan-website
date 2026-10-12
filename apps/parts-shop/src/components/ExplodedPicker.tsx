@@ -96,6 +96,14 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     const root = document.documentElement;
     if (!root.hasAttribute('data-kv-open')) return;
     (window as unknown as { __kvOpen?: boolean }).__kvOpen = true;
+    // Only the picture shows during the opening: bring it to the middle of the screen (CSS moves it
+    // back when the opening mark goes).
+    const fig = canvas.current?.closest('figure');
+    if (fig) {
+      const r = fig.getBoundingClientRect();
+      const top = Math.max(16, (window.innerHeight - r.height) / 2);
+      fig.style.setProperty('--kv-dy', `${Math.round(top - r.top)}px`);
+    }
     let cancelled = false;
     let raf = 0;
     let seen: IntersectionObserver | undefined;
