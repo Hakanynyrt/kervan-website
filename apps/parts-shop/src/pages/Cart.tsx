@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
-import { ORG_EMAIL } from '@kervan/seo';
 import { PageTitle, QtyStepper } from '../components/Bits';
 import { FOCUS, whatsappHref } from '../components/Layout';
 import { PartGroups } from '../components/PartGroups';
@@ -12,8 +11,8 @@ import { localePath } from '../lib/locale-path';
 import { fmtDate, fmtTry, fmtUsd, VAT_PERCENT, vatOf } from '../lib/price';
 import { LEGAL, legalPath } from '../lib/legal';
 import { PARTS_PATH } from '../lib/routes';
-import { SITE } from '../lib/site';
 import type { Lang } from '../types';
+import { ORDER_EMAIL, SITE } from '../lib/site';
 
 const FIELDS = ['name', 'company', 'phone', 'city', 'note'] as const;
 type Field = (typeof FIELDS)[number];
@@ -273,7 +272,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                 {c.sendWa}
               </a>
               <a
-                href={`mailto:${ORG_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`}
+                href={`mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`}
                 {...ORDER_CONVERSION}
                 className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
               >

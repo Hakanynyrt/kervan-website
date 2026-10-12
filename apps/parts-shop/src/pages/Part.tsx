@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useRef, useState, type KeyboardEvent } from 
 import { matches, rewriteQuery, slugify, type FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import { useReducedMotion } from '@kervan/motion';
-import { ORG_EMAIL } from '@kervan/seo';
 import {
   Breadcrumb,
   ImgNote,
@@ -24,7 +23,6 @@ import { addToCart } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import type { ListedPart } from '../lib/listed-parts';
 import { localePath } from '../lib/locale-path';
-import { SITE } from '../lib/site';
 import { renderModel, renderTitle } from '../lib/part-caption';
 import { DEFAULT_FILTER, filtersFor, inFilter, type PartFilter } from '../lib/part-filters';
 import { renderAnchor } from '../lib/part-links';
@@ -40,6 +38,7 @@ import {
   type PartKey,
 } from '../lib/routes';
 import type { Lang } from '../types';
+import { ORDER_EMAIL, SITE } from '../lib/site';
 
 type Model = Extract<PageModel, { kind: 'part' }>;
 
@@ -517,7 +516,7 @@ export function QuotePanel({
             {t.family.whatsapp}
           </a>
           <a
-            href={`mailto:${ORG_EMAIL}?subject=${encodeURIComponent(breaker.trim() ? `${name} – ${breaker.trim()}` : name)}&body=${encodeURIComponent(text)}`}
+            href={`mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(breaker.trim() ? `${name} – ${breaker.trim()}` : name)}&body=${encodeURIComponent(text)}`}
             {...ORDER_CONVERSION}
             className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
           >
