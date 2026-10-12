@@ -2066,16 +2066,45 @@ const redrawn = (base: string): string => {
   const v = m && REDRAWN[m[1]];
   return v ? `/photos/parca/${m[1]}-${m[2]}-${v}` : base;
 };
-/** Display names that differ from the drawings' (owner: "MTB 210 II ile MTB 215 aynı modeller"). Files keep their names. */
-const MODEL_NAME: Record<string, string> = { 'MTB 210 II': 'MTB 215 / 210 II' };
+/** Display names that differ from the drawings' (owner: "MTB 210 II ile MTB 215 aynı modeller",
+ *  "MTB 275 II = MTB 285"). Files keep their names. */
+const MODEL_NAME: Record<string, string> = {
+  'MTB 210 II': 'MTB 215 / 210 II',
+  'MTB 275 II': 'MTB 285 / 275 II',
+};
+/** Soosan models are shown without the "TS-P" suffix (owner: "TS-P'yi her yerden kaldır"). */
+const displayModel = (model: string): string => {
+  const m = MODEL_NAME[model] ?? model;
+  return m.startsWith('Soosan ') ? m.replace(/ TS-P\b/, '') : m;
+};
 const revise = (r: PartRender): PartRender => ({
   ...r,
-  model: MODEL_NAME[r.model] ?? r.model,
+  model: displayModel(r.model),
   ...(r.hero ? { hero: redrawn(r.hero) } : {}),
   views: r.views.map((x) => ({ ...x, base: redrawn(x.base) })),
 });
+/**
+ * A group that held both a plain Soosan model (the old type) and its TS-P one would show two cards
+ * of the same name once TS-P is dropped: the plain one becomes the old type there.
+ */
+function reviseGroup(list: readonly PartRender[]): PartRender[] {
+  const tsp = new Set(
+    list
+      .filter((r) => r.model.startsWith('Soosan ') && / TS-P\b/.test(r.model))
+      .map((r) => `${displayModel(r.model)}|${r.kind ?? ''}`),
+  );
+  return list.map((r) => {
+    const out = revise(r);
+    const plainTwin =
+      r.model.startsWith('Soosan ') &&
+      !/ TS-P\b/.test(r.model) &&
+      !r.variant &&
+      tsp.has(`${r.model}|${r.kind ?? ''}`);
+    return plainTwin ? { ...out, variant: 'oldType' } : out;
+  });
+}
 export const PART_RENDERS = Object.fromEntries(
-  Object.entries(DRAWN).map(([k, list]) => [k, list.map(revise)]),
+  Object.entries(DRAWN).map(([k, list]) => [k, reviseGroup(list)]),
 ) as unknown as Record<PartKey, readonly PartRender[]>;
 
 /**
