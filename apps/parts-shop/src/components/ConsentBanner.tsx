@@ -36,7 +36,7 @@ export function ConsentBanner({ lang, t }: { lang: Lang; t: Dict }) {
     window.addEventListener(CONSENT_OPEN_EVENT, reopen);
 
     // Phone and WhatsApp links anywhere count as contact conversions, links marked
-    // ORDER_CONVERSION (order requests, quotes) as `form`; no-op until the tag is loaded.
+    // ORDER_CONVERSION (order requests, quotes) only as `form`; no-op until the tag is loaded.
     const onClick = (e: MouseEvent) => {
       const a = (e.target as Element | null)?.closest?.('a[href]');
       if (a) for (const kind of conversionsForLink(a)) trackConversion(kind);
