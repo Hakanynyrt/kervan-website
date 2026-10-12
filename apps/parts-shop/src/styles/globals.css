@@ -167,6 +167,38 @@
   opacity: 0;
   visibility: hidden;
 }
+/* Phones: the breaker stands upright, tip down, with the numbered list beside it (owner: "mobilde
+   dikey kırıcı"). The picture keeps its own pixels and is turned as one block, so the canvas, the
+   callouts and the pointer boxes turn with it; the numbers are turned back to read upright. */
+@media (max-width: 39.999rem) {
+  .kv-pick {
+    grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr);
+    column-gap: 0.75rem;
+    align-items: start;
+  }
+  .kv-open-turn {
+    --kv-len: min(60svh, 32rem);
+    position: relative;
+    height: var(--kv-len);
+  }
+  .kv-open-pic {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--kv-len);
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+  .kv-open-spots text {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: rotate(-90deg);
+    font-size: 64px;
+  }
+  /* The picture is drawn smaller here: bigger number discs keep them readable and tappable. */
+  .kv-open-spots .kv-num {
+    r: 58px;
+  }
+}
 @media (min-width: 64rem) {
   .kv-pick {
     grid-template-columns: 13.5rem minmax(0, 1fr);

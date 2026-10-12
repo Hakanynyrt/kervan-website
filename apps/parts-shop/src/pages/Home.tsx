@@ -59,11 +59,13 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
       <section className="border-b border-hair bg-bg-soft">
         <Container className="py-10 md:py-14">
           <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-x-10 lg:gap-y-8">
-            <div className="max-w-3xl">
+            {/* Phones: title, then the opening picture (so the breaker comes apart on the first
+                screen), then the lead and the buttons; `contents` lets the picture sit between. */}
+            <div className="contents sm:block sm:max-w-3xl">
               <h1 className="m-0 font-sans text-4xl font-bold leading-tight text-ink md:text-5xl">
                 {h.title}
               </h1>
-              <p className="m-0 mt-4 font-sans text-lg text-ink-mid">{h.lead}</p>
+              <p className="m-0 font-sans text-lg text-ink-mid max-sm:order-2 sm:mt-4">{h.lead}</p>
             </div>
             <div className="order-last flex flex-wrap gap-3 font-sans text-sm font-medium lg:order-none">
               <a
@@ -79,7 +81,7 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
                 {h.ctaQuote}
               </a>
             </div>
-            <div className="lg:col-span-2">
+            <div className="max-sm:order-1 lg:col-span-2">
               <ExplodedPicker lang={lang} t={t} />
             </div>
           </div>
