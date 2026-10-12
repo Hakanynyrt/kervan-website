@@ -19,7 +19,8 @@ export type Conversion = keyof typeof SEND_TO;
 
 /**
  * Spread onto a link that sends an order request or a quote (palet, product pages): a click
- * on it counts as a `form` conversion, on top of `whatsapp` when it is a WhatsApp link.
+ * on it counts as one `form` conversion only, even when it is a WhatsApp link, so one order
+ * is never counted twice in Google Ads.
  */
 export const ORDER_CONVERSION = { 'data-kv-conversion': 'form' } as const;
 
@@ -76,13 +77,11 @@ export function conversionForHref(href: string): Conversion | null {
   return null;
 }
 
-/** Every conversion one click on this link counts, each at most once. */
+/** The conversions one click on this link counts: an order link only `form`, else by href. */
 export function conversionsForLink(a: Element): Conversion[] {
-  const out = new Set<Conversion>();
+  if (a.getAttribute('data-kv-conversion') === 'form') return ['form'];
   const byHref = conversionForHref(a.getAttribute('href') ?? '');
-  if (byHref) out.add(byHref);
-  if (a.getAttribute('data-kv-conversion') === 'form') out.add('form');
-  return [...out];
+  return byHref ? [byHref] : [];
 }
 
 /** Injects gtag.js once. Call only after consent. */
