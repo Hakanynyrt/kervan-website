@@ -25,9 +25,10 @@ const BASE = '/photos/parca/acilis';
 const FINAL = `${BASE}-acik-01`;
 const KABIN = 36;
 const FRAMES = 48;
-/** One size only (1600 px) for every screen: the frames count against Pages' file limit. */
+/** One size only (the full 2864 px render) for every screen: the frames count against Pages'
+ *  file limit. */
 const src = (kind: 'kabin' | 'kare', i: number) =>
-  `${BASE}-${kind}-01-${String(i).padStart(2, '0')}-lg.webp`;
+  `${BASE}-${kind}-02-${String(i).padStart(2, '0')}-lg.webp`;
 /** Timeline (ms): pause on the housed breaker, housing slide, cylinder fade, opening. */
 const HOLD = 500;
 const SLIDE = 1200;
@@ -35,7 +36,11 @@ const FADE = 350;
 const OPEN = 900;
 const OPEN_KEY = 'kv_open_played';
 /** Width of the opening frames in their own pixels (`-lg`). */
-const FRAME_PX = 1600;
+const FRAME_PX = 2864;
+/** The housed breaker inside the frames (fraction of the frame length, along the breaker): the
+ *  opening starts close up on it and draws back to the whole frame as the parts come apart. */
+const NEAR_SPAN = 0.5;
+const NEAR_MID = 0.46;
 
 /** Picture size in render pixels (the boxes and callouts below are in the same pixels). */
 const W = 2864;
@@ -103,6 +108,8 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     // place when the opening mark goes). Measured again if the screen turns or resizes.
     const fig = canvas.current?.closest('figure');
     const pic = canvas.current?.parentElement;
+    // Close up on the housed breaker first, then the whole frame once it opens.
+    let wide = false;
     const place = (instant: boolean) => {
       if (!fig || !pic) return;
       if (instant) {
@@ -117,15 +124,30 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
       // clientWidth leaves out a classic scrollbar, so the breaker sits on the visible centre.
       const vw = document.documentElement.clientWidth;
       const vh = document.documentElement.clientHeight;
-      // The frames are 1600 px wide: no more than 1.5× their own pixels, or they turn soft.
-      const long = Math.max(p.width, p.height);
+      // No more than 1.5× the frames' own pixels, or they turn soft.
+      const upright = p.height > p.width;
+      const long = upright ? p.height : p.width;
       const sharp = (FRAME_PX * 1.5) / Math.max(1, window.devicePixelRatio || 1) / long;
-      const k = Math.max(1, Math.min((vw * 0.96) / p.width, (vh * 0.9) / p.height, sharp));
+      const fit = (span: number, across: number) =>
+        Math.min(
+          ((upright ? vh : vw) * (upright ? 0.9 : 0.96)) / (long * span),
+          ((upright ? vw : vh) * (upright ? 0.96 : 0.9)) / (Math.min(p.width, p.height) * across),
+        );
+      const k = Math.max(1, Math.min(wide ? fit(1, 1) : fit(NEAR_SPAN, 0.7), sharp));
+      // The point to bring to the middle of the screen, from the picture's centre (the upright
+      // picture is turned 90°, so the frame's left end is at its top).
+      const off = wide ? 0 : (NEAR_MID - 0.5) * long * k;
       const ox = p.left + p.width / 2 - f.left;
       const oy = p.top + p.height / 2 - f.top;
       fig.style.transformOrigin = `${ox}px ${oy}px`;
-      fig.style.setProperty('--kv-dx', `${Math.round(vw / 2 - (f.left + ox))}px`);
-      fig.style.setProperty('--kv-dy', `${Math.round(vh / 2 - (f.top + oy))}px`);
+      fig.style.setProperty(
+        '--kv-dx',
+        `${Math.round(vw / 2 - (f.left + ox) - (upright ? 0 : off))}px`,
+      );
+      fig.style.setProperty(
+        '--kv-dy',
+        `${Math.round(vh / 2 - (f.top + oy) - (upright ? off : 0))}px`,
+      );
       fig.style.setProperty('--kv-k', k.toFixed(3));
       if (instant) {
         void fig.offsetWidth;
@@ -146,48 +168,92 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
         /* storage blocked: it plays again next time */
       }
     };
-    const load = (kind: 'kabin' | 'kare', n: number) =>
-      Array.from({ length: n }, (_, i) => {
-        const im = new Image();
-        im.src = src(kind, i);
-        return im;
+    // All frames in playing order. Only their files are fetched up front (about 2.5 MB); a frame is
+    // decoded just before it shows and released after, since all of them decoded at once (2864 px
+    // each) would take hundreds of MB, more than a phone gives a page.
+    const urls = [
+      ...Array.from({ length: KABIN }, (_, i) => src('kabin', i)),
+      ...Array.from({ length: FRAMES }, (_, i) => src('kare', i)),
+    ];
+    const bitmaps: (ImageBitmap | null | undefined)[] = [];
+    let blobs: Blob[] = [];
+    const AHEAD = 6;
+    const want = (i: number) => {
+      for (let j = i; j < Math.min(urls.length, i + AHEAD); j++) {
+        if (bitmaps[j] !== undefined) continue;
+        bitmaps[j] = null;
+        createImageBitmap(blobs[j]).then(
+          (bm) => {
+            if (cancelled) bm.close();
+            else bitmaps[j] = bm;
+          },
+          () => undefined,
+        );
+      }
+      for (let j = 0; j < i - 1; j++) {
+        bitmaps[j]?.close();
+        if (bitmaps[j]) bitmaps[j] = null;
+      }
+    };
+    const ready = (n: number) =>
+      new Promise<void>((resolve, reject) => {
+        const check = () => {
+          if (cancelled) return reject();
+          if (bitmaps.slice(0, n).every(Boolean)) return resolve();
+          window.setTimeout(check, 30);
+        };
+        check();
       });
-    const kabin = load('kabin', KABIN);
-    const kare = load('kare', FRAMES);
-    const imgs = [...kabin, ...kare];
     // A slow connection should not hold the page on the assembled picture.
     const giveUp = window.setTimeout(() => {
       cancelled = true;
       finish();
     }, 5000);
-    Promise.all(imgs.map((im) => im.decode()))
+    Promise.all(urls.map((u) => fetch(u).then((r) => (r.ok ? r.blob() : Promise.reject()))))
+      .then((b) => {
+        blobs = b;
+        want(0);
+        return ready(AHEAD);
+      })
       .then(() => {
         window.clearTimeout(giveUp);
         if (cancelled) return;
         const c = canvas.current;
         const ctx = c?.getContext('2d');
-        if (!c || !ctx) return finish();
-        c.width = imgs[0].naturalWidth;
-        c.height = imgs[0].naturalHeight;
-        ctx.drawImage(imgs[0], 0, 0);
+        const first = bitmaps[0];
+        if (!c || !ctx || !first) return finish();
+        c.width = first.width;
+        c.height = first.height;
+        ctx.drawImage(first, 0, 0);
         let start = 0;
         const at = (p: number, n: number) => Math.min(n - 1, Math.max(0, Math.floor(p * n)));
+        // Draws frame i if it is decoded; otherwise the canvas keeps the last one for this tick.
+        const draw = (i: number, alpha = 1) => {
+          want(i);
+          const bm = bitmaps[i];
+          if (!bm) return;
+          ctx.globalAlpha = alpha;
+          ctx.drawImage(bm, 0, 0);
+          ctx.globalAlpha = 1;
+        };
         const step = (now: number) => {
           if (cancelled) return;
           if (!start) start = now;
           let t = now - start - HOLD;
           if (t < SLIDE) {
-            ctx.drawImage(kabin[at(t / SLIDE, KABIN)], 0, 0);
+            draw(at(t / SLIDE, KABIN));
           } else if ((t -= SLIDE) < FADE) {
-            ctx.globalAlpha = 1;
-            ctx.drawImage(kabin[KABIN - 1], 0, 0);
-            ctx.globalAlpha = t / FADE;
-            ctx.drawImage(kare[0], 0, 0);
-            ctx.globalAlpha = 1;
+            if (!wide) {
+              // Draw back to the whole frame as the parts start to come apart (CSS --kv-shrink).
+              wide = true;
+              place(false);
+            }
+            draw(KABIN - 1);
+            draw(KABIN, t / FADE);
           } else if ((t -= FADE) < OPEN) {
-            ctx.drawImage(kare[at(t / OPEN, FRAMES)], 0, 0);
+            draw(KABIN + at(t / OPEN, FRAMES));
           } else {
-            ctx.drawImage(kare[FRAMES - 1], 0, 0);
+            draw(urls.length - 1);
             return finish();
           }
           raf = requestAnimationFrame(step);
@@ -198,10 +264,11 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
       })
       .catch(() => {
         window.clearTimeout(giveUp);
-        finish();
+        if (!cancelled) finish();
       });
     return () => {
       cancelled = true;
+      bitmaps.forEach((bm) => bm?.close());
       window.removeEventListener('resize', onResize);
       cancelAnimationFrame(raf);
       window.clearTimeout(giveUp);
