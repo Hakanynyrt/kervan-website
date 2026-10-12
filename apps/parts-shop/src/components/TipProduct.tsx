@@ -412,18 +412,18 @@ export default function TipProduct({
               <li key={g.base}>
                 <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
                   <img
-                    src={`${g.base}-vitrin-01-lg.webp`}
-                    srcSet={`${g.base}-vitrin-01-xs.webp 320w, ${g.base}-vitrin-01-lg.webp 1600w`}
+                    src={`${g.base}-vitrin-${g.v}-lg.webp`}
+                    srcSet={`${g.base}-vitrin-${g.v}-xs.webp 320w, ${g.base}-vitrin-${g.v}-lg.webp 1600w`}
                     sizes="(min-width: 640px) 33vw, 100vw"
                     width={1600}
                     height={900}
-                    alt={tf.groovedAlt(g.tipType ? t.tip[g.tipType] : null)}
+                    alt={tf.groovedAlt(t.tip[g.tipType], g.special)}
                     loading="lazy"
                     decoding="async"
                     className="block aspect-video h-auto w-full"
                   />
                   <figcaption className="bg-bg px-3 py-2 font-sans text-sm font-medium text-ink">
-                    {tf.groovedAlt(g.tipType ? t.tip[g.tipType] : null)}
+                    {tf.groovedAlt(t.tip[g.tipType], g.special)}
                   </figcaption>
                 </figure>
               </li>

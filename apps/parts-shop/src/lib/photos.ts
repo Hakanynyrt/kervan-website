@@ -2123,11 +2123,33 @@ export const PLANT_PHOTOS = [
  */
 export const GROOVED_TOOLS: readonly {
   breaker: string;
-  /** Null when the drawing names no tip type. */
-  tipType: 'moil' | 'conical' | null;
+  tipType: 'moil' | 'conical';
+  /** The drawing's "ÖZEL" (special) version: captioned so, apart from the standard tool. */
+  special?: true;
   base: string;
+  /** File version of the pictures (`<base>-vitrin-<v>`). */
+  v: string;
 }[] = [
-  { breaker: 'MTB 700', tipType: null, base: '/photos/parca/uc-mtb-700-grooved-tool' },
-  { breaker: 'MTB 700', tipType: 'moil', base: '/photos/parca/uc-mtb-700-grooved-tool-moil' },
-  { breaker: 'MTB 700', tipType: 'conical', base: '/photos/parca/uc-mtb-700-grooved-tool-conical' },
+  // 2007 sheet: the main view is broken off at the end; the 35° cone is the detail above it
+  // (owner confirmed: conical), so the pictures are version 02 (01 drew a flat end).
+  {
+    breaker: 'MTB 700',
+    tipType: 'conical',
+    base: '/photos/parca/uc-mtb-700-grooved-tool',
+    v: '02',
+  },
+  {
+    breaker: 'MTB 700',
+    tipType: 'moil',
+    base: '/photos/parca/uc-mtb-700-grooved-tool-moil',
+    v: '01',
+  },
+  // 2009 "ÖZEL KONİK TOZ KANALLI": the slimmed (Ø180) working body.
+  {
+    breaker: 'MTB 700',
+    tipType: 'conical',
+    special: true,
+    base: '/photos/parca/uc-mtb-700-grooved-tool-conical',
+    v: '01',
+  },
 ];
