@@ -37,8 +37,9 @@ export default function App({ lang }: Props) {
 
       <Nav lang={lang} t={t} techAuthed={tech.state === 'authed'} />
       <main>
-        <Hero t={t} />
+        {/* The opening: the cooling tip, then the hero. */}
         <Cooling t={t} />
+        <Hero t={t} />
         <Services t={t} lang={lang} />
         <TechnicalCapacity t={t} />
         <TechInfo t={t} lang={lang} tech={tech} />

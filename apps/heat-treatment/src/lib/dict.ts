@@ -82,6 +82,7 @@ export const DICT: Dict = {
       sceneLabel:
         'Fırından kızgın çıkan bir kırıcı ucu; sayfa kaydıkça soğuyup parlak siyah çeliğe dönüşüyor',
       posterAlt: 'Fırından yeni çıkmış, kiraz kırmızısı kızgın bir kırıcı ucu',
+      scroll: 'Kaydır',
     },
     services: {
       eyebrow: 'Hizmetler',
@@ -299,6 +300,7 @@ export const DICT: Dict = {
       sceneLabel:
         'A breaker tip fresh out of the furnace, glowing hot; as the page scrolls it cools to glossy black steel',
       posterAlt: 'A breaker tip fresh out of the furnace, glowing cherry red',
+      scroll: 'Scroll',
     },
     services: {
       eyebrow: 'Services',

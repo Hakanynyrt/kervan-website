@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { motion, useInView } from 'framer-motion';
 import {
   durations,
   editorialEase,
@@ -31,20 +31,35 @@ const introPending = (): boolean => {
 
 export default function Hero({ t }: Props) {
   const reduced = useReducedMotion();
-  // First visit: the hero waits for the intro curtain. Later visits start right away.
-  const [t0] = useState(() => (!reduced && introPending() ? INTRO_WAIT : 0));
+  const ref = useRef<HTMLElement>(null);
+  // The hero follows the cooling opening, so its sequence starts when it scrolls into view.
+  const inView = useInView(ref, { once: true, amount: 0.25 });
+  const [mountedAt] = useState(() => (typeof performance === 'undefined' ? 0 : performance.now()));
+  const [pending] = useState(() => !reduced && introPending());
+  // Delay before the sequence: only what is left of the intro curtain (first visit), if any.
+  const [t0, setT0] = useState<number | null>(reduced ? 0 : null);
+  useEffect(() => {
+    if (!inView || t0 !== null) return;
+    const left = pending ? INTRO_WAIT - (performance.now() - mountedAt) / 1000 : 0;
+    setT0(Math.max(0, left));
+  }, [inView, t0, pending, mountedAt]);
+  const go = t0 !== null;
+  const d0 = t0 ?? 0;
   // Explicit initial/animate objects (not variants) so the delay below really applies.
   const rise = (delay: number, y: number, duration: number) => ({
     initial: reduced ? (false as const) : { opacity: 0, y },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration, ease: editorialEase, delay: t0 + delay },
+    animate: go ? { opacity: 1, y: 0 } : undefined,
+    transition: { duration, ease: editorialEase, delay: d0 + delay },
   });
 
   const words1 = t.hero.title1.split(/\s+/).filter(Boolean);
   const words2 = t.hero.title2.split(/\s+/).filter(Boolean);
 
   return (
-    <section className="relative min-h-dvh flex flex-col justify-center pt-[calc(8rem+var(--kv-strip-h))] pb-16 md:pt-[calc(10rem+var(--kv-strip-h))] md:pb-24 overflow-hidden">
+    <section
+      ref={ref}
+      className="relative min-h-dvh flex flex-col justify-center pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden"
+    >
       {/* Subtle radial gradient — forge ember warmth without an asset */}
       <div
         aria-hidden="true"
@@ -66,9 +81,9 @@ export default function Hero({ t }: Props) {
 
           <motion.h1
             className="font-serif italic text-[clamp(26px,8vw,56px)] sm:text-display text-ink leading-[0.95] tracking-[-0.025em]"
-            variants={staggerContainer(t0 + 0.2, reduced ? 0 : 0.1)}
+            variants={staggerContainer(d0 + 0.2, reduced ? 0 : 0.1)}
             initial={reduced ? 'show' : 'hidden'}
-            animate="show"
+            animate={go ? 'show' : 'hidden'}
             aria-label={`${t.hero.title1} ${t.hero.title2}`}
           >
             {[words1, words2].map((line, li) => (
@@ -123,14 +138,14 @@ export default function Hero({ t }: Props) {
         </div>
 
         {/* Film — far right column at lg; below lg it comes before the stats so phones see it on the first screen. */}
-        <HeroFilm t={t} startAt={t0 + HERO_SEQ_END} />
+        <HeroFilm t={t} startAt={d0 + HERO_SEQ_END} hold={!go} />
 
         {/* Stats — middle column at lg (capacity numbers, not marketing claims) */}
         <motion.dl
           className="grid grid-cols-2 gap-8 m-0 lg:col-start-2 lg:row-start-1 lg:self-stretch lg:flex lg:flex-col lg:justify-between lg:gap-6"
-          variants={staggerContainer(t0 + 1, 0.12)}
+          variants={staggerContainer(d0 + 1, 0.12)}
           initial={reduced ? 'show' : 'hidden'}
-          animate="show"
+          animate={go ? 'show' : 'hidden'}
         >
           {t.hero.stats.map((s, i) => (
             <motion.div
