@@ -74,6 +74,14 @@ export const DICT: Dict = {
         play: 'Videoyu oynat',
       },
     },
+    cooling: {
+      title: 'Isıdan gelen sertlik.',
+      body: 'Sertleştirmede parça fırında ısıtılır, ardından kontrollü soğutulur. Temperleme gerilimi alır, tokluk kazandırır. Sonuç: sert, tok ve uzun ömürlü çelik.',
+      steps: ['Fırından çıkış', 'Kontrollü soğutma', 'Temperlenmiş çelik'],
+      sceneLabel:
+        'Fırından kızgın çıkan bir kırıcı ucu; sayfa kaydıkça soğuyup parlak siyah çeliğe dönüşüyor',
+      posterAlt: 'Fırından yeni çıkmış, kiraz kırmızısı kızgın bir kırıcı ucu',
+    },
     services: {
       eyebrow: 'Hizmetler',
       title: 'Üç ana süreç. Tek disiplin.',
@@ -281,6 +289,14 @@ export const DICT: Dict = {
         pause: 'Pause video',
         play: 'Play video',
       },
+    },
+    cooling: {
+      title: 'Hardness, made with heat.',
+      body: 'For hardening, the part is heated in the furnace, then cooled under control. Tempering relieves stress and adds toughness. The result: hard, tough, long-lasting steel.',
+      steps: ['Out of the furnace', 'Controlled cooling', 'Tempered steel'],
+      sceneLabel:
+        'A breaker tip fresh out of the furnace, glowing hot; as the page scrolls it cools to glossy black steel',
+      posterAlt: 'A breaker tip fresh out of the furnace, glowing cherry red',
     },
     services: {
       eyebrow: 'Services',
