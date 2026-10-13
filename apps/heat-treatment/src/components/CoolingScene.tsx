@@ -390,7 +390,7 @@ export default function CoolingScene({ section, onReady, onFail }: Props) {
       const H2 = CAM_D * TAN;
       const W2 = H2 * aspect;
       const portrait = aspect < 0.85;
-      const share = portrait ? 0.98 : lerp(0.8, 0.68, clamp01((aspect - 1) / 0.8));
+      const share = portrait ? 0.9 : lerp(0.8, 0.68, clamp01((aspect - 1) / 0.8));
       const s = Math.min(share * 2 * W2, 2.4 * H2);
       outer.scale.setScalar(s);
       outer.position.set(portrait ? 0 : W2 * 0.15, portrait ? -H2 * 0.32 : -H2 * 0.16, 0);

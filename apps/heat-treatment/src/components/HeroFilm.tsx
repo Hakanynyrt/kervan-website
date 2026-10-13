@@ -51,9 +51,11 @@ interface Props {
   t: DictBlock;
   /** seconds; Hero passes t0 + HERO_SEQ_END */
   startAt: number;
+  /** The hero sequence has not started yet (hero still below the opening): do not arm. */
+  hold?: boolean;
 }
 
-export default function HeroFilm({ t, startAt }: Props) {
+export default function HeroFilm({ t, startAt, hold = false }: Props) {
   const reduced = useReducedMotion(); // true in static mode → poster only, no effects run
   const [motionOff, setMotionOff] = useState(false); // live opt-out: framer's hook is a mount-time snapshot
   const off = reduced || motionOff;
@@ -84,7 +86,7 @@ export default function HeroFilm({ t, startAt }: Props) {
 
   // 1. Arm after the hero sequence (+ intro curtain), then idle, then when the card is ≥25 % on screen.
   useEffect(() => {
-    if (off) return;
+    if (off || hold) return;
     const w = window as IdleWindow;
     let idle = 0;
     let io: IntersectionObserver | undefined;
@@ -116,7 +118,7 @@ export default function HeroFilm({ t, startAt }: Props) {
       else window.clearTimeout(idle);
       io?.disconnect();
     };
-  }, [off, startAt]);
+  }, [off, hold, startAt]);
 
   // 2. Muted (React sets only the property; iOS wants the attribute) and seek to the poster frame.
   useEffect(() => {

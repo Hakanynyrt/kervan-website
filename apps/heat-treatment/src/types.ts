@@ -96,6 +96,8 @@ export interface DictBlock {
     sceneLabel: string;
     /** Alt text of the static poster (cherry-red frame). */
     posterAlt: string;
+    /** Scroll cue under the opening stage ("Kaydır"). */
+    scroll: string;
   };
   services: {
     eyebrow: string;
