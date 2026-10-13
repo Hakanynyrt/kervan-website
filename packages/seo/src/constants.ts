@@ -32,8 +32,9 @@ export const ORG_FACEBOOK = 'https://www.facebook.com/KRVbreaker';
 export const ORG_YOUTUBE = 'https://www.youtube.com/@kervanbreaker';
 export const ORG_LINKEDIN = 'https://www.linkedin.com/company/kervan-isil-islem';
 export const ORG_X = 'https://x.com/KervanHB';
+export const ORG_TELEGRAM = 'https://t.me/kervanbreaker';
 
-export type OrgSocialKey = 'facebook' | 'instagram' | 'youtube' | 'linkedin' | 'x';
+export type OrgSocialKey = 'facebook' | 'instagram' | 'youtube' | 'linkedin' | 'x' | 'telegram';
 
 /** The brand's social profiles, in display order (footer icons + JSON-LD `sameAs`). */
 export const ORG_SOCIALS: readonly { key: OrgSocialKey; url: string }[] = [
@@ -42,6 +43,7 @@ export const ORG_SOCIALS: readonly { key: OrgSocialKey; url: string }[] = [
   { key: 'youtube', url: ORG_YOUTUBE },
   { key: 'linkedin', url: ORG_LINKEDIN },
   { key: 'x', url: ORG_X },
+  { key: 'telegram', url: ORG_TELEGRAM },
 ];
 
 /** All three sites' canonical base URLs plus the social profiles — used as `sameAs` by the
@@ -56,4 +58,5 @@ export const ORG_SAME_AS = [
   ORG_YOUTUBE,
   ORG_LINKEDIN,
   ORG_X,
+  ORG_TELEGRAM,
 ] as const;

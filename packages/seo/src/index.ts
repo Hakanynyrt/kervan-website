@@ -58,6 +58,7 @@ export {
   ORG_YOUTUBE,
   ORG_LINKEDIN,
   ORG_X,
+  ORG_TELEGRAM,
   ORG_SOCIALS,
   ORG_SAME_AS,
 } from './constants.js';
