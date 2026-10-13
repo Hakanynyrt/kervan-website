@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
-import { Container } from '@kervan/ui';
-import { ORG_PHONE, ORG_PHONE_E164, ORG_TRADING_NAME } from '@kervan/seo';
+import { Container, SocialIcon } from '@kervan/ui';
+import { ORG_PHONE, ORG_PHONE_E164, ORG_SOCIALS, ORG_TRADING_NAME } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import {
@@ -332,6 +332,24 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
                 </a>
               </li>
             </ul>
+            <div className="mt-6">
+              <p className={HEAD}>{t.footer.social}</p>
+              <ul className="m-0 mt-3 flex list-none flex-wrap gap-4 p-0">
+                {ORG_SOCIALS.map((s) => (
+                  <li key={s.key}>
+                    <a
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={t.footer.socials[s.key]}
+                      className={`inline-flex hover:text-ink ${FOCUS}`}
+                    >
+                      <SocialIcon name={s.key} size={18} />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </Container>
         <div className="border-t border-hair">
