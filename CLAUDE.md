@@ -64,7 +64,10 @@ deploy's `verify` job runs the same four and blocks every deploy.
   (`.claude/settings.json`) runs it before every `git commit` / `git push`, and `verify` runs it on
   every PR and push. Never bypass it; if it blocks a false positive, narrow its rule in a PR.
 - Tip codes (`KU{Ø}-{NN}`, SKU suffixes) are permanent: never renumber or reuse. No third-party
-  catalogue names or part numbers on the sites or in shop identifiers.
+  catalogue names on the sites or in shop identifiers, and no third-party part numbers, except
+  genuine OEM numbers in the shop's "Muadil OEM no." field (owner's decision; confirmed numbers
+  only, `apps/parts-shop/src/lib/oem-numbers.ts`, never in JSON-LD `mpn`/`sku`). Never VEGA
+  (`VT…`) numbers, Kervan drawing numbers or repair-kit codes.
 - Never invent references, customer names or numbers on the sites.
 - Never POST to `/api/tech/login` from CI or probes.
 - Images are cached immutable: a changed picture gets a **new file name** (`-02`, `-v2`).

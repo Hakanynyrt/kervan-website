@@ -3,8 +3,9 @@
 // - only the cart (/palet) and 404 pages carry meta robots noindex, and they must; every other
 //   page is indexable, has a self canonical on SITE and is listed in the sitemap, and its
 //   JSON-LD parses;
-// - no file in dist/ contains a forbidden string (third-party catalogue names or part
-//   numbers, private D1 columns);
+// - no file in dist/ contains a forbidden string (third-party catalogue names, VEGA part
+//   numbers, private D1 columns); genuine OEM numbers are allowed, only through the
+//   "Muadil OEM no." field (src/lib/oem-numbers.ts, owner's decision);
 // - at most MAX_FILES files (Pages limit).
 import fs from 'node:fs';
 import path from 'node:path';
