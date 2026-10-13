@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
 import { fadeUp, inViewOnce, useReducedMotion } from '../lib/motion';
 import { SectionHeading } from '@kervan/ui';
-import { ORG_EMAIL } from '@kervan/seo';
+import { ORG_PUBLIC_EMAIL } from '@kervan/seo';
 
 interface Props {
   t: DictBlock;
@@ -72,8 +72,11 @@ export default function Contact({ t }: Props) {
             {
               label: t.contact.emailLabel,
               value: (
-                <a href={`mailto:${ORG_EMAIL}`} className="hover:text-brand transition-colors">
-                  {ORG_EMAIL}
+                <a
+                  href={`mailto:${ORG_PUBLIC_EMAIL}`}
+                  className="hover:text-brand transition-colors"
+                >
+                  {ORG_PUBLIC_EMAIL}
                 </a>
               ),
             },
