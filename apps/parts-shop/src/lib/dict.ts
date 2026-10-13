@@ -1143,7 +1143,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     consent: {
       title: 'Çerez tercihi',
-      body: 'Reklamlarımızın işe yarayıp yaramadığını ölçmek için Google Ads çerezlerini kullanmak istiyoruz. Bu çerezler yalnızca kabul ederseniz yüklenir ve veriler Google’a (yurt dışına) aktarılır. Reddederseniz site ve sipariş aynen çalışır.',
+      body: 'Reklamlarımızın işe yarayıp yaramadığını ölçmek için Google Ads ve OpenAI (ChatGPT) Ads çerezlerini kullanmak istiyoruz. Bu çerezler yalnızca kabul ederseniz yüklenir ve veriler Google’a ve OpenAI’ye (yurt dışına) aktarılır. Reddederseniz site ve sipariş aynen çalışır.',
       accept: 'Kabul et',
       reject: 'Reddet',
       policy: 'Ayrıntılar',
@@ -1891,7 +1891,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     consent: {
       title: 'Cookie preference',
-      body: 'We would like to use Google Ads cookies to measure whether our ads work. They load only if you accept, and the data is transferred to Google (abroad). If you decline, the site and ordering work exactly the same.',
+      body: 'We would like to use Google Ads and OpenAI (ChatGPT) Ads cookies to measure whether our ads work. They load only if you accept, and the data is transferred to Google and OpenAI (abroad). If you decline, the site and ordering work exactly the same.',
       accept: 'Accept',
       reject: 'Decline',
       policy: 'Details',
