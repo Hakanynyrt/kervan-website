@@ -4,11 +4,12 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 /** "Tek Parça": one black breaker tip (pointed / moil, two key slots) standing
  *  steep (65°, point down and to the left, turned 25°) on the dark page, lit like a
- *  studio product shot: a baked softbox environment (long key strip along the tool
- *  axis, cool right strip and back-left kicker, a faint ember strip), a warm key, a
- *  cool fill and an ember rim light that slowly circles it. Under the point a
- *  faint ember pool lies on an unseen floor; an ember radial glow sits behind it
- *  (CSS, on the container). No stars, no bloom, no post-processing.
+ *  studio product shot: a baked softbox environment (long key strip, cool right
+ *  strip, a faint ember strip, top box, ember floor), a warm key, a cool fill, an
+ *  ember rim light that slowly circles it and a small ember bounce at the point.
+ *  The forged body carries a UV-mapped value-noise roughness and bump. Under the
+ *  point a faint ember pool lies on an unseen floor; an ember radial glow sits
+ *  behind it (CSS, on the container). No stars, no bloom, no post-processing.
  *
  *  Scroll rail (continuous, anchored to the hero element, read every frame):
  *    OPENING (scrollY 0 → heroTop)          — tip centred, 80 % of the frame tall
@@ -28,7 +29,7 @@ const smooth = (x: number) => x * x * (3 - 2 * x);
 const deg = THREE.MathUtils.degToRad;
 
 /** Model file. Images/models are cached immutable: a changed model gets a new name. */
-const MODEL_URL = '/kirici-ucu-siyah-01.glb';
+const MODEL_URL = '/kirici-ucu-siyah-02.glb';
 
 // Approved look (owner, "Tek Parça", realism + pose update 2026-10-13).
 const FOV_DEG = 16;
@@ -39,7 +40,12 @@ const TURN = 25; // turned 25° about the vertical
 const LEAN = -1; // point to the screen left, striking end to the upper right
 const HERO_EXTRA_YAW = -10;
 const ROLL = 95; // about the long axis: both key slots read as silhouette notches
-const RIM_ANGLE = 70; // rim light angle in the reduced-motion / start frame
+// Rim light orbit (radius, height, centre z): the start / reduced-motion frame
+// (angle −2.6°) puts it at (2.2, 1.4, −2.6), as in the approved look.
+const RIM_ANGLE = -2.6;
+const RIM_R = 2.2;
+const RIM_Y = 1.4;
+const RIM_Z = -2.5;
 const RIM_PERIOD_S = 12;
 // Projected tool height as a share of the frame height.
 const OPEN_H = 0.8;
@@ -56,8 +62,7 @@ const HERO_X_PORTRAIT = 0.65;
 const HERO_Y_PORTRAIT = 0.24;
 
 /** Studio environment baked once into a PMREM: a dark room with emissive
- *  softbox panels (colour × intensity, linear). The vertical strips lean with
- *  the tool axis so its reflection is one long continuous highlight. */
+ *  softbox panels (colour × intensity, linear), as in the approved look. */
 function buildStudioEnv(pmrem: THREE.PMREMGenerator): THREE.Texture {
   const studio = new THREE.Scene();
   const geos: THREE.BufferGeometry[] = [];
@@ -69,11 +74,7 @@ function buildStudioEnv(pmrem: THREE.PMREMGenerator): THREE.Texture {
   const room = new THREE.Mesh(roomGeo, roomMat);
   room.position.y = 2;
   studio.add(room);
-  const strips = new THREE.Group();
-  strips.rotation.z = deg(-(90 - ELEV));
-  studio.add(strips);
   const panel = (
-    parent: THREE.Object3D,
     w: number,
     h: number,
     col: number,
@@ -89,17 +90,15 @@ function buildStudioEnv(pmrem: THREE.PMREMGenerator): THREE.Texture {
     geos.push(g);
     mats.push(m);
     const mesh = new THREE.Mesh(g, m);
-    parent.add(mesh);
     mesh.position.set(...pos);
-    parent.updateMatrixWorld(true);
-    mesh.lookAt(parent.localToWorld(new THREE.Vector3(...look)));
+    mesh.lookAt(...look);
+    studio.add(mesh);
   };
-  panel(strips, 1.4, 6, 0xfff4e8, 16, [-3.2, 0.6, 2.2], [0, 0.3, 0]); // key strip
-  panel(strips, 0.5, 6, 0xe6eef8, 7, [3.3, 0.6, -0.4], [0, 0.3, 0]); // right strip
-  panel(strips, 0.5, 6, 0xcfd8e6, 3, [-4, 0.5, -2.5], [0, 0.3, 0]); // back-left kicker
-  panel(strips, 0.4, 4.5, 0xff5a14, 4, [-1.2, 0.6, -3.6], [0, 0.3, 0]); // ember strip
-  panel(studio, 3, 2.4, 0xffffff, 2.5, [0, 4.2, 0.8], [0, 0, 0]); // top box
-  panel(studio, 6, 6, 0xff6a1a, 0.2, [0, -1.4, 0], [0, 1, 0]); // ember floor
+  panel(0.9, 6, 0xfff4e8, 16, [-3.2, 0.6, 2.2], [0, 0.3, 0]); // key strip
+  panel(3, 2.4, 0xffffff, 2.5, [0, 4.2, 0.8], [0, 0, 0]); // top box
+  panel(0.5, 6, 0xe6eef8, 7, [3.3, 0.6, -0.4], [0, 0.3, 0]); // right strip
+  panel(0.4, 4.5, 0xff5a14, 6, [-1.2, 0.6, -3.6], [0, 0.3, 0]); // ember strip
+  panel(6, 6, 0xff6a1a, 0.2, [0, -1.4, 0], [0, 1, 0]); // ember floor
   const tex = pmrem.fromScene(studio, 0.02).texture;
   geos.forEach((g) => g.dispose());
   mats.forEach((m) => m.dispose());
@@ -148,131 +147,26 @@ function makeNoiseTexture(): THREE.CanvasTexture {
   }
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  // Sampled with a cylindrical mapping in the shader (no UVs in the model):
-  // no mipmaps, so the wrap of the angle leaves no seam.
-  tex.generateMipmaps = false;
-  tex.minFilter = THREE.LinearFilter;
+  // Model UVs: u 0..1 around the tool, v 0..1 along it (the source's 0..5 / 5),
+  // so 3 tiles around and 5 along.
+  tex.repeat.set(3, 5);
   return tex;
 }
 
-/** Forged-surface roughness noise, a light bump and the key-slot occlusion,
- *  added to a standard material. The noise is mapped around the long axis
- *  (3 tiles around, 5 along the length) from the object-space position. */
-function addSurfaceDetail(
-  mat: THREE.MeshStandardMaterial,
-  cacheKey: string,
-  noise: THREE.Texture,
-  roughVar: number,
-  bumpScale: number,
-  axis: { swizzle: string; alongScale: number },
-) {
-  mat.customProgramCacheKey = () => cacheKey;
+/** Forged surface: the roughness map (the noise) varies the roughness around
+ *  `base` by ±`variation` instead of multiplying it. */
+function addRoughnessVariation(mat: THREE.MeshStandardMaterial, base: number, variation: number) {
+  mat.customProgramCacheKey = () => `kv-tip-rough-${base}-${variation}`;
   mat.onBeforeCompile = (sh) => {
-    sh.uniforms.uNoise = { value: noise };
-    sh.uniforms.uRoughVar = { value: roughVar };
-    sh.uniforms.uBump = { value: bumpScale };
-    sh.uniforms.uAlong = { value: axis.alongScale };
-    sh.vertexShader = sh.vertexShader
-      .replace(
-        '#include <common>',
-        '#include <common>\nattribute float ao;\nvarying float vAO;\nvarying vec3 vObjP;',
-      )
-      .replace(
-        '#include <begin_vertex>',
-        `#include <begin_vertex>\nvAO = ao;\nvObjP = position.${axis.swizzle};`,
-      );
-    sh.fragmentShader = sh.fragmentShader
-      .replace(
-        '#include <common>',
-        `#include <common>
-uniform sampler2D uNoise;
-uniform float uRoughVar;
-uniform float uBump;
-uniform float uAlong;
-varying float vAO;
-varying vec3 vObjP; // xy across the long axis, z along it
-vec3 cvPerturb( vec3 surf_pos, vec3 surf_norm, vec2 dHdxy, float faceDirection ) {
-  vec3 vSigmaX = normalize( dFdx( surf_pos ) );
-  vec3 vSigmaY = normalize( dFdy( surf_pos ) );
-  vec3 R1 = cross( vSigmaY, surf_norm );
-  vec3 R2 = cross( surf_norm, vSigmaX );
-  float fDet = dot( vSigmaX, R1 ) * faceDirection;
-  vec3 vGrad = sign( fDet ) * ( dHdxy.x * R1 + dHdxy.y * R2 );
-  return normalize( abs( fDet ) * surf_norm - vGrad );
-}`,
-      )
-      .replace(
-        '#include <roughnessmap_fragment>',
-        `vec2 cvUv = vec2( atan( vObjP.y, vObjP.x ) * ( 3.0 / 6.2831853 ), vObjP.z * uAlong );
-float cvH = texture2D( uNoise, cvUv ).g;
-float roughnessFactor = roughness + ( cvH - 0.5 ) * 2.0 * uRoughVar;`,
-      )
-      .replace(
-        '#include <normal_fragment_maps>',
-        `#include <normal_fragment_maps>
-if ( uBump > 0.0 ) normal = cvPerturb( - vViewPosition, normal, vec2( dFdx( cvH ), dFdy( cvH ) ) * uBump, faceDirection );`,
-      )
-      .replace(
-        '#include <aomap_fragment>',
-        `#include <aomap_fragment>
-reflectedLight.indirectDiffuse *= vAO;
-reflectedLight.indirectSpecular *= vAO * vAO;
-reflectedLight.directDiffuse *= mix( 1.0, vAO, 0.6 );
-reflectedLight.directSpecular *= mix( 1.0, vAO, 0.6 );`,
-      );
+    sh.fragmentShader = sh.fragmentShader.replace(
+      '#include <roughnessmap_fragment>',
+      `float roughnessFactor = ${base.toFixed(3)};
+#ifdef USE_ROUGHNESSMAP
+  vec4 texelRoughness = texture2D( roughnessMap, vRoughnessMapUv );
+  roughnessFactor += ( texelRoughness.g - 0.5 ) * ${(2 * variation).toFixed(3)};
+#endif`,
+    );
   };
-}
-
-/** Per-vertex occlusion for the key slots: a vertex below the local outer radius
- *  (max radius within ±2 of ~200 bins along the long axis) is darkened by up to
- *  35 %. The end faces are left alone. Positions are in the model's own units. */
-function computeSlotAO(geos: THREE.BufferGeometry[], axisIdx: number) {
-  const BINS = 200;
-  const a = (axisIdx + 1) % 3,
-    b = (axisIdx + 2) % 3;
-  let lo = Infinity,
-    hi = -Infinity;
-  for (const g of geos) {
-    const p = g.getAttribute('position');
-    for (let i = 0; i < p.count; i++) {
-      const t = p.getComponent(i, axisIdx);
-      lo = Math.min(lo, t);
-      hi = Math.max(hi, t);
-    }
-  }
-  const L = Math.max(1e-9, hi - lo);
-  const binOf = (t: number) => Math.min(BINS - 1, Math.max(0, Math.floor(((t - lo) / L) * BINS)));
-  const rmax = new Float32Array(BINS);
-  for (const g of geos) {
-    const p = g.getAttribute('position');
-    for (let i = 0; i < p.count; i++) {
-      const k = binOf(p.getComponent(i, axisIdx));
-      rmax[k] = Math.max(rmax[k] ?? 0, Math.hypot(p.getComponent(i, a), p.getComponent(i, b)));
-    }
-  }
-  const rnb = new Float32Array(BINS);
-  for (let k = 0; k < BINS; k++) {
-    let m = 0;
-    for (let j = Math.max(0, k - 2); j <= Math.min(BINS - 1, k + 2); j++)
-      m = Math.max(m, rmax[j] ?? 0);
-    rnb[k] = m;
-  }
-  for (const g of geos) {
-    const p = g.getAttribute('position');
-    const ao = new Float32Array(p.count);
-    for (let i = 0; i < p.count; i++) {
-      const tAx = p.getComponent(i, axisIdx);
-      const u = (tAx - lo) / L;
-      if (u < 0.03 || u > 0.97) {
-        ao[i] = 1;
-        continue;
-      }
-      const r = Math.hypot(p.getComponent(i, a), p.getComponent(i, b));
-      const t = clamp01(((rnb[binOf(tAx)] ?? 0) - r) / L / 0.02);
-      ao[i] = 1 - 0.35 * smooth(t);
-    }
-    g.setAttribute('ao', new THREE.BufferAttribute(ao, 1));
-  }
 }
 
 /** Soft ember pool under the point (additive, on an unseen floor). */
@@ -437,7 +331,7 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     const fill = new THREE.DirectionalLight(0x9fb4d0, 0.25);
     fill.position.set(4, 1, 2);
     scene.add(fill);
-    const RIM_I = 2.6;
+    const RIM_I = 3.5;
     const rim = new THREE.DirectionalLight(0xff6a1a, RIM_I);
     scene.add(rim);
     // Rim position on its orbit (angle a), turned with the tip's extra hero yaw
@@ -449,28 +343,36 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     const setRim = (a: number, dy = 0) => {
       const d = Math.atan2(Math.sin(a - RIM_DIP), Math.cos(a - RIM_DIP)) / RIM_DIP_W;
       rim.intensity = RIM_I * (1 - 0.8 * Math.exp(-d * d));
-      const x = Math.cos(a) * 3;
-      const z = Math.sin(a) * 3 - 2.5;
+      const x = Math.cos(a) * RIM_R;
+      const z = Math.sin(a) * RIM_R + RIM_Z;
       rim.position.set(
         x * Math.cos(dy) + z * Math.sin(dy),
-        2.2,
+        RIM_Y,
         z * Math.cos(dy) - x * Math.sin(dy),
       );
     };
     setRim(deg(RIM_ANGLE));
+    // Small ember bounce just behind and below the point (placed every frame).
+    const bounce = new THREE.PointLight(0xff5a14, 0.4, 0.5, 2);
+    scene.add(bounce);
 
-    // Every surface black (owner): forged body with a fine roughness noise and
-    // the machined faces (key slots, ends) as smoother metal.
+    // Every surface black (owner): forged body with a UV-mapped value noise as
+    // roughness variation (0.36 ± 0.18) and bump, the machined faces (key slots,
+    // ends) as smoother metal.
     const noiseTex = makeNoiseTexture();
     const bodyMat = new THREE.MeshStandardMaterial({
-      color: 0x202226,
-      metalness: 0.6,
-      roughness: 0.34,
+      color: 0x1d1f22,
+      metalness: 0.55,
+      roughness: 1,
+      roughnessMap: noiseTex,
+      bumpMap: noiseTex,
+      bumpScale: 0.3,
     });
+    addRoughnessVariation(bodyMat, 0.36, 0.18);
     const machinedMat = new THREE.MeshStandardMaterial({
       color: 0x1e2024,
       metalness: 1,
-      roughness: 0.38,
+      roughness: 0.4,
     });
 
     // Ember pool on the unseen floor under the point (not part of the tip).
@@ -538,7 +440,6 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
         if (disposed) return;
         try {
           const model = gltf.scene;
-          const meshGeos: THREE.BufferGeometry[] = [];
           model.traverse((o) => {
             const mesh = o as THREE.Mesh;
             if (!mesh.isMesh) return;
@@ -546,7 +447,6 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
             (mesh.material as THREE.Material).dispose();
             mesh.material = name === 'machined' ? machinedMat : bodyMat;
             loaded.push(mesh.geometry);
-            meshGeos.push(mesh.geometry);
           });
           // Centre on the bbox, long axis → X, length 1.
           const box = new THREE.Box3().setFromObject(model);
@@ -561,25 +461,6 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
           else if (axisIdx === 2) piv.rotation.y = Math.PI / 2;
           piv.scale.setScalar(1 / Math.max(1e-6, L));
           rollG.add(piv);
-
-          // Surface detail in the model's own (geometry) units.
-          let gLo = Infinity,
-            gHi = -Infinity;
-          for (const g of meshGeos) {
-            g.computeBoundingBox();
-            const bb = g.boundingBox;
-            if (!bb) continue;
-            gLo = Math.min(gLo, bb.min.getComponent(axisIdx));
-            gHi = Math.max(gHi, bb.max.getComponent(axisIdx));
-          }
-          const gL = Math.max(1e-9, gHi - gLo);
-          computeSlotAO(meshGeos, axisIdx);
-          const axis = {
-            swizzle: ['yzx', 'xzy', 'xyz'][axisIdx] ?? 'xzy',
-            alongScale: 5 / gL,
-          };
-          addSurfaceDetail(bodyMat, 'kv-tip-body', noiseTex, 0.16, 0.25, axis);
-          addSurfaceDetail(machinedMat, 'kv-tip-machined', noiseTex, 0, 0, axis);
 
           // Extent of the posed tool at unit scale, for sizing by height.
           outer.quaternion.copy(qBase);
@@ -744,6 +625,8 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       pool.scale.set(poolR, poolR * lerp(3, 4.5, pose), 1);
       poolMat.opacity = lerp(0.5, 0.3, pose);
       pool.visible = modelLoaded;
+      bounce.position.set(pointWorld.x, pointWorld.y - 0.03 * cur.s, pointWorld.z - 0.12 * cur.s);
+      bounce.distance = 0.5 * cur.s;
 
       // A short fade-in once the model arrives (instant under reduced motion).
       const loadIn = !modelLoaded ? 0 : reduced ? 1 : clamp01((now - loadedAt) / 600);
