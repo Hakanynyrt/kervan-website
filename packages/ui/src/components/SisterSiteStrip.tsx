@@ -20,8 +20,6 @@ const onSpace = (e: ReactKeyboardEvent<HTMLAnchorElement>) => {
 };
 
 export interface SisterSiteCopy {
-  /** Pill label, sm+ (CSS-uppercased; <html lang> makes TR "KARDEŞ SİTE"). */
-  tag: string;
   /** Lead before the domain, md+. */
   lead: string;
   /** Lead before the domain, below md (sr-only under 340px). */
@@ -105,15 +103,6 @@ export function SisterSiteStrip({ lang, t, image, hidden, sheenAt }: Props) {
                 : 'transition-transform duration-250 ease-editorial group-hover:scale-110 group-focus-visible:scale-110')
             }
           />
-        </span>{' '}
-        <span className="hidden sm:inline-flex shrink-0 items-center gap-1.5 rounded-pill border border-brand px-2.5 py-1">
-          <span
-            aria-hidden="true"
-            className="size-1.5 rounded-pill bg-brand-hi shadow-glow-brand"
-          />
-          <span className="text-xs/none font-medium uppercase tracking-[0.2em] text-brand-hi">
-            {t.tag}
-          </span>
         </span>{' '}
         {/* Only the lead shrinks (ellipsis) when the text is enlarged; the domain and arrow always stay whole.
             Colour sits on the spans: the apps' global `a { color: inherit }` overrides utilities on the <a>. */}

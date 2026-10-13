@@ -49,7 +49,6 @@ export const DICT: Dict = {
       language: 'Dil',
     },
     sister: {
-      tag: 'Kardeş site',
       lead: 'Hidrolik kırıcı yedek parçalarımız ayrı sitemizde:',
       leadShort: 'Kırıcı yedek parçaları:',
       site: 'kervanbreaker.com',
@@ -258,7 +257,6 @@ export const DICT: Dict = {
       language: 'Language',
     },
     sister: {
-      tag: 'Sister site',
       lead: 'Our hydraulic breaker spare parts have their own site:',
       leadShort: 'Breaker spare parts:',
       site: 'kervanbreaker.com',

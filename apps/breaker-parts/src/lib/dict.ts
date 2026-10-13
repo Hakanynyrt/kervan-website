@@ -20,7 +20,6 @@ export const DICT: Dict = {
       language: 'Dil',
     },
     sister: {
-      tag: 'Kardeş site',
       lead: 'Kontrollü atmosfer fırınlarda fason ısıl işlem hizmetimiz:',
       leadShort: 'Fason ısıl işlem:',
       site: 'kervanheat.com',
@@ -552,7 +551,6 @@ export const DICT: Dict = {
       language: 'Language',
     },
     sister: {
-      tag: 'Sister site',
       lead: 'Our contract heat treatment in controlled-atmosphere furnaces:',
       leadShort: 'Contract heat treatment:',
       site: 'kervanheat.com',
