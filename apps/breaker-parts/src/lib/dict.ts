@@ -453,7 +453,7 @@ export const DICT: Dict = {
       eyebrow: 'Hakkımızda',
       title: 'Aynı çatı, iki disiplin.',
       body: "Kervan Makina, Kartepe / Kocaeli'de hem fason ısıl işlem (kervanheat.com) hem de hidrolik kırıcı yedek parça üretimi yapan bir aile şirketi. Aynı tezgâhta, aynı ellerle. Bu sitede hidrolik kırıcı yedek parça vitrinimiz var — ısıl işlem hizmeti için kervanheat.com'a bakın.",
-      company: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
+      company: 'Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti.',
       location: 'Kartepe · Kocaeli',
     },
     productDetail: {
@@ -532,8 +532,15 @@ export const DICT: Dict = {
     footer: {
       brand: 'Kervan Breaker',
       tag: 'Kocaeli · 2004',
-      rights: '© 2026 Kervan Isıl İşlem San. Tic. Ltd. Şti. Tüm hakları saklıdır.',
+      rights: '© 2026 Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti. Tüm hakları saklıdır.',
       kvkk: 'KVKK',
+      social: {
+        facebook: 'Facebook — Kervan Breaker',
+        instagram: 'Instagram — Kervan Breaker',
+        youtube: 'YouTube — Kervan Breaker',
+        linkedin: 'LinkedIn — Kervan Breaker',
+        x: 'X — Kervan Breaker',
+      },
     },
   },
 
@@ -987,7 +994,7 @@ export const DICT: Dict = {
       eyebrow: 'About',
       title: 'One roof, two disciplines.',
       body: 'Kervan Makina is a family business in Kartepe / Kocaeli running both contract heat treatment (kervanheat.com) and hydraulic breaker spare-part production. Same bench, same hands. This site is the breaker-parts catalogue — for heat treatment service, see kervanheat.com.',
-      company: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
+      company: 'Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti.',
       location: 'Kartepe · Kocaeli · Türkiye',
     },
     productDetail: {
@@ -1066,8 +1073,15 @@ export const DICT: Dict = {
     footer: {
       brand: 'Kervan Breaker',
       tag: 'Kocaeli · Since 2004',
-      rights: '© 2026 Kervan Isıl İşlem San. Tic. Ltd. Şti. All rights reserved.',
+      rights: '© 2026 Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti. All rights reserved.',
       kvkk: 'Privacy',
+      social: {
+        facebook: 'Facebook — Kervan Breaker',
+        instagram: 'Instagram — Kervan Breaker',
+        youtube: 'YouTube — Kervan Breaker',
+        linkedin: 'LinkedIn — Kervan Breaker',
+        x: 'X — Kervan Breaker',
+      },
     },
   },
 };

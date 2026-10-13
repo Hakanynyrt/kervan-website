@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
-import { ORG_EMAIL } from '@kervan/seo';
+import { ORG_PUBLIC_EMAIL } from '@kervan/seo';
 import { fadeUp, inViewOnce, useReducedMotion, useStaticMotion } from '@kervan/motion';
 import { PRODUCT_BY_SLUG } from '../data/products';
 import type { DictBlock, Lang } from '../types';
@@ -106,8 +106,11 @@ export default function Contact({ t, lang }: Props) {
               {
                 label: t.contact.emailLabel,
                 value: (
-                  <a href={`mailto:${ORG_EMAIL}`} className="hover:text-brand transition-colors">
-                    {ORG_EMAIL}
+                  <a
+                    href={`mailto:${ORG_PUBLIC_EMAIL}`}
+                    className="hover:text-brand transition-colors"
+                  >
+                    {ORG_PUBLIC_EMAIL}
                   </a>
                 ),
               },

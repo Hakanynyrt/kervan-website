@@ -1,3 +1,4 @@
+import type { OrgSocialKey } from '@kervan/seo';
 /* ═══════════════════════════════════════════════════════════════════════
    Dictionary types — combines the rich kervanbreaker.com long-scroll
    surface with the Faz 3 page routes (ProductDetail, Brands, Production,
@@ -381,6 +382,7 @@ export interface DictBlock {
     tag: string;
     rights: string;
     kvkk: string;
+    social: Record<OrgSocialKey, string>;
   };
 }
 

@@ -1,6 +1,6 @@
 import {
   KERVAN_BREAKER_URL,
-  ORG_EMAIL,
+  ORG_PUBLIC_EMAIL,
   ORG_PHONE,
   breadcrumbList,
   itemList,
@@ -166,7 +166,9 @@ export function pageHead(pathname: string): PageHead {
         ],
       };
     case '/iletisim': {
-      const description = m.contactDesc.replace('{email}', ORG_EMAIL).replace('{phone}', ORG_PHONE);
+      const description = m.contactDesc
+        .replace('{email}', ORG_PUBLIC_EMAIL)
+        .replace('{phone}', ORG_PHONE);
       return {
         ...common,
         title: m.contactTitle,
