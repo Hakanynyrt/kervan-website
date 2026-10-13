@@ -84,6 +84,17 @@ export interface DictBlock {
     /** Hero film card (client-only video over a poster). */
     film: { alt: string; caption: string; pause: string; play: string };
   };
+  /** "Isınıp soğuyan parça": 3D tip cooling on scroll (Cooling.tsx). */
+  cooling: {
+    title: string;
+    body: string;
+    /** Three stage labels, highlighted as the piece cools. */
+    steps: [string, string, string];
+    /** aria-label of the 3D stage. */
+    sceneLabel: string;
+    /** Alt text of the static poster (cherry-red frame). */
+    posterAlt: string;
+  };
   services: {
     eyebrow: string;
     title: string;
