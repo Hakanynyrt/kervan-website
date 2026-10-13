@@ -1152,6 +1152,7 @@ export const DICT: Record<Lang, Dict> = {
         youtube: 'Kervan YouTube kanalı',
         linkedin: 'Kervan LinkedIn sayfası',
         x: 'Kervan X hesabı',
+        telegram: 'Kervan Telegram kanalı',
       },
     },
     consent: {
@@ -1908,6 +1909,7 @@ export const DICT: Record<Lang, Dict> = {
         youtube: 'Kervan on YouTube',
         linkedin: 'Kervan on LinkedIn',
         x: 'Kervan on X',
+        telegram: 'Kervan on Telegram',
       },
     },
     consent: {

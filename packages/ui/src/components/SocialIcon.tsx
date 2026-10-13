@@ -1,5 +1,5 @@
 /** Same keys as `OrgSocialKey` in `@kervan/seo` (kept local: `@kervan/ui` does not depend on it). */
-export type SocialIconName = 'facebook' | 'instagram' | 'youtube' | 'linkedin' | 'x';
+export type SocialIconName = 'facebook' | 'instagram' | 'youtube' | 'linkedin' | 'x' | 'telegram';
 
 /* Monochrome social glyphs (24×24, currentColor) for the footers' profile links.
    Purely decorative: the surrounding link carries the accessible name (aria-label from dict). */
@@ -49,6 +49,12 @@ const PATHS: Record<SocialIconName, JSX.Element> = {
     <path
       fill="currentColor"
       d="M17.2 3.5h3l-6.6 7.5 7.8 9.5h-6.1l-4.8-5.9-5.5 5.9h-3l7.1-7.9L1.6 3.5h6.2l4.3 5.4 5.1-5.4zm-1 15.3h1.7L7 5.1H5.2l11 13.7z"
+    />
+  ),
+  telegram: (
+    <path
+      fill="currentColor"
+      d="M21.5 4.2 2.9 11.4c-1.2.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.1.9.8.9.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.6c.3-1.3-.5-1.8-1.4-1.1zM9.2 14.1l9.1-5.7c.4-.3.8-.1.5.2l-7.8 7-.3 3.2-1.5-4.7z"
     />
   ),
 };
