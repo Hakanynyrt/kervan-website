@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ORG_EMAIL } from '@kervan/seo';
+import { ORG_PUBLIC_EMAIL, ORG_SOCIALS } from '@kervan/seo';
+import { SocialIcon } from '@kervan/ui';
 import type { DictBlock } from '../types';
 import { useLocale, useLocalePath } from '../lib/locale-path';
 import { shopUrl } from '../lib/shop';
@@ -24,29 +25,18 @@ export default function Footer({ t }: Props) {
         </Link>
 
         <nav className="flex flex-wrap gap-x-6 gap-y-2 font-sans text-sm text-ink-mid items-center">
-          <a
-            href="https://www.instagram.com/kervanmakina/"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Instagram @kervanmakina"
-            className="inline-flex items-center justify-center w-8 h-8 hover:text-ink transition-colors"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+          {ORG_SOCIALS.map(({ key, url }) => (
+            <a
+              key={key}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t.footer.social[key]}
+              className="inline-flex items-center justify-center w-8 h-8 hover:text-ink transition-colors"
             >
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-            </svg>
-          </a>
+              <SocialIcon name={key} />
+            </a>
+          ))}
           {/* Sister sites: same tab, no rel, like the sister-site strip. */}
           <a
             href={lang === 'en' ? 'https://kervanheat.com/en/' : 'https://kervanheat.com/'}
@@ -61,8 +51,8 @@ export default function Footer({ t }: Props) {
           <a href="/kvkk" className="hover:text-ink transition-colors">
             {t.footer.kvkk}
           </a>
-          <a href={`mailto:${ORG_EMAIL}`} className="hover:text-ink transition-colors">
-            {ORG_EMAIL}
+          <a href={`mailto:${ORG_PUBLIC_EMAIL}`} className="hover:text-ink transition-colors">
+            {ORG_PUBLIC_EMAIL}
           </a>
           <a href="tel:+905316693734" className="hover:text-ink transition-colors">
             +90 531 669 37 34

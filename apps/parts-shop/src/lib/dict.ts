@@ -1,3 +1,4 @@
+import type { OrgSocialKey } from '@kervan/seo';
 import type { TipType } from '@kervan/tips';
 import type { PartKey } from './routes';
 import type { Lang } from '../types';
@@ -403,6 +404,10 @@ export interface Dict {
     fax: string;
     /** Reopens the cookie banner (ConsentBanner). */
     cookies: string;
+    /** Heading over the social profile links. */
+    social: string;
+    /** aria-label of each social profile link (icon only). */
+    socials: Record<OrgSocialKey, string>;
   };
   /** Cookie banner for Google Ads measurement (ConsentBanner). */
   consent: { title: string; body: string; accept: string; reject: string; policy: string };
@@ -1140,6 +1145,14 @@ export const DICT: Record<Lang, Dict> = {
       images:
         '© Kervan Makina. Ürün görselleri Kervan Makina’ya aittir, temsilidir; izinsiz kullanılamaz.',
       cookies: 'Çerez tercihleri',
+      social: 'Sosyal medya',
+      socials: {
+        facebook: 'Kervan Facebook sayfası',
+        instagram: 'Kervan Instagram hesabı',
+        youtube: 'Kervan YouTube kanalı',
+        linkedin: 'Kervan LinkedIn sayfası',
+        x: 'Kervan X hesabı',
+      },
     },
     consent: {
       title: 'Çerez tercihi',
@@ -1888,6 +1901,14 @@ export const DICT: Record<Lang, Dict> = {
       images:
         '© Kervan Makina. Product images belong to Kervan Makina and are illustrations; do not use without permission.',
       cookies: 'Cookie preferences',
+      social: 'Social media',
+      socials: {
+        facebook: 'Kervan on Facebook',
+        instagram: 'Kervan on Instagram',
+        youtube: 'Kervan on YouTube',
+        linkedin: 'Kervan on LinkedIn',
+        x: 'Kervan on X',
+      },
     },
     consent: {
       title: 'Cookie preference',

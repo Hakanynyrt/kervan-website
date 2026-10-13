@@ -1,4 +1,5 @@
-import { ORG_EMAIL, ORG_PHONE } from '@kervan/seo';
+import { ORG_PHONE, ORG_REGISTERED_NAME } from '@kervan/seo';
+import { SHOP_EMAIL } from './site';
 import type { Lang } from '../types';
 
 /**
@@ -12,13 +13,13 @@ export const LEGAL_PATH = '/yasal';
 export const legalPath = (k: LegalKey): string => `${LEGAL_PATH}/${k}`;
 
 export const SELLER = {
-  name: 'Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti.',
+  name: ORG_REGISTERED_NAME,
   address: 'Uzunçiftlik Mh. Sadun Atığ Cd. No:112, Kartepe / Kocaeli',
   tax: 'Alemdar V.D. 5451088184',
   phone: '0 (262) 371 10 05',
   fax: '0 (262) 371 10 04',
   mobile: ORG_PHONE,
-  email: ORG_EMAIL,
+  email: SHOP_EMAIL,
   web: 'kiriciparca.com',
 } as const;
 
