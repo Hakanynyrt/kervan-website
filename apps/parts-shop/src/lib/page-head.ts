@@ -79,7 +79,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
             ...organization({
               primaryUrl: SITE,
               alternateName: m.siteName,
-              logoUrl: `${SITE}/logo-krv-128.webp`,
+              logoUrl: `${SITE}/logo-krv-v2-256.png`,
             }),
             '@id': `${SITE}/#organization`,
             name: ORG_TRADING_NAME,

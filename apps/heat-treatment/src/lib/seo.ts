@@ -45,7 +45,7 @@ function organization() {
     legalName: ORG_LEGAL_NAME,
     alternateName: SITE_NAME,
     url: SITE,
-    logo: `${SITE}/logo-krv-128.png`,
+    logo: `${SITE}/logo-krv-v2-256.png`,
     sameAs: [KERVAN_BREAKER_URL, KERVAN_SHOP_URL, ORG_INSTAGRAM],
     contactPoint: {
       '@type': 'ContactPoint',

@@ -30,4 +30,5 @@
 
 - Start with `21st_magic_component_inspiration`; never generate cold.
 - Never accept output verbatim: convert to this repo's conventions — map colors/spacing to `@kervan/ui` tokens, use `@kervan/ui` components where they exist, replace `lucide-react` with inline SVG or the `Icon` component, and apply the motion contract above.
+- Kervan logo (all three sites, owner 2026-10-13): the **KRV** mark, steel-grey letters `#747b83` with the V drawn as a chisel tip in ember `#d9481c`. The SAME colours on the light and dark themes (owner: no dark variant); both read about 4.3:1 on white and on `#141416`. Files in each app's `public/`: `logo-krv-v2.svg` (header, footer, 404; shown 32 to 40 px high, width auto), `logo-krv-v2-256.png` (JSON-LD `logo`), `favicon-16.png` / `favicon-32.png` (pixel-fitted KRV), `apple-touch-icon.png` (180 px, mark on `#141416`). No lone letter and no tile or box around the mark (owner).
 - Brand logo bars: `logo_search` against Atlas Copco, Furukawa, Soosan, Montabert, Indeco, Rammer, Epiroc, Sandvik, NPK, Toku, Kobelco, Hanwoo (existing logos: `apps/breaker-parts/public/brand-logos/`).
