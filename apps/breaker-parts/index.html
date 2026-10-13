@@ -4,8 +4,31 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kervan Breaker — Hidrolik kırıcı yedek parçaları</title>
-    <meta name="description" content="Keski, piston, burç, sızdırmazlık. 2004'ten beri Kocaeli'de üretiliyor. 40+ kırıcı markası uyumlu." />
+    <meta
+      name="description"
+      content="Keski, piston, burç, sızdırmazlık. 2004'ten beri Kocaeli'de üretiliyor. 40+ kırıcı markası uyumlu."
+    />
     <meta name="theme-color" content="#0A0A0B" />
+    <script>
+      // Light by day, dark at night: the edge middleware (functions/_middleware.ts) sets
+      // data-sun = day | night on the html element; a theme picked by hand (header "Tema", localStorage
+      // kv_theme) wins and is applied here before paint. No mark ⇒ the dark (night) look. Keep
+      // the key and the colours in sync with @kervan/ui ThemeSelect and src/styles/globals.css.
+      (function () {
+        var h = document.documentElement;
+        try {
+          var t = localStorage.getItem('kv_theme');
+          if (t === 'dark' || t === 'light') h.setAttribute('data-theme', t);
+        } catch (e) {
+          /* storage blocked: the sun decides */
+        }
+        var light =
+          h.getAttribute('data-theme') === 'light' ||
+          (h.getAttribute('data-theme') !== 'dark' && h.getAttribute('data-sun') === 'day');
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', light ? '#F6F3EE' : '#0A0A0B');
+      })();
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

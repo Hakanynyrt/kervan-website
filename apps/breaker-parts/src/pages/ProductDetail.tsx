@@ -71,7 +71,7 @@ export default function ProductDetail({ t, lang }: Props) {
                     className="absolute inset-0 flex items-center justify-center"
                     style={{
                       background:
-                        'radial-gradient(ellipse at 30% 30%, rgba(232,67,27,0.18), transparent 60%), linear-gradient(135deg, #1C1C20, #141416)',
+                        'radial-gradient(ellipse at 30% 30%, var(--kv-ph-glow, rgba(232,67,27,0.18)), transparent 60%), linear-gradient(135deg, var(--color-bg-warm), var(--color-bg-soft))',
                     }}
                   >
                     <span className="font-serif italic text-4xl md:text-5xl text-ink-mid opacity-60 px-6 text-center">

@@ -17,6 +17,8 @@ export type { SocialIconName } from './components/SocialIcon.js';
 export { Marquee } from './components/Marquee.js';
 export { SisterSiteStrip } from './components/SisterSiteStrip.js';
 export type { SisterSiteCopy } from './components/SisterSiteStrip.js';
+export { ThemeSelect } from './components/ThemeSelect.js';
+export type { ThemeSelectCopy } from './components/ThemeSelect.js';
 
 // Helpers
 export { cn } from './lib/cn.js';

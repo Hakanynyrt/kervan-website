@@ -21,6 +21,69 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+   Day theme ("fırın kâğıdı"): light by day, today's dark Mood C at night.
+   The edge middleware (functions/_middleware.ts) marks the page
+   `<html data-sun="day|night">` by the sun where the visitor is; the theme
+   select (localStorage `kv_theme`, applied by the inline script in
+   index.html before paint) overrides it with `data-theme`. Without either
+   mark the page keeps the dark Mood C of @kervan/ui (the night look).
+   A shade warmer than kervanbreaker.com's paper (#F6F3EE), same ember.
+   Contrast (WCAG): ink-soft 5.10:1, brand 4.85:1 on bg-warm; bg-coloured
+   text on brand buttons 5.65:1. Unlayered so it wins over @theme.
+═══════════════════════════════════════════════════════════════════════ */
+:root[data-theme='light'],
+:root[data-sun='day']:not([data-theme='dark']) {
+  --color-bg: #f5f0e8;
+  --color-bg-soft: #eee7dc;
+  --color-bg-warm: #e7dfd2;
+  --color-ink: #1c1712;
+  --color-ink-mid: #4b4239;
+  --color-ink-soft: #645a4e;
+  --color-brand: #ad340e;
+  --color-brand-hi: #942c0b;
+  --color-brand-lo: #82270a;
+  --color-brand-soft: rgba(173, 52, 14, 0.08);
+  --color-hair: #ddd4c6;
+  --color-hair-strong: #bcb1a1;
+  --color-ok: #1e7046;
+  --color-err: #b42318;
+  --shadow-xs: 0 1px 2px rgba(40, 30, 20, 0.08);
+  --shadow-sm: 0 2px 8px rgba(40, 30, 20, 0.08);
+  --shadow-md: 0 6px 24px rgba(40, 30, 20, 0.1);
+  --shadow-lg: 0 16px 48px rgba(40, 30, 20, 0.12);
+  color-scheme: light;
+}
+
+/* The night palette on one part of a day page: the cooling section (#sogutma),
+   whose glowing-to-black tip only reads on dark. Same values as @kervan/ui
+   tokens.css, so on the night theme nothing changes. */
+.kv-night {
+  --color-bg: #0a0a0b;
+  --color-bg-soft: #141416;
+  --color-bg-warm: #1c1c20;
+  --color-ink: #e8e2d6;
+  --color-ink-mid: #b8afa0;
+  --color-ink-soft: #918879;
+  --color-brand: #e8431b;
+  --color-brand-hi: #ff5c32;
+  --color-brand-lo: #c53614;
+  --color-brand-soft: rgba(232, 67, 27, 0.12);
+  --color-hair: #262629;
+  --color-hair-strong: #36363b;
+  color: var(--color-ink);
+  color-scheme: dark;
+}
+/* Links ignore Tailwind's text colour (the unlayered `a { color: inherit }`
+   below), so day-theme brand buttons would inherit the dark ink: give them
+   the page colour (5.65:1 on brand). The night look is left as it is. */
+:root[data-theme='light'] a.text-bg:not(.kv-night *),
+:root[data-sun='day']:not([data-theme='dark']) a.text-bg:not(.kv-night *),
+:root[data-theme='light'] a.hover\:text-bg:hover:not(.kv-night *),
+:root[data-sun='day']:not([data-theme='dark']) a.hover\:text-bg:hover:not(.kv-night *) {
+  color: var(--color-bg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
    Heat-treatment app — Mood C tokens are sourced from @kervan/ui.
    This file owns base reset and font-* utilities only.
 ═══════════════════════════════════════════════════════════════════════ */

@@ -21,6 +21,62 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+   Day theme ("kâğıt"): light by day, today's dark Mood C at night.
+   The edge middleware (functions/_middleware.ts) marks the page
+   `<html data-sun="day|night">` by the sun where the visitor is; the theme
+   select (localStorage `kv_theme`, applied by the inline script in
+   index.html before paint) overrides it with `data-theme`. Without either
+   mark the page keeps the dark Mood C of @kervan/ui (the night look).
+   Contrast (WCAG): ink-soft 4.92:1, brand 4.76:1 on bg-warm; bg-coloured
+   text on brand buttons 5.64:1. Unlayered so it wins over @theme.
+═══════════════════════════════════════════════════════════════════════ */
+:root[data-theme='light'],
+:root[data-sun='day']:not([data-theme='dark']) {
+  --color-bg: #f6f3ee;
+  --color-bg-soft: #eeeae3;
+  --color-bg-warm: #e6e0d6;
+  --color-ink: #1a1714;
+  --color-ink-mid: #4a433a;
+  --color-ink-soft: #665d52;
+  --color-brand: #b0350e;
+  --color-brand-hi: #962d0b;
+  --color-brand-lo: #82270a;
+  --color-brand-soft: rgba(176, 53, 14, 0.08);
+  --color-hair: #ddd6cb;
+  --color-hair-strong: #bdb3a4;
+  --color-ok: #1e7046;
+  --color-err: #b42318;
+  --shadow-xs: 0 1px 2px rgba(40, 30, 20, 0.08);
+  --shadow-sm: 0 2px 8px rgba(40, 30, 20, 0.08);
+  --shadow-md: 0 6px 24px rgba(40, 30, 20, 0.1);
+  --shadow-lg: 0 16px 48px rgba(40, 30, 20, 0.12);
+  color-scheme: light;
+}
+
+/* Links ignore Tailwind's text colour (the unlayered `a { color: inherit }`
+   below), so day-theme brand buttons would inherit the dark ink: give them
+   the page colour (5.64:1 on brand). The night look is left as it is. */
+:root[data-theme='light'] a.text-bg,
+:root[data-sun='day']:not([data-theme='dark']) a.text-bg,
+:root[data-theme='light'] a.hover\:text-bg:hover,
+:root[data-sun='day']:not([data-theme='dark']) a.hover\:text-bg:hover {
+  color: var(--color-bg);
+}
+
+/* Brand logo tiles (BrandMarquee): the wordmark SVGs are drawn in the night
+   ink (#E8E2D6); by day they are darkened to ink and the tile shadow lightened. */
+:root[data-theme='light'],
+:root[data-sun='day']:not([data-theme='dark']) {
+  --kv-tile-shadow: 0 4px 14px rgba(40, 30, 20, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  /* Product placeholders (ProductGrid, ProductDetail): no ember glow on paper. */
+  --kv-ph-glow: transparent;
+}
+:root[data-theme='light'] .kv-brand-tile img,
+:root[data-sun='day']:not([data-theme='dark']) .kv-brand-tile img {
+  filter: brightness(0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
    Breaker-parts app — Mood C tokens are sourced from @kervan/ui.
 ═══════════════════════════════════════════════════════════════════════ */
 
@@ -62,6 +118,12 @@ body {
    is mounted; body bg falls back to Mood C on cleanup. */
 html.opening-active body {
   background-color: #000;
+}
+/* Day theme: the opening is the paper page too (the tip stands on a light studio
+   sweep drawn by Scene.tsx), so no black. */
+:root[data-theme='light'].opening-active body,
+:root[data-sun='day']:not([data-theme='dark']).opening-active body {
+  background-color: var(--color-bg);
 }
 
 a {

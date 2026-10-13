@@ -4,15 +4,41 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kervan Heat — Fason ısıl işlem · Kartepe / Kocaeli</title>
-    <meta name="description" content="Kontrollü atmosfer pit-tip fırınlarda fason ısıl işlem. Sertleştirme ve temperleme. 42CrMo, 42CrMoA ve diğer alaşımlar." />
+    <meta
+      name="description"
+      content="Kontrollü atmosfer pit-tip fırınlarda fason ısıl işlem. Sertleştirme ve temperleme. 42CrMo, 42CrMoA ve diğer alaşımlar."
+    />
     <meta name="theme-color" content="#0A0A0B" />
+    <script>
+      // Light by day, dark at night: the edge middleware (functions/_middleware.ts) sets
+      // data-sun = day | night on the html element; a theme picked by hand (header "Tema", localStorage
+      // kv_theme) wins and is applied here before paint. No mark ⇒ the dark (night) look. Keep
+      // the key and the colours in sync with @kervan/ui ThemeSelect and src/styles/globals.css.
+      (function () {
+        var h = document.documentElement;
+        try {
+          var t = localStorage.getItem('kv_theme');
+          if (t === 'dark' || t === 'light') h.setAttribute('data-theme', t);
+        } catch (e) {
+          /* storage blocked: the sun decides */
+        }
+        var light =
+          h.getAttribute('data-theme') === 'light' ||
+          (h.getAttribute('data-theme') !== 'dark' && h.getAttribute('data-sun') === 'day');
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', light ? '#F5F0E8' : '#0A0A0B');
+      })();
+    </script>
 
     <link rel="canonical" href="https://kervanheat.com/" />
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://kervanheat.com/" />
     <meta property="og:title" content="Kervan Heat — Fason ısıl işlem" />
-    <meta property="og:description" content="Kontrollü atmosfer pit-tip fırınlarda sertleştirme ve temperleme. Kartepe / Kocaeli." />
+    <meta
+      property="og:description"
+      content="Kontrollü atmosfer pit-tip fırınlarda sertleştirme ve temperleme. Kartepe / Kocaeli."
+    />
     <meta property="og:image" content="https://kervanheat.com/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
 
@@ -39,10 +65,7 @@
         "alternateName": "Kervan Heat",
         "url": "https://kervanheat.com",
         "logo": "https://kervanheat.com/logo-krv-v2-256.png",
-        "sameAs": [
-          "https://kervanbreaker.com",
-          "https://www.instagram.com/kervanmakina/"
-        ],
+        "sameAs": ["https://kervanbreaker.com", "https://www.instagram.com/kervanmakina/"],
         "contactPoint": {
           "@type": "ContactPoint",
           "telephone": "+90 531 669 37 34",

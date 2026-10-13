@@ -107,10 +107,12 @@ interface TileProps {
 function BrandTile({ name, slug, z, skewY }: TileProps) {
   return (
     <span
-      className="relative inline-flex items-center justify-center px-8 py-4 border border-hair bg-bg-soft/40 min-w-[200px] h-[68px]"
+      className="kv-brand-tile relative inline-flex items-center justify-center px-8 py-4 border border-hair bg-bg-soft/40 min-w-[200px] h-[68px]"
       style={{
         transform: `translateZ(${z}px) rotateY(${skewY}deg)`,
-        boxShadow: '0 6px 18px rgba(0,0,0,0.45), inset 0 1px 0 rgba(232,226,214,0.06)',
+        // The day theme swaps in a lighter shadow (globals.css).
+        boxShadow:
+          'var(--kv-tile-shadow, 0 6px 18px rgba(0,0,0,0.45), inset 0 1px 0 rgba(232,226,214,0.06))',
       }}
     >
       {/* Inner top highlight — thin metallic gloss */}

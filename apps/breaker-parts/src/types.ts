@@ -47,6 +47,8 @@ export interface DictBlock {
     home: string;
     menu: string;
     language: string;
+    /** Header theme select: auto (by the sun) / light / dark. */
+    theme: { label: string; auto: string; light: string; dark: string };
   };
   /** Top strip of the fixed header linking to the heat-treatment sister site. */
   sister: SisterSiteCopy;

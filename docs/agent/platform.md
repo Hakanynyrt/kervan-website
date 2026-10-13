@@ -56,6 +56,12 @@
 
 - `build` = `tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs`. The script writes one full-text `index.html` per route and language (`dist/…/index.html`, `dist/en/…/index.html`) plus `404.html` (noindex), the generated `sitemap.xml`, then deletes `dist-ssr/`. It never calls `/api/tech/*` or reads `TECH_CONTENT`; `/teknik-bilgiler` (+ `/en/`) is prerendered as a noindex shell without content and is not in the sitemap.
 - No SPA fallback in either app: Pages serves the nearest `404.html` with HTTP 404 for unknown paths; Pages Functions (`/api/*`) still take precedence.
+
+## Day / night by the sun (all three sites)
+
+- Each app has `functions/_middleware.ts`: for GET/HEAD HTML answers it reads Cloudflare's city-level IP geolocation (`request.cf.latitude/longitude`, never sent to the browser), computes the sun's elevation (`functions/_lib/sun.ts`) and sets `<html data-sun="day|night">` (night = sun more than 6° below the horizon) plus an `X-Kv-Sun` header (`smoke.sh` checks all three sites). Everything else (`/api/*`, POST/OPTIONS, JSON, assets) passes through untouched. `public/_routes.json` keeps the function off the immutable assets.
+- `sun.ts` lives in `apps/parts-shop/functions/_lib/` with its unit tests; breaker and heat carry verbatim copies (Pages bundles each app's `functions/` on its own), and a shop test fails if a copy drifts. Change the shop's file, then copy it.
+- An inline script in each `index.html` applies a hand-picked theme (`localStorage kv_theme`, header select) before paint and sets `theme-color`. Fallback without a mark: the shop follows `prefers-color-scheme`; the company sites stay dark (Mood C).
 - `sitemap.xml` lists only canonical, indexable pages in both languages with `xhtml:link` hreflang alternates; `<lastmod>` is the last git commit date of the page's files, so the deploy jobs check out with `fetch-depth: 0` (build date only if git is unavailable). Do not add a static `public/sitemap.xml`.
 - `robots.txt`: allow all, `Disallow: /api/`, sitemap link. KVKK is canonical at `/kvkk` (Pages 308s `/kvkk.html`); link and list `/kvkk`.
 - All user-facing text goes through the dict, including `aria-label`s.
