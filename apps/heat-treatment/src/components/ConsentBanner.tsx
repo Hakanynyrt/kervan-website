@@ -65,44 +65,48 @@ export default function ConsentBanner({ t }: Props) {
   if (!open) return null;
 
   return (
+    // A thin strip along the bottom edge (owner: "daha az rahatsız etsin"): one line from md
+    // up, text over the buttons on phones; both choices the same size (KVKK cookie guide).
     <motion.div
       role="dialog"
       aria-modal="false"
       aria-labelledby="kv-consent-title"
       aria-describedby="kv-consent-body"
-      className="fixed z-50 bottom-4 inset-x-4 md:inset-x-auto md:right-6 md:bottom-6 md:max-w-md bg-bg-soft border border-hair rounded-md p-5 shadow-[0_12px_32px_rgba(0,0,0,0.5)] font-sans"
+      className="fixed z-50 inset-x-0 bottom-0 bg-bg-soft border-t border-hair shadow-[0_-8px_24px_rgba(0,0,0,0.45)] font-sans"
       initial={reduced ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: durations.md, ease: editorialEase }}
     >
-      <p id="kv-consent-title" className="text-sm font-medium text-ink m-0">
-        {t.title}
-      </p>
-      <p id="kv-consent-body" className="mt-2 mb-0 text-sm text-ink-mid leading-relaxed">
-        {t.body}{' '}
-        {/* Colour/underline on the span: the global `a { color: inherit; text-decoration: none }` wins over utilities on the <a>. */}
-        <a
-          href="/kvkk#cerezler"
-          className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
-        >
-          <span className="text-brand-hi underline underline-offset-2">{t.policy}</span>
-        </a>
-      </p>
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={() => choose('denied')}
-          className="min-h-11 border border-ink-soft text-ink px-4 text-sm hover:bg-bg-warm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
-        >
-          {t.reject}
-        </button>
-        <button
-          type="button"
-          onClick={() => choose('granted')}
-          className="min-h-11 bg-brand text-bg px-4 text-sm hover:bg-brand-hi transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
-        >
-          {t.accept}
-        </button>
+      <div className="mx-auto max-w-6xl px-4 py-2.5 flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
+        <p id="kv-consent-title" className="sr-only">
+          {t.title}
+        </p>
+        <p id="kv-consent-body" className="m-0 flex-1 min-w-0 text-sm text-ink-mid leading-snug">
+          {t.body}{' '}
+          {/* Colour/underline on the span: the global `a { color: inherit; text-decoration: none }` wins over utilities on the <a>. */}
+          <a
+            href="/kvkk#cerezler"
+            className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+          >
+            <span className="text-brand-hi underline underline-offset-2">{t.policy}</span>
+          </a>
+        </p>
+        <div className="grid grid-cols-2 gap-2 shrink-0 md:w-64">
+          <button
+            type="button"
+            onClick={() => choose('denied')}
+            className="min-h-10 border border-ink-soft text-ink px-4 text-sm hover:bg-bg-warm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+          >
+            {t.reject}
+          </button>
+          <button
+            type="button"
+            onClick={() => choose('granted')}
+            className="min-h-10 bg-brand text-bg px-4 text-sm hover:bg-brand-hi transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+          >
+            {t.accept}
+          </button>
+        </div>
       </div>
     </motion.div>
   );

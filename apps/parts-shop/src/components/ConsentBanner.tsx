@@ -20,7 +20,7 @@ import type { Lang } from '../types';
  * Cookie consent for Google Ads measurement (same design as heat-treatment's). Client-only:
  * the first render is null in the prerender and the hydrate, so the markup always matches;
  * the banner appears after mount for humans who have not chosen yet. Non-modal (no focus
- * trap), no motion (the shop has none in M1).
+ * trap), no motion (the shop has none in M1). A one-line strip at the bottom edge.
  */
 export function ConsentBanner({ lang, t }: { lang: Lang; t: Dict }) {
   const [open, setOpen] = useState(false);
@@ -60,41 +60,45 @@ export function ConsentBanner({ lang, t }: { lang: Lang; t: Dict }) {
 
   if (!open) return null;
 
+  // A thin strip along the bottom edge (owner: "daha az rahatsız etsin"): one line from md up,
+  // text over the buttons on phones; both choices the same size (KVKK cookie guide).
   return (
     <div
       role="dialog"
       aria-modal="false"
       aria-labelledby="kv-consent-title"
       aria-describedby="kv-consent-body"
-      className="fixed inset-x-3 bottom-3 z-50 rounded-sm border border-hair-strong border-t-2 border-t-ink bg-bg p-5 font-sans text-sm shadow-lg sm:inset-x-auto sm:bottom-6 sm:right-6 sm:max-w-md"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-hair-strong bg-bg font-sans text-sm shadow-[0_-4px_16px_rgba(0,0,0,0.08)]"
     >
-      <p id="kv-consent-title" className="m-0 text-base font-bold text-ink">
-        {c.title}
-      </p>
-      <p id="kv-consent-body" className="m-0 mt-2 leading-relaxed text-ink-mid">
-        {c.body}{' '}
-        <a
-          href={`${localePath(legalPath('kvkk'), lang)}#cerezler`}
-          className={`font-medium text-brand-hi underline underline-offset-2 hover:text-ink ${FOCUS}`}
-        >
-          {c.policy}
-        </a>
-      </p>
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={() => choose('denied')}
-          className={`min-h-11 cursor-pointer rounded-sm border border-ink-soft bg-bg px-4 font-medium text-ink hover:bg-bg-warm ${FOCUS}`}
-        >
-          {c.reject}
-        </button>
-        <button
-          type="button"
-          onClick={() => choose('granted')}
-          className={`min-h-11 cursor-pointer rounded-sm bg-brand px-4 font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
-        >
-          {c.accept}
-        </button>
+      <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-2.5 md:flex-row md:items-center md:gap-4">
+        <p id="kv-consent-title" className="sr-only">
+          {c.title}
+        </p>
+        <p id="kv-consent-body" className="m-0 min-w-0 flex-1 leading-snug text-ink-mid">
+          {c.body}{' '}
+          <a
+            href={`${localePath(legalPath('kvkk'), lang)}#cerezler`}
+            className={`font-medium text-brand-hi underline underline-offset-2 hover:text-ink ${FOCUS}`}
+          >
+            {c.policy}
+          </a>
+        </p>
+        <div className="grid shrink-0 grid-cols-2 gap-2 md:w-64">
+          <button
+            type="button"
+            onClick={() => choose('denied')}
+            className={`min-h-10 cursor-pointer rounded-sm border border-ink-soft bg-bg px-4 font-medium text-ink hover:bg-bg-warm ${FOCUS}`}
+          >
+            {c.reject}
+          </button>
+          <button
+            type="button"
+            onClick={() => choose('granted')}
+            className={`min-h-10 cursor-pointer rounded-sm bg-brand px-4 font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
+          >
+            {c.accept}
+          </button>
+        </div>
       </div>
     </div>
   );

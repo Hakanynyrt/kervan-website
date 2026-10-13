@@ -207,7 +207,7 @@ export const DICT: Dict = {
     },
     consent: {
       title: 'Çerez tercihi',
-      body: 'Reklamlarımızın işe yarayıp yaramadığını ölçmek için Google Ads çerezlerini kullanmak istiyoruz. Bu çerezler yalnızca kabul ederseniz yüklenir ve veriler Google’a (ABD) aktarılır. Reddederseniz site aynen çalışır.',
+      body: 'Reklam ölçümü için Google Ads çerezlerini yalnızca izin verirseniz kullanırız; veriler Google’a (ABD) aktarılır. Reddederseniz site aynen çalışır.',
       accept: 'Kabul et',
       reject: 'Reddet',
       policy: 'Ayrıntılar',
@@ -415,7 +415,7 @@ export const DICT: Dict = {
     },
     consent: {
       title: 'Cookie preference',
-      body: 'We would like to use Google Ads cookies to measure whether our ads work. They load only if you accept, and the data is transferred to Google (USA). If you decline, the site works exactly the same.',
+      body: 'We use Google Ads cookies to measure our ads only if you allow it; the data goes to Google (USA). If you decline, the site works the same.',
       accept: 'Accept',
       reject: 'Decline',
       policy: 'Details',
