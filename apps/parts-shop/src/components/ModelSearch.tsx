@@ -8,6 +8,7 @@ import {
   matches,
   parseTipFilter,
   rewriteQuery,
+  searchName,
   tipFilterToSearch,
   type CarrierBand,
   type TipFacets,
@@ -137,7 +138,7 @@ export function ModelTable({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang;
       for (const [k, v] of merged) sp.append(k, v);
     });
   }, [ready, query, filter]);
-  const shown = query ? rows.filter((r) => matches(query, r.name)) : [];
+  const shown = query ? rows.filter((r) => matches(query, searchName(r.name))) : [];
   // Nothing found: try the query with a misspelt make fixed and unknown words dropped (on the
   // unfiltered rows, so a filter can never hide the suggestion).
   const guess =
@@ -148,7 +149,7 @@ export function ModelTable({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang;
           [...new Set(rows.map((r) => r.brand))],
         )
       : null;
-  const near = guess ? rows.filter((r) => matches(guess, r.name)) : [];
+  const near = guess ? rows.filter((r) => matches(guess, searchName(r.name))) : [];
   const found = shown.length ? shown : near;
   const facets = facetsOf(found);
   const active = isFilterActive(filter);

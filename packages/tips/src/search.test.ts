@@ -1,6 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { breakerKeys, editDistance, fold, guessMake, matches, rewriteQuery } from './search.ts';
+import {
+  breakerKeys,
+  editDistance,
+  fold,
+  guessMake,
+  matches,
+  rewriteQuery,
+  searchName,
+} from './search.ts';
 
 test('fold: Turkish-safe lower case, letters and digits only', () => {
   assert.equal(fold('Indeco HP 500'), 'indecohp500');
@@ -87,4 +95,13 @@ test('breakerKeys: spacing does not matter, lists and brackets', () => {
   assert.deepEqual(breakerKeys('Atlas Copco MB 1000 (Krupp HM 680)'), ['atlascopcomb1000']);
   assert.deepEqual(breakerKeys('Soosan SB50 TS-P'), ['soosansb50tsp']);
   assert.deepEqual(breakerKeys('Unknown X 1'), []);
+});
+
+test('searchName: the other name of the same model is searchable', () => {
+  assert.ok(matches('210 II', searchName('MTB 215')));
+  assert.ok(matches('mtb 210 ii', searchName('MTB 215')));
+  assert.ok(matches('mtb 215', searchName('MTB 210 II')));
+  assert.ok(matches('275 II', searchName('MTB 285')));
+  assert.equal(searchName('MTB 210'), 'MTB 210');
+  assert.ok(!matches('210 II', searchName('MTB 210')));
 });

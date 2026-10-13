@@ -169,3 +169,25 @@ export function breakerKeys(name: string): string[] {
     ...new Set(parts.map((p, i) => fold(`${make} ${i > 0 && /^\d/.test(p) ? prefix + p : p}`))),
   ];
 }
+
+/**
+ * Models sold under two names (owner: "MTB 210 II ile MTB 215 aynı modeller",
+ * "MTB 275 II = MTB 285"): searching either name finds the other's page.
+ */
+export const SAME_MODELS: readonly (readonly [string, string])[] = [
+  ['MTB 215', 'MTB 210 II'],
+  ['MTB 285', 'MTB 275 II'],
+];
+
+/** The text a breaker search matches: the name plus the other name of the same model, if any. */
+export function searchName(name: string): string {
+  const keys = new Set(breakerKeys(name));
+  const also = SAME_MODELS.flatMap(([a, b]) =>
+    breakerKeys(a).some((k) => keys.has(k))
+      ? [b]
+      : breakerKeys(b).some((k) => keys.has(k))
+        ? [a]
+        : [],
+  );
+  return also.length ? `${name} / ${also.join(' / ')}` : name;
+}
