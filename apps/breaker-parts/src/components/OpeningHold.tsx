@@ -8,8 +8,8 @@ interface Props {
 }
 
 /**
- * 100vh spacer that holds the first viewport empty so Scene's chisel +
- * starfield owns the opening composition. A faint "scroll ↓" hint
+ * 100vh spacer that holds the first viewport empty so Scene's breaker tip
+ * owns the opening composition. A faint "scroll ↓" hint
  * fades in after the intro perdesi closes (~2.6s on a first visit, almost at
  * once when the intro was already seen this session).
  *

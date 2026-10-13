@@ -44,7 +44,7 @@ export default function Home({ t, lang }: Props) {
       )}
 
       <div className="app-root">
-        {/* Cinematic opening hold — first viewport is just chisel + starfield. */}
+        {/* Cinematic opening hold — first viewport is just the 3D breaker tip. */}
         {!isStatic && <OpeningHold t={t} />}
         <Hero t={t} />
         <Products t={t} />

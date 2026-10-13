@@ -2,31 +2,41 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 
-/** Scroll-driven chisel animation, single rail.
+/** "Tek Parça": one black breaker tip (pointed / moil, two key slots) on the dark
+ *  page, lit by a warm key, a cool fill and an ember rim light that slowly circles it.
+ *  An ember radial glow sits behind it (CSS, on the container). No stars, no bloom.
  *
- *  Phases (continuous, no section detection, no pose table):
- *    OPENING (scrollY 0 → heroTop)        — center, full size, full alpha
- *    HERO    (heroTop → heroBottom)       — slides right, tilts -Z, scales to 0.85
- *    POST    (heroBottom → heroBottom+½ih)— alpha fades to 0; chisel disappears
- *    BELOW   (any further)                — invisible. Editorial sections own the page.
+ *  Scroll rail (continuous, anchored to the hero element, read every frame):
+ *    OPENING (scrollY 0 → heroTop)          — tip centred in the approved pose
+ *    HERO    (heroTop → heroBottom)         — turns to yaw −50°, moves to the right
+ *                                             third (phones: upper band, smaller)
+ *    POST    (heroBottom → heroBottom+⅕ih)  — fades out; nothing is drawn after that
  *
- *  Y rotation is always-on (slow continuous revolution). Tiny breath
- *  so the chisel doesn't read as frozen. Reduced-motion: snap to
- *  computed pose, no breath, no continuous rotation.
- *
- *  Anchor: only the hero element matters here. We read its position
- *  every frame so the rail stays in sync even if layout shifts (e.g.
- *  OpeningHold unmount).
+ *  Idle: a very slow ±3.5° sway and the rim light orbiting (~12 s per turn).
+ *  Reduced motion (followed live): the static approved frame, drawn only on change.
+ *  Drawing is on demand: ~30 fps while idle, every frame while the pose moves,
+ *  nothing while the tab is hidden or the tip has faded out.
  */
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const smooth = (x: number) => x * x * (3 - 2 * x);
+const deg = THREE.MathUtils.degToRad;
 
-/** Round soft-edged star sprite. 64×64 radial gradient drawn once. */
+/** Model file. Images/models are cached immutable: a changed model gets a new name. */
+const MODEL_URL = '/kirici-ucu-siyah-01.glb';
+
+// Approved look (owner, "Tek Parça").
+const FOV_DEG = 22;
+const CAM_D = 3;
+const YAW_OPEN = -22;
+const YAW_HERO = -50;
+const PITCH = 14;
+const ROLL = 100; // about the long axis: one key slot faces up, the other is the lower notch
+const RIM_ANGLE = 70; // rim light angle in the reduced-motion / start frame
+const RIM_PERIOD_S = 12;
+
+/** Round soft-edged sprite for the key star. 64×64 radial gradient drawn once. */
 function makeStarSprite(): THREE.CanvasTexture {
   const c = document.createElement('canvas');
   c.width = c.height = 64;
@@ -44,91 +54,13 @@ function makeStarSprite(): THREE.CanvasTexture {
   return tex;
 }
 
-interface StarLayerSpec {
-  count: number;
-  /** [width, height, depth] — half-widths used for placement */
-  box: [number, number, number];
-  /** Z-near (closest to camera, more negative pushes back) */
-  zNear: number;
-  /** Z-far (deeper into the scene) */
-  zFar: number;
-  sizeMin: number;
-  sizeMax: number;
-  brightnessMin: number;
-  brightnessMax: number;
-  sprite: THREE.CanvasTexture;
-}
-
-/** Realistic spectral mix — mostly cream, with warm whites, cool
- *  blues, ember accents and a few far-redshift dim reds. */
-const STAR_PALETTE: Array<{ weight: number; color: THREE.Color }> = [
-  { weight: 0.6, color: new THREE.Color(0xe8e2d6) }, // brand cream
-  { weight: 0.18, color: new THREE.Color(0xfff1d8) }, // warm white
-  { weight: 0.1, color: new THREE.Color(0xc8d8ff) }, // cool blue
-  { weight: 0.07, color: new THREE.Color(0xff6a1a) }, // ember accent
-  { weight: 0.05, color: new THREE.Color(0xc07060) }, // dim red
-];
-
-function pickStarColor(): THREE.Color {
-  const r = Math.random();
-  let acc = 0;
-  for (const p of STAR_PALETTE) {
-    acc += p.weight;
-    if (r <= acc) return p.color;
-  }
-  return STAR_PALETTE[0].color;
-}
-
-/** Build one parallax layer of stars. Per-vertex colors + per-vertex
- *  sizes (via an `aSize` attribute interpreted by PointsMaterial.size
- *  scaled by sizeAttenuation — Three.js doesn't accept per-vertex size
- *  on the standard PointsMaterial, so we stagger sizes by splitting
- *  into a few size buckets isn't worth it; instead we vary the *color*
- *  brightness which reads as size variance under bloom). */
-function makeStarLayer(spec: StarLayerSpec): { points: THREE.Points } {
-  const { count, box, zNear, zFar, sizeMin, sizeMax, brightnessMin, brightnessMax, sprite } = spec;
-  const geom = new THREE.BufferGeometry();
-  const pos = new Float32Array(count * 3);
-  const col = new Float32Array(count * 3);
-  for (let i = 0; i < count; i++) {
-    pos[i * 3 + 0] = (Math.random() - 0.5) * box[0];
-    pos[i * 3 + 1] = (Math.random() - 0.5) * box[1];
-    pos[i * 3 + 2] = zNear + Math.random() * (zFar - zNear);
-    const c = pickStarColor();
-    const b = brightnessMin + Math.random() * (brightnessMax - brightnessMin);
-    col[i * 3 + 0] = c.r * b;
-    col[i * 3 + 1] = c.g * b;
-    col[i * 3 + 2] = c.b * b;
-  }
-  geom.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  geom.setAttribute('color', new THREE.BufferAttribute(col, 3));
-  const mat = new THREE.PointsMaterial({
-    size: (sizeMin + sizeMax) / 2,
-    sizeAttenuation: true,
-    transparent: true,
-    opacity: 0.95,
-    vertexColors: true,
-    map: sprite,
-    alphaMap: sprite,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-  });
-  const points = new THREE.Points(geom, mat);
-  return { points };
-}
-
-/**
- * Scene — vanilla Three.js (R3F yerine). v1 pattern'i: direkt DOM mount,
- * kendi animation loop'u, kendi resize listener'ı. iOS Safari + lazy import
- * + Suspense + ErrorBoundary chain'inde tıkandığı için R3F'ten ayrıldık.
- *
- * Chisel arkaplanda eliptik orbital drift'te, görünür alana sığar.
- */
-/** One star in a colour that no other star uses. It circles behind the chisel;
+/** One small star in a colour used nowhere else. It circles behind the tip;
  *  clicking it calls `onSecret` (the owner's hidden way into /teknik-bilgiler —
  *  the page itself is still password-protected and reachable by URL). */
 const KEY_STAR_COLOR = new THREE.Color(0x3ee6b4);
 const KEY_STAR_HIT_PX = 28;
+/** Key star depth behind the tip (world units; the tip is 1 unit long). */
+const KEY_BEHIND = 0.8;
 
 export default function Scene({ onSecret }: { onSecret?: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -136,25 +68,23 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
   onSecretRef.current = onSecret;
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const container: HTMLDivElement = el;
+
+    let raf = 0;
+    const wake = () => {
+      if (!raf && !document.hidden) raf = requestAnimationFrame(tick);
+    };
 
     // Follows the OS setting live, not just its value at mount.
     const reducedMq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
     let reduced = reducedMq?.matches ?? false;
     const onReducedChange = () => {
       reduced = reducedMq?.matches ?? false;
+      wake();
     };
     reducedMq?.addEventListener?.('change', onReducedChange);
-
-    // ─── Camera framing constants ────────────────────────────────────
-    // Single source of truth — `targetH` and the orbit clamp both
-    // derive from these. Bring CAM_Z in to dolly the camera closer;
-    // bump CHISEL_H_RATIO to fill more of the frame vertically.
-    const CAM_Z = 7;
-    const FOV_DEG = 28;
-    const VISIBLE_H = 2 * Math.tan(THREE.MathUtils.degToRad(FOV_DEG / 2)) * CAM_Z;
-    const CHISEL_H_RATIO = 0.62;
 
     // ─── Renderer ────────────────────────────────────────────────────
     let renderer: THREE.WebGLRenderer;
@@ -173,8 +103,7 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       return;
     }
     renderer.setClearAlpha(0);
-    // Phones render at most 1.5x: the bloom pipeline costs the most there and the
-    // difference is not visible on a soft, dark scene.
+    // Phones render at most 1.5x, desktops 2x.
     const coarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
     const DPR = Math.min(coarse ? 1.5 : 2, window.devicePixelRatio || 1);
     // The drawing buffer must stay within what the GPU accepts, whatever the
@@ -189,22 +118,14 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     const MAX_W = Math.min(maxSide, vpDims?.[0] || maxSide);
     const MAX_H = Math.min(maxSide, vpDims?.[1] || maxSide);
     const ratioFor = (W: number, H: number) => Math.max(0.1, Math.min(DPR, MAX_W / W, MAX_H / H));
-    renderer.setPixelRatio(DPR);
-    // Cinematic colour pipeline: physically-based output, ACES Filmic
-    // tone mapping (the de-facto film response curve) at 1.05 exposure
-    // — gives shadows their density back and lets bright specular hits
-    // roll off without clipping to white.
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 1.25;
 
-    // Visual viewport — iOS Safari URL-bar collapse cycles change layout
-    // height while content (and a fixed `inset:0` element) re-flow late.
-    // `visualViewport` always reflects the *visible* area; fall back to
-    // `innerWidth/Height`, then `container.clientWidth/Height` as a last
-    // resort for environments without either (very old WebViews).
-    // The height is clamped (never taller than the layout viewport or
-    // MAX_CSS_H): a very tall window must not make a huge drawing buffer.
+    // Visual viewport: iOS Safari URL-bar collapse changes the visible height
+    // while a fixed `inset:0` element re-flows late. The height is clamped (never
+    // taller than the layout viewport or MAX_CSS_H) so a very tall window cannot
+    // make a huge drawing buffer.
     const MAX_CSS_H = 1400;
     const w = () =>
       Math.floor(window.visualViewport?.width ?? window.innerWidth ?? container.clientWidth) || 0;
@@ -218,16 +139,14 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       ) || 0;
     const W0 = Math.max(1, w());
     const H0 = Math.max(1, h());
-    const ratio0 = ratioFor(W0, H0);
-    renderer.setPixelRatio(ratio0);
+    renderer.setPixelRatio(ratioFor(W0, H0));
     renderer.setSize(W0, H0, false);
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = `${H0}px`;
     renderer.domElement.style.display = 'block';
     container.appendChild(renderer.domElement);
 
-    // GPU context loss (tab switch on low memory, driver reset): stop drawing until three
-    // restores it, instead of rendering into a dead context.
+    // GPU context loss: stop drawing until three restores it.
     let contextLost = false;
     const onContextLost = (e: Event) => {
       e.preventDefault();
@@ -235,94 +154,77 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     };
     const onContextRestored = () => {
       contextLost = false;
+      wake();
     };
     renderer.domElement.addEventListener('webglcontextlost', onContextLost);
     renderer.domElement.addEventListener('webglcontextrestored', onContextRestored);
 
-    // ─── Scene + Camera ──────────────────────────────────────────────
+    // ─── Scene, camera, environment, lights ──────────────────────────
     const scene = new THREE.Scene();
-    // FOV 28 + camera dropped slightly below eye-line, looking up at the
-    // model — classic monument/hero framing. Tighter FOV compresses
-    // perspective slightly, makes the chisel feel longer and weightier.
-    // CAM_Z 7 (was 9) brings the model closer for a cinematic close-up.
-    const camera = new THREE.PerspectiveCamera(FOV_DEG, W0 / H0, 0.1, 100);
-    camera.position.set(0, -0.55, CAM_Z);
-    camera.lookAt(0, 0.45, 0);
+    const camera = new THREE.PerspectiveCamera(FOV_DEG, W0 / H0, 0.05, 50);
+    camera.position.set(0, 0, CAM_D);
+    camera.lookAt(0, 0, 0);
+    const TAN = Math.tan(deg(FOV_DEG / 2));
 
-    // MeshStandardMaterial with high metalness reflects the environment;
-    // without one, metallic surfaces render nearly black (only direct-light
-    // specular highlights are visible) and the chisel disappears against
-    // body bg #0A0A0B. v1 had this (public/scene.js:41) — restored here.
+    // Metal reflects the environment; without one it renders flat black.
     const pmrem = new THREE.PMREMGenerator(renderer);
-    pmrem.compileEquirectangularShader();
-    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    const room = new RoomEnvironment();
+    const envTex = pmrem.fromScene(room, 0.04).texture;
+    room.dispose();
+    scene.environment = envTex;
+    scene.environmentIntensity = 0.7;
 
-    // ─── Lights ──────────────────────────────────────────────────────
-    // Cinematic 4-point: low ambient for shadow density, strong warm key
-    // from camera-left (chiselled facets), dim cool fill on the right
-    // (don't fully wash shadows), bright ember rim from behind-right
-    // (silhouette pop against dark bg), warm sun catches the tip face.
-    scene.add(new THREE.AmbientLight(0xffffff, 0.22));
-
-    const key = new THREE.DirectionalLight(0xffcfa0, 4.2);
-    key.position.set(-3, 4, 4);
+    const key = new THREE.DirectionalLight(0xfff1e0, 2.6);
+    key.position.set(-3, 4, 3);
     scene.add(key);
-
-    const fill = new THREE.DirectionalLight(0x9ca8b8, 0.35);
-    fill.position.set(4, 2, 3);
+    const fill = new THREE.DirectionalLight(0x9fb4d0, 0.35);
+    fill.position.set(4, 1, 2);
     scene.add(fill);
-
-    const rim = new THREE.DirectionalLight(0xff6a1a, 6.5);
-    rim.position.set(2.4, 1, -5);
+    const rim = new THREE.DirectionalLight(0xff6a1a, 5);
     scene.add(rim);
+    // Rim position on its orbit (angle a), turned with the tip's yaw change (dy) so
+    // the hero turn keeps the approved light-to-tip relation.
+    // Around 115° the orbit passes in front of the tip, above it, where the ember
+    // would flood the whole top face instead of edging it: dim it there.
+    const RIM_DIP = deg(115);
+    const RIM_DIP_W = deg(25);
+    const setRim = (a: number, dy = 0) => {
+      const d = Math.atan2(Math.sin(a - RIM_DIP), Math.cos(a - RIM_DIP)) / RIM_DIP_W;
+      rim.intensity = 5 * (1 - 0.8 * Math.exp(-d * d));
+      const x = Math.cos(a) * 3;
+      const z = Math.sin(a) * 3 - 2.5;
+      rim.position.set(
+        x * Math.cos(dy) + z * Math.sin(dy),
+        2.2,
+        z * Math.cos(dy) - x * Math.sin(dy),
+      );
+    };
+    setRim(deg(RIM_ANGLE));
 
-    const sun = new THREE.DirectionalLight(0xffe8b0, 5.6);
-    sun.position.set(7, 0.8, 1.5);
-    scene.add(sun);
+    // Every surface black (owner): forged body and the slightly brighter machined
+    // faces (key slots, ends) that keep the slots readable.
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: 0x111317,
+      metalness: 0.5,
+      roughness: 0.45,
+    });
+    const machinedMat = new THREE.MeshStandardMaterial({
+      color: 0x1a1c20,
+      metalness: 1,
+      roughness: 0.32,
+    });
 
-    // ─── Starfield: layered cosmic ambiance behind the chisel ────────
-    // Two parallax layers + a soft round sprite for each star.
-    //
-    // - Far (1800 stars, 220×160×100 box, z ∈ [-130, -30]): tiny dim
-    //   stars that drift slowly, anchor the depth.
-    // - Near (700 stars, 100×70×50 box, z ∈ [-62, -12]): brighter,
-    //   chunkier stars that drift faster — parallax against the far
-    //   layer reads as 3D depth, not wallpaper.
-    //
-    // Color mix is realistic spectral-ish (mostly cream, with warm
-    // whites, cool blues, ember accents and a few far-redshift dim
-    // reds) so the field feels varied without drifting from Mood C.
-    //
-    // The sprite is a 64-px radial gradient drawn once on a canvas —
-    // round soft stars, not square pixels. Bloom (already at 0.85
-    // threshold) twinkles the brightest near-layer stars naturally.
+    // ─── Group hierarchy: outer (pose) > roll > model ────────────────
+    // outer: position, scale, yaw (Y) and pitch (X); roll: about the long axis (X).
+    const outer = new THREE.Group();
+    const rollG = new THREE.Group();
+    rollG.rotation.x = deg(ROLL);
+    outer.add(rollG);
+    outer.visible = false;
+    scene.add(outer);
+
+    // ─── Key star ────────────────────────────────────────────────────
     const starSprite = makeStarSprite();
-    const FAR = makeStarLayer({
-      count: 1800,
-      box: [220, 160, 100],
-      zNear: -30,
-      zFar: -130,
-      sizeMin: 0.18,
-      sizeMax: 0.28,
-      brightnessMin: 0.18,
-      brightnessMax: 0.55,
-      sprite: starSprite,
-    });
-    const NEAR = makeStarLayer({
-      count: 700,
-      box: [100, 70, 50],
-      zNear: -12,
-      zFar: -62,
-      sizeMin: 0.45,
-      sizeMax: 0.65,
-      brightnessMin: 0.55,
-      brightnessMax: 1.0,
-      sprite: starSprite,
-    });
-    scene.add(FAR.points);
-    scene.add(NEAR.points);
-
-    // ─── Key star: the only mint-coloured star, orbiting behind the chisel ──
     const keyMat = new THREE.SpriteMaterial({
       map: starSprite,
       color: KEY_STAR_COLOR,
@@ -331,299 +233,232 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       depthWrite: false,
     });
     const keyStar = new THREE.Sprite(keyMat);
-    keyStar.scale.setScalar(0.13);
     scene.add(keyStar);
-    const KEY_Z = -2.2;
     let sceneVisible = true;
 
-    // ─── Postprocessing: bloom for cinematic rim glow ────────────────
-    // RenderPass → UnrealBloomPass → OutputPass (does the final colour
-    // space conversion when the renderer is in linear-WG mode). Bloom
-    // strength is intentionally light — only the brightest highlights
-    // (specular hits where rim/sun catch the polished steel) bloom; the
-    // shadow body stays clean. Threshold 0.85 keeps mid-tones out of it.
-    const composer = new EffectComposer(renderer);
-    composer.setSize(W0, H0);
-    composer.setPixelRatio(ratio0);
-    composer.addPass(new RenderPass(scene, camera));
-    const bloom = new UnrealBloomPass(
-      new THREE.Vector2(W0, H0),
-      0.55, // strength
-      0.7, // radius
-      0.85, // threshold (0..1)
-    );
-    composer.addPass(bloom);
-    composer.addPass(new OutputPass());
-
-    // ─── Group hierarchy: orbit > spin > model ───────────────────────
-    const orbitGroup = new THREE.Group();
-    const spinGroup = new THREE.Group();
-    orbitGroup.add(spinGroup);
-    scene.add(orbitGroup);
-
-    // ─── Fallback ember sphere — GLB yüklenene/yüklenmezse görünür ───
-    const fallbackGeo = new THREE.IcosahedronGeometry(1.2, 1);
-    const fallbackMat = new THREE.MeshStandardMaterial({
-      color: 0x7a6a5a,
-      metalness: 0.85,
-      roughness: 0.42,
-      emissive: 0xff6a1a,
-      emissiveIntensity: 0.25,
-    });
-    const fallback = new THREE.Mesh(fallbackGeo, fallbackMat);
-    spinGroup.add(fallback);
-
+    // ─── Model ───────────────────────────────────────────────────────
     let modelLoaded = false;
-
-    // ─── Load GLB asynchronously, replace fallback ───────────────────
-    // GLB plain glTF (DRACO compression decompressed via gltf-transform).
-    // Standart GLTFLoader natively handle eder, ekstra loader gerekmez.
-    const loader = new GLTFLoader();
-    loader.load(
-      '/kirici-uc.glb',
+    let loadedAt = 0;
+    let disposed = false;
+    const loaded: THREE.BufferGeometry[] = [];
+    new GLTFLoader().load(
+      MODEL_URL,
       (gltf) => {
+        if (disposed) return;
         try {
           const model = gltf.scene;
-
-          // Minimal orient: longest axis → world Y. v1 hard-coded
-          // -π/2 around Z worked for tip-down (commit bc23cf30).
-          // Fancy centroid heuristic kaldırıldı — sessizce throw etmek
-          // riskli, simple yaklaşım daha güvenilir.
-          const box1 = new THREE.Box3().setFromObject(model);
-          const size1 = new THREE.Vector3();
-          box1.getSize(size1);
-          const longest = Math.max(size1.x, size1.y, size1.z);
-          if (size1.x === longest) {
-            model.rotation.z = -Math.PI / 2;
-          } else if (size1.z === longest) {
-            model.rotation.x = Math.PI / 2;
-          }
-          model.updateMatrixWorld(true);
-
-          // Scale FIRST so model.position is computed in scaled units below.
-          // (Three.js doesn't scale `position` itself; it scales children's
-          // vertices. Centering pre-scale leaves a huge offset that survives
-          // scaling and parks the model far below the camera frustum.)
-          // Fill ~85% of visible viewport height — close-up hero framing.
-          // Derived from CAM_Z/FOV constants above so a single edit
-          // there re-proportions the whole composition.
-          const targetH = VISIBLE_H * CHISEL_H_RATIO;
-          const box2 = new THREE.Box3().setFromObject(model);
-          const size2 = new THREE.Vector3();
-          box2.getSize(size2);
-          const s = targetH / Math.max(0.01, size2.y);
-          model.scale.setScalar(s);
-          model.updateMatrixWorld(true);
-
-          // Center bbox at origin (after scale, in scaled-world units)
-          const box3 = new THREE.Box3().setFromObject(model);
-          const center = new THREE.Vector3();
-          box3.getCenter(center);
-          model.position.sub(center);
-
-          // Material — forged tool steel, tightened for cinematic
-          // specular response. Roughness dropped from 0.28 → 0.22 makes
-          // highlight transitions crisper without glassing the surface;
-          // envMapIntensity 1.6 lets the room env reflection contribute
-          // more — combined with the bloom pass downstream, the ember
-          // rim now glows along the silhouette.
           model.traverse((o) => {
             const mesh = o as THREE.Mesh;
-            if (mesh.isMesh) {
-              mesh.material = new THREE.MeshStandardMaterial({
-                color: 0x2a2a2e,
-                metalness: 0.94,
-                roughness: 0.22,
-                envMapIntensity: 1.6,
-              });
-            }
+            if (!mesh.isMesh) return;
+            const name = (mesh.material as THREE.Material).name;
+            (mesh.material as THREE.Material).dispose();
+            mesh.material = name === 'machined' ? machinedMat : bodyMat;
+            loaded.push(mesh.geometry);
           });
-
-          spinGroup.remove(fallback);
-          fallback.geometry.dispose();
-          fallback.material.dispose();
-          spinGroup.add(model);
+          // Centre on the bbox, long axis → X, length 1.
+          const box = new THREE.Box3().setFromObject(model);
+          const size = box.getSize(new THREE.Vector3());
+          const center = box.getCenter(new THREE.Vector3());
+          const piv = new THREE.Group();
+          model.position.sub(center);
+          piv.add(model);
+          const L = Math.max(size.x, size.y, size.z);
+          if (size.y === L) piv.rotation.z = Math.PI / 2;
+          else if (size.z === L) piv.rotation.y = Math.PI / 2;
+          piv.scale.setScalar(1 / Math.max(1e-6, L));
+          rollG.add(piv);
+          outer.visible = true;
           modelLoaded = true;
+          loadedAt = performance.now();
+          wake();
         } catch (err) {
-          console.error('[scene] post-load processing failed, fallback stays', err);
+          console.error('[scene] post-load processing failed', err);
         }
       },
       undefined,
       (err) => {
-        console.warn('[scene] GLB load failed, fallback ember stays', err);
+        console.warn('[scene] GLB load failed, glow stays', err);
       },
     );
 
-    // ─── Resize listener ─────────────────────────────────────────────
+    // ─── Resize ──────────────────────────────────────────────────────
     const onResize = () => {
       const W = w(),
         H = h();
       // Hidden / collapsed viewport (0 × n): keep the last size, draw nothing.
       if (W <= 0 || H <= 0) return;
-      const ratio = ratioFor(W, H);
       camera.aspect = W / H;
       camera.updateProjectionMatrix();
-      renderer.setPixelRatio(ratio);
+      renderer.setPixelRatio(ratioFor(W, H));
       renderer.setSize(W, H, false);
       renderer.domElement.style.height = `${H}px`;
-      composer.setPixelRatio(ratio);
-      composer.setSize(W, H);
-      bloom.setSize(W, H);
+      lastGlow = '';
+      wake();
     };
     window.addEventListener('resize', onResize, { passive: true });
     window.addEventListener('orientationchange', onResize, { passive: true });
-
-    // visualViewport: iOS Safari URL-bar collapse fires resize *only* here,
-    // not on `window`. Without this, the canvas keeps the URL-bar-expanded
-    // height after the bar collapses, projecting the chisel into a buffer
-    // taller than the visible area.
     window.visualViewport?.addEventListener('resize', onResize);
 
-    // ─── Animation loop ──────────────────────────────────────────────
-    const startTime = performance.now();
-    let raf = 0;
-
-    // Single-rail scroll-driven phase. Phase 0..3:
-    //   0..1  OPENING    (chisel center, full size)
-    //   1..2  HERO       (slides right, tilts, scales 1 → 0.85)
-    //   2..3  POST-HERO  (alpha 1 → 0; chisel disappears)
-    // Past 3 the chisel is completely transparent — all body sections
-    // render as clean editorial without the chisel competing.
+    // ─── Scroll phase ────────────────────────────────────────────────
+    //   0..1 OPENING, 1..2 HERO, 2..3 POST (fade). Past 3 nothing is drawn.
     let phase = 0;
     const updatePhase = () => {
       const sy = window.scrollY;
       const ih = window.innerHeight;
       const hero = document.querySelector<HTMLElement>('[data-scene-pose="hero"]');
-      const heroTop = hero ? hero.getBoundingClientRect().top + window.scrollY : 0;
-      const heroBot = hero ? hero.getBoundingClientRect().bottom + window.scrollY : ih;
+      const r = hero?.getBoundingClientRect();
+      const heroTop = r ? r.top + sy : 0;
+      const heroBot = r ? r.bottom + sy : ih;
       const heroSpan = Math.max(1, heroBot - heroTop);
-      if (sy < heroTop) {
-        // OPENING — 0 at top of doc, → 1 as scroll hits hero start
-        phase = heroTop > 0 ? sy / heroTop : 1;
-      } else if (sy < heroBot) {
-        phase = 1 + (sy - heroTop) / heroSpan;
-      } else {
-        // Past hero → quick fade. By the time Products is fully in
-        // view (scrollY ≈ heroBot + ih) the chisel must be invisible.
-        // Fade across 20% of a viewport feels snappy without flicker.
-        phase = 2 + Math.min(1, (sy - heroBot) / (ih * 0.2));
-      }
+      // Once OpeningHold has unmounted (the visitor is past the opening) the hero
+      // sits at the top of the page: the opening is over, so the tip keeps its
+      // hero pose even at scrollY 0.
+      const holding = !!document.querySelector('[data-scene-pose="opening"]');
+      if (holding && sy < heroTop) phase = heroTop > 0 ? sy / heroTop : 1;
+      else if (sy < heroBot) phase = 1 + Math.max(0, sy - heroTop) / heroSpan;
+      else phase = 2 + Math.min(1, (sy - heroBot) / (ih * 0.2));
     };
-    window.addEventListener('scroll', updatePhase, { passive: true });
+    const onScroll = () => {
+      updatePhase();
+      wake();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
     updatePhase();
 
-    // Mutable pose accumulator — eased toward the per-frame target.
-    const cur = { px: 0, py: 0, pz: 0, rx: 0, rz: 0, s: 1, o: 1 };
-    let lastTickT = performance.now();
+    const onVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else {
+        lastTickT = performance.now();
+        wake();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
 
-    const tick = () => {
+    // ─── Frame ───────────────────────────────────────────────────────
+    const startTime = performance.now();
+    let lastTickT = startTime;
+    let lastRender = 0;
+    let lastGlow = '';
+    let first = true;
+    // Eased pose accumulator: x/y in half-heights, scale, yaw, opacity.
+    const cur = { x: 0, y: 0, s: 1, yaw: YAW_OPEN };
+    const proj = new THREE.Vector3();
+
+    function tick() {
+      raf = 0;
       const now = performance.now();
+      // Layout can shift without a scroll event (OpeningHold unmounting).
+      updatePhase();
       const t = (now - startTime) / 1000;
-      const dt = Math.min(0.05, (now - lastTickT) / 1000);
+      const dt = Math.min(0.1, (now - lastTickT) / 1000);
       lastTickT = now;
       const vw = w();
       const vh = h();
-      if (vw <= 0 || vh <= 0) {
-        raf = requestAnimationFrame(tick);
-        return;
-      }
+      if (vw <= 0 || vh <= 0) return;
       const aspect = vw / vh;
-      const isPortrait = aspect < 0.85;
+      const H2 = CAM_D * TAN; // half the visible height at the tip's plane
+      const W2 = H2 * aspect;
+      const portrait = aspect < 0.85;
 
-      // Phase mapped to per-frame target pose.
-      //   0..0.6  OPENING — chisel pinned centre, full size, full alpha
-      //   0.6..1  OPENING tail — chisel transitions to hero pose
-      //                          (slides right, tilts, scales 0.85)
-      //   1..1.7  HERO — chisel parked at hero pose, full alpha
-      //   1.7..2  HERO tail — opacity fades from 1 → 0
-      //   ≥ 2     POST — opacity 0; sections below are clean editorial.
-      // The pose transition ENDS at hero start (phase 1.0), so when the
-      // user lands on Hero the chisel is already at the right side and
-      // the title/copy is fully readable. No "chisel covers Hero text"
-      // moment at the opening→hero handoff.
-      const poseProgress = clamp01((phase - 0.6) / 0.4);
-      const fadeProgress = clamp01((phase - 1.7) / 0.3);
+      const pose = smooth(clamp01((phase - 0.6) / 0.4));
+      const fade = clamp01((phase - 1.7) / 0.3);
 
-      // Position rail: center → right side (or "off-frame" on portrait)
-      const lateral = isPortrait ? 0.5 : 1;
-      const targetPx = lerp(0, 0.7, poseProgress) * lateral;
-      const targetPy = lerp(0, -0.05, poseProgress);
-      const targetPz = lerp(0, 0.1, poseProgress);
-      const targetRx = lerp(0, -0.04, poseProgress);
-      const targetRz = lerp(0, -0.16, poseProgress);
-      const targetS = lerp(1.0, 0.85, poseProgress);
-      const targetO = 1 - fadeProgress;
+      // Size: the tip's length as a share of the visible width (wider share on
+      // narrow screens), never taller than the frame allows.
+      const share = lerp(0.84, 0.61, clamp01((aspect - 0.75) / 0.55));
+      const s0 = Math.min(share * 2 * W2, 2.5 * H2);
+      // Hero pose: right third on landscape, above the hero figures; upper band
+      // (smaller, above the heading) on portrait.
+      const heroX = portrait ? 0.02 : 0.5;
+      const heroY = portrait ? 0.68 : 0.33;
+      const heroS = portrait ? 0.6 : 0.62;
+      const tx = lerp(0, heroX, pose) * aspect; // half-height units
+      const ty = lerp(0, heroY, pose);
+      const ts = s0 * lerp(1, heroS, pose);
+      const tyaw = lerp(YAW_OPEN, YAW_HERO, pose);
+      const targetO = 1 - fade;
 
-      if (!reduced) {
-        // Smooth current-pose accumulator with frame-rate-independent
-        // exp decay. Time constant 0.18s feels responsive without
-        // jitter for position/rotation. Opacity is set directly — it's
-        // a "visibility" value tied to scroll progress and the scroll
-        // itself is already smooth, so an extra lerp just leaves a
-        // ghost of the chisel hanging when the phase clears.
+      let moving = false;
+      if (!reduced && !first) {
         const a = 1 - Math.exp(-dt / 0.18);
-        cur.px += (targetPx - cur.px) * a;
-        cur.py += (targetPy - cur.py) * a;
-        cur.pz += (targetPz - cur.pz) * a;
-        cur.rx += (targetRx - cur.rx) * a;
-        cur.rz += (targetRz - cur.rz) * a;
-        cur.s += (targetS - cur.s) * a;
-        cur.o = targetO;
-
-        // Tiny breath so the chisel reads as alive at rest. Y rotation
-        // is a slow continuous revolution (~250 s / full turn).
-        const breathX = Math.sin(t * 0.03) * 0.012;
-        const breathZ = Math.sin(t * 0.04 + 1.5) * 0.012;
-
-        orbitGroup.position.set(cur.px, cur.py, cur.pz);
-        spinGroup.rotation.x = cur.rx + breathX;
-        spinGroup.rotation.y = t * 0.025;
-        spinGroup.rotation.z = cur.rz + breathZ;
-        spinGroup.scale.setScalar(cur.s);
-        container.style.opacity = String(cur.o);
+        const step = (k: 'x' | 'y' | 's' | 'yaw', target: number, eps: number) => {
+          const d = target - cur[k];
+          if (Math.abs(d) > eps) moving = true;
+          cur[k] += d * a;
+        };
+        step('x', tx, 1e-4);
+        step('y', ty, 1e-4);
+        step('s', ts, 1e-4);
+        step('yaw', tyaw, 0.01);
       } else {
-        // Reduced motion: snap to computed pose, no breath, no rotation.
-        orbitGroup.position.set(targetPx, targetPy, targetPz);
-        spinGroup.rotation.set(targetRx, 0, targetRz);
-        spinGroup.scale.setScalar(targetS);
-        container.style.opacity = String(targetO);
+        cur.x = tx;
+        cur.y = ty;
+        cur.s = ts;
+        cur.yaw = tyaw;
+      }
+      first = false;
+
+      // Idle sway (±3.5° yaw, ±1.2° pitch) and the orbiting rim light.
+      const sway = reduced ? 0 : Math.sin((t * Math.PI * 2) / 14) * 3.5;
+      const nod = reduced ? 0 : Math.sin((t * Math.PI * 2) / 19 + 1) * 1.2;
+      outer.position.set(cur.x * H2, cur.y * H2, 0);
+      outer.scale.setScalar(cur.s);
+      outer.rotation.set(deg(PITCH + nod), deg(cur.yaw + sway), 0);
+      setRim(
+        deg(RIM_ANGLE) + (reduced ? 0 : (t / RIM_PERIOD_S) * Math.PI * 2),
+        deg(cur.yaw - YAW_OPEN),
+      );
+
+      // A short fade-in once the model arrives (instant under reduced motion).
+      const loadIn = !modelLoaded ? 0 : reduced ? 1 : clamp01((now - loadedAt) / 600);
+      if (modelLoaded && loadIn < 1) moving = true;
+      const opacity = targetO * loadIn;
+      container.style.opacity = String(opacity);
+      sceneVisible = opacity > 0.5;
+
+      // Ember glow behind the tip (CSS, so it costs nothing to draw).
+      proj.copy(outer.position).project(camera);
+      const gx = Math.round(((proj.x + 1) / 2) * vw);
+      const gy = Math.round(((1 - proj.y) / 2) * vh + vh * 0.06);
+      const gr = Math.round(vh * lerp(0.75, portrait ? 0.5 : 0.62, pose));
+      const glow = `radial-gradient(circle ${gr}px at ${gx}px ${gy}px, rgba(232,67,27,0.22), rgba(232,67,27,0.06) 45%, rgba(232,67,27,0) 100%)`;
+      if (glow !== lastGlow) {
+        container.style.background = glow;
+        lastGlow = glow;
       }
 
-      // Key star: ellipse behind the chisel, sized to stay inside the frame.
-      const halfW = Math.tan(THREE.MathUtils.degToRad(FOV_DEG / 2)) * (CAM_Z - KEY_Z) * aspect;
-      const keyRx = Math.min(1.2, halfW * 0.7);
+      // Key star: ellipse behind the tip, sized to stay inside the frame. Same
+      // screen size and path as before the scene change.
+      const kH = (CAM_D + KEY_BEHIND) * TAN;
+      const kRx = Math.min(0.523, 0.7 * aspect) * kH;
       const keyA = reduced ? Math.PI * 0.9 : t * 0.2;
       keyStar.position.set(
-        orbitGroup.position.x + Math.cos(keyA) * keyRx,
-        0.45 + Math.sin(keyA) * 0.6,
-        KEY_Z,
+        cur.x * kH + Math.cos(keyA) * kRx,
+        Math.sin(keyA) * 0.2615 * kH,
+        -KEY_BEHIND,
       );
+      keyStar.scale.setScalar(0.0567 * kH);
       keyMat.opacity = reduced ? 1 : 0.8 + Math.sin(t * 1.3) * 0.2;
-      sceneVisible = (reduced ? targetO : cur.o) > 0.5;
 
-      // Layered parallax drift — far layer slower (anchors depth),
-      // near layer faster (foreground). The relative speed is the
-      // visual cue; absolute speeds are still imperceptible per-frame.
-      FAR.points.rotation.y = t * 0.003;
-      FAR.points.rotation.x = Math.sin(t * 0.0008) * 0.015;
-      NEAR.points.rotation.y = t * 0.008;
-      NEAR.points.rotation.x = Math.sin(t * 0.0014) * 0.025;
-
-      // Fallback ember pulse — model yüklenene kadar
-      if (!modelLoaded) {
-        const pulse = 0.18 + Math.sin(t * 1.6) * 0.08;
-        fallbackMat.emissiveIntensity = pulse;
+      // Draw: every frame while the pose moves, ~30 fps while idling, once when
+      // reduced. Nothing before the model arrives (its load wakes the loop) or once
+      // faded out (a scroll back wakes it).
+      const invisible = targetO < 0.01;
+      const animating = modelLoaded && !invisible && (moving || !reduced);
+      if (
+        modelLoaded &&
+        !invisible &&
+        !contextLost &&
+        (moving || reduced || now - lastRender > 31)
+      ) {
+        renderer.render(scene, camera);
+        lastRender = now;
       }
-
-      // Composer chain (RenderPass → UnrealBloomPass → OutputPass)
-      // owns the final draw — no direct renderer.render here. Once the chisel has
-      // faded out (scrolled past the hero) there is nothing to see, so skip the bloom
-      // pipeline; the cheap pose maths above keeps running so it fades back in.
-      const invisible = (reduced ? targetO : cur.o) < 0.01;
-      if (!invisible && !contextLost) composer.render();
-      raf = requestAnimationFrame(tick);
-    };
-    tick();
+      if (animating) raf = requestAnimationFrame(tick);
+    }
+    wake();
 
     // ─── Key star hit-testing ────────────────────────────────────────
     // The canvas is pointer-events:none behind the page, so listen on the
@@ -642,10 +477,10 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       const sx = rect.left + ((ndc.x + 1) / 2) * rect.width;
       const sy = rect.top + ((1 - ndc.y) / 2) * rect.height;
       if (Math.hypot(e.clientX - sx, e.clientY - sy) > KEY_STAR_HIT_PX) return false;
-      // Not while it passes behind the chisel (hidden from view).
+      // Not while it passes behind the tip (hidden from view).
       raycaster.set(camera.position, keyWorld.clone().sub(camera.position).normalize());
       const dist = camera.position.distanceTo(keyWorld);
-      const hit = raycaster.intersectObject(spinGroup, true)[0];
+      const hit = raycaster.intersectObject(outer, true)[0];
       return !(hit && hit.distance < dist);
     };
     let hovering = false;
@@ -665,25 +500,26 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
 
     // ─── Cleanup ─────────────────────────────────────────────────────
     return () => {
+      disposed = true;
+      cancelAnimationFrame(raf);
+      raf = 0;
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('click', onClick);
       if (hovering) document.documentElement.style.cursor = '';
-      keyMat.dispose();
-      cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', onResize);
-      window.removeEventListener('scroll', updatePhase);
+      window.removeEventListener('scroll', onScroll);
+      document.removeEventListener('visibilitychange', onVisibility);
       reducedMq?.removeEventListener?.('change', onReducedChange);
       renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
       renderer.domElement.removeEventListener('webglcontextrestored', onContextRestored);
       window.visualViewport?.removeEventListener('resize', onResize);
-      FAR.points.geometry.dispose();
-      (FAR.points.material as THREE.PointsMaterial).dispose();
-      NEAR.points.geometry.dispose();
-      (NEAR.points.material as THREE.PointsMaterial).dispose();
+      loaded.forEach((g) => g.dispose());
+      bodyMat.dispose();
+      machinedMat.dispose();
+      keyMat.dispose();
       starSprite.dispose();
-      bloom.dispose();
-      composer.dispose();
+      envTex.dispose();
       pmrem.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode) {
