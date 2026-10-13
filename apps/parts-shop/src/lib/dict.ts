@@ -339,6 +339,12 @@ export interface Dict {
       related: string;
       linksLabel: string;
     };
+    /** Genuine OEM numbers of the part ours replaces (owner's decision), cross-reference only. */
+    oemRef: {
+      label: string;
+      /** Item page: what the numbers are for. */
+      note: string;
+    };
     /** Priced parts of breakers we have not modelled: a search shows them with a sample picture. */
     listed: {
       title: string;
@@ -1063,6 +1069,10 @@ export const DICT: Record<Lang, Dict> = {
         back: (group) => `Tüm ${group.toLocaleLowerCase('tr')} modelleri`,
         related: 'Bu kırıcı için ürettiğimiz diğer parçalar',
         linksLabel: 'Parça bağlantıları',
+      },
+      oemRef: {
+        label: 'Muadil OEM no.',
+        note: 'Yalnızca karşılaştırma içindir: parçamız kendi üretimimizdir ve bu OEM numaralı parçayla uyumludur.',
       },
       listed: {
         title: 'Satıştaki parçalar',
@@ -1819,6 +1829,10 @@ export const DICT: Record<Lang, Dict> = {
         back: (group) => `All ${group.toLowerCase()} models`,
         related: 'Other parts we make for this breaker',
         linksLabel: 'Part links',
+      },
+      oemRef: {
+        label: 'Equivalent OEM no.',
+        note: 'For cross-reference only: our part is our own production, compatible with the part of this OEM number.',
       },
       listed: {
         title: 'Parts we sell',

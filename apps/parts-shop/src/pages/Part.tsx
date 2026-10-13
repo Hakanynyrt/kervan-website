@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { matches, rewriteQuery, slugify, type FxRate } from '@kervan/tips';
+import { matches, matchesOem, rewriteQuery, slugify, type FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import { useReducedMotion } from '@kervan/motion';
 import {
@@ -7,6 +7,7 @@ import {
   ImgNote,
   MissingModel,
   OemLine,
+  OemNumbers,
   PageTitle,
   Photo,
   QtyStepper,
@@ -54,6 +55,8 @@ export interface Ctx {
   tipLinks: Record<string, string>;
   /** Render anchor (`anchor#b` = burçlu head) → net USD cents (owner's prices). */
   prices: Record<string, number>;
+  /** Render anchor → genuine OEM numbers ("Muadil OEM no."), shown under the caption. */
+  oem: Record<string, readonly string[]>;
   fx: FxRate | null;
   lang: Lang;
   t: Dict;
@@ -135,7 +138,13 @@ export default function Part({
   }, []);
   const query = q.trim();
   const names = all.map((r) => renderName(r, t));
-  const found = query ? all.filter((_, i) => matches(query, names[i])) : [];
+  const oem = model.oem ?? {};
+  // A genuine OEM number typed (spaces / dashes ignored) names one part: show it whatever the
+  // "Parça türü" chip; otherwise the make + model search.
+  const byOem = query ? every.filter((r) => matchesOem(query, oem[renderAnchor(r)] ?? [])) : [];
+  // An OEM hit is shown across every kind: the chips say so ("Tümü").
+  const shownFilter = byOem.length ? null : filter;
+  const found = byOem.length ? byOem : query ? all.filter((_, i) => matches(query, names[i])) : [];
   // Nothing found: try the query with a misspelt make fixed and unknown words dropped.
   const guess =
     query && !found.length
@@ -177,6 +186,7 @@ export default function Part({
     qty,
     tipLinks: model.tipLinks ?? {},
     prices: model.prices ?? {},
+    oem,
     fx,
     lang,
     t,
@@ -225,9 +235,9 @@ export default function Part({
               <li key={f ?? 'all'}>
                 <button
                   type="button"
-                  aria-pressed={filter === f}
+                  aria-pressed={shownFilter === f}
                   onClick={() => pickFilter(f)}
-                  className={chipClass(filter === f)}
+                  className={chipClass(shownFilter === f)}
                 >
                   {f ? t.parts.filter.items[f] : t.parts.filter.all}
                 </button>
@@ -660,6 +670,7 @@ export function RenderFigure({
               {caption}
             </a>
           </span>
+          <OemNumbers numbers={ctx.oem[renderAnchor(r)] ?? []} t={t} className="mt-1" />
           {cents !== undefined && (
             <PartPriceLine
               cents={cents}

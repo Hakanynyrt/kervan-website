@@ -306,6 +306,34 @@ export function ImgNote({
 
 /** OEM / original-quality line under a product title. */
 /** Repair kits are put together for the breaker, not made by us: their own line (`kit`). */
+/**
+ * "Muadil OEM no.": the original manufacturer's numbers of the part ours is compatible with
+ * (owner's decision; cross-reference only, never our mpn/sku). `note` adds what they are for.
+ */
+export function OemNumbers({
+  numbers,
+  t,
+  note = false,
+  className = '',
+}: {
+  numbers: readonly string[];
+  t: Dict;
+  note?: boolean;
+  className?: string;
+}) {
+  if (!numbers.length) return null;
+  const o = t.parts.oemRef;
+  return (
+    <div className={`font-sans text-sm ${className}`}>
+      <dl className="m-0 flex flex-wrap gap-x-1.5">
+        <dt className="font-medium text-ink-mid">{o.label}:</dt>
+        <dd className="m-0 text-ink tabular-nums">{numbers.join(', ')}</dd>
+      </dl>
+      {note && <p className="m-0 mt-1 max-w-3xl text-ink-mid">{o.note}</p>}
+    </div>
+  );
+}
+
 export function OemLine({ t, kit = false }: { t: Dict; kit?: boolean }) {
   return (
     <p className="m-0 mt-2 font-sans text-base font-semibold text-ink">

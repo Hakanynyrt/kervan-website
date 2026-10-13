@@ -21,8 +21,19 @@ import {
 import { listedParts, type ListedPart } from './listed-parts';
 import { groupPrices, resolvePartPrices } from './part-prices';
 import { groovedFor } from './grooved';
+import { OEM_NUMBERS } from './oem-numbers';
 import { GROOVED_TOOLS, PART_RENDERS, type PartRender } from './photos';
 import type { TipGroupStats } from '../types';
+
+/** One group's genuine OEM numbers by render anchor (what its search matches besides the names). */
+function groupOem(part: PartKey): Record<string, readonly string[]> {
+  const out: Record<string, readonly string[]> = {};
+  for (const [key, nums] of Object.entries(OEM_NUMBERS)) {
+    const slash = key.indexOf('/');
+    if (key.slice(0, slash) === part) out[key.slice(slash + 1)] = nums;
+  }
+  return out;
+}
 
 /** A part we model for a best-selling breaker (the best-sellers page). */
 export interface PopularPart extends PartLink {
@@ -89,6 +100,8 @@ export type PageModel =
       prices: Record<string, number>;
       /** Priced parts of breakers we have not modelled (shown on a search, sample picture). */
       listed: ListedPart[];
+      /** Render anchor → genuine OEM numbers ("Muadil OEM no.", cross-reference; searchable). */
+      oem: Record<string, readonly string[]>;
       demo: boolean;
       hasPopular: boolean;
     }
@@ -105,6 +118,8 @@ export type PageModel =
       /** Net USD cents of this render, and of its burçlu state (front heads); null = quote. */
       price: number | null;
       priceFitted: number | null;
+      /** Genuine OEM numbers of the part ours is compatible with ("Muadil OEM no."); never mpn/sku. */
+      oem: readonly string[];
       demo: boolean;
       hasPopular: boolean;
     }
@@ -455,6 +470,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         tipLinks: tipLinksForPart(part, tipPaths),
         prices: groupPrices(partPrices, part),
         listed: listed[part] ?? [],
+        oem: groupOem(part),
         demo,
         hasPopular,
       },
@@ -473,6 +489,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
             related: relatedParts(part, r),
             price: partPrices.get(`${part}/${anchor}`) ?? null,
             priceFitted: partPrices.get(`${part}/${anchor}#b`) ?? null,
+            oem: OEM_NUMBERS[`${part}/${anchor}`] ?? [],
             demo,
             hasPopular,
           },

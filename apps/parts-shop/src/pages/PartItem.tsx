@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import type { FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
-import { Breadcrumb, ImgNote, OemLine, PageTitle, StickyQuote } from '../components/Bits';
+import {
+  Breadcrumb,
+  ImgNote,
+  OemLine,
+  OemNumbers,
+  PageTitle,
+  StickyQuote,
+} from '../components/Bits';
 import { FOCUS } from '../components/Layout';
 import { PartOrder, PartPriceLine, partOrderText, priceNote } from '../components/PartOrder';
 import type { Dict } from '../lib/dict';
@@ -51,7 +58,17 @@ export default function PartItem({
   const fittedNow = !!r.fitted && withB;
   const cents = fittedNow ? model.priceFitted : model.price;
   const itemPath = partItemPath(model.part, model.anchor);
-  const ctx: Ctx = { part: model.part, name: p.name, qty, tipLinks: {}, prices: {}, fx, lang, t };
+  const ctx: Ctx = {
+    part: model.part,
+    name: p.name,
+    qty,
+    tipLinks: {},
+    prices: {},
+    oem: { [model.anchor]: model.oem },
+    fx,
+    lang,
+    t,
+  };
   const related = model.related.flatMap((l) => {
     const x = findRender(l.part, l.anchor);
     return x ? [{ l, x }] : [];
@@ -69,6 +86,7 @@ export default function PartItem({
       />
       <PageTitle>{caption}</PageTitle>
       <OemLine t={t} kit={model.part === 'tamir-takimi'} />
+      <OemNumbers numbers={model.oem} t={t} note className="mt-3" />
       {cents !== null && (
         <PartPriceLine
           cents={cents}
