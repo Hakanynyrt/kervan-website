@@ -77,6 +77,27 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # The repo and its CI logs are public: refuse price sheets, the sheet key, drawings,
+      # VEGA numbers and tokens in the pushed commits (scripts/secret-guard.mjs; it prints
+      # file, line and rule only, never the matched text).
+      - name: Secret guard
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          node --test scripts/secret-guard.test.mjs
+          if [ "$EVENT" = pull_request ]; then
+            node scripts/secret-guard.mjs "$PR_BASE..$PR_HEAD"
+          elif [ "$EVENT" = push ] && ! printf '%s' "$PUSH_BEFORE" | grep -qE '^0+$'; then
+            node scripts/secret-guard.mjs "$PUSH_BEFORE..$GITHUB_SHA"
+          else
+            node scripts/secret-guard.mjs "HEAD~1..HEAD"
+          fi
 
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 

@@ -60,7 +60,9 @@ deploy's `verify` job runs the same four and blocks every deploy.
 - **The repo and CI logs are public.** Never commit or print: prices, the price sheet or pricing
   policy, `SHOP_SHEET_KEY`, repair-kit sizes, the `TECH_CONTENT` text, the VEGA catalog / drawings
   / `popular:v1` data, source drawings, tokens or passwords. Data scripts print counts only and
-  write outside the repo.
+  write outside the repo. `scripts/secret-guard.mjs` enforces this: a Claude Code hook
+  (`.claude/settings.json`) runs it before every `git commit` / `git push`, and `verify` runs it on
+  every PR and push. Never bypass it; if it blocks a false positive, narrow its rule in a PR.
 - Tip codes (`KU{Ø}-{NN}`, SKU suffixes) are permanent: never renumber or reuse. No third-party
   catalogue names or part numbers on the sites or in shop identifiers.
 - Never invent references, customer names or numbers on the sites.
