@@ -1,16 +1,20 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
-/** "Tek Parça": one black breaker tip (pointed / moil, two key slots) on the dark
- *  page, lit by a warm key, a cool fill and an ember rim light that slowly circles it.
- *  An ember radial glow sits behind it (CSS, on the container). No stars, no bloom.
+/** "Tek Parça": one black breaker tip (pointed / moil, two key slots) standing
+ *  steep (65°, point down and to the left, turned 25°) on the dark page, lit like a
+ *  studio product shot: a baked softbox environment (long key strip along the tool
+ *  axis, cool right strip and back-left kicker, a faint ember strip), a warm key, a
+ *  cool fill and an ember rim light that slowly circles it. Under the point a
+ *  faint ember pool lies on an unseen floor; an ember radial glow sits behind it
+ *  (CSS, on the container). No stars, no bloom, no post-processing.
  *
  *  Scroll rail (continuous, anchored to the hero element, read every frame):
- *    OPENING (scrollY 0 → heroTop)          — tip centred in the approved pose
- *    HERO    (heroTop → heroBottom)         — turns to yaw −50°, moves to the right
- *                                             third (phones: upper band, smaller)
+ *    OPENING (scrollY 0 → heroTop)          — tip centred, 80 % of the frame tall
+ *    HERO    (heroTop → heroBottom)         — turns a further −10°, shrinks and moves
+ *                                             above the hero figures (phones: right of
+ *                                             the heading lines)
  *    POST    (heroBottom → heroBottom+⅕ih)  — fades out; nothing is drawn after that
  *
  *  Idle: a very slow ±3.5° sway and the rim light orbiting (~12 s per turn).
@@ -26,15 +30,270 @@ const deg = THREE.MathUtils.degToRad;
 /** Model file. Images/models are cached immutable: a changed model gets a new name. */
 const MODEL_URL = '/kirici-ucu-siyah-01.glb';
 
-// Approved look (owner, "Tek Parça").
-const FOV_DEG = 22;
-const CAM_D = 3;
-const YAW_OPEN = -22;
-const YAW_HERO = -50;
-const PITCH = 14;
-const ROLL = 100; // about the long axis: one key slot faces up, the other is the lower notch
+// Approved look (owner, "Tek Parça", realism + pose update 2026-10-13).
+const FOV_DEG = 16;
+const CAM_D = 4.6;
+const CAM_ELEV = -3; // camera slightly below the tool centre, looking up
+const ELEV = 65; // the long axis is 65° off horizontal, point down
+const TURN = 25; // turned 25° about the vertical
+const LEAN = -1; // point to the screen left, striking end to the upper right
+const HERO_EXTRA_YAW = -10;
+const ROLL = 95; // about the long axis: both key slots read as silhouette notches
 const RIM_ANGLE = 70; // rim light angle in the reduced-motion / start frame
 const RIM_PERIOD_S = 12;
+// Projected tool height as a share of the frame height.
+const OPEN_H = 0.8;
+const OPEN_Y = -0.03; // half-heights: a little low, clear of the nav
+const HERO_H = 0.42;
+const OPEN_H_PORTRAIT = 0.7;
+const HERO_H_PORTRAIT = 0.34;
+const MAX_W_PORTRAIT = 0.8; // never wider than this share of a portrait frame
+// Hero position (x in half-widths, y in half-heights): above the hero figures on
+// landscape; right of the heading lines on portrait.
+const HERO_X = 0.5;
+const HERO_Y = 0.33;
+const HERO_X_PORTRAIT = 0.65;
+const HERO_Y_PORTRAIT = 0.24;
+
+/** Studio environment baked once into a PMREM: a dark room with emissive
+ *  softbox panels (colour × intensity, linear). The vertical strips lean with
+ *  the tool axis so its reflection is one long continuous highlight. */
+function buildStudioEnv(pmrem: THREE.PMREMGenerator): THREE.Texture {
+  const studio = new THREE.Scene();
+  const geos: THREE.BufferGeometry[] = [];
+  const mats: THREE.Material[] = [];
+  const roomGeo = new THREE.BoxGeometry(12, 8, 12);
+  const roomMat = new THREE.MeshBasicMaterial({ color: 0x040404, side: THREE.BackSide });
+  geos.push(roomGeo);
+  mats.push(roomMat);
+  const room = new THREE.Mesh(roomGeo, roomMat);
+  room.position.y = 2;
+  studio.add(room);
+  const strips = new THREE.Group();
+  strips.rotation.z = deg(-(90 - ELEV));
+  studio.add(strips);
+  const panel = (
+    parent: THREE.Object3D,
+    w: number,
+    h: number,
+    col: number,
+    I: number,
+    pos: [number, number, number],
+    look: [number, number, number],
+  ) => {
+    const g = new THREE.PlaneGeometry(w, h);
+    const m = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(col).multiplyScalar(I),
+      side: THREE.DoubleSide,
+    });
+    geos.push(g);
+    mats.push(m);
+    const mesh = new THREE.Mesh(g, m);
+    parent.add(mesh);
+    mesh.position.set(...pos);
+    parent.updateMatrixWorld(true);
+    mesh.lookAt(parent.localToWorld(new THREE.Vector3(...look)));
+  };
+  panel(strips, 1.4, 6, 0xfff4e8, 16, [-3.2, 0.6, 2.2], [0, 0.3, 0]); // key strip
+  panel(strips, 0.5, 6, 0xe6eef8, 7, [3.3, 0.6, -0.4], [0, 0.3, 0]); // right strip
+  panel(strips, 0.5, 6, 0xcfd8e6, 3, [-4, 0.5, -2.5], [0, 0.3, 0]); // back-left kicker
+  panel(strips, 0.4, 4.5, 0xff5a14, 4, [-1.2, 0.6, -3.6], [0, 0.3, 0]); // ember strip
+  panel(studio, 3, 2.4, 0xffffff, 2.5, [0, 4.2, 0.8], [0, 0, 0]); // top box
+  panel(studio, 6, 6, 0xff6a1a, 0.2, [0, -1.4, 0], [0, 1, 0]); // ember floor
+  const tex = pmrem.fromScene(studio, 0.02).texture;
+  geos.forEach((g) => g.dispose());
+  mats.forEach((m) => m.dispose());
+  return tex;
+}
+
+/** 128 px tileable 5-octave value noise (forged surface), drawn once. */
+function makeNoiseTexture(): THREE.CanvasTexture {
+  const N = 128;
+  const c = document.createElement('canvas');
+  c.width = c.height = N;
+  const g = c.getContext('2d');
+  if (g) {
+    const img = g.createImageData(N, N);
+    let seed = 7;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const octave = (f: number) => {
+      const G: number[] = [];
+      for (let i = 0; i < f * f; i++) G.push(rnd());
+      const v = (i: number, j: number) => G[(((j % f) + f) % f) * f + (((i % f) + f) % f)] ?? 0;
+      return (x: number, y: number) => {
+        const fx = (x * f) / N,
+          fy = (y * f) / N;
+        const x0 = Math.floor(fx),
+          y0 = Math.floor(fy);
+        const sx = smooth(fx - x0),
+          sy = smooth(fy - y0);
+        return (
+          (v(x0, y0) * (1 - sx) + v(x0 + 1, y0) * sx) * (1 - sy) +
+          (v(x0, y0 + 1) * (1 - sx) + v(x0 + 1, y0 + 1) * sx) * sy
+        );
+      };
+    };
+    const octs = [octave(4), octave(8), octave(16), octave(32), octave(64)];
+    const wts = [0.3, 0.25, 0.2, 0.15, 0.1];
+    for (let y = 0; y < N; y++) {
+      for (let x = 0; x < N; x++) {
+        let n = 0;
+        for (let k = 0; k < 5; k++) n += (octs[k]?.(x, y) ?? 0) * (wts[k] ?? 0);
+        const i = (y * N + x) * 4;
+        img.data[i] = img.data[i + 1] = img.data[i + 2] = Math.round(n * 255);
+        img.data[i + 3] = 255;
+      }
+    }
+    g.putImageData(img, 0, 0);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  // Sampled with a cylindrical mapping in the shader (no UVs in the model):
+  // no mipmaps, so the wrap of the angle leaves no seam.
+  tex.generateMipmaps = false;
+  tex.minFilter = THREE.LinearFilter;
+  return tex;
+}
+
+/** Forged-surface roughness noise, a light bump and the key-slot occlusion,
+ *  added to a standard material. The noise is mapped around the long axis
+ *  (3 tiles around, 5 along the length) from the object-space position. */
+function addSurfaceDetail(
+  mat: THREE.MeshStandardMaterial,
+  cacheKey: string,
+  noise: THREE.Texture,
+  roughVar: number,
+  bumpScale: number,
+  axis: { swizzle: string; alongScale: number },
+) {
+  mat.customProgramCacheKey = () => cacheKey;
+  mat.onBeforeCompile = (sh) => {
+    sh.uniforms.uNoise = { value: noise };
+    sh.uniforms.uRoughVar = { value: roughVar };
+    sh.uniforms.uBump = { value: bumpScale };
+    sh.uniforms.uAlong = { value: axis.alongScale };
+    sh.vertexShader = sh.vertexShader
+      .replace(
+        '#include <common>',
+        '#include <common>\nattribute float ao;\nvarying float vAO;\nvarying vec3 vObjP;',
+      )
+      .replace(
+        '#include <begin_vertex>',
+        `#include <begin_vertex>\nvAO = ao;\nvObjP = position.${axis.swizzle};`,
+      );
+    sh.fragmentShader = sh.fragmentShader
+      .replace(
+        '#include <common>',
+        `#include <common>
+uniform sampler2D uNoise;
+uniform float uRoughVar;
+uniform float uBump;
+uniform float uAlong;
+varying float vAO;
+varying vec3 vObjP; // xy across the long axis, z along it
+vec3 cvPerturb( vec3 surf_pos, vec3 surf_norm, vec2 dHdxy, float faceDirection ) {
+  vec3 vSigmaX = normalize( dFdx( surf_pos ) );
+  vec3 vSigmaY = normalize( dFdy( surf_pos ) );
+  vec3 R1 = cross( vSigmaY, surf_norm );
+  vec3 R2 = cross( surf_norm, vSigmaX );
+  float fDet = dot( vSigmaX, R1 ) * faceDirection;
+  vec3 vGrad = sign( fDet ) * ( dHdxy.x * R1 + dHdxy.y * R2 );
+  return normalize( abs( fDet ) * surf_norm - vGrad );
+}`,
+      )
+      .replace(
+        '#include <roughnessmap_fragment>',
+        `vec2 cvUv = vec2( atan( vObjP.y, vObjP.x ) * ( 3.0 / 6.2831853 ), vObjP.z * uAlong );
+float cvH = texture2D( uNoise, cvUv ).g;
+float roughnessFactor = roughness + ( cvH - 0.5 ) * 2.0 * uRoughVar;`,
+      )
+      .replace(
+        '#include <normal_fragment_maps>',
+        `#include <normal_fragment_maps>
+if ( uBump > 0.0 ) normal = cvPerturb( - vViewPosition, normal, vec2( dFdx( cvH ), dFdy( cvH ) ) * uBump, faceDirection );`,
+      )
+      .replace(
+        '#include <aomap_fragment>',
+        `#include <aomap_fragment>
+reflectedLight.indirectDiffuse *= vAO;
+reflectedLight.indirectSpecular *= vAO * vAO;
+reflectedLight.directDiffuse *= mix( 1.0, vAO, 0.6 );
+reflectedLight.directSpecular *= mix( 1.0, vAO, 0.6 );`,
+      );
+  };
+}
+
+/** Per-vertex occlusion for the key slots: a vertex below the local outer radius
+ *  (max radius within ±2 of ~200 bins along the long axis) is darkened by up to
+ *  35 %. The end faces are left alone. Positions are in the model's own units. */
+function computeSlotAO(geos: THREE.BufferGeometry[], axisIdx: number) {
+  const BINS = 200;
+  const a = (axisIdx + 1) % 3,
+    b = (axisIdx + 2) % 3;
+  let lo = Infinity,
+    hi = -Infinity;
+  for (const g of geos) {
+    const p = g.getAttribute('position');
+    for (let i = 0; i < p.count; i++) {
+      const t = p.getComponent(i, axisIdx);
+      lo = Math.min(lo, t);
+      hi = Math.max(hi, t);
+    }
+  }
+  const L = Math.max(1e-9, hi - lo);
+  const binOf = (t: number) => Math.min(BINS - 1, Math.max(0, Math.floor(((t - lo) / L) * BINS)));
+  const rmax = new Float32Array(BINS);
+  for (const g of geos) {
+    const p = g.getAttribute('position');
+    for (let i = 0; i < p.count; i++) {
+      const k = binOf(p.getComponent(i, axisIdx));
+      rmax[k] = Math.max(rmax[k] ?? 0, Math.hypot(p.getComponent(i, a), p.getComponent(i, b)));
+    }
+  }
+  const rnb = new Float32Array(BINS);
+  for (let k = 0; k < BINS; k++) {
+    let m = 0;
+    for (let j = Math.max(0, k - 2); j <= Math.min(BINS - 1, k + 2); j++)
+      m = Math.max(m, rmax[j] ?? 0);
+    rnb[k] = m;
+  }
+  for (const g of geos) {
+    const p = g.getAttribute('position');
+    const ao = new Float32Array(p.count);
+    for (let i = 0; i < p.count; i++) {
+      const tAx = p.getComponent(i, axisIdx);
+      const u = (tAx - lo) / L;
+      if (u < 0.03 || u > 0.97) {
+        ao[i] = 1;
+        continue;
+      }
+      const r = Math.hypot(p.getComponent(i, a), p.getComponent(i, b));
+      const t = clamp01(((rnb[binOf(tAx)] ?? 0) - r) / L / 0.02);
+      ao[i] = 1 - 0.35 * smooth(t);
+    }
+    g.setAttribute('ao', new THREE.BufferAttribute(ao, 1));
+  }
+}
+
+/** Soft ember pool under the point (additive, on an unseen floor). */
+function makePoolTexture(): THREE.CanvasTexture {
+  const N = 128;
+  const c = document.createElement('canvas');
+  c.width = c.height = N;
+  const g = c.getContext('2d');
+  if (g) {
+    const grad = g.createRadialGradient(N / 2, N / 2, 0, N / 2, N / 2, N / 2);
+    grad.addColorStop(0, 'rgba(255,106,26,1)');
+    grad.addColorStop(0.25, 'rgba(232,67,27,0.45)');
+    grad.addColorStop(0.6, 'rgba(232,67,27,0.12)');
+    grad.addColorStop(1, 'rgba(232,67,27,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, N, N);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
 
 /** Round soft-edged sprite for the key star. 64×64 radial gradient drawn once. */
 function makeStarSprite(): THREE.CanvasTexture {
@@ -120,7 +379,7 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     const ratioFor = (W: number, H: number) => Math.max(0.1, Math.min(DPR, MAX_W / W, MAX_H / H));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.2;
 
     // Visual viewport: iOS Safari URL-bar collapse changes the visible height
     // while a fixed `inset:0` element re-flows late. The height is clamped (never
@@ -162,35 +421,34 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     // ─── Scene, camera, environment, lights ──────────────────────────
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(FOV_DEG, W0 / H0, 0.05, 50);
-    camera.position.set(0, 0, CAM_D);
+    camera.position.set(0, Math.sin(deg(CAM_ELEV)) * CAM_D, Math.cos(deg(CAM_ELEV)) * CAM_D);
     camera.lookAt(0, 0, 0);
     const TAN = Math.tan(deg(FOV_DEG / 2));
 
     // Metal reflects the environment; without one it renders flat black.
     const pmrem = new THREE.PMREMGenerator(renderer);
-    const room = new RoomEnvironment();
-    const envTex = pmrem.fromScene(room, 0.04).texture;
-    room.dispose();
+    const envTex = buildStudioEnv(pmrem);
     scene.environment = envTex;
-    scene.environmentIntensity = 0.7;
+    scene.environmentIntensity = 1;
 
-    const key = new THREE.DirectionalLight(0xfff1e0, 2.6);
-    key.position.set(-3, 4, 3);
+    const key = new THREE.DirectionalLight(0xfff1e0, 1.6);
+    key.position.set(-2.5, 3.5, 2.5);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0x9fb4d0, 0.35);
+    const fill = new THREE.DirectionalLight(0x9fb4d0, 0.25);
     fill.position.set(4, 1, 2);
     scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xff6a1a, 5);
+    const RIM_I = 2.6;
+    const rim = new THREE.DirectionalLight(0xff6a1a, RIM_I);
     scene.add(rim);
-    // Rim position on its orbit (angle a), turned with the tip's yaw change (dy) so
-    // the hero turn keeps the approved light-to-tip relation.
+    // Rim position on its orbit (angle a), turned with the tip's extra hero yaw
+    // (dy) so the hero turn keeps the approved light-to-tip relation.
     // Around 115° the orbit passes in front of the tip, above it, where the ember
-    // would flood the whole top face instead of edging it: dim it there.
+    // would flood the front instead of edging it: dim it there.
     const RIM_DIP = deg(115);
     const RIM_DIP_W = deg(25);
     const setRim = (a: number, dy = 0) => {
       const d = Math.atan2(Math.sin(a - RIM_DIP), Math.cos(a - RIM_DIP)) / RIM_DIP_W;
-      rim.intensity = 5 * (1 - 0.8 * Math.exp(-d * d));
+      rim.intensity = RIM_I * (1 - 0.8 * Math.exp(-d * d));
       const x = Math.cos(a) * 3;
       const z = Math.sin(a) * 3 - 2.5;
       rim.position.set(
@@ -201,27 +459,60 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     };
     setRim(deg(RIM_ANGLE));
 
-    // Every surface black (owner): forged body and the slightly brighter machined
-    // faces (key slots, ends) that keep the slots readable.
+    // Every surface black (owner): forged body with a fine roughness noise and
+    // the machined faces (key slots, ends) as smoother metal.
+    const noiseTex = makeNoiseTexture();
     const bodyMat = new THREE.MeshStandardMaterial({
-      color: 0x111317,
-      metalness: 0.5,
-      roughness: 0.45,
+      color: 0x202226,
+      metalness: 0.6,
+      roughness: 0.34,
     });
     const machinedMat = new THREE.MeshStandardMaterial({
-      color: 0x1a1c20,
+      color: 0x1e2024,
       metalness: 1,
-      roughness: 0.32,
+      roughness: 0.38,
     });
 
+    // Ember pool on the unseen floor under the point (not part of the tip).
+    const poolTex = makePoolTexture();
+    const poolMat = new THREE.MeshBasicMaterial({
+      map: poolTex,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      toneMapped: false,
+      side: THREE.DoubleSide,
+    });
+    const poolGeo = new THREE.PlaneGeometry(1, 1);
+    const pool = new THREE.Mesh(poolGeo, poolMat);
+    pool.rotation.x = -Math.PI / 2;
+    pool.renderOrder = -1;
+    pool.visible = false;
+    scene.add(pool);
+
     // ─── Group hierarchy: outer (pose) > roll > model ────────────────
-    // outer: position, scale, yaw (Y) and pitch (X); roll: about the long axis (X).
+    // outer: position, scale and the pose quaternion (the long axis, local −X at the
+    // point, along `pointDir`); roll: about the long axis (X).
     const outer = new THREE.Group();
     const rollG = new THREE.Group();
     rollG.rotation.x = deg(ROLL);
     outer.add(rollG);
     outer.visible = false;
     scene.add(outer);
+    const e = deg(ELEV),
+      tn = deg(TURN);
+    const pointDir = new THREE.Vector3(
+      LEAN * Math.cos(e) * Math.cos(tn),
+      -Math.sin(e),
+      LEAN * Math.cos(e) * Math.sin(tn),
+    ).normalize();
+    const qBase = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(-1, 0, 0), pointDir);
+    const qYaw = new THREE.Quaternion();
+    const qNod = new THREE.Quaternion();
+    const AX_X = new THREE.Vector3(1, 0, 0);
+    const AX_Y = new THREE.Vector3(0, 1, 0);
+    // The tool's world-space extent at unit scale in the base pose (set on load).
+    const unitBox = { w: 1, h: 1 };
 
     // ─── Key star ────────────────────────────────────────────────────
     const starSprite = makeStarSprite();
@@ -247,6 +538,7 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
         if (disposed) return;
         try {
           const model = gltf.scene;
+          const meshGeos: THREE.BufferGeometry[] = [];
           model.traverse((o) => {
             const mesh = o as THREE.Mesh;
             if (!mesh.isMesh) return;
@@ -254,6 +546,7 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
             (mesh.material as THREE.Material).dispose();
             mesh.material = name === 'machined' ? machinedMat : bodyMat;
             loaded.push(mesh.geometry);
+            meshGeos.push(mesh.geometry);
           });
           // Centre on the bbox, long axis → X, length 1.
           const box = new THREE.Box3().setFromObject(model);
@@ -263,10 +556,39 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
           model.position.sub(center);
           piv.add(model);
           const L = Math.max(size.x, size.y, size.z);
-          if (size.y === L) piv.rotation.z = Math.PI / 2;
-          else if (size.z === L) piv.rotation.y = Math.PI / 2;
+          const axisIdx = size.y === L ? 1 : size.z === L ? 2 : 0;
+          if (axisIdx === 1) piv.rotation.z = Math.PI / 2;
+          else if (axisIdx === 2) piv.rotation.y = Math.PI / 2;
           piv.scale.setScalar(1 / Math.max(1e-6, L));
           rollG.add(piv);
+
+          // Surface detail in the model's own (geometry) units.
+          let gLo = Infinity,
+            gHi = -Infinity;
+          for (const g of meshGeos) {
+            g.computeBoundingBox();
+            const bb = g.boundingBox;
+            if (!bb) continue;
+            gLo = Math.min(gLo, bb.min.getComponent(axisIdx));
+            gHi = Math.max(gHi, bb.max.getComponent(axisIdx));
+          }
+          const gL = Math.max(1e-9, gHi - gLo);
+          computeSlotAO(meshGeos, axisIdx);
+          const axis = {
+            swizzle: ['yzx', 'xzy', 'xyz'][axisIdx] ?? 'xzy',
+            alongScale: 5 / gL,
+          };
+          addSurfaceDetail(bodyMat, 'kv-tip-body', noiseTex, 0.16, 0.25, axis);
+          addSurfaceDetail(machinedMat, 'kv-tip-machined', noiseTex, 0, 0, axis);
+
+          // Extent of the posed tool at unit scale, for sizing by height.
+          outer.quaternion.copy(qBase);
+          outer.scale.setScalar(1);
+          outer.position.set(0, 0, 0);
+          outer.updateMatrixWorld(true);
+          const ext = new THREE.Box3().setFromObject(outer).getSize(new THREE.Vector3());
+          unitBox.w = Math.max(1e-3, ext.x);
+          unitBox.h = Math.max(1e-3, ext.y);
           outer.visible = true;
           modelLoaded = true;
           loadedAt = performance.now();
@@ -342,9 +664,10 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     let lastRender = 0;
     let lastGlow = '';
     let first = true;
-    // Eased pose accumulator: x/y in half-heights, scale, yaw, opacity.
-    const cur = { x: 0, y: 0, s: 1, yaw: YAW_OPEN };
+    // Eased pose accumulator: x/y in half-heights, scale, extra yaw (degrees).
+    const cur = { x: 0, y: 0, s: 1, extraYaw: 0 };
     const proj = new THREE.Vector3();
+    const pointWorld = new THREE.Vector3();
 
     function tick() {
       raf = 0;
@@ -365,25 +688,27 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       const pose = smooth(clamp01((phase - 0.6) / 0.4));
       const fade = clamp01((phase - 1.7) / 0.3);
 
-      // Size: the tip's length as a share of the visible width (wider share on
-      // narrow screens), never taller than the frame allows.
-      const share = lerp(0.84, 0.61, clamp01((aspect - 0.75) / 0.55));
-      const s0 = Math.min(share * 2 * W2, 2.5 * H2);
-      // Hero pose: right third on landscape, above the hero figures; upper band
-      // (smaller, above the heading) on portrait.
-      const heroX = portrait ? 0.02 : 0.5;
-      const heroY = portrait ? 0.68 : 0.33;
-      const heroS = portrait ? 0.6 : 0.62;
+      // Size by projected height (the tip stands steep); on portrait screens also
+      // never wider than MAX_W_PORTRAIT of the frame.
+      const openH = portrait ? OPEN_H_PORTRAIT : OPEN_H;
+      let s0 = (openH * 2 * H2) / unitBox.h;
+      if (portrait) s0 = Math.min(s0, (MAX_W_PORTRAIT * 2 * W2) / unitBox.w);
+      // Hero pose: right third above the figures on landscape; right of the
+      // heading lines (smaller) on portrait.
+      const heroX = portrait ? HERO_X_PORTRAIT : HERO_X;
+      const heroY = portrait ? HERO_Y_PORTRAIT : HERO_Y;
+      const openY = portrait ? 0 : OPEN_Y;
+      const heroS = portrait ? HERO_H_PORTRAIT / OPEN_H_PORTRAIT : HERO_H / OPEN_H;
       const tx = lerp(0, heroX, pose) * aspect; // half-height units
-      const ty = lerp(0, heroY, pose);
+      const ty = lerp(openY, heroY, pose);
       const ts = s0 * lerp(1, heroS, pose);
-      const tyaw = lerp(YAW_OPEN, YAW_HERO, pose);
+      const tyaw = lerp(0, HERO_EXTRA_YAW, pose);
       const targetO = 1 - fade;
 
       let moving = false;
       if (!reduced && !first) {
         const a = 1 - Math.exp(-dt / 0.18);
-        const step = (k: 'x' | 'y' | 's' | 'yaw', target: number, eps: number) => {
+        const step = (k: 'x' | 'y' | 's' | 'extraYaw', target: number, eps: number) => {
           const d = target - cur[k];
           if (Math.abs(d) > eps) moving = true;
           cur[k] += d * a;
@@ -391,25 +716,34 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
         step('x', tx, 1e-4);
         step('y', ty, 1e-4);
         step('s', ts, 1e-4);
-        step('yaw', tyaw, 0.01);
+        step('extraYaw', tyaw, 0.01);
       } else {
         cur.x = tx;
         cur.y = ty;
         cur.s = ts;
-        cur.yaw = tyaw;
+        cur.extraYaw = tyaw;
       }
       first = false;
 
-      // Idle sway (±3.5° yaw, ±1.2° pitch) and the orbiting rim light.
+      // Idle sway (±3.5° yaw, ±1.2° nod) and the orbiting rim light.
       const sway = reduced ? 0 : Math.sin((t * Math.PI * 2) / 14) * 3.5;
       const nod = reduced ? 0 : Math.sin((t * Math.PI * 2) / 19 + 1) * 1.2;
       outer.position.set(cur.x * H2, cur.y * H2, 0);
       outer.scale.setScalar(cur.s);
-      outer.rotation.set(deg(PITCH + nod), deg(cur.yaw + sway), 0);
-      setRim(
-        deg(RIM_ANGLE) + (reduced ? 0 : (t / RIM_PERIOD_S) * Math.PI * 2),
-        deg(cur.yaw - YAW_OPEN),
-      );
+      qYaw.setFromAxisAngle(AX_Y, deg(cur.extraYaw + sway));
+      qNod.setFromAxisAngle(AX_X, deg(nod));
+      outer.quaternion.copy(qYaw).multiply(qNod).multiply(qBase);
+      setRim(deg(RIM_ANGLE) + (reduced ? 0 : (t / RIM_PERIOD_S) * Math.PI * 2), deg(cur.extraYaw));
+
+      // Ember pool under the point (the point is local −X at half the length).
+      outer.updateMatrixWorld();
+      pointWorld.set(-0.5, 0, 0);
+      outer.localToWorld(pointWorld);
+      const poolR = 0.38 * 2 * cur.s;
+      pool.position.copy(pointWorld);
+      pool.scale.set(poolR, poolR * lerp(3, 4.5, pose), 1);
+      poolMat.opacity = lerp(0.5, 0.3, pose);
+      pool.visible = modelLoaded;
 
       // A short fade-in once the model arrives (instant under reduced motion).
       const loadIn = !modelLoaded ? 0 : reduced ? 1 : clamp01((now - loadedAt) / 600);
@@ -418,12 +752,13 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       container.style.opacity = String(opacity);
       sceneVisible = opacity > 0.5;
 
-      // Ember glow behind the tip (CSS, so it costs nothing to draw).
+      // Ember glow behind the tip (CSS, so it costs nothing to draw), sitting low,
+      // toward the point.
       proj.copy(outer.position).project(camera);
       const gx = Math.round(((proj.x + 1) / 2) * vw);
-      const gy = Math.round(((1 - proj.y) / 2) * vh + vh * 0.06);
-      const gr = Math.round(vh * lerp(0.75, portrait ? 0.5 : 0.62, pose));
-      const glow = `radial-gradient(circle ${gr}px at ${gx}px ${gy}px, rgba(232,67,27,0.22), rgba(232,67,27,0.06) 45%, rgba(232,67,27,0) 100%)`;
+      const gy = Math.round(((1 - proj.y) / 2) * vh + vh * 0.12);
+      const gr = Math.round(vh * lerp(0.8, portrait ? 0.5 : 0.62, pose));
+      const glow = `radial-gradient(circle ${gr}px at ${gx}px ${gy}px, rgba(232,67,27,0.16), rgba(232,67,27,0.045) 45%, rgba(232,67,27,0) 100%)`;
       if (glow !== lastGlow) {
         container.style.background = glow;
         lastGlow = glow;
@@ -517,6 +852,10 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       loaded.forEach((g) => g.dispose());
       bodyMat.dispose();
       machinedMat.dispose();
+      noiseTex.dispose();
+      poolGeo.dispose();
+      poolMat.dispose();
+      poolTex.dispose();
       keyMat.dispose();
       starSprite.dispose();
       envTex.dispose();
