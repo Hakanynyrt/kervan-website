@@ -10,6 +10,8 @@ export { Badge } from './components/Badge.js';
 export { Divider } from './components/Divider.js';
 export { Link } from './components/Link.js';
 export { Icon } from './components/Icon.js';
+export { SocialIcon } from './components/SocialIcon.js';
+export type { SocialIconName } from './components/SocialIcon.js';
 
 // Migrated specialty components
 export { Marquee } from './components/Marquee.js';

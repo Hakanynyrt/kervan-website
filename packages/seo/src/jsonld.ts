@@ -1,10 +1,10 @@
 import {
   KERVAN_HEAT_URL,
   KERVAN_BREAKER_URL,
-  ORG_LEGAL_NAME,
+  ORG_REGISTERED_NAME,
   ORG_TRADING_NAME,
   ORG_PHONE,
-  ORG_EMAIL,
+  ORG_PUBLIC_EMAIL,
   ORG_STREET,
   ORG_LOCALITY,
   ORG_REGION,
@@ -33,8 +33,8 @@ export function organization({ primaryUrl, alternateName, logoUrl }: BuildOrgOpt
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: ORG_LEGAL_NAME,
-    legalName: ORG_LEGAL_NAME,
+    name: ORG_REGISTERED_NAME,
+    legalName: ORG_REGISTERED_NAME,
     alternateName: alternateName ?? ORG_TRADING_NAME,
     url: primaryUrl,
     logo: logoUrl ?? `${primaryUrl}/logo-krv-v2-256.png`,
@@ -42,7 +42,7 @@ export function organization({ primaryUrl, alternateName, logoUrl }: BuildOrgOpt
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: ORG_PHONE,
-      email: ORG_EMAIL,
+      email: ORG_PUBLIC_EMAIL,
       contactType: 'sales',
       areaServed: 'TR',
       availableLanguage: ['tr', 'en'],
