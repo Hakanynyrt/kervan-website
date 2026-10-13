@@ -21,6 +21,98 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+   Day theme ("kâğıt"): light by day, today's dark Mood C at night.
+   The edge middleware (functions/_middleware.ts) marks the page
+   `<html data-sun="day|night">` by the sun where the visitor is; the theme
+   select (localStorage `kv_theme`, applied by the inline script in
+   index.html before paint) overrides it with `data-theme`. Without either
+   mark the page keeps the dark Mood C of @kervan/ui (the night look).
+   Contrast (WCAG): ink-soft 4.92:1, brand 4.76:1 on bg-warm; bg-coloured
+   text on brand buttons 5.64:1. Unlayered so it wins over @theme.
+═══════════════════════════════════════════════════════════════════════ */
+:root[data-theme='light'],
+:root[data-sun='day']:not([data-theme='dark']) {
+  --color-bg: #f6f3ee;
+  --color-bg-soft: #eeeae3;
+  --color-bg-warm: #e6e0d6;
+  --color-ink: #1a1714;
+  --color-ink-mid: #4a433a;
+  --color-ink-soft: #665d52;
+  --color-brand: #b0350e;
+  --color-brand-hi: #962d0b;
+  --color-brand-lo: #82270a;
+  --color-brand-soft: rgba(176, 53, 14, 0.08);
+  --color-hair: #ddd6cb;
+  --color-hair-strong: #bdb3a4;
+  --color-ok: #1e7046;
+  --color-err: #b42318;
+  --shadow-xs: 0 1px 2px rgba(40, 30, 20, 0.08);
+  --shadow-sm: 0 2px 8px rgba(40, 30, 20, 0.08);
+  --shadow-md: 0 6px 24px rgba(40, 30, 20, 0.1);
+  --shadow-lg: 0 16px 48px rgba(40, 30, 20, 0.12);
+  color-scheme: light;
+}
+
+/* The night palette on one part of a day page: the home's opening and hero
+   (the 3D tip's stage) and the header while it floats transparent over them.
+   Same values as @kervan/ui tokens.css. */
+.kv-night,
+:root:has(.kv-hero) .kv-band-top {
+  --color-bg: #0a0a0b;
+  --color-bg-soft: #141416;
+  --color-bg-warm: #1c1c20;
+  --color-ink: #e8e2d6;
+  --color-ink-mid: #b8afa0;
+  --color-ink-soft: #918879;
+  --color-brand: #e8431b;
+  --color-brand-hi: #ff5c32;
+  --color-brand-lo: #c53614;
+  --color-brand-soft: rgba(232, 67, 27, 0.12);
+  --color-hair: #262629;
+  --color-hair-strong: #36363b;
+  color: var(--color-ink);
+  color-scheme: dark;
+}
+/* The stage band itself: painted on the page background behind the fixed 3D
+   canvas, down to the hero's bottom (--kv-band-h, src/lib/use-stage-band.ts). */
+html.kv-band body {
+  background-image: linear-gradient(#0a0a0b, #0a0a0b);
+  background-size: 100% var(--kv-band-h);
+  background-repeat: no-repeat;
+}
+/* Day theme: the fixed 3D canvas shows only over the band's visible part. */
+:root[data-theme='light'].kv-band .scene-bg,
+:root[data-sun='day']:not([data-theme='dark']).kv-band .scene-bg {
+  clip-path: inset(0 0 max(0px, calc(100% - var(--kv-band-vis, 100%))) 0);
+}
+/* The prerendered static page has no canvas: its hero carries the colour itself. */
+html:not(.js-anim) #root[data-prerendered] .kv-hero {
+  background-color: var(--color-bg);
+}
+/* Links ignore Tailwind's text colour (the unlayered `a { color: inherit }`
+   below), so day-theme brand buttons would inherit the dark ink: give them
+   the page colour (5.64:1 on brand). The night look is left as it is. */
+:root[data-theme='light'] a.text-bg:not(.kv-night *),
+:root[data-sun='day']:not([data-theme='dark']) a.text-bg:not(.kv-night *),
+:root[data-theme='light'] a.hover\:text-bg:hover:not(.kv-night *),
+:root[data-sun='day']:not([data-theme='dark']) a.hover\:text-bg:hover:not(.kv-night *) {
+  color: var(--color-bg);
+}
+
+/* Brand logo tiles (BrandMarquee): the wordmark SVGs are drawn in the night
+   ink (#E8E2D6); by day they are darkened to ink and the tile shadow lightened. */
+:root[data-theme='light'],
+:root[data-sun='day']:not([data-theme='dark']) {
+  --kv-tile-shadow: 0 4px 14px rgba(40, 30, 20, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  /* Product placeholders (ProductGrid, ProductDetail): no ember glow on paper. */
+  --kv-ph-glow: transparent;
+}
+:root[data-theme='light'] .kv-brand-tile img,
+:root[data-sun='day']:not([data-theme='dark']) .kv-brand-tile img {
+  filter: brightness(0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
    Breaker-parts app — Mood C tokens are sourced from @kervan/ui.
 ═══════════════════════════════════════════════════════════════════════ */
 

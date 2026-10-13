@@ -40,7 +40,7 @@ export default function Cooling({ t }: Props) {
       <section
         id="sogutma"
         aria-labelledby="sogutma-title"
-        className="relative py-20 md:py-32 overflow-hidden"
+        className="kv-night bg-bg relative py-20 md:py-32 overflow-hidden"
       >
         <div className="relative w-full max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-10 lg:gap-12 items-center">
           <Copy c={c} />
@@ -165,7 +165,7 @@ function CoolingLive({ c }: { c: CoolingCopy }) {
       ref={sectionRef}
       id="sogutma"
       aria-labelledby="sogutma-title"
-      className="relative h-[220vh]"
+      className="kv-night bg-bg relative h-[220vh]"
     >
       <div className="sticky top-0 h-dvh overflow-hidden">
         <div

@@ -12,6 +12,7 @@ import Exports from '../components/Exports';
 import Contact from '../components/Contact';
 import type { DictBlock, Lang } from '../types';
 import { localePath } from '../lib/locale-path';
+import { useStageBand } from '../lib/use-stage-band';
 
 // three.js is ~700 KB: load it as its own chunk, only here, once the page has painted.
 const Scene = lazy(() => import('../components/Scene'));
@@ -34,6 +35,7 @@ export default function Home({ t, lang }: Props) {
   const navigate = useNavigate();
   const isStatic = useStaticMotion();
   const idle = useClientIdle();
+  useStageBand();
   return (
     <>
       {/* 3D BG — vanilla Three.js, fixed full-viewport behind everything. */}

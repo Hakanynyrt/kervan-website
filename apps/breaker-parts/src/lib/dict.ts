@@ -18,6 +18,7 @@ export const DICT: Dict = {
       home: 'Kervan Breaker — anasayfa',
       menu: 'Menü',
       language: 'Dil',
+      theme: { label: 'Tema', auto: 'Otomatik', light: 'Açık', dark: 'Koyu' },
     },
     sister: {
       lead: 'Kontrollü atmosfer fırınlarda fason ısıl işlem hizmetimiz:',
@@ -557,6 +558,7 @@ export const DICT: Dict = {
       home: 'Kervan Breaker — home',
       menu: 'Menu',
       language: 'Language',
+      theme: { label: 'Theme', auto: 'Auto', light: 'Light', dark: 'Dark' },
     },
     sister: {
       lead: 'Our contract heat treatment in controlled-atmosphere furnaces:',

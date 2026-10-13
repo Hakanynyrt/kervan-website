@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "description": "Pages Functions run for pages (the day/night middleware) and /api/* (the endpoints, untouched by the middleware); the immutable assets are served straight from the CDN.",
+  "include": ["/*"],
+  "exclude": [
+    "/assets/*",
+    "/photos/*",
+    "/videos/*",
+    "/brand-logos/*",
+    "/sister/*",
+    "/favicon-32.png",
+    "/favicon-16.png",
+    "/apple-touch-icon.png",
+    "/logo-krv-v2.svg",
+    "/logo-krv-v2-256.png",
+    "/og.png",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/kirici-uc.glb",
+    "/kirici-ucu-siyah-02.glb"
+  ]
+}

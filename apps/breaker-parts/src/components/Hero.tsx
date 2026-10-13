@@ -35,7 +35,8 @@ export default function Hero({ t }: Props) {
   return (
     <section
       data-scene-pose="hero"
-      className="relative min-h-dvh flex flex-col justify-center pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden"
+      // kv-night: the hero is the 3D tip's stage, dark on the day theme too (globals.css).
+      className="kv-hero kv-night relative min-h-dvh flex flex-col justify-center pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden"
     >
       <div className="max-w-[1280px] mx-auto px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-12 items-center">
         {/* Copy — sol yarı */}

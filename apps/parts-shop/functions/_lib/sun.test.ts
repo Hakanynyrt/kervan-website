@@ -53,3 +53,16 @@ test('midnight sun: Longyearbyen in June is day all night', () => {
   for (const h of [0, 6, 12, 18])
     assert.equal(sunPhase(Date.UTC(2026, 5, 21, h, 0), 78.22, 15.63), 'day');
 });
+
+test('the copies on kervanbreaker.com and kervanheat.com match this file', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const own = await readFile(new URL('./sun.ts', import.meta.url), 'utf8');
+  for (const app of ['breaker-parts', 'heat-treatment']) {
+    const copy = await readFile(
+      new URL(`../../../${app}/functions/_lib/sun.ts`, import.meta.url),
+      'utf8',
+    );
+    // The copy only adds a `//` header naming this file.
+    assert.equal(copy.replace(/^(\/\/.*\n)+/, ''), own, `${app}/functions/_lib/sun.ts`);
+  }
+});

@@ -3,6 +3,13 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { Lang } from '../types';
 import { ORIGIN, EXPORTS, type ExportPoint } from '../lib/exports';
+import { isDayTheme, onThemeChange } from '../lib/day-theme';
+
+/** Globe colours: night = the original dark globe; day = a paper globe with ink borders. */
+const GLOBE_COLORS = {
+  night: { sphere: 0x1a1815, grat: 0x2d2820, border: 0xd8c8a8, dot: 0xe8e2d6, ember: 0xff6a1a },
+  day: { sphere: 0xfffcf6, grat: 0xb9ae9d, border: 0x6f6455, dot: 0x4a433a, ember: 0xd9481c },
+};
 
 interface Props {
   lang: Lang;
@@ -133,12 +140,15 @@ export default function ExportsGlobe({ lang }: Props) {
 
     const world = new THREE.Group();
     scene.add(world);
+    let day = isDayTheme();
+    let palette = day ? GLOBE_COLORS.day : GLOBE_COLORS.night;
+    const arcMats: THREE.LineBasicMaterial[] = [];
 
     // ──── Filled globe ───────────────────────────────────────────
     const globe = new THREE.Mesh(
       new THREE.SphereGeometry(1, 64, 64),
       new THREE.MeshStandardMaterial({
-        color: 0x1a1815,
+        color: GLOBE_COLORS.night.sphere,
         metalness: 0.15,
         roughness: 0.85,
       }),
@@ -149,7 +159,7 @@ export default function ExportsGlobe({ lang }: Props) {
     const grat = new THREE.LineSegments(
       new THREE.WireframeGeometry(new THREE.SphereGeometry(1.001, 24, 16)),
       new THREE.LineBasicMaterial({
-        color: 0x2d2820,
+        color: GLOBE_COLORS.night.grat,
         transparent: true,
         opacity: 0.42,
       }),
@@ -183,7 +193,7 @@ export default function ExportsGlobe({ lang }: Props) {
         bordersGroup = new THREE.LineSegments(
           geom,
           new THREE.LineBasicMaterial({
-            color: 0xd8c8a8,
+            color: GLOBE_COLORS.night.border,
             transparent: true,
             opacity: 0.95,
             blending: THREE.AdditiveBlending,
@@ -191,6 +201,7 @@ export default function ExportsGlobe({ lang }: Props) {
           }),
         );
         world.add(bordersGroup);
+        applyPalette();
       })
       .catch((err) => {
         if (err.name !== 'AbortError') {
@@ -212,7 +223,7 @@ export default function ExportsGlobe({ lang }: Props) {
       const dot = new THREE.Mesh(
         new THREE.SphereGeometry(isOrigin ? 0.026 : 0.02, 14, 14),
         new THREE.MeshBasicMaterial({
-          color: isOrigin ? 0xff6a1a : 0xe8e2d6,
+          color: isOrigin ? GLOBE_COLORS.night.ember : GLOBE_COLORS.night.dot,
         }),
       );
       dot.position.copy(pos);
@@ -250,11 +261,36 @@ export default function ExportsGlobe({ lang }: Props) {
       const arcPts = greatCircleArc(start, end, 64, 0.28);
       const geom = new THREE.BufferGeometry().setFromPoints(arcPts);
       const mat = new THREE.LineBasicMaterial({
-        color: 0xff6a1a,
+        color: GLOBE_COLORS.night.ember,
         transparent: true,
         opacity: 0.55,
       });
+      arcMats.push(mat);
       world.add(new THREE.Line(geom, mat));
+    });
+
+    // Day theme: a paper globe with ink borders (additive light lines vanish on a light page).
+    function applyPalette() {
+      palette = day ? GLOBE_COLORS.day : GLOBE_COLORS.night;
+      (globe.material as THREE.MeshStandardMaterial).color.setHex(palette.sphere);
+      const gm = grat.material as THREE.LineBasicMaterial;
+      gm.color.setHex(palette.grat);
+      gm.opacity = day ? 0.55 : 0.42;
+      if (bordersGroup) {
+        const bm = bordersGroup.material as THREE.LineBasicMaterial;
+        bm.color.setHex(palette.border);
+        bm.blending = day ? THREE.NormalBlending : THREE.AdditiveBlending;
+        bm.opacity = day ? 0.7 : 0.95;
+        bm.needsUpdate = true;
+      }
+      (dotMeshes[0]?.material as THREE.MeshBasicMaterial | undefined)?.color.setHex(palette.ember);
+      (originHalo.material as THREE.MeshBasicMaterial).color.setHex(palette.ember);
+      for (const m of arcMats) m.color.setHex(palette.ember);
+    }
+    applyPalette();
+    const offTheme = onThemeChange((d) => {
+      day = d;
+      applyPalette();
     });
 
     // ──── Chisel marker (loaded async from /kirici-uc.glb) ───────
@@ -511,7 +547,7 @@ export default function ExportsGlobe({ lang }: Props) {
         const mat = d.material as THREE.MeshBasicMaterial;
         const isSel = i === selectedRef.current;
         if (i === 0) return; // origin always brand colour
-        mat.color.setHex(isSel ? 0xff6a1a : 0xe8e2d6);
+        mat.color.setHex(isSel ? palette.ember : palette.dot);
         d.scale.setScalar(isSel ? 1.4 : 1);
       });
 
@@ -532,6 +568,7 @@ export default function ExportsGlobe({ lang }: Props) {
       io?.disconnect();
       reducedMq?.removeEventListener?.('change', onReducedChange);
       abortCtrl.abort();
+      offTheme();
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
       window.removeEventListener('pointercancel', onPointerCancel);

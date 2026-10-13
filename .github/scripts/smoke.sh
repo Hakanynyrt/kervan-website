@@ -100,15 +100,17 @@ for old in https://magaza.kervanbreaker.com https://shop.kervanbreaker.com https
     fail=1
   fi
 done
-# The night-theme middleware answers every page (day / night by the request's location,
-# unknown without coordinates); no header means the Pages Function did not run.
-sun=$("${CURL[@]}" -o /dev/null -D - https://kiriciparca.com/ | tr -d '\r' |
-  awk -F': ' 'tolower($1) == "x-kv-sun" { print $2 }')
-if [[ $sun == day || $sun == night || $sun == unknown ]]; then
-  echo "ok    X-Kv-Sun '$sun'  https://kiriciparca.com/"
-else
-  echo "FAIL  X-Kv-Sun '$sun'  https://kiriciparca.com/  (middleware not running)"
-  fail=1
-fi
+# The day/night middleware answers every page of all three sites (day / night by the request's
+# location, unknown without coordinates); no header means the Pages Function did not run.
+for url in https://kiriciparca.com/ https://kervanbreaker.com/ https://kervanheat.com/; do
+  sun=$("${CURL[@]}" -o /dev/null -D - "$url" | tr -d '\r' |
+    awk -F': ' 'tolower($1) == "x-kv-sun" { print $2 }')
+  if [[ $sun == day || $sun == night || $sun == unknown ]]; then
+    echo "ok    X-Kv-Sun '$sun'  $url"
+  else
+    echo "FAIL  X-Kv-Sun '$sun'  $url  (middleware not running)"
+    fail=1
+  fi
+done
 
 exit $fail

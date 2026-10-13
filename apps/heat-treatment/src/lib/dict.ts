@@ -47,6 +47,7 @@ export const DICT: Dict = {
       home: 'Kervan Heat — ana sayfa',
       menu: 'Menü',
       language: 'Dil',
+      theme: { label: 'Tema', auto: 'Otomatik', light: 'Açık', dark: 'Koyu' },
     },
     sister: {
       lead: 'Hidrolik kırıcı yedek parçalarımız ayrı sitemizde:',
@@ -263,6 +264,7 @@ export const DICT: Dict = {
       home: 'Kervan Heat — home',
       menu: 'Menu',
       language: 'Language',
+      theme: { label: 'Theme', auto: 'Auto', light: 'Light', dark: 'Dark' },
     },
     sister: {
       lead: 'Our hydraulic breaker spare parts have their own site:',

@@ -6,7 +6,10 @@ import type { Lang, DictBlock } from '../types';
 import { localePath, stripLang } from '../lib/locale-path';
 import { shopUrl } from '../lib/shop';
 import { rememberLang } from '../lib/use-lang';
-import { SisterSiteStrip } from '@kervan/ui';
+import { SisterSiteStrip, ThemeSelect } from '@kervan/ui';
+
+/** `<meta name="theme-color">` per theme; same values as the inline script in index.html. */
+const THEME_COLOR = { light: '#F6F3EE', dark: '#0A0A0B' };
 
 interface Props {
   lang: Lang;
@@ -118,7 +121,8 @@ export default function Nav({ lang, t, techAuthed }: Props) {
         (stuck
           ? // Slides the sister strip away, but not while its link has keyboard focus (see SisterSiteStrip).
             '-translate-y-(--kv-strip-h) has-[[data-sister-link]:focus-visible]:translate-y-0 bg-bg/85 backdrop-blur-md border-b border-hair'
-          : 'bg-transparent')
+          : // Transparent over the home's dark stage band: take its night palette (globals.css).
+            'bg-transparent kv-band-top')
       }
     >
       <SisterSiteStrip
@@ -149,6 +153,8 @@ export default function Nav({ lang, t, techAuthed }: Props) {
         </nav>
 
         <div className="flex items-center gap-3">
+          {/* Light by day, dark at night (the edge middleware); this overrides it. lg+ only, like the shop's. */}
+          <ThemeSelect t={t.nav.theme} themeColor={THEME_COLOR} className="hidden lg:flex" />
           <Link
             to={otherHref}
             hrefLang={otherLang}
