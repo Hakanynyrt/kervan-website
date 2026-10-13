@@ -53,49 +53,13 @@
   color-scheme: light;
 }
 
-/* The night palette on one part of a day page: the home's opening and hero
-   (the 3D tip's stage) and the header while it floats transparent over them.
-   Same values as @kervan/ui tokens.css. */
-.kv-night,
-:root:has(.kv-hero) .kv-band-top {
-  --color-bg: #0a0a0b;
-  --color-bg-soft: #141416;
-  --color-bg-warm: #1c1c20;
-  --color-ink: #e8e2d6;
-  --color-ink-mid: #b8afa0;
-  --color-ink-soft: #918879;
-  --color-brand: #e8431b;
-  --color-brand-hi: #ff5c32;
-  --color-brand-lo: #c53614;
-  --color-brand-soft: rgba(232, 67, 27, 0.12);
-  --color-hair: #262629;
-  --color-hair-strong: #36363b;
-  color: var(--color-ink);
-  color-scheme: dark;
-}
-/* The stage band itself: painted on the page background behind the fixed 3D
-   canvas, down to the hero's bottom (--kv-band-h, src/lib/use-stage-band.ts). */
-html.kv-band body {
-  background-image: linear-gradient(#0a0a0b, #0a0a0b);
-  background-size: 100% var(--kv-band-h);
-  background-repeat: no-repeat;
-}
-/* Day theme: the fixed 3D canvas shows only over the band's visible part. */
-:root[data-theme='light'].kv-band .scene-bg,
-:root[data-sun='day']:not([data-theme='dark']).kv-band .scene-bg {
-  clip-path: inset(0 0 max(0px, calc(100% - var(--kv-band-vis, 100%))) 0);
-}
-/* The prerendered static page has no canvas: its hero carries the colour itself. */
-html:not(.js-anim) #root[data-prerendered] .kv-hero {
-  background-color: var(--color-bg);
-}
 /* Links ignore Tailwind's text colour (the unlayered `a { color: inherit }`
    below), so day-theme brand buttons would inherit the dark ink: give them
    the page colour (5.64:1 on brand). The night look is left as it is. */
-:root[data-theme='light'] a.text-bg:not(.kv-night *),
-:root[data-sun='day']:not([data-theme='dark']) a.text-bg:not(.kv-night *),
-:root[data-theme='light'] a.hover\:text-bg:hover:not(.kv-night *),
-:root[data-sun='day']:not([data-theme='dark']) a.hover\:text-bg:hover:not(.kv-night *) {
+:root[data-theme='light'] a.text-bg,
+:root[data-sun='day']:not([data-theme='dark']) a.text-bg,
+:root[data-theme='light'] a.hover\:text-bg:hover,
+:root[data-sun='day']:not([data-theme='dark']) a.hover\:text-bg:hover {
   color: var(--color-bg);
 }
 
@@ -154,6 +118,12 @@ body {
    is mounted; body bg falls back to Mood C on cleanup. */
 html.opening-active body {
   background-color: #000;
+}
+/* Day theme: the opening is the paper page too (the tip stands on a light studio
+   sweep drawn by Scene.tsx), so no black. */
+:root[data-theme='light'].opening-active body,
+:root[data-sun='day']:not([data-theme='dark']).opening-active body {
+  background-color: var(--color-bg);
 }
 
 a {

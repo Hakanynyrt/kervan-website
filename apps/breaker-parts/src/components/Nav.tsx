@@ -121,8 +121,7 @@ export default function Nav({ lang, t, techAuthed }: Props) {
         (stuck
           ? // Slides the sister strip away, but not while its link has keyboard focus (see SisterSiteStrip).
             '-translate-y-(--kv-strip-h) has-[[data-sister-link]:focus-visible]:translate-y-0 bg-bg/85 backdrop-blur-md border-b border-hair'
-          : // Transparent over the home's dark stage band: take its night palette (globals.css).
-            'bg-transparent kv-band-top')
+          : 'bg-transparent')
       }
     >
       <SisterSiteStrip

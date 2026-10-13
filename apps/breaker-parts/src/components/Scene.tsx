@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { isDayTheme, onThemeChange } from '../lib/day-theme';
 
 /** "Tek Parça": one black breaker tip (pointed / moil, two key slots) standing
  *  steep (65°, point down and to the left, turned 25°) on the dark page, lit like a
@@ -17,6 +18,12 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
  *                                             above the hero figures (phones: right of
  *                                             the heading lines)
  *    POST    (heroBottom → heroBottom+⅕ih)  — fades out; nothing is drawn after that
+ *
+ *  Day theme (light page, followed live): the same black tip on a light studio
+ *  sweep — a bright seamless room baked into its own PMREM, a soft grey contact +
+ *  cast shadow under the point instead of the ember pool, a toned-down warm rim,
+ *  a pale backdrop light (CSS) instead of the ember glow and a darker, non-additive
+ *  key star. Night is the approved dark look, unchanged.
  *
  *  Idle: a very slow ±3.5° sway and the rim light orbiting (~12 s per turn).
  *  Reduced motion (followed live): the static approved frame, drawn only on change.
@@ -61,14 +68,42 @@ const HERO_Y = 0.33;
 const HERO_X_PORTRAIT = 0.65;
 const HERO_Y_PORTRAIT = 0.24;
 
-/** Studio environment baked once into a PMREM: a dark room with emissive
- *  softbox panels (colour × intensity, linear), as in the approved look. */
-function buildStudioEnv(pmrem: THREE.PMREMGenerator): THREE.Texture {
+type V3 = [number, number, number];
+/** Day theme: the light studio (tuned 2026-10-13 for the paper page). */
+const DAY = {
+  room: 0x1f1d1b, // the sweep's mid tone seen in the steel, kept low so the tip reads black
+  panels: [
+    [14, 14, 0xf3eee6, 1.1, [0, -1.6, 0], [0, 1, 0]], // the sweep's bright floor
+    [14, 7, 0xefe9e0, 0.55, [0, 1.2, -5.5], [0, 1.2, 0]], // the sweep's back wall
+    [0.9, 6, 0xfff6ec, 22, [-3.2, 0.6, 2.2], [0, 0.3, 0]], // key strip
+    [4, 3, 0xffffff, 4, [0, 4.2, 0.8], [0, 0, 0]], // top box
+    [0.5, 6, 0xeef2f8, 9, [3.3, 0.6, -0.4], [0, 0.3, 0]], // right strip
+    [3, 6, 0x050505, 1, [-5.5, 0.6, -1], [0, 0.6, 0]], // black flag left
+    [3, 6, 0x050505, 1, [5.5, 0.6, 1.5], [0, 0.6, 0]], // black flag right
+  ] as [number, number, number, number, V3, V3][],
+  exposure: 1.0,
+  key: 1.4,
+  fill: 0.35,
+  rim: 0xffb48a, // a soft warm edge, not ember
+  rimI: 0.8,
+  bounce: 0,
+  star: 0x14866a, // the key star: a darker mint that reads on paper
+  starOpacity: 0.55,
+};
+
+/** Studio environment baked once into a PMREM: a room with emissive softbox
+ *  panels (colour × intensity, linear). Night: the approved dark room. Day: a
+ *  light seamless sweep (bright floor and back wall, black flags at the sides so
+ *  the black steel keeps its dark faces and crisp highlights). */
+function buildStudioEnv(pmrem: THREE.PMREMGenerator, day: boolean): THREE.Texture {
   const studio = new THREE.Scene();
   const geos: THREE.BufferGeometry[] = [];
   const mats: THREE.Material[] = [];
   const roomGeo = new THREE.BoxGeometry(12, 8, 12);
-  const roomMat = new THREE.MeshBasicMaterial({ color: 0x040404, side: THREE.BackSide });
+  const roomMat = new THREE.MeshBasicMaterial({
+    color: day ? DAY.room : 0x040404,
+    side: THREE.BackSide,
+  });
   geos.push(roomGeo);
   mats.push(roomMat);
   const room = new THREE.Mesh(roomGeo, roomMat);
@@ -94,11 +129,15 @@ function buildStudioEnv(pmrem: THREE.PMREMGenerator): THREE.Texture {
     mesh.lookAt(...look);
     studio.add(mesh);
   };
-  panel(0.9, 6, 0xfff4e8, 16, [-3.2, 0.6, 2.2], [0, 0.3, 0]); // key strip
-  panel(3, 2.4, 0xffffff, 2.5, [0, 4.2, 0.8], [0, 0, 0]); // top box
-  panel(0.5, 6, 0xe6eef8, 7, [3.3, 0.6, -0.4], [0, 0.3, 0]); // right strip
-  panel(0.4, 4.5, 0xff5a14, 6, [-1.2, 0.6, -3.6], [0, 0.3, 0]); // ember strip
-  panel(6, 6, 0xff6a1a, 0.2, [0, -1.4, 0], [0, 1, 0]); // ember floor
+  if (day) {
+    for (const [w, h, col, I, pos, look] of DAY.panels) panel(w, h, col, I, pos, look);
+  } else {
+    panel(0.9, 6, 0xfff4e8, 16, [-3.2, 0.6, 2.2], [0, 0.3, 0]); // key strip
+    panel(3, 2.4, 0xffffff, 2.5, [0, 4.2, 0.8], [0, 0, 0]); // top box
+    panel(0.5, 6, 0xe6eef8, 7, [3.3, 0.6, -0.4], [0, 0.3, 0]); // right strip
+    panel(0.4, 4.5, 0xff5a14, 6, [-1.2, 0.6, -3.6], [0, 0.3, 0]); // ember strip
+    panel(6, 6, 0xff6a1a, 0.2, [0, -1.4, 0], [0, 1, 0]); // ember floor
+  }
   const tex = pmrem.fromScene(studio, 0.02).texture;
   geos.forEach((g) => g.dispose());
   mats.forEach((m) => m.dispose());
@@ -189,6 +228,26 @@ function makePoolTexture(): THREE.CanvasTexture {
   return tex;
 }
 
+/** Day theme: soft shadow under the point (normal blending, drawn once). */
+function makeShadowTexture(): THREE.CanvasTexture {
+  const N = 128;
+  const c = document.createElement('canvas');
+  c.width = c.height = N;
+  const g = c.getContext('2d');
+  if (g) {
+    const grad = g.createRadialGradient(N / 2, N / 2, 0, N / 2, N / 2, N / 2);
+    grad.addColorStop(0, 'rgba(0,0,0,1)');
+    grad.addColorStop(0.2, 'rgba(0,0,0,0.6)');
+    grad.addColorStop(0.5, 'rgba(0,0,0,0.18)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, N, N);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
 /** Round soft-edged sprite for the key star. 64×64 radial gradient drawn once. */
 function makeStarSprite(): THREE.CanvasTexture {
   const c = document.createElement('canvas');
@@ -249,11 +308,16 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       });
     } catch {
       // No WebGL (blocked, old GPU, headless): silently leave a soft ember glow
-      // instead of an empty black opening.
-      container.style.background =
-        'radial-gradient(ellipse at 50% 55%, color-mix(in srgb, var(--color-brand) 16%, transparent), transparent 60%)';
+      // (by day a pale studio light) instead of an empty opening.
+      const paint = (day: boolean) => {
+        container.style.background = day
+          ? 'radial-gradient(ellipse at 50% 55%, rgba(255,255,255,0.75), rgba(255,255,255,0) 60%)'
+          : 'radial-gradient(ellipse at 50% 55%, color-mix(in srgb, var(--color-brand) 16%, transparent), transparent 60%)';
+      };
+      paint(isDayTheme());
+      const offFallbackTheme = onThemeChange(paint);
       reducedMq?.removeEventListener?.('change', onReducedChange);
-      return;
+      return offFallbackTheme;
     }
     renderer.setClearAlpha(0);
     // Phones render at most 1.5x, desktops 2x.
@@ -273,7 +337,7 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     const ratioFor = (W: number, H: number) => Math.max(0.1, Math.min(DPR, MAX_W / W, MAX_H / H));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.2; // night; the day theme sets its own (applyTheme)
 
     // Visual viewport: iOS Safari URL-bar collapse changes the visible height
     // while a fixed `inset:0` element re-flows late. The height is clamped (never
@@ -320,9 +384,9 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     const TAN = Math.tan(deg(FOV_DEG / 2));
 
     // Metal reflects the environment; without one it renders flat black.
+    // One environment per theme, each baked the first time it is needed.
     const pmrem = new THREE.PMREMGenerator(renderer);
-    const envTex = buildStudioEnv(pmrem);
-    scene.environment = envTex;
+    const envs: { day?: THREE.Texture; night?: THREE.Texture } = {};
     scene.environmentIntensity = 1;
 
     const key = new THREE.DirectionalLight(0xfff1e0, 1.6);
@@ -332,6 +396,7 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     fill.position.set(4, 1, 2);
     scene.add(fill);
     const RIM_I = 3.5;
+    let rimI = RIM_I; // the day theme tones it down (applyTheme)
     const rim = new THREE.DirectionalLight(0xff6a1a, RIM_I);
     scene.add(rim);
     // Rim position on its orbit (angle a), turned with the tip's extra hero yaw
@@ -342,7 +407,7 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     const RIM_DIP_W = deg(25);
     const setRim = (a: number, dy = 0) => {
       const d = Math.atan2(Math.sin(a - RIM_DIP), Math.cos(a - RIM_DIP)) / RIM_DIP_W;
-      rim.intensity = RIM_I * (1 - 0.8 * Math.exp(-d * d));
+      rim.intensity = rimI * (1 - 0.8 * Math.exp(-d * d));
       const x = Math.cos(a) * RIM_R;
       const z = Math.sin(a) * RIM_R + RIM_Z;
       rim.position.set(
@@ -351,7 +416,6 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
         z * Math.cos(dy) - x * Math.sin(dy),
       );
     };
-    setRim(deg(RIM_ANGLE));
     // Small ember bounce just behind and below the point (placed every frame).
     const bounce = new THREE.PointLight(0xff5a14, 0.4, 0.5, 2);
     scene.add(bounce);
@@ -392,6 +456,28 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     pool.visible = false;
     scene.add(pool);
 
+    // Day theme: a soft grey shadow on the unseen floor instead of the ember pool,
+    // a tight contact patch at the point and a wider cast toward the back right
+    // (the key light is upper left).
+    const shadowTex = makeShadowTexture();
+    const contactMat = new THREE.MeshBasicMaterial({
+      map: shadowTex,
+      color: 0x2a241d,
+      transparent: true,
+      depthWrite: false,
+      toneMapped: false,
+      side: THREE.DoubleSide,
+    });
+    const castMat = contactMat.clone();
+    const contact = new THREE.Mesh(poolGeo, contactMat);
+    const cast = new THREE.Mesh(poolGeo, castMat);
+    for (const m of [cast, contact]) {
+      m.rotation.x = -Math.PI / 2;
+      m.renderOrder = -1;
+      m.visible = false;
+      scene.add(m);
+    }
+
     // ─── Group hierarchy: outer (pose) > roll > model ────────────────
     // outer: position, scale and the pose quaternion (the long axis, local −X at the
     // point, along `pointDir`); roll: about the long axis (X).
@@ -428,6 +514,27 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
     const keyStar = new THREE.Sprite(keyMat);
     scene.add(keyStar);
     let sceneVisible = true;
+
+    // ─── Theme (day / night), followed live ──────────────────────────
+    let day = false;
+    let lastGlow = '';
+    const applyTheme = (d: boolean) => {
+      day = d;
+      const env = (envs[d ? 'day' : 'night'] ??= buildStudioEnv(pmrem, d));
+      scene.environment = env;
+      renderer.toneMappingExposure = d ? DAY.exposure : 1.2;
+      key.intensity = d ? DAY.key : 1.6;
+      fill.intensity = d ? DAY.fill : 0.25;
+      rim.color.set(d ? DAY.rim : 0xff6a1a);
+      rimI = d ? DAY.rimI : RIM_I;
+      bounce.intensity = d ? DAY.bounce : 0.4;
+      keyMat.color.set(d ? DAY.star : KEY_STAR_COLOR);
+      keyMat.blending = d ? THREE.NormalBlending : THREE.AdditiveBlending;
+      keyMat.needsUpdate = true;
+      lastGlow = '';
+    };
+    applyTheme(isDayTheme());
+    setRim(deg(RIM_ANGLE));
 
     // ─── Model ───────────────────────────────────────────────────────
     let modelLoaded = false;
@@ -538,12 +645,15 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       }
     };
     document.addEventListener('visibilitychange', onVisibility);
+    const offTheme = onThemeChange((d) => {
+      applyTheme(d);
+      wake();
+    });
 
     // ─── Frame ───────────────────────────────────────────────────────
     const startTime = performance.now();
     let lastTickT = startTime;
     let lastRender = 0;
-    let lastGlow = '';
     let first = true;
     // Eased pose accumulator: x/y in half-heights, scale, extra yaw (degrees).
     const cur = { x: 0, y: 0, s: 1, extraYaw: 0 };
@@ -584,7 +694,10 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       const ty = lerp(openY, heroY, pose);
       const ts = s0 * lerp(1, heroS, pose);
       const tyaw = lerp(0, HERO_EXTRA_YAW, pose);
-      const targetO = 1 - fade;
+      // Day theme on portrait: the black tip would sit on the hero's dark heading
+      // lines (no dark stage to hide it), so it bows out as the hero arrives.
+      const dayPortraitOut = day && portrait ? smooth(clamp01((phase - 0.7) / 0.3)) : 0;
+      const targetO = (1 - fade) * (1 - dayPortraitOut);
 
       let moving = false;
       if (!reduced && !first) {
@@ -624,7 +737,15 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       pool.position.copy(pointWorld);
       pool.scale.set(poolR, poolR * lerp(3, 4.5, pose), 1);
       poolMat.opacity = lerp(0.5, 0.3, pose);
-      pool.visible = modelLoaded;
+      pool.visible = modelLoaded && !day;
+      contact.position.copy(pointWorld);
+      const shW = lerp(1, 0.7, pose); // narrower on the hero's figure rule
+      contact.scale.set(poolR * 0.4 * shW, poolR * 0.5 * lerp(3, 4.5, pose), 1);
+      contactMat.opacity = lerp(0.55, 0.45, pose);
+      cast.position.set(pointWorld.x + 0.12 * cur.s, pointWorld.y, pointWorld.z - 0.1 * cur.s);
+      cast.scale.set(poolR * 0.85 * shW, poolR * 0.55 * lerp(3, 4.5, pose), 1);
+      castMat.opacity = lerp(0.2, 0.15, pose);
+      contact.visible = cast.visible = modelLoaded && day;
       bounce.position.set(pointWorld.x, pointWorld.y - 0.03 * cur.s, pointWorld.z - 0.12 * cur.s);
       bounce.distance = 0.5 * cur.s;
 
@@ -641,7 +762,10 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       const gx = Math.round(((proj.x + 1) / 2) * vw);
       const gy = Math.round(((1 - proj.y) / 2) * vh + vh * 0.12);
       const gr = Math.round(vh * lerp(0.8, portrait ? 0.5 : 0.62, pose));
-      const glow = `radial-gradient(circle ${gr}px at ${gx}px ${gy}px, rgba(232,67,27,0.16), rgba(232,67,27,0.045) 45%, rgba(232,67,27,0) 100%)`;
+      // By day a pale studio light on the backdrop instead (no ember on paper).
+      const glow = day
+        ? `radial-gradient(circle ${gr}px at ${gx}px ${gy - Math.round(vh * 0.12)}px, rgba(255,255,255,0.8), rgba(255,255,255,0.3) 45%, rgba(255,255,255,0) 100%)`
+        : `radial-gradient(circle ${gr}px at ${gx}px ${gy}px, rgba(232,67,27,0.16), rgba(232,67,27,0.045) 45%, rgba(232,67,27,0) 100%)`;
       if (glow !== lastGlow) {
         container.style.background = glow;
         lastGlow = glow;
@@ -658,7 +782,7 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
         -KEY_BEHIND,
       );
       keyStar.scale.setScalar(0.0567 * kH);
-      keyMat.opacity = reduced ? 1 : 0.8 + Math.sin(t * 1.3) * 0.2;
+      keyMat.opacity = (reduced ? 1 : 0.8 + Math.sin(t * 1.3) * 0.2) * (day ? DAY.starOpacity : 1);
 
       // Draw: every frame while the pose moves, ~30 fps while idling, once when
       // reduced. Nothing before the model arrives (its load wakes the loop) or once
@@ -728,6 +852,7 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       window.removeEventListener('orientationchange', onResize);
       window.removeEventListener('scroll', onScroll);
       document.removeEventListener('visibilitychange', onVisibility);
+      offTheme();
       reducedMq?.removeEventListener?.('change', onReducedChange);
       renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
       renderer.domElement.removeEventListener('webglcontextrestored', onContextRestored);
@@ -739,9 +864,13 @@ export default function Scene({ onSecret }: { onSecret?: () => void }) {
       poolGeo.dispose();
       poolMat.dispose();
       poolTex.dispose();
+      contactMat.dispose();
+      castMat.dispose();
+      shadowTex.dispose();
       keyMat.dispose();
       starSprite.dispose();
-      envTex.dispose();
+      envs.day?.dispose();
+      envs.night?.dispose();
       pmrem.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode) {

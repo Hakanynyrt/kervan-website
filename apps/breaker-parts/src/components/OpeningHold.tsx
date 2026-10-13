@@ -132,7 +132,7 @@ export default function OpeningHold({ t }: Props) {
     <section
       data-scene-pose="opening"
       aria-hidden="true"
-      className="kv-night relative h-dvh w-full pointer-events-none"
+      className="relative h-dvh w-full pointer-events-none"
     >
       <motion.div
         className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-sans text-[11px] tracking-[0.32em] uppercase text-ink-mid"
