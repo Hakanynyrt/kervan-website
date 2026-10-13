@@ -37,7 +37,7 @@ export function organization({ primaryUrl, alternateName, logoUrl }: BuildOrgOpt
     legalName: ORG_LEGAL_NAME,
     alternateName: alternateName ?? ORG_TRADING_NAME,
     url: primaryUrl,
-    logo: logoUrl ?? `${primaryUrl}/logo-krv-128.png`,
+    logo: logoUrl ?? `${primaryUrl}/logo-krv-v2-256.png`,
     sameAs: ORG_SAME_AS.filter((u) => u !== primaryUrl),
     contactPoint: {
       '@type': 'ContactPoint',

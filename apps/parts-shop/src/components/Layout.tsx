@@ -126,11 +126,11 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
             className={`flex shrink-0 items-center gap-2 sm:gap-3 ${FOCUS}`}
           >
             <img
-              src="/logo-krv-128.webp"
+              src="/logo-krv-v2.svg"
               alt=""
-              width={40}
-              height={40}
-              className="size-10 rounded-sm"
+              width={112}
+              height={36}
+              className="h-8 w-auto sm:h-9"
             />
             <span className="flex flex-col leading-tight">
               <span className="whitespace-nowrap font-sans text-base font-bold text-ink sm:text-lg">
@@ -229,12 +229,12 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
         <Container className="flex flex-col gap-4 border-b border-hair py-8 sm:flex-row sm:items-center sm:justify-between">
           <a href={localePath('/', lang)} className={`flex items-center gap-3 ${FOCUS}`}>
             <img
-              src="/logo-krv-128.webp"
+              src="/logo-krv-v2.svg"
               alt=""
-              width={48}
-              height={48}
+              width={124}
+              height={40}
               loading="lazy"
-              className="size-12 rounded-sm"
+              className="h-10 w-auto"
             />
             <span className="flex flex-col">
               <span className="font-sans text-base font-bold text-ink">{ORG_TRADING_NAME}</span>

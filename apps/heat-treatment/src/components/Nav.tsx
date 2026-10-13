@@ -91,11 +91,11 @@ export default function Nav({ lang, t, techAuthed }: Props) {
       <div className="max-w-[1280px] mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
         <a href={pathForLang(lang)} className="flex items-center" aria-label={t.nav.home}>
           <img
-            src="/logo-krv-128.png"
+            src="/logo-krv-v2.svg"
             alt="Kervan Heat"
-            width={40}
+            width={124}
             height={40}
-            className="h-10 w-10 md:h-11 md:w-11 select-none"
+            className="h-9 w-auto md:h-10 select-none"
             draggable={false}
           />
         </a>
