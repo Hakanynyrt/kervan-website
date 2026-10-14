@@ -54,18 +54,21 @@ for (const lang of ['tr', 'en']) {
   write(lang === 'en' ? 'en/index.html' : 'index.html', html);
 }
 
-// 2. 404 page: static, noindex, no client script (nothing to hydrate).
+// 2. 404 pages: static, noindex, no client script (nothing to hydrate). Pages serves the
+//    nearest 404.html, so unknown /en/… paths get the English-first one (lang="en").
 const notFoundTemplate = template
   .replace(/\s*<script type="module"[^>]*><\/script>/gi, '')
   .replace(/\s*<link rel="modulepreload"[^>]*>/gi, '');
-write(
-  '404.html',
-  ssr.injectHead(notFoundTemplate, {
-    lang: 'tr',
-    headTags: ssr.buildHeadTags(ssr.notFoundHead()),
-    appHtml: ssr.renderNotFound(),
-  }),
-);
+for (const lang of ['tr', 'en']) {
+  write(
+    lang === 'en' ? 'en/404.html' : '404.html',
+    ssr.injectHead(notFoundTemplate, {
+      lang,
+      headTags: ssr.buildHeadTags(ssr.notFoundHead(lang)),
+      appHtml: ssr.renderNotFound(lang),
+    }),
+  );
+}
 
 // 3. sitemap.xml: canonical, indexable pages only, with hreflang alternates.
 const mod = lastmod(['src', 'index.html']);

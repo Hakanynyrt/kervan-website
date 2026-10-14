@@ -15,11 +15,25 @@
  *   MAIL_TO                           — RFQ inbox (default: info@kervanheat.com)
  *   MAIL_FROM                         — sender (default: noreply@kervanheat.com)
  *
+ * Attachments: optional files in the multipart field `attachment` (kervanheat.com's form; the
+ * breaker form sends none): at most 3, 8 MB in all, PDF / DWG / DXF / STEP / JPG / PNG / WebP,
+ * content checked against the extension (functions/_lib/rfq-attachments.ts). Anything else →
+ * 422 `{ ok: false, error: 'attachment', reason: 'count' | 'size' | 'type' }`. Accepted files go
+ * to the owner as e-mail attachments (CAD files and WebP wrapped in a one-file zip).
+ *
  * Response: { ok, emailSent, delivered, emailStatus } — `emailStatus` is a diagnostic
  * (transport name + HTTP status of the last attempt, never a body or key); a honeypot hit
  * reports `{ transport: 'none', status: 'honeypot' }`. `delivered` is true only when an email went
  * out; the forms show success only when it is true.
  */
+
+import {
+  MAX_FILES,
+  MAX_TOTAL_BYTES,
+  toMailAttachments,
+  validateAttachments,
+  type IncomingFile,
+} from '../_lib/rfq-attachments';
 
 interface Env {
   BREVO_API_KEY?: string;
@@ -131,13 +145,26 @@ async function handleRfq(request: Request, env: Env): Promise<Response> {
   if (!name || !email || !emailValid)
     return Response.json({ ok: false, error: 'validation' }, { status: 422 });
 
-  const fileList: string[] = [];
-  for (const [key, value] of form.entries()) {
-    if (key === 'attachment' && value instanceof File) {
-      if (value.size > 50 * 1024 * 1024) continue;
-      fileList.push(`${value.name} (${(value.size / 1048576).toFixed(2)} MB)`);
-    }
-  }
+  // Attachments (kervanheat.com form: drawings / photos, field "attachment"). Count and total
+  // size are checked before anything is read; then extension and content signature.
+  // A refused file fails the whole request (422) so the visitor can fix it; contents are never logged.
+  const uploads = form
+    .getAll('attachment')
+    .filter((v): v is File => typeof v !== 'string' && (v.size > 0 || v.name !== ''));
+  if (uploads.length > MAX_FILES)
+    return Response.json({ ok: false, error: 'attachment', reason: 'count' }, { status: 422 });
+  if (uploads.reduce((n, f) => n + f.size, 0) > MAX_TOTAL_BYTES)
+    return Response.json({ ok: false, error: 'attachment', reason: 'size' }, { status: 422 });
+  const files: IncomingFile[] = [];
+  for (const f of uploads)
+    files.push({ name: f.name, bytes: new Uint8Array(await f.arrayBuffer()) });
+  const fileError = validateAttachments(files);
+  if (fileError)
+    return Response.json({ ok: false, error: 'attachment', reason: fileError }, { status: 422 });
+  const attachments = toMailAttachments(files);
+  const fileList = attachments.map(
+    (a, i) => `${a.name} (${(files[i].bytes.length / 1048576).toFixed(2)} MB)`,
+  );
 
   // Identify which site sent the request — useful for routing in inbox
   const host = new URL(origin).hostname;
@@ -164,7 +191,7 @@ ${specs || '(not specified)'}
 Message:
 ${message || '(none)'}
 
-Files:
+Files (attached to this email; CAD files and WebP inside a .zip):
 ${fileList.length ? fileList.join('\n') : 'No attachments'}
 
 Marketing consent: ${marketing ? 'YES' : 'NO'}
@@ -179,11 +206,11 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
   let emailSent = false;
   let emailStatus: EmailStatus = { transport: 'none', status: 'error' };
   if (env.BREVO_API_KEY) {
-    try {
-      const r = await fetch('https://api.brevo.com/v3/smtp/email', {
+    const brevo = async (withFiles: boolean): Promise<Response> =>
+      fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
         headers: {
-          'api-key': env.BREVO_API_KEY,
+          'api-key': env.BREVO_API_KEY!,
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
@@ -192,13 +219,35 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
           to: [{ email: mailTo }],
           replyTo: { email, name },
           subject: emailSubject,
-          textContent: emailBody,
+          textContent: withFiles
+            ? emailBody
+            : emailBody +
+              (attachments.length
+                ? '\n\nNOTE: the mail service refused the attached files; ask the sender to e-mail them.'
+                : ''),
+          ...(withFiles && attachments.length
+            ? { attachment: attachments.map(({ name, content }) => ({ name, content })) }
+            : {}),
         }),
         signal: AbortSignal.timeout(8000),
       });
+    try {
+      let r = await brevo(true);
+      // A 400 with files is most likely a refused attachment: send the request without them,
+      // so the owner still gets it (the note in the body says the files are missing).
+      if (r.status === 400 && attachments.length) {
+        console.error('Brevo refused the message with attachments; retrying without them');
+        r = await brevo(false);
+      }
       emailSent = r.ok;
       emailStatus = { transport: 'brevo', status: r.status };
-      if (!r.ok) console.error('Brevo fail:', r.status, await r.text().catch(() => '<no body>'));
+      // Brevo's error text names the problem; it never echoes attachment contents. Capped anyway.
+      if (!r.ok)
+        console.error(
+          'Brevo fail:',
+          r.status,
+          (await r.text().catch(() => '<no body>')).slice(0, 300),
+        );
     } catch (e) {
       emailStatus = { transport: 'brevo', status: 'error' };
       console.error('Brevo error', e);
@@ -219,6 +268,14 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
           reply_to: email,
           subject: emailSubject,
           text: emailBody,
+          ...(attachments.length
+            ? {
+                attachments: attachments.map(({ name, content }) => ({
+                  filename: name,
+                  content,
+                })),
+              }
+            : {}),
         }),
       });
       emailSent = r.ok;
@@ -247,6 +304,15 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
           reply_to: { email },
           subject: emailSubject,
           content: [{ type: 'text/plain', value: emailBody }],
+          ...(attachments.length
+            ? {
+                attachments: attachments.map(({ name, content, type }) => ({
+                  filename: name,
+                  content,
+                  type,
+                })),
+              }
+            : {}),
         }),
       });
       emailSent = r.ok;

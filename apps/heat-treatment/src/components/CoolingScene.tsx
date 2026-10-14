@@ -326,7 +326,9 @@ export default function CoolingScene({ section, onReady, onFail }: Props) {
 
     const progress = () => {
       const r = section.getBoundingClientRect();
-      const span = r.height - window.innerHeight;
+      // At least half a screen of scrolling for the whole cooling: the phone section is only
+      // 115vh, so the piece keeps cooling while the stage scrolls away (keep in sync: Cooling / CoolingScene).
+      const span = Math.max(r.height - window.innerHeight, window.innerHeight * 0.5);
       return span > 0 ? clamp01(-r.top / span) : 0;
     };
     const onScroll = () => wake();

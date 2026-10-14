@@ -65,6 +65,10 @@ type CoolingCopy = DictBlock['cooling'];
 function Copy({ c, step }: { c: CoolingCopy; step?: number }) {
   return (
     <div className="flex flex-col gap-4 md:gap-6 max-w-[36rem]">
+      {/* What we do and where: the first words a phone visitor reads. */}
+      <p className="m-0 -mb-1 md:-mb-3 font-sans text-xs md:text-sm font-medium tracking-[0.16em] uppercase text-brand">
+        {c.kicker}
+      </p>
       <h2
         id="sogutma-title"
         className="font-serif italic text-[clamp(30px,8.5vw,44px)] md:text-h2 text-ink leading-[1.1] tracking-[-0.015em]"
@@ -142,7 +146,9 @@ function CoolingLive({ c }: { c: CoolingCopy }) {
     const update = () => {
       raf = 0;
       const r = el.getBoundingClientRect();
-      const span = r.height - window.innerHeight;
+      // At least half a screen of scrolling for the whole cooling: the phone section is only
+      // 115vh, so the piece keeps cooling while the stage scrolls away (keep in sync: Cooling / CoolingScene).
+      const span = Math.max(r.height - window.innerHeight, window.innerHeight * 0.5);
       const p = span > 0 ? Math.max(0, Math.min(1, -r.top / span)) : 0;
       setStep(p < 0.3 ? 0 : p < 0.75 ? 1 : 2);
       setAtTop(p < 0.04);
@@ -165,8 +171,8 @@ function CoolingLive({ c }: { c: CoolingCopy }) {
       ref={sectionRef}
       id="sogutma"
       aria-labelledby="sogutma-title"
-      // Shorter on phones so nobody is held long before the hero.
-      className="kv-night bg-bg relative h-[160vh] md:h-[220vh]"
+      // Short on phones (about one extra screen of scrolling) so nobody is held long before the hero.
+      className="kv-night bg-bg relative h-[115vh] md:h-[180vh]"
     >
       <div className="sticky top-0 h-dvh overflow-hidden">
         <div

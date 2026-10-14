@@ -25,7 +25,7 @@ export function renderPage(lang: Lang): string {
   );
 }
 
-/** dist/404.html body (static, no client script). */
-export function renderNotFound(): string {
-  return renderToString(<NotFound />);
+/** dist/404.html (tr) and dist/en/404.html (en) body (static, no client script). */
+export function renderNotFound(lang: Lang = 'tr'): string {
+  return renderToString(<NotFound lang={lang} />);
 }

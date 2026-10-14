@@ -54,6 +54,16 @@
   color-scheme: light;
 }
 
+/* Night (Mood C) on this site: secondary text one step brighter than @kervan/ui
+   (ink-mid #b8afa0 → #cec6b8, ink-soft #918879 → #a8a091), so lead paragraphs,
+   asides and small labels read comfortably on #0a0a0b / #141416 / #1c1c20
+   (ink-soft 6.6:1 on bg-warm). Unlayered: wins over @theme; the day block
+   above has a more specific selector and still wins by day. */
+:root {
+  --color-ink-mid: #cec6b8;
+  --color-ink-soft: #a8a091;
+}
+
 /* The night palette on one part of a day page: the cooling section (#sogutma),
    whose glowing-to-black tip only reads on dark. Same values as @kervan/ui
    tokens.css, so on the night theme nothing changes. */
@@ -62,8 +72,8 @@
   --color-bg-soft: #141416;
   --color-bg-warm: #1c1c20;
   --color-ink: #e8e2d6;
-  --color-ink-mid: #b8afa0;
-  --color-ink-soft: #918879;
+  --color-ink-mid: #cec6b8;
+  --color-ink-soft: #a8a091;
   --color-brand: #e8431b;
   --color-brand-hi: #ff5c32;
   --color-brand-lo: #c53614;
@@ -74,13 +84,28 @@
   color-scheme: dark;
 }
 /* Links ignore Tailwind's text colour (the unlayered `a { color: inherit }`
-   below), so day-theme brand buttons would inherit the dark ink: give them
-   the page colour (5.65:1 on brand). The night look is left as it is. */
-:root[data-theme='light'] a.text-bg:not(.kv-night *),
-:root[data-sun='day']:not([data-theme='dark']) a.text-bg:not(.kv-night *),
-:root[data-theme='light'] a.hover\:text-bg:hover:not(.kv-night *),
-:root[data-sun='day']:not([data-theme='dark']) a.hover\:text-bg:hover:not(.kv-night *) {
+   below), so brand buttons would inherit the ink (night: light ink on ember,
+   3.1:1). Give them the page colour in both themes: day 5.65:1, night
+   #0a0a0b on #e8431b 4.95:1 (and more on the brand-hi hover). */
+a.text-bg,
+a.hover\:text-bg:hover {
   color: var(--color-bg);
+}
+
+/* Section headings (SectionHeading from @kervan/ui with className="kv-heading"):
+   the eyebrow larger and in the brand colour (as the hero / craft eyebrows), the
+   aside as plain readable text instead of small grey italics. Both themes. */
+.kv-heading > div:first-child > div:first-child {
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: var(--color-brand);
+}
+.kv-heading p {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--color-ink-mid);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -100,6 +125,8 @@ body {
 }
 html {
   overflow-x: clip;
+  /* The intro curtain locks scrolling; a stable gutter keeps the page from shifting when it unlocks (CLS). */
+  scrollbar-gutter: stable;
   scroll-behavior: smooth;
   scroll-padding-top: 80px;
 }

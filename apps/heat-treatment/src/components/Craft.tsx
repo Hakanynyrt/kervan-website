@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { fadeUp, inViewOnce, ScrollReveal, useReducedMotion } from '@kervan/motion';
+import { fadeUp, inViewOnce, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
 
 interface Props {
@@ -26,15 +26,16 @@ export default function Craft({ t }: Props) {
         whileInView="show"
         viewport={inViewOnce}
       >
-        <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand font-medium">
+        <span className="font-sans text-[13px] tracking-[0.16em] uppercase text-brand font-medium">
           {t.craft.eyebrow}
         </span>
         <h2 className="font-serif italic text-h2 text-ink leading-[1.1] tracking-[-0.015em]">
           {t.craft.title}
         </h2>
-        <ScrollReveal className="font-serif italic text-xl md:text-2xl text-ink-mid leading-relaxed max-w-[44ch]">
+        {/* Plain text (was a word-by-word scroll reveal whose last lines stayed faded). */}
+        <p className="font-serif italic text-xl md:text-2xl text-ink leading-relaxed max-w-[44ch] m-0">
           {t.craft.body}
-        </ScrollReveal>
+        </p>
       </motion.div>
 
       <motion.ul

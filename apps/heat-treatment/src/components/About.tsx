@@ -19,16 +19,16 @@ export default function About({ t }: Props) {
         viewport={inViewOnce}
       >
         <div className="col-span-12 lg:col-span-4 flex flex-col gap-3">
-          <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand">
+          <span className="font-sans text-[13px] font-medium tracking-[0.16em] uppercase text-brand">
             {t.about.eyebrow}
           </span>
           <h2 className="font-serif italic text-3xl md:text-4xl text-ink leading-tight">
             {t.about.title}
           </h2>
-          <span className="font-sans text-sm text-ink-soft mt-2">{t.about.location}</span>
+          <span className="font-sans text-[15px] text-ink-mid mt-2">{t.about.location}</span>
         </div>
 
-        <p className="col-span-12 lg:col-span-8 font-serif text-xl md:text-2xl text-ink-mid leading-relaxed italic max-w-[60ch]">
+        <p className="col-span-12 lg:col-span-8 font-serif text-xl md:text-2xl text-ink leading-relaxed italic max-w-[60ch]">
           {t.about.body}
         </p>
       </motion.div>

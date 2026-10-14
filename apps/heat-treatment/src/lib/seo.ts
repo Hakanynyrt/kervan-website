@@ -5,10 +5,10 @@ import {
   ORG_COUNTRY,
   ORG_EMAIL,
   ORG_INSTAGRAM,
-  ORG_LEGAL_NAME,
   ORG_LOCALITY,
   ORG_PHONE,
   ORG_REGION,
+  ORG_REGISTERED_NAME,
   ORG_STREET,
   type HeadAlternates,
   type HeadInput,
@@ -41,8 +41,8 @@ function organization() {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     '@id': ORG_ID,
-    name: ORG_LEGAL_NAME,
-    legalName: ORG_LEGAL_NAME,
+    name: ORG_REGISTERED_NAME,
+    legalName: ORG_REGISTERED_NAME,
     alternateName: SITE_NAME,
     url: SITE,
     logo: `${SITE}/logo-krv-v2-256.png`,
@@ -75,7 +75,8 @@ export function homeHead(lang: Lang): HeadInput {
     description: m.description,
     canonical: url,
     alternates: ALTERNATES,
-    ogImage: `${SITE}/og.png`,
+    // Per language (KRV mark + text); a changed image gets a new name (immutable cache).
+    ogImage: `${SITE}/og-${lang}-02.png`,
     siteName: SITE_NAME,
     jsonLd: [
       organization(),
@@ -111,11 +112,11 @@ export function homeHead(lang: Lang): HeadInput {
   };
 }
 
-/** Head tags for dist/404.html: noindex, no canonical/alternates. */
-export function notFoundHead(): HeadInput {
-  const t = DICT.tr;
+/** Head tags for dist/404.html (tr) and dist/en/404.html (en): noindex, no canonical/alternates. */
+export function notFoundHead(lang: Lang = 'tr'): HeadInput {
+  const t = DICT[lang];
   return {
-    lang: 'tr',
+    lang,
     title: `${t.notFound.title.replace(/\.$/, '')} — ${SITE_NAME}`,
     description: t.meta.description,
     robots: 'noindex',
