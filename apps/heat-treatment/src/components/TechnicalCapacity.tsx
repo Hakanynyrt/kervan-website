@@ -19,27 +19,31 @@ export default function TechnicalCapacity({ t }: Props) {
         eyebrow={t.capacity.eyebrow}
         title={t.capacity.title}
         aside={t.capacity.aside}
+        className="w-full kv-heading"
       />
 
-      <motion.dl
-        className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-hair m-0"
-        variants={staggerContainer(0, 0.08)}
-        initial={reduce ? false : 'hidden'}
-        whileInView="show"
-        viewport={inViewOnce}
-      >
-        {t.capacity.items.map((c, i) => (
-          <motion.div key={i} variants={fadeUp} className="bg-bg p-8 md:p-10 flex flex-col gap-3">
-            <dt className="font-sans text-xs tracking-[0.2em] uppercase text-ink-soft">
-              {c.label}
-            </dt>
-            <dd className="font-serif text-4xl md:text-5xl text-ink leading-none m-0 mt-1">
-              {c.value}
-            </dd>
-            {c.note && <p className="font-sans text-sm text-ink-mid mt-2">{c.note}</p>}
-          </motion.div>
-        ))}
-      </motion.dl>
+      {/* Padding on the wrapper, the hairline grid inside: no bg-hair slabs beside the cards. */}
+      <div className="max-w-[1280px] w-full mx-auto px-6 md:px-8">
+        <motion.dl
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-hair border border-hair m-0"
+          variants={staggerContainer(0, 0.08)}
+          initial={reduce ? false : 'hidden'}
+          whileInView="show"
+          viewport={inViewOnce}
+        >
+          {t.capacity.items.map((c, i) => (
+            <motion.div key={i} variants={fadeUp} className="bg-bg p-8 md:p-10 flex flex-col gap-3">
+              <dt className="font-sans text-[13px] font-medium tracking-[0.14em] uppercase text-ink-mid">
+                {c.label}
+              </dt>
+              <dd className="font-serif text-4xl md:text-5xl text-ink leading-none m-0 mt-1">
+                {c.value}
+              </dd>
+              {c.note && <p className="font-sans text-[15px] text-ink-mid mt-2">{c.note}</p>}
+            </motion.div>
+          ))}
+        </motion.dl>
+      </div>
     </section>
   );
 }

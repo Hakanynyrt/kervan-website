@@ -24,7 +24,12 @@ export default function TechInfo({ t, lang, tech }: Props) {
     if (!c) return null;
     return (
       <section id="teknik-bilgiler" className="py-20 md:py-32">
-        <SectionHeading eyebrow={c.eyebrow} title={c.title} aside={c.aside} />
+        <SectionHeading
+          eyebrow={c.eyebrow}
+          title={c.title}
+          aside={c.aside}
+          className="w-full kv-heading"
+        />
 
         <motion.div
           className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-px bg-hair"
@@ -89,7 +94,11 @@ function LoginForm({ t, tech }: { t: DictBlock; tech: TechAuth }) {
 
   return (
     <section id="giris" className="py-20 md:py-32">
-      <SectionHeading eyebrow={t.techUi.eyebrow} title={t.techUi.loginTitle} />
+      <SectionHeading
+        eyebrow={t.techUi.eyebrow}
+        title={t.techUi.loginTitle}
+        className="w-full kv-heading"
+      />
       <form onSubmit={onSubmit} className="max-w-[420px] mx-auto px-6 md:px-8 flex flex-col gap-4">
         <label
           htmlFor="tech-pw"

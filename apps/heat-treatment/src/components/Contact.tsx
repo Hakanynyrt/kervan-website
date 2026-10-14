@@ -103,9 +103,14 @@ export default function Contact({ t }: Props) {
       id="contact"
       className="min-h-dvh flex flex-col justify-center py-16 md:py-24 bg-bg-soft/40"
     >
-      <SectionHeading eyebrow={t.contact.eyebrow} title={t.contact.title} aside={t.contact.sub} />
+      <SectionHeading
+        eyebrow={t.contact.eyebrow}
+        title={t.contact.title}
+        aside={t.contact.sub}
+        className="w-full kv-heading"
+      />
 
-      <div className="max-w-[1280px] mx-auto px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-16">
+      <div className="max-w-[1280px] w-full mx-auto px-6 md:px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-16">
         {/* Info — 4 col */}
         <motion.dl
           className="col-span-12 lg:col-span-4 flex flex-col gap-7 m-0"
@@ -163,7 +168,7 @@ export default function Contact({ t }: Props) {
             { label: t.contact.hoursLabel, value: t.contact.hours },
           ].map((row, i) => (
             <div key={i} className="flex flex-col gap-1.5">
-              <dt className="font-sans text-xs tracking-widest uppercase text-ink-soft">
+              <dt className="font-sans text-[13px] font-medium tracking-[0.12em] uppercase text-ink-mid">
                 {row.label}
               </dt>
               <dd className="font-serif italic text-lg text-ink m-0">{row.value}</dd>
@@ -207,14 +212,14 @@ export default function Contact({ t }: Props) {
           <Field label={t.contact.fields.phone} name="phone" type="tel" maxLength={30} />
 
           <label className="md:col-span-2 flex flex-col gap-2">
-            <span className="font-sans text-xs tracking-widest uppercase text-ink-soft">
+            <span className="font-sans text-[13px] font-medium tracking-[0.12em] uppercase text-ink-mid">
               {t.contact.fields.message}
             </span>
             <textarea
               name="message"
               rows={4}
               maxLength={3000}
-              className="bg-transparent border-b border-ink-soft pb-2 font-serif text-lg text-ink resize-none focus:border-ink transition-colors"
+              className="w-full bg-bg border border-ink-soft rounded-sm px-3.5 py-3 font-sans text-base text-ink placeholder:text-ink-soft hover:border-ink-mid focus:border-ink transition-colors resize-y min-h-[7.5rem]"
             />
           </label>
 
@@ -222,7 +227,7 @@ export default function Contact({ t }: Props) {
           <div className="md:col-span-2 flex flex-col gap-2">
             <label
               htmlFor={`${ids}-files`}
-              className="font-sans text-xs tracking-widest uppercase text-ink-soft"
+              className="font-sans text-[13px] font-medium tracking-[0.12em] uppercase text-ink-mid"
             >
               {t.contact.files.label}
             </label>
@@ -240,7 +245,7 @@ export default function Contact({ t }: Props) {
               aria-invalid={fileProblem || state === 'rejected' ? true : undefined}
               className="w-full font-sans text-sm text-ink-mid file:mr-4 file:border file:border-solid file:border-ink-soft file:bg-transparent file:px-4 file:py-2 file:font-sans file:text-sm file:text-ink file:cursor-pointer hover:file:border-ink file:transition-colors"
             />
-            <span id={fileHintId} className="font-sans text-xs text-ink-soft">
+            <span id={fileHintId} className="font-sans text-sm text-ink-mid">
               {t.contact.files.hint}
             </span>
             {files.length > 0 && !fileProblem && (
@@ -259,7 +264,7 @@ export default function Contact({ t }: Props) {
             )}
           </div>
 
-          <p className="md:col-span-2 m-0 font-sans text-xs text-ink-soft">
+          <p className="md:col-span-2 m-0 font-sans text-sm text-ink-mid">
             {t.contact.requiredNote}
           </p>
 
@@ -271,7 +276,7 @@ export default function Contact({ t }: Props) {
             {state === 'sending' ? t.contact.sending : t.contact.submit}
           </button>
 
-          <p className="md:col-span-2 m-0 font-sans text-xs text-ink-soft leading-relaxed">
+          <p className="md:col-span-2 m-0 font-sans text-sm text-ink-mid leading-relaxed">
             {t.contact.kvkk.before}
             <a
               href="/kvkk"
@@ -317,7 +322,7 @@ interface FieldProps {
 function Field({ label, name, type = 'text', required, maxLength }: FieldProps) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="font-sans text-xs tracking-widest uppercase text-ink-soft">
+      <span className="font-sans text-[13px] font-medium tracking-[0.12em] uppercase text-ink-mid">
         {label}
         {/* Visual mark; `required` + `aria-required` tell assistive technology. */}
         {required && (
@@ -334,7 +339,7 @@ function Field({ label, name, type = 'text', required, maxLength }: FieldProps) 
         required={required}
         aria-required={required || undefined}
         maxLength={maxLength}
-        className="bg-transparent border-b border-ink-soft pb-2 font-serif text-lg text-ink focus:border-ink transition-colors"
+        className="w-full bg-bg border border-ink-soft rounded-sm px-3.5 py-3 font-sans text-base text-ink placeholder:text-ink-soft hover:border-ink-mid focus:border-ink transition-colors"
       />
     </label>
   );

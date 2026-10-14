@@ -73,7 +73,7 @@ export default function Hero({ t }: Props) {
         {/* Copy — left */}
         <div className="flex flex-col gap-8 lg:col-start-1 lg:row-start-1 lg:row-span-2">
           <motion.div
-            className="font-sans text-eyebrow uppercase tracking-[0.2em] text-brand font-medium"
+            className="font-sans text-[13px] uppercase tracking-[0.16em] text-brand font-medium"
             {...rise(0.1, 8, durations.lg)}
           >
             {t.hero.eyebrow}
@@ -155,7 +155,9 @@ export default function Hero({ t }: Props) {
               variants={fadeUp}
               className="flex flex-col-reverse gap-2 border-t border-hair pt-5"
             >
-              <dt className="font-sans text-xs tracking-widest uppercase text-ink-soft">{s.l}</dt>
+              <dt className="font-sans text-[13px] font-medium tracking-[0.08em] uppercase text-ink-mid">
+                {s.l}
+              </dt>
               <dd className="font-serif text-4xl md:text-5xl lg:text-4xl text-ink leading-none m-0">
                 {s.n}
               </dd>

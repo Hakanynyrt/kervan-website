@@ -19,7 +19,12 @@ export default function Services({ t, lang }: Props) {
   const s = t.services;
   return (
     <section id="hizmetler" className="min-h-dvh flex flex-col justify-center py-20 md:py-32">
-      <SectionHeading eyebrow={s.eyebrow} title={s.title} aside={s.aside} className="w-full" />
+      <SectionHeading
+        eyebrow={s.eyebrow}
+        title={s.title}
+        aside={s.aside}
+        className="w-full kv-heading"
+      />
 
       <div className="max-w-[1280px] w-full mx-auto px-6 md:px-8 flex flex-col gap-12 md:gap-16">
         <motion.ul
