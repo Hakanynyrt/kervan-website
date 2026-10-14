@@ -89,6 +89,8 @@ export interface DictBlock {
   /** "Isınıp soğuyan parça": 3D tip cooling on scroll (Cooling.tsx). */
   cooling: {
     title: string;
+    /** What we do and where, under the opening heading (phones see it on the first screen). */
+    kicker: string;
     body: string;
     /** Three stage labels, highlighted as the piece cools. */
     steps: [string, string, string];
@@ -103,6 +105,13 @@ export interface DictBlock {
     eyebrow: string;
     title: string;
     aside: string;
+    /** aria-label of the process list. */
+    processesLabel: string;
+    /** The heat treatment processes we offer (owner, Oct 2026). */
+    processes: { name: string; body: string }[];
+    /** The quality line under the processes (hardness report per batch). */
+    quality: { name: string; body: string };
+    /** Two cards under the list: contract / special jobs and our own parts. */
     items: ServiceItem[];
   };
   capacity: {
@@ -155,7 +164,25 @@ export interface DictBlock {
     sending: string;
     success: string;
     error: string;
+    /** "* = required" line above the submit button. */
+    requiredNote: string;
+    /** Optional drawing / photo attachments (limits in lib/attachments.ts). */
+    files: {
+      label: string;
+      hint: string;
+      tooMany: string;
+      tooBig: string;
+      badType: string;
+      /** The server refused the files (422 attachment). */
+      rejected: string;
+    };
+    /** One-line KVKK notice next to the submit button: before + link + after. */
+    kvkk: { before: string; link: string; after: string };
+    addressLabel: string;
+    /** Street address (from @kervan/seo), two lines. */
     address: string;
+    /** Link text to the Google Maps search for the address. */
+    mapLabel: string;
     phoneLabel: string;
     whatsappLabel: string;
     emailLabel: string;

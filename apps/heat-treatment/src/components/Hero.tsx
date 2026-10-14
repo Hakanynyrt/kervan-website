@@ -80,7 +80,9 @@ export default function Hero({ t }: Props) {
           </motion.div>
 
           <motion.h1
-            className="font-serif italic text-[clamp(26px,8vw,56px)] sm:text-display text-ink leading-[0.95] tracking-[-0.025em]"
+            // lg+: sized so each dict line fits the copy column on one line (two lines at 1440,
+            // sub + CTAs on the first screen); the display size alone ran to four lines.
+            className="font-serif italic text-[clamp(26px,8vw,56px)] sm:text-display lg:text-[clamp(48px,4.5vw,68px)] text-ink leading-[0.95] tracking-[-0.025em]"
             variants={staggerContainer(d0 + 0.2, reduced ? 0 : 0.1)}
             initial={reduced ? 'show' : 'hidden'}
             animate={go ? 'show' : 'hidden'}

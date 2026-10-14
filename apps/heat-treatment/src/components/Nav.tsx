@@ -119,7 +119,7 @@ export default function Nav({ lang, t, techAuthed }: Props) {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Light by day, dark at night (the edge middleware); this overrides it. lg+ only, like the shop's. */}
           <ThemeSelect t={t.nav.theme} themeColor={THEME_COLOR} className="hidden lg:flex" />
           <a
@@ -133,9 +133,10 @@ export default function Nav({ lang, t, techAuthed }: Props) {
           >
             {otherLang === 'en' ? 'EN' : 'TR'}
           </a>
+          {/* Every width: on phones it is the quickest way to the form (compact there). */}
           <a
             href="#contact"
-            className="hidden sm:inline-block bg-brand text-bg px-5 py-2 font-sans text-sm hover:bg-brand-hi transition-colors"
+            className="inline-flex items-center min-h-10 sm:min-h-0 bg-brand text-bg px-3 sm:px-5 py-2 font-sans text-[13px] sm:text-sm whitespace-nowrap hover:bg-brand-hi transition-colors"
           >
             {t.nav.cta}
           </a>
@@ -169,13 +170,6 @@ export default function Nav({ lang, t, techAuthed }: Props) {
                   {l.label}
                 </a>
               ))}
-              <a
-                href="#contact"
-                onClick={() => setOpen(false)}
-                className="sm:hidden mt-2 bg-brand text-bg px-5 py-3 font-sans text-sm text-center"
-              >
-                {t.nav.cta}
-              </a>
             </div>
           </motion.div>
         )}

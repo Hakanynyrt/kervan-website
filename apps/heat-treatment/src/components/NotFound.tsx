@@ -6,19 +6,20 @@ const focusRing =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2';
 
 /**
- * Static 404 page (dist/404.html). Cloudflare Pages serves it with HTTP 404
- * for every unknown path, in either language, so it shows both: Turkish
- * first, English below. No motion, no client script.
+ * Static 404 page. Cloudflare Pages serves the nearest 404.html with HTTP 404:
+ * dist/404.html (Turkish first) for unknown paths, dist/en/404.html (English
+ * first, `<html lang="en">`) under /en/. Both show both languages. No motion,
+ * no client script.
  */
-export default function NotFound() {
-  const langs: Lang[] = ['tr', 'en'];
+export default function NotFound({ lang = 'tr' }: { lang?: Lang }) {
+  const langs: Lang[] = lang === 'en' ? ['en', 'tr'] : ['tr', 'en'];
   return (
     <main className="min-h-dvh flex flex-col justify-center py-20 md:py-32">
       <div className="max-w-[820px] w-full mx-auto px-6 md:px-8 flex flex-col gap-16">
         <a
-          href="/"
+          href={pathForLang(lang)}
           className={`self-start flex items-center ${focusRing}`}
-          aria-label={DICT.tr.nav.home}
+          aria-label={DICT[lang].nav.home}
         >
           <img
             src="/logo-krv-v2.svg"
@@ -32,11 +33,15 @@ export default function NotFound() {
         {langs.map((l) => {
           const t = DICT[l].notFound;
           return (
-            <section key={l} lang={l} className="flex flex-col gap-6 items-start">
+            <section
+              key={l}
+              lang={l === lang ? undefined : l}
+              className="flex flex-col gap-6 items-start"
+            >
               <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand font-medium">
                 {t.eyebrow}
               </span>
-              {l === 'tr' ? (
+              {l === lang ? (
                 <h1 className="font-serif italic text-h2 text-ink leading-[1.1] tracking-[-0.015em] m-0">
                   {t.title}
                 </h1>

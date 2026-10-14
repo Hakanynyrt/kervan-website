@@ -74,12 +74,11 @@
   color-scheme: dark;
 }
 /* Links ignore Tailwind's text colour (the unlayered `a { color: inherit }`
-   below), so day-theme brand buttons would inherit the dark ink: give them
-   the page colour (5.65:1 on brand). The night look is left as it is. */
-:root[data-theme='light'] a.text-bg:not(.kv-night *),
-:root[data-sun='day']:not([data-theme='dark']) a.text-bg:not(.kv-night *),
-:root[data-theme='light'] a.hover\:text-bg:hover:not(.kv-night *),
-:root[data-sun='day']:not([data-theme='dark']) a.hover\:text-bg:hover:not(.kv-night *) {
+   below), so brand buttons would inherit the ink (night: light ink on ember,
+   3.1:1). Give them the page colour in both themes: day 5.65:1, night
+   #0a0a0b on #e8431b 4.95:1 (and more on the brand-hi hover). */
+a.text-bg,
+a.hover\:text-bg:hover {
   color: var(--color-bg);
 }
 
@@ -100,6 +99,8 @@ body {
 }
 html {
   overflow-x: clip;
+  /* The intro curtain locks scrolling; a stable gutter keeps the page from shifting when it unlocks (CLS). */
+  scrollbar-gutter: stable;
   scroll-behavior: smooth;
   scroll-padding-top: 80px;
 }

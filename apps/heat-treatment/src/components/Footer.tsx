@@ -12,9 +12,18 @@ export default function Footer({ t, lang }: Props) {
   return (
     <footer className="border-t border-hair">
       <div className="max-w-[1280px] mx-auto px-8 py-12 flex flex-col md:flex-row gap-6 md:gap-12 items-start md:items-center justify-between">
-        <div className="flex items-baseline gap-3">
-          <span className="font-serif italic text-3xl text-ink leading-none">K</span>
-          <div className="flex flex-col">
+        <div className="flex items-center gap-4 shrink-0">
+          {/* The KRV mark (same file as the header); the brand name follows, so no alt text. */}
+          <img
+            src="/logo-krv-v2.svg"
+            alt=""
+            width={124}
+            height={40}
+            className="h-8 w-auto select-none"
+            draggable={false}
+            loading="lazy"
+          />
+          <div className="flex flex-col whitespace-nowrap">
             <span className="font-sans text-sm font-medium text-ink">{t.footer.brand}</span>
             <span className="font-serif italic text-sm text-ink-soft">{t.footer.tag}</span>
           </div>

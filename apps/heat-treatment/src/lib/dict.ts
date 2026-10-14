@@ -1,3 +1,4 @@
+import { ORG_LOCALITY, ORG_REGION, ORG_REGISTERED_NAME, ORG_STREET } from '@kervan/seo';
 import type { Dict } from '../types';
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -10,22 +11,34 @@ export const DICT: Dict = {
     meta: {
       title: 'Kervan Heat — Fason ısıl işlem · Kartepe / Kocaeli',
       description:
-        'Kontrollü atmosfer pit-tip fırınlarda fason ısıl işlem. Sertleştirme ve temperleme. 42CrMo, 42CrMoA ve diğer alaşımlar.',
+        'Kontrollü atmosfer kuyu tipi (pit) fırınlarda fason ısıl işlem: sertleştirme, temperleme, gerilim giderme, normalizasyon ve yumuşatma tavlaması. Kartepe / Kocaeli.',
       siteDescription: 'Kontrollü atmosfer pit-tip fırınlarda fason ısıl işlem.',
       service: {
         type: 'Fason ısıl işlem',
         name: 'Fason ısıl işlem',
         description:
-          'Kontrollü atmosfer pit-tip fırınlarda sertleştirme ve temperleme. 42CrMo, 42CrMoA ve diğer alaşımlar — kendi ölçüm ve kontrol disiplinimizle.',
+          'Kontrollü atmosfer pit-tip fırınlarda sertleştirme, temperleme, gerilim giderme, normalizasyon ve yumuşatma tavlaması. 42CrMo, 42CrMoA ve diğer alaşımlar; her partide sertlik ölçüm raporu.',
         catalogName: 'Isıl işlem hizmetleri',
         offers: [
           {
-            name: 'Sertleştirme & Temperleme',
-            description: 'Pit-tip fırında ısıtma, kontrollü soğutma, çift potalı temper hattı.',
+            name: 'Sertleştirme (su verme)',
+            description: 'Pit-tip fırında ısıtma, ardından yağ veya havada kontrollü soğutma.',
           },
           {
-            name: 'Fason ısıl işlem',
-            description: 'Özel alaşım, özel sıcaklık eğrisi, özel parti büyüklüğü.',
+            name: 'Temperleme',
+            description: 'Su verme sonrası gerilimi alır, tokluk kazandırır; iki temper potası.',
+          },
+          {
+            name: 'Gerilim giderme',
+            description: 'Talaşlı işleme, kaynak veya şekillendirme sonrası iç gerilimi azaltır.',
+          },
+          {
+            name: 'Normalizasyon',
+            description: 'Dövme veya haddeleme sonrası iç yapıyı düzgünleştirir.',
+          },
+          {
+            name: 'Yumuşatma tavlaması',
+            description: 'Sertliği düşürür, talaşlı işlemeyi kolaylaştırır.',
           },
         ],
       },
@@ -65,7 +78,7 @@ export const DICT: Dict = {
       stats: [
         { n: '2', l: 'temper potası' },
         { n: 'Ø1200', l: 'mm max çap' },
-        { n: '2.5 t', l: 'tek sefer max yük' },
+        { n: '2,5 t', l: 'tek sefer max yük' },
         { n: '42CrMo', l: 'standart alaşım' },
       ],
       film: {
@@ -77,6 +90,7 @@ export const DICT: Dict = {
     },
     cooling: {
       title: 'Isıdan gelen sertlik.',
+      kicker: 'Fason ısıl işlem · Kartepe / Kocaeli',
       body: 'Sertleştirmede parça fırında ısıtılır, ardından kontrollü soğutulur. Temperleme gerilimi alır, tokluk kazandırır. Sonuç: sert, tok ve uzun ömürlü çelik.',
       steps: ['Fırından çıkış', 'Kontrollü soğutma', 'Temperlenmiş çelik'],
       sceneLabel:
@@ -86,21 +100,38 @@ export const DICT: Dict = {
     },
     services: {
       eyebrow: 'Hizmetler',
-      title: 'Üç ana süreç. Tek disiplin.',
-      aside: 'Kontrollü atmosfer, ölçülmüş sıcaklık eğrisi, sertlik kontrolü.',
+      title: 'Beş süreç. Tek disiplin.',
+      aside: 'Kontrollü atmosfer, ölçülmüş sıcaklık eğrisi, her partide sertlik ölçümü.',
+      processesLabel: 'Isıl işlem süreçlerimiz',
+      processes: [
+        {
+          name: 'Sertleştirme (su verme)',
+          body: 'Parça pit-tip fırında sertleşme sıcaklığına ısıtılır, ardından yağ veya havada kontrollü soğutulur.',
+        },
+        {
+          name: 'Temperleme',
+          body: 'Su verme sonrası gerilimi alır, tokluk kazandırır. İki temper potası sayesinde aynı gün iki ayrı sıcaklık eğrisi paralel çalışabilir.',
+        },
+        {
+          name: 'Gerilim giderme',
+          body: 'Talaşlı işleme, kaynak veya şekillendirme sonrası parçadaki iç gerilimi azaltır.',
+        },
+        {
+          name: 'Normalizasyon',
+          body: 'Dövme veya haddeleme sonrası iç yapıyı düzgünleştirir, sonraki işlemlere hazırlar.',
+        },
+        {
+          name: 'Yumuşatma tavlaması',
+          body: 'Sertliği düşürür; parçanın talaşlı işlenmesini kolaylaştırır.',
+        },
+      ],
+      quality: {
+        name: 'Her partide sertlik ölçüm raporu',
+        body: 'İşlenen her partinin sertliği ölçülür ve raporlanır.',
+      },
       items: [
         {
           index: '01',
-          name: 'Sertleştirme & Temperleme',
-          body: 'Pit-tip fırında ısıtma, kontrollü soğutma, ardından temper potasında stres giderimi. İki potalı temper hattı sayesinde aynı gün içinde iki ayrı sıcaklık eğrisi paralel çalışabilir.',
-          bullets: [
-            'Yağ ve hava soğutma',
-            'Çift potalı temper — paralel sıcaklık',
-            'Yüzey sertlik kontrolü, lot başı',
-          ],
-        },
-        {
-          index: '02',
           name: 'Fason Isıl İşlem',
           body: 'Standart hizmet listesinin dışına çıkan ihtiyaçlar için: özel alaşım, özel sıcaklık eğrisi, özel parti büyüklüğü. Önce numune, sonra seri.',
           bullets: [
@@ -110,9 +141,9 @@ export const DICT: Dict = {
           ],
         },
         {
-          index: '03',
+          index: '02',
           name: 'Üretim & Entegrasyon',
-          body: 'Hidrolik kırıcı yedek parçalarımızı da kendi tezgahımızda üretir, kendi pit-tip fırınımızda işleriz. Metallurjiyi sadece müşteri parçası için değil, kendi parçamız için de yaşıyoruz.',
+          body: 'Hidrolik kırıcı yedek parçalarımızı da kendi tezgâhımızda üretir, kendi pit-tip fırınımızda işleriz. Metalurjiyi sadece müşteri parçası için değil, kendi parçamız için de yaşıyoruz.',
           bullets: [
             'Keski, piston, burç, tamir kiti',
             'Aynı tesis, aynı disiplin',
@@ -129,7 +160,7 @@ export const DICT: Dict = {
       items: [
         { value: '2', label: 'Temper potası', note: 'Paralel iki sıcaklık eğrisi' },
         { value: 'Ø1200 mm', label: 'Max parça çapı', note: 'Pit-tip fırın iç ölçüsü' },
-        { value: '2.5 ton', label: 'Tek sefer max yük', note: 'Brüt parti ağırlığı' },
+        { value: '2,5 ton', label: 'Tek sefer max yük', note: 'Brüt parti ağırlığı' },
         {
           value: '42CrMo · 42CrMoA',
           label: 'Standart alaşımlar',
@@ -180,15 +211,15 @@ export const DICT: Dict = {
     },
     about: {
       eyebrow: 'Hakkımızda',
-      title: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
+      title: ORG_REGISTERED_NAME,
       body: "Kartepe / Kocaeli'de fason ısıl işlem hizmeti veriyoruz. Türkiye'nin sanayi koridorunun ortasında — gelen parçayı ölçer, işler, kontrol eder ve aynı disiplinle teslim ederiz. Her partinin ardında bir sertlik testi vardır.",
-      company: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
+      company: ORG_REGISTERED_NAME,
       location: 'Kartepe · Kocaeli',
     },
     contact: {
       eyebrow: 'İletişim',
       title: 'Bir mesaj, bir cevap.',
-      sub: 'Parça çizimini veya malzeme bilgisini paylaş, yirmi dört saat içinde dönüş yapalım.',
+      sub: 'Parça çizimini veya malzeme bilgisini paylaşın, yirmi dört saat içinde dönüş yapalım.',
       fields: {
         name: 'Ad Soyad',
         company: 'Firma',
@@ -199,8 +230,25 @@ export const DICT: Dict = {
       submit: 'Gönder',
       sending: 'Gönderiliyor…',
       success: 'Aldık. En kısa sürede dönüyoruz.',
-      error: "Bir sorun oldu. +90 531 669 37 34'ü arayabilirsin.",
-      address: 'Kartepe · Kocaeli',
+      error: "Bir sorun oldu. +90 531 669 37 34'ü arayabilirsiniz.",
+      requiredNote: '* işaretli alanlar zorunludur.',
+      files: {
+        label: 'Çizim / fotoğraf ekle',
+        hint: 'PDF, DWG, DXF, STEP, JPG, PNG veya WebP · en fazla 3 dosya, toplam 8 MB',
+        tooMany: 'En fazla 3 dosya ekleyebilirsiniz.',
+        tooBig: 'Dosyaların toplamı 8 MB’ı geçemez.',
+        badType: 'Bu dosya türü kabul edilmiyor. PDF, DWG, DXF, STEP, JPG, PNG veya WebP ekleyin.',
+        rejected:
+          'Eklediğiniz dosyalardan biri kabul edilmedi (tür, sayı veya boyut). Dosyaları kontrol edip tekrar gönderin.',
+      },
+      kvkk: {
+        before: 'Bilgileriniz ',
+        link: 'KVKK Aydınlatma Metni',
+        after: ' kapsamında yalnızca talebinizi yanıtlamak için işlenir.',
+      },
+      addressLabel: 'Adres',
+      address: `${ORG_STREET}\n${ORG_LOCALITY} / ${ORG_REGION}`,
+      mapLabel: 'Google Haritalar’da aç',
       phoneLabel: 'Telefon',
       whatsappLabel: 'WhatsApp',
       emailLabel: 'E-posta',
@@ -211,7 +259,7 @@ export const DICT: Dict = {
     footer: {
       brand: 'Kervan Heat',
       tag: 'Kartepe · Kocaeli',
-      rights: '© 2026 Kervan Isıl İşlem San. Tic. Ltd. Şti. Tüm hakları saklıdır.',
+      rights: `© 2026 ${ORG_REGISTERED_NAME} Tüm hakları saklıdır.`,
       kvkk: 'KVKK',
       cookies: 'Çerez tercihleri',
     },
@@ -228,22 +276,34 @@ export const DICT: Dict = {
     meta: {
       title: 'Kervan Heat — Contract heat treatment · Kartepe / Kocaeli',
       description:
-        'Contract heat treatment in controlled-atmosphere pit furnaces. Hardening and tempering. 42CrMo, 42CrMoA and other alloys.',
+        'Contract heat treatment in controlled-atmosphere pit furnaces: hardening, tempering, stress relieving, normalising and soft annealing. Kartepe / Kocaeli, Türkiye.',
       siteDescription: 'Contract heat treatment in controlled-atmosphere pit furnaces.',
       service: {
         type: 'Contract heat treatment',
         name: 'Contract heat treatment',
         description:
-          'Hardening and tempering in controlled-atmosphere pit furnaces. 42CrMo, 42CrMoA and other alloys — under our own measurement and control discipline.',
+          'Hardening, tempering, stress relieving, normalising and soft annealing in controlled-atmosphere pit furnaces. 42CrMo, 42CrMoA and other alloys; a hardness test report for every batch.',
         catalogName: 'Heat treatment services',
         offers: [
           {
-            name: 'Hardening & Tempering',
-            description: 'Heating in a pit furnace, controlled cooling, two-pot tempering line.',
+            name: 'Hardening (quenching)',
+            description: 'Heating in a pit furnace, then controlled cooling in oil or air.',
           },
           {
-            name: 'Contract heat treatment',
-            description: 'Special alloys, special temperature curves, special batch sizes.',
+            name: 'Tempering',
+            description: 'Relieves the stress of quenching and adds toughness; two tempering pots.',
+          },
+          {
+            name: 'Stress relieving',
+            description: 'Reduces internal stress after machining, welding or forming.',
+          },
+          {
+            name: 'Normalising',
+            description: 'Evens out the structure after forging or rolling.',
+          },
+          {
+            name: 'Soft annealing',
+            description: 'Lowers hardness and makes the part easier to machine.',
           },
         ],
       },
@@ -295,6 +355,7 @@ export const DICT: Dict = {
     },
     cooling: {
       title: 'Hardness, made with heat.',
+      kicker: 'Contract heat treatment · Kartepe / Kocaeli',
       body: 'For hardening, the part is heated in the furnace, then cooled under control. Tempering relieves stress and adds toughness. The result: hard, tough, long-lasting steel.',
       steps: ['Out of the furnace', 'Controlled cooling', 'Tempered steel'],
       sceneLabel:
@@ -304,22 +365,39 @@ export const DICT: Dict = {
     },
     services: {
       eyebrow: 'Services',
-      title: 'Three core processes. One discipline.',
-      aside: 'Controlled atmosphere, measured temperature curves, hardness checks.',
+      title: 'Five processes. One discipline.',
+      aside: 'Controlled atmosphere, measured temperature curves, a hardness check on every batch.',
+      processesLabel: 'Our heat treatment processes',
+      processes: [
+        {
+          name: 'Hardening (quenching)',
+          body: 'The part is heated to hardening temperature in a pit furnace, then cooled under control in oil or air.',
+        },
+        {
+          name: 'Tempering',
+          body: 'Relieves the stress of quenching and adds toughness. With two tempering pots, two distinct temperature curves can run in parallel on the same day.',
+        },
+        {
+          name: 'Stress relieving',
+          body: 'Reduces the internal stress left in a part by machining, welding or forming.',
+        },
+        {
+          name: 'Normalising',
+          body: 'Evens out the structure after forging or rolling and prepares the part for the next steps.',
+        },
+        {
+          name: 'Soft annealing',
+          body: 'Lowers hardness so the part is easier to machine.',
+        },
+      ],
+      quality: {
+        name: 'A hardness test report for every batch',
+        body: 'The hardness of every batch we treat is measured and reported.',
+      },
       items: [
         {
           index: '01',
-          name: 'Hardening & Tempering',
-          body: 'Heating in a pit furnace, controlled cooling, then stress relief in the tempering pot. With two tempering pots, two distinct temperature curves can run in parallel within the same day.',
-          bullets: [
-            'Oil and air quench',
-            'Two-pot tempering — parallel curves',
-            'Surface hardness check, every lot',
-          ],
-        },
-        {
-          index: '02',
-          name: 'Bespoke Heat Treatment',
+          name: 'Contract Heat Treatment',
           body: 'For requirements outside the standard list: special alloys, special curves, special batch sizes. Sample first, then production run.',
           bullets: [
             'Other alloys on request',
@@ -328,12 +406,12 @@ export const DICT: Dict = {
           ],
         },
         {
-          index: '03',
+          index: '02',
           name: 'Production & Integration',
-          body: 'We also produce hydraulic breaker spare parts on our own benches, run through our own pit furnaces. We live the metallurgy not just for customer parts — for our own parts too.',
+          body: 'We also make hydraulic breaker spare parts on our own machines and treat them in our own pit furnaces. We apply the same metallurgy to our own parts as to our customers’.',
           bullets: [
             'Chisel, piston, bushing, repair kit',
-            'Same shop, same discipline',
+            'Same plant, same discipline',
             {
               label: 'Catalogue',
               site: 'kervanbreaker.com',
@@ -346,7 +424,7 @@ export const DICT: Dict = {
     },
     capacity: {
       eyebrow: 'Capacity',
-      title: 'The shop in numbers.',
+      title: 'Our plant in numbers.',
       aside: 'Furnace capacity, material range and measurement discipline at a glance.',
       items: [
         { value: '2', label: 'Tempering pots', note: 'Two parallel temperature curves' },
@@ -398,15 +476,15 @@ export const DICT: Dict = {
     },
     about: {
       eyebrow: 'About',
-      title: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
+      title: ORG_REGISTERED_NAME,
       body: "We provide contract heat treatment in Kartepe / Kocaeli, in the heart of Türkiye's industrial corridor. We measure the part, run the process, verify the result and ship it back — with the same discipline every time. Behind every batch is a hardness test.",
-      company: 'Kervan Isıl İşlem San. Tic. Ltd. Şti.',
+      company: ORG_REGISTERED_NAME,
       location: 'Kartepe · Kocaeli · Türkiye',
     },
     contact: {
       eyebrow: 'Contact',
       title: 'One message, one answer.',
-      sub: 'Share the drawing or material spec — we will come back within twenty-four hours.',
+      sub: 'Share the drawing or material spec — we will get back to you within twenty-four hours.',
       fields: {
         name: 'Name',
         company: 'Company',
@@ -418,7 +496,24 @@ export const DICT: Dict = {
       sending: 'Sending…',
       success: 'Got it. We will be in touch soon.',
       error: 'Something went wrong. You can call +90 531 669 37 34.',
-      address: 'Kartepe · Kocaeli · Türkiye',
+      requiredNote: 'Fields marked * are required.',
+      files: {
+        label: 'Attach a drawing / photo',
+        hint: 'PDF, DWG, DXF, STEP, JPG, PNG or WebP · up to 3 files, 8 MB in total',
+        tooMany: 'You can attach up to 3 files.',
+        tooBig: 'The files may not exceed 8 MB in total.',
+        badType: 'This file type is not accepted. Attach PDF, DWG, DXF, STEP, JPG, PNG or WebP.',
+        rejected:
+          'One of the attached files was not accepted (type, number or size). Please check the files and send again.',
+      },
+      kvkk: {
+        before: 'We process your details only to answer your request, as described in our ',
+        link: 'privacy notice (KVKK, in Turkish)',
+        after: '.',
+      },
+      addressLabel: 'Address',
+      address: `${ORG_STREET}\n${ORG_LOCALITY} / ${ORG_REGION}, Türkiye`,
+      mapLabel: 'Open in Google Maps',
       phoneLabel: 'Phone',
       whatsappLabel: 'WhatsApp',
       emailLabel: 'Email',
@@ -429,7 +524,7 @@ export const DICT: Dict = {
     footer: {
       brand: 'Kervan Heat',
       tag: 'Kartepe · Kocaeli',
-      rights: '© 2026 Kervan Heat Treatment. All rights reserved.',
+      rights: `© 2026 ${ORG_REGISTERED_NAME} All rights reserved.`,
       kvkk: 'Privacy',
       cookies: 'Cookie settings',
     },
