@@ -5,5 +5,5 @@ Final bulk re-render of the kiriciparca.com part pictures (black finish, C′ qu
 Not deployed: the §9 code PR copies these into `apps/parts-shop/public/photos/parca`, bumps `REDRAWN`, and deletes the old versions.
 
 `kaynak.tgz.enc`: the render generator, part specs and plan, AES-256 encrypted (not public data).
-Decrypt: `openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in kaynak.tgz.enc -pass file:KEY | tar xzf - -P`
+Decrypt: `openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in kaynak.tgz.enc -pass file:KEY | tar xzf - -C /`
 (the key is in the owner's Google Drive, file "kervan-render-yedek-anahtar"; it restores to the original absolute paths).
