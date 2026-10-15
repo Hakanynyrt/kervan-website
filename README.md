@@ -1,63 +1,92 @@
 # kervan-platform
 
-Monorepo for Kervan Makina'nın iki web sitesi:
+Kervan Makina'nın üç web sitesi tek monorepo'da:
 
 - **kervanheat.com** — fason ısıl işlem hizmetleri (sertleştirme, temperleme)
 - **kervanbreaker.com** — hidrolik kırıcı yedek parçaları (keski, piston, burç, kit)
+- **kiriciparca.com** — kırıcı yedek parça mağazası (uçlar ve diğer parçalar; arama, ürün
+  sayfaları, palet, fiyatlar)
 
 ## Stack
 
-- pnpm 10+ workspace · Turborepo 2.9
-- Vite 5 + TypeScript 5.9 + React 18 (her iki app)
+- pnpm 10+ workspace · Turborepo 2
+- Vite 5 + TypeScript 5 + React 18 (üç app)
 - Tailwind v4 + Framer Motion
-- Mood C dark palette + Forge Ember accent (`#E8431B`)
-- Cloudflare Pages (static + Functions için RFQ endpoint)
+- Isıl işlem + kırıcı: Mood C dark palette + Forge Ember accent (`#E8431B`)
+- Mağaza: açık, kurumsal palet (aynı token adları, açık değerler)
+- Cloudflare Pages — statik sayfalar + Functions (RFQ, tema, şifreli teknik katalog);
+  mağazanın verisi (katalog, fiyat, stok) D1 veritabanında, repoda değil
 
 ## Layout
 
 ```
 apps/
   heat-treatment/        kervanheat.com — single-page, plain
-    functions/api/rfq.ts   Pages Function — RFQ POST handler
+    functions/api/         RFQ POST handler + şifreli teknik katalog uçları
+    functions/_middleware  gündüz/gece teması (konuma göre)
     src/                   React + sections + dict
     public/                static assets, _redirects, _headers, sitemap, robots
   breaker-parts/         kervanbreaker.com — long-scroll + 8 detail routes
+    functions/api/tech/    şifreli teknik katalog (giriş, oturum, içerik)
+    functions/_middleware  gündüz/gece teması (konuma göre)
     src/                   pages, components, sections, data, lib
     public/                photos, videos symlink, brand-logos, kirici-uc.glb
+  parts-shop/            kiriciparca.com — önceden üretilmiş sayfalar + arama
+    functions/             Pages Function — gündüz/gece teması (tek sunucu kodu)
+    migrations/            D1 şeması
+    render/                uç görsellerinin üreteci (headless Chromium)
+    scripts/               katalog, prerender, render, veri aktarımı
+    src/                   pages, components, lib, dict
+    public/                parça/stok fotoğrafları, 3B modeller, _redirects, _headers, _routes.json
 
 packages/
   ui/                    @kervan/ui — Mood C tokens + base components
   motion/                @kervan/motion — Framer variants + ScrollReveal
   seo/                   @kervan/seo — JSON-LD + PageMeta + JsonLd
+  tips/                  @kervan/tips — uç kodları, model listeleri, parça mantığı (en çok test)
 ```
 
 ## Komutlar
 
 ```bash
 pnpm install                                       # workspace tümü
-pnpm dev                                           # turbo dev (her iki app)
+pnpm dev                                           # turbo dev (üç app)
 pnpm --filter @kervan/heat-treatment dev           # tek app — http://localhost:5173
 pnpm --filter @kervan/breaker-parts dev            # tek app — http://localhost:5174
-pnpm turbo build                                   # her iki app + paketler
-pnpm turbo typecheck                               # 5 paket
+pnpm --filter @kervan/parts-shop dev               # tek app — http://localhost:5175 (DEMO katalog)
+pnpm turbo build                                   # üç app + paketler
+pnpm turbo typecheck                               # tüm paketler
+pnpm test                                          # birim testleri
 pnpm format                                        # Prettier
 pnpm lint                                          # ESLint flat config
 ```
 
+Mağaza veri token'ı olmadan DEMO katalogla açılır (`XX…` kodlar, sayfada "DEMO verisi" uyarısı);
+gerçek katalog D1'den gelir ve repoya yazılmaz.
+
 ## Deploy
 
-İki ayrı Cloudflare Pages projesi. `main` branch → production, diğerleri → preview.
+Üç ayrı Cloudflare Pages projesi. `main` branch → production, diğerleri → preview.
 
 | Pages projesi           | Domain            | Build path                 |
 | ----------------------- | ----------------- | -------------------------- |
 | `kervan-heat-treatment` | kervanheat.com    | `apps/heat-treatment/dist` |
 | `kervan-breaker-parts`  | kervanbreaker.com | `apps/breaker-parts/dist`  |
+| `kervan-parts-shop`     | kiriciparca.com   | `apps/parts-shop/dist`     |
+
+`www.kiriciparca.com` ve eski `magaza.` / `shop.kervanbreaker.com` adresleri 301 ile
+kiriciparca.com'a yönlenir.
 
 GitHub Actions workflow (`.github/workflows/deploy.yml`):
 
+- Önce `verify`: typecheck + lint + format + gizli bilgi kontrolü — geçmezse deploy olmaz
 - `dorny/paths-filter` ile değişen app'i tespit eder
-- Sadece etkilenen app'i build + deploy eder (`packages/**` değişirse ikisini de)
-- `cloudflare/wrangler-action@v3` ile `pages deploy`
+- Sadece etkilenen app'i build + deploy eder (`packages/**` değişirse hepsi)
+- `cloudflare/wrangler-action` ile `pages deploy`
+- `main`'e her push'ta üç app birden yayınlanır, ardından smoke kontrolü çalışır
+
+Bunun dışında zamanlanmış ve elle çalıştırılan workflow'lar var — aşağıdaki
+"Zamanlanmış ve yardımcı workflow'lar" bölümüne bak.
 
 ### Manuel kurulum (bir kerelik, dashboard'dan)
 
@@ -67,6 +96,7 @@ GitHub Actions workflow (`.github/workflows/deploy.yml`):
 | ----------------------- | ----------------- | ------------------------- | -------------------------- |
 | `kervan-heat-treatment` | `main`            | (empty — Actions yapacak) | `apps/heat-treatment/dist` |
 | `kervan-breaker-parts`  | `main`            | (empty — Actions yapacak) | `apps/breaker-parts/dist`  |
+| `kervan-parts-shop`     | `main`            | (empty — Actions yapacak) | `apps/parts-shop/dist`     |
 
 > Build command'ı boş bırak — bu repo'yu Cloudflare git integration'a bağlama. Deploy'lar Actions tarafından `wrangler pages deploy` ile yapılır. Pages projesi sadece "host" rolünde.
 
@@ -74,17 +104,19 @@ GitHub Actions workflow (`.github/workflows/deploy.yml`):
 
 - `kervan-heat-treatment` → `kervanheat.com` + `www.kervanheat.com`
 - `kervan-breaker-parts` → `kervanbreaker.com` + `www.kervanbreaker.com`
+- `kervan-parts-shop` → `kiriciparca.com` (+ `www` ve eski adresler 301)
 
-Her iki domain Cloudflare'de zaten kayıtlı; Pages otomatik DNS kayıtlarını kuruyor.
+Domainler Cloudflare'de zaten kayıtlı; Pages otomatik DNS kayıtlarını kuruyor.
 
 **C. GitHub repository secrets** (Settings → Secrets and variables → Actions):
 
-| Secret                  | Source                                                                                  |
-| ----------------------- | --------------------------------------------------------------------------------------- |
-| `CLOUDFLARE_API_TOKEN`  | dashboard → My Profile → API Tokens → "Edit Cloudflare Workers" template ile yeni token |
-| `CLOUDFLARE_ACCOUNT_ID` | dashboard → Workers & Pages anasayfası → sağ alt "Account ID"                           |
+| Secret                       | Source                                                                                  |
+| ---------------------------- | --------------------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`       | dashboard → My Profile → API Tokens → "Edit Cloudflare Workers" template ile yeni token |
+| `CLOUDFLARE_ACCOUNT_ID`      | dashboard → Workers & Pages anasayfası → sağ alt "Account ID"                           |
+| `CLOUDFLARE_SHOP_DATA_TOKEN` | mağazanın verisini okuyan salt-okunur token (katalog + fiyat çekme adımları için)       |
 
-**D. Heat-treatment Pages env vars** (RFQ Function için — sadece `kervan-heat-treatment` projesinde, breaker'da gerek yok):
+**D. Heat-treatment Pages env vars** (RFQ Function için — sadece `kervan-heat-treatment` projesinde; breaker'da ve mağazada gerek yok):
 
 | Variable                        | Purpose                                    |
 | ------------------------------- | ------------------------------------------ |
@@ -96,30 +128,26 @@ Her iki domain Cloudflare'de zaten kayıtlı; Pages otomatik DNS kayıtlarını 
 | `MAIL_TO`                       | RFQ inbox (default: `info@kervanheat.com`) |
 | `MAIL_FROM`                     | sender (default: `noreply@kervanheat.com`) |
 
-**E. Cutover sırası — downtime'sız geçiş için:**
+**E. Mağaza tarafı:**
 
-1. PR aç (`claude/kervan-dual-site-migration-gKTT3` → `main`) ama **henüz merge etme**
-2. PR açılınca workflow tetiklenir → preview deploy
-3. Preview URL'leri kontrol et:
-   - `https://<branch>.kervan-heat-treatment.pages.dev`
-   - `https://<branch>.kervan-breaker-parts.pages.dev`
-4. Her şey çalışıyorsa **main'e merge et** → production deploy. Bu noktada Pages projeleri canlı ama özel domain hâlâ eski Worker'a yönlü.
-5. Cloudflare dashboard'dan custom domain'leri Pages projelerine bind et — bu DNS cutover anı. Saniyeler içinde traffic Pages'e geçer.
-6. Eski Worker route'unu (`kervanheat.com → kervan-website` Worker) deaktive et veya Worker'ı tamamen sil.
-7. Eski `src/worker/`, `wrangler.jsonc` ve kök `public/`'in eski sayfaları temizlendi.
-
-> **Önemli:** Adım 4'ten önce eski Worker hâlâ canlı, kervanheat.com hizmet vermeye devam ediyor. Pages'e DNS cutover sadece adım 5'te. Bu sıra downtime'sız bir geçiş garanti eder.
+- D1 veritabanı (`kervan-shop`) oluşturulur, `migrations/` uygulanır.
+- Katalog ve fiyat, D1'e veri aktarım script'leriyle yüklenir; fiyat verisi repoya girmez.
+- Fiyat güncelleme ve katalog içe aktarma Actions ile çalışır (`shop-prices.yml`,
+  `shop-import.yml`), elle panel işlemi gerekmez.
 
 ## RFQ akışı
 
-Her iki site `/api/rfq` endpoint'ine POST atar:
+Isıl işlem ve kırıcı siteleri aynı `/api/rfq` endpoint'ine POST atar:
 
 - **kervanheat.com Contact** → same-origin POST (`/api/rfq` Pages Function)
 - **kervanbreaker.com Contact** → cross-origin POST (`https://kervanheat.com/api/rfq`)
 
-Worker tarafı CORS allowlist'inde `kervanbreaker.com` var; allowlist dışı origin'ler 403.
+Function tarafındaki CORS allowlist'inde `kervanbreaker.com` var; allowlist dışı origin'ler 403 alır.
 
 Email pipeline: Brevo (primary) → Resend → MailChannels (fallbacks). Email is the only notification channel.
+
+Mağazada RFQ formu yok: sipariş isteği, "palete yükle" ile doldurulan paletten WhatsApp veya e-posta
+üzerinden gönderilir. Mağazada çalışan sunucu kodu yalnızca gündüz/gece teması Function'ıdır.
 
 ## Medya ekleme
 
@@ -145,8 +173,16 @@ Sonra Claude'a "yükledim, bakar mısın?" de → içerikleri inceler, doğru is
 | breaker-parts  | `apps/breaker-parts/public/photos/kit/`            | seal-kit                                                                                                                                                      |
 | heat-treatment | `public/photos/isil-islem/` (repo root, symlinked) | `<ad>-640.webp` + `<ad>-1080.webp` (4:5), listed in dict `craft.photos`                                                                                       |
 | heat-treatment | `public/videos/isil-islem/` (repo root, symlinked) | `firin-hatti-loop-01.mp4` (720×1280) + `-wide.mp4` (1280×720) + `-poster.webp` / `-wide-poster.webp` = frame 189 (6.3 s), hero film (`HeroFilm.tsx` START_AT) |
+| parts-shop     | `apps/parts-shop/public/photos/`                   | stok fotoğrafları: her görsel `-sm` + `-lg` webp (4:3), adı yeni sürümde değişir                                                                              |
+| parts-shop     | `apps/parts-shop/public/photos/parca/`             | yedek parça render'ları (alt gövde, burç, kama, saplama, piston, kit); 3B modellerden üretilir, elle eklenmez                                                 |
+| parts-shop     | `apps/parts-shop/public/photos/tesis/`             | tesis/atölye fotoğrafları                                                                                                                                     |
+| parts-shop     | `apps/parts-shop/public/models/`                   | 3B modeller (GLB, sayfadaki "3B incele" ile açılır)                                                                                                           |
 
 `apps/breaker-parts/public/videos` → repo kökünde `public/videos/` symlink (paylaşılan).
+
+Uç (keski) render'ları ayrıdır: build sırasında `.renders/` içinde üretilir (headless Chromium,
+`scripts/render-tips.ts`), `dist/tips/` altında yayınlanır ve repoda tutulmaz. Parça render'ları ise
+`public/photos/parca/` altında repodadır.
 
 Tavsiye edilen ölçü/limit:
 
@@ -161,12 +197,27 @@ Tavsiye edilen ölçü/limit:
 
 ## Mimarinin notları
 
-- **Mood C** — dark industrial palette: bg `#0A0A0B`, ink `#E8E2D6` (warm cream), accent `#E8431B` (Forge Ember). Tokens `packages/ui/src/tokens.css` Tailwind v4 `@theme` bloğu ile expose edilir; her iki app `@import "@kervan/ui/tokens.css"` ile çeker.
-- **Typography** — Display Fraunces italic serif, body Inter. "Atelier editorial · dark variant" karakteri.
-- **3D scene** — sadece breaker-parts'ın `/` route'unda (Three.js + GLTF). heat-treatment'ta 3D yok.
+- **Mood C** — dark industrial palette: bg `#0A0A0B`, ink `#E8E2D6` (warm cream), accent `#E8431B` (Forge Ember). Tokens `packages/ui/src/tokens.css` Tailwind v4 `@theme` bloğu ile expose edilir; ısıl işlem ve kırıcı app'leri `@import "@kervan/ui/tokens.css"` ile çeker.
+- **Mağaza paleti** — aynı token adları, açık değerler. Kural: açık, kurumsal, resmî; "yapay zekâ görünümü" yok (glow, gradient, italik serif, pill buton yok). Uç render'ları kendi kor rengini taşır.
+- **Typography** — ısıl işlem ve kırıcı: Display Fraunces italic serif, body Inter ("Atelier editorial · dark variant"). Mağaza: sade kurumsal dizgi.
+- **3D scene** — breaker-parts'ın `/` route'unda (Three.js + GLTF) ve mağazanın parça sayfalarında "3B incele" (lazy yüklenen üç boyut görüntüleyici). heat-treatment'ta 3D yok.
+- **Mağaza mimarisi** — router yok, tek sayfa uygulaması yok: her sayfa build sırasında üretilir ve içeriği sayfaya gömülür; linkler düz `<a>`. Katalog, stok ve fiyat D1'den gelir; mağazadaki tek sunucu kodu gündüz/gece teması Function'ıdır. Veri güncellemesi kod değişikliği gerektirmez.
 - **i18n** — TR default, EN altyapı. `?lang=` query > `localStorage('kv_lang')` > `navigator.language` > 'tr' fallback.
 - **Branch discipline** — `main` korunur (otomatik prod deploy). Feature branch'ler `feature/<topic>`.
 
 ## Paylaşılan medya
 
-Kök `public/` yalnızca iki sitenin paylaştığı medyayı taşır: `photos/`, `videos/` ve `kirici-uc.glb`. Uygulamalar bunlara symlink ile bağlanır; taşırken symlink'leri ve `deploy.yml` içindeki `paths-filter` yollarını da güncelle. Eski Worker (`src/worker/`, kök `wrangler.jsonc`) ve eski monolit site repodan kaldırıldı.
+Kök `public/` yalnızca ısıl işlem ve kırıcı sitelerinin paylaştığı medyayı taşır: `photos/`,
+`videos/` ve `kirici-uc.glb`. Mağaza medyasını kendi `apps/parts-shop/public/` dizininde tutar.
+Uygulamalar kök medyaya symlink ile bağlanır; taşırken symlink'leri ve `deploy.yml` içindeki
+`paths-filter` yollarını da güncelle. Eski Worker (`src/worker/`, kök `wrangler.jsonc`) ve eski
+monolit site repodan kaldırıldı.
+
+## Zamanlanmış ve yardımcı workflow'lar
+
+| Workflow          | Ne zaman        | Ne yapar                                                   |
+| ----------------- | --------------- | ---------------------------------------------------------- |
+| `uptime.yml`      | her 15 dakikada | üç sitenin ayakta olduğunu ve yönlendirmeleri kontrol eder |
+| `shop-daily.yml`  | her sabah       | mağazayı yeniden üretip yayınlar (güncel kur ile)          |
+| `shop-import.yml` | elle            | katalogu D1'e aktarır, sonra mağazayı yayınlar             |
+| `shop-prices.yml` | elle            | fiyatları D1'e aktarır, sonra mağazayı yayınlar            |
