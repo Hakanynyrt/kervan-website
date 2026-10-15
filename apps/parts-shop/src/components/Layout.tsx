@@ -45,10 +45,21 @@ interface Props {
   hasPopular: boolean;
   /** Header quote button's message (the page's product); the generic tip message without it. */
   quoteText?: string;
+  /** Home page: no order notice bar, so the opening picture sits higher (owner). */
+  home?: boolean;
   children: ReactNode;
 }
 
-export default function Layout({ lang, path, t, demo, hasPopular, quoteText, children }: Props) {
+export default function Layout({
+  lang,
+  path,
+  t,
+  demo,
+  hasPopular,
+  quoteText,
+  home,
+  children,
+}: Props) {
   const other: Lang = lang === 'tr' ? 'en' : 'tr';
   const barRef = useRef<HTMLUListElement>(null);
   // Phones: the category bar scrolls sideways; bring the current group into view.
@@ -191,7 +202,10 @@ export default function Layout({ lang, path, t, demo, hasPopular, quoteText, chi
           </Container>
         </nav>
       </header>
-      <div className="border-b border-hair bg-bg-soft font-sans text-[13px] text-ink-mid">
+      <div
+        hidden={home}
+        className="border-b border-hair bg-bg-soft font-sans text-[13px] text-ink-mid"
+      >
         <Container className="flex items-start gap-x-2.5 py-2">
           <svg
             aria-hidden="true"

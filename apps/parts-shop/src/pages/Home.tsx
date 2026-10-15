@@ -57,32 +57,32 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
   return (
     <>
       <section className="border-b border-hair bg-bg-soft">
-        <Container className="py-10 md:py-14">
-          <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-x-10 lg:gap-y-8">
-            {/* Phones: title, then the opening picture (so the breaker comes apart on the first
-                screen), then the lead and the buttons; `contents` lets the picture sit between. */}
-            <div className="contents sm:block sm:max-w-3xl">
-              <h1 className="m-0 font-sans text-4xl font-bold leading-tight text-ink md:text-5xl">
-                {h.title}
-              </h1>
-              <p className="m-0 font-sans text-lg text-ink-mid max-sm:order-2 sm:mt-4">{h.lead}</p>
-            </div>
-            <div className="order-last flex flex-wrap gap-3 font-sans text-sm font-medium lg:order-none">
-              <a
-                href={localePath(PARTS_PATH, lang)}
-                className={`rounded-sm border border-ink-soft bg-bg px-5 py-3 text-ink hover:bg-bg-warm ${FOCUS}`}
-              >
-                {h.allGroups}
-              </a>
-              <a
-                href={whatsappHref(t.nav.quoteText)}
-                className={`rounded-sm border border-ink-soft bg-bg px-5 py-3 text-ink hover:bg-bg-warm ${FOCUS}`}
-              >
-                {h.ctaQuote}
-              </a>
-            </div>
-            <div className="max-sm:order-1 lg:col-span-2">
+        <Container className="py-5 md:py-6">
+          {/* A compact title, then the opening picture as high as it can sit (owner: "daha büyük";
+              the order notice bar is left out on this page), then the lead and the buttons. */}
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5">
+            <h1 className="m-0 font-sans text-2xl font-bold leading-tight text-ink md:text-3xl">
+              {h.title}
+            </h1>
+            <div>
               <ExplodedPicker lang={lang} t={t} />
+            </div>
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-x-10">
+              <p className="m-0 max-w-3xl font-sans text-lg text-ink-mid">{h.lead}</p>
+              <div className="flex flex-wrap gap-3 font-sans text-sm font-medium">
+                <a
+                  href={localePath(PARTS_PATH, lang)}
+                  className={`rounded-sm border border-ink-soft bg-bg px-5 py-3 text-ink hover:bg-bg-warm ${FOCUS}`}
+                >
+                  {h.allGroups}
+                </a>
+                <a
+                  href={whatsappHref(t.nav.quoteText)}
+                  className={`rounded-sm border border-ink-soft bg-bg px-5 py-3 text-ink hover:bg-bg-warm ${FOCUS}`}
+                >
+                  {h.ctaQuote}
+                </a>
+              </div>
             </div>
           </div>
         </Container>

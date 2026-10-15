@@ -244,9 +244,25 @@ body :has(.kv-open) {
 /* Phones: the breaker stands upright, tip down, centred across the width (owner: "mobilde dikey
    kırıcı"). The picture keeps its own pixels and is turned as one block, so the canvas, the
    callouts and the pointer boxes turn with it; the numbers are turned back to read upright. */
+/* Wider screens: the picture breaks out of the content column to the full viewport width, less
+   a small gutter (owner: "daha büyük"); the callouts and pointer boxes are in percent, so they
+   scale with it. 100vw counts a classic scrollbar: the 1.25rem gutter absorbs it, and <main>
+   clips any rest so the page never scrolls sideways. */
+@media (min-width: 40rem) {
+  .kv-open {
+    margin-inline: calc(50% - 50vw + 1.25rem);
+  }
+  .kv-open figcaption {
+    text-align: center;
+  }
+}
+main:has(.kv-open) {
+  overflow-x: clip;
+}
 @media (max-width: 39.999rem) {
   .kv-open-turn {
-    --kv-len: min(72svh, 40rem);
+    /* Most of the screen height (owner: "daha büyük"), never wider than the screen once turned. */
+    --kv-len: min(86svh, 48rem, calc((100vw - 2rem) * 4.6));
     position: relative;
     height: var(--kv-len);
   }
