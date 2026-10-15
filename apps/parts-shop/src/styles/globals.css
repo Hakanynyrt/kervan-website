@@ -39,8 +39,6 @@
   --font-sans: 'Inter', 'Inter Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
   /* Home opening stage (ExplodedPicker; its frames are transparent): light by day. */
   --color-open-stage: #f4f5f6;
-  /* While it plays by day the parts stand on the plain page colour (no panel edge shows). */
-  --kv-stage-play: transparent;
   color-scheme: light;
 }
 
@@ -71,7 +69,6 @@
   --color-on-brand: #1c1f23;
   --color-open-stage: #141416;
   --kv-stage: var(--kv-stage-night);
-  --kv-stage-play: var(--kv-stage-night);
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
@@ -91,7 +88,6 @@
     --color-on-brand: #1c1f23;
     --color-open-stage: #141416;
     --kv-stage: var(--kv-stage-night);
-    --kv-stage-play: var(--kv-stage-night);
     color-scheme: dark;
   }
 }
@@ -198,14 +194,18 @@ body :has(.kv-open) {
 main:has(.kv-open) {
   overflow-x: clip;
 }
-/* The stage behind the transparent frames: a studio floor by day (here, so phones can turn its
-   direction), the ember glow by night (`--kv-stage`). */
+/* The stage behind the transparent frames, for the whole opening and the final picture: by day
+   a light studio (owner: "Açık stüdyo zemini"; backdrop, soft horizon, a darker floor the
+   contact shadows fall on; here, so phones can turn its direction), the ember glow by night
+   (`--kv-stage`). */
 .kv-open-pic {
-  background: var(--kv-stage, linear-gradient(var(--kv-floor-dir, 180deg), #f4f5f6, #dfe2e5));
+  background: var(
+    --kv-stage,
+    linear-gradient(var(--kv-floor-dir, 180deg), #f4f5f6 0%, #eceef0 60%, #dfe2e5 66%, #d6d9dd 100%)
+  );
 }
 /* While it plays, the stage ends at the picture's edge: fade the edges into the page. */
 :root[data-kv-open] .kv-open-pic {
-  background: var(--kv-stage-play);
   -webkit-mask-image:
     linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent),
     linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
