@@ -58,15 +58,38 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
     <>
       <section className="border-b border-hair bg-bg-soft">
         <Container className="py-5 md:py-6">
-          {/* A compact title, then the opening picture as high as it can sit (owner: "daha büyük";
-              the order notice bar is left out on this page), then the lead and the buttons. */}
-          <div className="grid grid-cols-[minmax(0,1fr)] gap-5">
-            <h1 className="m-0 font-sans text-2xl font-bold leading-tight text-ink md:text-3xl">
+          {/* Owner's "Birleşik" layout: a one-line h1 and the make/model search at the top, the
+              opening picture as a wide stage under it, the part chips and the thin trust row under
+              the stage, then the lead and the buttons (the order notice bar is left out here). */}
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
+            <h1 className="m-0 font-sans text-2xl font-bold leading-tight text-ink md:text-[2.125rem]">
               {h.title}
             </h1>
-            <div>
-              <ExplodedPicker lang={lang} t={t} />
-            </div>
+            <ExplodedPicker lang={lang} t={t} />
+            <ul className="m-0 grid list-none grid-cols-2 gap-x-4 gap-y-2 border-y border-hair p-0 py-3 font-sans text-[13px] text-ink-mid lg:grid-cols-4 lg:gap-x-0 lg:py-2.5">
+              {h.trust.map((x) => (
+                <li
+                  key={x.title}
+                  className="flex items-center gap-2 border-hair lg:border-l lg:pl-4 lg:first:border-l-0 lg:first:pl-0"
+                >
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 16 16"
+                    className="size-4 shrink-0 text-brand"
+                  >
+                    <path
+                      d="M3 8.5l3 3 7-7"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span className="font-medium text-ink">{x.title}</span>
+                </li>
+              ))}
+            </ul>
             <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-x-10">
               <p className="m-0 max-w-3xl font-sans text-lg text-ink-mid">{h.lead}</p>
               <div className="flex flex-wrap gap-3 font-sans text-sm font-medium">
@@ -87,19 +110,6 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
           </div>
         </Container>
       </section>
-
-      <div className="border-b border-hair bg-bg">
-        <Container>
-          <ul className="m-0 grid list-none grid-cols-1 gap-px p-0 sm:grid-cols-2 lg:grid-cols-4">
-            {h.trust.map((x) => (
-              <li key={x.title} className="py-4 font-sans sm:py-6 sm:pr-6">
-                <p className="m-0 text-base font-semibold text-ink">{x.title}</p>
-                <p className="m-0 mt-1 text-sm text-ink-mid">{x.body}</p>
-              </li>
-            ))}
-          </ul>
-        </Container>
-      </div>
 
       <section aria-labelledby="groups" className="bg-bg">
         <Container className="py-14 md:py-16">

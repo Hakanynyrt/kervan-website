@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { LIST_PATH, partPath, type PartKey } from '../lib/routes';
+import { LIST_PATH, PARTS_PATH, partPath, type PartKey } from '../lib/routes';
 import type { Lang } from '../types';
 import { FOCUS } from './Layout';
 
@@ -275,10 +275,53 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
   };
   const lit = (g: Group) => g === sel || g === hover;
 
-  // Picture (full width), the numbered part list as a wrapping row of chips, then the search;
-  // the list and search fade in around the picture once the breaker has come apart.
+  // The make/model search first, then the picture (the stage, full width), then the numbered part
+  // list as a row of chips; only the callouts on the picture wait for the breaker to come apart.
   return (
     <div className="kv-pick">
+      {/* The search first (owner's "Birleşik" layout): label, box and button, then the links. */}
+      <form
+        action={localePath(groupPath(sel), lang)}
+        method="get"
+        role="search"
+        className="kv-pick-search min-w-0"
+      >
+        <label htmlFor="pick-q" className="block font-sans text-sm font-semibold text-ink-mid">
+          {p.label(name(sel))}
+        </label>
+        <div className="mt-2 flex max-w-3xl gap-2">
+          <input
+            ref={input}
+            id="pick-q"
+            name="q"
+            type="search"
+            placeholder={t.search.placeholder}
+            autoComplete="off"
+            className={`min-w-0 flex-1 rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft ${FOCUS}`}
+          />
+          <button
+            type="submit"
+            className={`rounded-sm bg-brand px-6 py-3 font-sans text-sm font-semibold text-on-brand hover:bg-brand-hi ${FOCUS}`}
+          >
+            {t.search.button}
+          </button>
+        </div>
+        <p className="m-0 mt-2.5 flex flex-wrap gap-x-5 gap-y-1 font-sans text-sm">
+          <a
+            href={localePath(PARTS_PATH, lang)}
+            className={`font-medium text-brand-hi hover:underline ${FOCUS}`}
+          >
+            {t.home.allGroups} →
+          </a>
+          <a
+            href={localePath(groupPath(sel), lang)}
+            className={`text-ink-mid hover:underline ${FOCUS}`}
+          >
+            {p.open(name(sel))} →
+          </a>
+        </p>
+      </form>
+
       <figure className="kv-open m-0 min-w-0 overflow-hidden">
         {/* Phones turn the picture upright, tip down (CSS `.kv-open-turn`). */}
         <div className="kv-open-turn">
@@ -396,42 +439,6 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
           ))}
         </ol>
       </nav>
-
-      <form
-        action={localePath(groupPath(sel), lang)}
-        method="get"
-        role="search"
-        className="min-w-0 rounded-md border border-hair bg-bg p-4 md:p-5"
-      >
-        <label htmlFor="pick-q" className="block font-sans text-base font-semibold text-ink">
-          {p.label(name(sel))}
-        </label>
-        <div className="mt-3 flex gap-2">
-          <input
-            ref={input}
-            id="pick-q"
-            name="q"
-            type="search"
-            placeholder={t.search.placeholder}
-            autoComplete="off"
-            className={`min-w-0 flex-1 rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft ${FOCUS}`}
-          />
-          <button
-            type="submit"
-            className={`rounded-sm bg-brand px-5 py-3 font-sans text-sm font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
-          >
-            {t.search.button}
-          </button>
-        </div>
-        <p className="m-0 mt-3 font-sans text-sm">
-          <a
-            href={localePath(groupPath(sel), lang)}
-            className={`font-medium text-brand-hi hover:underline ${FOCUS}`}
-          >
-            {p.open(name(sel))} →
-          </a>
-        </p>
-      </form>
     </div>
   );
 }

@@ -194,12 +194,12 @@
     linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
   mask-composite: intersect;
 }
-/* Picture on its own row across the content width, then the numbered part list (a wrapping row
-   of chips), then the search. */
+/* The make/model search, then the picture on its own row, then the numbered part list (a
+   wrapping row of chips). */
 .kv-pick {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 1rem 0;
+  gap: 0.75rem 0;
 }
 /* Phones: the breaker stands upright, tip down, centred across the width (owner: "mobilde dikey
    kırıcı"). The picture keeps its own pixels and is turned as one block, so the canvas, the
@@ -214,6 +214,31 @@
   }
   .kv-open figcaption {
     text-align: center;
+  }
+  /* The stage is a band about 60 % of the viewport high (owner: the breaker reads big) with the
+     picture centred in it; the band carries the studio floor / ember glow and the faded edges, so
+     the picture itself keeps only the ground shadow. */
+  .kv-open-turn {
+    display: grid;
+    align-items: center;
+    height: clamp(18rem, 60vh, 44rem);
+    background: var(
+      --kv-stage,
+      linear-gradient(180deg, #f4f5f6 0%, #eceef0 62%, #dfe2e5 68%, #d6d9dd 100%)
+    );
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent),
+      linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent),
+      linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+    mask-composite: intersect;
+  }
+  .kv-open-pic {
+    background: var(--kv-shadow);
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 }
 main:has(.kv-open) {
