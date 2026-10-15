@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState, type ComponentType } from 
 import { motion } from 'framer-motion';
 import { useClientIdle, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
+import { coolingProgress } from '../lib/cooling-progress';
 
 type SceneProps = { section: HTMLElement; onReady?: () => void; onFail?: () => void };
 
@@ -145,11 +146,7 @@ function CoolingLive({ c }: { c: CoolingCopy }) {
     let raf = 0;
     const update = () => {
       raf = 0;
-      const r = el.getBoundingClientRect();
-      // At least half a screen of scrolling for the whole cooling: the phone section is only
-      // 115vh, so the piece keeps cooling while the stage scrolls away (keep in sync: Cooling / CoolingScene).
-      const span = Math.max(r.height - window.innerHeight, window.innerHeight * 0.5);
-      const p = span > 0 ? Math.max(0, Math.min(1, -r.top / span)) : 0;
+      const p = coolingProgress(el);
       setStep(p < 0.3 ? 0 : p < 0.75 ? 1 : 2);
       setAtTop(p < 0.04);
     };
@@ -171,10 +168,11 @@ function CoolingLive({ c }: { c: CoolingCopy }) {
       ref={sectionRef}
       id="sogutma"
       aria-labelledby="sogutma-title"
-      // Short on phones (about one extra screen of scrolling) so nobody is held long before the hero.
-      className="kv-night bg-bg relative h-[115vh] md:h-[180vh]"
+      // Tall enough that the stage stays pinned until the piece has cooled (owner: it left before
+      // the end); the stage is `svh` so a phone's sliding toolbar does not resize it.
+      className="kv-night bg-bg relative h-[220svh] md:h-[220vh]"
     >
-      <div className="sticky top-0 h-dvh overflow-hidden">
+      <div className="sticky top-0 h-svh overflow-hidden">
         <div
           aria-hidden="true"
           className="absolute inset-0 pointer-events-none"

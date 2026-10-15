@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { coolingProgress } from '../lib/cooling-progress';
 
 /** "Isınıp soğuyan parça": one breaker moil tip that cools, as the visitor scrolls
  *  through its section, from just out of the furnace (bright orange-yellow, the
@@ -324,13 +325,7 @@ export default function CoolingScene({ section, onReady, onFail }: Props) {
     });
     io.observe(section);
 
-    const progress = () => {
-      const r = section.getBoundingClientRect();
-      // At least half a screen of scrolling for the whole cooling: the phone section is only
-      // 115vh, so the piece keeps cooling while the stage scrolls away (keep in sync: Cooling / CoolingScene).
-      const span = Math.max(r.height - window.innerHeight, window.innerHeight * 0.5);
-      return span > 0 ? clamp01(-r.top / span) : 0;
-    };
+    const progress = () => coolingProgress(section);
     const onScroll = () => wake();
     window.addEventListener('scroll', onScroll, { passive: true });
 
