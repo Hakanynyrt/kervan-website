@@ -37,6 +37,10 @@
   --color-whatsapp: #0f7a6e;
   /* Inter, then Arial scaled to Inter's metrics, so text does not jump when Inter loads. */
   --font-sans: 'Inter', 'Inter Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Home opening stage (ExplodedPicker; its frames are transparent): light by day. */
+  --color-open-stage: #f4f5f6;
+  /* While it plays by day the parts stand on the plain page colour (no panel edge shows). */
+  --kv-stage-play: transparent;
   color-scheme: light;
 }
 
@@ -65,6 +69,9 @@
   --color-hair: #343940;
   --color-hair-strong: #767d86;
   --color-on-brand: #1c1f23;
+  --color-open-stage: #141416;
+  --kv-stage: var(--kv-stage-night);
+  --kv-stage-play: var(--kv-stage-night);
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
@@ -82,8 +89,16 @@
     --color-hair: #343940;
     --color-hair-strong: #767d86;
     --color-on-brand: #1c1f23;
+    --color-open-stage: #141416;
+    --kv-stage: var(--kv-stage-night);
+    --kv-stage-play: var(--kv-stage-night);
     color-scheme: dark;
   }
+}
+/* Night opening stage: the renders' dark stage with its ember floor glow. */
+:root {
+  --kv-stage-night:
+    radial-gradient(ellipse 60% 85% at 50% 78%, rgba(122, 42, 18, 0.32), transparent 72%), #141416;
 }
 
 @font-face {
@@ -163,8 +178,8 @@
   visibility: hidden;
 }
 /* Only the breaker shows while the opening plays (owner: "açılışta sadece kırıcı gözüksün, diğer
-   bilgiler sonra"): the page goes dark, every element beside the picture's line of ancestors is
-   hidden, the picture is frameless on the stage colour of the renders (so it has no edge) and is
+   bilgiler sonra"): the page takes the stage colour of the theme (light by day), every element beside the picture's line of ancestors is
+   hidden, the picture is frameless on that stage colour (so it has no edge) and is
    scaled up and moved to the middle of the screen (`--kv-dx/dy/k`, set by the component; owner:
    "çerçevesiz ve daha büyük"), and all of it fades back in once the breaker has come apart.
    Browsers without :has() keep the page. */
@@ -175,7 +190,7 @@ body :has(.kv-open) {
     border-color 700ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 :root[data-kv-open] {
-  background-color: var(--color-stage);
+  background-color: var(--color-open-stage);
 }
 /* The scaled picture may reach past the sides; kept clipped on the home page (not only while the
    mark is set) so it cannot pan the page while it shrinks back. On <main>, not <body>: body's
@@ -183,8 +198,14 @@ body :has(.kv-open) {
 main:has(.kv-open) {
   overflow-x: clip;
 }
-/* The frames' ember floor glow ends at the image edge: fade the edges into the page. */
+/* The stage behind the transparent frames: a studio floor by day (here, so phones can turn its
+   direction), the ember glow by night (`--kv-stage`). */
+.kv-open-pic {
+  background: var(--kv-stage, linear-gradient(var(--kv-floor-dir, 180deg), #f4f5f6, #dfe2e5));
+}
+/* While it plays, the stage ends at the picture's edge: fade the edges into the page. */
 :root[data-kv-open] .kv-open-pic {
+  background: var(--kv-stage-play);
   -webkit-mask-image:
     linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent),
     linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
@@ -209,6 +230,7 @@ main:has(.kv-open) {
   visibility: hidden;
 }
 .kv-open {
+  background-color: var(--color-open-stage);
   transition:
     transform var(--kv-shrink) cubic-bezier(0.22, 1, 0.36, 1),
     background-color 700ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -260,6 +282,8 @@ main:has(.kv-open) {
     height: var(--kv-len);
   }
   .kv-open-pic {
+    /* The picture is turned 90°: its floor gradient turns back to run down the screen. */
+    --kv-floor-dir: 90deg;
     position: absolute;
     left: 50%;
     top: 50%;

@@ -20,15 +20,17 @@ import { FOCUS } from './Layout';
 type Group = 'tips' | PartKey;
 
 const BASE = '/photos/parca/acilis';
-/** Final (opened) picture; the frames are `<BASE>-kabin-01-NN` (top cover off, housing sliding
- *  away, KABIN of them) and `<BASE>-kare-01-NN` (our parts opening, FRAMES of them), `-{sm,lg}.webp`. */
-const FINAL = `${BASE}-acik-01`;
+/** Final (opened) picture, `-{sm,lg}.webp`; the frames are `<BASE>-kabin-03-NN` (top cover off,
+ *  housing sliding away, KABIN of them) and `<BASE>-kare-03-NN` (our parts opening, FRAMES of
+ *  them). All are transparent (part, contact shadow, faint floor reflection): the stage behind
+ *  them is drawn by the page per theme (globals.css `--kv-stage`). */
+const FINAL = `${BASE}-acik-02`;
 const KABIN = 36;
 const FRAMES = 48;
 /** One size only (the full 2864 px render) for every screen: the frames count against Pages'
  *  file limit. */
 const src = (kind: 'kabin' | 'kare', i: number) =>
-  `${BASE}-${kind}-02-${String(i).padStart(2, '0')}-lg.webp`;
+  `${BASE}-${kind}-03-${String(i).padStart(2, '0')}-lg.webp`;
 /** Timeline (ms): pause on the housed breaker, housing slide, cylinder fade, opening. */
 const HOLD = 500;
 const SLIDE = 1200;
@@ -110,6 +112,9 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     const pic = canvas.current?.parentElement;
     // Close up on the housed breaker first, then the whole frame once it opens.
     let wide = false;
+    /** Long side of the picture on screen at its largest (close up), in device pixels. */
+    let shown = 0;
+    let base: [DOMRect, DOMRect] | null = null;
     const place = (instant: boolean) => {
       if (!fig || !pic) return;
       if (instant) {
@@ -119,21 +124,25 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
         fig.style.setProperty('--kv-dy', '0px');
         fig.style.setProperty('--kv-k', '1');
       }
-      const f = fig.getBoundingClientRect();
-      const p = pic.getBoundingClientRect();
+      // Measured untransformed only (first call, resize): once scaled, the boxes would put the
+      // transform origin in the wrong place and the picture would jump off screen as it draws back.
+      if (instant || !base) base = [fig.getBoundingClientRect(), pic.getBoundingClientRect()];
+      const [f, p] = base;
       // clientWidth leaves out a classic scrollbar, so the breaker sits on the visible centre.
       const vw = document.documentElement.clientWidth;
       const vh = document.documentElement.clientHeight;
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
       // No more than 1.5× the frames' own pixels, or they turn soft.
       const upright = p.height > p.width;
       const long = upright ? p.height : p.width;
-      const sharp = (FRAME_PX * 1.5) / Math.max(1, window.devicePixelRatio || 1) / long;
+      const sharp = (FRAME_PX * 1.5) / dpr / long;
       const fit = (span: number, across: number) =>
         Math.min(
           ((upright ? vh : vw) * (upright ? 0.9 : 0.96)) / (long * span),
           ((upright ? vw : vh) * (upright ? 0.96 : 0.9)) / (Math.min(p.width, p.height) * across),
         );
       const k = Math.max(1, Math.min(wide ? fit(1, 1) : fit(NEAR_SPAN, 0.7), sharp));
+      if (!wide) shown = Math.max(shown, long * k * dpr);
       // The point to bring to the middle of the screen, from the picture's centre (the upright
       // picture is turned 90°, so the frame's left end is at its top).
       const off = wide ? 0 : (NEAR_MID - 0.5) * long * k;
@@ -159,30 +168,67 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     window.addEventListener('resize', onResize);
     let cancelled = false;
     let raf = 0;
-    const finish = () => {
+    const finish = (skip = false) => {
+      cancelled = true;
       window.removeEventListener('resize', onResize);
-      root.removeAttribute('data-kv-open');
+      if (skip && fig) {
+        // Not ready in time: the final picture at once, in its place (no zoomed hold).
+        fig.style.transition = 'none';
+        root.removeAttribute('data-kv-open');
+        void fig.offsetWidth;
+        fig.style.transition = '';
+      } else root.removeAttribute('data-kv-open');
       try {
         sessionStorage.setItem(OPEN_KEY, '1');
       } catch {
         /* storage blocked: it plays again next time */
       }
     };
-    // All frames in playing order. Only their files are fetched up front (about 2.5 MB); a frame is
-    // decoded just before it shows and released after, since all of them decoded at once (2864 px
-    // each) would take hundreds of MB, more than a phone gives a page.
+    // All frames in playing order, fetched in that order a few at a time; the opening starts once
+    // the first START are decoded and the rest keep coming while it plays. Each frame is decoded
+    // at the size it is shown (not its full 2864 px), AHEAD of the one on screen, and released
+    // once passed: all of them decoded at once would take more memory than a phone gives a page.
     const urls = [
       ...Array.from({ length: KABIN }, (_, i) => src('kabin', i)),
       ...Array.from({ length: FRAMES }, (_, i) => src('kare', i)),
     ];
+    const START = 10;
+    const AHEAD = 12;
+    const blobs: (Promise<Blob> | undefined)[] = [];
+    let next = 0;
+    let busy = 0;
+    const pump = () => {
+      while (!cancelled && busy < 4 && next < urls.length) {
+        const i = next++;
+        busy++;
+        blobs[i] = fetch(urls[i]).then((r) => (r.ok ? r.blob() : Promise.reject(new Error())));
+        blobs[i]!.then(
+          () => {
+            busy--;
+            pump();
+          },
+          () => finish(true),
+        );
+      }
+    };
+    pump();
+    const dw = Math.min(FRAME_PX, Math.ceil(shown) || FRAME_PX);
+    const dh = Math.round((dw * H) / W);
+    // Resizing while decoding costs more than it saves when the size shown is close to the
+    // frame's own (desktop): then the frames decode as they are.
+    const decode = (b: Blob) =>
+      dw > FRAME_PX * 0.75
+        ? createImageBitmap(b)
+        : createImageBitmap(b, { resizeWidth: dw, resizeHeight: dh, resizeQuality: 'high' }).catch(
+            () => createImageBitmap(b),
+          );
     const bitmaps: (ImageBitmap | null | undefined)[] = [];
-    let blobs: Blob[] = [];
-    const AHEAD = 6;
     const want = (i: number) => {
       for (let j = i; j < Math.min(urls.length, i + AHEAD); j++) {
-        if (bitmaps[j] !== undefined) continue;
+        const b = blobs[j];
+        if (bitmaps[j] !== undefined || !b) continue;
         bitmaps[j] = null;
-        createImageBitmap(blobs[j]).then(
+        b.then(decode).then(
           (bm) => {
             if (cancelled) bm.close();
             else bitmaps[j] = bm;
@@ -195,77 +241,86 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
         if (bitmaps[j]) bitmaps[j] = null;
       }
     };
-    const ready = (n: number) =>
-      new Promise<void>((resolve, reject) => {
-        const check = () => {
-          if (cancelled) return reject();
-          if (bitmaps.slice(0, n).every(Boolean)) return resolve();
-          window.setTimeout(check, 30);
-        };
-        check();
-      });
-    // A slow connection should not hold the page on the assembled picture.
-    const giveUp = window.setTimeout(() => {
-      cancelled = true;
-      finish();
-    }, 5000);
-    Promise.all(urls.map((u) => fetch(u).then((r) => (r.ok ? r.blob() : Promise.reject()))))
-      .then((b) => {
-        blobs = b;
-        want(0);
-        return ready(AHEAD);
-      })
-      .then(() => {
-        window.clearTimeout(giveUp);
+    // A slow connection should not hold the page on the housed breaker: without a start in time
+    // the final picture shows at once.
+    const giveUp = window.setTimeout(() => finish(true), 1500);
+    const waitStart = () => {
+      if (cancelled) return;
+      want(0);
+      if (bitmaps.slice(0, START).every(Boolean)) play();
+      else raf = requestAnimationFrame(waitStart);
+    };
+    const play = () => {
+      window.clearTimeout(giveUp);
+      const c = canvas.current;
+      const ctx = c?.getContext('2d');
+      const first = bitmaps[0];
+      if (!c || !ctx || !first) return finish(true);
+      c.width = first.width;
+      c.height = first.height;
+      ctx.drawImage(first, 0, 0);
+      // The timeline's own clock: it stops while the frame due is not decoded yet (the picture
+      // holds rather than jumps), and it never moves more than one frame per screen update, so a
+      // slow screen plays every frame a little slower instead of skipping them.
+      let clock = 0;
+      let last = 0;
+      let held = 0;
+      let shownAt = 0;
+      const at = (p: number, n: number) => Math.min(n - 1, Math.max(0, Math.floor(p * n)));
+      /** Frames to draw at time t (ms), with their opacity; the cylinder fades out over FADE. */
+      const frames = (t: number): [number, number][] => {
+        t -= HOLD;
+        if (t < SLIDE) return [[at(t / SLIDE, KABIN), 1]];
+        if ((t -= SLIDE) < FADE) {
+          return [
+            [KABIN, 1],
+            [KABIN - 1, 1 - t / FADE],
+          ];
+        }
+        if ((t -= FADE) < OPEN) return [[KABIN + at(t / OPEN, FRAMES), 1]];
+        return [[urls.length - 1, 1]];
+      };
+      const END = HOLD + SLIDE + FADE + OPEN;
+      /** Start time (ms) of frame i; the cylinder fade starts on frame KABIN. */
+      const startOf = (i: number) =>
+        i < KABIN
+          ? HOLD + (i * SLIDE) / KABIN
+          : i === KABIN
+            ? HOLD + SLIDE
+            : HOLD + SLIDE + FADE + ((i - KABIN) * OPEN) / FRAMES;
+      const main = (fs: [number, number][]) => Math.max(...fs.map(([i]) => i));
+      const step = (now: number) => {
         if (cancelled) return;
-        const c = canvas.current;
-        const ctx = c?.getContext('2d');
-        const first = bitmaps[0];
-        if (!c || !ctx || !first) return finish();
-        c.width = first.width;
-        c.height = first.height;
-        ctx.drawImage(first, 0, 0);
-        let start = 0;
-        const at = (p: number, n: number) => Math.min(n - 1, Math.max(0, Math.floor(p * n)));
-        // Draws frame i if it is decoded; otherwise the canvas keeps the last one for this tick.
-        const draw = (i: number, alpha = 1) => {
-          want(i);
-          const bm = bitmaps[i];
-          if (!bm) return;
-          ctx.globalAlpha = alpha;
-          ctx.drawImage(bm, 0, 0);
-          ctx.globalAlpha = 1;
-        };
-        const step = (now: number) => {
-          if (cancelled) return;
-          if (!start) start = now;
-          let t = now - start - HOLD;
-          if (t < SLIDE) {
-            draw(at(t / SLIDE, KABIN));
-          } else if ((t -= SLIDE) < FADE) {
-            if (!wide) {
-              // Draw back to the whole frame as the parts start to come apart (CSS --kv-shrink).
-              wide = true;
-              place(false);
-            }
-            draw(KABIN - 1);
-            draw(KABIN, t / FADE);
-          } else if ((t -= FADE) < OPEN) {
-            draw(KABIN + at(t / OPEN, FRAMES));
-          } else {
-            draw(urls.length - 1);
-            return finish();
+        const dt = last ? Math.min(40, now - last) : 0;
+        last = now;
+        let t = Math.min(END, clock + dt);
+        if (main(frames(t)) > shownAt + 1) t = startOf(shownAt + 1);
+        const fs = frames(t);
+        want(Math.min(...fs.map(([i]) => i)));
+        if (fs.every(([i]) => bitmaps[i])) {
+          clock = t;
+          held = 0;
+          shownAt = main(fs);
+          if (!wide && t >= HOLD + SLIDE) {
+            // Draw back to the whole frame as the parts start to come apart (CSS --kv-shrink).
+            wide = true;
+            place(false);
           }
-          raf = requestAnimationFrame(step);
-        };
-        // The picture is already in the middle of the screen: play.
-        root.setAttribute('data-kv-open', 'play');
+          ctx.clearRect(0, 0, c.width, c.height);
+          for (const [i, a] of fs) {
+            ctx.globalAlpha = a;
+            ctx.drawImage(bitmaps[i]!, 0, 0, c.width, c.height);
+          }
+          ctx.globalAlpha = 1;
+          if (t >= END) return finish();
+        } else if ((held += dt) > 3000) return finish(true);
         raf = requestAnimationFrame(step);
-      })
-      .catch(() => {
-        window.clearTimeout(giveUp);
-        if (!cancelled) finish();
-      });
+      };
+      // The picture is already in the middle of the screen: play.
+      root.setAttribute('data-kv-open', 'play');
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(waitStart);
     return () => {
       cancelled = true;
       bitmaps.forEach((bm) => bm?.close());
@@ -298,7 +353,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
   // come apart (CSS `.kv-pick`); phones keep picture, list, search one under the other.
   return (
     <div className="kv-pick">
-      <figure className="kv-open m-0 min-w-0 overflow-hidden rounded-md border border-hair bg-stage lg:col-start-2 lg:row-start-1">
+      <figure className="kv-open m-0 min-w-0 overflow-hidden rounded-md border border-hair lg:col-start-2 lg:row-start-1">
         {/* Phones turn the picture upright, tip down (CSS `.kv-open-turn`). */}
         <div className="kv-open-turn">
           <div className="kv-open-pic relative">
@@ -340,7 +395,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
                 {SPOTS.map(({ g, at, to }, i) => (
                   <g
                     key={g}
-                    className={lit(g) ? 'text-brand-hi' : 'text-white/75'}
+                    className={lit(g) ? 'text-brand-hi' : 'text-ink-mid'}
                     stroke="currentColor"
                     fill="currentColor"
                   >
@@ -351,7 +406,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
                       cy={at[1]}
                       r={30}
                       strokeWidth={4}
-                      className={`kv-num ${lit(g) ? 'fill-brand-hi' : 'fill-stage'}`}
+                      className={`kv-num ${lit(g) ? 'fill-brand-hi' : 'fill-bg'}`}
                     />
                     <text
                       x={at[0]}
@@ -361,7 +416,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
                       stroke="none"
                       fontSize={34}
                       fontWeight={600}
-                      className={`font-sans ${lit(g) ? 'fill-stage' : 'fill-white'}`}
+                      className={`font-sans ${lit(g) ? 'fill-on-brand' : 'fill-ink'}`}
                     >
                       {i + 1}
                     </text>
@@ -391,7 +446,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
             </div>
           </div>
         </div>
-        <figcaption className="border-t border-white/15 px-4 py-2 font-sans text-xs text-white/70">
+        <figcaption className="border-t border-hair px-4 py-2 font-sans text-xs text-ink-soft">
           {p.caption}
         </figcaption>
       </figure>
