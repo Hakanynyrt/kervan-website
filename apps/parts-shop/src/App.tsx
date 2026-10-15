@@ -37,7 +37,15 @@ export default function App({ lang, path, model, fx }: PageProps) {
           ? t.nav.quoteTextFor(model.name)
           : undefined;
   return (
-    <Layout lang={lang} path={path} t={t} demo={demo} hasPopular={hasPopular} quoteText={quoteText}>
+    <Layout
+      lang={lang}
+      path={path}
+      t={t}
+      demo={demo}
+      hasPopular={hasPopular}
+      quoteText={quoteText}
+      home={model.kind === 'home'}
+    >
       {model.kind === 'home' && <Home model={model} lang={lang} t={t} />}
       {model.kind === 'list' && <TipList model={model} lang={lang} t={t} />}
       {model.kind === 'popular' && <Popular model={model} lang={lang} t={t} />}
