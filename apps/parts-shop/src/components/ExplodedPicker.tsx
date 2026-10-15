@@ -39,11 +39,6 @@ const OPEN = 900;
 const OPEN_KEY = 'kv_open_played';
 /** Width of the opening frames in their own pixels (`-lg`). */
 const FRAME_PX = 2864;
-/** The housed breaker inside the frames (fraction of the frame length, along the breaker): the
- *  opening starts close up on it and draws back to the whole frame as the parts come apart. */
-const NEAR_SPAN = 0.5;
-const NEAR_MID = 0.46;
-
 /** Picture size in render pixels (the boxes and callouts below are in the same pixels). */
 const W = 2864;
 const H = 620;
@@ -105,79 +100,18 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     const root = document.documentElement;
     if (!root.hasAttribute('data-kv-open')) return;
     (window as unknown as { __kvOpen?: boolean }).__kvOpen = true;
-    // Only the breaker shows during the opening, frameless and large: scale the picture (the
-    // upright one on phones) to fill most of the screen and centre it (CSS turns it back to its
-    // place when the opening mark goes). Measured again if the screen turns or resizes.
-    const fig = canvas.current?.closest('figure');
+    // Only the breaker shows while the opening plays, at its own size and in its own place (CSS
+    // hides the rest of the page and fades it in around the picture when the mark goes).
     const pic = canvas.current?.parentElement;
-    // Close up on the housed breaker first, then the whole frame once it opens.
-    let wide = false;
-    /** Long side of the picture on screen at its largest (close up), in device pixels. */
-    let shown = 0;
-    let base: [DOMRect, DOMRect] | null = null;
-    const place = (instant: boolean) => {
-      if (!fig || !pic) return;
-      if (instant) {
-        // Measure the untransformed layout box.
-        fig.style.transition = 'none';
-        fig.style.setProperty('--kv-dx', '0px');
-        fig.style.setProperty('--kv-dy', '0px');
-        fig.style.setProperty('--kv-k', '1');
-      }
-      // Measured untransformed only (first call, resize): once scaled, the boxes would put the
-      // transform origin in the wrong place and the picture would jump off screen as it draws back.
-      if (instant || !base) base = [fig.getBoundingClientRect(), pic.getBoundingClientRect()];
-      const [f, p] = base;
-      // clientWidth leaves out a classic scrollbar, so the breaker sits on the visible centre.
-      const vw = document.documentElement.clientWidth;
-      const vh = document.documentElement.clientHeight;
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
-      // No more than 1.5× the frames' own pixels, or they turn soft.
-      const upright = p.height > p.width;
-      const long = upright ? p.height : p.width;
-      const sharp = (FRAME_PX * 1.5) / dpr / long;
-      const fit = (span: number, across: number) =>
-        Math.min(
-          ((upright ? vh : vw) * (upright ? 0.9 : 0.96)) / (long * span),
-          ((upright ? vw : vh) * (upright ? 0.96 : 0.9)) / (Math.min(p.width, p.height) * across),
-        );
-      const k = Math.max(1, Math.min(wide ? fit(1, 1) : fit(NEAR_SPAN, 0.7), sharp));
-      if (!wide) shown = Math.max(shown, long * k * dpr);
-      // The point to bring to the middle of the screen, from the picture's centre (the upright
-      // picture is turned 90°, so the frame's left end is at its top).
-      const off = wide ? 0 : (NEAR_MID - 0.5) * long * k;
-      const ox = p.left + p.width / 2 - f.left;
-      const oy = p.top + p.height / 2 - f.top;
-      fig.style.transformOrigin = `${ox}px ${oy}px`;
-      fig.style.setProperty(
-        '--kv-dx',
-        `${Math.round(vw / 2 - (f.left + ox) - (upright ? 0 : off))}px`,
-      );
-      fig.style.setProperty(
-        '--kv-dy',
-        `${Math.round(vh / 2 - (f.top + oy) - (upright ? off : 0))}px`,
-      );
-      fig.style.setProperty('--kv-k', k.toFixed(3));
-      if (instant) {
-        void fig.offsetWidth;
-        fig.style.transition = '';
-      }
-    };
-    place(false);
-    const onResize = () => place(true);
-    window.addEventListener('resize', onResize);
+    /** Long side of the picture on screen (upright on phones), in device pixels. */
+    const shown = pic
+      ? Math.max(pic.offsetWidth, pic.offsetHeight) * Math.max(1, window.devicePixelRatio || 1)
+      : 0;
     let cancelled = false;
     let raf = 0;
-    const finish = (skip = false) => {
+    const finish = () => {
       cancelled = true;
-      window.removeEventListener('resize', onResize);
-      if (skip && fig) {
-        // Not ready in time: the final picture at once, in its place (no zoomed hold).
-        fig.style.transition = 'none';
-        root.removeAttribute('data-kv-open');
-        void fig.offsetWidth;
-        fig.style.transition = '';
-      } else root.removeAttribute('data-kv-open');
+      root.removeAttribute('data-kv-open');
       try {
         sessionStorage.setItem(OPEN_KEY, '1');
       } catch {
@@ -207,7 +141,7 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
             busy--;
             pump();
           },
-          () => finish(true),
+          () => finish(),
         );
       }
     };
@@ -243,7 +177,7 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     };
     // A slow connection should not hold the page on the housed breaker: without a start in time
     // the final picture shows at once.
-    const giveUp = window.setTimeout(() => finish(true), 1500);
+    const giveUp = window.setTimeout(() => finish(), 1500);
     const waitStart = () => {
       if (cancelled) return;
       want(0);
@@ -255,7 +189,7 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
       const c = canvas.current;
       const ctx = c?.getContext('2d');
       const first = bitmaps[0];
-      if (!c || !ctx || !first) return finish(true);
+      if (!c || !ctx || !first) return finish();
       c.width = first.width;
       c.height = first.height;
       ctx.drawImage(first, 0, 0);
@@ -301,11 +235,6 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
           clock = t;
           held = 0;
           shownAt = main(fs);
-          if (!wide && t >= HOLD + SLIDE) {
-            // Draw back to the whole frame as the parts start to come apart (CSS --kv-shrink).
-            wide = true;
-            place(false);
-          }
           ctx.clearRect(0, 0, c.width, c.height);
           for (const [i, a] of fs) {
             ctx.globalAlpha = a;
@@ -313,10 +242,9 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
           }
           ctx.globalAlpha = 1;
           if (t >= END) return finish();
-        } else if ((held += dt) > 3000) return finish(true);
+        } else if ((held += dt) > 3000) return finish();
         raf = requestAnimationFrame(step);
       };
-      // The picture is already in the middle of the screen: play.
       root.setAttribute('data-kv-open', 'play');
       raf = requestAnimationFrame(step);
     };
@@ -324,7 +252,6 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     return () => {
       cancelled = true;
       bitmaps.forEach((bm) => bm?.close());
-      window.removeEventListener('resize', onResize);
       cancelAnimationFrame(raf);
       window.clearTimeout(giveUp);
     };
@@ -349,11 +276,11 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
   };
   const lit = (g: Group) => g === sel || g === hover;
 
-  // lg+: the part list stands on the left of the picture, opening slowly once the breaker has
-  // come apart (CSS `.kv-pick`); phones keep picture, list, search one under the other.
+  // Picture (full width), the numbered part list as a wrapping row of chips, then the search;
+  // the list and search fade in around the picture once the breaker has come apart.
   return (
     <div className="kv-pick">
-      <figure className="kv-open m-0 min-w-0 overflow-hidden rounded-md border border-hair lg:col-start-2 lg:row-start-1">
+      <figure className="kv-open m-0 min-w-0 overflow-hidden">
         {/* Phones turn the picture upright, tip down (CSS `.kv-open-turn`). */}
         <div className="kv-open-turn">
           <div className="kv-open-pic relative">
@@ -446,16 +373,11 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
             </div>
           </div>
         </div>
-        <figcaption className="border-t border-hair px-4 py-2 font-sans text-xs text-ink-soft">
-          {p.caption}
-        </figcaption>
+        <figcaption className="mt-2 font-sans text-xs text-ink-soft">{p.caption}</figcaption>
       </figure>
 
-      <nav
-        aria-label={p.listLabel}
-        className="kv-pick-side lg:col-start-1 lg:row-span-2 lg:row-start-1"
-      >
-        <ol className="m-0 grid list-none grid-cols-1 gap-2 p-0 font-sans text-sm sm:flex sm:flex-wrap lg:grid lg:grid-cols-1 lg:gap-1.5">
+      <nav aria-label={p.listLabel} className="kv-pick-side">
+        <ol className="m-0 flex list-none flex-wrap gap-2 p-0 font-sans text-sm">
           {GROUPS.map((g, i) => (
             <li key={g}>
               <a
@@ -480,7 +402,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
         action={localePath(groupPath(sel), lang)}
         method="get"
         role="search"
-        className="col-span-full min-w-0 rounded-md border border-hair bg-bg p-4 md:p-5 lg:col-span-1 lg:col-start-2 lg:row-start-2"
+        className="min-w-0 rounded-md border border-hair bg-bg p-4 md:p-5"
       >
         <label htmlFor="pick-q" className="block font-sans text-base font-semibold text-ink">
           {p.label(name(sel))}
