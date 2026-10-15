@@ -199,10 +199,21 @@ main:has(.kv-open) {
    contact shadows fall on; here, so phones can turn its direction), the ember glow by night
    (`--kv-stage`). */
 .kv-open-pic {
-  background: var(
-    --kv-stage,
-    linear-gradient(var(--kv-floor-dir, 180deg), #f4f5f6 0%, #eceef0 60%, #dfe2e5 66%, #d6d9dd 100%)
-  );
+  /* The ground shadow is drawn here, not in the frames (they hold the part only), so it stays
+     under the breaker when phones turn the picture upright (owner: "dik ise gölgesi aşağıda"). */
+  --kv-shadow: radial-gradient(ellipse 47% 6% at 50% 91%, rgba(0, 0, 0, 0.2), transparent 70%);
+  background:
+    var(--kv-shadow),
+    var(
+      --kv-stage,
+      linear-gradient(
+        var(--kv-floor-dir, 180deg),
+        #f4f5f6 0%,
+        #eceef0 60%,
+        #dfe2e5 66%,
+        #d6d9dd 100%
+      )
+    );
 }
 /* While it plays, the stage ends at the picture's edge: fade the edges into the page. */
 :root[data-kv-open] .kv-open-pic {
@@ -282,8 +293,10 @@ main:has(.kv-open) {
     height: var(--kv-len);
   }
   .kv-open-pic {
-    /* The picture is turned 90°: its floor gradient turns back to run down the screen. */
+    /* The picture is turned 90°: its floor gradient turns back to run down the screen, and the
+       ground shadow sits at the frame's right end (the tip), i.e. under the upright breaker. */
     --kv-floor-dir: 90deg;
+    --kv-shadow: radial-gradient(ellipse 5% 28% at 98% 50%, rgba(0, 0, 0, 0.24), transparent 70%);
     position: absolute;
     left: 50%;
     top: 50%;
