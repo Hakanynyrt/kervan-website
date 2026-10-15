@@ -20,17 +20,17 @@ import { FOCUS } from './Layout';
 type Group = 'tips' | PartKey;
 
 const BASE = '/photos/parca/acilis';
-/** Final (opened) picture, `-{sm,lg}.webp`; the frames are `<BASE>-kabin-03-NN` (top cover off,
- *  housing sliding away, KABIN of them) and `<BASE>-kare-03-NN` (our parts opening, FRAMES of
+/** Final (opened) picture, `-{sm,lg}.webp`; the frames are `<BASE>-kabin-04-NN` (top cover off,
+ *  housing sliding away, KABIN of them) and `<BASE>-kare-04-NN` (our parts opening, FRAMES of
  *  them). All are transparent (part, contact shadow, faint floor reflection): the stage behind
  *  them is drawn by the page per theme (globals.css `--kv-stage`). */
-const FINAL = `${BASE}-acik-02`;
+const FINAL = `${BASE}-acik-03`;
 const KABIN = 36;
 const FRAMES = 48;
 /** One size only (the full 2864 px render) for every screen: the frames count against Pages'
  *  file limit. */
 const src = (kind: 'kabin' | 'kare', i: number) =>
-  `${BASE}-${kind}-03-${String(i).padStart(2, '0')}-lg.webp`;
+  `${BASE}-${kind}-04-${String(i).padStart(2, '0')}-lg.webp`;
 /** Timeline (ms): pause on the housed breaker, housing slide, cylinder fade, opening. */
 const HOLD = 500;
 const SLIDE = 1200;
