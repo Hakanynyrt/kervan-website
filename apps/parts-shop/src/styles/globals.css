@@ -37,8 +37,6 @@
   --color-whatsapp: #0f7a6e;
   /* Inter, then Arial scaled to Inter's metrics, so text does not jump when Inter loads. */
   --font-sans: 'Inter', 'Inter Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  /* Home opening stage (ExplodedPicker; its frames are transparent): light by day. */
-  --color-open-stage: #f4f5f6;
   color-scheme: light;
 }
 
@@ -67,7 +65,6 @@
   --color-hair: #343940;
   --color-hair-strong: #767d86;
   --color-on-brand: #1c1f23;
-  --color-open-stage: #141416;
   --kv-stage: var(--kv-stage-night);
   color-scheme: dark;
 }
@@ -86,7 +83,6 @@
     --color-hair: #343940;
     --color-hair-strong: #767d86;
     --color-on-brand: #1c1f23;
-    --color-open-stage: #141416;
     --kv-stage: var(--kv-stage-night);
     color-scheme: dark;
   }
@@ -157,10 +153,10 @@
 :root[data-kv-open] .kv-open-final {
   visibility: hidden;
 }
-/* The numbers and the caption come in once the breaker has come apart; hidden (not just
-   transparent) until then, so a tap cannot pick a part. */
-.kv-open-spots,
-.kv-open figcaption {
+/* The page shows at once (owner: "Site hemen yüklensin, kırıcı site ile birlikte dağıtılsın"):
+   only the picture plays, in its own box, so nothing moves. The numbers come in once the breaker
+   has come apart; hidden (not just transparent) until then, so a tap cannot pick a part. */
+.kv-open-spots {
   transition:
     opacity 400ms cubic-bezier(0.22, 1, 0.36, 1) 150ms,
     visibility 0s linear 150ms;
@@ -168,20 +164,6 @@
 :root[data-kv-open] .kv-open-spots {
   opacity: 0;
   visibility: hidden;
-}
-/* Only the breaker shows while the opening plays (owner: "açılışta sadece kırıcı gözüksün, diğer
-   bilgiler sonra"): the page takes the stage colour of the theme (light by day) and every element
-   beside the picture's line of ancestors is hidden. The picture plays at its own size, in its own
-   place (owner), and the rest fades in around it
-   once the breaker has come apart. Browsers without :has() keep the page. */
-html,
-body :has(.kv-open) {
-  transition:
-    background-color 700ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 700ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-:root[data-kv-open] {
-  background-color: var(--color-open-stage);
 }
 /* The stage behind the transparent frames, for the whole opening and the final picture: by day
    a light studio (owner: "Açık stüdyo zemini"; backdrop, soft horizon, a darker floor the
@@ -212,34 +194,12 @@ body :has(.kv-open) {
     linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
   mask-composite: intersect;
 }
-:root[data-kv-open] body :has(.kv-open) {
-  background-color: transparent;
-  border-color: transparent;
-}
-:has(.kv-open) > :not(:has(.kv-open)):not(.kv-open) {
-  transition:
-    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1) 250ms,
-    visibility 0s;
-}
-:root[data-kv-open] :has(.kv-open) > :not(:has(.kv-open)):not(.kv-open),
-:root[data-kv-open] .kv-open figcaption {
-  opacity: 0;
-  visibility: hidden;
-}
 /* Picture on its own row across the content width, then the numbered part list (a wrapping row
-   of chips), then the search; the list fades in once the breaker has come apart (owner: "kırıcı
-   dağıldıktan sonra yavaşça açılsın"). */
+   of chips), then the search. */
 .kv-pick {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 1rem 0;
-}
-.kv-pick-side {
-  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1) 350ms;
-}
-:root[data-kv-open] .kv-pick-side {
-  opacity: 0;
-  visibility: hidden;
 }
 /* Phones: the breaker stands upright, tip down, centred across the width (owner: "mobilde dikey
    kırıcı"). The picture keeps its own pixels and is turned as one block, so the canvas, the

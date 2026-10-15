@@ -100,8 +100,7 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     const root = document.documentElement;
     if (!root.hasAttribute('data-kv-open')) return;
     (window as unknown as { __kvOpen?: boolean }).__kvOpen = true;
-    // Only the breaker shows while the opening plays, at its own size and in its own place (CSS
-    // hides the rest of the page and fades it in around the picture when the mark goes).
+    // The page shows at once; only the picture plays, at its own size and in its own place.
     const pic = canvas.current?.parentElement;
     /** Long side of the picture on screen (upright on phones), in device pixels. */
     const shown = pic
@@ -376,7 +375,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
         <figcaption className="mt-2 font-sans text-xs text-ink-soft">{p.caption}</figcaption>
       </figure>
 
-      <nav aria-label={p.listLabel} className="kv-pick-side">
+      <nav aria-label={p.listLabel}>
         <ol className="m-0 flex list-none flex-wrap gap-2 p-0 font-sans text-sm">
           {GROUPS.map((g, i) => (
             <li key={g}>
