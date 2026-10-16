@@ -115,7 +115,18 @@ export function BrandChips({
  * read from the URL after hydration (`?q=&tip=&cap=&kanal=1`) and written back with
  * `replaceState`, so a filtered search can be shared; the prerender is the empty state.
  */
-export function ModelTable({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang; t: Dict }) {
+export function ModelTable({
+  rows,
+  lang,
+  t,
+  all = false,
+}: {
+  rows: BreakerCard[];
+  lang: Lang;
+  t: Dict;
+  /** A brand page lists every model of its make while the box is empty (owner: all models show). */
+  all?: boolean;
+}) {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<TipFilter>(EMPTY_FILTER);
   // Writing the URL waits for the load-time read, so the first render cannot wipe a shared link.
@@ -138,7 +149,7 @@ export function ModelTable({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang;
       for (const [k, v] of merged) sp.append(k, v);
     });
   }, [ready, query, filter]);
-  const shown = query ? rows.filter((r) => matches(query, searchName(r.name))) : [];
+  const shown = query ? rows.filter((r) => matches(query, searchName(r.name))) : all ? rows : [];
   // Nothing found: try the query with a misspelt make fixed and unknown words dropped (on the
   // unfiltered rows, so a filter can never hide the suggestion).
   const guess =
@@ -195,7 +206,7 @@ export function ModelTable({ rows, lang, t }: { rows: BreakerCard[]; lang: Lang;
           className={`min-w-0 flex-[1_1_22rem] rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft sm:max-w-md ${FOCUS}`}
         />
         <p className="m-0 font-sans text-sm text-ink-mid" aria-live="polite">
-          {!query
+          {!query && !all
             ? t.search.hint
             : shown.length
               ? active
