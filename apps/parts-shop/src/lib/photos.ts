@@ -2066,10 +2066,10 @@ const redrawn = (base: string): string => {
   const v = m && REDRAWN[m[1]];
   return v ? `/photos/parca/${m[1]}-${m[2]}-${v}` : base;
 };
-/** Display names that differ from the drawings' (owner: "MTB 210 II ile MTB 215 aynı modeller",
- *  "MTB 275 II = MTB 285"). Files keep their names. */
+/** Display names that differ from the drawings' (owner: "MTB 210 II ile MTB 215 aynı modeller", shown
+ *  as just "MTB 215"; "MTB 275 II = MTB 285"). Files keep their names. */
 const MODEL_NAME: Record<string, string> = {
-  'MTB 210 II': 'MTB 215 / 210 II',
+  'MTB 210 II': 'MTB 215',
   'MTB 275 II': 'MTB 285 / 275 II',
 };
 /** Soosan models are shown without the "TS-P" suffix (owner: "TS-P'yi her yerden kaldır"). */
