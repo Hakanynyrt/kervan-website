@@ -1,0 +1,32 @@
+{
+  "name": "Kervan Heat",
+  "short_name": "Kervan Heat",
+  "description": "Fason ısıl işlem",
+  "lang": "tr",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#0A0A0B",
+  "background_color": "#0A0A0B",
+  "icons": [
+    {
+      "src": "/icon-192-02.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512-02.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512-02.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

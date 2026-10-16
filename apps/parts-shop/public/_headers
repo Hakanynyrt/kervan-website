@@ -25,6 +25,15 @@
   Cache-Control: public, max-age=31536000, immutable
 /favicon-16-02.png
   Cache-Control: public, max-age=31536000, immutable
+/icon-192-02.png
+  Cache-Control: public, max-age=31536000, immutable
+/icon-512-02.png
+  Cache-Control: public, max-age=31536000, immutable
+/icon-maskable-512-02.png
+  Cache-Control: public, max-age=31536000, immutable
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: public, max-age=3600
 /logo-krv-v2.svg
   Cache-Control: public, max-age=31536000, immutable
 /logo-krv-v2-256.png
