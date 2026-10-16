@@ -67,6 +67,10 @@
 - `robots.txt`: allow all, `Disallow: /api/`, sitemap link. KVKK is canonical at `/kvkk` (Pages 308s `/kvkk.html`); link and list `/kvkk`.
 - All user-facing text goes through the dict, including `aria-label`s.
 
+## Home-screen app (all three sites)
+
+Each site has `public/manifest.webmanifest` (standalone, scope `/`, start `/`, Turkish names "Kervan Mağaza" / "Kervan Breaker" / "Kervan Heat") and the icons `icon-192-02.png`, `icon-512-02.png`, `icon-maskable-512-02.png` (the KRV tile on #141416, same look as `apple-touch-icon-02.png`; a changed icon gets a new `-0N` name). `index.html` links the manifest and carries the iOS standalone meta tags; the prerender copies them to every page. **No service worker** (owner and workflow decision, 2026-10-16): prices, stock, the edge day/night mark and same-day deploys must never come from a cache. English pages install with the Turkish name (owner's choice). The opening animation plays on every app launch (owner: keep it). `_routes.json` keeps the manifest and icons off the edge function; `_headers` gives the manifest `application/manifest+json`.
+
 ## Shared media at the repo root
 
 - Root `public/` now holds only shared media: `photos/` (symlinked as `apps/heat-treatment/public/photos`), `videos/` (symlinked by both apps) and `kirici-uc.glb` (symlinked by breaker-parts). `deploy.yml`'s `paths-filter` watches these paths. Do not delete or move them without updating the symlinks and the filter.
