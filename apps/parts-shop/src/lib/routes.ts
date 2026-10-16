@@ -358,6 +358,10 @@ function sampleFor(
  * breaker. Family pages stay for the permanent codes and for tips with no listed breaker.
  * Best-sellers are their own page, not a badge on every card.
  */
+/** The tip catalog's "MTB 210 II" is shown as "MTB 215" only (owner); its URL and lookups keep the catalog name. */
+const shownBreaker = <T extends { name: string; model: string }>(x: T): T =>
+  x.name === 'MTB 210 II' ? { ...x, name: 'MTB 215', model: '215' } : x;
+
 export function buildPages(c: PublicCatalog): BuiltPage[] {
   const demo = c.demo === true;
   const { breakers } = groupBreakers(c);
@@ -404,18 +408,19 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       if (!groovedSeen.has(b))
         console.warn(`buildPages: grooved tools of "${b}" match no breaker of the catalog`);
   const tipPaths = new Map(cards.map((x) => [fold(x.name), x.path]));
-  const popular = cards.filter((x) => x.popularTier !== null).sort(byPopularity);
+  const shownCards = cards.map(shownBreaker);
+  const popular = shownCards.filter((x) => x.popularTier !== null).sort(byPopularity);
   const hasPopular = popular.length > 0;
   const partPrices = resolvePartPrices(c.partPrices ?? []);
   const listed = listedParts(c);
   const byBrand = new Map<string, BreakerCard[]>();
-  for (const x of cards) byBrand.set(x.brand, [...(byBrand.get(x.brand) ?? []), x]);
+  for (const x of shownCards) byBrand.set(x.brand, [...(byBrand.get(x.brand) ?? []), x]);
   const brands: BrandLink[] = [...byBrand]
     .map(([name, rows]) => ({ name, path: brandPath(name), count: rows.length }))
     .sort((a, b) => a.name.localeCompare(b.name, 'tr'));
   // Home: one breaker per tip family, so the first screen is not eight names for one tip.
   const seen = new Set<string | null>();
-  const featured = (hasPopular ? popular : cards).filter((x) => {
+  const featured = (hasPopular ? popular : shownCards).filter((x) => {
     const k = x.image ?? x.slug;
     if (seen.has(k)) return false;
     seen.add(k);
@@ -433,7 +438,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         featured: featured.slice(0, FEATURED),
         featuredArePopular: hasPopular,
         morePopular: popular.length > FEATURED,
-        total: cards.length,
+        total: shownCards.length,
         brands,
         tips,
         demo,
@@ -443,7 +448,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     // Search results: best-sellers first, then working diameter (owner: never A–Z).
     {
       path: LIST_PATH,
-      model: { kind: 'list', rows: [...cards].sort(byPopularity), brands, demo, hasPopular },
+      model: { kind: 'list', rows: [...shownCards].sort(byPopularity), brands, demo, hasPopular },
     },
     ...[...byBrand].map(([brand, rows]) => ({
       path: brandPath(brand),
@@ -515,14 +520,14 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       path: breakerPath(slug),
       model: {
         kind: 'breaker' as const,
-        name: e.name,
+        name: shownBreaker(e).name,
         ...(e.extra ? { extra: e.extra } : {}),
         ...(() => {
           const sample = e.families.length ? null : sampleFor(e, breakers);
           return sample ? { sample } : {};
         })(),
         brand: e.brand,
-        model: e.model,
+        model: shownBreaker(e).model,
         families: e.families,
         parts: partsForBreaker(e.name),
         demo,

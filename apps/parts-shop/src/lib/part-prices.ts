@@ -1,4 +1,4 @@
-import { breakerKeys, type PartPrice, type PartTypeCode } from '@kervan/tips';
+import { breakerKeys, SAME_MODELS, type PartPrice, type PartTypeCode } from '@kervan/tips';
 import { renderAnchor } from './part-links';
 import { PART_RENDERS, type PartRender } from './photos';
 import type { PartKey } from './routes';
@@ -81,11 +81,20 @@ interface Candidate {
 }
 
 function candidates(): Candidate[] {
+  /** A model shown under one name is still priced by the sales rows of its other name (MTB 215 = MTB 210 II). */
+  const withSameModel = (keys: string[]): string[] => {
+    const extra = SAME_MODELS.flatMap(([a, b]) => {
+      const ka = breakerKeys(a);
+      const kb = breakerKeys(b);
+      return ka.some((k) => keys.includes(k)) ? kb : kb.some((k) => keys.includes(k)) ? ka : [];
+    });
+    return [...new Set([...keys, ...extra])];
+  };
   const out: Candidate[] = [];
   for (const part of Object.keys(PART_RENDERS) as PartKey[])
     for (const r of PART_RENDERS[part]) {
       const page = `${part}/${renderAnchor(r)}`;
-      const keys = breakerKeys(r.model);
+      const keys = withSameModel(breakerKeys(r.model));
       const variant = r.variant ?? '';
       if (r.kind) {
         out.push({ page, part, type: KIND_TYPE[r.kind], variant, keys });

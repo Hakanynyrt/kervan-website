@@ -21,6 +21,10 @@
 
 /favicon-32-02.png
   Cache-Control: public, max-age=31536000, immutable
+/apple-touch-icon.png
+  Cache-Control: public, max-age=86400
+/apple-touch-icon-precomposed.png
+  Cache-Control: public, max-age=86400
 /apple-touch-icon-02.png
   Cache-Control: public, max-age=31536000, immutable
 /favicon-16-02.png

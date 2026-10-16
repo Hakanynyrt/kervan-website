@@ -1,6 +1,6 @@
 import { Container } from '@kervan/ui';
 import { Breadcrumb, PageTitle } from '../components/Bits';
-import { ModelTable } from '../components/ModelSearch';
+import { BrandChips, ModelTable } from '../components/ModelSearch';
 import type { Dict } from '../lib/dict';
 import { PARTS_PATH, type PageModel } from '../lib/routes';
 import type { Lang } from '../types';
@@ -20,8 +20,15 @@ export default function TipList({ model, lang, t }: { model: Model; lang: Lang; 
       <p className="m-0 mt-3 font-sans text-ink-mid">{t.list.lead}</p>
       {/* Owner: no model named here; the badge shows on a typed search's results. */}
       <p className="m-0 mt-2 font-sans text-sm text-ink-mid">{t.list.groovedHint}</p>
-      <div className="mt-6">
+      {/* Owner (2026-10-16): the makes are listed here again; a make opens all its models. */}
+      <div className="mt-6 hidden sm:block">
+        <BrandChips brands={model.brands} only="wide" lang={lang} t={t} />
+      </div>
+      <div className="mt-6 sm:mt-8">
         <ModelTable rows={model.rows} lang={lang} t={t} />
+      </div>
+      <div className="mt-8 sm:hidden">
+        <BrandChips brands={model.brands} only="phone" lang={lang} t={t} />
       </div>
     </Container>
   );
