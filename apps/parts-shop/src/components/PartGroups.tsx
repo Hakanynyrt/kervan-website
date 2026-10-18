@@ -5,6 +5,7 @@ import { LIST_PATH, PART_KEYS, partPath } from '../lib/routes';
 import { tipImg } from '../lib/tip-img';
 import type { Lang, TipGroupStats } from '../types';
 import { FOCUS } from './Layout';
+import { photoImg, photoSet } from '../lib/photo-url';
 
 /**
  * Tiles for the product groups: breaker tips first (a wide lead tile on large screens), then
@@ -55,7 +56,7 @@ export function PartGroups({
             >
               <div className="relative aspect-video border-b border-hair bg-stage">
                 <img
-                  src={g.hero ? `${g.hero}-${g.xs ? 'xs' : 'lg'}.webp` : `${stock}-sm.webp`}
+                  src={g.hero ? photoImg(g.hero, g.xs ? 'xs' : 'lg') : photoImg(stock, 'sm')}
                   width={320}
                   height={180}
                   alt=""
@@ -88,7 +89,7 @@ export function PartGroups({
               >
                 {g.hero ? (
                   <img
-                    src={`${g.hero}-lg.webp`}
+                    src={photoImg(g.hero, 'lg')}
                     width={1600}
                     height={900}
                     sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
@@ -109,8 +110,8 @@ export function PartGroups({
                   />
                 ) : lead ? (
                   <img
-                    src={`${stock}-lg.webp`}
-                    srcSet={`${stock}-sm.webp 480w, ${stock}-lg.webp 960w`}
+                    src={photoImg(stock, 'lg')}
+                    srcSet={photoSet(stock, ['sm', 480], ['lg', 960])}
                     sizes="(min-width: 1024px) 760px, (min-width: 640px) 50vw, 100vw"
                     width={960}
                     height={720}

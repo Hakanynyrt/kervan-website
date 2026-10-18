@@ -19,6 +19,7 @@ import { tipImgAbs } from './tip-img';
 import { tipOptions } from './tip-options';
 import type { PageProps } from './page-props';
 import { SITE } from './site';
+import { photoImgAbs } from './photo-url';
 
 export { SITE };
 
@@ -136,7 +137,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       const name = t.parts.items[model.part].name;
       const caption = r ? renderTitle(r, name, t) : name;
       const pic = r?.hero ?? r?.views[0]?.base;
-      const image = pic ? `${SITE}${pic}-lg.webp` : undefined;
+      const image = pic ? photoImgAbs(pic, 'lg', SITE) : undefined;
       // The price the prerendered page shows: front heads open Burçlu (PartItem.tsx).
       const cents = r?.fitted ? model.priceFitted : model.price;
       const description = m.partItemDesc(caption, {

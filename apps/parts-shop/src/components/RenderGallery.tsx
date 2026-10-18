@@ -2,6 +2,7 @@ import { useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import type { Dict } from '../lib/dict';
 import type { RenderView } from '../lib/photos';
 import { FOCUS } from './Layout';
+import { photoImg } from '../lib/photo-url';
 
 type View = RenderView | 'hero';
 export type GalleryItem = { base: string; view: View };
@@ -84,7 +85,7 @@ export default function RenderGallery({
         >
           <img
             key={cur.base}
-            src={`${cur.base}-lg.webp`}
+            src={photoImg(cur.base, 'lg')}
             width={isHero ? 1600 : 960}
             height={isHero ? 900 : 720}
             alt={`${caption}, ${name(cur.view)}`}
@@ -138,7 +139,7 @@ export default function RenderGallery({
                 className={`block overflow-hidden rounded-sm border bg-stage ${i === k ? 'border-ink shadow-[inset_0_-2px_0_var(--color-brand)]' : 'border-hair hover:border-hair-strong'}`}
               >
                 <img
-                  src={it.view === 'hero' ? `${it.base}-xs.webp` : `${it.base}-lg.webp`}
+                  src={photoImg(it.base, it.view === 'hero' ? 'xs' : 'lg')}
                   width={it.view === 'hero' ? 320 : 960}
                   height={it.view === 'hero' ? 180 : 720}
                   alt=""

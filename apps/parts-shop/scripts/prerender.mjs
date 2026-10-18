@@ -47,6 +47,20 @@ process.env.NODE_ENV ??= 'production';
 // With VITE_TIP_IMG_BASE set (CI on main) the tip images are not copied into dist: the deploy
 // uploads .renders/pub to R2 and the pages point at it.
 const OFFSITE_TIPS = Boolean(process.env.VITE_TIP_IMG_BASE);
+// The part photos (public/photos/parca) move to R2 the same way (src/lib/photo-url.ts): drop them
+// from dist, except the opening frames (acilis-*), which ExplodedPicker fetch()es and which stay
+// on Pages. Prints a count only.
+if (OFFSITE_TIPS) {
+  const dir = path.join(DIST, 'photos', 'parca');
+  let removed = 0;
+  if (fs.existsSync(dir))
+    for (const f of fs.readdirSync(dir))
+      if (!f.startsWith('acilis-')) {
+        fs.rmSync(path.join(dir, f));
+        removed++;
+      }
+  process.stdout.write(`prerender: ${removed} part photos left out of dist (served from R2)\n`);
+}
 
 try {
   const ssr = await import(pathToFileURL(path.join(SSR, 'entry-server.js')).href);

@@ -92,6 +92,18 @@ for (const f of files) {
 }
 if (sitemapLocs.size !== indexable)
   problems.push(`sitemap: ${sitemapLocs.size} URLs for ${indexable} indexable pages`);
+// With the R2 base set (CI on main) the part photos must be out of dist except the opening
+// frames, and no page may still point at one of them on this host.
+if (process.env.VITE_TIP_IMG_BASE) {
+  const pdir = path.join(DIST, 'photos', 'parca');
+  const left = fs.existsSync(pdir) ? fs.readdirSync(pdir) : [];
+  const stray = left.filter((f) => !f.startsWith('acilis-'));
+  if (stray.length) problems.push(`dist: ${stray.length} part photos still in dist/photos/parca (R2 build)`);
+  if (left.length - stray.length < 86) problems.push('dist: opening frames (acilis-*) missing');
+  const local = /(?:src|srcset|content)="(?:[^"]*[\s,])?\/photos\/parca\/(?!acilis-)/i;
+  const bad = files.filter((f) => f.endsWith('.html') && local.test(fs.readFileSync(f, 'utf8')));
+  if (bad.length) problems.push(`${bad.length} pages still reference /photos/parca on this host (R2 build)`);
+}
 if (total > MAX_FILES) problems.push(`dist: ${total} files, more than ${MAX_FILES} (Pages limit 20,000)`);
 if (problems.length) {
   process.stderr.write(`check-dist: ${problems.length} problem(s)\n${problems.slice(0, 20).join('\n')}\n`);

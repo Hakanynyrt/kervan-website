@@ -182,7 +182,7 @@ Sonra Claude'a "yükledim, bakar mısın?" de → içerikleri inceler, doğru is
 
 Uç (keski) render'ları ayrıdır: build sırasında `.renders/` içinde üretilir (headless Chromium,
 `scripts/render-tips.ts`), `dist/tips/` altında yayınlanır ve repoda tutulmaz. Parça render'ları ise
-`public/photos/parca/` altında repodadır.
+`public/photos/parca/` altında repodadır (canlı sitede main'den R2'ye yüklenir; `acilis-*` kareleri Pages'te kalır).
 
 Tavsiye edilen ölçü/limit:
 
