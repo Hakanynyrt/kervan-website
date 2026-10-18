@@ -388,7 +388,7 @@ jobs:
       # with different bytes stops the job: a changed picture needs a new -NN version (CLAUDE.md).
       - name: Upload part photos to R2
         if: steps.r2.outputs.base != ''
-        timeout-minutes: 40
+        timeout-minutes: 90
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
