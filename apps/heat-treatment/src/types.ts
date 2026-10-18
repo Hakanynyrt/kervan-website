@@ -83,6 +83,8 @@ export interface DictBlock {
     stats: Stat[];
     /** The one hero photo: alt text and the visible caption. */
     photo: { alt: string; caption: string };
+    /** Hero film card (client-only video over a poster). */
+    film: { alt: string; caption: string; pause: string; play: string };
   };
   services: {
     eyebrow: string;

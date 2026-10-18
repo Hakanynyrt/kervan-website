@@ -83,6 +83,12 @@ export const DICT: Dict = {
         alt: 'Atölyemizde ısıl işlem sonrası sıralanmış kırıcı uçları ve istiflenmiş çelik çubuklar',
         caption: 'Isıl işlem sonrası parçalar',
       },
+      film: {
+        alt: 'Kartepe tesisimizde kuyu tipi fırın hattı: önde kapağı açık bir fırın, arkada üstünde alev yanan bir fırın',
+        caption: 'Fırın hattımız · Kartepe',
+        pause: 'Videoyu duraklat',
+        play: 'Videoyu oynat',
+      },
     },
     services: {
       eyebrow: 'Hizmetler',
@@ -333,6 +339,12 @@ export const DICT: Dict = {
       photo: {
         alt: 'Breaker tools lined up after heat treatment and stacked steel bars in our workshop',
         caption: 'Parts after heat treatment',
+      },
+      film: {
+        alt: 'Pit furnace line at our Kartepe plant: an open furnace in front, and behind it a furnace with a flame burning on top',
+        caption: 'Our furnace line · Kartepe',
+        pause: 'Pause video',
+        play: 'Play video',
       },
     },
     services: {
