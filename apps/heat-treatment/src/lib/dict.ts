@@ -69,34 +69,20 @@ export const DICT: Dict = {
       href: 'https://kervanbreaker.com/',
     },
     hero: {
-      eyebrow: 'Kartepe · Kocaeli',
       title1: 'Kontrollü atmosfer pit-tip',
       title2: 'fırınlarda fason ısıl işlem.',
       sub: 'Sertleştirme ve temperleme. 42CrMo, 42CrMoA ve diğer alaşımlar — kendi ölçüm ve kontrol disiplinimizle.',
       cta: 'Teklif Al',
-      ctaSecondary: 'Hizmetler',
       stats: [
         { n: '2', l: 'temper potası' },
         { n: 'Ø1200', l: 'mm max çap' },
         { n: '2,5 t', l: 'tek sefer max yük' },
         { n: '42CrMo', l: 'standart alaşım' },
       ],
-      film: {
-        alt: 'Kartepe tesisimizde kuyu tipi fırın hattı: önde kapağı açık bir fırın, arkada üstünde alev yanan bir fırın',
-        caption: 'Fırın hattımız · Kartepe',
-        pause: 'Videoyu duraklat',
-        play: 'Videoyu oynat',
+      photo: {
+        alt: 'Atölyemizde ısıl işlem sonrası sıralanmış kırıcı uçları ve istiflenmiş çelik çubuklar',
+        caption: 'Isıl işlem sonrası parçalar',
       },
-    },
-    cooling: {
-      title: 'Isıdan gelen sertlik.',
-      kicker: 'Fason ısıl işlem · Kartepe / Kocaeli',
-      body: 'Sertleştirmede parça fırında ısıtılır, ardından kontrollü soğutulur. Temperleme gerilimi alır, tokluk kazandırır. Sonuç: sert, tok ve uzun ömürlü çelik.',
-      steps: ['Fırından çıkış', 'Kontrollü soğutma', 'Temperlenmiş çelik'],
-      sceneLabel:
-        'Fırından kızgın çıkan bir kırıcı ucu; sayfa kaydıkça soğuyup parlak siyah çeliğe dönüşüyor',
-      posterAlt: 'Fırından yeni çıkmış, kiraz kırmızısı kızgın bir kırıcı ucu',
-      scroll: 'Kaydır',
     },
     services: {
       eyebrow: 'Hizmetler',
@@ -334,34 +320,20 @@ export const DICT: Dict = {
       href: 'https://kervanbreaker.com/en/',
     },
     hero: {
-      eyebrow: 'Kartepe · Kocaeli',
       title1: 'Contract heat treatment in',
       title2: 'controlled-atmosphere pit furnaces.',
       sub: 'Hardening and tempering. 42CrMo, 42CrMoA and other alloys — under our own measurement and control discipline.',
       cta: 'Get a Quote',
-      ctaSecondary: 'Services',
       stats: [
         { n: '2', l: 'tempering pots' },
         { n: 'Ø1200', l: 'mm max diameter' },
         { n: '2.5 t', l: 'max load per batch' },
         { n: '42CrMo', l: 'standard alloy' },
       ],
-      film: {
-        alt: 'Pit furnace line at our Kartepe plant: an open furnace in front, and behind it a furnace with a flame burning on top',
-        caption: 'Our furnace line · Kartepe',
-        pause: 'Pause video',
-        play: 'Play video',
+      photo: {
+        alt: 'Breaker tools lined up after heat treatment and stacked steel bars in our workshop',
+        caption: 'Parts after heat treatment',
       },
-    },
-    cooling: {
-      title: 'Hardness, made with heat.',
-      kicker: 'Contract heat treatment · Kartepe / Kocaeli',
-      body: 'For hardening, the part is heated in the furnace, then cooled under control. Tempering relieves stress and adds toughness. The result: hard, tough, long-lasting steel.',
-      steps: ['Out of the furnace', 'Controlled cooling', 'Tempered steel'],
-      sceneLabel:
-        'A breaker tip fresh out of the furnace, glowing hot; as the page scrolls it cools to glossy black steel',
-      posterAlt: 'A breaker tip fresh out of the furnace, glowing cherry red',
-      scroll: 'Scroll',
     },
     services: {
       eyebrow: 'Services',

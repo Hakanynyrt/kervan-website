@@ -76,30 +76,13 @@ export interface DictBlock {
   /** Top strip of the fixed header linking to the breaker-parts sister site. */
   sister: SisterSiteCopy;
   hero: {
-    eyebrow: string;
     title1: string;
     title2: string;
     sub: string;
     cta: string;
-    ctaSecondary: string;
     stats: Stat[];
-    /** Hero film card (client-only video over a poster). */
-    film: { alt: string; caption: string; pause: string; play: string };
-  };
-  /** "Isınıp soğuyan parça": 3D tip cooling on scroll (Cooling.tsx). */
-  cooling: {
-    title: string;
-    /** What we do and where, under the opening heading (phones see it on the first screen). */
-    kicker: string;
-    body: string;
-    /** Three stage labels, highlighted as the piece cools. */
-    steps: [string, string, string];
-    /** aria-label of the 3D stage. */
-    sceneLabel: string;
-    /** Alt text of the static poster (cherry-red frame). */
-    posterAlt: string;
-    /** Scroll cue under the opening stage ("Kaydır"). */
-    scroll: string;
+    /** The one hero photo: alt text and the visible caption. */
+    photo: { alt: string; caption: string };
   };
   services: {
     eyebrow: string;

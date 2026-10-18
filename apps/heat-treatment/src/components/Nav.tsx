@@ -24,9 +24,6 @@ interface Props {
 export default function Nav({ lang, t, techAuthed }: Props) {
   const [open, setOpen] = useState(false);
   const [stuck, setStuck] = useState(false);
-  // Over the dark opening band (#sogutma) the header takes the night palette too,
-  // so by day its light-theme ink does not sit on black.
-  const [overDark, setOverDark] = useState(true);
   const reduced = useReducedMotion();
   const menuBtn = useRef<HTMLButtonElement>(null);
 
@@ -45,8 +42,6 @@ export default function Nav({ lang, t, techAuthed }: Props) {
   useEffect(() => {
     const onScroll = () => {
       setStuck(window.scrollY > 8);
-      const band = document.getElementById('sogutma');
-      setOverDark(!!band && band.getBoundingClientRect().bottom > 48);
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -84,7 +79,6 @@ export default function Nav({ lang, t, techAuthed }: Props) {
     <header
       className={
         'fixed top-0 inset-x-0 z-40 transition-all duration-300 ' +
-        (overDark ? 'kv-night ' : '') +
         (stuck
           ? // Slides the sister strip away, but not while its link has keyboard focus (see SisterSiteStrip).
             '-translate-y-(--kv-strip-h) has-[[data-sister-link]:focus-visible]:translate-y-0 bg-bg/85 backdrop-blur-md border-b border-hair'
