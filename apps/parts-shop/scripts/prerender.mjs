@@ -44,6 +44,9 @@ async function publishImage(src, out, width) {
 }
 
 process.env.NODE_ENV ??= 'production';
+// With VITE_TIP_IMG_BASE set (CI on main) the tip images are not copied into dist: the deploy
+// uploads .renders/pub to R2 and the pages point at it.
+const OFFSITE_TIPS = Boolean(process.env.VITE_TIP_IMG_BASE);
 
 try {
   const ssr = await import(pathToFileURL(path.join(SSR, 'entry-server.js')).href);
@@ -53,7 +56,7 @@ try {
   let images = 0;
   if (fs.existsSync(path.join(renders, 'manifest.json'))) {
     const manifest = JSON.parse(fs.readFileSync(path.join(renders, 'manifest.json'), 'utf8'));
-    fs.mkdirSync(path.join(DIST, 'tips'), { recursive: true });
+    if (!OFFSITE_TIPS) fs.mkdirSync(path.join(DIST, 'tips'), { recursive: true });
     const pub = path.join(renders, 'pub');
     fs.mkdirSync(pub, { recursive: true });
     const copy = async (key) => {
@@ -66,7 +69,7 @@ try {
         const cached = path.join(pub, name);
         if (!fs.existsSync(cached))
           await publishImage(path.join(renders, n), cached, MD_WIDTH);
-        fs.copyFileSync(cached, path.join(DIST, 'tips', name));
+        if (!OFFSITE_TIPS) fs.copyFileSync(cached, path.join(DIST, 'tips', name));
         images++;
       }
       return true;

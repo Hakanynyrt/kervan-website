@@ -328,28 +328,33 @@ export function groupBreakers(c: PublicCatalog): {
 }
 
 /**
- * A sample tip picture for a breaker sold by model without catalogue geometry (an extra product):
+ * A sample tip picture for a breaker whose own tips have no picture (catalogue geometry without photos, or an extra product):
  * the tip of the same maker's breaker nearest in working diameter (a tie takes the smaller one),
- * shown labelled as a sample. None without a diameter or a pictured tip of that maker.
+ * shown labelled as a sample; failing that within 15 mm, the nearest pictured tip of any maker
+ * within 30 mm (owner, 2026-10-16: every model shows its tips with photos). None without a
+ * diameter or a pictured tip that close.
  */
 function sampleFor(
   e: BreakerEntry,
   breakers: Map<string, BreakerEntry>,
 ): { name: string; family: PublicFamily } | null {
-  const d = e.extra?.diameterMm;
+  const d = e.extra?.diameterMm ?? e.families[0]?.attrs.diameterMm;
   if (!d) return null;
-  let best: { name: string; family: PublicFamily; gap: number; dm: number } | null = null;
-  for (const o of breakers.values()) {
-    if (o === e || o.brand !== e.brand) continue;
-    for (const f of o.families) {
-      if (!f.skus.some((x) => x.image)) continue;
-      const dm = f.attrs.diameterMm,
-        gap = Math.abs(dm - d);
-      if (!best || gap < best.gap || (gap === best.gap && dm < best.dm))
-        best = { name: o.name, family: f, gap, dm };
+  const pick = (sameBrand: boolean, maxGap: number) => {
+    let best: { name: string; family: PublicFamily; gap: number; dm: number } | null = null;
+    for (const o of breakers.values()) {
+      if (o === e || (sameBrand && o.brand !== e.brand)) continue;
+      for (const f of o.families) {
+        if (!f.skus.some((x) => x.image)) continue;
+        const dm = f.attrs.diameterMm,
+          gap = Math.abs(dm - d);
+        if (!best || gap < best.gap || (gap === best.gap && dm < best.dm))
+          best = { name: o.name, family: f, gap, dm };
+      }
     }
-  }
-  return best && best.gap <= 15 ? { name: best.name, family: best.family } : null;
+    return best && best.gap <= maxGap ? { name: best.name, family: best.family } : null;
+  };
+  return pick(true, 15) ?? pick(false, 30);
 }
 
 /**
@@ -358,10 +363,6 @@ function sampleFor(
  * breaker. Family pages stay for the permanent codes and for tips with no listed breaker.
  * Best-sellers are their own page, not a badge on every card.
  */
-/** The tip catalog's "MTB 210 II" is shown as "MTB 215" only (owner); its URL and lookups keep the catalog name. */
-const shownBreaker = <T extends { name: string; model: string }>(x: T): T =>
-  x.name === 'MTB 210 II' ? { ...x, name: 'MTB 215', model: '215' } : x;
-
 export function buildPages(c: PublicCatalog): BuiltPage[] {
   const demo = c.demo === true;
   const { breakers } = groupBreakers(c);
@@ -408,19 +409,18 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       if (!groovedSeen.has(b))
         console.warn(`buildPages: grooved tools of "${b}" match no breaker of the catalog`);
   const tipPaths = new Map(cards.map((x) => [fold(x.name), x.path]));
-  const shownCards = cards.map(shownBreaker);
-  const popular = shownCards.filter((x) => x.popularTier !== null).sort(byPopularity);
+  const popular = cards.filter((x) => x.popularTier !== null).sort(byPopularity);
   const hasPopular = popular.length > 0;
   const partPrices = resolvePartPrices(c.partPrices ?? []);
   const listed = listedParts(c);
   const byBrand = new Map<string, BreakerCard[]>();
-  for (const x of shownCards) byBrand.set(x.brand, [...(byBrand.get(x.brand) ?? []), x]);
+  for (const x of cards) byBrand.set(x.brand, [...(byBrand.get(x.brand) ?? []), x]);
   const brands: BrandLink[] = [...byBrand]
     .map(([name, rows]) => ({ name, path: brandPath(name), count: rows.length }))
     .sort((a, b) => a.name.localeCompare(b.name, 'tr'));
   // Home: one breaker per tip family, so the first screen is not eight names for one tip.
   const seen = new Set<string | null>();
-  const featured = (hasPopular ? popular : shownCards).filter((x) => {
+  const featured = (hasPopular ? popular : cards).filter((x) => {
     const k = x.image ?? x.slug;
     if (seen.has(k)) return false;
     seen.add(k);
@@ -438,7 +438,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         featured: featured.slice(0, FEATURED),
         featuredArePopular: hasPopular,
         morePopular: popular.length > FEATURED,
-        total: shownCards.length,
+        total: cards.length,
         brands,
         tips,
         demo,
@@ -448,7 +448,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     // Search results: best-sellers first, then working diameter (owner: never A–Z).
     {
       path: LIST_PATH,
-      model: { kind: 'list', rows: [...shownCards].sort(byPopularity), brands, demo, hasPopular },
+      model: { kind: 'list', rows: [...cards].sort(byPopularity), brands, demo, hasPopular },
     },
     ...[...byBrand].map(([brand, rows]) => ({
       path: brandPath(brand),
@@ -520,14 +520,15 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       path: breakerPath(slug),
       model: {
         kind: 'breaker' as const,
-        name: shownBreaker(e).name,
+        name: e.name,
         ...(e.extra ? { extra: e.extra } : {}),
         ...(() => {
-          const sample = e.families.length ? null : sampleFor(e, breakers);
+          const pictured = e.families.some((f) => f.skus.some((x) => x.image));
+          const sample = pictured ? null : sampleFor(e, breakers);
           return sample ? { sample } : {};
         })(),
         brand: e.brand,
-        model: shownBreaker(e).model,
+        model: e.model,
         families: e.families,
         parts: partsForBreaker(e.name),
         demo,

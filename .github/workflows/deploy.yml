@@ -292,8 +292,95 @@ jobs:
           path: apps/parts-shop/.renders
           key: shop-renders-${{ github.run_id }}-${{ github.run_attempt }}
 
+      # Tip images live in R2 (img.kiriciparca.com), outside Pages' 20,000-file limit. Production
+      # only, and only when both R2 keys exist; previews and PRs keep /tips inside dist.
+      - name: R2 for tip images
+        id: r2
+        env:
+          R2_KEY: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            if [ -z "$R2_KEY" ] || [ -z "$R2_SECRET" ]; then
+              echo "::error::R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY missing on main: the tip images need R2 (Pages file limit)"
+              exit 1
+            fi
+            echo "base=https://img.kiriciparca.com" >> "$GITHUB_OUTPUT"
+          else
+            echo "base=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build parts-shop
+        env:
+          VITE_TIP_IMG_BASE: ${{ steps.r2.outputs.base }}
         run: pnpm turbo build --filter=@kervan/parts-shop
+
+      # Additive only (never --delete): published names are content-addressed, so a name never
+      # changes meaning. Uploads exactly the images the built pages reference and are missing from
+      # the bucket, then proves every one is there. Only public tip renders (<key>-md-<PUB>.webp)
+      # may go to the public bucket. Fails closed: if anything below fails, the deploy does not
+      # run and production keeps the previous site.
+      - name: Upload tip images to R2
+        if: steps.r2.outputs.base != ''
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          # aws-cli >= 2.23 adds CRC checksums R2 does not take; only send them when required.
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+          R2_ENDPOINT: https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          R2_BUCKET: kervan-renders
+          R2_BASE: ${{ steps.r2.outputs.base }}
+        run: |
+          set -euo pipefail
+          aws --version
+          PUB=apps/parts-shop/.renders/pub
+          DIST=apps/parts-shop/dist
+          PUBV=$(sed -n "s/^const PUB = '\(.*\)';.*/\1/p" apps/parts-shop/scripts/prerender.mjs)
+          [ -n "$PUBV" ] || { echo "PUB version not found in prerender.mjs"; exit 1; }
+          # Every image the pages use: absolute URLs in the HTML and the keys in the page props.
+          {
+            grep -rhoE 'img\.kiriciparca\.com/tips/[A-Za-z0-9._-]+\.webp' "$DIST" --include='*.html' | sed 's#.*/tips/##' || true
+            grep -rhoE '"image(Side|Rear)?":"[A-Za-z0-9]+"' "$DIST" --include='*.html' | sed -E 's/.*:"//; s/"$//; s/$/-md-'"$PUBV"'.webp/' || true
+          } | sort -u > refs.txt
+          echo "images the pages use: $(wc -l < refs.txt)"
+          bad=$(grep -Ev "^[A-Za-z0-9]+-md-${PUBV}\.webp$" refs.txt || true)
+          if [ -n "$bad" ]; then echo "unexpected image names referenced: $(echo "$bad" | wc -l)"; exit 1; fi
+          list_bucket() {
+            aws s3api list-objects-v2 --bucket "$R2_BUCKET" --prefix tips/ --endpoint-url "$R2_ENDPOINT" \
+              --query 'Contents[].Key' --output text | tr '\t' '\n' | sed 's#^tips/##' | grep -v '^None$' | sort -u > "$1" || true
+          }
+          list_bucket have.txt
+          comm -23 refs.txt have.txt > missing.txt
+          echo "missing in the bucket: $(wc -l < missing.txt)"
+          while read -r f; do
+            [ -f "$PUB/$f" ] || { echo "page uses an image with no local render: $f"; exit 1; }
+          done < missing.txt
+          if [ -s missing.txt ]; then
+            export PUB R2_BUCKET R2_ENDPOINT
+            xargs -a missing.txt -P 8 -I{} aws s3 cp "$PUB/{}" "s3://$R2_BUCKET/tips/{}" \
+              --endpoint-url "$R2_ENDPOINT" --only-show-errors \
+              --content-type image/webp --cache-control "public, max-age=31536000, immutable"
+          fi
+          list_bucket have2.txt
+          still=$(comm -23 refs.txt have2.txt | wc -l)
+          [ "$still" = 0 ] || { echo "still missing after upload: $still"; exit 1; }
+          echo "every referenced image is in the bucket"
+          # The public URLs must really serve it: the newest uploads, else a sample of all.
+          { head -n 5 missing.txt; shuf -n 3 refs.txt; } | sort -u > probe.txt
+          while read -r f; do
+            ok=0; code=""
+            for try in 1 2 3 4 5; do
+              code=$(curl -s --max-time 15 -o /dev/null -w '%{http_code} %{content_type}' "$R2_BASE/tips/$f" || true)
+              if [ "$code" = "200 image/webp" ]; then ok=1; break; fi
+              sleep 6
+            done
+            [ "$ok" = 1 ] || { echo "public URL check failed for $f: $code"; exit 1; }
+          done < probe.txt
+          echo "public URL check passed"
+          # Old same-site links (/tips/...) keep working; written to the built redirects only here.
+          echo "/tips/* $R2_BASE/tips/:splat 301" >> "$DIST/_redirects"
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3

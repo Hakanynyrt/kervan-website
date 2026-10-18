@@ -15,7 +15,7 @@ import { fmtNum } from './format';
 import { renderModel, renderTitle } from './part-caption';
 import { findRender } from './part-links';
 import { brandPath, LIST_PATH, PARTS_PATH, partPath } from './routes';
-import { tipImg } from './tip-img';
+import { tipImgAbs } from './tip-img';
 import { tipOptions } from './tip-options';
 import type { PageProps } from './page-props';
 import { SITE } from './site';
@@ -185,7 +185,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       // breaker page never shows it (owner).
       const { opts, types: order } = tipOptions(model.families, model.extra);
       const opt = order.length ? opts.get(order[0]) : undefined;
-      const image = opt?.sku?.image ? SITE + tipImg(opt.sku.image) : undefined;
+      const image = opt?.sku?.image ? tipImgAbs(opt.sku.image, SITE) : undefined;
       return {
         ...page,
         title: m.breakerTitle(model.name, d),
@@ -220,7 +220,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       const description = m.familyDesc(f.code, d, types);
       const { opts, types: order } = tipOptions([f]);
       const opt = order.length ? opts.get(order[0]) : undefined;
-      const image = opt?.sku?.image ? SITE + tipImg(opt.sku.image) : undefined;
+      const image = opt?.sku?.image ? tipImgAbs(opt.sku.image, SITE) : undefined;
       return {
         ...page,
         title: m.familyTitle(f.code, d),
