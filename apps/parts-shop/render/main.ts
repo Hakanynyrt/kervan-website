@@ -73,6 +73,13 @@ function materials(): THREE.Material[] {
     }),
     new THREE.MeshPhysicalMaterial({ color: 0x9a9fa6, metalness: 0.9, roughness: 0.28 }),
     new THREE.MeshPhysicalMaterial({ color: 0xc3c8cf, metalness: 1, roughness: 0.3 }),
+    // Moil cone (CONE): dark, matte, like the worn points in the photos.
+    new THREE.MeshPhysicalMaterial({
+      color: 0x5a5f65,
+      metalness: 0.9,
+      roughness: 0.58,
+      roughnessMap: n,
+    }),
   ];
 }
 

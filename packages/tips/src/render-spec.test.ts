@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { MOIL_POINT_ANGLE, rearSpec, renderSpec, specKey } from './render-spec.ts';
+import { MOIL_NOSE, MOIL_NOSE_MATERIAL, rearSpec, renderSpec, specKey } from './render-spec.ts';
 import type { FamilyAttrs, ShankProfile } from './types.ts';
 
 const attrs = (over: Partial<FamilyAttrs> = {}): FamilyAttrs => ({
@@ -166,13 +166,30 @@ test('uneven two-key slot: the cut depth is split between the key side and the f
   assert.equal(r.spec.slot.floorB, 74.5);
 });
 
-test('moil point in two stages: main cone to rMid, then the blunter point cone; other types have none', () => {
+test('moil nose: the shared relative profile scaled to D; other types have none', () => {
   const sku = { lengthMm: { min: 1300, max: 1300 }, tipAngleDeg: null };
   const m = renderSpec(attrs(), { ...sku, tipType: 'moil' })!.spec;
-  assert.ok(m.point);
-  assert.equal(m.point.angle2, MOIL_POINT_ANGLE);
-  assert.ok(m.point.rMid > 0 && m.point.rMid < m.D / 2);
-  assert.ok(m.point.angle2 > m.angle!);
-  assert.equal(renderSpec(attrs(), { ...sku, tipType: 'conical' })!.spec.point, undefined);
-  assert.equal(renderSpec(attrs(), { ...sku, tipType: 'chisel' })!.spec.point, undefined);
+  assert.ok(m.nose);
+  assert.equal(m.nose.v.length, MOIL_NOSE.length);
+  assert.equal(m.nose.m.length, m.nose.v.length - 1);
+  assert.deepEqual(m.nose.m, [...MOIL_NOSE_MATERIAL]);
+  // Scaled by D, last vertex on the body radius, radii and distances only grow towards the body.
+  const last = m.nose.v[m.nose.v.length - 1];
+  assert.ok(Math.abs(last[1] - m.D / 2) < 0.01);
+  for (let i = 1; i < m.nose.v.length; i++) {
+    assert.ok(m.nose.v[i][0] > m.nose.v[i - 1][0]);
+    assert.ok(m.nose.v[i][1] > m.nose.v[i - 1][1]);
+  }
+  // A short blunt cone: the whole nose is about one diameter long and the tip face is small.
+  assert.ok(last[0] < 1.25 * m.D);
+  assert.ok(m.nose.v[0][1] < 0.1 * m.D);
+  // Same relative profile whatever the table angle.
+  const other = renderSpec(attrs(), { ...sku, tipType: 'moil', tipAngleDeg: 40 })!.spec;
+  assert.deepEqual(other.nose, m.nose);
+  MOIL_NOSE.forEach(([x, r], i) => {
+    assert.ok(Math.abs(m.nose!.v[i][0] - x * m.D) < 0.01);
+    assert.ok(Math.abs(m.nose!.v[i][1] - r * m.D) < 0.01);
+  });
+  for (const type of ['conical', 'chisel', 'pyramid', 'blunt'] as const)
+    assert.equal(renderSpec(attrs(), { ...sku, tipType: type })!.spec.nose, undefined);
 });

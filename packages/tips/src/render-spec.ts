@@ -8,14 +8,25 @@ import type {
 } from './types.ts';
 
 /** Bump when the renderer's look or geometry rules change: every image gets a new key. */
-export const RENDER_VERSION = 11;
+export const RENDER_VERSION = 12;
+
+/**
+ * Moil (sivri) nose, relative to the body diameter D (read off the real points' photos, owner
+ * approved; a short blunt cone, a clear nose radius, a soft blend into the body). Vertices
+ * [distance back from the tip face, radius, fillet radius] in units of D; fillet < 0 = smooth
+ * continuation. MOIL_NOSE_MATERIAL[i] is the material of segment i -> i+1: 'g' dark ground cone,
+ * 'b' body. The profile is the same for every moil whatever its table angle.
+ */
+export const MOIL_NOSE: ReadonlyArray<readonly [number, number, number]> = [
+  [0, 0.04, 0.03],
+  [0.3, 0.24, 0.06],
+  [0.7, 0.38, -1],
+  [1.175, 0.488, 0],
+  [1.19, 0.5, 0],
+];
+export const MOIL_NOSE_MATERIAL: ReadonlyArray<'g' | 'b'> = ['g', 'g', 'g', 'b'];
 
 /** Included angle (deg) when the data has none. Assumptions, labelled as such. */
-/** Moil point in two stages: the second, blunter cone starts at this fraction of the body radius. */
-export const MOIL_MID = 0.32;
-/** Included angle of the moil's second (point) cone. */
-export const MOIL_POINT_ANGLE = 60;
-
 export const DEFAULT_INCLUDED_ANGLE: Record<'moil' | 'conical' | 'chisel' | 'pyramid', number> = {
   moil: 28,
   conical: 60,
@@ -63,19 +74,16 @@ export interface TipSpec {
   /** Included tip angle; null for blunt. */
   angle: number | null;
   /**
-   * Moil only: the cone in two stages (owner). The main cone at `angle` runs from the body down
-   * to radius `rMid`, then a blunter cone at `angle2` runs to the point.
+   * Moil only: the nose profile in mm ([distance back from the tip face, radius, fillet], see
+   * MOIL_NOSE); the renderer draws it instead of a plain cone at `angle`.
    */
-  point?: {
-    rMid: number;
-    angle2: number;
-    /** Radius of a flat end face (none: a rounded point). */ flat?: number;
-  };
+  nose?: { v: [number, number, number][]; m: ('g' | 'b')[] };
   /** Chisel edge relative to the key slots. */
   chiselEdge: 'parallel' | 'perpendicular';
 }
 
 const r1 = (v: number): number => Math.round(v * 10) / 10;
+const r2 = (v: number): number => Math.round(v * 100) / 100;
 
 /**
  * Shank outline from the table alone. Reading of the catalogue table, checked against its
@@ -236,7 +244,16 @@ export function renderSpec(
       },
       angle,
       ...(type === 'moil'
-        ? { point: { rMid: r1(MOIL_MID * (D / 2)), angle2: MOIL_POINT_ANGLE } }
+        ? {
+            nose: {
+              v: MOIL_NOSE.map(([x, r, f]): [number, number, number] => [
+                r2(x * D),
+                r2(r * D),
+                f < 0 ? -1 : r2(f * D),
+              ]),
+              m: [...MOIL_NOSE_MATERIAL],
+            },
+          }
         : {}),
       chiselEdge,
     },

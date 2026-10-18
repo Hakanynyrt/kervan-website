@@ -90,6 +90,20 @@ export const DICT: Dict = {
         play: 'Videoyu oynat',
       },
     },
+    gear: {
+      title: 'Parçanın ısıl işlem yolu.',
+      sub: 'Kontrollü atmosfer, ölçülmüş sıcaklık eğrisi, her partide sertlik ölçümü.',
+      sceneLabel: 'Isıl işlem gören dişli çarkın üç boyutlu görünümü',
+      posterAlt: 'Isıtılmış dişli çark',
+      stagesLabel: 'Isıl işlem aşamaları',
+      stages: [
+        { name: 'Isıtma', desc: 'Pit-tip fırında sertleşme sıcaklığına ısıtılır.' },
+        { name: 'Su verme', desc: 'Kontrollü soğutulur.' },
+        { name: 'Temperleme', desc: 'Su verme sonrası gerilimi alır, tokluk kazandırır.' },
+        { name: 'Rapor', desc: 'Her partide sertlik ölçüm raporu.' },
+      ],
+      report: { title: 'Sertlik ölçüm raporu', note: 'Her partide' },
+    },
     services: {
       eyebrow: 'Hizmetler',
       title: 'Beş süreç. Tek disiplin.',
@@ -346,6 +360,20 @@ export const DICT: Dict = {
         pause: 'Pause video',
         play: 'Play video',
       },
+    },
+    gear: {
+      title: "A part's path through heat treatment.",
+      sub: 'Controlled atmosphere, measured temperature curves, a hardness check on every batch.',
+      sceneLabel: '3D view of a gear going through heat treatment',
+      posterAlt: 'A heated gear',
+      stagesLabel: 'Heat treatment stages',
+      stages: [
+        { name: 'Heating', desc: 'Heated to hardening temperature in a pit furnace.' },
+        { name: 'Quenching', desc: 'Cooled under control.' },
+        { name: 'Tempering', desc: 'Relieves the stress of quenching and adds toughness.' },
+        { name: 'Report', desc: 'A hardness test report for every batch.' },
+      ],
+      report: { title: 'Hardness test report', note: 'Every batch' },
     },
     services: {
       eyebrow: 'Services',
