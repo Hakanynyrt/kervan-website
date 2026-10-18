@@ -113,4 +113,13 @@ for url in https://kiriciparca.com/ https://kervanbreaker.com/ https://kervanhea
   fi
 done
 
+# Tip images come from R2 (img.kiriciparca.com): one real image URL taken from a live model page
+# must serve as image/webp. Skipped while no page points at R2 yet.
+img=$("${CURL[@]}" https://kiriciparca.com/kirici/mtb/215 | grep -oE 'https://img\.kiriciparca\.com/tips/[A-Za-z0-9._-]+\.webp' | head -n 1 || true)
+if [[ -n $img ]]; then
+  check "$img" 200 image/webp
+else
+  echo "skip  no R2 tip image on https://kiriciparca.com/kirici/mtb/215 yet"
+fi
+
 exit $fail
