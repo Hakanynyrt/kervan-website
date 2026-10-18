@@ -69,16 +69,16 @@ export interface DictBlock {
     /** Contact page info label. */
     contactLabel: string;
   };
-  opening: {
-    scroll: string;
-  };
   hero: {
-    eyebrow: string;
+    /** aria-label of the hero section. */
+    sectionLabel: string;
     title1: string;
     title2: string;
     sub: string;
     cta: string;
     ctaSecondary: string;
+    photoAlt: string;
+    photoCaption: string;
     stats: Stat[];
   };
   products: {

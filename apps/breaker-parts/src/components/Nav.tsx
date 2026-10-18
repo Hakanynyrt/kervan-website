@@ -129,8 +129,7 @@ export default function Nav({ lang, t, techAuthed }: Props) {
         t={t.sister}
         image="/sister/kervanheat-firin-01.webp"
         hidden={stuck}
-        // First visit: after the intro curtain and the opening glide to the hero; later visits right away.
-        sheenAt={{ first: 3.4, later: 1 }}
+        sheenAt={{ first: 1, later: 1 }}
       />
       <div className="max-w-[1280px] mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
         <Link to={to('/')} className="flex items-center" aria-label={t.nav.home}>
