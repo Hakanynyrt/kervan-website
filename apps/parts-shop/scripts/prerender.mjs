@@ -16,7 +16,7 @@ const CATALOG = path.join(APP, '.catalog', 'catalog.json');
 // 1200 px original, both re-encoded with copyright metadata (EXIF + IPTC/XMP). Cached next to
 // the renders (.renders/pub, kept by CI's .renders cache). Change PUB when the published files
 // change: names are cached immutable. Keep in sync with src/lib/tip-img.ts.
-const PUB = 'p1';
+const PUB = 'p2';
 const MD_WIDTH = 800;
 const OWNER = 'Kervan Makina';
 const RIGHTS = `© ${OWNER}. Tüm hakları saklıdır / All rights reserved.`;

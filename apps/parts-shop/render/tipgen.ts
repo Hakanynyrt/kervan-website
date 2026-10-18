@@ -10,8 +10,8 @@ import type { StepKind, TipSpec } from '@kervan/tips';
 
 const deg = (d: number) => (d * Math.PI) / 180;
 
-/** Material slots: heat-treated body, ground faces, machined cuts. */
-export const MAT = { BODY: 0, GROUND: 1, MACHINED: 2 } as const;
+/** Material slots: heat-treated body, ground faces, machined cuts, moil cone (dark, matte). */
+export const MAT = { BODY: 0, GROUND: 1, MACHINED: 2, CONE: 3 } as const;
 
 interface Run {
   pts: [number, number][];
@@ -140,6 +140,94 @@ function stepPoints(
   return pts;
 }
 
+/**
+ * Moil nose from the spec: vertices [distance back from the tip face, radius, fillet radius]
+ * (fillet < 0: smooth continuation), nose.m[i] = material of the segment i -> i+1 ('g' cone,
+ * 'b' body). Returns runs in the order tip -> body (as profileRuns pushes them, tip side
+ * first from the body) and the y where the plain body ends.
+ */
+function noseRuns(nose: NonNullable<TipSpec['nose']>, L: number, R: number) {
+  const V = nose.v;
+  const mats = nose.m.map((c) => (c === 'b' ? MAT.BODY : MAT.CONE));
+  const P = (i: number): [number, number] => [V[i][1], L - V[i][0]]; // (r, y)
+  const n = V.length - 1;
+  const prev = (i: number): [number, number] => (i === 0 ? [0, L - V[0][0]] : P(i - 1));
+  const next = (i: number): [number, number] => (i === n ? [R, L - V[n][0] - 1000] : P(i + 1));
+  const runs: Run[] = [];
+  let cur: [number, number][] = [[0, L - V[0][0]]];
+  let curMat: number = MAT.CONE;
+  const flush = () => {
+    if (cur.length > 1) runs.push({ pts: cur, mat: curMat, smooth: true });
+  };
+  for (let i = 0; i <= n; i++) {
+    const C = P(i);
+    const A = prev(i);
+    const B = next(i);
+    const f = V[i][2];
+    const matIn = i === 0 ? MAT.CONE : mats[i - 1];
+    const matOut = i === n ? MAT.BODY : mats[i];
+    if (f < 0) {
+      cur.push(C);
+      if (matOut !== curMat && i < n) {
+        flush();
+        cur = [C];
+        curMat = matOut;
+      }
+      continue;
+    }
+    let u1: [number, number] = [A[0] - C[0], A[1] - C[1]];
+    let u2: [number, number] = [B[0] - C[0], B[1] - C[1]];
+    const l1 = Math.hypot(...u1);
+    const l2 = Math.hypot(...u2);
+    u1 = [u1[0] / l1, u1[1] / l1];
+    u2 = [u2[0] / l2, u2[1] / l2];
+    const th = Math.acos(Math.max(-1, Math.min(1, u1[0] * u2[0] + u1[1] * u2[1])));
+    if (f < 0.05 || th > Math.PI - 0.05) {
+      cur.push(C);
+      flush();
+      cur = [C];
+      curMat = matOut;
+      continue;
+    }
+    // Fillet of radius ff tangent to both neighbours (limited to 46 % of the shorter one).
+    let t = f / Math.tan(th / 2);
+    const tmax = 0.46 * Math.min(l1, l2);
+    let ff = f;
+    if (t > tmax) {
+      t = tmax;
+      ff = t * Math.tan(th / 2);
+    }
+    const T1: [number, number] = [C[0] + u1[0] * t, C[1] + u1[1] * t];
+    const T2: [number, number] = [C[0] + u2[0] * t, C[1] + u2[1] * t];
+    const bis: [number, number] = [u1[0] + u2[0], u1[1] + u2[1]];
+    const bl = Math.hypot(...bis);
+    const k = ff / Math.sin(th / 2) / bl;
+    const O: [number, number] = [C[0] + bis[0] * k, C[1] + bis[1] * k];
+    const a1 = Math.atan2(T1[1] - O[1], T1[0] - O[0]);
+    const a2 = Math.atan2(T2[1] - O[1], T2[0] - O[0]);
+    let d = a2 - a1;
+    while (d > Math.PI) d -= 2 * Math.PI;
+    while (d < -Math.PI) d += 2 * Math.PI;
+    cur.push(T1);
+    flush();
+    const arc: [number, number][] = [];
+    for (let j = 0; j <= 14; j++) {
+      const a = a1 + (d * j) / 14;
+      arc.push([O[0] + ff * Math.cos(a), O[1] + ff * Math.sin(a)]);
+    }
+    runs.push({ pts: arc, mat: i === 0 ? matOut : matIn, smooth: true });
+    cur = [T2];
+    curMat = matOut;
+  }
+  // Built tip -> body; profileRuns wants body -> tip, each run reversed.
+  const last = runs[runs.length - 1];
+  const workStart = last.pts[last.pts.length - 1][1];
+  return {
+    runs: runs.reverse().map((r) => ({ ...r, pts: [...r.pts].reverse() as [number, number][] })),
+    workStart,
+  };
+}
+
 function profileRuns(s: TipSpec): Run[] {
   const runs: Run[] = [];
   const secs = s.sections;
@@ -165,89 +253,32 @@ function profileRuns(s: TipSpec): Run[] {
   }
   let workStart: number;
   const tip: Run[] = [];
-  if (s.type === 'moil' || s.type === 'conical') {
-    // A two-stage moil: the main cone down to rMid, then the blunter point cone (s.point).
-    const half = deg((s.point ? s.point.angle2 : s.angle!) / 2);
-    const rho = (s.type === 'moil' ? 0.06 : 0.1) * D; // blunted point radius
+  if (s.type === 'moil') {
+    // Moil: the measured nose profile (short blunt cone, clear nose radius, soft blend into the
+    // body), straight from s.nose.
+    if (!s.nose) throw new Error('moil spec without a nose profile');
+    const pn = noseRuns(s.nose, L, R);
+    tip.push(...pn.runs);
+    workStart = pn.workStart;
+  } else if (s.type === 'conical') {
+    const half = deg(s.angle! / 2);
+    const rho = 0.1 * D; // blunted point radius
     const rt = rho * Math.cos(half);
     const yt = L - rho + rho * Math.sin(half);
-    if (s.point) {
-      const half1 = deg(s.angle! / 2);
-      const rm = Math.max(s.point.rMid, rt + 0.5);
-      const ym = yt - (rm - rt) / Math.tan(half);
-      workStart = ym - (R - rm) / Math.tan(half1);
-      tip.push({
-        pts: [
-          [R, workStart],
-          [rm, ym],
-        ],
-        mat: MAT.GROUND,
-      });
-      tip.push({
-        pts: [
-          [rm, ym],
-          [rt, yt],
-        ],
-        mat: MAT.GROUND,
-      });
-    } else {
-      workStart = yt - (R - rt) / Math.tan(half);
-      tip.push({
-        pts: [
-          [R, workStart],
-          [rt, yt],
-        ],
-        mat: MAT.GROUND,
-      });
+    workStart = yt - (R - rt) / Math.tan(half);
+    tip.push({
+      pts: [
+        [R, workStart],
+        [rt, yt],
+      ],
+      mat: MAT.GROUND,
+    });
+    const cap: [number, number][] = [];
+    for (let i = 0; i <= 12; i++) {
+      const b = half + ((Math.PI / 2 - half) * i) / 12;
+      cap.push([rho * Math.cos(b), L - rho + rho * Math.sin(b)]);
     }
-    if (s.point?.flat) {
-      // Flat end (our drawings: Ø0.2 × D with about R 0.05 × D at the edge): the point cone stops at
-      // the edge round, then the end face. Replaces the spherical cap.
-      tip.length = 0;
-      const half1 = deg(s.angle! / 2);
-      const rf = s.point.flat,
-        re = 0.05 * D;
-      const phi = Math.PI / 2 - half; // turn from the cone onto the end face
-      const t = re * Math.tan(phi / 2);
-      const rc = rf + t; // sharp corner of cone and face
-      const dir: [number, number] = [-Math.sin(half), Math.cos(half)]; // along the cone, inwards
-      const T1: [number, number] = [rc - t * dir[0], L - t * dir[1]];
-      const rm = Math.max(s.point.rMid, T1[0] + 0.5);
-      const ym = T1[1] - (rm - T1[0]) / Math.tan(half);
-      workStart = ym - (R - rm) / Math.tan(half1);
-      tip.push({
-        pts: [
-          [R, workStart],
-          [rm, ym],
-        ],
-        mat: MAT.GROUND,
-      });
-      tip.push({ pts: [[rm, ym], T1], mat: MAT.GROUND });
-      const arc: [number, number][] = [];
-      for (let i = 0; i <= 8; i++) {
-        const u = i / 8,
-          v = 1 - u;
-        arc.push([
-          v * v * T1[0] + 2 * u * v * rc + u * u * rf,
-          v * v * T1[1] + 2 * u * v * L + u * u * L,
-        ]);
-      }
-      tip.push({ pts: arc, mat: MAT.GROUND, smooth: true });
-      tip.push({
-        pts: [
-          [rf, L],
-          [0, L],
-        ],
-        mat: MAT.GROUND,
-      });
-    } else {
-      const cap: [number, number][] = [];
-      for (let i = 0; i <= 12; i++) {
-        const b = half + ((Math.PI / 2 - half) * i) / 12;
-        cap.push([rho * Math.cos(b), L - rho + rho * Math.sin(b)]);
-      }
-      tip.push({ pts: cap, mat: MAT.GROUND, smooth: true });
-    }
+    tip.push({ pts: cap, mat: MAT.GROUND, smooth: true });
   } else if (s.type === 'blunt') {
     const c = 0.07 * D;
     workStart = L - c;

@@ -1,5 +1,5 @@
 /** Published tip image URL (see scripts/prerender.mjs: PUB suffix, one size, md = 800 px wide). */
-export const TIP_PUB = 'p1';
+export const TIP_PUB = 'p2';
 /**
  * Where the tip images live: empty = this site's own /tips (previews, local builds); set at
  * build time by CI on main to the R2 domain (https://img.kiriciparca.com), which keeps them out
