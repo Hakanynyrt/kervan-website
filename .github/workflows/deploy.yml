@@ -292,8 +292,61 @@ jobs:
           path: apps/parts-shop/.renders
           key: shop-renders-${{ github.run_id }}-${{ github.run_attempt }}
 
+      # Tip images live in R2 (img.kiriciparca.com), outside Pages' 20,000-file limit. Production
+      # only, and only when both R2 keys exist; previews and PRs keep /tips inside dist.
+      - name: R2 for tip images
+        id: r2
+        env:
+          R2_KEY: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          if [ "$GITHUB_REF" = "refs/heads/main" ] && [ -n "$R2_KEY" ] && [ -n "$R2_SECRET" ]; then
+            echo "base=https://img.kiriciparca.com" >> "$GITHUB_OUTPUT"
+          else
+            echo "base=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build parts-shop
+        env:
+          VITE_TIP_IMG_BASE: ${{ steps.r2.outputs.base }}
         run: pnpm turbo build --filter=@kervan/parts-shop
+
+      # Additive only (never --delete): published names are content-addressed, so a name never
+      # changes meaning. Only public tip renders (…-md-p1.webp) may go to the public bucket.
+      # Fails closed: if the upload or the check fails, the deploy below does not run and
+      # production keeps the previous site.
+      - name: Upload tip images to R2
+        if: steps.r2.outputs.base != ''
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          R2_BUCKET: kervan-renders
+          R2_BASE: ${{ steps.r2.outputs.base }}
+        run: |
+          set -euo pipefail
+          PUB=apps/parts-shop/.renders/pub
+          if [ ! -d "$PUB" ] || [ -z "$(ls -A "$PUB")" ]; then echo "no tip renders yet; nothing to upload"; exit 0; fi
+          bad=$(ls "$PUB" | grep -Ev '^[A-Za-z0-9._-]+-(md|sm)-p1\.webp$' || true)
+          if [ -n "$bad" ]; then echo "refusing to upload unexpected files: $(echo "$bad" | wc -l)"; exit 1; fi
+          aws s3 sync "$PUB" "s3://$R2_BUCKET/tips/" --endpoint-url "$R2_ENDPOINT" \
+            --exclude '*' --include '*-md-p1.webp' \
+            --size-only --no-progress --only-show-errors \
+            --content-type image/webp --cache-control "public, max-age=31536000, immutable"
+          echo "uploaded; files in the bucket prefix:"
+          aws s3 ls "s3://$R2_BUCKET/tips/" --endpoint-url "$R2_ENDPOINT" | wc -l
+          # The public URLs must really serve what the pages will point at (a sample).
+          for f in $(ls "$PUB" | grep -- '-md-p1' | head -n 5); do
+            ok=0
+            for try in 1 2 3 4 5; do
+              code=$(curl -s -o /dev/null -w '%{http_code} %{content_type}' "$R2_BASE/tips/$f" || true)
+              if [ "$code" = "200 image/webp" ]; then ok=1; break; fi
+              sleep 6
+            done
+            [ "$ok" = 1 ] || { echo "public URL check failed for a sample file: $code"; exit 1; }
+          done
+          echo "public URL check passed"
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
