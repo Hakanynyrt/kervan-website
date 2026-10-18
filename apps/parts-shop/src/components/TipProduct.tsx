@@ -168,6 +168,49 @@ export default function TipProduct({
         </p>
       )}
 
+      {/* Every tip type of the model as a photo tile (owner, 2026-10-16: "uçlar fotoğraflı gözüksün"); a tile picks the type like the chips below. */}
+      <ul
+        aria-label={tf.type}
+        className="m-0 mt-6 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-4 lg:max-w-3xl"
+      >
+        {types.map((x) => {
+          const o = opts.get(x)!;
+          const key =
+            o.sku?.image ??
+            sample?.family.skus.find((y) => y.tipType === x && y.image)?.image ??
+            null;
+          const on = x === opt.tipType;
+          return (
+            <li key={x}>
+              <button
+                type="button"
+                aria-pressed={on}
+                onClick={() => {
+                  setType(x);
+                  setAdded(false);
+                }}
+                className={`block w-full overflow-hidden rounded-md border bg-bg text-left ${on ? 'border-brand ring-1 ring-brand' : 'border-hair hover:border-hair-strong'} ${FOCUS}`}
+              >
+                {key && (
+                  <img
+                    src={tipImg(key)}
+                    width={800}
+                    height={533}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="block aspect-[3/2] h-auto w-full bg-stage object-cover"
+                  />
+                )}
+                <span className="block px-3 py-2 font-sans text-sm font-semibold text-ink">
+                  {t.tip[x]}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
       <div className="mt-6 grid gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
         {sampleSku?.image && sample && (
           <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
