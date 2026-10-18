@@ -40,6 +40,7 @@ import {
 } from '../lib/routes';
 import type { Lang } from '../types';
 import { ORDER_EMAIL, SITE } from '../lib/site';
+import { photoImg, photoSet } from '../lib/photo-url';
 
 type Model = Extract<PageModel, { kind: 'part' }>;
 
@@ -287,8 +288,8 @@ export default function Part({
                           className={`group block h-full overflow-hidden rounded-md border border-hair bg-bg hover:border-hair-strong ${FOCUS}`}
                         >
                           <img
-                            src={`${r.hero}-xs.webp`}
-                            srcSet={`${r.hero}-xs.webp 320w, ${r.hero}-lg.webp 1600w`}
+                            src={photoImg(r.hero, 'xs')}
+                            srcSet={photoSet(r.hero, ['xs', 320], ['lg', 1600])}
                             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                             width={320}
                             height={180}
@@ -408,8 +409,8 @@ function ListedCard({ l, ctx }: { l: ListedPart; ctx: Ctx }) {
     <figure className="m-0 flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg">
       <div className="relative">
         <img
-          src={`${l.sample}-xs.webp`}
-          srcSet={`${l.sample}-xs.webp 320w, ${l.sample}-lg.webp 1600w`}
+          src={photoImg(l.sample, 'xs')}
+          srcSet={photoSet(l.sample, ['xs', 320], ['lg', 1600])}
           sizes="(min-width: 640px) 30vw, 100vw"
           width={320}
           height={180}
@@ -882,7 +883,7 @@ function SeriesPicker({
             >
               {r.hero && (
                 <img
-                  src={`${r.hero}-xs.webp`}
+                  src={photoImg(r.hero, 'xs')}
                   width={320}
                   height={180}
                   alt=""

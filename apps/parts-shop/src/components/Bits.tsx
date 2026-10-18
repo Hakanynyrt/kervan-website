@@ -5,6 +5,7 @@ import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import type { Lang } from '../types';
 import { FOCUS, whatsappHref } from './Layout';
+import { photoImg, photoSet } from '../lib/photo-url';
 
 /** A toggle chip of a filter row (`aria-pressed` buttons): part kinds, tip search filters. */
 export const chipClass = (active: boolean): string =>
@@ -244,8 +245,8 @@ export function Photo({
 }) {
   return (
     <img
-      src={`${base}-${single ? 'lg' : 'sm'}.webp`}
-      srcSet={single ? undefined : `${base}-sm.webp 480w, ${base}-lg.webp 960w`}
+      src={photoImg(base, single ? 'lg' : 'sm')}
+      srcSet={single ? undefined : photoSet(base, ['sm', 480], ['lg', 960])}
       sizes={single ? undefined : '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw'}
       width={480}
       height={360}

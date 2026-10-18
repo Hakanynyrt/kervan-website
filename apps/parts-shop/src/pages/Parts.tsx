@@ -5,6 +5,7 @@ import type { Dict } from '../lib/dict';
 import { PLANT_PHOTOS } from '../lib/photos';
 import type { PageModel } from '../lib/routes';
 import type { Lang } from '../types';
+import { photoImg, photoSet } from '../lib/photo-url';
 
 type Model = Extract<PageModel, { kind: 'parts' }>;
 
@@ -36,8 +37,8 @@ export default function Parts({ model, lang, t }: { model: Model; lang: Lang; t:
               <li key={p}>
                 <figure className="m-0">
                   <img
-                    src={`${p}-sm.webp`}
-                    srcSet={`${p}-sm.webp 480w, ${p}-lg.webp 960w`}
+                    src={photoImg(p, 'sm')}
+                    srcSet={photoSet(p, ['sm', 480], ['lg', 960])}
                     sizes="(min-width: 1024px) 290px, 50vw"
                     width={480}
                     height={600}

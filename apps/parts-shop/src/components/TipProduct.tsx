@@ -36,6 +36,7 @@ import {
 } from './Bits';
 import { FOCUS, whatsappHref } from './Layout';
 import { ORDER_EMAIL, SITE } from '../lib/site';
+import { photoImg, photoSet } from '../lib/photo-url';
 
 function availabilityText(s: PublicSku, t: Dict): string {
   const a = s.availability;
@@ -454,8 +455,8 @@ export default function TipProduct({
               <li key={g.base}>
                 <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
                   <img
-                    src={`${g.base}-vitrin-${g.v}-lg.webp`}
-                    srcSet={`${g.base}-vitrin-${g.v}-xs.webp 320w, ${g.base}-vitrin-${g.v}-lg.webp 1600w`}
+                    src={photoImg(`${g.base}-vitrin-${g.v}`, 'lg')}
+                    srcSet={photoSet(`${g.base}-vitrin-${g.v}`, ['xs', 320], ['lg', 1600])}
                     sizes="(min-width: 640px) 33vw, 100vw"
                     width={1600}
                     height={900}

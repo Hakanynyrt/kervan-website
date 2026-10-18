@@ -122,4 +122,14 @@ else
   echo "skip  no R2 tip image on https://kiriciparca.com/kirici/mtb/215 yet"
 fi
 
+# Part photos come from R2 too (the opening frames stay on Pages): one real URL from a live part
+# page must serve as image/webp, and an opening frame must still come from Pages.
+pimg=$("${CURL[@]}" https://kiriciparca.com/yedek-parca/burc | grep -oE 'https://img\.kiriciparca\.com/photos/parca/[A-Za-z0-9._-]+-lg\.webp' | head -n 1 || true)
+if [[ -n $pimg ]]; then
+  check "$pimg" 200 image/webp
+else
+  echo "skip  no R2 part photo on https://kiriciparca.com/yedek-parca/burc yet"
+fi
+check https://kiriciparca.com/photos/parca/acilis-kabin-05-00-lg.webp 200 image/webp
+
 exit $fail
