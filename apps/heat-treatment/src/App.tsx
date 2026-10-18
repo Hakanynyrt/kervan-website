@@ -6,6 +6,7 @@ import type { Lang } from './types';
 import IntroOverlay from './components/IntroOverlay';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
+import GearProcess from './components/GearProcess';
 import Services from './components/Services';
 import TechnicalCapacity from './components/TechnicalCapacity';
 import TechInfo from './components/TechInfo';
@@ -37,6 +38,7 @@ export default function App({ lang }: Props) {
       <Nav lang={lang} t={t} techAuthed={tech.state === 'authed'} />
       <main>
         <Hero t={t} />
+        <GearProcess t={t} />
         <Services t={t} lang={lang} />
         <TechnicalCapacity t={t} />
         <TechInfo t={t} lang={lang} tech={tech} />

@@ -86,6 +86,21 @@ export interface DictBlock {
     /** Hero film card (client-only video over a poster). */
     film: { alt: string; caption: string; pause: string; play: string };
   };
+  /** The pinned "gear" section after the hero (GearProcess): four heat-treatment stages. */
+  gear: {
+    title: string;
+    sub: string;
+    /** aria-label of the 3D scene (role img) */
+    sceneLabel: string;
+    /** alt of the static poster */
+    posterAlt: string;
+    /** aria-label of the stage list */
+    stagesLabel: string;
+    /** Exactly four: heating, quenching, tempering, report (the scene's stages, in order). */
+    stages: { name: string; desc: string }[];
+    /** Card shown in the report stage. */
+    report: { title: string; note: string };
+  };
   services: {
     eyebrow: string;
     title: string;

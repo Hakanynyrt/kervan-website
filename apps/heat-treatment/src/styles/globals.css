@@ -248,3 +248,184 @@ html:not(.js-anim) .min-h-\[60dvh\] {
 html:not(.js-anim) .min-h-\[70dvh\] {
   min-height: min(70dvh, 700px);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   GearProcess (#surec): the pinned 3D gear section after the hero.
+   Theme follows the site (same day/night rule as the tokens above); the
+   poster files are picked by CSS so the prerendered HTML needs no script.
+═══════════════════════════════════════════════════════════════════════ */
+.kv-gear-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* the baked soft shadow would end in a visible square at the image edge: fade it out (a mask, not a visible gradient) */
+  mask-image: radial-gradient(closest-side, #000 84%, transparent 100%);
+}
+.kv-gear-img-day {
+  display: none;
+}
+:root[data-theme='light'] .kv-gear-img-day,
+:root[data-sun='day']:not([data-theme='dark']) .kv-gear-img-day {
+  display: block;
+}
+:root[data-theme='light'] .kv-gear-img-night,
+:root[data-sun='day']:not([data-theme='dark']) .kv-gear-img-night {
+  display: none;
+}
+/* Pinned poster: same numbers as the canvas (set by GearProcess: --gx, --gy, --gd). */
+.kv-gear-poster {
+  position: absolute;
+  left: calc(var(--gx, 70%) - var(--gd, 700px) * 0.5 / 0.76);
+  top: calc(var(--gy, 52%) - var(--gd, 700px) * 0.5 / 0.76);
+  width: calc(var(--gd, 700px) / 0.76);
+  height: calc(var(--gd, 700px) / 0.76);
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+/* Stage bar: the steel's colour scale, filled by the real progress; the tick marks where the part is. */
+.kv-gear-scale {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  margin-bottom: 14px;
+}
+.kv-gear-scale i {
+  display: block;
+  height: 100%;
+  background: var(--c);
+  opacity: 0.26;
+  transition: opacity 0.4s;
+}
+.kv-gear-scale i.on {
+  opacity: 1;
+}
+.kv-gear-tick {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: calc(var(--prog, 0) * 100%);
+  width: 3px;
+  margin-left: -1.5px;
+  background: var(--color-ink);
+  pointer-events: none;
+}
+.kv-gear-tabs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0 24px;
+}
+.kv-gear-tab {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-ink-mid);
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  min-height: 48px;
+  min-width: 44px;
+  padding: 0 0 2px;
+  text-align: left;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+.kv-gear-tabs li[aria-current='step'] .kv-gear-tab {
+  color: var(--color-ink);
+  font-weight: 700;
+  border-bottom-color: var(--color-brand);
+}
+.kv-gear-now {
+  margin: 6px 0 0;
+  height: 28px;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--color-ink);
+  overflow: hidden;
+}
+/* Report stage: the hardness-report card (the three marks on the gear's face stand for it). */
+.kv-gear-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px 10px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-hair);
+  border-left: 4px solid var(--color-brand);
+  color: var(--color-ink);
+}
+.kv-gear-card svg {
+  flex: none;
+  width: 26px;
+  height: 26px;
+}
+.kv-gear-card strong {
+  display: block;
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+.kv-gear-card span {
+  display: block;
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--color-ink-mid);
+}
+.kv-gear-card-pinned {
+  position: absolute;
+  z-index: 2;
+  left: var(--card-left, 30%);
+  top: var(--card-top, 60%);
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+  pointer-events: none;
+}
+.kv-gear-card-pinned.show {
+  opacity: 1;
+  transform: none;
+}
+/* Narrow or tall screens ([data-stacked] is set by GearProcess from the stage size): text on top, gear below it. */
+[data-stacked] .kv-gear-copy {
+  justify-content: flex-start;
+  padding-bottom: 0;
+}
+[data-stacked] .kv-gear-tabs {
+  display: flex;
+  justify-content: space-between;
+  gap: 0 8px;
+}
+[data-stacked] .kv-gear-tab {
+  white-space: nowrap;
+}
+[data-stacked] .kv-gear-now {
+  margin-top: 10px;
+  height: 48px;
+  font-size: 16px;
+}
+[data-stacked] .kv-gear-card {
+  padding: 7px 10px 7px 8px;
+  gap: 8px;
+}
+[data-stacked] .kv-gear-card strong {
+  font-size: 14px;
+}
+[data-stacked] .kv-gear-card span {
+  font-size: 13px;
+}
+@media (max-width: 599px) {
+  .kv-gear-tab {
+    font-size: 17px;
+    min-height: 46px;
+  }
+  .kv-gear-card svg {
+    width: 22px;
+    height: 22px;
+  }
+}
