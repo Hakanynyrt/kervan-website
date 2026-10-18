@@ -5,8 +5,6 @@ import type { DictBlock } from '../types';
 
 /** Cut from public/videos/atolye/furnace-01.mp4. Immutable cache: a re-encode needs a new name (-02). */
 const DIR = '/videos/isil-islem/firin-hatti-loop-01';
-/** Tailwind lg: the card is 9:16 with the portrait files; below it 16:9 with the -wide files. */
-const LG = '(min-width: 64rem)';
 /** Both posters are frame 189 (6.30–6.33 s, the furnace with the flame); playback starts on that frame
  *  so the poster comes alive without a jump. `loop` then wraps 9.2 s → 0 (the loop is seamless). */
 const START_AT = 6.32;
@@ -24,7 +22,7 @@ function autoplayAllowed(): boolean {
   if (c?.saveData || (c?.effectiveType && c.effectiveType !== '4g')) return false; // unknown (Safari) = allowed
   return !window.matchMedia('(prefers-reduced-data: reduce)').matches;
 }
-const pickSrc = () => `${DIR}${window.matchMedia(LG).matches ? '' : '-wide'}.mp4`;
+const pickSrc = () => `${DIR}-wide.mp4`;
 const readPaused = () => {
   try {
     return sessionStorage.getItem(PREF) === 'paused';
@@ -49,13 +47,11 @@ const play = (v: HTMLVideoElement, onBlocked: () => void) => {
 
 interface Props {
   t: DictBlock;
-  /** seconds; Hero passes t0 + HERO_SEQ_END */
-  startAt: number;
-  /** The hero sequence has not started yet (hero still below the opening): do not arm. */
-  hold?: boolean;
+  /** seconds to wait before arming (after first paint; default 1) */
+  startAt?: number;
 }
 
-export default function HeroFilm({ t, startAt, hold = false }: Props) {
+export default function HeroFilm({ t, startAt = 1 }: Props) {
   const reduced = useReducedMotion(); // true in static mode → poster only, no effects run
   const [motionOff, setMotionOff] = useState(false); // live opt-out: framer's hook is a mount-time snapshot
   const off = reduced || motionOff;
@@ -86,7 +82,7 @@ export default function HeroFilm({ t, startAt, hold = false }: Props) {
 
   // 1. Arm after the hero sequence (+ intro curtain), then idle, then when the card is ≥25 % on screen.
   useEffect(() => {
-    if (off || hold) return;
+    if (off) return;
     const w = window as IdleWindow;
     let idle = 0;
     let io: IntersectionObserver | undefined;
@@ -118,7 +114,7 @@ export default function HeroFilm({ t, startAt, hold = false }: Props) {
       else window.clearTimeout(idle);
       io?.disconnect();
     };
-  }, [off, hold, startAt]);
+  }, [off, startAt]);
 
   // 2. Muted (React sets only the property; iOS wants the attribute) and seek to the poster frame.
   useEffect(() => {
@@ -195,14 +191,13 @@ export default function HeroFilm({ t, startAt, hold = false }: Props) {
   };
 
   return (
-    <figure className="m-0 lg:col-start-3 lg:row-start-1 flex flex-col gap-3">
+    <figure className="m-0 flex flex-col gap-3">
       {/* No opacity/clip entrance on the card or poster: it paints with the first render (LCP). */}
       <div
         ref={frameRef}
-        className="relative overflow-hidden rounded-md border border-hair bg-bg-soft aspect-video lg:aspect-[9/16]"
+        className="relative overflow-hidden rounded-md border border-hair bg-bg-soft aspect-video"
       >
         <picture>
-          <source media={LG} srcSet={`${DIR}-poster.webp`} />
           <img
             src={`${DIR}-wide-poster.webp`}
             width={1280}

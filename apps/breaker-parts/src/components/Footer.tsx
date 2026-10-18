@@ -59,7 +59,13 @@ export default function Footer({ t }: Props) {
           </a>
         </nav>
 
-        <div className="font-sans text-xs text-ink-soft tracking-wide">{t.footer.rights}</div>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 font-sans text-xs text-ink-soft tracking-wide">
+          <span>{t.footer.rights}</span>
+          {/* Quiet text link to the technical-info page (label reuses nav.tech). */}
+          <Link to={to('/teknik-bilgiler')} className="hover:text-ink transition-colors">
+            {t.nav.tech}
+          </Link>
+        </div>
       </div>
     </footer>
   );

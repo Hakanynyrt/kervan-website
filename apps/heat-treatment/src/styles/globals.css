@@ -14,6 +14,39 @@
    the package (e.g. `bg-brand`, `text-ink`) are emitted in the bundle. */
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
 
+/* Hero photo: slightly dimmed on the night theme (set to 0 by the day block below). */
+:root {
+  --kv-photo-dim: 0.22;
+}
+
+/* Hero photo: one-way, very slow scale 1 → 1.04 that holds at the end (no loop). Off for reduced motion
+   (the global reduced-motion rule below also shortens it; this removes it outright). */
+.kv-hero-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #0a0a0b;
+  opacity: var(--kv-photo-dim);
+  pointer-events: none;
+}
+.kv-hero-drift {
+  transform-origin: 50% 50%;
+  animation: kv-hero-drift 40s linear both;
+}
+@keyframes kv-hero-drift {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.04);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kv-hero-drift {
+    animation: none;
+  }
+}
+
 /* Height of the sister-site strip at the top of the fixed header (SisterSiteStrip in Nav).
    Hero adds it to its top padding; the header slides up by it once the page is scrolled. */
 :root {
@@ -51,6 +84,7 @@
   --shadow-sm: 0 2px 8px rgba(40, 30, 20, 0.08);
   --shadow-md: 0 6px 24px rgba(40, 30, 20, 0.1);
   --shadow-lg: 0 16px 48px rgba(40, 30, 20, 0.12);
+  --kv-photo-dim: 0;
   color-scheme: light;
 }
 
@@ -64,25 +98,6 @@
   --color-ink-soft: #a8a091;
 }
 
-/* The night palette on one part of a day page: the cooling section (#sogutma),
-   whose glowing-to-black tip only reads on dark. Same values as @kervan/ui
-   tokens.css, so on the night theme nothing changes. */
-.kv-night {
-  --color-bg: #0a0a0b;
-  --color-bg-soft: #141416;
-  --color-bg-warm: #1c1c20;
-  --color-ink: #e8e2d6;
-  --color-ink-mid: #cec6b8;
-  --color-ink-soft: #a8a091;
-  --color-brand: #e8431b;
-  --color-brand-hi: #ff5c32;
-  --color-brand-lo: #c53614;
-  --color-brand-soft: rgba(232, 67, 27, 0.12);
-  --color-hair: #262629;
-  --color-hair-strong: #36363b;
-  color: var(--color-ink);
-  color-scheme: dark;
-}
 /* Links ignore Tailwind's text colour (the unlayered `a { color: inherit }`
    below), so brand buttons would inherit the ink (night: light ink on ember,
    3.1:1). Give them the page colour in both themes: day 5.65:1, night

@@ -102,9 +102,6 @@ html {
 }
 body {
   background-color: var(--color-bg);
-  /* Smooth bg fade between opening (black) and rest of site (Mood C)
-     so the colour swap doesn't feel like a single-frame flash. */
-  transition: background-color 600ms cubic-bezier(0.22, 1, 0.36, 1);
   color: var(--color-ink);
   font-family: var(--font-sans);
   font-size: 17px;
@@ -114,18 +111,6 @@ body {
   text-rendering: optimizeLegibility;
   overflow-x: clip;
 }
-/* OpeningHold component flips this class on while the cinematic intro
-   is mounted; body bg falls back to Mood C on cleanup. */
-html.opening-active body {
-  background-color: #000;
-}
-/* Day theme: the opening is the paper page too (the tip stands on a light studio
-   sweep drawn by Scene.tsx), so no black. */
-:root[data-theme='light'].opening-active body,
-:root[data-sun='day']:not([data-theme='dark']).opening-active body {
-  background-color: var(--color-bg);
-}
-
 a {
   color: inherit;
   text-decoration: none;
@@ -234,15 +219,6 @@ button {
   display: none;
 }
 
-/* 3D scene container — fixed full-viewport behind everything.
-   No mask — chisel her zaman tam görünür kalır. */
-.scene-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
 /* Content sits on top of the scene */
 .app-root {
   position: relative;
@@ -260,4 +236,220 @@ html:not(.js-anim) .min-h-\[60dvh\] {
 }
 html:not(.js-anim) .min-h-\[70dvh\] {
   min-height: min(70dvh, 700px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Hero (first screen): copy left, one workshop photo right; on phones the
+   copy and the primary button come first, the photo below. Colours are the
+   theme tokens, so day and night follow the theme select / data-sun.
+═══════════════════════════════════════════════════════════════════════ */
+.kv-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'copy' 'photo' 'stats';
+  row-gap: 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 88px 16px 40px;
+}
+.kv-hero-copy {
+  grid-area: copy;
+}
+.kv-hero-stats {
+  grid-area: stats;
+}
+.kv-hero-photo {
+  grid-area: photo;
+  margin: 0;
+}
+.kv-hero h1 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--color-ink);
+  margin: 0 0 12px;
+}
+.kv-hero-sub {
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--color-ink-mid);
+  max-width: 40ch;
+  margin: 0 0 20px;
+}
+.kv-hero-btns {
+  display: flex;
+  gap: 10px;
+}
+.kv-hero-btn {
+  flex: 1;
+  min-width: 0;
+  min-height: 56px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-ink);
+  border-radius: 4px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--color-ink);
+  background: transparent;
+  transition:
+    background-color 150ms,
+    color 150ms;
+}
+.kv-hero-btn:hover {
+  background: var(--color-ink);
+  color: var(--color-bg);
+}
+.kv-hero-btn--primary {
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+  color: var(--color-bg);
+}
+.kv-hero-btn--primary:hover {
+  background: var(--color-brand-hi);
+  border-color: var(--color-brand-hi);
+  color: var(--color-bg);
+}
+.kv-hero-frame {
+  overflow: hidden;
+  border: 1px solid var(--color-hair-strong);
+  background: var(--color-bg-soft);
+  aspect-ratio: 4 / 3;
+}
+.kv-hero-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 60%;
+  transform-origin: 70% 85%;
+  /* One slow, one-way push-in; never loops. */
+  animation: kvHeroPush 24s linear 0.1s forwards;
+}
+.kv-hero-photo figcaption {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--color-ink-mid);
+}
+.kv-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--color-hair-strong);
+  padding-top: 16px;
+}
+.kv-hero-stat {
+  padding-right: 10px;
+  margin-right: 10px;
+  border-right: 1px solid var(--color-hair-strong);
+}
+.kv-hero-stat:last-child {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.kv-hero-stat b {
+  display: block;
+  font-size: 24px;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+.kv-hero-stat span {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--color-ink-mid);
+}
+@keyframes kvHeroPush {
+  to {
+    transform: scale(1.04);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kv-hero-frame img {
+    animation: none;
+    transform: none;
+  }
+}
+@media (min-width: 1024px) {
+  .kv-hero {
+    grid-template-columns: minmax(0, 47fr) minmax(0, 53fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas: 'copy photo' 'stats photo';
+    column-gap: clamp(32px, 4vw, 72px);
+    row-gap: 0;
+    height: min(calc(100svh - var(--kv-strip-h)), 960px);
+    min-height: 640px;
+    padding: 96px clamp(24px, 4vw, 64px) 32px;
+  }
+  .kv-hero-copy {
+    align-self: center;
+    padding-bottom: 24px;
+  }
+  .kv-hero-stats {
+    align-self: end;
+    padding-top: 22px;
+  }
+  .kv-hero-photo {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .kv-hero-frame {
+    flex: 1;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+  .kv-hero h1 {
+    font-size: clamp(44px, 5.2vw, 80px);
+    line-height: 1.02;
+    margin-bottom: 24px;
+    max-width: 12ch;
+  }
+  .kv-hero-sub {
+    font-size: clamp(18px, 1.5vw, 22px);
+    margin-bottom: 34px;
+  }
+  .kv-hero-btns {
+    gap: 14px;
+  }
+  .kv-hero-btn {
+    flex: 0 0 auto;
+    min-height: 58px;
+    min-width: 190px;
+    padding: 0 32px;
+    font-size: 18px;
+  }
+  .kv-hero-stat {
+    padding-right: 28px;
+    margin-right: 28px;
+  }
+  .kv-hero-stat b {
+    font-size: clamp(28px, 2.6vw, 38px);
+  }
+  .kv-hero-stat span {
+    font-size: 16px;
+  }
+  .kv-hero-stats {
+    grid-template-columns: repeat(3, auto);
+    justify-content: start;
+  }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .kv-hero {
+    padding-inline: 32px;
+  }
+  .kv-hero-btn {
+    flex: 0 0 auto;
+    min-width: 200px;
+  }
 }

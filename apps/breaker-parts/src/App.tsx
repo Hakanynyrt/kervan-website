@@ -4,7 +4,6 @@ import { useLang } from './lib/use-lang';
 import { DICT } from './lib/dict';
 import { LANGS, stripLang } from './lib/locale-path';
 import { useTechAuth } from './lib/use-tech-auth';
-import IntroOverlay from './components/IntroOverlay';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
 import WhatsAppFAB from './components/WhatsAppFAB';
@@ -42,7 +41,6 @@ export default function App() {
 
   return (
     <>
-      <IntroOverlay />
       <RouteHead />
 
       <Nav lang={lang} t={t} techAuthed={tech.state === 'authed'} />
