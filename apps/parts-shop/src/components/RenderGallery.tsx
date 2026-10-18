@@ -70,7 +70,7 @@ export default function RenderGallery({
     >
       <div className="min-w-0 sm:col-start-2">
         <div
-          className="relative aspect-[4/3] touch-pan-y overflow-hidden rounded-t-md border border-hair bg-stage-deep"
+          className="relative aspect-[4/3] touch-pan-y overflow-hidden rounded-t-md border border-hair bg-pstage-deep"
           onPointerDown={(e) => {
             if (e.pointerType !== 'mouse') swipe.current = e.clientX;
           }}
@@ -136,7 +136,7 @@ export default function RenderGallery({
               className={`w-16 shrink-0 cursor-pointer rounded-sm p-0 text-left sm:w-full ${FOCUS}`}
             >
               <span
-                className={`block overflow-hidden rounded-sm border bg-stage ${i === k ? 'border-ink shadow-[inset_0_-2px_0_var(--color-brand)]' : 'border-hair hover:border-hair-strong'}`}
+                className={`block overflow-hidden rounded-sm border bg-pstage ${i === k ? 'border-ink shadow-[inset_0_-2px_0_var(--color-brand)]' : 'border-hair hover:border-hair-strong'}`}
               >
                 <img
                   src={photoImg(it.base, it.view === 'hero' ? 'xs' : 'lg')}

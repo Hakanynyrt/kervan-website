@@ -32,7 +32,15 @@ export const PART_PHOTOS: Record<PartKey, readonly string[]> = {
  */
 export type RenderView = 'front' | 'rear' | 'side' | 'detail' | 'section' | 'assembly' | 'top';
 /** Seal-kit pictures carry each part's quantity (×N); version 02 added the labels (files are cached immutable). */
-const KIT_V = '02';
+const KIT_V = '03';
+/** `/photos/parca/<stem>-<view>-<NN>`: the stem and view of a published render picture. */
+const VERSIONED = /^\/photos\/parca\/(.+)-(vitrin|on|arka|yan|kesit|pencere)-\d\d$/;
+/** A re-rendered picture keeps its name with the new file version from `REDRAWN` (images are cached immutable). */
+const redrawn = (base: string): string => {
+  const m = VERSIONED.exec(base);
+  const v = m && REDRAWN[m[1]];
+  return v ? `/photos/parca/${m[1]}-${m[2]}-${v}` : base;
+};
 /** One line of a repair (seal) kit. */
 export type KitItemType =
   | 'oring'
@@ -1950,10 +1958,10 @@ const withFitted = (r: PartRender): PartRender => {
     ...r,
     fitted: {
       views: [
-        { base: `${b}-on-01`, view: 'front' },
-        { base: `${b}-arka-01`, view: 'rear' },
-        { base: `${b}-yan-01`, view: 'side' },
-        { base: `${b}-montaj-kesit-01`, view: 'assembly' },
+        { base: redrawn(`${b}-on-01`), view: 'front' },
+        { base: redrawn(`${b}-arka-01`), view: 'rear' },
+        { base: redrawn(`${b}-yan-01`), view: 'side' },
+        { base: redrawn(`${b}-montaj-kesit-01`), view: 'assembly' },
       ],
     },
   };
@@ -2058,14 +2066,6 @@ const DRAWN: Record<PartKey, readonly PartRender[]> = {
   'tamir-takimi': REPAIR_KITS.map(kitPartRender),
 };
 
-/** `/photos/parca/<stem>-<view>-<NN>`: the stem and view of a published render picture. */
-const VERSIONED = /^\/photos\/parca\/(.+)-(vitrin|on|arka|yan|kesit|pencere)-\d\d$/;
-/** A re-rendered picture keeps its name with the new file version from `REDRAWN` (images are cached immutable). */
-const redrawn = (base: string): string => {
-  const m = VERSIONED.exec(base);
-  const v = m && REDRAWN[m[1]];
-  return v ? `/photos/parca/${m[1]}-${m[2]}-${v}` : base;
-};
 /** Display names that differ from the drawings' (owner: "MTB 210 II ile MTB 215 aynı modeller", shown
  *  as just "MTB 215"; "MTB 275 II = MTB 285"). Files keep their names. */
 const MODEL_NAME: Record<string, string> = {
@@ -2116,10 +2116,10 @@ export const PART_RENDERS = Object.fromEntries(
 export const GROUP_COVERS: Partial<
   Record<PartKey, { base: string; contain?: boolean; xs?: boolean }>
 > = {
-  'alt-govde': { base: '/photos/parca/alt-govde-mtb-220-burclu-on-01', contain: true },
-  kama: { base: '/photos/parca/kama-mtb-150-vitrin-02', xs: true },
-  saplama: { base: '/photos/parca/saplama-takim-mtb-150-vitrin-01', xs: true },
-  'asinma-plakasi': { base: '/photos/parca/asinma-set-mtb-150-vitrin-01', xs: true },
+  'alt-govde': { base: redrawn('/photos/parca/alt-govde-mtb-220-burclu-on-01'), contain: true },
+  kama: { base: redrawn('/photos/parca/kama-mtb-150-vitrin-02'), xs: true },
+  saplama: { base: redrawn('/photos/parca/saplama-takim-mtb-150-vitrin-01'), xs: true },
+  'asinma-plakasi': { base: redrawn('/photos/parca/asinma-set-mtb-150-vitrin-01'), xs: true },
 };
 
 /**
@@ -2165,13 +2165,13 @@ export const GROOVED_TOOLS: readonly {
     breaker: 'MTB 700',
     tipType: 'conical',
     base: '/photos/parca/uc-mtb-700-grooved-tool',
-    v: '02',
+    v: '03',
   },
   {
     breaker: 'MTB 700',
     tipType: 'moil',
     base: '/photos/parca/uc-mtb-700-grooved-tool-moil',
-    v: '01',
+    v: '02',
   },
   // 2009 "ÖZEL KONİK TOZ KANALLI": the slimmed (Ø180) working body.
   {
@@ -2179,6 +2179,6 @@ export const GROOVED_TOOLS: readonly {
     tipType: 'conical',
     special: true,
     base: '/photos/parca/uc-mtb-700-grooved-tool-conical',
-    v: '01',
+    v: '02',
   },
 ];

@@ -296,7 +296,7 @@ export default function Part({
                             alt=""
                             loading={i > 3 ? 'lazy' : undefined}
                             decoding="async"
-                            className="block h-auto w-full bg-stage"
+                            className="block h-auto w-full bg-pstage"
                           />
                           <span className="block px-2.5 pt-2 font-sans text-sm leading-snug font-medium text-ink group-hover:underline">
                             {renderTitle(r, b ? t.parts.fitted.name(p.name, true) : p.name, t)}
@@ -417,7 +417,7 @@ function ListedCard({ l, ctx }: { l: ListedPart; ctx: Ctx }) {
           alt=""
           loading="lazy"
           decoding="async"
-          className="block h-auto w-full bg-stage"
+          className="block h-auto w-full bg-pstage"
         />
         <span className="absolute left-2 top-2 rounded-sm bg-bg/90 px-2 py-0.5 font-sans text-xs text-ink">
           {t.parts.listed.sample}
@@ -889,7 +889,7 @@ function SeriesPicker({
                   alt=""
                   loading="lazy"
                   decoding="async"
-                  className="block h-auto w-full rounded-t-[4px] bg-stage"
+                  className="block h-auto w-full rounded-t-[4px] bg-pstage"
                 />
               )}
               <span className="block px-2 py-1.5 font-sans text-sm font-semibold text-ink">

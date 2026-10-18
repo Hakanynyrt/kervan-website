@@ -54,7 +54,7 @@ export function PartGroups({
               href={localePath(g.path, lang)}
               className={`group flex h-full flex-col overflow-hidden rounded-sm border border-hair bg-bg hover:border-hair-strong ${FOCUS}`}
             >
-              <div className="relative aspect-video border-b border-hair bg-stage">
+              <div className="relative aspect-video border-b border-hair bg-pstage">
                 <img
                   src={g.hero ? photoImg(g.hero, g.xs ? 'xs' : 'lg') : photoImg(stock, 'sm')}
                   width={320}
@@ -85,7 +85,7 @@ export function PartGroups({
               className={`group flex h-full flex-col overflow-hidden rounded-sm border border-hair bg-bg hover:border-hair-strong ${lead ? 'lg:flex-row' : ''} ${FOCUS}`}
             >
               <div
-                className={`relative aspect-[16/9] border-b border-hair bg-stage ${lead ? 'lg:aspect-auto lg:w-[58%] lg:shrink-0 lg:border-b-0 lg:border-r' : ''}`}
+                className={`relative aspect-[16/9] border-b border-hair bg-pstage ${lead ? 'lg:aspect-auto lg:w-[58%] lg:shrink-0 lg:border-b-0 lg:border-r' : ''}`}
               >
                 {g.hero ? (
                   <img

@@ -31,6 +31,11 @@
   --color-brand-soft: rgba(194, 57, 15, 0.08);
   --color-hair: #dde1e5;
   --color-hair-strong: #8e959d;
+  /* Part renders are transparent (part, contact shadow and a faint reflection only): by day they stand
+     on a light studio sweep (backdrop, soft horizon, a darker floor), at night on the dark stage with
+     its ember floor glow. Tip renders are opaque and keep `bg-stage`. */
+  --pstage: linear-gradient(180deg, #f4f5f6 0%, #eceef0 60%, #dfe2e5 64%, #d6d9dd 100%);
+  --pstage-deep: var(--pstage);
   --radius-md: 8px;
   --radius-lg: 10px;
   /* White 14 px text on the WhatsApp buttons: 5.21:1 (the shared #128c7e gives 4.14:1). */
@@ -66,6 +71,8 @@
   --color-hair-strong: #767d86;
   --color-on-brand: #1c1f23;
   --kv-stage: var(--kv-stage-night);
+  --pstage: var(--kv-stage-night);
+  --pstage-deep: var(--kv-stage-night);
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
@@ -84,8 +91,17 @@
     --color-hair-strong: #767d86;
     --color-on-brand: #1c1f23;
     --kv-stage: var(--kv-stage-night);
+    --pstage: var(--kv-stage-night);
+    --pstage-deep: var(--kv-stage-night);
     color-scheme: dark;
   }
+}
+/* Part-render stages (see `--pstage`); unlayered so they win over the utilities. */
+.bg-pstage {
+  background: var(--pstage);
+}
+.bg-pstage-deep {
+  background: var(--pstage-deep);
 }
 /* Night opening stage: the renders' dark stage with its ember floor glow. */
 :root {

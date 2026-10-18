@@ -253,7 +253,7 @@ export function Photo({
       alt={alt}
       loading={lazy ? 'lazy' : undefined}
       decoding="async"
-      className={`block h-auto w-full rounded-md border border-hair ${single ? 'bg-stage' : 'bg-bg-warm'}`}
+      className={`block h-auto w-full rounded-md border border-hair ${single ? 'bg-pstage' : 'bg-bg-warm'}`}
     />
   );
 }
