@@ -36,8 +36,10 @@ const walk = (d) => {
 walk(DIST);
 
 // Cloudflare Pages takes at most 20,000 files per deployment; fail here, with the count, rather
-// than at the deploy step. The margin leaves room for the tip renders still to come.
-const MAX_FILES = 19000;
+// than at the deploy step. The margin leaves room for the tip renders still to come. PR previews
+// (no R2 base) keep every part photo in dist, about 7,300 files more than main, so they may come
+// closer to the hard limit; main must keep the wide margin.
+const MAX_FILES = process.env.VITE_TIP_IMG_BASE ? 19000 : 19900;
 let total = 0;
 const count = (d) => {
   for (const e of fs.readdirSync(d, { withFileTypes: true }))
