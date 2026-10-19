@@ -1,3 +1,4 @@
+import { MODELS_3D } from './models3d';
 import { REDRAWN } from './redrawn';
 import { REPAIR_KITS, type RepairKit } from './repair-kits';
 import { BUSHING_SETS, ROD_SETS, SMALL_PARTS, WEAR_SETS, type SmallPart } from './small-parts';
@@ -2103,8 +2104,15 @@ function reviseGroup(list: readonly PartRender[]): PartRender[] {
     return plainTwin ? { ...out, variant: 'oldType' } : out;
   });
 }
+/** Adds the interactive 3D model of a render whose file stem has one (`MODELS_3D`, generated with the renders). */
+const with3d = (r: PartRender): PartRender => {
+  const stem = r.hero?.match(/^\/photos\/parca\/(.+)-vitrin-\d\d$/)?.[1];
+  const m = stem ? MODELS_3D[stem] : undefined;
+  return r.model3d || !m ? r : { ...r, model3d: m };
+};
+
 export const PART_RENDERS = Object.fromEntries(
-  Object.entries(DRAWN).map(([k, list]) => [k, reviseGroup(list)]),
+  Object.entries(DRAWN).map(([k, list]) => [k, reviseGroup(list).map(with3d)]),
 ) as unknown as Record<PartKey, readonly PartRender[]>;
 
 /**

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { useReducedMotion } from '@kervan/motion';
@@ -31,6 +32,8 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
   const [pos, setPos] = useState(50);
   const plane = useRef(new THREE.Plane(new THREE.Vector3(-1, 0, 0), NO_CUT));
   const span = useRef<[number, number]>([0, 0]);
+  /** Start camera position, fitted to the model (a 0.2 m bushing and a 0.7 m front head fill the frame alike). */
+  const home = useRef(new THREE.Vector3(0.62, 0.36, 0.95));
   const view = useRef<{ camera: THREE.Camera; controls: OrbitControls } | null>(null);
 
   useEffect(() => {
@@ -40,7 +43,7 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
     if (!cut || !v) return;
     v.controls.autoRotate = false;
     // Keep the cut face (it looks along +x) towards the camera.
-    if (v.camera.position.x < 0.1) v.camera.position.set(0.62, 0.36, 0.95);
+    if (v.camera.position.x < 0.1) v.camera.position.copy(home.current);
   }, [cut, pos, state]);
 
   useEffect(() => {
@@ -125,12 +128,23 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
     el.addEventListener('keydown', onKey);
 
     let model: THREE.Object3D | null = null;
-    new GLTFLoader().load(
+    // bushing models are meshopt-compressed (gltf-transform optimize): 25–180 kB instead of MBs
+    new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(
       src,
       (gltf) => {
         model = gltf.scene;
         const b = new THREE.Box3().setFromObject(model);
         model.position.sub(b.getCenter(new THREE.Vector3()));
+        // fit: the camera keeps its direction, its distance follows the model's size
+        const r = b.getSize(new THREE.Vector3()).length() / 2;
+        const d = (r / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2))) * 1.05;
+        home.current.set(0.62, 0.36, 0.95).setLength(d);
+        camera.position.copy(home.current);
+        camera.near = d / 50;
+        camera.far = d * 20;
+        camera.updateProjectionMatrix();
+        controls.minDistance = d * 0.4;
+        controls.maxDistance = d * 2;
         span.current = [
           b.min.x - b.getCenter(new THREE.Vector3()).x,
           b.max.x - b.getCenter(new THREE.Vector3()).x,
@@ -201,10 +215,10 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
         tabIndex={0}
         role="img"
         aria-label={`${label}. ${t.parts.viewer.hint}`}
-        className="aspect-video w-full cursor-grab overflow-hidden rounded-md border border-hair bg-stage focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand active:cursor-grabbing"
+        className="aspect-video w-full cursor-grab overflow-hidden rounded-md border border-hair bg-pstage focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand active:cursor-grabbing"
       />
       {state !== 'ready' && (
-        <p className="absolute inset-0 m-0 flex items-center justify-center font-sans text-sm text-white">
+        <p className="absolute inset-0 m-0 flex items-center justify-center font-sans text-sm text-ink-mid">
           {state === 'loading' ? t.parts.viewer.loading : t.parts.viewer.error}
         </p>
       )}

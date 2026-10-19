@@ -591,7 +591,7 @@ export function RenderFigure({
     <figure id={id} className="m-0 scroll-mt-4">
       {open3d && r.model3d ? (
         <div className="mb-4">
-          <Suspense fallback={<div className="aspect-video w-full rounded-md bg-stage" />}>
+          <Suspense fallback={<div className="aspect-video w-full rounded-md bg-pstage" />}>
             <PartViewer src={r.model3d} label={caption} t={t} />
           </Suspense>
           <button
