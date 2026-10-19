@@ -298,8 +298,6 @@ export interface Dict {
       error: string;
       cut: string;
       cutOff: string;
-      cutLabel: string;
-      cutHint: string;
     };
     series: {
       title: (series: string) => string;
@@ -1022,8 +1020,6 @@ export const DICT: Record<Lang, Dict> = {
         error: '3B model açılamadı.',
         cut: 'Kesit',
         cutOff: 'Kesiti kapat',
-        cutLabel: 'Kesit konumu',
-        cutHint: 'Sürgüyü sağa sola kaydırın: parça baştan sona kesilerek iç yapısı görünür.',
       },
       series: {
         title: (series) => `${series} modelleri`,
@@ -1782,8 +1778,6 @@ export const DICT: Record<Lang, Dict> = {
         error: 'The 3D model could not be opened.',
         cut: 'Section',
         cutOff: 'Hide the section',
-        cutLabel: 'Section position',
-        cutHint: 'Move the slider left and right to cut the part from end to end and see inside.',
       },
       series: {
         title: (series) => `${series} models`,

@@ -20,31 +20,29 @@ const NO_CUT = 1e3;
  * Interactive 3D view of one part (lazy chunk: three.js loads only when a visitor opens it).
  * Drag to turn, pinch or wheel to zoom, arrow keys turn it from the keyboard. It turns slowly
  * by itself until touched, never under reduced motion, and draws only while on screen.
- * "Kesit" adds a slider that moves a cross-section plane from one end of the part to the other;
- * the cut face is drawn by the back faces behind the plane in one flat colour (ember for the body,
- * light steel for fitted parts such as bushings).
+ * "Kesit" cuts the part lengthwise through its axis on a horizontal plane and takes the upper half away
+ * (owner: a horizontal section, not across the part, and no position slider); the cut face is drawn by
+ * the back faces in one flat colour (ember for the body, light steel for fitted parts such as bushings).
  */
 export default function PartViewer({ src, label, t }: { src: string; label: string; t: Dict }) {
   const box = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [cut, setCut] = useState(false);
-  const [pos, setPos] = useState(50);
-  const plane = useRef(new THREE.Plane(new THREE.Vector3(-1, 0, 0), NO_CUT));
-  const span = useRef<[number, number]>([0, 0]);
+  // the model is centred on the origin with its axis along x: y = 0 is the horizontal plane through the axis
+  const plane = useRef(new THREE.Plane(new THREE.Vector3(0, -1, 0), NO_CUT));
   /** Start camera position, fitted to the model (a 0.2 m bushing and a 0.7 m front head fill the frame alike). */
   const home = useRef(new THREE.Vector3(0.62, 0.36, 0.95));
   const view = useRef<{ camera: THREE.Camera; controls: OrbitControls } | null>(null);
 
   useEffect(() => {
-    const [lo, hi] = span.current;
-    plane.current.constant = cut ? hi - (pos / 100) * (hi - lo) : NO_CUT;
+    plane.current.constant = cut ? 0 : NO_CUT;
     const v = view.current;
     if (!cut || !v) return;
     v.controls.autoRotate = false;
-    // Keep the cut face (it looks along +x) towards the camera.
-    if (v.camera.position.x < 0.1) v.camera.position.copy(home.current);
-  }, [cut, pos, state]);
+    // Keep the cut face (it looks up) towards the camera: look from above.
+    if (v.camera.position.y < 0.2 * home.current.length()) v.camera.position.copy(home.current);
+  }, [cut, state]);
 
   useEffect(() => {
     const el = box.current;
@@ -145,10 +143,6 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
         camera.updateProjectionMatrix();
         controls.minDistance = d * 0.4;
         controls.maxDistance = d * 2;
-        span.current = [
-          b.min.x - b.getCenter(new THREE.Vector3()).x,
-          b.max.x - b.getCenter(new THREE.Vector3()).x,
-        ];
         const caps: THREE.Mesh[] = [];
         model.traverse((o) => {
           const m = o as THREE.Mesh;
@@ -233,23 +227,6 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
           >
             {cut ? t.parts.viewer.cutOff : t.parts.viewer.cut}
           </button>
-          {cut && (
-            <div className="mt-3">
-              <label htmlFor="cut-pos" className="block font-semibold text-ink">
-                {t.parts.viewer.cutLabel}
-              </label>
-              <input
-                id="cut-pos"
-                type="range"
-                min={2}
-                max={98}
-                value={pos}
-                onChange={(e) => setPos(Number(e.target.value))}
-                className="mt-2 block w-full cursor-pointer accent-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-              />
-              <p className="m-0 mt-1 text-ink-mid">{t.parts.viewer.cutHint}</p>
-            </div>
-          )}
         </div>
       )}
     </div>
