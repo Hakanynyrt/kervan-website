@@ -20,28 +20,28 @@ const NO_CUT = 1e3;
  * Interactive 3D view of one part (lazy chunk: three.js loads only when a visitor opens it).
  * Drag to turn, pinch or wheel to zoom, arrow keys turn it from the keyboard. It turns slowly
  * by itself until touched, never under reduced motion, and draws only while on screen.
- * "Kesit" cuts the part lengthwise through its axis on a horizontal plane and takes the upper half away
- * (owner: a horizontal section, not across the part, and no position slider); the cut face is drawn by
- * the back faces in one flat colour (ember for the body, light steel for fitted parts such as bushings).
+ * "Kesit" cuts the part lengthwise through its axis and takes the half facing the camera away; the cut
+ * plane turns with the camera, so the section always faces the viewer (owner: a lengthwise section at the
+ * camera's angle, no position slider). The cut face is drawn by the back faces in one flat colour (ember
+ * for the body, light steel for fitted parts such as bushings).
  */
 export default function PartViewer({ src, label, t }: { src: string; label: string; t: Dict }) {
   const box = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [cut, setCut] = useState(false);
-  // the model is centred on the origin with its axis along x: y = 0 is the horizontal plane through the axis
+  // the model is centred on the origin with its axis along x; the cut plane holds the axis and faces the camera
   const plane = useRef(new THREE.Plane(new THREE.Vector3(0, -1, 0), NO_CUT));
+  const cutOn = useRef(false);
   /** Start camera position, fitted to the model (a 0.2 m bushing and a 0.7 m front head fill the frame alike). */
   const home = useRef(new THREE.Vector3(0.62, 0.36, 0.95));
   const view = useRef<{ camera: THREE.Camera; controls: OrbitControls } | null>(null);
 
   useEffect(() => {
+    cutOn.current = cut;
     plane.current.constant = cut ? 0 : NO_CUT;
     const v = view.current;
-    if (!cut || !v) return;
-    v.controls.autoRotate = false;
-    // Keep the cut face (it looks up) towards the camera: look from above.
-    if (v.camera.position.y < 0.2 * home.current.length()) v.camera.position.copy(home.current);
+    if (cut && v) v.controls.autoRotate = false;
   }, [cut, state]);
 
   useEffect(() => {
@@ -102,6 +102,11 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
       raf = requestAnimationFrame(loop);
       if (!visible) return;
       controls.update();
+      if (cutOn.current) {
+        // the camera direction without its part along the axis: the plane through the axis that faces the camera
+        const n = camera.position.clone().sub(controls.target).setX(0);
+        if (n.lengthSq() > 1e-9) plane.current.normal.copy(n.normalize().negate());
+      }
       renderer.render(scene, camera);
     };
 
