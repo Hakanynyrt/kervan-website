@@ -23,7 +23,7 @@ export function CartLink({ lang, t, current }: { lang: Lang; t: Dict; current: b
     <a
       href={localePath(CART_PATH, lang)}
       aria-current={current ? 'page' : undefined}
-      className={`inline-flex items-center gap-1.5 text-ink hover:text-brand-hi aria-[current=page]:text-brand-hi ${FOCUS}`}
+      className={`inline-flex min-h-11 items-center gap-1.5 text-ink hover:text-brand-hi aria-[current=page]:text-brand-hi ${FOCUS}`}
     >
       {t.nav.cart}
       {n > 0 && (

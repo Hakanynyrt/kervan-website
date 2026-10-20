@@ -20,6 +20,8 @@ import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
 import { LIST_PATH, type BrandLink, type BreakerCard } from '../lib/routes';
 import type { Lang } from '../types';
+import { fmtUsd } from '../lib/price';
+import { tipImg } from '../lib/tip-img';
 import { replaceSearch } from '../lib/url-state';
 import { chipClass, MissingModel } from './Bits';
 import { FOCUS } from './Layout';
@@ -120,12 +122,15 @@ export function ModelTable({
   lang,
   t,
   all = false,
+  cards = false,
 }: {
   rows: BreakerCard[];
   lang: Lang;
   t: Dict;
   /** A brand page lists every model of its make while the box is empty (owner: all models show). */
   all?: boolean;
+  /** Picture cards instead of the table (brand pages, owner: "modelleri fotoğrafları ile birlikte"). */
+  cards?: boolean;
 }) {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<TipFilter>(EMPTY_FILTER);
@@ -181,7 +186,11 @@ export function ModelTable({
     ) : null;
   const table =
     visible.length > 0 ? (
-      <Table rows={visible} tip={filter.tip} lang={lang} t={t} />
+      cards ? (
+        <Cards rows={visible} tip={filter.tip} lang={lang} t={t} />
+      ) : (
+        <Table rows={visible} tip={filter.tip} lang={lang} t={t} />
+      )
     ) : active && found.length > 0 ? (
       <div className="mt-4 rounded-md border border-hair bg-bg-soft p-4 font-sans text-sm">
         <p className="m-0 text-ink">{t.search.filter.none(found.length)}</p>
@@ -354,6 +363,86 @@ function FilterBar({
   );
 }
 
+/** Brand page: one card per model: its own tip picture, or (no picture of its own) the working diameter set large in
+ *  the picture's place with its tip types, never a borrowed picture (owner), then name and diameter. */
+function Cards({
+  rows,
+  tip,
+  lang,
+  t,
+}: {
+  rows: BreakerCard[];
+  tip: TipType | null;
+  lang: Lang;
+  t: Dict;
+}) {
+  const href = (r: BreakerCard) =>
+    localePath(r.path, lang) + (tip && r.types.includes(tip) ? `?tip=${tip}` : '');
+  const dia = (r: BreakerCard) =>
+    r.diameterMm === null ? '—' : `Ø${fmtNum(r.diameterMm, lang)} mm`;
+  return (
+    <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+      {rows.map((r) => (
+        <li key={r.slug}>
+          <a
+            href={href(r)}
+            className={`group flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg transition-colors hover:border-hair-strong ${FOCUS}`}
+          >
+            {r.image ? (
+              <img
+                src={tipImg(r.image)}
+                alt=""
+                width={480}
+                height={320}
+                loading="lazy"
+                decoding="async"
+                className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain"
+              />
+            ) : (
+              <span className="flex aspect-[3/2] w-full flex-col items-center justify-center gap-1 border-b border-hair bg-bg-soft px-2 text-center font-sans">
+                <span className="text-2xl font-bold tabular-nums text-ink sm:text-3xl">
+                  {dia(r)}
+                </span>
+                {r.types.length > 0 && (
+                  <span className="text-xs text-ink-mid sm:text-sm">
+                    {r.types.map((x) => t.tip[x]).join(', ')}
+                  </span>
+                )}
+              </span>
+            )}
+            <span className="flex flex-1 flex-col gap-1 p-3 font-sans">
+              <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
+                {r.name}
+              </span>
+              {/* without a picture the diameter is already set large above: only the badge here */}
+              {(r.image || r.grooved) && (
+                <span className="text-sm text-ink-mid tabular-nums">
+                  {r.image ? dia(r) : ''}
+                  {r.grooved && `${r.image ? ' · ' : ''}${t.list.groovedBadge}`}
+                </span>
+              )}
+              <span className="mt-auto pt-1 text-sm text-ink tabular-nums">
+                {r.price ? (
+                  <>
+                    <span className="font-semibold">
+                      {r.price[0] === r.price[1]
+                        ? fmtUsd(r.price[0], lang)
+                        : `${fmtNum(r.price[0] / 100, lang)}–${fmtUsd(r.price[1], lang)}`}
+                    </span>{' '}
+                    <span className="text-xs text-ink-soft">{t.list.priceExVat}</span>
+                  </>
+                ) : (
+                  <span className="text-ink-mid">{t.list.priceAsk}</span>
+                )}
+              </span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function Table({
   rows,
   tip,
@@ -387,10 +476,11 @@ function Table({
         <tbody>
           {rows.map((r) => (
             <tr key={r.slug} className="border-t border-hair">
-              <th scope="row" className="px-4 py-3 text-left font-medium">
+              <th scope="row" className="px-4 py-0.5 text-left font-medium">
+                {/* min-h-11: a 44 px tap target, the row keeps its height */}
                 <a
                   href={href(r)}
-                  className={`text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
+                  className={`inline-flex min-h-11 items-center text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
                 >
                   {r.name}
                 </a>
@@ -399,7 +489,7 @@ function Table({
                   <a
                     href={`${localePath(r.path, lang)}#toz-kanalli`}
                     aria-label={t.list.groovedBadgeLabel(r.name)}
-                    className={`mt-2 flex w-fit items-center rounded-sm border border-hair-strong bg-bg-soft px-2 py-1 text-xs font-medium text-ink hover:border-ink-soft sm:ml-3 sm:mt-0 sm:inline-flex ${FOCUS}`}
+                    className={`mb-2 flex w-fit items-center rounded-sm border border-hair-strong bg-bg-soft px-2 py-1 text-xs font-medium text-ink hover:border-ink-soft sm:mb-0 sm:ml-3 sm:inline-flex ${FOCUS}`}
                   >
                     {t.list.groovedBadge}
                   </a>

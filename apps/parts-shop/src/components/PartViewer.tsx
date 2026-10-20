@@ -13,6 +13,11 @@ const EMBER = 0xe8431b;
 const CUT = 0xd9552c;
 /** Cut face of parts fitted into the body (bushings, GLB nodes named `fitted…`): light steel. */
 const CUT_FITTED = 0xc9ccd1;
+/** Black finish of the renders for the GLB steel materials, by name: [colour, metalness, roughness]. */
+const FINISH: Record<string, [number, number, number]> = {
+  forged: [0x3b404b, 0.3, 0.6],
+  machined: [0x4d535c, 0.85, 0.3],
+};
 /** Plane constant that clips nothing. */
 const NO_CUT = 1e3;
 
@@ -20,31 +25,29 @@ const NO_CUT = 1e3;
  * Interactive 3D view of one part (lazy chunk: three.js loads only when a visitor opens it).
  * Drag to turn, pinch or wheel to zoom, arrow keys turn it from the keyboard. It turns slowly
  * by itself until touched, never under reduced motion, and draws only while on screen.
- * "Kesit" adds a slider that moves a cross-section plane from one end of the part to the other;
- * the cut face is drawn by the back faces behind the plane in one flat colour (ember for the body,
- * light steel for fitted parts such as bushings).
+ * "Kesit" cuts the part lengthwise through its axis and takes the half facing the camera away; the cut
+ * plane turns with the camera, so the section always faces the viewer (owner: a lengthwise section at the
+ * camera's angle, no position slider). The cut face is drawn by the back faces in one flat colour (ember
+ * for the body, light steel for fitted parts such as bushings).
  */
 export default function PartViewer({ src, label, t }: { src: string; label: string; t: Dict }) {
   const box = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [cut, setCut] = useState(false);
-  const [pos, setPos] = useState(50);
-  const plane = useRef(new THREE.Plane(new THREE.Vector3(-1, 0, 0), NO_CUT));
-  const span = useRef<[number, number]>([0, 0]);
+  // the model is centred on the origin with its axis along x; the cut plane holds the axis and faces the camera
+  const plane = useRef(new THREE.Plane(new THREE.Vector3(0, -1, 0), NO_CUT));
+  const cutOn = useRef(false);
   /** Start camera position, fitted to the model (a 0.2 m bushing and a 0.7 m front head fill the frame alike). */
   const home = useRef(new THREE.Vector3(0.62, 0.36, 0.95));
   const view = useRef<{ camera: THREE.Camera; controls: OrbitControls } | null>(null);
 
   useEffect(() => {
-    const [lo, hi] = span.current;
-    plane.current.constant = cut ? hi - (pos / 100) * (hi - lo) : NO_CUT;
+    cutOn.current = cut;
+    plane.current.constant = cut ? 0 : NO_CUT;
     const v = view.current;
-    if (!cut || !v) return;
-    v.controls.autoRotate = false;
-    // Keep the cut face (it looks along +x) towards the camera.
-    if (v.camera.position.x < 0.1) v.camera.position.copy(home.current);
-  }, [cut, pos, state]);
+    if (cut && v) v.controls.autoRotate = false;
+  }, [cut, state]);
 
   useEffect(() => {
     const el = box.current;
@@ -104,6 +107,11 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
       raf = requestAnimationFrame(loop);
       if (!visible) return;
       controls.update();
+      if (cutOn.current) {
+        // the camera direction without its part along the axis: the plane through the axis that faces the camera
+        const n = camera.position.clone().sub(controls.target).setX(0);
+        if (n.lengthSq() > 1e-9) plane.current.normal.copy(n.normalize().negate());
+      }
       renderer.render(scene, camera);
     };
 
@@ -145,14 +153,21 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
         camera.updateProjectionMatrix();
         controls.minDistance = d * 0.4;
         controls.maxDistance = d * 2;
-        span.current = [
-          b.min.x - b.getCenter(new THREE.Vector3()).x,
-          b.max.x - b.getCenter(new THREE.Vector3()).x,
-        ];
         const caps: THREE.Mesh[] = [];
         model.traverse((o) => {
           const m = o as THREE.Mesh;
           if (!m.isMesh) return;
+          // the renders' black finish: the GLBs carry the generator's grey forged / machined steel, which reads
+          // grey under the viewer's lighting (owner: "gövde siyah değil")
+          for (const x of ([] as THREE.Material[]).concat(m.material)) {
+            const k = x as THREE.MeshStandardMaterial;
+            const f = FINISH[k.name];
+            if (f) {
+              k.color.set(f[0]);
+              k.metalness = f[1];
+              k.roughness = f[2];
+            }
+          }
           for (const x of ([] as THREE.Material[]).concat(m.material))
             x.clippingPlanes = [plane.current];
           let fitted = false;
@@ -233,23 +248,6 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
           >
             {cut ? t.parts.viewer.cutOff : t.parts.viewer.cut}
           </button>
-          {cut && (
-            <div className="mt-3">
-              <label htmlFor="cut-pos" className="block font-semibold text-ink">
-                {t.parts.viewer.cutLabel}
-              </label>
-              <input
-                id="cut-pos"
-                type="range"
-                min={2}
-                max={98}
-                value={pos}
-                onChange={(e) => setPos(Number(e.target.value))}
-                className="mt-2 block w-full cursor-pointer accent-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-              />
-              <p className="m-0 mt-1 text-ink-mid">{t.parts.viewer.cutHint}</p>
-            </div>
-          )}
         </div>
       )}
     </div>
