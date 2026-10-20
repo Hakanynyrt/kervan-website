@@ -20,6 +20,7 @@ import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
 import { LIST_PATH, type BrandLink, type BreakerCard } from '../lib/routes';
 import type { Lang } from '../types';
+import { tipImg } from '../lib/tip-img';
 import { replaceSearch } from '../lib/url-state';
 import { chipClass, MissingModel } from './Bits';
 import { FOCUS } from './Layout';
@@ -120,12 +121,15 @@ export function ModelTable({
   lang,
   t,
   all = false,
+  cards = false,
 }: {
   rows: BreakerCard[];
   lang: Lang;
   t: Dict;
   /** A brand page lists every model of its make while the box is empty (owner: all models show). */
   all?: boolean;
+  /** Picture cards instead of the table (brand pages, owner: "modelleri fotoğrafları ile birlikte"). */
+  cards?: boolean;
 }) {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<TipFilter>(EMPTY_FILTER);
@@ -181,7 +185,11 @@ export function ModelTable({
     ) : null;
   const table =
     visible.length > 0 ? (
-      <Table rows={visible} tip={filter.tip} lang={lang} t={t} />
+      cards ? (
+        <Cards rows={visible} tip={filter.tip} lang={lang} t={t} />
+      ) : (
+        <Table rows={visible} tip={filter.tip} lang={lang} t={t} />
+      )
     ) : active && found.length > 0 ? (
       <div className="mt-4 rounded-md border border-hair bg-bg-soft p-4 font-sans text-sm">
         <p className="m-0 text-ink">{t.search.filter.none(found.length)}</p>
@@ -351,6 +359,67 @@ function FilterBar({
         </div>
       )}
     </section>
+  );
+}
+
+/** Brand page: one picture card per model (its own tip picture, else the labelled sample), name and working diameter. */
+function Cards({
+  rows,
+  tip,
+  lang,
+  t,
+}: {
+  rows: BreakerCard[];
+  tip: TipType | null;
+  lang: Lang;
+  t: Dict;
+}) {
+  const href = (r: BreakerCard) =>
+    localePath(r.path, lang) + (tip && r.types.includes(tip) ? `?tip=${tip}` : '');
+  return (
+    <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+      {rows.map((r) => {
+        const img = r.image ?? r.sampleImage;
+        return (
+          <li key={r.slug}>
+            <a
+              href={href(r)}
+              className={`group flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg transition-colors hover:border-hair-strong ${FOCUS}`}
+            >
+              <span className="relative block">
+                {img ? (
+                  <img
+                    src={tipImg(img)}
+                    alt=""
+                    width={480}
+                    height={320}
+                    loading="lazy"
+                    decoding="async"
+                    className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain"
+                  />
+                ) : (
+                  <span className="block aspect-[3/2] w-full border-b border-hair bg-stage" />
+                )}
+                {!r.image && img && (
+                  <span className="absolute bottom-2 left-2 rounded-sm bg-bg/90 px-1.5 py-0.5 font-sans text-xs text-ink-mid">
+                    {t.list.sampleImage}
+                  </span>
+                )}
+              </span>
+              <span className="flex flex-1 flex-col gap-1 p-3 font-sans">
+                <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
+                  {r.name}
+                </span>
+                <span className="text-sm text-ink-mid tabular-nums">
+                  {r.diameterMm === null ? '—' : `Ø${fmtNum(r.diameterMm, lang)} mm`}
+                  {r.grooved && ` · ${t.list.groovedBadge}`}
+                </span>
+              </span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

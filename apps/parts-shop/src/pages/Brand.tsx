@@ -26,7 +26,7 @@ export default function Brand({ model, lang, t }: { model: Model; lang: Lang; t:
         <BrandChips brands={model.brands} current={model.brand} only="wide" lang={lang} t={t} />
       </div>
       <div className="mt-6 sm:mt-8">
-        <ModelTable rows={model.rows} lang={lang} t={t} all />
+        <ModelTable rows={model.rows} lang={lang} t={t} all cards />
       </div>
       <div className="mt-8 sm:hidden">
         <BrandChips brands={model.brands} current={model.brand} only="phone" lang={lang} t={t} />
