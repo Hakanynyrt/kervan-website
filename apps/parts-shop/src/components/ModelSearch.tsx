@@ -387,10 +387,11 @@ function Table({
         <tbody>
           {rows.map((r) => (
             <tr key={r.slug} className="border-t border-hair">
-              <th scope="row" className="px-4 py-3 text-left font-medium">
+              <th scope="row" className="px-4 py-0.5 text-left font-medium">
+                {/* min-h-11: a 44 px tap target, the row keeps its height */}
                 <a
                   href={href(r)}
-                  className={`text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
+                  className={`inline-flex min-h-11 items-center text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
                 >
                   {r.name}
                 </a>
@@ -399,7 +400,7 @@ function Table({
                   <a
                     href={`${localePath(r.path, lang)}#toz-kanalli`}
                     aria-label={t.list.groovedBadgeLabel(r.name)}
-                    className={`mt-2 flex w-fit items-center rounded-sm border border-hair-strong bg-bg-soft px-2 py-1 text-xs font-medium text-ink hover:border-ink-soft sm:ml-3 sm:mt-0 sm:inline-flex ${FOCUS}`}
+                    className={`mb-2 flex w-fit items-center rounded-sm border border-hair-strong bg-bg-soft px-2 py-1 text-xs font-medium text-ink hover:border-ink-soft sm:mb-0 sm:ml-3 sm:inline-flex ${FOCUS}`}
                   >
                     {t.list.groovedBadge}
                   </a>

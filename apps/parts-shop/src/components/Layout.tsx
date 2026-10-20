@@ -104,14 +104,14 @@ export default function Layout({
         {t.nav.skip}
       </a>
       <div className="border-b border-hair bg-bg-soft font-sans text-xs text-ink-mid">
-        <Container className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-2">
+        <Container className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-0 sm:py-2">
           <span className="hidden sm:inline">
             {ORG_TRADING_NAME} · {t.top.tagline}
           </span>
           <span className="flex flex-1 justify-between gap-4 sm:flex-none">
             <a
               href={`tel:${ORG_PHONE_E164}`}
-              className={`font-medium text-ink hover:text-brand-hi ${FOCUS}`}
+              className={`inline-flex min-h-11 items-center font-medium text-ink hover:text-brand-hi sm:min-h-0 ${FOCUS}`}
             >
               {ORG_PHONE}
             </a>
@@ -123,7 +123,7 @@ export default function Layout({
               hrefLang={other}
               lang={other}
               aria-label={t.nav.langLabel}
-              className={`font-medium text-ink hover:text-brand-hi sm:hidden ${FOCUS}`}
+              className={`inline-flex min-h-11 min-w-11 items-center justify-end font-medium text-ink hover:text-brand-hi sm:hidden ${FOCUS}`}
             >
               {t.nav.langOther}
             </a>
