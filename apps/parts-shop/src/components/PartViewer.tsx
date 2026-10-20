@@ -13,6 +13,11 @@ const EMBER = 0xe8431b;
 const CUT = 0xd9552c;
 /** Cut face of parts fitted into the body (bushings, GLB nodes named `fitted…`): light steel. */
 const CUT_FITTED = 0xc9ccd1;
+/** Black finish of the renders for the GLB steel materials, by name: [colour, metalness, roughness]. */
+const FINISH: Record<string, [number, number, number]> = {
+  forged: [0x3b404b, 0.3, 0.6],
+  machined: [0x4d535c, 0.85, 0.3],
+};
 /** Plane constant that clips nothing. */
 const NO_CUT = 1e3;
 
@@ -152,6 +157,17 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
         model.traverse((o) => {
           const m = o as THREE.Mesh;
           if (!m.isMesh) return;
+          // the renders' black finish: the GLBs carry the generator's grey forged / machined steel, which reads
+          // grey under the viewer's lighting (owner: "gövde siyah değil")
+          for (const x of ([] as THREE.Material[]).concat(m.material)) {
+            const k = x as THREE.MeshStandardMaterial;
+            const f = FINISH[k.name];
+            if (f) {
+              k.color.set(f[0]);
+              k.metalness = f[1];
+              k.roughness = f[2];
+            }
+          }
           for (const x of ([] as THREE.Material[]).concat(m.material))
             x.clippingPlanes = [plane.current];
           let fitted = false;
