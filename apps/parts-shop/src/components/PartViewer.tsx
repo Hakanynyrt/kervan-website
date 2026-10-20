@@ -17,6 +17,9 @@ const CUT_FITTED = 0xc9ccd1;
 const FINISH: Record<string, [number, number, number]> = {
   forged: [0x3b404b, 0.3, 0.6],
   machined: [0x4d535c, 0.85, 0.3],
+  // bushings' unground surfaces: the renders' near-black reads as a hole under the viewer's lighting (owner:
+  // "burçlar alt gövdede dışı çok koyu görünüyor"); a dark steel with some sheen keeps their shape readable
+  black: [0x2e3238, 0.6, 0.42],
 };
 /** Plane constant that clips nothing. */
 const NO_CUT = 1e3;
