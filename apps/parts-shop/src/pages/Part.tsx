@@ -580,6 +580,33 @@ export function RenderFigure({
   const tip = ctx.tipLinks[renderAnchor(r)];
   // Priced (owner's rows): the burçlu head has its own price; the item page takes the order.
   const cents = ctx.prices[`${renderAnchor(r)}${r.fitted && withB ? '#b' : ''}`];
+  // Owner: the Burçsuz / Burçlu choice goes under the picture, not above it; in "3B incele" it shows or
+  // hides the fitted bushings and pins in the model.
+  const choice = r.fitted && (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:mt-3">
+      <div
+        role="group"
+        aria-label={t.parts.fitted.label}
+        className="inline-flex rounded-sm border border-hair-strong font-sans text-sm"
+      >
+        {[false, true].map((on) => (
+          <button
+            key={String(on)}
+            type="button"
+            aria-pressed={withB === on}
+            onClick={() => {
+              setWithB(on);
+              onWithB?.(on);
+            }}
+            className={`min-h-11 cursor-pointer px-4 font-medium first:rounded-l-sm last:rounded-r-sm aria-pressed:bg-ink aria-pressed:text-bg ${on ? 'border-l border-hair-strong' : ''} text-ink hover:bg-bg-warm aria-pressed:hover:bg-ink ${FOCUS}`}
+          >
+            {on ? t.parts.fitted.with : t.parts.fitted.without}
+          </button>
+        ))}
+      </div>
+      {withB && <p className="m-0 font-sans text-sm text-ink-mid">{t.parts.fitted.withNote}</p>}
+    </div>
+  );
   const share = (
     <ShareLinks
       url={partItemUrl(ctx.part, r, ctx.lang)}
@@ -592,8 +619,9 @@ export function RenderFigure({
       {open3d && r.model3d ? (
         <div className="mb-4">
           <Suspense fallback={<div className="aspect-video w-full rounded-md bg-pstage" />}>
-            <PartViewer src={r.model3d} label={caption} t={t} />
+            <PartViewer src={r.model3d} label={caption} t={t} showFitted={withB} />
           </Suspense>
+          {choice && <div className="mt-3">{choice}</div>}
           <button
             type="button"
             onClick={() => setOpen3d(false)}
@@ -625,37 +653,7 @@ export function RenderFigure({
               </button>
             )
           }
-          below={
-            // Owner: the Burçsuz / Burçlu choice goes under the picture, not above it.
-            r.fitted && (
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:mt-3">
-                <div
-                  role="group"
-                  aria-label={t.parts.fitted.label}
-                  className="inline-flex rounded-sm border border-hair-strong font-sans text-sm"
-                >
-                  {[false, true].map((on) => (
-                    <button
-                      key={String(on)}
-                      type="button"
-                      aria-pressed={withB === on}
-                      onClick={() => {
-                        setWithB(on);
-                        setOpen3d(false);
-                        onWithB?.(on);
-                      }}
-                      className={`min-h-11 cursor-pointer px-4 font-medium first:rounded-l-sm last:rounded-r-sm aria-pressed:bg-ink aria-pressed:text-bg ${on ? 'border-l border-hair-strong' : ''} text-ink hover:bg-bg-warm aria-pressed:hover:bg-ink ${FOCUS}`}
-                    >
-                      {on ? t.parts.fitted.with : t.parts.fitted.without}
-                    </button>
-                  ))}
-                </div>
-                {withB && (
-                  <p className="m-0 font-sans text-sm text-ink-mid">{t.parts.fitted.withNote}</p>
-                )}
-              </div>
-            )
-          }
+          below={choice}
         />
       )}
       {r.kit && <KitTable items={r.kit} t={t} lang={ctx.lang} />}

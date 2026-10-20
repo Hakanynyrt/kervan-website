@@ -29,8 +29,20 @@ const NO_CUT = 1e3;
  * plane turns with the camera, so the section always faces the viewer (owner: a lengthwise section at the
  * camera's angle, no position slider). The cut face is drawn by the back faces in one flat colour (ember
  * for the body, light steel for fitted parts such as bushings).
+ * A burçlu front head's model carries its bushings and pins as nodes named `fitted…`; they show only with
+ * `showFitted` (the page's Burçsuz / Burçlu choice).
  */
-export default function PartViewer({ src, label, t }: { src: string; label: string; t: Dict }) {
+export default function PartViewer({
+  src,
+  label,
+  t,
+  showFitted = true,
+}: {
+  src: string;
+  label: string;
+  t: Dict;
+  showFitted?: boolean;
+}) {
   const box = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -41,6 +53,14 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
   /** Start camera position, fitted to the model (a 0.2 m bushing and a 0.7 m front head fill the frame alike). */
   const home = useRef(new THREE.Vector3(0.62, 0.36, 0.95));
   const view = useRef<{ camera: THREE.Camera; controls: OrbitControls } | null>(null);
+  /** Fitted parts and their cut faces, hidden for Burçsuz. */
+  const fittedParts = useRef<THREE.Object3D[]>([]);
+  const fittedOn = useRef(showFitted);
+
+  useEffect(() => {
+    fittedOn.current = showFitted;
+    for (const o of fittedParts.current) o.visible = showFitted;
+  }, [showFitted, state]);
 
   useEffect(() => {
     cutOn.current = cut;
@@ -154,6 +174,7 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
         controls.minDistance = d * 0.4;
         controls.maxDistance = d * 2;
         const caps: THREE.Mesh[] = [];
+        const fittedList: THREE.Object3D[] = [];
         model.traverse((o) => {
           const m = o as THREE.Mesh;
           if (!m.isMesh) return;
@@ -183,6 +204,7 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
             }),
           );
           caps.push(cap);
+          if (fitted) fittedList.push(m, cap);
         });
         for (const c of caps) {
           // Same transform as the mesh it caps (the geometry is shared).
@@ -194,6 +216,8 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
             c.scale.copy(m.scale);
           }
         }
+        for (const o of fittedList) o.visible = fittedOn.current;
+        fittedParts.current = fittedList;
         scene.add(model);
         setState('ready');
         loop();
