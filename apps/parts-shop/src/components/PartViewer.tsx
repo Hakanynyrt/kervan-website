@@ -204,6 +204,11 @@ export default function PartViewer({
               side: THREE.BackSide,
               clippingPlanes: [plane.current],
               toneMapped: false,
+              // a bushing's outer diameter lies exactly on the head's bore: without this the cut face and the
+              // other part's bore surface share a depth and flicker into stripes (owner: "kesitte … tırtıklı")
+              polygonOffset: true,
+              polygonOffsetFactor: -1,
+              polygonOffsetUnits: -4,
             }),
           );
           caps.push(cap);
