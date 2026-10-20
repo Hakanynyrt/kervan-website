@@ -11,8 +11,9 @@ import type { Dict } from '../lib/dict';
 const EMBER = 0xe8431b;
 /** Cut face of the section view: a glowing, freshly cut ember tone (render-only colour). */
 const CUT = 0xd9552c;
-/** Cut face of parts fitted into the body (bushings, GLB nodes named `fitted…`): light steel. */
-const CUT_FITTED = 0xc9ccd1;
+/** Cut face of parts fitted into the body (bushings, GLB nodes named `fitted…`): bronze, so they stand apart
+ *  from the ember body in a section (owner: "burçlar kesitte farklı renk görünsün"). */
+const CUT_FITTED = 0xc8a050;
 /** Black finish of the renders for the GLB steel materials, by name: [colour, metalness, roughness]. */
 const FINISH: Record<string, [number, number, number]> = {
   forged: [0x3b404b, 0.3, 0.6],
@@ -31,7 +32,7 @@ const NO_CUT = 1e3;
  * "Kesit" cuts the part lengthwise through its axis and takes the half facing the camera away; the cut
  * plane turns with the camera, so the section always faces the viewer (owner: a lengthwise section at the
  * camera's angle, no position slider). The cut face is drawn by the back faces in one flat colour (ember
- * for the body, light steel for fitted parts such as bushings).
+ * for the body, bronze for fitted parts such as bushings).
  * A burçlu front head's model carries its bushings and pins as nodes named `fitted…`; they show only with
  * `showFitted` (the page's Burçsuz / Burçlu choice).
  */
