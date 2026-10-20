@@ -65,8 +65,6 @@ export interface BreakerCard {
   popularTier: 1 | 2 | null;
   /** We model a tool with dust grooves for this breaker (`groovedFor`). */
   grooved?: true;
-  /** No picture of its own: the render key of the sample tip (`sampleFor`), shown labelled as a sample. */
-  sampleImage?: string;
 }
 
 export type PageModel =
@@ -398,13 +396,6 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     };
   });
   cards.sort(byName);
-  // Brand pages show every model with a picture (owner): a model without one gets the sample tip of its model page.
-  for (const x of cards) {
-    if (x.image) continue;
-    const e = breakers.get(x.slug);
-    const img = e ? sampleFor(e, breakers)?.family.skus.find((k) => k.image)?.image : undefined;
-    if (img) x.sampleImage = img;
-  }
   // Tools with dust grooves: a badge on the list rows, linking to the product page's section.
   const groovedSeen = new Set<string>();
   for (const x of cards) {

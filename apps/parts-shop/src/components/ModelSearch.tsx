@@ -362,7 +362,8 @@ function FilterBar({
   );
 }
 
-/** Brand page: one picture card per model (its own tip picture, else the labelled sample), name and working diameter. */
+/** Brand page: one card per model: its own tip picture, or (no picture of its own) the working diameter set large in
+ *  the picture's place with its tip types, never a borrowed picture (owner), then name and diameter. */
 function Cards({
   rows,
   tip,
@@ -376,49 +377,53 @@ function Cards({
 }) {
   const href = (r: BreakerCard) =>
     localePath(r.path, lang) + (tip && r.types.includes(tip) ? `?tip=${tip}` : '');
+  const dia = (r: BreakerCard) =>
+    r.diameterMm === null ? '—' : `Ø${fmtNum(r.diameterMm, lang)} mm`;
   return (
     <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-      {rows.map((r) => {
-        const img = r.image ?? r.sampleImage;
-        return (
-          <li key={r.slug}>
-            <a
-              href={href(r)}
-              className={`group flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg transition-colors hover:border-hair-strong ${FOCUS}`}
-            >
-              <span className="relative block">
-                {img ? (
-                  <img
-                    src={tipImg(img)}
-                    alt=""
-                    width={480}
-                    height={320}
-                    loading="lazy"
-                    decoding="async"
-                    className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain"
-                  />
-                ) : (
-                  <span className="block aspect-[3/2] w-full border-b border-hair bg-stage" />
-                )}
-                {!r.image && img && (
-                  <span className="absolute bottom-2 left-2 rounded-sm bg-bg/90 px-1.5 py-0.5 font-sans text-xs text-ink-mid">
-                    {t.list.sampleImage}
+      {rows.map((r) => (
+        <li key={r.slug}>
+          <a
+            href={href(r)}
+            className={`group flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg transition-colors hover:border-hair-strong ${FOCUS}`}
+          >
+            {r.image ? (
+              <img
+                src={tipImg(r.image)}
+                alt=""
+                width={480}
+                height={320}
+                loading="lazy"
+                decoding="async"
+                className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain"
+              />
+            ) : (
+              <span className="flex aspect-[3/2] w-full flex-col items-center justify-center gap-1 border-b border-hair bg-bg-soft px-2 text-center font-sans">
+                <span className="text-2xl font-bold tabular-nums text-ink sm:text-3xl">
+                  {dia(r)}
+                </span>
+                {r.types.length > 0 && (
+                  <span className="text-xs text-ink-mid sm:text-sm">
+                    {r.types.map((x) => t.tip[x]).join(', ')}
                   </span>
                 )}
               </span>
-              <span className="flex flex-1 flex-col gap-1 p-3 font-sans">
-                <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
-                  {r.name}
-                </span>
-                <span className="text-sm text-ink-mid tabular-nums">
-                  {r.diameterMm === null ? '—' : `Ø${fmtNum(r.diameterMm, lang)} mm`}
-                  {r.grooved && ` · ${t.list.groovedBadge}`}
-                </span>
+            )}
+            <span className="flex flex-1 flex-col gap-1 p-3 font-sans">
+              <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
+                {r.name}
               </span>
-            </a>
-          </li>
-        );
-      })}
+              {/* without a picture the diameter is already set large above: only the badge here */}
+              {(r.image || r.grooved) && (
+                <span className="text-sm text-ink-mid tabular-nums">
+                  {r.image ? dia(r) : ''}
+                  {r.grooved && `${r.image ? ' · ' : ''}${t.list.groovedBadge}`}
+                </span>
+              )}
+            </span>
+          </a>
+        </li>
+      ))}
     </ul>
   );
 }
