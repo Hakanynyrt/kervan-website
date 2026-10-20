@@ -20,6 +20,7 @@ import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
 import { LIST_PATH, type BrandLink, type BreakerCard } from '../lib/routes';
 import type { Lang } from '../types';
+import { fmtUsd } from '../lib/price';
 import { tipImg } from '../lib/tip-img';
 import { replaceSearch } from '../lib/url-state';
 import { chipClass, MissingModel } from './Bits';
@@ -420,6 +421,20 @@ function Cards({
                   {r.grooved && `${r.image ? ' · ' : ''}${t.list.groovedBadge}`}
                 </span>
               )}
+              <span className="mt-auto pt-1 text-sm text-ink tabular-nums">
+                {r.price ? (
+                  <>
+                    <span className="font-semibold">
+                      {r.price[0] === r.price[1]
+                        ? fmtUsd(r.price[0], lang)
+                        : `${fmtNum(r.price[0] / 100, lang)}–${fmtUsd(r.price[1], lang)}`}
+                    </span>{' '}
+                    <span className="text-xs text-ink-soft">{t.list.priceExVat}</span>
+                  </>
+                ) : (
+                  <span className="text-ink-mid">{t.list.priceAsk}</span>
+                )}
+              </span>
             </span>
           </a>
         </li>

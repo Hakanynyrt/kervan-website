@@ -65,6 +65,8 @@ export interface BreakerCard {
   popularTier: 1 | 2 | null;
   /** We model a tool with dust grooves for this breaker (`groovedFor`). */
   grooved?: true;
+  /** Lowest and highest net USD list price (cents) over its tips; null when none is priced (brand page cards). */
+  price: [number, number] | null;
 }
 
 export type PageModel =
@@ -327,6 +329,12 @@ export function groupBreakers(c: PublicCatalog): {
   return { breakers, redirects };
 }
 
+/** Lowest and highest of the priced values, null when none is priced. */
+function priceSpan(cents: (number | null)[]): [number, number] | null {
+  const v = cents.filter((x): x is number => x !== null);
+  return v.length ? [Math.min(...v), Math.max(...v)] : null;
+}
+
 /**
  * A sample tip picture for a breaker whose own tips have no picture (catalogue geometry without photos, or an extra product):
  * the tip of the same maker's breaker nearest in working diameter (a tie takes the smaller one),
@@ -379,6 +387,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         types: e.extra?.tipTypes ?? [],
         image: null,
         popularTier: null,
+        price: null,
       };
     return {
       slug,
@@ -393,6 +402,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         (t, x) => (tierRank(x.popularTier) < tierRank(t) ? x.popularTier : t),
         null,
       ),
+      price: priceSpan(e.families.flatMap((x) => x.skus.map((k) => k.priceUsdNetCents))),
     };
   });
   cards.sort(byName);

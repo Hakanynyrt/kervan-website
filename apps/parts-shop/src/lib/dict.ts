@@ -115,6 +115,9 @@ export interface Dict {
     groovedHint: string;
     /** Badge on a result row whose breaker has tools with dust grooves; link to the section. */
     groovedBadge: string;
+    /** Brand page cards: net list price (or span) and the note under it; no price yet. */
+    priceExVat: string;
+    priceAsk: string;
     groovedBadgeLabel: (name: string) => string;
   };
   family: {
@@ -585,6 +588,8 @@ export const DICT: Record<Lang, Dict> = {
       types: 'Uç tipleri',
       groovedHint: 'Bazı kırıcılar için toz kanallı uç da yapıyoruz; kırıcınızı yazın.',
       groovedBadge: 'Toz kanallı',
+      priceExVat: 'KDV hariç',
+      priceAsk: 'Fiyat için sorun',
       groovedBadgeLabel: (name) => `${name} için toz kanallı uçlar`,
     },
     popular: {
@@ -1336,6 +1341,8 @@ export const DICT: Record<Lang, Dict> = {
       types: 'Tip types',
       groovedHint: 'For some breakers we also make tools with dust grooves; type your breaker.',
       groovedBadge: 'Dust grooves',
+      priceExVat: 'excl. VAT',
+      priceAsk: 'Ask for a price',
       groovedBadgeLabel: (name) => `Tools with dust grooves for the ${name}`,
     },
     popular: {
