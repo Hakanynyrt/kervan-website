@@ -121,16 +121,28 @@ export const isHiddenBreaker = (b: { brand: string; model: string; slug?: string
 /**
  * Breaker–tip links of the catalogue that are wrong (a model-name collision such as "40" or "8"
  * joined a breaker to another class's tip), found by the 2026-10-21 price and fit audit (owner:
- * "Gerekenleri uygula"): tip family code → breaker slugs it does not fit. They are left out of
+ * "Gerekenleri uygula"): tip family code → catalogue breaker slugs (as stored, e.g. `diger/…`)
+ * it does not fit. They are left out of
  * the public catalogue, so the breaker page and its card show only the tips that fit.
  */
 export const WRONG_FITS: Readonly<Record<string, readonly string[]>> = {
-  'KU135-21': ['komatsu/jthb-20'],
-  'KU146-07': ['komatsu/jthb-30'],
+  'KU135-21': ['diger/komatsu-jthb-20'],
+  'KU146-07': ['diger/komatsu-jthb-30'],
   'KU155-02': ['atlas-copco/mb-500'],
-  'KU80-05': ['omal/80', 'star/sh-40'],
-  'KU80-07': ['idromeccanica/imi-85', 'montabert/brh-40', 'omal/80', 'promove/pmv-90-p-3-sh'],
-  'KU85-06': ['furukawa/hb-40g', 'inan/400', 'kent/khb-400', 'kent/khb-40g-ii', 'mega/450'],
+  'KU80-05': ['diger/omal-80', 'diger/star-sh-40'],
+  'KU80-07': [
+    'diger/idromeccanica-imi-85',
+    'diger/mal-80',
+    'diger/montabert-brh-40',
+    'diger/promove-pmv-90-p-3sh',
+  ],
+  'KU85-06': [
+    'diger/inanga-400',
+    'diger/kent-khb-400',
+    'diger/kent-khb-40g-ii',
+    'furukawa/hb-40g',
+    'mega/450',
+  ],
 };
 
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
