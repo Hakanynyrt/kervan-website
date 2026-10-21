@@ -320,8 +320,8 @@ export interface Dict {
       renderNote: string;
       type: Record<import('./photos').KitItemType, string>;
     };
-    /** Group page before a search: a few renders with no make or model named. */
-    showcase: { title: string; lead: string };
+    /** Group page before a search: every part as a picture card, a page of them at a time. */
+    showcase: { title: string; lead: string; more: (left: number) => string };
     /** Under a part's caption: its breaker's tip page. */
     tipLink: string;
     /** Under a part's caption: WhatsApp quote for exactly that model. */
@@ -1064,7 +1064,8 @@ export const DICT: Record<Lang, Dict> = {
       },
       showcase: {
         title: 'Ürettiklerimizden',
-        lead: 'Ürettiğimiz parçalardan örnekler. Marka ve modelinizi yazınca o kırıcının parçaları açılır.',
+        lead: 'Ürettiğimiz parçalar. Marka ve modelinizi yazınca o kırıcının parçaları açılır.',
+        more: (left) => `Daha fazla göster (${left} parça daha)`,
       },
       tipLink: 'Bu kırıcının ucu',
       quoteThis: 'Bu model için teklif iste',
@@ -1830,8 +1831,9 @@ export const DICT: Record<Lang, Dict> = {
         },
       },
       showcase: {
-        title: 'Some of what we make',
-        lead: 'Examples of the parts we make. Type your make and model to open that breaker’s parts.',
+        title: 'What we make',
+        lead: 'The parts we make. Type your make and model to open that breaker’s parts.',
+        more: (left) => `Show more (${left} more parts)`,
       },
       tipLink: 'Tip for this breaker',
       quoteThis: 'Request a quote for this model',
