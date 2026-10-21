@@ -808,7 +808,7 @@ export const DICT: Record<Lang, Dict> = {
         kama: { name: 'Kama', body: 'Ucu gövdede tutan kamalar ve tutucu pimler.' },
         saplama: {
           name: 'Saplama',
-          body: 'Kırıcı gövdesini bir arada tutan saplamalar, somun ve pullarıyla.',
+          body: 'Kırıcı gövdesini bir arada tutan saplamalar; takımlar somunlarıyla, çizimde varsa pullarıyla.',
         },
         piston: { name: 'Piston', body: 'Kırıcının darbe pistonu; kırıcı modeline göre.' },
         akumulator: {
@@ -912,7 +912,7 @@ export const DICT: Record<Lang, Dict> = {
         sideWearPlate: 'yan aşınma plakası',
         frontWearPlate: 'ön aşınma plakası',
         allRoundWearPlate: 'üst-alt-yan aşınma plakası',
-        tieRodSet: 'boy saplama takımı (somun ve pullarıyla)',
+        tieRodSet: 'boy saplama takımı',
         wearPlateSet: 'aşınma plakası ve takoz seti',
         bushingSet: 'burç takımı',
       },
@@ -1009,6 +1009,8 @@ export const DICT: Record<Lang, Dict> = {
         oilGroove: 'yağ kanallı',
         greasingHole: 'yağlama delikli',
         puCoated: 'PU kaplamalı',
+        rubberCoated: 'lastik kaplamalı',
+        oRingType: 'O-ringli tip',
         pu: 'poliüretan',
         rubber: 'kauçuk',
         city: 'City',
@@ -1133,7 +1135,7 @@ export const DICT: Record<Lang, Dict> = {
         text: (part, breaker, qty, price, url) =>
           `Merhaba, ${breaker} ${part}, ${qty} adet sipariş vermek istiyorum (birim ${price} + vergiler).\n${url}`,
         other: 'Başka bir kırıcı için teklif isteyin',
-        withNuts: 'Somun ve pullarıyla birlikte, takım olarak',
+        withNuts: 'Somunlarıyla birlikte, takım olarak',
       },
       fitted: {
         label: 'Seçenek',
@@ -1576,7 +1578,7 @@ export const DICT: Record<Lang, Dict> = {
         },
         saplama: {
           name: 'Tie rods',
-          body: 'Tie rods that hold the breaker body together, with nuts and washers.',
+          body: 'Tie rods that hold the breaker body together; sets come with their nuts, and washers where the drawing has them.',
         },
         piston: { name: 'Pistons', body: 'The breaker’s impact piston, by breaker model.' },
         akumulator: {
@@ -1684,7 +1686,7 @@ export const DICT: Record<Lang, Dict> = {
         sideWearPlate: 'side wear plate',
         frontWearPlate: 'front wear plate',
         allRoundWearPlate: 'top, bottom and side wear plate',
-        tieRodSet: 'through bolt set (with nuts and washers)',
+        tieRodSet: 'through bolt set',
         wearPlateSet: 'wear plate and buffer set',
         bushingSet: 'bushing set',
       },
@@ -1781,6 +1783,8 @@ export const DICT: Record<Lang, Dict> = {
         oilGroove: 'oil grooves',
         greasingHole: 'greasing hole',
         puCoated: 'PU-coated',
+        rubberCoated: 'rubber-coated',
+        oRingType: 'O-ring type',
         pu: 'polyurethane',
         rubber: 'rubber',
         city: 'City',
@@ -1905,7 +1909,7 @@ export const DICT: Record<Lang, Dict> = {
         text: (part, breaker, qty, price, url) =>
           `Hello, I would like to order ${qty} × ${breaker} ${part} (unit ${price}, export price).\n${url}`,
         other: 'Request a quote for another breaker',
-        withNuts: 'Sold as a set, with its nuts and washers',
+        withNuts: 'Sold as a set, with its nuts',
       },
       fitted: {
         label: 'Option',

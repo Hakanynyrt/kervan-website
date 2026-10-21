@@ -142,6 +142,8 @@ export interface PartRender {
     | 'oilGroove'
     | 'greasingHole'
     | 'puCoated'
+    | 'rubberCoated'
+    | 'oRingType'
     | 'pu'
     | 'rubber'
     | 'city'
@@ -1417,6 +1419,45 @@ const kitRender =
   };
 
 /**
+ * More MTB tie rods (boy saplama), one sheet each, outside the 20-model kit (no kama or piston drawn for them):
+ * `/photos/parca/saplama-<file>-{vitrin,yan,on}-01`. Coated rods carry their coating as a variant: PU on the
+ * grooved bands (yellow), rubber (lastik) on the MTB 36 band; the MTB 275 II has an O-ring type and a
+ * urethane-coated ("lastikli") type. The MTB 36's parts are also the new-model MSB 250's.
+ */
+const MTB_TIE_RODS: {
+  make: string;
+  model: string;
+  file: string;
+  variant?: PartRender['variant'];
+}[] = [
+  { make: 'MTB', model: '10', file: 'mtb-10' },
+  { make: 'MTB', model: '15', file: 'mtb-15', variant: 'puCoated' },
+  { make: 'MTB', model: '36', file: 'mtb-36', variant: 'rubberCoated' },
+  { make: 'MSB', model: '250', file: 'mtb-36', variant: 'newType' },
+  { make: 'MTB', model: '120', file: 'mtb-120', variant: 'puCoated' },
+  { make: 'MTB', model: '170', file: 'mtb-170', variant: 'puCoated' },
+  { make: 'MTB', model: '210 II', file: 'mtb-215' },
+  { make: 'MTB', model: '275 II', file: 'mtb-275-ii', variant: 'oRingType' },
+  { make: 'MTB', model: '275 II', file: 'mtb-275-ii-lastikli', variant: 'puCoated' },
+  { make: 'MTB', model: '365', file: 'mtb-365', variant: 'puCoated' },
+];
+const tieRodRender = ({
+  make,
+  model,
+  file,
+  variant,
+}: (typeof MTB_TIE_RODS)[number]): PartRender => ({
+  ...otherRender({
+    make,
+    model,
+    file: `saplama-${file}`,
+    kind: 'tieRod',
+    views: ['side', 'front'],
+  }),
+  ...(variant ? { variant } : {}),
+});
+
+/**
  * More parts modelled from our drawings, one drawing each (`/photos/parca/<file>-<view>-01`):
  * retainer pins and side bolts join the kama and saplama pages, accumulator parts and wear plates
  * have their own pages. Wear plates are rendered standing on their long edge.
@@ -2265,6 +2306,7 @@ const DRAWN: Record<PartKey, readonly PartRender[]> = {
   ],
   saplama: [
     ...PART_KIT.map(kitRender('saplama', 'tieRod', ['side', 'front'])),
+    ...MTB_TIE_RODS.map(tieRodRender),
     ...SIDE_BOLTS.map(otherRender),
     ...ROD_SETS.map(smallRender),
     ...SMALL_PARTS.saplama.map(smallRender),
