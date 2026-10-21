@@ -25,8 +25,8 @@ export const PART_FILTERS: Partial<Record<PartKey, [PartFilter, readonly Kind[]]
   burc: [
     ['sets', ['bushingSet']],
     ['toolBushing', ['toolBushing']],
-    ['upperBushing', ['upperBushing']],
-    ['thrustRing', ['thrustRing', 'spacerBushing', 'rockDrillThrustRing']],
+    ['upperBushing', ['upperBushing', 'upperSpacerBushing']],
+    ['thrustRing', ['thrustRing', 'spacerBushing', 'rockDrillThrustRing', 'rockDrillChuckBushing']],
     ['oneBushing', ['oneBushing']],
     ['twoInOne', ['thrustUpperBushing', 'toolUpperBushing']],
     [

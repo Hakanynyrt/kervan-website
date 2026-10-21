@@ -313,6 +313,7 @@ jobs:
       - name: Build parts-shop
         env:
           VITE_TIP_IMG_BASE: ${{ steps.r2.outputs.base }}
+          SHOP_PREVIEW_LEAN: ${{ github.ref != 'refs/heads/main' && '1' || '' }}
         run: pnpm turbo build --filter=@kervan/parts-shop
 
       # Additive only (never --delete): published names are content-addressed, so a name never

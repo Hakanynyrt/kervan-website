@@ -11,12 +11,16 @@ import type { Dict } from '../lib/dict';
 const EMBER = 0xe8431b;
 /** Cut face of the section view: a glowing, freshly cut ember tone (render-only colour). */
 const CUT = 0xd9552c;
-/** Cut face of parts fitted into the body (bushings, GLB nodes named `fitted…`): light steel. */
-const CUT_FITTED = 0xc9ccd1;
+/** Cut face of parts fitted into the body (bushings, GLB nodes named `fitted…`): bronze, so they stand apart
+ *  from the ember body in a section (owner: "burçlar kesitte farklı renk görünsün"). */
+const CUT_FITTED = 0xc8a050;
 /** Black finish of the renders for the GLB steel materials, by name: [colour, metalness, roughness]. */
 const FINISH: Record<string, [number, number, number]> = {
   forged: [0x3b404b, 0.3, 0.6],
   machined: [0x4d535c, 0.85, 0.3],
+  // bushings' unground surfaces take the front head's colour (owner: "burçlar alt gövdede dışı çok koyu
+  // görünüyor" → "alt gövde ile aynı renk"); the renders' near-black read as a hole under the viewer's lighting
+  black: [0x3b404b, 0.3, 0.6],
 };
 /** Plane constant that clips nothing. */
 const NO_CUT = 1e3;
@@ -28,9 +32,21 @@ const NO_CUT = 1e3;
  * "Kesit" cuts the part lengthwise through its axis and takes the half facing the camera away; the cut
  * plane turns with the camera, so the section always faces the viewer (owner: a lengthwise section at the
  * camera's angle, no position slider). The cut face is drawn by the back faces in one flat colour (ember
- * for the body, light steel for fitted parts such as bushings).
+ * for the body, bronze for fitted parts such as bushings).
+ * A burçlu front head's model carries its bushings and pins as nodes named `fitted…`; they show only with
+ * `showFitted` (the page's Burçsuz / Burçlu choice).
  */
-export default function PartViewer({ src, label, t }: { src: string; label: string; t: Dict }) {
+export default function PartViewer({
+  src,
+  label,
+  t,
+  showFitted = true,
+}: {
+  src: string;
+  label: string;
+  t: Dict;
+  showFitted?: boolean;
+}) {
   const box = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -41,6 +57,14 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
   /** Start camera position, fitted to the model (a 0.2 m bushing and a 0.7 m front head fill the frame alike). */
   const home = useRef(new THREE.Vector3(0.62, 0.36, 0.95));
   const view = useRef<{ camera: THREE.Camera; controls: OrbitControls } | null>(null);
+  /** Fitted parts and their cut faces, hidden for Burçsuz. */
+  const fittedParts = useRef<THREE.Object3D[]>([]);
+  const fittedOn = useRef(showFitted);
+
+  useEffect(() => {
+    fittedOn.current = showFitted;
+    for (const o of fittedParts.current) o.visible = showFitted;
+  }, [showFitted, state]);
 
   useEffect(() => {
     cutOn.current = cut;
@@ -154,6 +178,7 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
         controls.minDistance = d * 0.4;
         controls.maxDistance = d * 2;
         const caps: THREE.Mesh[] = [];
+        const fittedList: THREE.Object3D[] = [];
         model.traverse((o) => {
           const m = o as THREE.Mesh;
           if (!m.isMesh) return;
@@ -180,9 +205,15 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
               side: THREE.BackSide,
               clippingPlanes: [plane.current],
               toneMapped: false,
+              // a bushing's outer diameter lies exactly on the head's bore: without this the cut face and the
+              // other part's bore surface share a depth and flicker into stripes (owner: "kesitte … tırtıklı")
+              polygonOffset: true,
+              polygonOffsetFactor: -1,
+              polygonOffsetUnits: -4,
             }),
           );
           caps.push(cap);
+          if (fitted) fittedList.push(m, cap);
         });
         for (const c of caps) {
           // Same transform as the mesh it caps (the geometry is shared).
@@ -194,6 +225,8 @@ export default function PartViewer({ src, label, t }: { src: string; label: stri
             c.scale.copy(m.scale);
           }
         }
+        for (const o of fittedList) o.visible = fittedOn.current;
+        fittedParts.current = fittedList;
         scene.add(model);
         setState('ready');
         loop();

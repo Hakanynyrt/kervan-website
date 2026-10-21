@@ -47,6 +47,10 @@ process.env.NODE_ENV ??= 'production';
 // With VITE_TIP_IMG_BASE set (CI on main) the tip images are not copied into dist: the deploy
 // uploads .renders/pub to R2 and the pages point at it.
 const OFFSITE_TIPS = Boolean(process.env.VITE_TIP_IMG_BASE);
+// PR previews (no R2) keep every part photo and 3D model in dist; to stay under the Pages file
+// limit they publish only each tip's front picture (SHOP_PREVIEW_LEAN=1, set by the deploy for
+// non-main builds). Main serves both tip pictures from R2.
+const LEAN = !OFFSITE_TIPS && process.env.SHOP_PREVIEW_LEAN === '1';
 // The part photos (public/photos/parca) move to R2 the same way (src/lib/photo-url.ts): drop them
 // from dist, except the opening frames (acilis-*), which ExplodedPicker fetch()es and which stay
 // on Pages. Prints a count only.
@@ -93,9 +97,9 @@ try {
       if (rear && (await copy(rear))) f.imageRear = rear;
       for (const s of f.skus) {
         const v = manifest.skus?.[s.code];
-        if (!v || !(await copy(v.hero)) || !(await copy(v.side))) continue;
+        if (!v || !(await copy(v.hero))) continue;
         s.image = v.hero;
-        s.imageSide = v.side;
+        if (!LEAN && (await copy(v.side))) s.imageSide = v.side;
       }
     }
   }
