@@ -11,7 +11,6 @@ import {
 import { DICT } from './dict';
 import { LEGAL } from './legal';
 import { localePath } from './locale-path';
-import { shownCents } from './price';
 import { fmtNum } from './format';
 import { renderModel, renderTitle } from './part-caption';
 import { findRender } from './part-links';
@@ -38,7 +37,7 @@ export const isIndexable = (p: PageProps): boolean => !NOINDEX_KINDS.has(p.model
 const productLd = (o: BuildShopProductOpts): object =>
   o.offer ? shopProduct(o) : productWebPage({ ...o, publisherId: `${SITE}/#organization` });
 
-/** Offer price as schema.org wants it: the USD price the page shows (taxes in on Turkish pages, see shownCents), "125.00". */
+/** Offer price as schema.org wants it: the net USD price the page shows, "125.00". */
 const usd = (cents: number): string => (cents / 100).toFixed(2);
 
 /**
@@ -161,9 +160,9 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
             ...(cents !== null
               ? {
                   offer: {
-                    price: usd(shownCents(cents, lang)),
+                    price: usd(cents),
                     priceCurrency: 'USD',
-                    valueAddedTaxIncluded: lang === 'tr',
+                    valueAddedTaxIncluded: false,
                   },
                 }
               : {}),
@@ -204,9 +203,9 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
             ...(opt && opt.cents !== null
               ? {
                   offer: {
-                    price: usd(shownCents(opt.cents, lang)),
+                    price: usd(opt.cents),
                     priceCurrency: 'USD',
-                    valueAddedTaxIncluded: lang === 'tr',
+                    valueAddedTaxIncluded: false,
                   },
                 }
               : {}),
@@ -241,9 +240,9 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
             ...(opt && opt.cents !== null
               ? {
                   offer: {
-                    price: usd(shownCents(opt.cents, lang)),
+                    price: usd(opt.cents),
                     priceCurrency: 'USD',
-                    valueAddedTaxIncluded: lang === 'tr',
+                    valueAddedTaxIncluded: false,
                   },
                 }
               : {}),

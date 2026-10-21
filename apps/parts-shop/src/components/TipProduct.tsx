@@ -15,7 +15,7 @@ import { fmtMm, fmtNum } from '../lib/format';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
 import type { GroovedTool } from '../lib/grooved';
 import { addToCart } from '../lib/cart';
-import { fmtDate, fmtTry, fmtUsd, shownCents } from '../lib/price';
+import { fmtDate, fmtTry, fmtUsd } from '../lib/price';
 import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
 import type { PartLink } from '../lib/part-links';
@@ -119,7 +119,6 @@ export default function TipProduct({
   const tons = diameter === null ? null : carrierTons(diameter);
   const url = SITE + localePath(path, lang);
   const order = opt.cents !== null;
-  const shown = opt.cents === null ? null : shownCents(opt.cents, lang);
   const text =
     opt.cents === null
       ? tf.quoteText(quoteName, t.tip[opt.tipType], opt.code ?? '', qty, url)
@@ -128,10 +127,10 @@ export default function TipProduct({
           t.tip[opt.tipType],
           opt.code ?? '',
           qty,
-          fmtUsd(shownCents(opt.cents, lang), lang),
+          fmtUsd(opt.cents, lang),
           url,
         );
-  const tl = shown === null ? null : fmtTry(shown, fx, lang);
+  const tl = opt.cents === null ? null : fmtTry(opt.cents, fx, lang);
   const add = () => {
     addToCart(
       {
@@ -158,10 +157,11 @@ export default function TipProduct({
       />
       <PageTitle>{title}</PageTitle>
       <OemLine t={t} />
-      {shown !== null && (
+      {opt.cents !== null && (
         <p className="m-0 mt-2 font-sans text-base text-ink-mid tabular-nums lg:hidden">
-          <span className="font-semibold text-ink">{fmtUsd(shown, lang)}</span>
+          <span className="font-semibold text-ink">{fmtUsd(opt.cents, lang)}</span>
           {tl && ` · ${tl}`}
+          {t.price.plus && <span className="text-sm text-ink-soft"> {t.price.plus}</span>}
         </p>
       )}
 
@@ -320,12 +320,15 @@ export default function TipProduct({
             ) : (
               <>
                 <p className="m-0 mt-1 text-3xl font-bold text-ink tabular-nums">
-                  {fmtUsd(shown ?? opt.cents, lang)}
+                  {fmtUsd(opt.cents, lang)}
+                  {t.price.plus && (
+                    <span className="text-base font-semibold text-ink-mid"> {t.price.plus}</span>
+                  )}
                 </p>
                 {tl && (
                   <p className="m-0 mt-1 text-lg font-semibold text-ink-mid tabular-nums">{tl}</p>
                 )}
-                <p className="m-0 mt-1 text-sm text-ink-soft">{t.price.taxNote}</p>
+                {t.price.note && <p className="m-0 mt-1 text-sm text-ink-soft">{t.price.note}</p>}
                 {tl && fx && (
                   <p className="m-0 mt-1 text-xs text-ink-soft">
                     {t.price.fxNote(fmtDate(fx.date, lang))}

@@ -21,7 +21,7 @@ import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
 import { LIST_PATH, type BrandLink, type BreakerCard } from '../lib/routes';
 import type { Lang } from '../types';
-import { fmtTry, fmtUsd, shownCents } from '../lib/price';
+import { fmtTry, fmtUsd } from '../lib/price';
 import { tipImg } from '../lib/tip-img';
 import { replaceSearch } from '../lib/url-state';
 import { chipClass, MissingModel } from './Bits';
@@ -406,84 +406,77 @@ function Cards({
     r.diameterMm === null ? '—' : `Ø${fmtNum(r.diameterMm, lang)} mm`;
   return (
     <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-      {rows.map((r) => {
-        const price = r.price
-          ? ([shownCents(r.price[0], lang), shownCents(r.price[1], lang)] as const)
-          : null;
-        return (
-          <li key={r.slug}>
-            <a
-              href={href(r)}
-              className={`group flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg transition-colors hover:border-hair-strong ${FOCUS}`}
-            >
-              {(r.image ?? r.sample) ? (
-                <span className="relative block">
-                  <img
-                    src={tipImg((r.image ?? r.sample)!)}
-                    alt=""
-                    width={480}
-                    height={320}
-                    loading="lazy"
-                    decoding="async"
-                    className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain"
-                  />
-                  {!r.image && (
-                    <span className="absolute bottom-1.5 left-1.5 rounded-sm bg-bg/90 px-1.5 py-0.5 font-sans text-xs text-ink-mid">
-                      {t.list.sampleBadge}
-                    </span>
-                  )}
-                </span>
-              ) : (
-                <span className="flex aspect-[3/2] w-full flex-col items-center justify-center gap-1 border-b border-hair bg-bg-soft px-2 text-center font-sans">
-                  <span className="text-2xl font-bold tabular-nums text-ink sm:text-3xl">
-                    {dia(r)}
-                  </span>
-                  {r.types.length > 0 && (
-                    <span className="text-xs text-ink-mid sm:text-sm">
-                      {r.types.map((x) => t.tip[x]).join(', ')}
-                    </span>
-                  )}
-                </span>
-              )}
-              <span className="flex flex-1 flex-col gap-1 p-3 font-sans">
-                <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
-                  {r.name}
-                </span>
-                {/* without a picture the diameter is already set large above: only the badge here */}
-                {(r.image || r.sample || r.grooved) && (
-                  <span className="text-sm text-ink-mid tabular-nums">
-                    {r.image || r.sample ? dia(r) : ''}
-                    {r.grooved && `${r.image || r.sample ? ' · ' : ''}${t.list.groovedBadge}`}
+      {rows.map((r) => (
+        <li key={r.slug}>
+          <a
+            href={href(r)}
+            className={`group flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg transition-colors hover:border-hair-strong ${FOCUS}`}
+          >
+            {(r.image ?? r.sample) ? (
+              <span className="relative block">
+                <img
+                  src={tipImg((r.image ?? r.sample)!)}
+                  alt=""
+                  width={480}
+                  height={320}
+                  loading="lazy"
+                  decoding="async"
+                  className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain"
+                />
+                {!r.image && (
+                  <span className="absolute bottom-1.5 left-1.5 rounded-sm bg-bg/90 px-1.5 py-0.5 font-sans text-xs text-ink-mid">
+                    {t.list.sampleBadge}
                   </span>
                 )}
-                <span className="mt-auto pt-1 text-sm text-ink tabular-nums">
-                  {price ? (
-                    <>
-                      <span className="font-semibold">
-                        {price[0] === price[1]
-                          ? fmtUsd(price[0], lang)
-                          : `${fmtNum(price[0] / 100, lang)}–${fmtUsd(price[1], lang)}`}
-                      </span>{' '}
-                      {t.list.priceNote && (
-                        <span className="text-xs text-ink-soft">{t.list.priceNote}</span>
-                      )}
-                      {fx && (
-                        <span className="block text-ink-mid">
-                          {price[0] === price[1]
-                            ? fmtTry(price[0], fx, lang)
-                            : `${fmtNum(Math.round((price[0] / 100) * fx.usdTry), lang)}–${fmtTry(price[1], fx, lang)}`}
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    <span className="text-ink-mid">{t.list.priceAsk}</span>
-                  )}
-                </span>
               </span>
-            </a>
-          </li>
-        );
-      })}
+            ) : (
+              <span className="flex aspect-[3/2] w-full flex-col items-center justify-center gap-1 border-b border-hair bg-bg-soft px-2 text-center font-sans">
+                <span className="text-2xl font-bold tabular-nums text-ink sm:text-3xl">
+                  {dia(r)}
+                </span>
+                {r.types.length > 0 && (
+                  <span className="text-xs text-ink-mid sm:text-sm">
+                    {r.types.map((x) => t.tip[x]).join(', ')}
+                  </span>
+                )}
+              </span>
+            )}
+            <span className="flex flex-1 flex-col gap-1 p-3 font-sans">
+              <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
+                {r.name}
+              </span>
+              {/* without a picture the diameter is already set large above: only the badge here */}
+              {(r.image || r.sample || r.grooved) && (
+                <span className="text-sm text-ink-mid tabular-nums">
+                  {r.image || r.sample ? dia(r) : ''}
+                  {r.grooved && `${r.image || r.sample ? ' · ' : ''}${t.list.groovedBadge}`}
+                </span>
+              )}
+              <span className="mt-auto pt-1 text-sm text-ink tabular-nums">
+                {r.price ? (
+                  <>
+                    <span className="font-semibold">
+                      {r.price[0] === r.price[1]
+                        ? fmtUsd(r.price[0], lang)
+                        : `${fmtNum(r.price[0] / 100, lang)}–${fmtUsd(r.price[1], lang)}`}
+                    </span>{' '}
+                    <span className="text-xs text-ink-soft">{t.list.priceNote}</span>
+                    {fx && (
+                      <span className="block text-ink-mid">
+                        {r.price[0] === r.price[1]
+                          ? fmtTry(r.price[0], fx, lang)
+                          : `${fmtNum(Math.round((r.price[0] / 100) * fx.usdTry), lang)}–${fmtTry(r.price[1], fx, lang)}`}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-ink-mid">{t.list.priceAsk}</span>
+                )}
+              </span>
+            </span>
+          </a>
+        </li>
+      ))}
     </ul>
   );
 }

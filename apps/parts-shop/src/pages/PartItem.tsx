@@ -92,6 +92,7 @@ export default function PartItem({
           cents={cents}
           fx={fx}
           lang={lang}
+          plus={t.price.plus}
           note={priceNote(r.kind, t)}
           className="mt-2 text-lg lg:hidden"
         />
