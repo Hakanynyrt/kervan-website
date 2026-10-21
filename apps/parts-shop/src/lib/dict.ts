@@ -118,6 +118,8 @@ export interface Dict {
     /** Brand page cards: net list price (or span) and the note under it; no price yet. */
     priceExVat: string;
     priceAsk: string;
+    /** Under a page of model cards: shows the next page. */
+    more: (left: number) => string;
     groovedBadgeLabel: (name: string) => string;
   };
   family: {
@@ -590,6 +592,7 @@ export const DICT: Record<Lang, Dict> = {
       groovedBadge: 'Toz kanallı',
       priceExVat: 'KDV hariç',
       priceAsk: 'Fiyat için sorun',
+      more: (left) => `Daha fazla göster (${left} model daha)`,
       groovedBadgeLabel: (name) => `${name} için toz kanallı uçlar`,
     },
     popular: {
@@ -1351,6 +1354,7 @@ export const DICT: Record<Lang, Dict> = {
       groovedBadge: 'Dust grooves',
       priceExVat: 'excl. VAT',
       priceAsk: 'Ask for a price',
+      more: (left) => `Show more (${left} more models)`,
       groovedBadgeLabel: (name) => `Tools with dust grooves for the ${name}`,
     },
     popular: {

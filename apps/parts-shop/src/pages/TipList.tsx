@@ -25,7 +25,8 @@ export default function TipList({ model, lang, t }: { model: Model; lang: Lang; 
         <BrandChips brands={model.brands} only="wide" lang={lang} t={t} />
       </div>
       <div className="mt-6 sm:mt-8">
-        <ModelTable rows={model.rows} lang={lang} t={t} />
+        {/* Owner (2026-10-21): every model listed before a search, as on the brand pages. */}
+        <ModelTable rows={model.rows} lang={lang} t={t} all cards />
       </div>
       <div className="mt-8 sm:hidden">
         <BrandChips brands={model.brands} only="phone" lang={lang} t={t} />

@@ -109,14 +109,18 @@ export function BrandChips({
 }
 
 /**
- * The breaker search: nothing is listed until something is typed (owner: no make/model
- * lists on the site; whoever looks for one types it). The box filters as you type and picks
+ * The breaker search: `all` lists every model while the box is empty (brand pages, and the tip
+ * page since the owner's 2026-10-21 "Kırıcı ucu sayfasında da tüm modeller listelensin"), as
+ * picture cards a page at a time with `cards`. The box filters as you type and picks
  * up `?q=` from the home page's search. A typed search's results can be narrowed by tip
  * type, diameter band (with the rough carrier weight) and dust grooves; the filters only
  * appear for results and only offer values the results have. The query and the filters are
  * read from the URL after hydration (`?q=&tip=&cap=&kanal=1`) and written back with
  * `replaceState`, so a filtered search can be shared; the prerender is the empty state.
  */
+/** Model cards shown at a time; "Daha fazla göster" adds as many again. */
+const PAGE = 24;
+
 export function ModelTable({
   rows,
   lang,
@@ -155,6 +159,9 @@ export function ModelTable({
     });
   }, [ready, query, filter]);
   const shown = query ? rows.filter((r) => matches(query, searchName(r.name))) : all ? rows : [];
+  // Cards show a page at a time; a new search or filter starts again from the first page.
+  const [page, setPage] = useState(PAGE);
+  useEffect(() => setPage(PAGE), [query, filter]);
   // Nothing found: try the query with a misspelt make fixed and unknown words dropped (on the
   // unfiltered rows, so a filter can never hide the suggestion).
   const guess =
@@ -187,7 +194,18 @@ export function ModelTable({
   const table =
     visible.length > 0 ? (
       cards ? (
-        <Cards rows={visible} tip={filter.tip} lang={lang} t={t} />
+        <>
+          <Cards rows={visible.slice(0, page)} tip={filter.tip} lang={lang} t={t} />
+          {visible.length > page && (
+            <button
+              type="button"
+              onClick={() => setPage((n) => n + PAGE)}
+              className={`mt-4 inline-flex min-h-11 items-center rounded-sm border border-ink-soft bg-bg px-4 font-sans text-sm font-medium text-ink hover:border-ink ${FOCUS}`}
+            >
+              {t.list.more(visible.length - page)}
+            </button>
+          )}
+        </>
       ) : (
         <Table rows={visible} tip={filter.tip} lang={lang} t={t} />
       )
