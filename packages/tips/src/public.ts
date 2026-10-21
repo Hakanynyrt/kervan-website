@@ -124,7 +124,14 @@ export const isHiddenBreaker = (b: { brand: string; model: string; slug?: string
  * "Gerekenleri uygula"): tip family code → breaker slugs it does not fit. They are left out of
  * the public catalogue, so the breaker page and its card show only the tips that fit.
  */
-export const WRONG_FITS: Readonly<Record<string, readonly string[]>> = {};
+export const WRONG_FITS: Readonly<Record<string, readonly string[]>> = {
+  'KU135-21': ['komatsu/jthb-20'],
+  'KU146-07': ['komatsu/jthb-30'],
+  'KU155-02': ['atlas-copco/mb-500'],
+  'KU80-05': ['omal/80', 'star/sh-40'],
+  'KU80-07': ['idromeccanica/imi-85', 'montabert/brh-40', 'omal/80', 'promove/pmv-90-p-3-sh'],
+  'KU85-06': ['furukawa/hb-40g', 'inan/400', 'kent/khb-400', 'kent/khb-40g-ii', 'mega/450'],
+};
 
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
