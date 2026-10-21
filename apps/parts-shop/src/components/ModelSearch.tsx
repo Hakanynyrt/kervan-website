@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { FxRate } from '@kervan/tips';
 import {
   applyTipFilter,
   CARRIER_BANDS,
@@ -20,7 +21,7 @@ import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
 import { LIST_PATH, type BrandLink, type BreakerCard } from '../lib/routes';
 import type { Lang } from '../types';
-import { fmtUsd } from '../lib/price';
+import { fmtTry, fmtUsd } from '../lib/price';
 import { tipImg } from '../lib/tip-img';
 import { replaceSearch } from '../lib/url-state';
 import { chipClass, MissingModel } from './Bits';
@@ -123,12 +124,15 @@ const PAGE = 24;
 
 export function ModelTable({
   rows,
+  fx = null,
   lang,
   t,
   all = false,
   cards = false,
 }: {
   rows: BreakerCard[];
+  /** CBRT rate for the cards' TL price (owner: "tl fiyatı da gözüksün"). */
+  fx?: FxRate | null;
   lang: Lang;
   t: Dict;
   /** A brand page lists every model of its make while the box is empty (owner: all models show). */
@@ -195,7 +199,7 @@ export function ModelTable({
     visible.length > 0 ? (
       cards ? (
         <>
-          <Cards rows={visible.slice(0, page)} tip={filter.tip} lang={lang} t={t} />
+          <Cards rows={visible.slice(0, page)} tip={filter.tip} fx={fx} lang={lang} t={t} />
           {visible.length > page && (
             <button
               type="button"
@@ -386,11 +390,13 @@ function FilterBar({
 function Cards({
   rows,
   tip,
+  fx,
   lang,
   t,
 }: {
   rows: BreakerCard[];
   tip: TipType | null;
+  fx: FxRate | null;
   lang: Lang;
   t: Dict;
 }) {
@@ -406,16 +412,23 @@ function Cards({
             href={href(r)}
             className={`group flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg transition-colors hover:border-hair-strong ${FOCUS}`}
           >
-            {r.image ? (
-              <img
-                src={tipImg(r.image)}
-                alt=""
-                width={480}
-                height={320}
-                loading="lazy"
-                decoding="async"
-                className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain"
-              />
+            {(r.image ?? r.sample) ? (
+              <span className="relative block">
+                <img
+                  src={tipImg((r.image ?? r.sample)!)}
+                  alt=""
+                  width={480}
+                  height={320}
+                  loading="lazy"
+                  decoding="async"
+                  className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain"
+                />
+                {!r.image && (
+                  <span className="absolute bottom-1.5 left-1.5 rounded-sm bg-bg/90 px-1.5 py-0.5 font-sans text-xs text-ink-mid">
+                    {t.list.sampleBadge}
+                  </span>
+                )}
+              </span>
             ) : (
               <span className="flex aspect-[3/2] w-full flex-col items-center justify-center gap-1 border-b border-hair bg-bg-soft px-2 text-center font-sans">
                 <span className="text-2xl font-bold tabular-nums text-ink sm:text-3xl">
@@ -433,10 +446,10 @@ function Cards({
                 {r.name}
               </span>
               {/* without a picture the diameter is already set large above: only the badge here */}
-              {(r.image || r.grooved) && (
+              {(r.image || r.sample || r.grooved) && (
                 <span className="text-sm text-ink-mid tabular-nums">
-                  {r.image ? dia(r) : ''}
-                  {r.grooved && `${r.image ? ' · ' : ''}${t.list.groovedBadge}`}
+                  {r.image || r.sample ? dia(r) : ''}
+                  {r.grooved && `${r.image || r.sample ? ' · ' : ''}${t.list.groovedBadge}`}
                 </span>
               )}
               <span className="mt-auto pt-1 text-sm text-ink tabular-nums">
@@ -448,6 +461,13 @@ function Cards({
                         : `${fmtNum(r.price[0] / 100, lang)}–${fmtUsd(r.price[1], lang)}`}
                     </span>{' '}
                     <span className="text-xs text-ink-soft">{t.list.priceExVat}</span>
+                    {fx && (
+                      <span className="block text-ink-mid">
+                        {r.price[0] === r.price[1]
+                          ? fmtTry(r.price[0], fx, lang)
+                          : `${fmtNum(Math.round((r.price[0] / 100) * fx.usdTry), lang)}–${fmtTry(r.price[1], fx, lang)}`}
+                      </span>
+                    )}
                   </>
                 ) : (
                   <span className="text-ink-mid">{t.list.priceAsk}</span>

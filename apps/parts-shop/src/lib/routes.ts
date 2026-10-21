@@ -62,6 +62,8 @@ export interface BreakerCard {
   types: TipType[];
   /** Render key of the first SKU that has one (see tip-img.ts). */
   image: string | null;
+  /** No picture of its own: the nearest-diameter pictured tip (as the breaker page's sample), shown labelled. */
+  sample?: string;
   popularTier: 1 | 2 | null;
   /** We model a tool with dust grooves for this breaker (`groovedFor`). */
   grooved?: true;
@@ -374,9 +376,14 @@ function sampleFor(
 export function buildPages(c: PublicCatalog): BuiltPage[] {
   const demo = c.demo === true;
   const { breakers } = groupBreakers(c);
+  // Cards without a picture of their own borrow the breaker page's sample, labelled (owner,
+  // 2026-10-21: "tümünde de uçlar gözüksün"; it replaces the large diameter of 2026-10-20).
+  const sampleImg = (e: BreakerEntry) =>
+    sampleFor(e, breakers)?.family.skus.find((s) => s.image)?.image ?? undefined;
   const cards: BreakerCard[] = [...breakers].map(([slug, e]) => {
     const f = e.families[0] as PublicFamily | undefined;
-    if (!f)
+    if (!f) {
+      const sample = sampleImg(e);
       return {
         slug,
         path: breakerPath(slug),
@@ -386,9 +393,13 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         diameterMm: e.extra?.diameterMm ?? null,
         types: e.extra?.tipTypes ?? [],
         image: null,
+        ...(sample ? { sample } : {}),
         popularTier: null,
         price: null,
       };
+    }
+    const image = e.families.flatMap((x) => x.skus).find((s) => s.image)?.image ?? null;
+    const sample = image ? undefined : sampleImg(e);
     return {
       slug,
       path: breakerPath(slug),
@@ -397,7 +408,8 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       model: e.model,
       diameterMm: f.attrs.diameterMm,
       types: [...new Set(e.families.flatMap((x) => x.skus.map((s) => s.tipType)))],
-      image: e.families.flatMap((x) => x.skus).find((s) => s.image)?.image ?? null,
+      image,
+      ...(sample ? { sample } : {}),
       popularTier: e.families.reduce<1 | 2 | null>(
         (t, x) => (tierRank(x.popularTier) < tierRank(t) ? x.popularTier : t),
         null,

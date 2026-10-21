@@ -1,3 +1,4 @@
+import type { FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import { Breadcrumb, PageTitle } from '../components/Bits';
 import { BrandChips, ModelTable } from '../components/ModelSearch';
@@ -7,7 +8,17 @@ import type { Lang } from '../types';
 
 type Model = Extract<PageModel, { kind: 'list' }>;
 
-export default function TipList({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
+export default function TipList({
+  model,
+  fx,
+  lang,
+  t,
+}: {
+  model: Model;
+  fx: FxRate | null;
+  lang: Lang;
+  t: Dict;
+}) {
   return (
     <Container className="pb-12 pt-8 lg:pt-12">
       <Breadcrumb
@@ -26,7 +37,7 @@ export default function TipList({ model, lang, t }: { model: Model; lang: Lang; 
       </div>
       <div className="mt-6 sm:mt-8">
         {/* Owner (2026-10-21): every model listed before a search, as on the brand pages. */}
-        <ModelTable rows={model.rows} lang={lang} t={t} all cards />
+        <ModelTable rows={model.rows} fx={fx} lang={lang} t={t} all cards />
       </div>
       <div className="mt-8 sm:hidden">
         <BrandChips brands={model.brands} only="phone" lang={lang} t={t} />
