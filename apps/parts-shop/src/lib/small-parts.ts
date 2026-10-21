@@ -29,8 +29,27 @@ export const SMALL_PARTS: Record<
     { make: 'Rammer', model: 'S25', file: 'somun-rammer-s25-tie-rod-nut', kind: 'tieRodNut' },
     { make: 'Rammer', model: 'S25', file: 'pul-rammer-s25-tie-rod-washer', kind: 'tieRodWasher' },
     { make: 'Rammer', model: 'S84', file: 'somun-rammer-s84-tie-rod-nut', kind: 'tieRodNut' },
+    { make: 'MTB', model: '10', file: 'somun-mtb-10-tie-rod-nut', kind: 'tieRodNut' },
+    { make: 'MTB', model: '10', file: 'pul-mtb-10-tie-rod-washer', kind: 'tieRodWasher' },
+    { make: 'MTB', model: '15', file: 'somun-mtb-15-tie-rod-nut', kind: 'tieRodNut' },
+    { make: 'MTB', model: '15', file: 'pul-mtb-15-tie-rod-washer', kind: 'tieRodWasher' },
+    { make: 'MTB', model: '36', file: 'somun-mtb-36-tie-rod-nut', kind: 'tieRodNut' },
+    { make: 'MTB', model: '85', file: 'somun-mtb-85-tie-rod-nut', kind: 'tieRodNut' },
+    { make: 'MTB', model: '120', file: 'somun-mtb-120-tie-rod-nut', kind: 'tieRodNut' },
     { make: 'MTB', model: '150', file: 'somun-mtb-150-tie-rod-nut', kind: 'tieRodNut' },
+    { make: 'MTB', model: '170', file: 'somun-mtb-170-tie-rod-nut', kind: 'tieRodNut' },
+    { make: 'MTB', model: '210', file: 'somun-mtb-210-tie-rod-nut', kind: 'tieRodNut' },
     { make: 'MTB', model: '210 II', file: 'somun-mtb-210-ii-tie-rod-nut', kind: 'tieRodNut' },
+    { make: 'MTB', model: '275 II', file: 'somun-mtb-275-ii-tie-rod-nut', kind: 'tieRodNut' },
+    { make: 'MTB', model: '365', file: 'somun-mtb-365-tie-rod-nut', kind: 'tieRodNut' },
+    // The MTB 36's parts are the new-model MSB 250's too: same nut, shown under both names.
+    {
+      make: 'MSB',
+      model: '250',
+      file: 'somun-mtb-36-tie-rod-nut',
+      kind: 'tieRodNut',
+      variant: 'newType',
+    },
     { make: 'Krupp', model: 'HM 1500', file: 'somun-krupp-hm-1500-tie-rod-nut', kind: 'tieRodNut' },
     {
       make: 'Krupp',
@@ -623,7 +642,8 @@ export const SMALL_PARTS: Record<
   ],
 };
 
-/** Tie rods with their nuts and washers (`saplama-takim-<kit>[-<nut shape>]`), one per nut shape. */
+/** Tie rods with their nuts and washers (`saplama-takim-<kit>[-<nut shape>]`), one per nut shape. Sets follow the
+ *  drawings: MTB sets are the rod (with its coating) and one barrel nut, MTB 10 / 15 a washer and a hex nut; no lock washers. */
 export const ROD_SETS: readonly SmallPart[] = [
   { make: 'Furukawa', model: 'F22', file: 'saplama-takim-furukawa-f22', kind: 'tieRodSet' },
   { make: 'Furukawa', model: 'HB20G', file: 'saplama-takim-furukawa-hb20g', kind: 'tieRodSet' },
@@ -639,7 +659,39 @@ export const ROD_SETS: readonly SmallPart[] = [
     kind: 'tieRodSet',
   },
   { make: 'Montabert', model: 'BRV 32', file: 'saplama-takim-montabert-brv-32', kind: 'tieRodSet' },
+  { make: 'MTB', model: '10', file: 'saplama-takim-mtb-10', kind: 'tieRodSet' },
+  { make: 'MTB', model: '15', file: 'saplama-takim-mtb-15', kind: 'tieRodSet' },
+  { make: 'MTB', model: '36', file: 'saplama-takim-mtb-36', kind: 'tieRodSet' },
+  { make: 'MTB', model: '85', file: 'saplama-takim-mtb-85', kind: 'tieRodSet' },
+  { make: 'MTB', model: '120', file: 'saplama-takim-mtb-120', kind: 'tieRodSet' },
   { make: 'MTB', model: '150', file: 'saplama-takim-mtb-150', kind: 'tieRodSet' },
+  { make: 'MTB', model: '170', file: 'saplama-takim-mtb-170', kind: 'tieRodSet' },
+  { make: 'MTB', model: '210', file: 'saplama-takim-mtb-210', kind: 'tieRodSet' },
+  // MTB 215 (= MTB 210 II): published as MTB 215 only (owner), so the file is named after it.
+  { make: 'MTB', model: '210 II', file: 'saplama-takim-mtb-215', kind: 'tieRodSet' },
+  // MTB 275 II: two rods on the sheets, the O-ring type and the urethane-coated ("lastikli") type.
+  {
+    make: 'MTB',
+    model: '275 II',
+    file: 'saplama-takim-mtb-275-ii',
+    kind: 'tieRodSet',
+    variant: 'oRingType',
+  },
+  {
+    make: 'MTB',
+    model: '275 II',
+    file: 'saplama-takim-mtb-275-ii-lastikli',
+    kind: 'tieRodSet',
+    variant: 'puCoated',
+  },
+  { make: 'MTB', model: '365', file: 'saplama-takim-mtb-365', kind: 'tieRodSet' },
+  {
+    make: 'MSB',
+    model: '250',
+    file: 'saplama-takim-mtb-36',
+    kind: 'tieRodSet',
+    variant: 'newType',
+  },
   { make: 'Rammer', model: 'E64', file: 'saplama-takim-rammer-e64', kind: 'tieRodSet' },
   { make: 'Rammer', model: 'E66', file: 'saplama-takim-rammer-e66', kind: 'tieRodSet' },
   {

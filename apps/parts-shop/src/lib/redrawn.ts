@@ -165,8 +165,9 @@ export const REDRAWN: Record<string, string> = {
   'saplama-takim-soosan-sb121-ts-p-newtype': '03',
   'saplama-takim-soosan-sb121-ts-p-trilobe': '03',
   'saplama-takim-furukawa-hb30g': '03',
-  // MTB 210 II tie-rod nut: a Ø100 × 105 cross-bore balta nut (was drawn as a block).
-  'somun-mtb-210-ii-tie-rod-nut': '03',
+  // MTB 210 II tie-rod nut: a Ø100 × 105 cross-bore barrel nut; 04 is modelled from its drawing
+  // (03 was still the published block's outline).
+  'somun-mtb-210-ii-tie-rod-nut': '04',
   // Rammer S84 kama: the 30° × 12.7 lead-in drawn as a ramp (was four steps).
   'kama-rammer-s84': '03',
   // Chamfers (pah) checked against every drawing: holes, bore mouths, ends and threads as drawn.
@@ -1517,7 +1518,8 @@ export const REDRAWN: Record<string, string> = {
   'saplama-takim-krupp-hm-960': '02',
   'saplama-takim-montabert-brh-501': '02',
   'saplama-takim-montabert-brv-32': '02',
-  'saplama-takim-mtb-150': '02',
+  // MTB 150 set as drawn: rod + one barrel nut at the lower end (03; 02 also had a nut on the upper end).
+  'saplama-takim-mtb-150': '03',
   'somun-furukawa-f22-tie-rod-lower-nut': '02',
   'somun-furukawa-f22-tie-rod-upper-nut': '02',
   'somun-furukawa-hb20g-tie-rod-lower-nut': '02',
@@ -1536,7 +1538,8 @@ export const REDRAWN: Record<string, string> = {
   'somun-krupp-hm-960-tie-rod-upper-nut': '02',
   'somun-montabert-brh-501-tie-rod-nut': '02',
   'somun-montabert-brv-32-tie-rod-nut': '02',
-  'somun-mtb-150-tie-rod-nut': '02',
+  // MTB 150 nut redrawn from its sheet (03: side flats, C1, bore across the rod).
+  'somun-mtb-150-tie-rod-nut': '03',
   'somun-rammer-e64-tie-rod-nut': '02',
   'somun-rammer-e66-tie-rod-nut': '02',
   'somun-rammer-e66-tie-rod-nut-new-type': '02',
