@@ -61,7 +61,8 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   // Tips name their type through the dict; spare parts carry the label they were added with.
   const lineLabel = (x: CartItem) => (x.tipType ? t.tip[x.tipType] : (x.label ?? ''));
   const totalCents = list.reduce((n, x) => n + (x.cents ?? 0) * x.qty, 0);
-  const vatCents = vatOf(totalCents);
+  // Taxes are added on Turkish pages only; English pages show the export price.
+  const vatCents = lang === 'tr' ? vatOf(totalCents) : 0;
   const grossCents = totalCents + vatCents;
   const anyAsk = list.some((x) => x.cents === null);
   const money = (cents: number) =>
@@ -79,8 +80,9 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   const message = c.message(
     lines,
     [
-      `${c.subtotal}: ${money(totalCents)}`,
-      `${c.vat(VAT_PERCENT)}: ${money(vatCents)}`,
+      ...(vatCents
+        ? [`${c.subtotal}: ${money(totalCents)}`, `${c.vat(VAT_PERCENT)}: ${money(vatCents)}`]
+        : []),
       `${c.total}: ${money(grossCents)}${anyAsk ? ` (${c.totalNote})` : ''}`,
     ].join('\n'),
     FIELDS.filter((k) => contact[k].trim()).map((k) => `${c[k]}: ${contact[k].trim()}`),
@@ -172,11 +174,12 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
             </ul>
             <div className="mt-6 font-sans">
               <dl className="m-0 text-sm tabular-nums">
-                {(
-                  [
-                    [c.subtotal, totalCents],
-                    [c.vat(VAT_PERCENT), vatCents],
-                  ] as [string, number][]
+                {(vatCents
+                  ? ([
+                      [c.subtotal, totalCents],
+                      [c.vat(VAT_PERCENT), vatCents],
+                    ] as [string, number][])
+                  : []
                 ).map(([k, v]) => (
                   <div key={k} className="flex justify-between gap-4 py-1 text-ink-mid">
                     <dt>{k}</dt>
@@ -197,6 +200,9 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                 <p className="m-0 mt-1 text-right text-xs text-ink-soft">
                   {t.price.fxNote(fmtDate(fx.date, lang))}
                 </p>
+              )}
+              {t.price.note && (
+                <p className="m-0 mt-1 text-right text-xs text-ink-soft">{t.price.note}</p>
               )}
               {anyAsk && <p className="m-0 mt-2 text-sm text-ink-mid">{c.totalNote}</p>}
               <button

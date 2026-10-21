@@ -172,3 +172,28 @@ test('extras: whitelisted, unknown types dropped, hidden brand left out', () => 
     },
   ]);
 });
+
+test('every tip type of a family takes the chisel price, else the first priced one', () => {
+  const fam: FamilyRow[] = [
+    { id: 1, code: 'KU135-01', attrs: attrs(135), popular_tier: null },
+    { id: 2, code: 'KU140-01', attrs: attrs(140), popular_tier: null },
+    { id: 3, code: 'KU150-01', attrs: attrs(150), popular_tier: null },
+  ];
+  const rows: SkuRow[] = [
+    sku(1, 'KU135-01-C', { price_usd_net_cents: 1000 }),
+    sku(1, 'KU135-01-M', { tip_type: 'moil', price_usd_net_cents: 900 }),
+    sku(1, 'KU135-01-B', { tip_type: 'blunt' }),
+    sku(2, 'KU140-01-M', { tip_type: 'moil', price_usd_net_cents: 1500 }),
+    sku(2, 'KU140-01-P', { tip_type: 'pyramid' }),
+    sku(3, 'KU150-01-C'),
+    sku(3, 'KU150-01-M', { tip_type: 'moil' }),
+  ];
+  const prices = toPublicCatalog(fam, rows, []).families.map((f) =>
+    f.skus.map((s) => s.priceUsdNetCents),
+  );
+  assert.deepEqual(prices, [
+    [1000, 1000, 1000],
+    [1500, 1500],
+    [null, null],
+  ]);
+});

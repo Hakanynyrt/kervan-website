@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { FxRate } from '@kervan/tips';
 import {
   applyTipFilter,
   CARRIER_BANDS,
@@ -20,7 +21,8 @@ import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
 import { LIST_PATH, type BrandLink, type BreakerCard } from '../lib/routes';
 import type { Lang } from '../types';
-import { fmtUsd } from '../lib/price';
+import { fmtTry, fmtUsd } from '../lib/price';
+import { cardHref, cardKey, cardName } from '../lib/card';
 import { tipImg } from '../lib/tip-img';
 import { replaceSearch } from '../lib/url-state';
 import { chipClass, MissingModel } from './Bits';
@@ -109,22 +111,29 @@ export function BrandChips({
 }
 
 /**
- * The breaker search: nothing is listed until something is typed (owner: no make/model
- * lists on the site; whoever looks for one types it). The box filters as you type and picks
+ * The breaker search: `all` lists every model while the box is empty (brand pages, and the tip
+ * page since the owner's 2026-10-21 "Kırıcı ucu sayfasında da tüm modeller listelensin"), as
+ * picture cards a page at a time with `cards`. The box filters as you type and picks
  * up `?q=` from the home page's search. A typed search's results can be narrowed by tip
  * type, diameter band (with the rough carrier weight) and dust grooves; the filters only
  * appear for results and only offer values the results have. The query and the filters are
  * read from the URL after hydration (`?q=&tip=&cap=&kanal=1`) and written back with
  * `replaceState`, so a filtered search can be shared; the prerender is the empty state.
  */
+/** Model cards shown at a time; "Daha fazla göster" adds as many again. */
+const PAGE = 24;
+
 export function ModelTable({
   rows,
+  fx = null,
   lang,
   t,
   all = false,
   cards = false,
 }: {
   rows: BreakerCard[];
+  /** CBRT rate for the cards' TL price (owner: "tl fiyatı da gözüksün"). */
+  fx?: FxRate | null;
   lang: Lang;
   t: Dict;
   /** A brand page lists every model of its make while the box is empty (owner: all models show). */
@@ -155,6 +164,9 @@ export function ModelTable({
     });
   }, [ready, query, filter]);
   const shown = query ? rows.filter((r) => matches(query, searchName(r.name))) : all ? rows : [];
+  // Cards show a page at a time; a new search or filter starts again from the first page.
+  const [page, setPage] = useState(PAGE);
+  useEffect(() => setPage(PAGE), [query, filter]);
   // Nothing found: try the query with a misspelt make fixed and unknown words dropped (on the
   // unfiltered rows, so a filter can never hide the suggestion).
   const guess =
@@ -187,7 +199,18 @@ export function ModelTable({
   const table =
     visible.length > 0 ? (
       cards ? (
-        <Cards rows={visible} tip={filter.tip} lang={lang} t={t} />
+        <>
+          <Cards rows={visible.slice(0, page)} tip={filter.tip} fx={fx} lang={lang} t={t} />
+          {visible.length > page && (
+            <button
+              type="button"
+              onClick={() => setPage((n) => n + PAGE)}
+              className={`mt-4 inline-flex min-h-11 items-center rounded-sm border border-ink-soft bg-bg px-4 font-sans text-sm font-medium text-ink hover:border-ink ${FOCUS}`}
+            >
+              {t.list.more(visible.length - page)}
+            </button>
+          )}
+        </>
       ) : (
         <Table rows={visible} tip={filter.tip} lang={lang} t={t} />
       )
@@ -368,36 +391,44 @@ function FilterBar({
 function Cards({
   rows,
   tip,
+  fx,
   lang,
   t,
 }: {
   rows: BreakerCard[];
   tip: TipType | null;
+  fx: FxRate | null;
   lang: Lang;
   t: Dict;
 }) {
-  const href = (r: BreakerCard) =>
-    localePath(r.path, lang) + (tip && r.types.includes(tip) ? `?tip=${tip}` : '');
+  const href = (r: BreakerCard) => cardHref(r, lang, tip);
   const dia = (r: BreakerCard) =>
     r.diameterMm === null ? '—' : `Ø${fmtNum(r.diameterMm, lang)} mm`;
   return (
     <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
       {rows.map((r) => (
-        <li key={r.slug}>
+        <li key={cardKey(r)}>
           <a
             href={href(r)}
             className={`group flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg transition-colors hover:border-hair-strong ${FOCUS}`}
           >
-            {r.image ? (
-              <img
-                src={tipImg(r.image)}
-                alt=""
-                width={480}
-                height={320}
-                loading="lazy"
-                decoding="async"
-                className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain"
-              />
+            {(r.image ?? r.sample) ? (
+              <span className="relative block">
+                <img
+                  src={tipImg((r.image ?? r.sample)!)}
+                  alt=""
+                  width={480}
+                  height={320}
+                  loading="lazy"
+                  decoding="async"
+                  className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain"
+                />
+                {!r.image && (
+                  <span className="absolute bottom-1.5 left-1.5 rounded-sm bg-bg/90 px-1.5 py-0.5 font-sans text-xs text-ink-mid">
+                    {t.list.sampleBadge}
+                  </span>
+                )}
+              </span>
             ) : (
               <span className="flex aspect-[3/2] w-full flex-col items-center justify-center gap-1 border-b border-hair bg-bg-soft px-2 text-center font-sans">
                 <span className="text-2xl font-bold tabular-nums text-ink sm:text-3xl">
@@ -412,13 +443,13 @@ function Cards({
             )}
             <span className="flex flex-1 flex-col gap-1 p-3 font-sans">
               <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
-                {r.name}
+                {cardName(r, lang)}
               </span>
               {/* without a picture the diameter is already set large above: only the badge here */}
-              {(r.image || r.grooved) && (
+              {(r.image || r.sample || r.grooved) && (
                 <span className="text-sm text-ink-mid tabular-nums">
-                  {r.image ? dia(r) : ''}
-                  {r.grooved && `${r.image ? ' · ' : ''}${t.list.groovedBadge}`}
+                  {r.image || r.sample ? dia(r) : ''}
+                  {r.grooved && `${r.image || r.sample ? ' · ' : ''}${t.list.groovedBadge}`}
                 </span>
               )}
               <span className="mt-auto pt-1 text-sm text-ink tabular-nums">
@@ -429,7 +460,14 @@ function Cards({
                         ? fmtUsd(r.price[0], lang)
                         : `${fmtNum(r.price[0] / 100, lang)}–${fmtUsd(r.price[1], lang)}`}
                     </span>{' '}
-                    <span className="text-xs text-ink-soft">{t.list.priceExVat}</span>
+                    <span className="text-xs text-ink-soft">{t.list.priceNote}</span>
+                    {fx && (
+                      <span className="block text-ink-mid">
+                        {r.price[0] === r.price[1]
+                          ? fmtTry(r.price[0], fx, lang)
+                          : `${fmtNum(Math.round((r.price[0] / 100) * fx.usdTry), lang)}–${fmtTry(r.price[1], fx, lang)}`}
+                      </span>
+                    )}
                   </>
                 ) : (
                   <span className="text-ink-mid">{t.list.priceAsk}</span>
@@ -455,8 +493,7 @@ function Table({
   lang: Lang;
   t: Dict;
 }) {
-  const href = (r: BreakerCard) =>
-    localePath(r.path, lang) + (tip && r.types.includes(tip) ? `?tip=${tip}` : '');
+  const href = (r: BreakerCard) => cardHref(r, lang, tip);
   return (
     <div className="mt-4 overflow-x-auto rounded-md border border-hair">
       <table className="w-full border-collapse font-sans text-sm tabular-nums">
@@ -475,14 +512,14 @@ function Table({
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.slug} className="border-t border-hair">
+            <tr key={cardKey(r)} className="border-t border-hair">
               <th scope="row" className="px-4 py-0.5 text-left font-medium">
                 {/* min-h-11: a 44 px tap target, the row keeps its height */}
                 <a
                   href={href(r)}
                   className={`inline-flex min-h-11 items-center text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
                 >
-                  {r.name}
+                  {cardName(r, lang)}
                 </a>
                 {r.grooved && (
                   // Under the name on phones (the types column is hidden there), beside it wider.

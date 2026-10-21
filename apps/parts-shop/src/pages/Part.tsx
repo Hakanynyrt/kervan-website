@@ -318,6 +318,7 @@ export default function Part({
                               cents={cents}
                               fx={ctx.fx}
                               lang={lang}
+                              plus={t.price.plus}
                               note={priceNote(r.kind, t)}
                               className="px-2.5 pt-1 text-sm"
                             />
@@ -452,6 +453,7 @@ function ListedCard({ l, ctx }: { l: ListedPart; ctx: Ctx }) {
           cents={l.cents}
           fx={ctx.fx}
           lang={lang}
+          plus={t.price.plus}
           note={l.type === 'BOY_SAPLAMA' ? t.parts.order.withNuts : null}
           className="mt-1 text-base"
         />
@@ -696,6 +698,7 @@ export function RenderFigure({
               cents={cents}
               fx={ctx.fx}
               lang={ctx.lang}
+              plus={ctx.t.price.plus}
               note={priceNote(r.kind, t)}
               className="mt-1 text-base"
             />

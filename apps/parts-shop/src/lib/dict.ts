@@ -116,8 +116,13 @@ export interface Dict {
     /** Badge on a result row whose breaker has tools with dust grooves; link to the section. */
     groovedBadge: string;
     /** Brand page cards: net list price (or span) and the note under it; no price yet. */
-    priceExVat: string;
+    /** Next to a card's price: "+ vergiler" in Turkish (net prices), "export price" in English. */
+    priceNote: string;
     priceAsk: string;
+    /** On a card whose picture is another breaker's tip. */
+    sampleBadge: string;
+    /** Under a page of model cards: shows the next page. */
+    more: (left: number) => string;
     groovedBadgeLabel: (name: string) => string;
   };
   family: {
@@ -126,6 +131,8 @@ export interface Dict {
     crumbLabel: string;
     diameter: string;
     type: string;
+    /** Chips of a breaker that takes tips of two sizes. */
+    size: string;
     qty: string;
     stockTitle: string;
     stockNote: string;
@@ -222,7 +229,10 @@ export interface Dict {
     added: string;
     goCart: string;
     /** Second, smaller figure next to the net price. */
-    inclVat: (money: string) => string;
+    /** After the price on item pages ("+ vergiler"; empty in English). */
+    plus: string;
+    /** Under the price on item pages and the cart: empty in Turkish, the export / shipping note in English. */
+    note: string;
   };
   cart: {
     title: string;
@@ -588,8 +598,10 @@ export const DICT: Record<Lang, Dict> = {
       types: 'Uç tipleri',
       groovedHint: 'Bazı kırıcılar için toz kanallı uç da yapıyoruz; kırıcınızı yazın.',
       groovedBadge: 'Toz kanallı',
-      priceExVat: 'KDV hariç',
+      priceNote: '+ vergiler',
       priceAsk: 'Fiyat için sorun',
+      sampleBadge: 'Temsili görsel',
+      more: (left) => `Daha fazla göster (${left} model daha)`,
       groovedBadgeLabel: (name) => `${name} için toz kanallı uçlar`,
     },
     popular: {
@@ -606,6 +618,7 @@ export const DICT: Record<Lang, Dict> = {
       crumbLabel: 'Bulunduğunuz yer',
       diameter: 'Çalışma çapı',
       type: 'Uç tipi',
+      size: 'Uç ölçüsü',
       qty: 'Adet',
       stockTitle: 'Stoğumuzdan',
       stockNote: 'Atölyemizdeki stoktan kırıcı uçları.',
@@ -637,7 +650,7 @@ export const DICT: Record<Lang, Dict> = {
       quoteText: (name, type, code, qty, url) =>
         `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet için fiyat teklifi almak istiyorum.\n${url}`,
       orderText: (name, type, code, qty, price, url) =>
-        `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet sipariş vermek istiyorum (birim ${price}, KDV hariç).\n${url}`,
+        `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet sipariş vermek istiyorum (birim ${price} + vergiler).\n${url}`,
       partsTitle: 'Bu kırıcı için ürettiğimiz parçalar',
       renderAlt: (name, type) => `${name} ${type} kırıcı ucu`,
       sample: (name) => `Temsili görsel: ${name} ucu`,
@@ -699,7 +712,8 @@ export const DICT: Record<Lang, Dict> = {
       add: 'Palete yükle',
       added: 'Palete yüklendi',
       goCart: 'Palete git',
-      inclVat: (money) => `KDV dahil ≈ ${money}`,
+      plus: '+ vergiler',
+      note: '',
     },
     cart: {
       title: 'Palet',
@@ -726,12 +740,12 @@ export const DICT: Record<Lang, Dict> = {
       },
       product: 'Ürün',
       qty: 'Adet',
-      unit: 'Birim fiyat (KDV hariç)',
+      unit: 'Birim fiyat (+ vergiler)',
       lineTotal: 'Tutar',
       ask: 'Fiyat sorulacak',
-      total: 'Toplam (KDV dahil, kargo hariç)',
-      subtotal: 'Ara toplam (KDV hariç)',
-      vat: (pct) => `KDV (%${pct})`,
+      total: 'Toplam (vergiler dahil, kargo hariç)',
+      subtotal: 'Ara toplam',
+      vat: (pct) => `Vergiler (%${pct})`,
       totalNote: 'Fiyatı sorulacak ürünler toplama dahil değildir.',
       remove: (name) => `${name} ürününü paletten indir`,
       removeShort: 'Kaldır',
@@ -1117,7 +1131,7 @@ export const DICT: Record<Lang, Dict> = {
         mail: 'E-posta ile sipariş ver',
         delivery: 'Stoktan aynı gün kargo',
         text: (part, breaker, qty, price, url) =>
-          `Merhaba, ${breaker} ${part}, ${qty} adet sipariş vermek istiyorum (birim ${price}, KDV hariç).\n${url}`,
+          `Merhaba, ${breaker} ${part}, ${qty} adet sipariş vermek istiyorum (birim ${price} + vergiler).\n${url}`,
         other: 'Başka bir kırıcı için teklif isteyin',
         withNuts: 'Somun ve pullarıyla birlikte, takım olarak',
       },
@@ -1349,8 +1363,10 @@ export const DICT: Record<Lang, Dict> = {
       types: 'Tip types',
       groovedHint: 'For some breakers we also make tools with dust grooves; type your breaker.',
       groovedBadge: 'Dust grooves',
-      priceExVat: 'excl. VAT',
+      priceNote: 'export price',
       priceAsk: 'Ask for a price',
+      sampleBadge: 'Sample picture',
+      more: (left) => `Show more (${left} more models)`,
       groovedBadgeLabel: (name) => `Tools with dust grooves for the ${name}`,
     },
     popular: {
@@ -1367,6 +1383,7 @@ export const DICT: Record<Lang, Dict> = {
       crumbLabel: 'Breadcrumb',
       diameter: 'Working diameter',
       type: 'Tip type',
+      size: 'Tip size',
       qty: 'Quantity',
       stockTitle: 'From our stock',
       stockNote: 'Breaker tips in stock at our plant.',
@@ -1398,7 +1415,7 @@ export const DICT: Record<Lang, Dict> = {
       quoteText: (name, type, code, qty, url) =>
         `Hello, I would like a quote for the ${type} tip${code ? ` (${code})` : ''} for the ${name}, quantity ${qty}.\n${url}`,
       orderText: (name, type, code, qty, price, url) =>
-        `Hello, I would like to order the ${type} tip${code ? ` (${code})` : ''} for the ${name}, quantity ${qty} (unit ${price}, excl. VAT).\n${url}`,
+        `Hello, I would like to order the ${type} tip${code ? ` (${code})` : ''} for the ${name}, quantity ${qty} (unit ${price}, export price).\n${url}`,
       partsTitle: 'Parts we make for this breaker',
       renderAlt: (name, type) => `${name} ${type} breaker tip`,
       sample: (name) => `Sample picture: the ${name} tip`,
@@ -1460,7 +1477,8 @@ export const DICT: Record<Lang, Dict> = {
       add: 'Add to cart',
       added: 'Added to cart',
       goCart: 'Go to cart',
-      inclVat: (money) => `incl. VAT ≈ ${money}`,
+      plus: '',
+      note: 'Export price: product price only, shipping is not included. Orders delivered within Türkiye are invoiced with Turkish taxes.',
     },
     cart: {
       title: 'Cart',
@@ -1487,12 +1505,12 @@ export const DICT: Record<Lang, Dict> = {
       },
       product: 'Product',
       qty: 'Qty',
-      unit: 'Unit price (excl. VAT)',
+      unit: 'Unit price (export)',
       lineTotal: 'Amount',
       ask: 'Price on request',
-      total: 'Total (incl. VAT, excl. shipping)',
-      subtotal: 'Subtotal (excl. VAT)',
-      vat: (pct) => `VAT (${pct}%)`,
+      total: 'Total (export price, excl. shipping)',
+      subtotal: 'Subtotal',
+      vat: (pct) => `Taxes (${pct}%)`,
       totalNote: 'Products priced on request are not in the total.',
       remove: (name) => `Remove ${name} from the cart`,
       removeShort: 'Remove',
@@ -1885,7 +1903,7 @@ export const DICT: Record<Lang, Dict> = {
         mail: 'Order by e-mail',
         delivery: 'Ships from stock the same day',
         text: (part, breaker, qty, price, url) =>
-          `Hello, I would like to order ${qty} × ${breaker} ${part} (unit ${price}, excl. VAT).\n${url}`,
+          `Hello, I would like to order ${qty} × ${breaker} ${part} (unit ${price}, export price).\n${url}`,
         other: 'Request a quote for another breaker',
         withNuts: 'Sold as a set, with its nuts and washers',
       },

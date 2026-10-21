@@ -45,3 +45,27 @@ export function tipOptions(
       });
   return { opts, types: TIP_TYPES.filter((x) => opts.has(x)) };
 }
+
+/** One distinct tip of a breaker: its working diameter and length (owner, 2026-10-21: "İki farklı uç varsa iki farklı model vardır demek. O zaman iki tane uç yap"). */
+export interface TipVariant {
+  diameterMm: number;
+  lengthMm: number | null;
+  families: PublicFamily[];
+}
+
+/**
+ * A breaker's tip families grouped by diameter and length, in catalogue order: families of one
+ * size are the same tip (one card, one price); a breaker with two sizes sells two tips.
+ */
+export function tipVariants(families: PublicFamily[]): TipVariant[] {
+  const out = new Map<string, TipVariant>();
+  for (const f of families) {
+    const lens = f.skus.map((s) => s.lengthMm?.min ?? null).filter((x): x is number => x !== null);
+    const lengthMm = lens.length ? Math.min(...lens) : null;
+    const key = `${f.attrs.diameterMm}|${lengthMm}`;
+    const v = out.get(key);
+    if (v) v.families.push(f);
+    else out.set(key, { diameterMm: f.attrs.diameterMm, lengthMm, families: [f] });
+  }
+  return [...out.values()];
+}

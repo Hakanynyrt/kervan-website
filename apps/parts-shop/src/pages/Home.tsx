@@ -4,6 +4,7 @@ import FamilyCardView from '../components/FamilyCardView';
 import ExplodedPicker from '../components/ExplodedPicker';
 import { PartGroups } from '../components/PartGroups';
 import { FOCUS, whatsappHref } from '../components/Layout';
+import { cardHref, cardKey, cardName } from '../lib/card';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
@@ -132,7 +133,7 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
           {withImages ? (
             <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:gap-4 lg:grid-cols-4">
               {model.featured.map((c) => (
-                <li key={c.slug}>
+                <li key={cardKey(c)}>
                   <FamilyCardView c={c} lang={lang} t={t} />
                 </li>
               ))}
@@ -148,13 +149,13 @@ export default function Home({ model, lang, t }: { model: Model; lang: Lang; t: 
               <div>
                 <ul className="m-0 grid list-none grid-cols-1 border-t border-hair p-0 sm:grid-cols-2 sm:gap-x-8">
                   {model.featured.map((c) => (
-                    <li key={c.slug} className="border-b border-hair">
+                    <li key={cardKey(c)} className="border-b border-hair">
                       <a
-                        href={localePath(c.path, lang)}
+                        href={cardHref(c, lang)}
                         className={`group flex items-center justify-between gap-4 px-1 py-3.5 font-sans ${FOCUS}`}
                       >
                         <span className="text-base font-semibold text-ink group-hover:text-brand-hi">
-                          {c.name}
+                          {cardName(c, lang)}
                         </span>
                         <span aria-hidden="true" className="text-sm font-medium text-brand-hi">
                           {t.card.view} →

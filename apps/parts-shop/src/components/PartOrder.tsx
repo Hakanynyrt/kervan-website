@@ -4,7 +4,7 @@ import { ORDER_CONVERSION } from '../lib/ads';
 import { addToCart } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { fmtDate, fmtTry, fmtUsd, vatOf } from '../lib/price';
+import { fmtDate, fmtTry, fmtUsd } from '../lib/price';
 import { CART_PATH } from '../lib/routes';
 import type { Lang } from '../types';
 import { QtyStepper, Terms } from './Bits';
@@ -17,11 +17,14 @@ export function PartPriceLine({
   fx,
   lang,
   note,
+  plus = '',
   className = '',
 }: {
   cents: number;
   fx: FxRate | null;
   lang: Lang;
+  /** After the USD price: "+ vergiler" on Turkish pages (`t.price.plus`). */
+  plus?: string;
   /** What the price covers, when it is more than the part (tie rods: nuts and washers). */
   note?: string | null;
   className?: string;
@@ -31,6 +34,7 @@ export function PartPriceLine({
     <p className={`m-0 font-sans tabular-nums ${className}`}>
       <span className="font-semibold text-ink">{fmtUsd(cents, lang)}</span>
       {tl && <span className="text-ink-mid"> · {tl}</span>}
+      {plus && <span className="text-sm text-ink-soft"> {plus}</span>}
       {note && <span className="block text-sm font-normal text-ink-mid">{note}</span>}
     </p>
   );
@@ -53,7 +57,7 @@ export const partOrderText = (
 
 /**
  * A priced spare part's order panel (item page): the price like the tip pages (USD, TL at the
- * CBRT rate, incl. VAT), same-day delivery, quantity, "Palete yükle", and the WhatsApp / e-mail
+ * CBRT rate; "+ vergiler" on Turkish pages, the export note in English), same-day delivery, quantity, "Palete yükle", and the WhatsApp / e-mail
  * order. The cart line keeps the price it was added at.
  */
 export function PartOrder({
@@ -88,17 +92,20 @@ export function PartOrder({
   const [added, setAdded] = useState(false);
   const o = t.parts.order;
   const tl = fmtTry(cents, fx, lang);
-  const gross = cents + vatOf(cents);
-  const grossMoney = [fmtUsd(gross, lang), fmtTry(gross, fx, lang)].filter(Boolean).join(' / ');
   const text = partOrderText(t, lang, label, breaker, qty, cents, path);
   return (
     <div className="lg:sticky lg:top-6">
       <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
         <p className="m-0 text-sm text-ink-mid">{t.price.label}</p>
-        <p className="m-0 mt-1 text-3xl font-bold text-ink tabular-nums">{fmtUsd(cents, lang)}</p>
+        <p className="m-0 mt-1 text-3xl font-bold text-ink tabular-nums">
+          {fmtUsd(cents, lang)}
+          {t.price.plus && (
+            <span className="text-base font-semibold text-ink-mid"> {t.price.plus}</span>
+          )}
+        </p>
         {tl && <p className="m-0 mt-1 text-lg font-semibold text-ink-mid tabular-nums">{tl}</p>}
         {note && <p className="m-0 mt-1 text-sm text-ink">{note}</p>}
-        <p className="m-0 mt-1 text-sm text-ink-soft tabular-nums">{t.price.inclVat(grossMoney)}</p>
+        {t.price.note && <p className="m-0 mt-1 text-sm text-ink-soft">{t.price.note}</p>}
         {tl && fx && (
           <p className="m-0 mt-1 text-xs text-ink-soft">{t.price.fxNote(fmtDate(fx.date, lang))}</p>
         )}

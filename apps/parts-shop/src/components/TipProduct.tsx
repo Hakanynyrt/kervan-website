@@ -15,15 +15,17 @@ import { fmtMm, fmtNum } from '../lib/format';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
 import type { GroovedTool } from '../lib/grooved';
 import { addToCart } from '../lib/cart';
-import { fmtDate, fmtTry, fmtUsd, vatOf } from '../lib/price';
+import { fmtDate, fmtTry, fmtUsd } from '../lib/price';
 import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
 import type { PartLink } from '../lib/part-links';
 import { tipImg } from '../lib/tip-img';
-import { tipOptions } from '../lib/tip-options';
+import { tipOptions, tipVariants } from '../lib/tip-options';
+import { replaceSearch } from '../lib/url-state';
 import type { Lang } from '../types';
 import {
   Breadcrumb,
+  chipClass,
   Chips,
   ImgNote,
   MissingModel,
@@ -95,15 +97,26 @@ export default function TipProduct({
   t,
 }: Props) {
   const tf = t.family;
-  const { opts, types } = tipOptions(families, extra);
+  // A breaker that takes tips of two sizes sells both: a size picker over the type picker
+  // (owner: "İki farklı uç varsa ... iki tane uç yap"); `?uc=` from its list card opens one.
+  const variants = tipVariants(families);
+  const [vi, setVi] = useState(0);
+  const variant = variants.length > 1 ? variants[Math.min(vi, variants.length - 1)] : null;
+  const { opts, types } = tipOptions(variant ? variant.families : families, extra);
+  const sizeLabel = (v: (typeof variants)[number]) =>
+    `Ø${fmtNum(v.diameterMm, lang)}${v.lengthMm ? ` × ${fmtNum(v.lengthMm, lang)}` : ''} mm`;
+  const name = variant ? `${quoteName} (${sizeLabel(variant)})` : quoteName;
   const [type, setType] = useState<TipType>(types[0]);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   // `?tip=` from a filtered search result preselects that type (after hydration; the
   // prerender always shows the first type).
   useEffect(() => {
-    const v = new URLSearchParams(window.location.search).get('tip');
-    if (isTipType(v) && opts.has(v)) setType(v);
+    const sp = new URLSearchParams(window.location.search);
+    const u = Number(sp.get('uc'));
+    if (Number.isInteger(u) && u >= 1 && u <= variants.length) setVi(u - 1);
+    const v = sp.get('tip');
+    if (isTipType(v)) setType(v);
     // Only on load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -121,26 +134,14 @@ export default function TipProduct({
   const order = opt.cents !== null;
   const text =
     opt.cents === null
-      ? tf.quoteText(quoteName, t.tip[opt.tipType], opt.code ?? '', qty, url)
-      : tf.orderText(
-          quoteName,
-          t.tip[opt.tipType],
-          opt.code ?? '',
-          qty,
-          fmtUsd(opt.cents, lang),
-          url,
-        );
+      ? tf.quoteText(name, t.tip[opt.tipType], opt.code ?? '', qty, url)
+      : tf.orderText(name, t.tip[opt.tipType], opt.code ?? '', qty, fmtUsd(opt.cents, lang), url);
   const tl = opt.cents === null ? null : fmtTry(opt.cents, fx, lang);
-  const gross = opt.cents === null ? null : opt.cents + vatOf(opt.cents);
-  const grossMoney =
-    gross === null
-      ? null
-      : [fmtUsd(gross, lang), fmtTry(gross, fx, lang)].filter(Boolean).join(' / ');
   const add = () => {
     addToCart(
       {
-        id: `${path}|${opt.tipType}`,
-        name: quoteName,
+        id: `${path}${variant ? `|${vi + 1}` : ''}|${opt.tipType}`,
+        name,
         tipType: opt.tipType,
         code: opt.code,
         path,
@@ -150,7 +151,7 @@ export default function TipProduct({
     );
     setAdded(true);
   };
-  const mail = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(quoteName)}&body=${encodeURIComponent(text)}`;
+  const mail = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(name)}&body=${encodeURIComponent(text)}`;
 
   return (
     <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">
@@ -166,10 +167,34 @@ export default function TipProduct({
         <p className="m-0 mt-2 font-sans text-base text-ink-mid tabular-nums lg:hidden">
           <span className="font-semibold text-ink">{fmtUsd(opt.cents, lang)}</span>
           {tl && ` · ${tl}`}
+          {t.price.plus && <span className="text-sm text-ink-soft"> {t.price.plus}</span>}
         </p>
       )}
 
       {/* Every tip type of the model as a photo tile (owner, 2026-10-16: "uçlar fotoğraflı gözüksün"); a tile picks the type like the chips below. */}
+      {variant && (
+        <div role="group" aria-label={tf.size} className="mt-6 font-sans text-sm">
+          <p className="m-0 mb-2 font-semibold text-ink">{tf.size}</p>
+          <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
+            {variants.map((v, i) => (
+              <li key={sizeLabel(v)}>
+                <button
+                  type="button"
+                  aria-pressed={i === vi}
+                  onClick={() => {
+                    setVi(i);
+                    setAdded(false);
+                    replaceSearch((sp) => sp.set('uc', String(i + 1)));
+                  }}
+                  className={chipClass(i === vi)}
+                >
+                  {sizeLabel(v)}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <ul
         aria-label={tf.type}
         className="m-0 mt-6 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-4 lg:max-w-3xl"
@@ -325,15 +350,14 @@ export default function TipProduct({
               <>
                 <p className="m-0 mt-1 text-3xl font-bold text-ink tabular-nums">
                   {fmtUsd(opt.cents, lang)}
+                  {t.price.plus && (
+                    <span className="text-base font-semibold text-ink-mid"> {t.price.plus}</span>
+                  )}
                 </p>
                 {tl && (
                   <p className="m-0 mt-1 text-lg font-semibold text-ink-mid tabular-nums">{tl}</p>
                 )}
-                {grossMoney && (
-                  <p className="m-0 mt-1 text-sm text-ink-soft tabular-nums">
-                    {t.price.inclVat(grossMoney)}
-                  </p>
-                )}
+                {t.price.note && <p className="m-0 mt-1 text-sm text-ink-soft">{t.price.note}</p>}
                 {tl && fx && (
                   <p className="m-0 mt-1 text-xs text-ink-soft">
                     {t.price.fxNote(fmtDate(fx.date, lang))}

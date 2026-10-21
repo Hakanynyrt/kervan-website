@@ -21,6 +21,7 @@ import {
 import { listedParts, type ListedPart } from './listed-parts';
 import { groupPrices, resolvePartPrices } from './part-prices';
 import { groovedFor } from './grooved';
+import { tipOptions, tipVariants } from './tip-options';
 import { OEM_NUMBERS } from './oem-numbers';
 import { GROOVED_TOOLS, PART_RENDERS, type PartRender } from './photos';
 import type { TipGroupStats } from '../types';
@@ -62,6 +63,10 @@ export interface BreakerCard {
   types: TipType[];
   /** Render key of the first SKU that has one (see tip-img.ts). */
   image: string | null;
+  /** One of a breaker's several tip sizes (`tipVariants`): its 1-based number (`?uc=`) and length. */
+  variant?: { n: number; lengthMm: number | null };
+  /** No picture of its own: the nearest-diameter pictured tip (as the breaker page's sample), shown labelled. */
+  sample?: string;
   popularTier: 1 | 2 | null;
   /** We model a tool with dust grooves for this breaker (`groovedFor`). */
   grooved?: true;
@@ -374,36 +379,54 @@ function sampleFor(
 export function buildPages(c: PublicCatalog): BuiltPage[] {
   const demo = c.demo === true;
   const { breakers } = groupBreakers(c);
-  const cards: BreakerCard[] = [...breakers].map(([slug, e]) => {
+  // Cards without a picture of their own borrow the breaker page's sample, labelled (owner,
+  // 2026-10-21: "tümünde de uçlar gözüksün"; it replaces the large diameter of 2026-10-20).
+  const sampleImg = (e: BreakerEntry) =>
+    sampleFor(e, breakers)?.family.skus.find((s) => s.image)?.image ?? undefined;
+  const cards: BreakerCard[] = [...breakers].flatMap(([slug, e]): BreakerCard[] => {
     const f = e.families[0] as PublicFamily | undefined;
-    if (!f)
+    if (!f) {
+      const sample = sampleImg(e);
+      return [
+        {
+          slug,
+          path: breakerPath(slug),
+          name: e.name,
+          brand: e.brand,
+          model: e.model,
+          diameterMm: e.extra?.diameterMm ?? null,
+          types: e.extra?.tipTypes ?? [],
+          image: null,
+          ...(sample ? { sample } : {}),
+          popularTier: null,
+          price: null,
+        },
+      ];
+    }
+    // A breaker that takes tips of two sizes sells two tips: one card per size (owner).
+    const variants = tipVariants(e.families);
+    return variants.map((v, i) => {
+      const image = v.families.flatMap((x) => x.skus).find((s) => s.image)?.image ?? null;
+      const sample = image ? undefined : sampleImg(e);
       return {
         slug,
         path: breakerPath(slug),
         name: e.name,
         brand: e.brand,
         model: e.model,
-        diameterMm: e.extra?.diameterMm ?? null,
-        types: e.extra?.tipTypes ?? [],
-        image: null,
-        popularTier: null,
-        price: null,
+        diameterMm: v.diameterMm,
+        types: [...new Set(v.families.flatMap((x) => x.skus.map((s) => s.tipType)))],
+        image,
+        ...(sample ? { sample } : {}),
+        ...(variants.length > 1 ? { variant: { n: i + 1, lengthMm: v.lengthMm } } : {}),
+        popularTier: v.families.reduce<1 | 2 | null>(
+          (t, x) => (tierRank(x.popularTier) < tierRank(t) ? x.popularTier : t),
+          null,
+        ),
+        // The price the breaker page sells this size at: per type, the first family that has it.
+        price: priceSpan([...tipOptions(v.families).opts.values()].map((o) => o.cents)),
       };
-    return {
-      slug,
-      path: breakerPath(slug),
-      name: e.name,
-      brand: e.brand,
-      model: e.model,
-      diameterMm: f.attrs.diameterMm,
-      types: [...new Set(e.families.flatMap((x) => x.skus.map((s) => s.tipType)))],
-      image: e.families.flatMap((x) => x.skus).find((s) => s.image)?.image ?? null,
-      popularTier: e.families.reduce<1 | 2 | null>(
-        (t, x) => (tierRank(x.popularTier) < tierRank(t) ? x.popularTier : t),
-        null,
-      ),
-      price: priceSpan(e.families.flatMap((x) => x.skus.map((k) => k.priceUsdNetCents))),
-    };
+    });
   });
   cards.sort(byName);
   // Tools with dust grooves: a badge on the list rows, linking to the product page's section.
