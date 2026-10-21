@@ -22,6 +22,7 @@ import { localePath } from '../lib/locale-path';
 import { LIST_PATH, type BrandLink, type BreakerCard } from '../lib/routes';
 import type { Lang } from '../types';
 import { fmtTry, fmtUsd } from '../lib/price';
+import { cardHref, cardKey, cardName } from '../lib/card';
 import { tipImg } from '../lib/tip-img';
 import { replaceSearch } from '../lib/url-state';
 import { chipClass, MissingModel } from './Bits';
@@ -400,14 +401,13 @@ function Cards({
   lang: Lang;
   t: Dict;
 }) {
-  const href = (r: BreakerCard) =>
-    localePath(r.path, lang) + (tip && r.types.includes(tip) ? `?tip=${tip}` : '');
+  const href = (r: BreakerCard) => cardHref(r, lang, tip);
   const dia = (r: BreakerCard) =>
     r.diameterMm === null ? '—' : `Ø${fmtNum(r.diameterMm, lang)} mm`;
   return (
     <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
       {rows.map((r) => (
-        <li key={r.slug}>
+        <li key={cardKey(r)}>
           <a
             href={href(r)}
             className={`group flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg transition-colors hover:border-hair-strong ${FOCUS}`}
@@ -443,7 +443,7 @@ function Cards({
             )}
             <span className="flex flex-1 flex-col gap-1 p-3 font-sans">
               <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
-                {r.name}
+                {cardName(r, lang)}
               </span>
               {/* without a picture the diameter is already set large above: only the badge here */}
               {(r.image || r.sample || r.grooved) && (
@@ -493,8 +493,7 @@ function Table({
   lang: Lang;
   t: Dict;
 }) {
-  const href = (r: BreakerCard) =>
-    localePath(r.path, lang) + (tip && r.types.includes(tip) ? `?tip=${tip}` : '');
+  const href = (r: BreakerCard) => cardHref(r, lang, tip);
   return (
     <div className="mt-4 overflow-x-auto rounded-md border border-hair">
       <table className="w-full border-collapse font-sans text-sm tabular-nums">
@@ -513,14 +512,14 @@ function Table({
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.slug} className="border-t border-hair">
+            <tr key={cardKey(r)} className="border-t border-hair">
               <th scope="row" className="px-4 py-0.5 text-left font-medium">
                 {/* min-h-11: a 44 px tap target, the row keeps its height */}
                 <a
                   href={href(r)}
                   className={`inline-flex min-h-11 items-center text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
                 >
-                  {r.name}
+                  {cardName(r, lang)}
                 </a>
                 {r.grooved && (
                   // Under the name on phones (the types column is hidden there), beside it wider.

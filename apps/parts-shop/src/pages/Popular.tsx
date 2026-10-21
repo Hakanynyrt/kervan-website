@@ -2,6 +2,7 @@ import { Container } from '@kervan/ui';
 import FamilyCardView from '../components/FamilyCardView';
 import { FOCUS } from '../components/Layout';
 import { SearchForm } from '../components/ModelSearch';
+import { cardKey } from '../lib/card';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { partItemPath, type PageModel, type PopularPart } from '../lib/routes';
@@ -22,7 +23,7 @@ export default function Popular({ model, lang, t }: { model: Model; lang: Lang; 
       <ul className="m-0 mt-10 grid list-none grid-cols-2 gap-3 p-0 sm:gap-4 lg:grid-cols-4">
         {model.items.map((it) =>
           it.kind === 'tip' ? (
-            <li key={`tip-${it.card.slug}`}>
+            <li key={`tip-${cardKey(it.card)}`}>
               <FamilyCardView c={it.card} lang={lang} t={t} />
             </li>
           ) : (

@@ -1,5 +1,5 @@
 import type { Dict } from '../lib/dict';
-import { localePath } from '../lib/locale-path';
+import { cardHref, cardName } from '../lib/card';
 import type { BreakerCard } from '../lib/routes';
 import { tipImg } from '../lib/tip-img';
 import type { Lang } from '../types';
@@ -9,7 +9,7 @@ import { FOCUS } from './Layout';
 export default function FamilyCardView({ c, lang, t }: { c: BreakerCard; lang: Lang; t: Dict }) {
   return (
     <a
-      href={localePath(c.path, lang)}
+      href={cardHref(c, lang)}
       className={`group flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg transition-colors hover:border-hair-strong ${FOCUS}`}
     >
       {c.image && (
@@ -24,7 +24,9 @@ export default function FamilyCardView({ c, lang, t }: { c: BreakerCard; lang: L
         />
       )}
       <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
-        <span className="font-sans text-base font-semibold text-ink sm:text-lg">{c.name}</span>
+        <span className="font-sans text-base font-semibold text-ink sm:text-lg">
+          {cardName(c, lang)}
+        </span>
         <span className="mt-auto pt-1 font-sans text-sm font-medium text-brand-hi group-hover:underline sm:pt-2">
           {t.card.view} →
         </span>

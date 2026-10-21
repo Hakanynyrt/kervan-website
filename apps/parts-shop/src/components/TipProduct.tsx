@@ -20,10 +20,12 @@ import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
 import type { PartLink } from '../lib/part-links';
 import { tipImg } from '../lib/tip-img';
-import { tipOptions } from '../lib/tip-options';
+import { tipOptions, tipVariants } from '../lib/tip-options';
+import { replaceSearch } from '../lib/url-state';
 import type { Lang } from '../types';
 import {
   Breadcrumb,
+  chipClass,
   Chips,
   ImgNote,
   MissingModel,
@@ -95,15 +97,26 @@ export default function TipProduct({
   t,
 }: Props) {
   const tf = t.family;
-  const { opts, types } = tipOptions(families, extra);
+  // A breaker that takes tips of two sizes sells both: a size picker over the type picker
+  // (owner: "İki farklı uç varsa ... iki tane uç yap"); `?uc=` from its list card opens one.
+  const variants = tipVariants(families);
+  const [vi, setVi] = useState(0);
+  const variant = variants.length > 1 ? variants[Math.min(vi, variants.length - 1)] : null;
+  const { opts, types } = tipOptions(variant ? variant.families : families, extra);
+  const sizeLabel = (v: (typeof variants)[number]) =>
+    `Ø${fmtNum(v.diameterMm, lang)}${v.lengthMm ? ` × ${fmtNum(v.lengthMm, lang)}` : ''} mm`;
+  const name = variant ? `${quoteName} (${sizeLabel(variant)})` : quoteName;
   const [type, setType] = useState<TipType>(types[0]);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   // `?tip=` from a filtered search result preselects that type (after hydration; the
   // prerender always shows the first type).
   useEffect(() => {
-    const v = new URLSearchParams(window.location.search).get('tip');
-    if (isTipType(v) && opts.has(v)) setType(v);
+    const sp = new URLSearchParams(window.location.search);
+    const u = Number(sp.get('uc'));
+    if (Number.isInteger(u) && u >= 1 && u <= variants.length) setVi(u - 1);
+    const v = sp.get('tip');
+    if (isTipType(v)) setType(v);
     // Only on load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -121,21 +134,14 @@ export default function TipProduct({
   const order = opt.cents !== null;
   const text =
     opt.cents === null
-      ? tf.quoteText(quoteName, t.tip[opt.tipType], opt.code ?? '', qty, url)
-      : tf.orderText(
-          quoteName,
-          t.tip[opt.tipType],
-          opt.code ?? '',
-          qty,
-          fmtUsd(opt.cents, lang),
-          url,
-        );
+      ? tf.quoteText(name, t.tip[opt.tipType], opt.code ?? '', qty, url)
+      : tf.orderText(name, t.tip[opt.tipType], opt.code ?? '', qty, fmtUsd(opt.cents, lang), url);
   const tl = opt.cents === null ? null : fmtTry(opt.cents, fx, lang);
   const add = () => {
     addToCart(
       {
-        id: `${path}|${opt.tipType}`,
-        name: quoteName,
+        id: `${path}${variant ? `|${vi + 1}` : ''}|${opt.tipType}`,
+        name,
         tipType: opt.tipType,
         code: opt.code,
         path,
@@ -145,7 +151,7 @@ export default function TipProduct({
     );
     setAdded(true);
   };
-  const mail = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(quoteName)}&body=${encodeURIComponent(text)}`;
+  const mail = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(name)}&body=${encodeURIComponent(text)}`;
 
   return (
     <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">
@@ -166,6 +172,29 @@ export default function TipProduct({
       )}
 
       {/* Every tip type of the model as a photo tile (owner, 2026-10-16: "uçlar fotoğraflı gözüksün"); a tile picks the type like the chips below. */}
+      {variant && (
+        <div role="group" aria-label={tf.size} className="mt-6 font-sans text-sm">
+          <p className="m-0 mb-2 font-semibold text-ink">{tf.size}</p>
+          <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
+            {variants.map((v, i) => (
+              <li key={sizeLabel(v)}>
+                <button
+                  type="button"
+                  aria-pressed={i === vi}
+                  onClick={() => {
+                    setVi(i);
+                    setAdded(false);
+                    replaceSearch((sp) => sp.set('uc', String(i + 1)));
+                  }}
+                  className={chipClass(i === vi)}
+                >
+                  {sizeLabel(v)}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <ul
         aria-label={tf.type}
         className="m-0 mt-6 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-4 lg:max-w-3xl"

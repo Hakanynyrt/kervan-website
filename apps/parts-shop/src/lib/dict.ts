@@ -131,6 +131,8 @@ export interface Dict {
     crumbLabel: string;
     diameter: string;
     type: string;
+    /** Chips of a breaker that takes tips of two sizes. */
+    size: string;
     qty: string;
     stockTitle: string;
     stockNote: string;
@@ -616,6 +618,7 @@ export const DICT: Record<Lang, Dict> = {
       crumbLabel: 'Bulunduğunuz yer',
       diameter: 'Çalışma çapı',
       type: 'Uç tipi',
+      size: 'Uç ölçüsü',
       qty: 'Adet',
       stockTitle: 'Stoğumuzdan',
       stockNote: 'Atölyemizdeki stoktan kırıcı uçları.',
@@ -1380,6 +1383,7 @@ export const DICT: Record<Lang, Dict> = {
       crumbLabel: 'Breadcrumb',
       diameter: 'Working diameter',
       type: 'Tip type',
+      size: 'Tip size',
       qty: 'Quantity',
       stockTitle: 'From our stock',
       stockNote: 'Breaker tips in stock at our plant.',
