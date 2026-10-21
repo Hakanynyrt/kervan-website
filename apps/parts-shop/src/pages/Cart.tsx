@@ -8,7 +8,7 @@ import { ORDER_CONVERSION } from '../lib/ads';
 import { CART_EVENT, readCart, writeCart, type CartItem } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { fmtDate, fmtTry, fmtUsd, VAT_PERCENT, vatOf } from '../lib/price';
+import { fmtDate, fmtTry, fmtUsd, shownCents } from '../lib/price';
 import { LEGAL, legalPath } from '../lib/legal';
 import { PARTS_PATH } from '../lib/routes';
 import type { Lang } from '../types';
@@ -60,9 +60,10 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   const list = items ?? [];
   // Tips name their type through the dict; spare parts carry the label they were added with.
   const lineLabel = (x: CartItem) => (x.tipType ? t.tip[x.tipType] : (x.label ?? ''));
-  const totalCents = list.reduce((n, x) => n + (x.cents ?? 0) * x.qty, 0);
-  const vatCents = vatOf(totalCents);
-  const grossCents = totalCents + vatCents;
+  // Cart lines keep the net price they were added at; the page shows it as the price pages do
+  // (taxes in on Turkish pages, the export price in English), with no tax lines.
+  const unitOf = (x: CartItem) => (x.cents === null ? null : shownCents(x.cents, lang));
+  const grossCents = list.reduce((n, x) => n + (unitOf(x) ?? 0) * x.qty, 0);
   const anyAsk = list.some((x) => x.cents === null);
   const money = (cents: number) =>
     [fmtUsd(cents, lang), fmtTry(cents, fx, lang)].filter(Boolean).join(' / ');
@@ -70,19 +71,15 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
     c.line(
       `${x.name}, ${lineLabel(x)}${x.code ? ` (${x.code})` : ''}`,
       x.qty,
-      x.cents === null ? c.ask : fmtUsd(x.cents, lang),
-      x.cents === null ? null : fmtUsd(x.cents * x.qty, lang),
+      x.cents === null ? c.ask : fmtUsd(unitOf(x)!, lang),
+      x.cents === null ? null : fmtUsd(unitOf(x)! * x.qty, lang),
       SITE + localePath(x.path, lang),
     ),
   );
   const subject = list.length ? c.subject(list[0].name, list.length - 1) : c.title;
   const message = c.message(
     lines,
-    [
-      `${c.subtotal}: ${money(totalCents)}`,
-      `${c.vat(VAT_PERCENT)}: ${money(vatCents)}`,
-      `${c.total}: ${money(grossCents)}${anyAsk ? ` (${c.totalNote})` : ''}`,
-    ].join('\n'),
+    `${c.total}: ${money(grossCents)}${anyAsk ? ` (${c.totalNote})` : ''}`,
     FIELDS.filter((k) => contact[k].trim()).map((k) => `${c[k]}: ${contact[k].trim()}`),
   );
 
@@ -141,7 +138,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                     </a>
                     <p className="m-0 text-ink-mid">{lineLabel(x)}</p>
                     <p className="m-0 text-ink-mid tabular-nums">
-                      {c.unit}: {x.cents === null ? c.ask : fmtUsd(x.cents, lang)}
+                      {c.unit}: {x.cents === null ? c.ask : fmtUsd(unitOf(x)!, lang)}
                     </p>
                   </div>
                   <QtyStepper
@@ -152,7 +149,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                     t={t}
                   />
                   <p className="m-0 ml-auto min-w-24 text-right font-semibold text-ink tabular-nums">
-                    {x.cents === null ? '—' : fmtUsd(x.cents * x.qty, lang)}
+                    {x.cents === null ? '—' : fmtUsd(unitOf(x)! * x.qty, lang)}
                   </p>
                   <button
                     type="button"
@@ -171,19 +168,6 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
               ))}
             </ul>
             <div className="mt-6 font-sans">
-              <dl className="m-0 text-sm tabular-nums">
-                {(
-                  [
-                    [c.subtotal, totalCents],
-                    [c.vat(VAT_PERCENT), vatCents],
-                  ] as [string, number][]
-                ).map(([k, v]) => (
-                  <div key={k} className="flex justify-between gap-4 py-1 text-ink-mid">
-                    <dt>{k}</dt>
-                    <dd className="m-0 text-right">{money(v)}</dd>
-                  </div>
-                ))}
-              </dl>
               <p className="m-0 mt-2 flex justify-between gap-4 border-t border-hair pt-3 text-lg font-bold text-ink tabular-nums">
                 <span>{c.total}</span>
                 <span className="whitespace-nowrap">{fmtUsd(grossCents, lang)}</span>
@@ -198,6 +182,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                   {t.price.fxNote(fmtDate(fx.date, lang))}
                 </p>
               )}
+              <p className="m-0 mt-1 text-right text-xs text-ink-soft">{t.price.taxNote}</p>
               {anyAsk && <p className="m-0 mt-2 text-sm text-ink-mid">{c.totalNote}</p>}
               <button
                 type="button"

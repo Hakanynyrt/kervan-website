@@ -22,3 +22,12 @@ export const fmtDate = (iso: string, lang: Lang): string => {
 /** VAT rate on our products (percent); catalogue prices are net. */
 export const VAT_PERCENT = 20;
 export const vatOf = (netCents: number): number => Math.round((netCents * VAT_PERCENT) / 100);
+
+/**
+ * The price a page shows from a net catalogue price: Turkish pages show it with taxes in, as
+ * consumer price rules require (6502 md. 54, Fiyat Etiketi Yönetmeliği md. 4/1-h); English
+ * pages show the net export price (KDVK md. 11). No tax wording on either (owner, 2026-10-21:
+ * "kdv yazısı görünmesin hiçbir yerde").
+ */
+export const shownCents = (netCents: number, lang: Lang): number =>
+  lang === 'tr' ? netCents + vatOf(netCents) : netCents;
