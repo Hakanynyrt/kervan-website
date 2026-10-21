@@ -63,8 +63,10 @@ export interface Ctx {
   t: Dict;
 }
 
-/** Pictures on the group page before a search: one per breaker series plus the solo renders, no names. */
+/** First cards on the group page before a search: one per breaker series plus the solo renders. */
 const SHOWCASE = 8;
+/** Cards shown at a time before a search; "Daha fazla göster" adds as many again (owner: "Tümünde görünmüyor"). */
+const PAGE = 24;
 /** `?tur=` value for "every kind" (the "Tümü" chip). */
 const TUR_ALL = 'tumu';
 
@@ -103,12 +105,14 @@ export default function Part({
     ? DEFAULT_FILTER[model.part]!
     : null;
   const [filter, setFilter] = useState<PartFilter | null>(defaultFilter);
+  const [shown, setShown] = useState(PAGE);
   const kinds = filters.find(([f]) => f === filter)?.[1];
   const all = kinds ? every.filter((r) => inFilter(r, kinds)) : every;
   // The chip picked is written to `?tur=` (shareable); `tumu` = every kind on a page whose
   // default chip is another one. Only a click writes it, never the page load.
   const pickFilter = (f: PartFilter | null) => {
     setFilter(f);
+    setShown(PAGE);
     replaceSearch((sp) => {
       if (f === defaultFilter) sp.delete('tur');
       else sp.set('tur', f ?? TUR_ALL);
@@ -179,6 +183,14 @@ export default function Part({
     seenHero.add(r.hero);
     showcase.push(r);
     if (showcase.length === SHOWCASE) break;
+  }
+  // Then every other part with a picture, each item page once: the whole group, a page at a time.
+  const shownUrl = new Set(showcase.map((r) => partItemUrl(model.part, r, lang)));
+  for (const r of all) {
+    const url = partItemUrl(model.part, r, lang);
+    if (!r.hero || shownUrl.has(url)) continue;
+    shownUrl.add(url);
+    showcase.push(r);
   }
   const pics = photos.length + all.length > 0;
   const ctx: Ctx = {
@@ -277,7 +289,7 @@ export default function Part({
                 </h2>
                 <p className="m-0 mt-1 font-sans text-sm text-ink-mid">{t.parts.showcase.lead}</p>
                 <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 lg:grid-cols-4">
-                  {showcase.map((r, i) => {
+                  {showcase.slice(0, shown).map((r, i) => {
                     // Same price as the item page: a front head opens Burçlu there (its own price).
                     const b = !!r.fitted && ctx.prices[`${renderAnchor(r)}#b`] !== undefined;
                     const cents = ctx.prices[`${renderAnchor(r)}${b ? '#b' : ''}`];
@@ -316,6 +328,15 @@ export default function Part({
                     );
                   })}
                 </ul>
+                {showcase.length > shown && (
+                  <button
+                    type="button"
+                    onClick={() => setShown((n) => n + PAGE)}
+                    className={`mt-4 inline-flex min-h-11 items-center rounded-sm border border-ink-soft bg-bg px-4 font-sans text-sm font-medium text-ink hover:border-ink ${FOCUS}`}
+                  >
+                    {t.parts.showcase.more(showcase.length - shown)}
+                  </button>
+                )}
                 <ImgNote
                   t={t}
                   kind={model.part === 'tamir-takimi' ? 'kit' : 'render'}
