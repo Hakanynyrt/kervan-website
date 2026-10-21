@@ -276,6 +276,13 @@ export function toPublicCatalog(
     const list = skusBy.get(f.id);
     if (!attrs || !list?.length) continue;
     list.sort((a, b) => TIP_TYPES.indexOf(a.tipType) - TIP_TYPES.indexOf(b.tipType));
+    // Every tip type of a family costs the same (owner, 2026-10-21: "tüm uç tipleri aynı fiyat"):
+    // the chisel's price, else the first priced type's, goes to all its SKUs.
+    const one =
+      list.find((s) => s.tipType === 'chisel' && s.priceUsdNetCents !== null)?.priceUsdNetCents ??
+      list.find((s) => s.priceUsdNetCents !== null)?.priceUsdNetCents ??
+      null;
+    if (one !== null) for (const s of list) s.priceUsdNetCents = one;
     out.push({
       code: f.code,
       attrs,
