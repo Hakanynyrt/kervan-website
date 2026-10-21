@@ -197,3 +197,11 @@ test('every tip type of a family takes the chisel price, else the first priced o
     [null, null],
   ]);
 });
+
+test('WRONG_FITS is a plain map of family code to breaker slugs', async () => {
+  const { WRONG_FITS } = await import('./public.ts');
+  for (const [code, slugs] of Object.entries(WRONG_FITS)) {
+    assert.match(code, /^KU\d+(?:\.\d+)?-\d{2}$/);
+    for (const s of slugs) assert.match(s, /^[a-z0-9-]+\/[a-z0-9-]+$/);
+  }
+});
