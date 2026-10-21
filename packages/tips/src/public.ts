@@ -118,6 +118,33 @@ export const HIDDEN_BRAND = /\bvega\b/i;
 export const isHiddenBreaker = (b: { brand: string; model: string; slug?: string }): boolean =>
   HIDDEN_BRAND.test(b.brand) || HIDDEN_BRAND.test(b.model) || HIDDEN_BRAND.test(b.slug ?? '');
 
+/**
+ * Breaker–tip links of the catalogue that are wrong (a model-name collision such as "40" or "8"
+ * joined a breaker to another class's tip), found by the 2026-10-21 price and fit audit (owner:
+ * "Gerekenleri uygula"): tip family code → catalogue breaker slugs (as stored, e.g. `diger/…`)
+ * it does not fit. They are left out of
+ * the public catalogue, so the breaker page and its card show only the tips that fit.
+ */
+export const WRONG_FITS: Readonly<Record<string, readonly string[]>> = {
+  'KU135-21': ['diger/komatsu-jthb-20'],
+  'KU146-07': ['diger/komatsu-jthb-30'],
+  'KU155-02': ['atlas-copco/mb-500'],
+  'KU80-05': ['diger/omal-80', 'diger/star-sh-40'],
+  'KU80-07': [
+    'diger/idromeccanica-imi-85',
+    'diger/mal-80',
+    'diger/montabert-brh-40',
+    'diger/promove-pmv-90-p-3sh',
+  ],
+  'KU85-06': [
+    'diger/inanga-400',
+    'diger/kent-khb-400',
+    'diger/kent-khb-40g-ii',
+    'furukawa/hb-40g',
+    'mega/450',
+  ],
+};
+
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
 const range = (a: number | null, b: number | null): Range | null => {
@@ -263,9 +290,11 @@ export function toPublicCatalog(
     });
     skusBy.set(s.family_id, list);
   }
+  const codeOf = new Map(families.map((f) => [f.id, f.code]));
   const fitsBy = new Map<number, PublicFamily['fits']>();
   for (const f of fits) {
     if (isHiddenBreaker(f)) continue;
+    if (WRONG_FITS[codeOf.get(f.family_id) ?? '']?.includes(f.slug)) continue;
     const list = fitsBy.get(f.family_id) ?? [];
     list.push({ brand: f.brand, model: f.model, slug: f.slug });
     fitsBy.set(f.family_id, list);
