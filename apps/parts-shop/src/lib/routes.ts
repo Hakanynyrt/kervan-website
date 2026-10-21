@@ -21,7 +21,7 @@ import {
 import { listedParts, type ListedPart } from './listed-parts';
 import { groupPrices, resolvePartPrices } from './part-prices';
 import { groovedFor } from './grooved';
-import { tipVariants } from './tip-options';
+import { tipOptions, tipVariants } from './tip-options';
 import { OEM_NUMBERS } from './oem-numbers';
 import { GROOVED_TOOLS, PART_RENDERS, type PartRender } from './photos';
 import type { TipGroupStats } from '../types';
@@ -423,7 +423,8 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
           (t, x) => (tierRank(x.popularTier) < tierRank(t) ? x.popularTier : t),
           null,
         ),
-        price: priceSpan(v.families.flatMap((x) => x.skus.map((k) => k.priceUsdNetCents))),
+        // The price the breaker page sells this size at: per type, the first family that has it.
+        price: priceSpan([...tipOptions(v.families).opts.values()].map((o) => o.cents)),
       };
     });
   });
