@@ -24,6 +24,7 @@ import { groovedFor } from './grooved';
 import { tipOptions, tipVariants } from './tip-options';
 import { OEM_NUMBERS } from './oem-numbers';
 import { GROOVED_TOOLS, PART_RENDERS, type PartRender } from './photos';
+import type { FinderMake } from './finder';
 import type { TipGroupStats } from '../types';
 
 /** One group's genuine OEM numbers by render anchor (what its search matches besides the names). */
@@ -45,6 +46,11 @@ export interface PopularPart extends PartLink {
   hero: string | null;
   kind: PartRender['kind'] | null;
 }
+
+/** A priced product on the home's "Ürettiklerimizden": a tip card, or a modelled part (`#b` = burçlu head). */
+export type MadeItem =
+  | { kind: 'tip'; card: BreakerCard }
+  | { kind: 'part'; part: PartKey; anchor: string; cents: number; fitted: boolean };
 
 /** The best-sellers page: tips and parts in one mixed grid (owner: all products, mixed). */
 export type PopularItem = { kind: 'tip'; card: BreakerCard } | { kind: 'part'; part: PopularPart };
@@ -77,13 +83,15 @@ export interface BreakerCard {
 export type PageModel =
   | {
       kind: 'home';
+      /** Best-selling breakers (one per tip family): the finder panel before a model is picked. */
       featured: BreakerCard[];
       featuredArePopular: boolean;
-      /** More best-sellers than shown: link to the best-sellers page. */
-      morePopular: boolean;
-      total: number;
-      /** Every catalogue make (home: numbers strip and compatible-makes row). */
+      /** Every catalogue make (the finder's make chips link to their pages). */
       brands: BrandLink[];
+      /** Every breaker by make, for the finder (finder.ts). */
+      finder: FinderMake[];
+      /** "Ürettiklerimizden": priced tips and parts with pictures. */
+      made: MadeItem[];
       tips: TipGroupStats;
       demo: boolean;
       hasPopular: boolean;
@@ -261,6 +269,51 @@ function popularItems(cards: BreakerCard[], parts: PopularPart[], seed: string):
     ...parts.slice(0, nParts).map((part) => ({ kind: 'part' as const, part })),
   ];
   return shuffled(items, seed);
+}
+
+/** "Ürettiklerimizden" shows this many priced items (tips and parts alternating). */
+const MADE = 8;
+
+/**
+ * The home's priced selection: tips with a picture and a price, and parts we model for the same
+ * breakers with a picture and a price (one per part group first), alternating tip / part; a short
+ * side is filled from the other. Prices as the pages show them: a front head that has a burçlu
+ * price opens Burçlu on its page, so it shows that price.
+ */
+function madeItems(cards: BreakerCard[], partPrices: Map<string, number>): MadeItem[] {
+  const tips: MadeItem[] = [];
+  const seen = new Set<string>();
+  for (const c of cards) {
+    if (!c.image || !c.price || seen.has(c.image)) continue;
+    seen.add(c.image);
+    tips.push({ kind: 'tip', card: c });
+  }
+  // One per part group first, then the rest, in best-seller order.
+  const first: MadeItem[] = [];
+  const rest: MadeItem[] = [];
+  const groups = new Set<PartKey>();
+  for (const l of popularParts(cards)) {
+    const r = PART_RENDERS[l.part].find((x) => renderAnchor(x) === l.anchor);
+    if (!r?.hero) continue;
+    const fittedCents = r.fitted ? partPrices.get(`${l.part}/${l.anchor}#b`) : undefined;
+    const cents = fittedCents ?? partPrices.get(`${l.part}/${l.anchor}`);
+    if (cents === undefined) continue;
+    (groups.has(l.part) ? rest : first).push({
+      kind: 'part',
+      part: l.part,
+      anchor: l.anchor,
+      cents,
+      fitted: fittedCents !== undefined,
+    });
+    groups.add(l.part);
+  }
+  const partQueue = [...first, ...rest];
+  const out: MadeItem[] = [];
+  for (let i = 0; out.length < MADE && (i < tips.length || i < partQueue.length); i++) {
+    if (i < tips.length) out.push(tips[i]);
+    if (out.length < MADE && i < partQueue.length) out.push(partQueue[i]);
+  }
+  return out;
 }
 
 const tierRank = (t: 1 | 2 | null): number => t ?? 3;
@@ -463,6 +516,22 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
   const tips: TipGroupStats = {
     image: featured.find((x) => x.image)?.image ?? null,
   };
+  // Finder: every breaker by make (cards are sorted by name), one entry per model with its tip sizes.
+  const finder: FinderMake[] = brands.map((b) => {
+    const models = new Map<string, FinderMake['models'][number]>();
+    for (const x of byBrand.get(b.name) ?? []) {
+      const m = models.get(x.slug) ?? { model: x.model, slug: x.slug, tips: [] };
+      const img = x.image ?? x.sample;
+      m.tips.push({
+        d: x.diameterMm,
+        ...(x.variant ? { n: x.variant.n, len: x.variant.lengthMm } : {}),
+        ...(img ? { img } : {}),
+        ...(!x.image && x.sample ? { sample: true as const } : {}),
+      });
+      models.set(x.slug, m);
+    }
+    return { brand: b.name, models: [...models.values()] };
+  });
   const pages: BuiltPage[] = [
     {
       path: '/',
@@ -470,9 +539,9 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         kind: 'home',
         featured: featured.slice(0, FEATURED),
         featuredArePopular: hasPopular,
-        morePopular: popular.length > FEATURED,
-        total: cards.length,
         brands,
+        finder,
+        made: madeItems(hasPopular ? popular : cards, partPrices),
         tips,
         demo,
         hasPopular,

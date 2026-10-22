@@ -2,7 +2,9 @@ import { useState, type ReactNode } from 'react';
 import { ORG_PHONE_E164 } from '@kervan/seo';
 import { MAX_QTY } from '../lib/cart';
 import type { Dict } from '../lib/dict';
+import { LEGAL, legalPath } from '../lib/legal';
 import { localePath } from '../lib/locale-path';
+import { PLANT_PHOTOS } from '../lib/photos';
 import type { Lang } from '../types';
 import { FOCUS, whatsappHref } from './Layout';
 import { photoImg, photoSet } from '../lib/photo-url';
@@ -340,5 +342,82 @@ export function OemLine({ t, kit = false }: { t: Dict; kit?: boolean }) {
     <p className="m-0 mt-2 font-sans text-base font-semibold text-ink">
       {kit ? t.parts.kit.oem : t.oem}
     </p>
+  );
+}
+
+/** The three ordering steps (`cart.steps`) and the pre-contract information link: the cart's
+ *  ordering guide and the home's "Nasıl sipariş verilir?". `className` sets the list's grid. */
+export function OrderSteps({
+  lang,
+  t,
+  className = '',
+}: {
+  lang: Lang;
+  t: Dict;
+  className?: string;
+}) {
+  const c = t.cart;
+  return (
+    <>
+      <ol className={`m-0 grid list-none gap-4 p-0 font-sans ${className}`}>
+        {c.steps.items.map((s, i) => (
+          <li key={s.h} className="rounded-sm border border-hair bg-bg p-5">
+            <span
+              aria-hidden="true"
+              className="flex size-8 items-center justify-center rounded-sm bg-bg-warm text-sm font-bold text-ink"
+            >
+              {i + 1}
+            </span>
+            <p className="m-0 mt-3 font-semibold text-ink">{s.h}</p>
+            <p className="m-0 mt-1 text-sm text-ink-mid">{s.p}</p>
+          </li>
+        ))}
+      </ol>
+      <p className="m-0 mt-4 font-sans text-xs text-ink-soft">
+        {c.steps.note}{' '}
+        <a
+          href={localePath(legalPath('on-bilgilendirme'), lang)}
+          className={`underline hover:text-ink ${FOCUS}`}
+        >
+          {LEGAL[lang]['on-bilgilendirme'].title}
+        </a>
+      </p>
+    </>
+  );
+}
+
+/** "Tesisimiz": our four plant photos (4:5) with captions (`/yedek-parca` and the home). */
+export function PlantPhotos({ t, className = '' }: { t: Dict; className?: string }) {
+  const pl = t.parts.plant;
+  return (
+    <section aria-labelledby="plant" className={className}>
+      <h2 id="plant" className="m-0 font-sans text-2xl font-bold text-ink">
+        {pl.title}
+      </h2>
+      <p className="m-0 mt-2 max-w-3xl font-sans text-ink-mid">{pl.lead}</p>
+      <ul className="m-0 mt-6 grid list-none grid-cols-2 gap-4 p-0 lg:grid-cols-4">
+        {PLANT_PHOTOS.map((p, i) => (
+          <li key={p}>
+            <figure className="m-0">
+              <img
+                src={photoImg(p, 'sm')}
+                srcSet={photoSet(p, ['sm', 480], ['lg', 960])}
+                sizes="(min-width: 1024px) 290px, 50vw"
+                width={480}
+                height={600}
+                alt={pl.items[i].alt}
+                loading="lazy"
+                decoding="async"
+                className="block aspect-[4/5] h-auto w-full rounded-sm border border-hair bg-bg-warm object-cover"
+              />
+              <figcaption className="mt-2 font-sans text-sm text-ink-mid">
+                {pl.items[i].caption}
+              </figcaption>
+            </figure>
+          </li>
+        ))}
+      </ul>
+      <p className="m-0 mt-4 font-sans text-xs text-ink-soft">{pl.note}</p>
+    </section>
   );
 }

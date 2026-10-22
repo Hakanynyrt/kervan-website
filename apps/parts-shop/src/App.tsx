@@ -46,7 +46,7 @@ export default function App({ lang, path, model, fx }: PageProps) {
       quoteText={quoteText}
       home={model.kind === 'home'}
     >
-      {model.kind === 'home' && <Home model={model} lang={lang} t={t} />}
+      {model.kind === 'home' && <Home model={model} fx={fx} lang={lang} t={t} />}
       {model.kind === 'list' && <TipList model={model} fx={fx} lang={lang} t={t} />}
       {model.kind === 'popular' && <Popular model={model} lang={lang} t={t} />}
       {model.kind === 'brand' && <Brand model={model} fx={fx} lang={lang} t={t} />}
