@@ -64,6 +64,18 @@ if (OFFSITE_TIPS) {
         removed++;
       }
   process.stdout.write(`prerender: ${removed} part photos left out of dist (served from R2)\n`);
+} else {
+  // Without R2 the card renditions (`-md`, src/lib/photo-url.ts cardSet) are not used: leave them
+  // out so previews stay under the file limit. The opening frames keep theirs.
+  const dir = path.join(DIST, 'photos', 'parca');
+  let removed = 0;
+  if (fs.existsSync(dir))
+    for (const f of fs.readdirSync(dir))
+      if (f.endsWith('-md.webp') && !f.startsWith('acilis-')) {
+        fs.rmSync(path.join(dir, f));
+        removed++;
+      }
+  process.stdout.write(`prerender: ${removed} card renditions (-md) left out of dist (no R2)\n`);
 }
 
 try {
@@ -85,8 +97,7 @@ try {
       for (const [size, n] of Object.entries(src)) {
         const name = `${key}-${size}-${PUB}.webp`;
         const cached = path.join(pub, name);
-        if (!fs.existsSync(cached))
-          await publishImage(path.join(renders, n), cached, MD_WIDTH);
+        if (!fs.existsSync(cached)) await publishImage(path.join(renders, n), cached, MD_WIDTH);
         if (!OFFSITE_TIPS) fs.copyFileSync(cached, path.join(DIST, 'tips', name));
         images++;
       }
@@ -127,7 +138,10 @@ try {
   // the last commit's date (stable across the daily rebuilds), else the build date.
   let lastmod = new Date().toISOString().slice(0, 10);
   try {
-    const d = execFileSync('git', ['log', '-1', '--format=%cs'], { cwd: APP, encoding: 'utf8' }).trim();
+    const d = execFileSync('git', ['log', '-1', '--format=%cs'], {
+      cwd: APP,
+      encoding: 'utf8',
+    }).trim();
     if (/^\d{4}-\d{2}-\d{2}$/.test(d)) lastmod = d;
   } catch {
     /* no git: build date */

@@ -409,7 +409,7 @@ jobs:
           n=$(wc -l < local.txt)
           echo "part photos in the repo: $n"
           [ "$n" -ge 5000 ] || { echo "too few part photos found: $n"; exit 1; }
-          bad=$(grep -Ev '^[a-z0-9-]+-(xs|sm|lg)\.webp$' local.txt || true)
+          bad=$(grep -Ev '^[a-z0-9-]+-(xs|sm|md|lg)\.webp$' local.txt || true)
           [ -z "$bad" ] || { echo "unexpected file names: $(echo "$bad" | wc -l)"; exit 1; }
           leak=$(grep -E 'VT[0-9]' local.txt || true)
           [ -z "$leak" ] || { echo "a file name looks like a private catalog number: $(echo "$leak" | wc -l)"; exit 1; }
@@ -442,9 +442,9 @@ jobs:
           [ "$still" = 0 ] || { echo "still missing after upload: $still"; exit 1; }
           echo "all $n part photos are in the bucket"
           # Every picture the built pages use (absolute URLs and the path-only bases in the page props).
-          sed -E 's/-(xs|sm|lg)\.webp$//' have2_names.txt | sort -u > have_bases.txt
+          sed -E 's/-(xs|sm|md|lg)\.webp$//' have2_names.txt | sort -u > have_bases.txt
           {
-            grep -rhoE 'img\.kiriciparca\.com/photos/parca/[A-Za-z0-9._-]+\.webp' "$DIST" --include='*.html' | sed 's#.*/photos/parca/##' | sed -E 's/-(xs|sm|lg)\.webp$//' || true
+            grep -rhoE 'img\.kiriciparca\.com/photos/parca/[A-Za-z0-9._-]+\.webp' "$DIST" --include='*.html' | sed 's#.*/photos/parca/##' | sed -E 's/-(xs|sm|md|lg)\.webp$//' || true
             grep -rhoE '"/photos/parca/[A-Za-z0-9-]+"' "$DIST" --include='*.html' | sed -E 's#^"/photos/parca/##; s#"$##' || true
           } | grep -v '^acilis-' | sort -u > refs_bases.txt
           echo "pictures the pages use: $(wc -l < refs_bases.txt)"

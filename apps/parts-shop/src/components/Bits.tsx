@@ -307,7 +307,7 @@ export function ImgNote({
   );
 }
 
-/** OEM / original-quality line under a product title. */
+/** The OEM-dimensions line under a product title ("OEM ölçülerinde üretilir, birebir uyumludur"). */
 /** Repair kits are put together for the breaker, not made by us: their own line (`kit`). */
 /**
  * "Muadil OEM no.": the original manufacturer's numbers of the part ours is compatible with

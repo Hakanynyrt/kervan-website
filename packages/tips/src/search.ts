@@ -98,8 +98,9 @@ export function guessMake(word: string, makes: readonly string[]): string | null
  * other-named makes are replaced by the make ("ramer e68" → "Rammer e68"); if that still
  * matches nothing, words without a digit are dropped, those found in no name first, then one
  * at a time from the end (never a make) ("krupp hm 960 cs" → "Krupp hm 960"), as long as a word with a digit
- * (the model number) is left when the query had one. Null when nothing matches or the query
- * already matches as it is.
+ * (the model number) is left when the query had one, and never down to bare numbers (an
+ * unknown make is not dropped to leave "20"). Null when nothing matches or the query already
+ * matches as it is.
  */
 export function rewriteQuery(
   q: string,
@@ -113,7 +114,11 @@ export function rewriteQuery(
   const hits = (list: string[]) =>
     list.length > 0 && folded.some((n) => list.every((w) => n.includes(fold(w))));
   const digits = ws.some((w) => /\d/.test(w));
-  const ok = (list: string[]) => (!digits || list.some((w) => /\d/.test(w))) && hits(list);
+  // A bare number is no suggestion: "Hyundai HDB 20" must not become "20" (owner, 2026-10-22:
+  // it listed unrelated models and opened Mega 20). A word with a letter must be left.
+  const named = (list: string[]) => list.some((w) => !/^\d+$/.test(fold(w)));
+  const ok = (list: string[]) =>
+    (!digits || list.some((w) => /\d/.test(w))) && named(list) && hits(list);
   const done = (list: string[]) => {
     const next = list.join(' ');
     return fold(next) === fold(q) ? null : next;

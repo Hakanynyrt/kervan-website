@@ -12,9 +12,14 @@ export type LegalKey = (typeof LEGAL_KEYS)[number];
 export const LEGAL_PATH = '/yasal';
 export const legalPath = (k: LegalKey): string => `${LEGAL_PATH}/${k}`;
 
+/** The street line as written on the legal pages and the footer: the one source, also used by
+ *  the Organization JSON-LD (`page-head.ts`) so the site never shows two addresses. */
+const SELLER_STREET = 'Uzunçiftlik Mh. Sadun Atığ Cd. No:112';
+
 export const SELLER = {
   name: ORG_REGISTERED_NAME,
-  address: 'Uzunçiftlik Mh. Sadun Atığ Cd. No:112, Kartepe / Kocaeli',
+  street: SELLER_STREET,
+  address: `${SELLER_STREET}, Kartepe / Kocaeli`,
   tax: 'Alemdar V.D. 5451088184',
   phone: '0 (262) 371 10 05',
   fax: '0 (262) 371 10 04',

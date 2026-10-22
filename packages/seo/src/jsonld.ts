@@ -27,9 +27,12 @@ interface BuildOrgOpts {
   alternateName?: string;
   /** Override the standard image URL (logo). */
   logoUrl?: string;
+  /** Override the street line: a site that shows its own written address (the shop's legal
+   *  pages) gives the same text here, so the page and its JSON-LD agree. */
+  street?: string;
 }
 
-export function organization({ primaryUrl, alternateName, logoUrl }: BuildOrgOpts) {
+export function organization({ primaryUrl, alternateName, logoUrl, street }: BuildOrgOpts) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -49,7 +52,7 @@ export function organization({ primaryUrl, alternateName, logoUrl }: BuildOrgOpt
     },
     address: {
       '@type': 'PostalAddress',
-      streetAddress: ORG_STREET,
+      streetAddress: street ?? ORG_STREET,
       addressLocality: ORG_LOCALITY,
       addressRegion: ORG_REGION,
       addressCountry: ORG_COUNTRY,

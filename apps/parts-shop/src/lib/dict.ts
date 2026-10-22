@@ -48,8 +48,13 @@ export interface Dict {
     skip: string;
     /** Short group names for the category bar (tips first, then PART_KEYS). */
     groups: { tips: string } & Record<PartKey, string>;
+    /** Phone call on the phones' bottom bar ("Telefon": "Ara" is the search button). */
     call: string;
     cart: string;
+    /** Shown once, next to the header's cart link: "(sepetiniz)", since "palet" is the owner's word. */
+    cartHint: string;
+    /** The header cart link's accessible name, with the number of items once known. */
+    cartLabel: (n: number) => string;
     langLabel: string;
     langOther: string;
     /** Header utility group (language, cart, quote). */
@@ -266,6 +271,13 @@ export interface Dict {
     company: string;
     phone: string;
     city: string;
+    /** English cart only (international orders): required, goes into the order message. */
+    country: string;
+    /** After a required field's label. */
+    required: string;
+    countryMissing: string;
+    /** English cart only: one line on international shipping, from facts stated elsewhere. */
+    intlNote: string;
     note: string;
     sendWa: string;
     sendMail: string;
@@ -443,7 +455,7 @@ export const DICT: Record<Lang, Dict> = {
       brand: 'Kervan Makina',
       homeTitle: 'Kırıcı yedek parça ve kırıcı ucu | Kervan Makina',
       homeDesc:
-        'Hidrolik kırıcı yedek parça: kırıcı ucu, alt gövde, burç, kama, saplama, piston, akümülatör parçaları, aşınma plakası ve tamir takımı, kırıcınızın marka ve modeline göre. Stoktan aynı gün kargo.',
+        'Hidrolik kırıcı yedek parça: kırıcı ucu, alt gövde, burç, kama, saplama, piston, aşınma plakası ve tamir takımı, marka ve modele göre. Stoktan aynı gün kargo.',
       listTitle: 'Kırıcı ucu: marka ve modele göre | Kervan Makina',
       listDesc:
         'Hidrolik kırıcı ucu: kırıcınızın marka ve modelini yazın, çalışma çapı ve uç tipleriyle Kervan üretimi ucu bulun. Stoktan aynı gün kargo.',
@@ -462,7 +474,7 @@ export const DICT: Record<Lang, Dict> = {
         `${brand} hidrolik kırıcı ucu: ${n} ${brand} kırıcı modeli için Kervan üretimi uç, çalışma çapı ve uç tipleri. Stoktan aynı gün kargo.`,
       partsTitle: 'Hidrolik kırıcı yedek parçaları | Kervan Makina',
       partsDesc:
-        'Hidrolik kırıcı yedek parçaları: kırıcı ucu, alt gövde, burç, kama, saplama, piston, akümülatör parçaları, aşınma plakası ve tamir takımı, kırıcınızın marka ve modeline göre.',
+        'Hidrolik kırıcı yedek parçaları: kırıcı ucu, alt gövde, burç, kama, saplama, piston, akümülatör parçaları, aşınma plakası ve tamir takımı, marka ve modele göre.',
       partTitle: (name) =>
         `Kırıcı ${name.toLocaleLowerCase('tr')}: marka ve modele göre | Kervan Makina`,
       partDesc: (name, kit) =>
@@ -494,8 +506,10 @@ export const DICT: Record<Lang, Dict> = {
         'asinma-plakasi': 'Aşınma plakası',
         'tamir-takimi': 'Tamir takımı',
       },
-      call: 'Ara',
+      call: 'Telefon',
       cart: 'Palet',
+      cartHint: '(sepetiniz)',
+      cartLabel: (n) => `Palet (sepetiniz)${n ? `, ${n} ürün` : ''}`,
       langLabel: 'English',
       langOther: 'EN',
       tools: 'Hızlı erişim',
@@ -563,7 +577,7 @@ export const DICT: Record<Lang, Dict> = {
       trust: [
         {
           title: 'Kendi üretimimiz',
-          body: 'Kartepe’deki tesisimizde, orijinalle aynı ve OEM kalitesinde işlenir; aracı yoktur.',
+          body: 'Kartepe’deki tesisimizde OEM ölçülerinde üretilir, birebir uyumludur; aracı yoktur.',
         },
         {
           title: 'Kendi ısıl işlemimiz',
@@ -575,7 +589,7 @@ export const DICT: Record<Lang, Dict> = {
         },
         {
           title: 'Stoktan aynı gün kargo',
-          body: 'Stoktaki uçlar ödemeniz bize ulaştığı gün kargoya verilir.',
+          body: 'Stoktaki ürünler ödemeniz bize ulaştığı gün kargoya verilir.',
         },
       ],
     },
@@ -724,7 +738,7 @@ export const DICT: Record<Lang, Dict> = {
           },
           {
             h: 'Onay ve kargo',
-            p: 'Toplam bedel, kargo ve ödeme bilgilerini içeren sipariş onayını gönderiyoruz; stoktaki ürünler aynı gün kargoya verilir.',
+            p: 'Toplam bedel, kargo ve ödeme bilgilerini içeren sipariş onayını gönderiyoruz; stoktaki ürünler ödemeniz bize ulaştığı gün kargoya verilir.',
           },
         ],
         note: 'Ayrıntılar:',
@@ -750,6 +764,10 @@ export const DICT: Record<Lang, Dict> = {
       company: 'Firma',
       phone: 'Telefon',
       city: 'Şehir',
+      country: 'Ülke',
+      required: '(zorunlu)',
+      countryMissing: '',
+      intlNote: '',
       note: 'Not',
       sendWa: 'Sipariş talebini WhatsApp ile gönder',
       sendMail: 'E-posta ile gönder',
@@ -773,7 +791,7 @@ export const DICT: Record<Lang, Dict> = {
     terms: {
       title: 'Satış koşulları',
       rows: [
-        ['Kalite', 'OEM kalitesinde, orijinalle aynı'],
+        ['Uyum', 'OEM ölçülerinde üretilir, birebir uyumludur'],
         ['Kargo', 'Alıcıya aittir; tutarı sipariş onayında bildirilir'],
         ['Ödeme', 'Kredi kartı veya havale/EFT'],
         ['Garanti', 'Teslimden itibaren 2 ay, malzeme ve üretim hatalarına karşı'],
@@ -1148,7 +1166,7 @@ export const DICT: Record<Lang, Dict> = {
     imgNote: 'Görseller temsilidir.',
     renderNote: '3B görseller; temsilidir.',
     photoNote: 'Atölyemizdeki stoktan, gerçek fotoğraflar.',
-    oem: 'OEM / orijinal kalitesinde, orijinalle aynı üretilir.',
+    oem: 'OEM ölçülerinde üretilir, birebir uyumludur.',
     legal: {
       nav: 'Yasal metinler',
       agree: 'Sipariş talebi göndererek aşağıdaki metinleri okuduğunuzu kabul edersiniz:',
@@ -1201,7 +1219,7 @@ export const DICT: Record<Lang, Dict> = {
       brand: 'Kervan Makina',
       homeTitle: 'Hydraulic breaker spare parts and tips | Kervan Makina',
       homeDesc:
-        'Hydraulic breaker spare parts: tips, front heads, bushings, retainer keys, tie rods, pistons, accumulator parts, wear plates and repair kits, by breaker make and model. Same-day shipping from stock.',
+        'Hydraulic breaker parts by make and model: tips, front heads, bushings, retainer keys, tie rods, pistons, wear plates, repair kits. Same-day shipping from stock.',
       listTitle: 'Breaker tips by make and model | Kervan Makina',
       listDesc:
         'Hydraulic breaker tips: type your breaker make and model to find the Kervan tip, with working diameter and tip types. Same-day shipping from stock.',
@@ -1220,7 +1238,7 @@ export const DICT: Record<Lang, Dict> = {
         `${brand} hydraulic breaker tips: Kervan tips for ${n} ${brand} breaker models, with working diameter and tip types. Same-day shipping from stock.`,
       partsTitle: 'Hydraulic breaker spare parts | Kervan Makina',
       partsDesc:
-        'Hydraulic breaker spare parts: tips, front heads, bushings, retainer keys, tie rods, pistons, accumulator parts, wear plates and repair kits, by breaker make and model.',
+        'Hydraulic breaker spare parts: tips, front heads, bushings, retainer keys, tie rods, pistons, accumulator parts, wear plates and repair kits, by make and model.',
       partTitle: (name) => `Breaker ${name.toLowerCase()} by make and model | Kervan Makina`,
       partDesc: (name, kit) =>
         kit
@@ -1253,6 +1271,8 @@ export const DICT: Record<Lang, Dict> = {
       },
       call: 'Call',
       cart: 'Cart',
+      cartHint: '',
+      cartLabel: (n) => `Cart${n ? `, ${n} ${n === 1 ? 'item' : 'items'}` : ''}`,
       langLabel: 'Türkçe',
       langOther: 'TR',
       tools: 'Quick links',
@@ -1320,7 +1340,7 @@ export const DICT: Record<Lang, Dict> = {
       trust: [
         {
           title: 'Our own production',
-          body: 'Machined in our plant in Kartepe, Türkiye, identical to the original, to OEM quality; no middlemen.',
+          body: 'Made in our plant in Kartepe, Türkiye, to OEM dimensions, a direct fit; no middlemen.',
         },
         {
           title: 'Our own heat treatment',
@@ -1332,7 +1352,7 @@ export const DICT: Record<Lang, Dict> = {
         },
         {
           title: 'Ships from stock the same day',
-          body: 'Tips in stock ship the day your payment reaches us.',
+          body: 'Items in stock ship the day your payment reaches us.',
         },
       ],
     },
@@ -1481,7 +1501,7 @@ export const DICT: Record<Lang, Dict> = {
           },
           {
             h: 'Confirmation and shipping',
-            p: 'We send an order confirmation with the total, shipping and payment details; stock items ship the same day.',
+            p: 'We send an order confirmation with the total, shipping and payment details; items in stock ship the day your payment reaches us.',
           },
         ],
         note: 'Details:',
@@ -1507,6 +1527,10 @@ export const DICT: Record<Lang, Dict> = {
       company: 'Company',
       phone: 'Phone',
       city: 'City',
+      country: 'Country',
+      required: '(required)',
+      countryMissing: 'Please enter your country, so we can quote the shipping.',
+      intlNote: 'Orders outside Türkiye: prices are export prices; shipping is not included.',
       note: 'Note',
       sendWa: 'Send the order request on WhatsApp',
       sendMail: 'Send by e-mail',
@@ -1530,7 +1554,7 @@ export const DICT: Record<Lang, Dict> = {
     terms: {
       title: 'Terms of sale',
       rows: [
-        ['Quality', 'OEM quality, identical to the original'],
+        ['Fit', 'Made to OEM dimensions, a direct fit'],
         ['Shipping', 'Paid by the buyer; the amount is given in the order confirmation'],
         ['Payment', 'Credit card or bank transfer'],
         ['Warranty', '2 months from delivery, against material and manufacturing defects'],
@@ -1913,7 +1937,7 @@ export const DICT: Record<Lang, Dict> = {
     imgNote: 'Images are for illustration.',
     renderNote: '3D images; for illustration.',
     photoNote: 'Real photos of our stock at the plant.',
-    oem: 'Made to OEM / original quality, identical to the original.',
+    oem: 'Made to OEM dimensions, a direct fit.',
     legal: {
       nav: 'Legal',
       agree: 'By sending an order request you confirm you have read:',

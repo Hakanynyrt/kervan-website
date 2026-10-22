@@ -26,12 +26,18 @@
       })();
       // Home opening (src/components/ExplodedPicker.tsx): once per session, for visitors without
       // reduced motion; the component clears the mark, and this timer does if it never runs.
+      // Skipped (the final picture shows) with Save-Data, on a 2g / 3g connection and on an ad
+      // click's landing (gclid / gbraid / wbraid): those visitors get the page without the frames.
       (function () {
         var h = document.documentElement;
         try {
+          var c = navigator.connection || {};
           if (
             /^\/(en\/?)?$/.test(location.pathname) &&
             !navigator.webdriver &&
+            !c.saveData &&
+            !/(^|-)[23]g$/.test(c.effectiveType || '') &&
+            !/[?&](gclid|gbraid|wbraid)=/.test(location.search) &&
             !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
             !sessionStorage.getItem('kv_open_played')
           ) {
@@ -55,6 +61,8 @@
     />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32-02.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16-02.png" />
+    <!-- Google's result favicon wants a multiple of 48 px; /favicon.ico (16/32/48) is a fixed name. -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192-02.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-02.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-02.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
