@@ -1,6 +1,6 @@
 /** Generated from the owner's drawings (nuts, washers, pins, plugs, buffers, wear plates): one render each,
  *  `/photos/parca/<file>-vitrin-01` (and `-yan-01` for plates and buffers). Names come from the drawing titles (`kind`), never part numbers. */
-import type { PartRender } from './photos';
+import type { PartRender, RenderView } from './photos';
 
 export interface SmallPart {
   make: string;
@@ -8,6 +8,9 @@ export interface SmallPart {
   file: string;
   kind: NonNullable<PartRender['kind']>;
   variant?: PartRender['variant'];
+  /** Extra published views besides the hero, e.g. a nut whose threaded bore the hero hardly shows gets the view
+   *  that looks into it (`-on-` front / `-arka-` rear). */
+  views?: readonly RenderView[];
 }
 
 export const SMALL_PARTS: Record<
@@ -26,12 +29,36 @@ export const SMALL_PARTS: Record<
       variant: 'newType',
     },
     { make: 'Rammer', model: 'G80', file: 'somun-rammer-g80-tie-rod-nut', kind: 'tieRodNut' },
-    { make: 'Rammer', model: 'S25', file: 'somun-rammer-s25-tie-rod-nut', kind: 'tieRodNut' },
+    {
+      make: 'Rammer',
+      model: 'S25',
+      file: 'somun-rammer-s25-tie-rod-nut',
+      views: ['section'],
+      kind: 'tieRodNut',
+    },
     { make: 'Rammer', model: 'S25', file: 'pul-rammer-s25-tie-rod-washer', kind: 'tieRodWasher' },
-    { make: 'Rammer', model: 'S84', file: 'somun-rammer-s84-tie-rod-nut', kind: 'tieRodNut' },
-    { make: 'MTB', model: '10', file: 'somun-mtb-10-tie-rod-nut', kind: 'tieRodNut' },
+    {
+      make: 'Rammer',
+      model: 'S84',
+      file: 'somun-rammer-s84-tie-rod-nut',
+      views: ['front'],
+      kind: 'tieRodNut',
+    },
+    {
+      make: 'MTB',
+      model: '10',
+      file: 'somun-mtb-10-tie-rod-nut',
+      views: ['front'],
+      kind: 'tieRodNut',
+    },
     { make: 'MTB', model: '10', file: 'pul-mtb-10-tie-rod-washer', kind: 'tieRodWasher' },
-    { make: 'MTB', model: '15', file: 'somun-mtb-15-tie-rod-nut', kind: 'tieRodNut' },
+    {
+      make: 'MTB',
+      model: '15',
+      file: 'somun-mtb-15-tie-rod-nut',
+      views: ['front'],
+      kind: 'tieRodNut',
+    },
     { make: 'MTB', model: '15', file: 'pul-mtb-15-tie-rod-washer', kind: 'tieRodWasher' },
     { make: 'MTB', model: '36', file: 'somun-mtb-36-tie-rod-nut', kind: 'tieRodNut' },
     { make: 'MTB', model: '85', file: 'somun-mtb-85-tie-rod-nut', kind: 'tieRodNut' },
@@ -57,7 +84,13 @@ export const SMALL_PARTS: Record<
       file: 'pul-krupp-hm-1500-tie-rod-washer',
       kind: 'tieRodWasher',
     },
-    { make: 'Krupp', model: 'HM 560', file: 'somun-krupp-hm-560-tie-rod-nut', kind: 'tieRodNut' },
+    {
+      make: 'Krupp',
+      model: 'HM 560',
+      file: 'somun-krupp-hm-560-tie-rod-nut',
+      views: ['front'],
+      kind: 'tieRodNut',
+    },
     {
       make: 'Krupp',
       model: 'HM 560',
@@ -69,12 +102,14 @@ export const SMALL_PARTS: Record<
       make: 'Krupp',
       model: 'HM 720',
       file: 'somun-krupp-hm-720-tie-rod-lower-nut',
+      views: ['rear'],
       kind: 'tieRodLowerNut',
     },
     {
       make: 'Krupp',
       model: 'HM 720',
       file: 'somun-krupp-hm-720-tie-rod-upper-nut',
+      views: ['front'],
       kind: 'tieRodUpperNut',
     },
     {
@@ -94,6 +129,7 @@ export const SMALL_PARTS: Record<
       make: 'Krupp',
       model: 'HM 960',
       file: 'somun-krupp-hm-960-tie-rod-upper-nut',
+      views: ['front'],
       kind: 'tieRodUpperNut',
     },
     {
@@ -113,6 +149,7 @@ export const SMALL_PARTS: Record<
       make: 'Soosan',
       model: 'SB121 TS-P',
       file: 'somun-soosan-sb121-ts-p-tie-rod-lower-nut-new-type',
+      views: ['front'],
       kind: 'tieRodLowerNut',
       variant: 'newType',
     },
@@ -127,6 +164,7 @@ export const SMALL_PARTS: Record<
       make: 'Soosan',
       model: 'SB121 TS-P',
       file: 'somun-soosan-sb121-ts-p-tie-rod-lower-nut-tri-nut',
+      views: ['front'],
       kind: 'tieRodLowerNut',
       variant: 'triLobe',
     },
@@ -134,6 +172,7 @@ export const SMALL_PARTS: Record<
       make: 'Soosan',
       model: 'SB121 TS-P',
       file: 'somun-soosan-sb121-ts-p-tie-rod-upper-nut',
+      views: ['front'],
       kind: 'tieRodUpperNut',
     },
     {
@@ -146,24 +185,28 @@ export const SMALL_PARTS: Record<
       make: 'Montabert',
       model: 'BRH 501',
       file: 'somun-montabert-brh-501-tie-rod-nut',
+      views: ['front'],
       kind: 'tieRodNut',
     },
     {
       make: 'Montabert',
       model: 'BRV 32',
       file: 'somun-montabert-brv-32-tie-rod-nut',
+      views: ['front'],
       kind: 'tieRodNut',
     },
     {
       make: 'Furukawa',
       model: 'F22',
       file: 'somun-furukawa-f22-tie-rod-lower-nut',
+      views: ['rear'],
       kind: 'tieRodLowerNut',
     },
     {
       make: 'Furukawa',
       model: 'F22',
       file: 'somun-furukawa-f22-tie-rod-upper-nut',
+      views: ['front'],
       kind: 'tieRodUpperNut',
     },
     {
@@ -183,12 +226,14 @@ export const SMALL_PARTS: Record<
       make: 'Furukawa',
       model: 'HB20G',
       file: 'somun-furukawa-hb20g-tie-rod-lower-nut',
+      views: ['rear'],
       kind: 'tieRodLowerNut',
     },
     {
       make: 'Furukawa',
       model: 'HB20G',
       file: 'somun-furukawa-hb20g-tie-rod-lower-nut-old-type',
+      views: ['rear'],
       kind: 'tieRodLowerNut',
       variant: 'oldType',
     },
@@ -196,12 +241,14 @@ export const SMALL_PARTS: Record<
       make: 'Furukawa',
       model: 'HB20G',
       file: 'somun-furukawa-hb20g-tie-rod-upper-nut',
+      views: ['front'],
       kind: 'tieRodUpperNut',
     },
     {
       make: 'Furukawa',
       model: 'HB20G',
       file: 'somun-furukawa-hb20g-tie-rod-upper-nut-old-type',
+      views: ['front'],
       kind: 'tieRodUpperNut',
       variant: 'oldType',
     },
@@ -215,12 +262,14 @@ export const SMALL_PARTS: Record<
       make: 'Furukawa',
       model: 'HB30G',
       file: 'somun-furukawa-hb30g-tie-rod-lower-nut',
+      views: ['rear'],
       kind: 'tieRodLowerNut',
     },
     {
       make: 'Furukawa',
       model: 'HB30G',
       file: 'somun-furukawa-hb30g-tie-rod-lower-nut-old-type',
+      views: ['rear'],
       kind: 'tieRodLowerNut',
       variant: 'oldType',
     },
@@ -228,12 +277,14 @@ export const SMALL_PARTS: Record<
       make: 'Furukawa',
       model: 'HB30G',
       file: 'somun-furukawa-hb30g-tie-rod-upper-nut',
+      views: ['front'],
       kind: 'tieRodUpperNut',
     },
     {
       make: 'Furukawa',
       model: 'HB30G',
       file: 'somun-furukawa-hb30g-tie-rod-upper-nut-old-type',
+      views: ['front'],
       kind: 'tieRodUpperNut',
       variant: 'oldType',
     },

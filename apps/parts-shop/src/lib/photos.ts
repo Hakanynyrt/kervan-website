@@ -2012,15 +2012,16 @@ const WEAR_PLATES: OtherPart[] = [
 /** Nuts, washers, pins, plugs, buffers and plates (`small-parts.ts`): hero plus side, front and rear. */
 /**
  * Small parts publish few files (Pages' 20,000-file limit, see check-dist): the hero, plus the side
- * view for plates and buffers; round pins, washers, nuts and plugs show everything in the hero.
+ * view for plates and buffers; round pins, washers, nuts and plugs show everything in the hero, except nuts whose
+ * hero hardly shows the threaded bore (`SmallPart.views`: one view looking into it).
  */
-const smallRender = ({ make, model, file, kind, variant }: SmallPart): PartRender => ({
+const smallRender = ({ make, model, file, kind, variant, views }: SmallPart): PartRender => ({
   ...otherRender({
     make,
     model,
     file,
     kind,
-    views: /^(asinma|takoz|saplama-takim)-/.test(file) ? ['side'] : [],
+    views: views ? [...views] : /^(asinma|takoz|saplama-takim)-/.test(file) ? ['side'] : [],
   }),
   ...(variant ? { variant } : {}),
 });
