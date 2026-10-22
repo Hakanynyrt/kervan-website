@@ -1531,7 +1531,7 @@ export const DICT: Record<Lang, Dict> = {
       required: '(required)',
       countryMissing: 'Please enter your country, so we can quote the shipping.',
       intlNote:
-        'Orders outside Türkiye: prices are export prices; shipping is not included, is paid by the buyer and is quoted in the order confirmation; import duties and taxes in your country are paid by the buyer.',
+        'Orders outside Türkiye: prices are export prices; shipping is not included.',
       note: 'Note',
       sendWa: 'Send the order request on WhatsApp',
       sendMail: 'Send by e-mail',

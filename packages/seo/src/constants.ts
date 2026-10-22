@@ -25,7 +25,7 @@ export const ORG_PUBLIC_EMAIL = 'info@kiriciparca.com';
 export const ORG_LOCALITY = 'Kartepe';
 export const ORG_REGION = 'Kocaeli';
 export const ORG_COUNTRY = 'TR';
-export const ORG_STREET = 'Uzunçiftlik Mah. Sadun Atığ Cad. No:112/A';
+export const ORG_STREET = 'Uzunçiftlik Mah. Sadun Atığ Cad. No:112';
 
 export const ORG_INSTAGRAM = 'https://www.instagram.com/kervanmakina/';
 export const ORG_FACEBOOK = 'https://www.facebook.com/KRVbreaker';
