@@ -416,7 +416,11 @@ function Cards({
               <span className="relative block">
                 <img
                   src={tipImg((r.image ?? r.sample)!)}
-                  alt=""
+                  alt={
+                    r.image
+                      ? t.breaker.title(cardName(r, lang))
+                      : t.family.sampleAlt(cardName(r, lang))
+                  }
                   width={480}
                   height={320}
                   loading="lazy"

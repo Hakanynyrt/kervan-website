@@ -222,7 +222,11 @@ export default function TipProduct({
                     src={tipImg(key)}
                     width={800}
                     height={533}
-                    alt=""
+                    alt={
+                      o.sku?.image || !sample
+                        ? tf.renderAlt(quoteName, t.tip[x])
+                        : tf.sampleAlt(sample.name)
+                    }
                     loading="lazy"
                     decoding="async"
                     className="block aspect-[3/2] h-auto w-full bg-stage object-cover"

@@ -319,6 +319,8 @@ export interface Dict {
       hero: string;
       heroShort: string;
       short: Record<RenderView, string>;
+      /** Alt text of a part picture: "Rammer E68 alt gövde, ön görünüş" (cards use `hero`). */
+      alt: (caption: string, view: string) => string;
     };
     viewer: {
       open: string;
@@ -1039,6 +1041,7 @@ export const DICT: Record<Lang, Dict> = {
         count: (i, n) => `${i} / ${n}`,
         hero: 'genel görünüş',
         heroShort: 'Genel',
+        alt: (caption, view) => `${caption}, ${view}`,
         short: {
           front: 'Ön',
           rear: 'Arka',
@@ -1809,6 +1812,7 @@ export const DICT: Record<Lang, Dict> = {
         count: (i, n) => `${i} / ${n}`,
         hero: 'general view',
         heroShort: 'General',
+        alt: (caption, view) => `${caption}, ${view}`,
         short: {
           front: 'Front',
           rear: 'Rear',

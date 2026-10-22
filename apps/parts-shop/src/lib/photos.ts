@@ -13,7 +13,7 @@ import type { PartKey } from './routes';
 export const STOCK_TIP_PHOTOS = [
   '/photos/stok/uc-stok-01',
   '/photos/stok/uc-stok-03',
-  '/photos/stok/uc-stok-03',
+  '/photos/stok/uc-stok-02',
 ] as const;
 
 export const PART_PHOTOS: Record<PartKey, readonly string[]> = {

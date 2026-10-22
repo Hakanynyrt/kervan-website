@@ -69,3 +69,27 @@ export function tipVariants(families: PublicFamily[]): TipVariant[] {
   }
   return [...out.values()];
 }
+
+/**
+ * What the prerendered breaker / family page shows (TipProduct: the first size, its first
+ * type): that option, its own render, and, when it has none, the sample's picture (another
+ * breaker's tip, shown labelled). The page head uses the same choice for `og:image` and the
+ * offer, so the link preview and the price match the page.
+ */
+export function shownTip(
+  families: PublicFamily[],
+  extra?: PublicExtra,
+  sample?: { family: PublicFamily },
+): { opt: TipOption | undefined; image: string | null; sampleImage: string | null } {
+  const variants = tipVariants(families);
+  const { opts, types } = tipOptions(variants.length > 1 ? variants[0].families : families, extra);
+  const opt = types.length ? opts.get(types[0]) : undefined;
+  const image = opt?.sku?.image ?? null;
+  const sampleImage = image
+    ? null
+    : ((
+        sample?.family.skus.find((x) => x.tipType === opt?.tipType && x.image) ??
+        sample?.family.skus.find((x) => x.image)
+      )?.image ?? null);
+  return { opt, image, sampleImage };
+}

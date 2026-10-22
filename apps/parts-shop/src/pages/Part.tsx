@@ -318,7 +318,10 @@ export default function Part({
                             sizes="(min-width: 1280px) 210px, (min-width: 1024px) 17vw, (min-width: 640px) 31vw, 47vw"
                             width={320}
                             height={180}
-                            alt=""
+                            alt={t.parts.gallery.alt(
+                              renderTitle(r, b ? t.parts.fitted.name(p.name, true) : p.name, t),
+                              t.parts.gallery.hero,
+                            )}
                             loading={i > 3 ? 'lazy' : undefined}
                             decoding="async"
                             className="block h-auto w-full bg-pstage"
@@ -449,7 +452,7 @@ function ListedCard({ l, ctx }: { l: ListedPart; ctx: Ctx }) {
           sizes="(min-width: 640px) 30vw, 100vw"
           width={320}
           height={180}
-          alt=""
+          alt={`${t.parts.listed.sample}: ${l.breaker} ${label}`}
           loading="lazy"
           decoding="async"
           className="block h-auto w-full bg-pstage"
@@ -921,7 +924,7 @@ function SeriesPicker({
                   src={photoImg(r.hero, 'xs')}
                   width={320}
                   height={180}
-                  alt=""
+                  alt={t.parts.gallery.alt(renderTitle(r, ctx.name, t), t.parts.gallery.hero)}
                   loading="lazy"
                   decoding="async"
                   className="block h-auto w-full rounded-t-[4px] bg-pstage"
