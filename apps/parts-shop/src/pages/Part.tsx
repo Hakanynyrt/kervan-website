@@ -40,7 +40,7 @@ import {
 } from '../lib/routes';
 import type { Lang } from '../types';
 import { ORDER_EMAIL, SITE } from '../lib/site';
-import { photoImg, photoSet } from '../lib/photo-url';
+import { cardSet, photoImg } from '../lib/photo-url';
 
 type Model = Extract<PageModel, { kind: 'part' }>;
 
@@ -110,7 +110,12 @@ export default function Part({
   const all = kinds ? every.filter((r) => inFilter(r, kinds)) : every;
   // The chip picked is written to `?tur=` (shareable); `tumu` = every kind on a page whose
   // default chip is another one. Only a click writes it, never the page load.
+  // A chip the visitor picked (or a `?tur=` link) holds while typing; the page's default chip
+  // ("Setler" on burç) does not: a typed search looks through every kind (owner, 2026-10-22:
+  // "MTB 150" typed on the burç page showed only the set, `?q=MTB+150` showed all 6 parts).
+  const chosen = useRef(false);
   const pickFilter = (f: PartFilter | null) => {
+    chosen.current = true;
     setFilter(f);
     setShown(PAGE);
     replaceSearch((sp) => {
@@ -125,7 +130,10 @@ export default function Part({
     const tur = sp.get('tur');
     const named = tur === TUR_ALL ? null : filters.find(([f]) => f === tur)?.[0];
     const explicit = named !== undefined;
-    if (explicit) setFilter(named);
+    if (explicit) {
+      chosen.current = true;
+      setFilter(named);
+    }
     const v = sp.get('q');
     if (v) {
       if (!explicit) setFilter(null);
@@ -225,7 +233,12 @@ export default function Part({
             id="filter"
             type="search"
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              setQ(v);
+              // Typing searches every kind ("Tümü"); clearing the box goes back to the default chip.
+              if (!chosen.current) setFilter(v.trim() ? null : defaultFilter);
+            }}
             placeholder={t.search.placeholder}
             autoComplete="off"
             className={`min-w-0 flex-[1_1_22rem] rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft ${FOCUS}`}
@@ -301,8 +314,8 @@ export default function Part({
                         >
                           <img
                             src={photoImg(r.hero, 'xs')}
-                            srcSet={photoSet(r.hero, ['xs', 320], ['lg', 1600])}
-                            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                            srcSet={cardSet(r.hero)}
+                            sizes="(min-width: 1280px) 210px, (min-width: 1024px) 17vw, (min-width: 640px) 31vw, 47vw"
                             width={320}
                             height={180}
                             alt=""
@@ -432,7 +445,7 @@ function ListedCard({ l, ctx }: { l: ListedPart; ctx: Ctx }) {
       <div className="relative">
         <img
           src={photoImg(l.sample, 'xs')}
-          srcSet={photoSet(l.sample, ['xs', 320], ['lg', 1600])}
+          srcSet={cardSet(l.sample)}
           sizes="(min-width: 640px) 30vw, 100vw"
           width={320}
           height={180}

@@ -81,6 +81,9 @@ test('rewriteQuery: fixes the make, drops unknown words, keeps the model number'
   assert.equal(rewriteQuery('rammer 960', NAMES, MAKES), null);
   // Nothing sensible left: no rewrite.
   assert.equal(rewriteQuery('xyz 12345', NAMES, MAKES), null);
+  // An unknown make is never dropped to leave a bare number ("Hyundai HDB 20" → not "20").
+  assert.equal(rewriteQuery('hyundai hdb 20', [...NAMES, 'Mega 20'], MAKES), null);
+  assert.equal(rewriteQuery('volvo 960', NAMES, MAKES), null);
   assert.equal(rewriteQuery('qwerty', NAMES, MAKES), null);
   assert.equal(rewriteQuery('', NAMES, MAKES), null);
   // Already fine as typed.

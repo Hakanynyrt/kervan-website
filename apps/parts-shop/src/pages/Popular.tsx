@@ -7,7 +7,7 @@ import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { partItemPath, type PageModel, type PopularPart } from '../lib/routes';
 import type { Lang } from '../types';
-import { photoImg, photoSet } from '../lib/photo-url';
+import { cardSet, photoImg } from '../lib/photo-url';
 
 type Model = Extract<PageModel, { kind: 'popular' }>;
 
@@ -50,7 +50,7 @@ function PartCard({ x, lang, t }: { x: PopularPart; lang: Lang; t: Dict }) {
         {x.hero && (
           <img
             src={photoImg(x.hero, 'xs')}
-            srcSet={photoSet(x.hero, ['xs', 320], ['lg', 1600])}
+            srcSet={cardSet(x.hero)}
             sizes="(min-width: 1024px) 25vw, 50vw"
             width={320}
             height={180}

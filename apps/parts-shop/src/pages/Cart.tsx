@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import type { FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import { OrderSteps, PageTitle, QtyStepper } from '../components/Bits';
@@ -14,8 +14,11 @@ import { PARTS_PATH } from '../lib/routes';
 import type { Lang } from '../types';
 import { ORDER_EMAIL, SITE } from '../lib/site';
 
-const FIELDS = ['name', 'company', 'phone', 'city', 'note'] as const;
+const FIELDS = ['name', 'company', 'phone', 'city', 'country', 'note'] as const;
 type Field = (typeof FIELDS)[number];
+/** The country is asked on the English cart only (international orders), and required there. */
+const fieldsFor = (lang: Lang): readonly Field[] =>
+  lang === 'en' ? FIELDS : FIELDS.filter((k) => k !== 'country');
 
 /**
  * The cart: lines from this browser's storage, quantities, totals in USD and TRY, and the order
@@ -30,8 +33,22 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
     company: '',
     phone: '',
     city: '',
+    country: '',
     note: '',
   });
+  const fields = fieldsFor(lang);
+  const needCountry = lang === 'en';
+  const countryRef = useRef<HTMLInputElement>(null);
+  const [countryError, setCountryError] = useState(false);
+  const blocked = needCountry && !contact.country.trim();
+  // The send links stay links (WhatsApp / mailto); without the required country they only
+  // point at the field (aria-disabled, so no conversion is counted either).
+  const guard = (e: MouseEvent) => {
+    if (!blocked) return;
+    e.preventDefault();
+    setCountryError(true);
+    countryRef.current?.focus();
+  };
   useEffect(() => {
     const load = () => setItems(readCart());
     load();
@@ -85,7 +102,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
         : []),
       `${c.total}: ${money(grossCents)}${anyAsk ? ` (${c.totalNote})` : ''}`,
     ].join('\n'),
-    FIELDS.filter((k) => contact[k].trim()).map((k) => `${c[k]}: ${contact[k].trim()}`),
+    fields.filter((k) => contact[k].trim()).map((k) => `${c[k]}: ${contact[k].trim()}`),
   );
 
   return (
@@ -217,10 +234,13 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
 
           <aside className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
             <p className="m-0 text-lg font-bold text-ink">{c.contactTitle}</p>
-            {FIELDS.map((k) => (
+            {fields.map((k) => (
               <div key={k} className="mt-3">
                 <label htmlFor={`c-${k}`} className="block font-medium text-ink">
                   {c[k]}
+                  {k === 'country' && (
+                    <span className="font-normal text-ink-mid"> {c.required}</span>
+                  )}
                 </label>
                 {k === 'note' ? (
                   <textarea
@@ -233,6 +253,12 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                 ) : (
                   <input
                     id={`c-${k}`}
+                    ref={k === 'country' ? countryRef : undefined}
+                    required={k === 'country' || undefined}
+                    aria-invalid={k === 'country' && countryError && blocked ? true : undefined}
+                    aria-describedby={
+                      k === 'country' && countryError && blocked ? 'c-country-err' : undefined
+                    }
                     type={k === 'phone' ? 'tel' : 'text'}
                     autoComplete={
                       k === 'name'
@@ -243,12 +269,23 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                             ? 'tel'
                             : k === 'city'
                               ? 'address-level2'
-                              : 'off'
+                              : k === 'country'
+                                ? 'country-name'
+                                : 'off'
                     }
                     value={contact[k]}
                     onChange={(e) => setContact({ ...contact, [k]: e.target.value })}
                     className={`mt-1 w-full rounded-sm border border-ink-soft bg-bg px-3 py-2 text-base text-ink ${FOCUS}`}
                   />
+                )}
+                {k === 'country' && countryError && blocked && (
+                  <p
+                    id="c-country-err"
+                    role="alert"
+                    className="m-0 mt-1 text-sm font-medium text-brand-hi"
+                  >
+                    {c.countryMissing}
+                  </p>
                 )}
               </div>
             ))}
@@ -273,6 +310,8 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
               <a
                 href={whatsappHref(message)}
                 {...ORDER_CONVERSION}
+                aria-disabled={blocked || undefined}
+                onClick={guard}
                 className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
               >
                 {c.sendWa}
@@ -280,11 +319,14 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
               <a
                 href={`mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`}
                 {...ORDER_CONVERSION}
+                aria-disabled={blocked || undefined}
+                onClick={guard}
                 className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
               >
                 {c.sendMail}
               </a>
             </div>
+            {c.intlNote && <p className="m-0 mt-4 text-xs text-ink-mid">{c.intlNote}</p>}
             <p className="m-0 mt-4 text-xs text-ink-mid">{c.info}</p>
           </aside>
         </div>

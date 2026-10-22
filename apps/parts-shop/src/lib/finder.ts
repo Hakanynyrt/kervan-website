@@ -68,14 +68,21 @@ export function findModels(
   };
 }
 
-/** The one model a query names: the only hit, or the hit whose name or model is the query. */
+/**
+ * The one model a query names exactly: the hit whose full name ("Furukawa HB 20G") or model
+ * ("HB 20G") is the query, folded, and no other hit is named so. Never a partial or corrected
+ * match (owner, 2026-10-22: "Hyundai HDB 20" opened Mega 20): the panel opens by itself only
+ * for this; anything else stays a list of chips to pick from.
+ */
 export function exactHit(hits: readonly FinderHit[], query: string): FinderHit | null {
-  if (hits.length === 1) return hits[0];
   const q = fold(query);
   if (!q) return null;
-  return (
-    hits.find((h) => fold(h.name) === q) ?? hits.find((h) => fold(h.model.model) === q) ?? null
-  );
+  // The name, or the other name of the same model (`searchName`: "MTB 215 / MTB 210 II").
+  const names = (h: FinderHit) => [h.name, ...searchName(h.name).slice(h.name.length).split(' / ')];
+  const byName = hits.filter((h) => names(h).some((n) => fold(n) === q));
+  if (byName.length) return byName.length === 1 ? byName[0] : null;
+  const byModel = hits.filter((h) => fold(h.model.model) === q);
+  return byModel.length === 1 ? byModel[0] : null;
 }
 
 /** Makes for the chips: most models first, then A–Z (no ranking of our own). */

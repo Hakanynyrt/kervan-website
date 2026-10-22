@@ -107,8 +107,10 @@ export default function Layout({
         <Container className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-0 sm:py-2">
           {home ? (
             // Home: the order notice is this thin line (owner's "Önce arama" layout), its link
-            // goes to the ordering steps on the page itself.
-            <p className="m-0 w-full py-2 sm:w-auto sm:flex-1 sm:py-0">
+            // goes to the ordering steps on the page itself. On phones it takes up to three lines;
+            // a fixed three-line height keeps the page from moving when Inter replaces the fallback
+            // font and the text wraps once more (2026-10-22: CLS 0.336 on /en/ at 412 px).
+            <p className="m-0 min-h-16 w-full py-2 sm:min-h-0 sm:w-auto sm:flex-1 sm:py-0">
               <strong className="font-semibold text-ink">{t.banner.label}</strong>{' '}
               {t.banner.preview}{' '}
               <a

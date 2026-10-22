@@ -12,7 +12,8 @@ import { FOCUS } from './Layout';
  *  into its parts, laid out side by side along its axis; then the parts are numbered like a parts
  *  catalogue. Every part (on the picture and in the numbered list) is a plain link to its page.
  *
- *  The opening plays once per session for JS visitors without reduced motion: the inline script
+ *  The opening plays once per session for JS visitors without reduced motion, Save-Data or a slow
+ *  (2g / 3g) connection, and not on an ad click's landing (gclid / gbraid / wbraid): the inline script
  *  in index.html marks <html data-kv-open> before paint (the first frame shows instead of the
  *  final picture), this component plays the frames on a canvas once the picture is in view and
  *  removes the mark. The prerendered markup is the final, opened state. */
@@ -26,10 +27,14 @@ const BASE = '/photos/parca/acilis';
 const FINAL = `${BASE}-acik-04`;
 const KABIN = 36;
 const FRAMES = 48;
-/** One size only (the full 2864 px render) for every screen: the frames count against Pages'
- *  file limit. */
-const src = (kind: 'kabin' | 'kare', i: number) =>
-  `${BASE}-${kind}-05-${String(i).padStart(2, '0')}-lg.webp`;
+/** Two sizes (the frames count against Pages' file limit): the full 2864 px render (`-lg`) and,
+ *  for screens up to SMALL_MQ, a 1280 px copy (`-md`, 2026-10-22: phones fetched ~3 MB of 2864 px
+ *  frames; the 1280 px set is ~1.6 MB). */
+const src = (kind: 'kabin' | 'kare', i: number, size: 'md' | 'lg' = 'lg') =>
+  `${BASE}-${kind}-05-${String(i).padStart(2, '0')}-${size}.webp`;
+const SMALL_MQ = '(max-width: 900px)';
+/** Width of the `-md` frames. */
+const FRAME_MD_PX = 1280;
 /** Timeline (ms): pause on the housed breaker, housing slide, cylinder fade, opening. */
 const HOLD = 500;
 const SLIDE = 1200;
@@ -105,6 +110,9 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     const shown = pic
       ? Math.max(pic.offsetWidth, pic.offsetHeight) * Math.max(1, window.devicePixelRatio || 1)
       : 0;
+    const small = window.matchMedia(SMALL_MQ).matches;
+    const size = small ? 'md' : 'lg';
+    const framePx = small ? FRAME_MD_PX : FRAME_PX;
     let cancelled = false;
     let raf = 0;
     const finish = () => {
@@ -121,8 +129,8 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     // at the size it is shown (not its full 2864 px), AHEAD of the one on screen, and released
     // once passed: all of them decoded at once would take more memory than a phone gives a page.
     const urls = [
-      ...Array.from({ length: KABIN }, (_, i) => src('kabin', i)),
-      ...Array.from({ length: FRAMES }, (_, i) => src('kare', i)),
+      ...Array.from({ length: KABIN }, (_, i) => src('kabin', i, size)),
+      ...Array.from({ length: FRAMES }, (_, i) => src('kare', i, size)),
     ];
     const START = 10;
     const AHEAD = 12;
@@ -143,12 +151,12 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
         );
       }
     };
-    const dw = Math.min(FRAME_PX, Math.ceil(shown) || FRAME_PX);
+    const dw = Math.min(framePx, Math.ceil(shown) || framePx);
     const dh = Math.round((dw * H) / W);
     // Resizing while decoding costs more than it saves when the size shown is close to the
     // frame's own (desktop): then the frames decode as they are.
     const decode = (b: Blob) =>
-      dw > FRAME_PX * 0.75
+      dw > framePx * 0.75
         ? createImageBitmap(b)
         : createImageBitmap(b, { resizeWidth: dw, resizeHeight: dh, resizeQuality: 'high' }).catch(
             () => createImageBitmap(b),
@@ -304,15 +312,18 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
             </picture>
             {/* The breaker in its housing, shown only while the opening is pending (lazy: never fetched
               otherwise), and the canvas the frames play on. */}
-            <img
-              src={src('kabin', 0)}
-              width={W}
-              height={H}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              className="kv-open-first absolute inset-0 h-full w-full"
-            />
+            <picture>
+              <source media={SMALL_MQ} srcSet={src('kabin', 0, 'md')} />
+              <img
+                src={src('kabin', 0)}
+                width={W}
+                height={H}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="kv-open-first absolute inset-0 h-full w-full"
+              />
+            </picture>
             <canvas
               ref={canvas}
               aria-hidden="true"

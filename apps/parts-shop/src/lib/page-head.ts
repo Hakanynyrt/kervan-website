@@ -9,7 +9,7 @@ import {
   type HeadInput,
 } from '@kervan/seo';
 import { DICT } from './dict';
-import { LEGAL } from './legal';
+import { LEGAL, SELLER } from './legal';
 import { localePath } from './locale-path';
 import { fmtNum } from './format';
 import { renderModel, renderTitle } from './part-caption';
@@ -81,6 +81,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
               primaryUrl: SITE,
               alternateName: m.siteName,
               logoUrl: `${SITE}/logo-krv-v2-256.png`,
+              street: SELLER.street,
             }),
             '@id': `${SITE}/#organization`,
             name: ORG_TRADING_NAME,

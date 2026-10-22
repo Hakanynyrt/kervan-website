@@ -6,15 +6,16 @@ import { BOT_UA_PATTERN } from '@kervan/motion';
  * Google and OpenAI abroad). Until then nothing is requested from either and no cookie is set.
  * Google part: same design as heat-treatment's `src/lib/ads.ts` (the pixel is shop-only).
  *
- * Same Google Ads account and, for now, the same conversion labels as kervanheat.com (owner:
- * one account); switch to shop-specific conversion actions here once the owner creates them.
+ * Same Google Ads account as kervanheat.com (owner: one account), with the shop's own
+ * conversion actions (owner, 2026-10-22): "kiriciparca - Sipariş talebi" (primary) for order
+ * and quote requests, and the shop's WhatsApp and phone-click actions.
  * The IDs are public by design (they appear in every page that uses the tag).
  */
 const AW_ID = 'AW-16701476208';
 const SEND_TO = {
-  form: 'AW-16701476208/eZMUCLiL7ZIdEPCa8Zs-',
-  phone: 'AW-16701476208/xu_3CLuL7ZIdEPCa8Zs-',
-  whatsapp: 'AW-16701476208/lP4HCL6L7ZIdEPCa8Zs-',
+  form: 'AW-16701476208/rQaaCIP5_aUdEPCa8Zs-',
+  phone: 'AW-16701476208/8CXFCIn5_aUdEPCa8Zs-',
+  whatsapp: 'AW-16701476208/OXtKCIb5_aUdEPCa8Zs-',
 } as const;
 export type Conversion = keyof typeof SEND_TO;
 
@@ -97,6 +98,8 @@ export function conversionForHref(href: string): Conversion | null {
 
 /** The conversions one click on this link counts: an order link only `form`, else by href. */
 export function conversionsForLink(a: Element): Conversion[] {
+  // A send link held back by the page (e.g. the English cart's required country is empty).
+  if (a.getAttribute('aria-disabled') === 'true') return [];
   if (a.getAttribute('data-kv-conversion') === 'form') return ['form'];
   const byHref = conversionForHref(a.getAttribute('href') ?? '');
   return byHref ? [byHref] : [];

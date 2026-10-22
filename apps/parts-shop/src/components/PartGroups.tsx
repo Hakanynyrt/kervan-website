@@ -5,7 +5,7 @@ import { LIST_PATH, PART_KEYS, partPath } from '../lib/routes';
 import { tipImg } from '../lib/tip-img';
 import type { Lang, TipGroupStats } from '../types';
 import { FOCUS } from './Layout';
-import { photoImg, photoSet } from '../lib/photo-url';
+import { cardSet, photoImg, photoSet } from '../lib/photo-url';
 
 /**
  * Tiles for the product groups: breaker tips first (a wide lead tile on large screens), then
@@ -150,9 +150,14 @@ export function PartGroups({
                 {g.hero ? (
                   <img
                     src={photoImg(g.hero, 'lg')}
+                    srcSet={g.xs ? cardSet(g.hero) : undefined}
                     width={1600}
                     height={900}
-                    sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
+                    sizes={
+                      g.xs
+                        ? '(min-width: 1024px) 380px, (min-width: 640px) 50vw, calc(100vw - 2rem)'
+                        : undefined
+                    }
                     alt=""
                     loading="lazy"
                     decoding="async"

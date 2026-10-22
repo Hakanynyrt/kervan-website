@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent, type MouseEvent }
 import type { FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import { useReducedMotion } from '@kervan/motion';
-import { OrderSteps, PlantPhotos } from '../components/Bits';
+import { MissingModel, OrderSteps, PlantPhotos } from '../components/Bits';
 import ExplodedPicker from '../components/ExplodedPicker';
 import { PartGroups } from '../components/PartGroups';
 import { FOCUS, whatsappHref } from '../components/Layout';
@@ -177,7 +177,8 @@ function Finder({
     if (!v) return;
     setQ(v);
     const r = findModels(model.finder, v);
-    setSel(exactHit(r.hits, r.guess ?? v));
+    // Only a query that names one model exactly opens it, never a corrected guess.
+    setSel(r.guess ? null : exactHit(r.hits, v));
     // Only on load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -201,7 +202,7 @@ function Finder({
   const onType = (v: string) => {
     setQ(v);
     const r = v.trim() ? findModels(model.finder, v) : null;
-    const exact = r ? exactHit(r.hits, r.guess ?? v) : null;
+    const exact = r && !r.guess ? exactHit(r.hits, v) : null;
     if (exact) setSel(exact);
     else if (sel && r && !r.hits.some((x) => x.model.slug === sel.model.slug)) setSel(null);
   };
@@ -209,7 +210,12 @@ function Finder({
     // Nothing found: the tip list's search takes over (its suggestions and "model not listed").
     if (!found?.hits.length) return;
     e.preventDefault();
-    pick(exactHit(found.hits, found.guess ?? query) ?? found.hits[0]);
+    // "Ara" opens the model the query names, or the only one it finds; a corrected guess or
+    // several hits stay chips to pick from (owner, 2026-10-22: never open a wrong breaker).
+    const one = found.guess
+      ? null
+      : (exactHit(found.hits, query) ?? (found.hits.length === 1 ? found.hits[0] : null));
+    if (one) pick(one);
   };
 
   const shownMakes = allMakes ? makes : makes.slice(0, MAKES_SHOWN);
@@ -283,6 +289,7 @@ function Finder({
                 ))}
               </ul>
             )}
+            {!found.hits.length && <MissingModel t={t} query={query} className="mt-3" />}
             {found.hits.length > hits.length && (
               <a
                 href={`${localePath(LIST_PATH, lang)}?q=${encodeURIComponent(query)}`}
