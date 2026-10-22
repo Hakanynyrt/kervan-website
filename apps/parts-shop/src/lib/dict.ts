@@ -63,38 +63,43 @@ export interface Dict {
   home: {
     title: string;
     lead: string;
-    cta: string;
-    ctaQuote: string;
-    popular: string;
-    featured: string;
     morePopular: string;
     groups: string;
-    count: (n: number) => string;
-    /** Opening: our parts of one breaker side by side, pick a part, then type the breaker. */
+    /** Opening strip: our parts of one breaker side by side, each linking to its group. */
     pick: {
       alt: string;
       caption: string;
       listLabel: string;
       tips: string;
-      label: (part: string) => string;
-      open: (part: string) => string;
     };
     allGroups: string;
-    makes: {
+    /** "Önce arama": the make/model finder and the panel listing the chosen model's parts. */
+    finder: {
       title: string;
-      lead: string;
-      all: (n: number) => string;
-      count: (n: number) => string;
+      makes: string;
+      allMakes: (n: number) => string;
+      models: (make: string) => string;
+      allModels: (make: string, n: number) => string;
+      found: string;
+      /** Under the model chips: the names only show the fit. */
       note: string;
+      /** Panel before a model is picked. */
+      startTitle: string;
+      startBody: string;
+      popular: string;
+      /** Panel for a picked model. */
+      forModel: string;
+      breakerPage: string;
+      tipSize: (d: string, len: string | null) => string;
+      noParts: string;
+      /** Tip rows of a breaker with several tip sizes. */
+      tipN: (n: number) => string;
     };
+    /** "Ürettiklerimizden": priced tips and parts, linked to their pages. */
+    made: { title: string; lead: string };
+    /** "Nasıl sipariş verilir?": the steps (cart.steps) and the contact box. */
+    order: { body: string; whatsapp: string; mail: string };
     trust: { title: string; body: string }[];
-    sectors: {
-      title: string;
-      lead: string;
-      typesLabel: string;
-      note: string;
-      items: { name: string; body: string; types: TipType[] }[];
-    };
   };
   card: { view: string };
   breaker: { title: (name: string) => string };
@@ -518,28 +523,42 @@ export const DICT: Record<Lang, Dict> = {
     home: {
       title: 'Hidrolik kırıcı yedek parçaları',
       lead: 'Kırıcı ucu, alt gövde, burç, kama, saplama, piston ve diğer parçalar: kendi tezgâhımızda işlenir, çelik parçalar kendi tesisimizde ısıl işlem görür. Kırıcınızın marka ve modelini arayın, uyan parçayı seçin. Stoktan aynı gün kargo.',
-      cta: 'Tüm kırıcı uçları',
-      ctaQuote: 'Teklif iste',
-      popular: 'Çok satanlar',
-      featured: 'Kırıcı ucu',
       morePopular: 'Tüm çok satanlar',
       groups: 'Ürün gruplarımız',
-      count: (n) => `${n} kırıcı modeli`,
       pick: {
         alt: 'Bir hidrolik kırıcının ürettiğimiz parçaları yan yana: akümülatör, saplamalar, piston, burçlar, alt gövde, kama, aşınma plakaları ve kırıcı ucu',
-        caption: 'Ürettiğimiz parçalar, 3B görsel. Bir parçaya tıklayın, kırıcınızı yazın.',
-        listLabel: 'Parça seçin',
+        caption:
+          'Ürettiğimiz parçalar, 3B görsel. Bir parçaya tıklayın, o parçanın sayfası açılır.',
+        listLabel: 'Parçalar',
         tips: 'Kırıcı ucu',
-        label: (x) => `${x}: kırıcınızın markası ve modeli`,
-        open: (x) => `${x} sayfasına git`,
       },
       allGroups: 'Tüm yedek parçalar',
-      makes: {
-        title: 'Uyumlu kırıcı markaları',
-        lead: 'Kırıcınızın markasını seçin, o markanın modellerini görün.',
-        all: (n) => `Tüm markalar (${n})`,
-        count: (n) => `${n} model`,
+      finder: {
+        title: 'Kırıcınızın markası ve modeli',
+        makes: 'Marka',
+        allMakes: (n) => `Tüm markalar (${n})`,
+        models: (make) => `${make} modelleri`,
+        allModels: (make, n) => `Tüm ${make} modelleri (${n})`,
+        found: 'Bulunan modeller',
         note: 'Ürünlerimiz Kervan Makina üretimidir, kırıcı üreticisinin orijinal parçası değildir; marka ve model adları yalnızca uyumu belirtir.',
+        startTitle: 'Kırıcınızı seçin',
+        startBody:
+          'Markayı seçin ya da modeli yazın; burada o kırıcı için ürettiğimiz uç ve yedek parçalar, sayfalarının bağlantılarıyla listelenir.',
+        popular: 'Çok satan kırıcılar',
+        forModel: 'Bu kırıcı için ürettiğimiz parçalar',
+        breakerPage: 'Kırıcı sayfası',
+        tipSize: (d, len) => `Ø${d}${len ? ` × ${len}` : ''} mm`,
+        noParts: 'Bu kırıcının diğer parçaları için modelinizi WhatsApp’tan yazın, size dönelim.',
+        tipN: (n) => `${n}. uç`,
+      },
+      made: {
+        title: 'Ürettiklerimizden',
+        lead: 'Ürettiğimiz uç ve parçalardan bir seçki. Fiyatlar nettir; TL karşılığı altında.',
+      },
+      order: {
+        body: 'Online ödeme henüz yok. Kırıcınızı ve parçayı yazın, size hemen dönelim.',
+        whatsapp: 'WhatsApp ile sor',
+        mail: 'E-posta gönder',
       },
       trust: [
         {
@@ -559,34 +578,6 @@ export const DICT: Record<Lang, Dict> = {
           body: 'Stoktaki uçlar ödemeniz bize ulaştığı gün kargoya verilir.',
         },
       ],
-      sectors: {
-        title: 'Sizin işinizi yapanlar hangi ucu seçiyor?',
-        lead: 'Sahada aynı işi yapan firmaların genellikle tercih ettiği uç tipleri.',
-        typesLabel: 'Genellikle tercih edilen',
-        note: 'Genel saha uygulamasıdır; kırıcı üreticisinin önerisi geçerlidir.',
-        items: [
-          {
-            name: 'Taş ocağı',
-            body: 'Sert kayada kırma ve iri blokların parçalanması.',
-            types: ['pyramid', 'conical', 'blunt'],
-          },
-          {
-            name: 'Maden',
-            body: 'Cevher ve sert kaya; yüksek aşınma.',
-            types: ['conical', 'moil'],
-          },
-          {
-            name: 'Yıkım',
-            body: 'Betonarme yapılar ve temel kırma.',
-            types: ['moil', 'chisel'],
-          },
-          {
-            name: 'Altyapı ve kazı',
-            body: 'Kanal açma, katmanlı zemin ve asfalt.',
-            types: ['chisel', 'asphalt', 'moil'],
-          },
-        ],
-      },
     },
     card: { view: 'Ucu gör' },
     breaker: { title: (name) => `${name} kırıcı ucu` },
@@ -1289,28 +1280,42 @@ export const DICT: Record<Lang, Dict> = {
     home: {
       title: 'Hydraulic breaker spare parts',
       lead: 'Tips, front heads, bushings, retainer keys, tie rods, pistons and other parts, machined on our own lathes, the steel ones heat-treated in our own plant. Search your breaker make and model and pick the part that fits. Ships from stock the same day.',
-      cta: 'All breaker tips',
-      ctaQuote: 'Request a quote',
-      popular: 'Best sellers',
-      featured: 'Breaker tips',
       morePopular: 'All best sellers',
       groups: 'Our product groups',
-      count: (n) => `${n} breaker models`,
       pick: {
         alt: 'The parts we make for a hydraulic breaker, side by side: accumulator, tie rods, piston, bushings, front head, key, wear plates and tool',
-        caption: 'The parts we make, as 3D images. Pick a part, then type your breaker.',
-        listLabel: 'Pick a part',
+        caption: 'The parts we make, as 3D images. Click a part to open its page.',
+        listLabel: 'Parts',
         tips: 'Breaker tool',
-        label: (x) => `${x}: your breaker's make and model`,
-        open: (x) => `Go to the ${x.toLowerCase()} page`,
       },
       allGroups: 'All spare parts',
-      makes: {
-        title: 'Compatible breaker makes',
-        lead: 'Pick your breaker’s make to see its models.',
-        all: (n) => `All makes (${n})`,
-        count: (n) => `${n} models`,
+      finder: {
+        title: 'Your breaker’s make and model',
+        makes: 'Make',
+        allMakes: (n) => `All makes (${n})`,
+        models: (make) => `${make} models`,
+        allModels: (make, n) => `All ${make} models (${n})`,
+        found: 'Models found',
         note: 'Our products are made by Kervan Makina and are not the breaker maker’s original parts; make and model names only show the fit.',
+        startTitle: 'Choose your breaker',
+        startBody:
+          'Pick the make or type the model; the tips and spare parts we make for that breaker are listed here, with links to their pages.',
+        popular: 'Best-selling breakers',
+        forModel: 'Parts we make for this breaker',
+        breakerPage: 'Breaker page',
+        tipSize: (d, len) => `Ø${d}${len ? ` × ${len}` : ''} mm`,
+        noParts:
+          'For this breaker’s other parts, send us your model on WhatsApp and we will get back to you.',
+        tipN: (n) => `Tool ${n}`,
+      },
+      made: {
+        title: 'From our production',
+        lead: 'A selection of the tips and parts we make, at export prices.',
+      },
+      order: {
+        body: 'No online payment yet. Tell us your breaker and the part, and we will get back to you.',
+        whatsapp: 'Ask on WhatsApp',
+        mail: 'Send an e-mail',
       },
       trust: [
         {
@@ -1330,30 +1335,6 @@ export const DICT: Record<Lang, Dict> = {
           body: 'Tips in stock ship the day your payment reaches us.',
         },
       ],
-      sectors: {
-        title: 'Which tip do people doing your work choose?',
-        lead: 'The tip types companies doing the same work usually choose on site.',
-        typesLabel: 'Usually chosen',
-        note: 'General site practice; the breaker maker’s recommendation comes first.',
-        items: [
-          {
-            name: 'Quarrying',
-            body: 'Breaking hard rock and oversize boulders.',
-            types: ['pyramid', 'conical', 'blunt'],
-          },
-          { name: 'Mining', body: 'Ore and hard rock; high wear.', types: ['conical', 'moil'] },
-          {
-            name: 'Demolition',
-            body: 'Reinforced concrete and foundations.',
-            types: ['moil', 'chisel'],
-          },
-          {
-            name: 'Utilities and excavation',
-            body: 'Trenching, layered ground and asphalt.',
-            types: ['chisel', 'asphalt', 'moil'],
-          },
-        ],
-      },
     },
     card: { view: 'View tip' },
     breaker: { title: (name) => `${name} breaker tip` },

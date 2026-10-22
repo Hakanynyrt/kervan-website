@@ -1,22 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { LIST_PATH, PARTS_PATH, partPath, type PartKey } from '../lib/routes';
+import { LIST_PATH, partPath, type PartKey } from '../lib/routes';
 import type { Lang } from '../types';
 import { FOCUS } from './Layout';
 
-/** Home opening: our parts of one breaker (rendered from our drawings, no make or model named).
- *  The breaker first stands in its housing (kabin), seen from the side; the top cover comes off and
- *  the breaker comes out through the top (the housing slides away past the tool), the cylinder
- *  (not ours) fades out, and the breaker opens into its parts, laid out
- *  side by side along its axis; then the parts are numbered like a parts catalogue. Picking a part
- *  (on the picture or in the list) points the make/model search below at that part's page; without
- *  JS every part is a plain link to its page.
+/** Home opening, in the strip under the make/model finder: our parts of one breaker (rendered
+ *  from our drawings, no make or model named). The breaker first stands in its housing (kabin),
+ *  seen from the side; the top cover comes off and the breaker comes out through the top (the
+ *  housing slides away past the tool), the cylinder (not ours) fades out, and the breaker opens
+ *  into its parts, laid out side by side along its axis; then the parts are numbered like a parts
+ *  catalogue. Every part (on the picture and in the numbered list) is a plain link to its page.
  *
  *  The opening plays once per session for JS visitors without reduced motion: the inline script
  *  in index.html marks <html data-kv-open> before paint (the first frame shows instead of the
- *  final picture), this component plays the frames on a canvas and removes the mark. The
- *  prerendered markup is the final, opened state. */
+ *  final picture), this component plays the frames on a canvas once the picture is in view and
+ *  removes the mark. The prerendered markup is the final, opened state. */
 type Group = 'tips' | PartKey;
 
 const BASE = '/photos/parca/acilis';
@@ -144,7 +143,6 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
         );
       }
     };
-    pump();
     const dw = Math.min(FRAME_PX, Math.ceil(shown) || FRAME_PX);
     const dh = Math.round((dw * H) / W);
     // Resizing while decoding costs more than it saves when the size shown is close to the
@@ -175,8 +173,8 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
       }
     };
     // A slow connection should not hold the page on the housed breaker: without a start in time
-    // the final picture shows at once.
-    const giveUp = window.setTimeout(() => finish(), 1500);
+    // the final picture shows at once (counted from when the picture comes into view).
+    let giveUp = 0;
     const waitStart = () => {
       if (cancelled) return;
       want(0);
@@ -247,9 +245,30 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
       root.setAttribute('data-kv-open', 'play');
       raf = requestAnimationFrame(step);
     };
-    raf = requestAnimationFrame(waitStart);
+    const start = () => {
+      if (cancelled) return;
+      pump();
+      giveUp = window.setTimeout(() => finish(), 1500);
+      raf = requestAnimationFrame(waitStart);
+    };
+    // The strip sits under the finder: the opening starts once half of it is on screen (a phone
+    // scrolls down to it), so it is not played unseen.
+    let io: IntersectionObserver | null = null;
+    if (pic && 'IntersectionObserver' in window) {
+      io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            io?.disconnect();
+            start();
+          }
+        },
+        { threshold: 0.5 },
+      );
+      io.observe(pic);
+    } else start();
     return () => {
       cancelled = true;
+      io?.disconnect();
       bitmaps.forEach((bm) => bm?.close());
       cancelAnimationFrame(raf);
       window.clearTimeout(giveUp);
@@ -260,70 +279,16 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
 export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
   const p = t.home.pick;
   const name = (g: Group) => (g === 'tips' ? p.tips : t.parts.items[g].name);
-  const [sel, setSel] = useState<Group>('tips');
   const [hover, setHover] = useState<Group | null>(null);
-  const input = useRef<HTMLInputElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   useOpening(canvas);
+  const lit = (g: Group) => g === hover;
 
-  const pick = (g: Group) => (e: React.MouseEvent) => {
-    // Plain clicks pick the part; modified clicks (new tab) keep the link.
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-    e.preventDefault();
-    setSel(g);
-    input.current?.focus();
-  };
-  const lit = (g: Group) => g === sel || g === hover;
-
-  // The make/model search first, then the picture (the stage, full width), then the numbered part
-  // list as a row of chips; only the callouts on the picture wait for the breaker to come apart.
+  // The picture (the stage), then the numbered part list as a row of links; only the callouts on
+  // the picture wait for the breaker to come apart.
   return (
     <div className="kv-pick">
-      {/* The search first (owner's "Birleşik" layout): label, box and button, then the links. */}
-      <form
-        action={localePath(groupPath(sel), lang)}
-        method="get"
-        role="search"
-        className="kv-pick-search min-w-0"
-      >
-        <label htmlFor="pick-q" className="block font-sans text-sm font-semibold text-ink-mid">
-          {p.label(name(sel))}
-        </label>
-        <div className="mt-2 flex max-w-3xl gap-2">
-          <input
-            ref={input}
-            id="pick-q"
-            name="q"
-            type="search"
-            placeholder={t.search.placeholder}
-            autoComplete="off"
-            className={`min-w-0 flex-1 rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft ${FOCUS}`}
-          />
-          <button
-            type="submit"
-            className={`rounded-sm bg-brand px-6 py-3 font-sans text-sm font-semibold text-on-brand hover:bg-brand-hi ${FOCUS}`}
-          >
-            {t.search.button}
-          </button>
-        </div>
-        <p className="m-0 mt-2.5 flex flex-wrap gap-x-5 gap-y-1 font-sans text-sm">
-          <a
-            href={localePath(PARTS_PATH, lang)}
-            className={`font-medium text-brand-hi hover:underline ${FOCUS}`}
-          >
-            {t.home.allGroups} →
-          </a>
-          <a
-            href={localePath(groupPath(sel), lang)}
-            className={`text-ink-mid hover:underline ${FOCUS}`}
-          >
-            {p.open(name(sel))} →
-          </a>
-        </p>
-      </form>
-
       <figure className="kv-open m-0 min-w-0 overflow-hidden">
-        {/* Phones turn the picture upright, tip down (CSS `.kv-open-turn`). */}
         <div className="kv-open-turn">
           <div className="kv-open-pic relative">
             <picture>
@@ -333,7 +298,6 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
                 width={W}
                 height={H}
                 alt={p.alt}
-                fetchPriority="high"
                 decoding="async"
                 className="kv-open-final block h-auto w-full"
               />
@@ -359,6 +323,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
               <svg
                 aria-hidden="true"
                 viewBox={`0 0 ${W} ${H}`}
+                overflow="visible"
                 className="pointer-events-none absolute inset-0 h-full w-full"
               >
                 {SPOTS.map(({ g, at, to }, i) => (
@@ -368,13 +333,13 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
                     stroke="currentColor"
                     fill="currentColor"
                   >
-                    <line x1={at[0]} y1={at[1]} x2={to[0]} y2={to[1]} strokeWidth={3} />
-                    <circle cx={to[0]} cy={to[1]} r={7} stroke="none" />
+                    <line x1={at[0]} y1={at[1]} x2={to[0]} y2={to[1]} strokeWidth={4} />
+                    <circle cx={to[0]} cy={to[1]} r={9} stroke="none" />
                     <circle
                       cx={at[0]}
                       cy={at[1]}
-                      r={30}
-                      strokeWidth={4}
+                      r={40}
+                      strokeWidth={5}
                       className={`kv-num ${lit(g) ? 'fill-brand-hi' : 'fill-bg'}`}
                     />
                     <text
@@ -383,7 +348,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
                       dy="0.36em"
                       textAnchor="middle"
                       stroke="none"
-                      fontSize={34}
+                      fontSize={46}
                       fontWeight={600}
                       className={`font-sans ${lit(g) ? 'fill-on-brand' : 'fill-ink'}`}
                     >
@@ -398,12 +363,10 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
                     <a
                       key={j}
                       href={localePath(groupPath(g), lang)}
-                      onClick={pick(g)}
                       // One tab stop per part: the extra boxes are pointer targets only.
                       tabIndex={j === 0 ? undefined : -1}
                       aria-hidden={j === 0 ? undefined : true}
                       aria-label={j === 0 ? `${i + 1}. ${name(g)}` : undefined}
-                      aria-current={j === 0 && g === sel ? 'true' : undefined}
                       onFocus={() => setHover(g)}
                       onBlur={() => setHover(null)}
                       style={boxStyle(b)}
@@ -419,19 +382,19 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
       </figure>
 
       <nav aria-label={p.listLabel}>
-        <ol className="m-0 flex list-none flex-wrap gap-2 p-0 font-sans text-sm">
+        <ol className="m-0 flex list-none flex-wrap gap-x-1 gap-y-0 p-0 font-sans text-sm">
           {GROUPS.map((g, i) => (
             <li key={g}>
               <a
                 href={localePath(groupPath(g), lang)}
-                onClick={pick(g)}
                 onMouseEnter={() => setHover(g)}
                 onMouseLeave={() => setHover(null)}
-                aria-current={g === sel ? 'true' : undefined}
-                className={`flex h-full items-center gap-2 rounded-sm border px-3 py-2 whitespace-nowrap sm:py-1.5 ${g === sel ? 'border-brand bg-brand text-on-brand' : 'border-hair bg-bg text-ink hover:border-hair-strong'} ${FOCUS}`}
+                onFocus={() => setHover(g)}
+                onBlur={() => setHover(null)}
+                className={`flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-sm px-2 sm:min-h-9 ${lit(g) ? 'text-brand-hi' : 'text-ink'} hover:underline ${FOCUS}`}
               >
                 {i < SPOTS.length && (
-                  <span className="tabular-nums text-xs opacity-75">{i + 1}</span>
+                  <span className="tabular-nums text-xs font-semibold text-ink-mid">{i + 1}</span>
                 )}
                 {name(g)}
               </a>

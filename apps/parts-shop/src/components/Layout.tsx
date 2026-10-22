@@ -45,7 +45,7 @@ interface Props {
   hasPopular: boolean;
   /** Header quote button's message (the page's product); the generic tip message without it. */
   quoteText?: string;
-  /** Home page: no order notice bar, so the opening picture sits higher (owner). */
+  /** Home page: the order notice is a thin line in the top bar instead of its own band. */
   home?: boolean;
   children: ReactNode;
 }
@@ -105,9 +105,24 @@ export default function Layout({
       </a>
       <div className="border-b border-hair bg-bg-soft font-sans text-xs text-ink-mid">
         <Container className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-0 sm:py-2">
-          <span className="hidden sm:inline">
-            {ORG_TRADING_NAME} · {t.top.tagline}
-          </span>
+          {home ? (
+            // Home: the order notice is this thin line (owner's "Önce arama" layout), its link
+            // goes to the ordering steps on the page itself.
+            <p className="m-0 w-full py-2 sm:w-auto sm:flex-1 sm:py-0">
+              <strong className="font-semibold text-ink">{t.banner.label}</strong>{' '}
+              {t.banner.preview}{' '}
+              <a
+                href="#siparis-adimlari"
+                className={`whitespace-nowrap font-medium text-brand-hi underline underline-offset-2 hover:text-ink ${FOCUS}`}
+              >
+                {t.banner.how}
+              </a>
+            </p>
+          ) : (
+            <span className="hidden sm:inline">
+              {ORG_TRADING_NAME} · {t.top.tagline}
+            </span>
+          )}
           <span className="flex flex-1 justify-between gap-4 sm:flex-none">
             <a
               href={`tel:${ORG_PHONE_E164}`}

@@ -210,82 +210,50 @@
     linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
   mask-composite: intersect;
 }
-/* The make/model search, then the picture on its own row, then the numbered part list (a
-   wrapping row of chips). */
+/* The strip under the home's make/model finder: the picture, then the numbered part list (a
+   wrapping row of links). It stays inside its column (owner's "Önce arama" layout: the finder
+   leads, the opening is a smaller strip). */
 .kv-pick {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 0.75rem 0;
+  gap: 0.5rem 0;
 }
-/* Phones: the breaker stands upright, tip down, centred across the width (owner: "mobilde dikey
-   kırıcı"). The picture keeps its own pixels and is turned as one block, so the canvas, the
-   callouts and the pointer boxes turn with it; the numbers are turned back to read upright. */
-/* Wider screens: the picture breaks out of the content column to the full viewport width, less
-   a small gutter (owner: "daha büyük"); the callouts and pointer boxes are in percent, so they
-   scale with it. 100vw counts a classic scrollbar: the 1.25rem gutter absorbs it, and <main>
-   clips any rest so the page never scrolls sideways. */
-@media (min-width: 40rem) {
+/* The stage is a band around the picture that carries the studio floor / ember glow and the
+   faded edges, so the picture itself keeps only the ground shadow. */
+.kv-open-turn {
+  padding-block: 1.25rem;
+  background: var(
+    --kv-stage,
+    linear-gradient(180deg, #f4f5f6 0%, #eceef0 62%, #dfe2e5 68%, #d6d9dd 100%)
+  );
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent),
+    linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent),
+    linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
+  mask-composite: intersect;
+}
+.kv-open-pic {
+  background: var(--kv-shadow);
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+/* Phones: the strip runs edge to edge (the picture is 4.6:1); the numbers on the picture would
+   be too small to read or tap there, so only the numbered list under it names the parts (each
+   part on the picture is still a link). */
+@media (max-width: 39.999rem) {
   .kv-open {
-    margin-inline: calc(50% - 50vw + 1.25rem);
+    margin-inline: -1.5rem;
   }
   .kv-open figcaption {
-    text-align: center;
+    padding-inline: 1.5rem;
   }
-  /* The stage is a band about 60 % of the viewport high (owner: the breaker reads big) with the
-     picture centred in it; the band carries the studio floor / ember glow and the faded edges, so
-     the picture itself keeps only the ground shadow. */
   .kv-open-turn {
-    display: grid;
-    align-items: center;
-    height: clamp(18rem, 60vh, 44rem);
-    background: var(
-      --kv-stage,
-      linear-gradient(180deg, #f4f5f6 0%, #eceef0 62%, #dfe2e5 68%, #d6d9dd 100%)
-    );
-    -webkit-mask-image:
-      linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent),
-      linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
-    -webkit-mask-composite: source-in;
-    mask-image:
-      linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent),
-      linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
-    mask-composite: intersect;
+    padding-block: 0.75rem;
   }
-  .kv-open-pic {
-    background: var(--kv-shadow);
-    -webkit-mask-image: none;
-    mask-image: none;
-  }
-}
-main:has(.kv-open) {
-  overflow-x: clip;
-}
-@media (max-width: 39.999rem) {
-  .kv-open-turn {
-    /* Most of the screen height (owner: "daha büyük"), never wider than the screen once turned. */
-    --kv-len: min(86svh, 48rem, calc((100vw - 2rem) * 4.6));
-    position: relative;
-    height: var(--kv-len);
-  }
-  .kv-open-pic {
-    /* The picture is turned 90°: its floor gradient turns back to run down the screen, and the
-       ground shadow sits at the frame's right end (the tip), i.e. under the upright breaker. */
-    --kv-floor-dir: 90deg;
-    --kv-shadow: radial-gradient(ellipse 5% 28% at 98% 50%, rgba(0, 0, 0, 0.24), transparent 70%);
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: var(--kv-len);
-    transform: translate(-50%, -50%) rotate(90deg);
-  }
-  .kv-open-spots text {
-    transform-box: fill-box;
-    transform-origin: center;
-    transform: rotate(-90deg);
-    font-size: 64px;
-  }
-  /* The picture is drawn smaller here: bigger number discs keep them readable and tappable. */
-  .kv-open-spots .kv-num {
-    r: 58px;
+  .kv-open-spots svg {
+    display: none;
   }
 }

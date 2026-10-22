@@ -452,32 +452,53 @@ function Cards({
                   {r.grooved && `${r.image || r.sample ? ' · ' : ''}${t.list.groovedBadge}`}
                 </span>
               )}
-              <span className="mt-auto pt-1 text-sm text-ink tabular-nums">
-                {r.price ? (
-                  <>
-                    <span className="font-semibold">
-                      {r.price[0] === r.price[1]
-                        ? fmtUsd(r.price[0], lang)
-                        : `${fmtNum(r.price[0] / 100, lang)}–${fmtUsd(r.price[1], lang)}`}
-                    </span>{' '}
-                    <span className="text-xs text-ink-soft">{t.list.priceNote}</span>
-                    {fx && (
-                      <span className="block text-ink-mid">
-                        {r.price[0] === r.price[1]
-                          ? fmtTry(r.price[0], fx, lang)
-                          : `${fmtNum(Math.round((r.price[0] / 100) * fx.usdTry), lang)}–${fmtTry(r.price[1], fx, lang)}`}
-                      </span>
-                    )}
-                  </>
-                ) : (
-                  <span className="text-ink-mid">{t.list.priceAsk}</span>
-                )}
-              </span>
+              <CardPrice price={r.price} fx={fx} lang={lang} t={t} />
             </span>
           </a>
         </li>
       ))}
     </ul>
+  );
+}
+
+/**
+ * A card's price (brand pages, the home's "Ürettiklerimizden"): the net USD list price or its span,
+ * "+ vergiler" / "export price" next to it, the TL amount at the CBRT rate under it; "Fiyat için
+ * sorun" without a price.
+ */
+export function CardPrice({
+  price,
+  fx,
+  lang,
+  t,
+}: {
+  price: [number, number] | null;
+  fx: FxRate | null;
+  lang: Lang;
+  t: Dict;
+}) {
+  return (
+    <span className="mt-auto pt-1 text-sm text-ink tabular-nums">
+      {price ? (
+        <>
+          <span className="font-semibold">
+            {price[0] === price[1]
+              ? fmtUsd(price[0], lang)
+              : `${fmtNum(price[0] / 100, lang)}–${fmtUsd(price[1], lang)}`}
+          </span>{' '}
+          <span className="text-xs text-ink-soft">{t.list.priceNote}</span>
+          {fx && (
+            <span className="block text-ink-mid">
+              {price[0] === price[1]
+                ? fmtTry(price[0], fx, lang)
+                : `${fmtNum(Math.round((price[0] / 100) * fx.usdTry), lang)}–${fmtTry(price[1], fx, lang)}`}
+            </span>
+          )}
+        </>
+      ) : (
+        <span className="text-ink-mid">{t.list.priceAsk}</span>
+      )}
+    </span>
   );
 }
 
