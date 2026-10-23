@@ -92,6 +92,36 @@ for (const f of files) {
     if (!sitemapLocs.has(url)) problems.push(`${rel}: not in the sitemap`);
   }
 }
+// Brand pages (/marka/<brand>, src/lib/page-head.ts case 'brand'): og:image is the first row's own
+// tip picture (rows sorted by popularity); a brand whose rows only borrow a sample picture has none.
+// With the R2 base set (CI on main) the picture must be on that host (img.kiriciparca.com).
+const TIP_HOST = (process.env.VITE_TIP_IMG_BASE ?? '').replace(/\/$/, '') || SITE;
+let brandOg = 0;
+let brandNoOg = 0;
+for (const f of files) {
+  const rel = path.relative(DIST, f).replace(/\\/g, '/');
+  if (!/^(en\/)?marka\/[^/]+\.html$/.test(rel)) continue;
+  const s = fs.readFileSync(f, 'utf8');
+  const props = /<script[^>]*id="kv-page"[^>]*>([\s\S]*?)<\/script>/.exec(s)?.[1];
+  let rows;
+  try {
+    rows = JSON.parse(props).model.rows;
+  } catch {
+    problems.push(`${rel}: brand page props do not parse`);
+    continue;
+  }
+  const key = rows.find((r) => r.image)?.image;
+  const og = /<meta property="og:image" content="([^"]+)"/.exec(s)?.[1];
+  if (key) {
+    brandOg++;
+    if (!og) problems.push(`${rel}: brand with a pictured tip has no og:image`);
+    else if (!og.startsWith(`${TIP_HOST}/tips/${key}-`))
+      problems.push(`${rel}: og:image ${og} is not its first pictured tip (${TIP_HOST}/tips/${key}-*)`);
+  } else {
+    brandNoOg++;
+    if (og) problems.push(`${rel}: sample-only brand must not use a borrowed og:image (${og})`);
+  }
+}
 if (sitemapLocs.size !== indexable)
   problems.push(`sitemap: ${sitemapLocs.size} URLs for ${indexable} indexable pages`);
 // With the R2 base set (CI on main) the part photos must be out of dist except the opening
