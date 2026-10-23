@@ -75,9 +75,19 @@ const PART_OG: Partial<Record<PartKey, string>> = {
   burc: '/og/og-burc-v1.jpg',
   saplama: '/og/og-saplama-v1.jpg',
   piston: '/og/og-piston-v1.jpg',
+  akumulator: '/og/og-akumulator-v1.jpg',
   'asinma-plakasi': '/og/og-asinma-plakasi-v1.jpg',
 };
+/** The same kind of picture for the home page, /kirici-ucu and /cok-satanlar (Turkish only). */
+const PAGE_OG = {
+  home: '/og/og-anasayfa-v1.jpg',
+  list: '/og/og-kirici-ucu-v1.jpg',
+  popular: '/og/og-cok-satanlar-v1.jpg',
+} as const;
 const OG_SIZE = { width: 1200, height: 630 } as const;
+/** og:image head fields of one of our /og/ pictures on a Turkish page; nothing on English. */
+const ogOf = (lang: PageProps['lang'], file: string | undefined): Partial<HeadInput> =>
+  lang === 'tr' && file ? { ogImage: SITE + file, ogImageSize: OG_SIZE } : {};
 
 /** Meta descriptions longer than this lose the alias (Google cuts snippets around 155–160). */
 const DESC_MAX = 155;
@@ -129,6 +139,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
         ...page,
         title: m.homeTitle,
         description: m.homeDesc,
+        ...ogOf(lang, PAGE_OG.home),
         jsonLd: [
           {
             ...organization({
@@ -157,10 +168,16 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
         ...page,
         title: m.listTitle,
         description: m.listDesc,
+        ...ogOf(lang, PAGE_OG.list),
         jsonLd: crumbs([partsCrumb], t.parts.tips.name),
       };
     case 'popular':
-      return { ...page, title: m.popularTitle, description: m.popularDesc };
+      return {
+        ...page,
+        title: m.popularTitle,
+        description: m.popularDesc,
+        ...ogOf(lang, PAGE_OG.popular),
+      };
     case 'brand':
       return {
         ...page,
@@ -188,12 +205,11 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       };
     case 'part': {
       const name = t.parts.items[model.part].name;
-      const og = lang === 'tr' ? PART_OG[model.part] : undefined;
       return {
         ...page,
         title: m.partTitle(name),
         description: m.partDesc(name, model.part === 'tamir-takimi'),
-        ...(og ? { ogImage: SITE + og, ogImageSize: OG_SIZE } : {}),
+        ...ogOf(lang, PART_OG[model.part]),
         jsonLd: crumbs([partsCrumb], name),
       };
     }
