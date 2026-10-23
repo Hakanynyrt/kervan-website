@@ -127,6 +127,7 @@ export const isHiddenBreaker = (b: { brand: string; model: string; slug?: string
  */
 export const WRONG_FITS: Readonly<Record<string, readonly string[]>> = {
   'KU135-21': ['diger/komatsu-jthb-20'],
+  'KU145-03': ['furukawa/hb-20g'],
   'KU146-07': ['diger/komatsu-jthb-30'],
   'KU155-02': ['atlas-copco/mb-500'],
   'KU80-05': ['diger/omal-80', 'diger/star-sh-40'],

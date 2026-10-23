@@ -3,6 +3,12 @@
 # magaza. / shop.kervanbreaker.com hosts → kiriciparca.com are Cloudflare Redirect Rules
 # on their zones; Pages cannot match the host here.)
 
+# Icons renamed after the shop opened (2026-10-16): the old URLs answer with the current files.
+# Icon file names are now frozen (Google: "the favicon URL must be stable"); see docs.
+/favicon-32.png /favicon-32-02.png 301
+/favicon-16.png /favicon-16-02.png 301
+/icon-192.png /icon-192-02.png 301
+
 # The cart was renamed "palet" (owner); keep old links working.
 /sepet /palet 301
 /en/sepet /en/palet 301

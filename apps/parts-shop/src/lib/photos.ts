@@ -16,6 +16,16 @@ export const STOCK_TIP_PHOTOS = [
   '/photos/stok/uc-stok-03',
 ] as const;
 
+/**
+ * The owner's real photos of the tips we make for one breaker model, keyed by the breaker page
+ * slug (`/kirici/<make>/<model>`), same files and naming as the stock photos above. The first
+ * one leads that model's page and replaces the sample picture on its cards, og:image and
+ * JSON-LD. Data only: add a model by adding a line.
+ */
+export const BREAKER_PHOTOS: Readonly<Record<string, readonly string[]>> = {
+  'furukawa/hb-20g': ['/photos/stok/hb-20g-uc-01', '/photos/stok/hb-20g-uc-02'],
+};
+
 export const PART_PHOTOS: Record<PartKey, readonly string[]> = {
   'alt-govde': [],
   burc: ['/photos/parca/burc-01'],

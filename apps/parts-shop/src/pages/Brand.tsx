@@ -37,7 +37,7 @@ export default function Brand({
         <BrandChips brands={model.brands} current={model.brand} only="wide" lang={lang} t={t} />
       </div>
       <div className="mt-6 sm:mt-8">
-        <ModelTable rows={model.rows} fx={fx} lang={lang} t={t} all cards />
+        <ModelTable rows={model.rows} fx={fx} lang={lang} t={t} all cards crawlAll />
       </div>
       <div className="mt-8 sm:hidden">
         <BrandChips brands={model.brands} current={model.brand} only="phone" lang={lang} t={t} />

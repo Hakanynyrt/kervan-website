@@ -7,7 +7,8 @@ import type { PartRender, RenderView } from './photos';
 
 export interface Dict {
   meta: {
-    /** og:site_name. */
+    /** og:site_name and the WebSite JSON-LD name: one name everywhere, the one the titles end in
+     *  (Google's site name follows it; differing names make it fall back to the domain). */
     siteName: string;
     /** Brand after the "|" in page titles (the maker people search for). */
     brand: string;
@@ -18,7 +19,9 @@ export interface Dict {
     familyTitle: (code: string, d: string) => string;
     familyDesc: (code: string, d: string, types: string) => string;
     breakerTitle: (name: string, d: string) => string;
-    breakerDesc: (name: string, d: string, types: string) => string;
+    /** `alias`: at most one other spelling of the model (the no-space form, "HB20G"); the full
+     *  list is on the page only. */
+    breakerDesc: (name: string, d: string, types: string, alias: string | null) => string;
     notFoundTitle: string;
     popularTitle: string;
     popularDesc: string;
@@ -95,7 +98,6 @@ export interface Dict {
       /** Panel for a picked model. */
       forModel: string;
       breakerPage: string;
-      tipSize: (d: string, len: string | null) => string;
       noParts: string;
       /** Tip rows of a breaker with several tip sizes. */
       tipN: (n: number) => string;
@@ -107,7 +109,25 @@ export interface Dict {
     trust: { title: string; body: string }[];
   };
   card: { view: string };
-  breaker: { title: (name: string) => string };
+  /** A tip size: the working diameter only (owner, 2026-10-23: never the length), plus an
+   *  ordinal when a breaker has two tips of one diameter (`sizeOrdinals` in tip-options.ts). */
+  tipSize: (d: string, ord: number | null) => string;
+  breaker: {
+    title: (name: string) => string;
+    /** Under the title: other spellings of the model the catalogue merged into this page. */
+    aliases: (list: string) => string;
+    /** Model facts from the catalogue: sizes, tip types, carrier class, the parts we make. */
+    facts: {
+      title: (name: string) => string;
+      size: string;
+      types: string;
+      carrier: string;
+      parts: string;
+    };
+    /** Other breakers that take the same tip (catalogue families), capped. `title` when the page
+     *  has one tip family; `sized` per family when it has several ("Ø135 mm"). */
+    siblings: { title: string; sized: (size: string) => string; more: (n: number) => string };
+  };
   popular: {
     title: string;
     lead: string;
@@ -131,6 +151,8 @@ export interface Dict {
     priceAsk: string;
     /** On a card whose picture is another breaker's tip. */
     sampleBadge: string;
+    /** A model card's picture: its own tip, or (`sample`) another breaker's as a sample. */
+    cardAlt: (name: string, sample: boolean) => string;
     /** Under a page of model cards: shows the next page. */
     more: (left: number) => string;
     groovedBadgeLabel: (name: string) => string;
@@ -187,7 +209,11 @@ export interface Dict {
     renderAlt: (name: string, type: string) => string;
     /** Extra products: caption and alt of the sample picture (another breaker's tip). */
     sample: (name: string) => string;
-    sampleAlt: (name: string) => string;
+    /** `name`: this page's model; `sample`: the breaker whose tip the picture shows. */
+    sampleAlt: (name: string, sample: string) => string;
+    /** The owner's real photos of the model's tips (`BREAKER_PHOTOS`): caption, and alt of the n-th (1-based). */
+    realPhoto: (name: string) => string;
+    realPhotoAlt: (name: string, n: number) => string;
     sideAlt: (name: string, type: string) => string;
     rearAlt: (name: string) => string;
     viewRear: string;
@@ -294,7 +320,10 @@ export interface Dict {
     title: string;
     lead: string;
     tips: { name: string; body: string };
-    items: Record<PartKey, { name: string; body: string }>;
+    /** `h1`: the group page's heading ("Hidrolik kırıcı burcu"); `name` stays short (nav, crumbs). */
+    items: Record<PartKey, { name: string; h1: string; body: string }>;
+    /** Picture of a part-group card (home, parts page). */
+    groupAlt: (h1: string) => string;
     view: string;
     /** Count line on a product-group card (computed from the renders or the catalogue). */
     groupsTitle: string;
@@ -451,7 +480,7 @@ export interface Dict {
 export const DICT: Record<Lang, Dict> = {
   tr: {
     meta: {
-      siteName: 'Kervan Mağaza',
+      siteName: 'Kervan Makina',
       brand: 'Kervan Makina',
       homeTitle: 'Kırıcı yedek parça ve kırıcı ucu | Kervan Makina',
       homeDesc:
@@ -463,8 +492,8 @@ export const DICT: Record<Lang, Dict> = {
       familyDesc: (code, d, types) =>
         `${code}: Ø${d} mm hidrolik kırıcı ucu (${types}). Kervan üretimi kırıcı yedek parça; stoktan aynı gün kargo.`,
       breakerTitle: (name, d) => `${name} kırıcı ucu${d ? ` Ø${d}` : ''} | Kervan Makina`,
-      breakerDesc: (name, d, types) =>
-        `${name} hidrolik kırıcı ucu: ${d ? `Ø${d} mm, ` : ''}${types}. Kervan üretimi kırıcı yedek parça; stoktan aynı gün kargo.`,
+      breakerDesc: (name, d, types, alias) =>
+        `${name}${alias ? ` (${alias})` : ''} hidrolik kırıcı ucu: ${d ? `Ø${d} mm, ` : ''}${types}. Kervan üretimi kırıcı yedek parça; stoktan aynı gün kargo.`,
       notFoundTitle: 'Sayfa bulunamadı | Kervan Makina',
       popularTitle: 'Çok satan kırıcı uçları ve yedek parçalar | Kervan Makina',
       popularDesc:
@@ -561,7 +590,6 @@ export const DICT: Record<Lang, Dict> = {
         popular: 'Çok satan kırıcılar',
         forModel: 'Bu kırıcı için ürettiğimiz parçalar',
         breakerPage: 'Kırıcı sayfası',
-        tipSize: (d, len) => `Ø${d}${len ? ` × ${len}` : ''} mm`,
         noParts: 'Bu kırıcının diğer parçaları için modelinizi WhatsApp’tan yazın, size dönelim.',
         tipN: (n) => `${n}. uç`,
       },
@@ -594,7 +622,23 @@ export const DICT: Record<Lang, Dict> = {
       ],
     },
     card: { view: 'Ucu gör' },
-    breaker: { title: (name) => `${name} kırıcı ucu` },
+    tipSize: (d, ord) => (ord ? `Ø${d} · ${ord}. tip` : `Ø${d} mm`),
+    breaker: {
+      title: (name) => `${name} kırıcı ucu`,
+      aliases: (list) => `Diğer yazılışlar: ${list}`,
+      facts: {
+        title: (name) => `${name} kırıcı ucu bilgileri`,
+        size: 'Uç ölçüsü',
+        types: 'Uç tipleri',
+        carrier: 'Taşıyıcı sınıfı (yaklaşık)',
+        parts: 'Bu kırıcı için ayrıca ürettiklerimiz',
+      },
+      siblings: {
+        title: 'Aynı uç bu kırıcılara da uyar',
+        sized: (size) => `${size} uç şu kırıcılara da uyar`,
+        more: (n) => `ve ${n} model daha`,
+      },
+    },
     list: {
       title: 'Tüm kırıcı uçları',
       lead: 'Kırıcınızın marka ve modelini yazın. En çok sipariş edilenler ayrı sayfada.',
@@ -606,6 +650,8 @@ export const DICT: Record<Lang, Dict> = {
       priceNote: '+ vergiler',
       priceAsk: 'Fiyat için sorun',
       sampleBadge: 'Temsili görsel',
+      cardAlt: (name, sample) =>
+        sample ? `${name} kırıcı ucu için temsili görsel` : `${name} kırıcı ucu`,
       more: (left) => `Daha fazla göster (${left} model daha)`,
       groovedBadgeLabel: (name) => `${name} için toz kanallı uçlar`,
     },
@@ -659,7 +705,10 @@ export const DICT: Record<Lang, Dict> = {
       partsTitle: 'Bu kırıcı için ürettiğimiz parçalar',
       renderAlt: (name, type) => `${name} ${type} kırıcı ucu`,
       sample: (name) => `Temsili görsel: ${name} ucu`,
-      sampleAlt: (name) => `Temsili görsel, ${name} kırıcı ucu`,
+      sampleAlt: (name, sample) => `${name} kırıcı ucu için temsili görsel: ${sample} ucu`,
+      realPhoto: (name) => `Kendi üretimimiz: ${name} uyumlu keski ve sivri uç (gerçek fotoğraf)`,
+      realPhotoAlt: (name, n) =>
+        `${name} uyumlu keski ve sivri kırıcı ucu, Kervan üretimi: gerçek fotoğraf ${n}`,
       sideAlt: (name, type) => `${name} ${type} kırıcı ucu, yandan görünüş`,
       rearAlt: (name) => `${name} kırıcı ucunun kama kanalı ve arka ucu, yakın görünüş`,
       viewRear: 'Kama kanalı ve arka uç',
@@ -808,32 +857,47 @@ export const DICT: Record<Lang, Dict> = {
       items: {
         'alt-govde': {
           name: 'Alt gövde',
+          h1: 'Hidrolik kırıcı alt gövdesi',
           body: 'Ucu ve burçları taşıyan alt gövde (ön kafa). Aşınmış ya da çatlamış gövdenin yerine.',
         },
         burc: {
           name: 'Burç',
+          h1: 'Hidrolik kırıcı burcu',
           body: 'Ucu yönlendiren kafa burçları, merkezlemeler ve dayama burçları; bazı kırıcılarda dayama ve merkezleme tek parçadır. Aşınmış burç ucu erken kırar; uçla birlikte kontrol edin.',
         },
-        kama: { name: 'Kama', body: 'Ucu gövdede tutan kamalar ve tutucu pimler.' },
+        kama: {
+          name: 'Kama',
+          h1: 'Hidrolik kırıcı kaması',
+          body: 'Ucu gövdede tutan kamalar ve tutucu pimler.',
+        },
         saplama: {
           name: 'Saplama',
+          h1: 'Hidrolik kırıcı saplaması',
           body: 'Kırıcı gövdesini bir arada tutan saplamalar; takımlar somunlarıyla, çizimde varsa pullarıyla.',
         },
-        piston: { name: 'Piston', body: 'Kırıcının darbe pistonu; kırıcı modeline göre.' },
+        piston: {
+          name: 'Piston',
+          h1: 'Hidrolik kırıcı pistonu',
+          body: 'Kırıcının darbe pistonu; kırıcı modeline göre.',
+        },
         akumulator: {
           name: 'Akümülatör parçaları',
+          h1: 'Hidrolik kırıcı akümülatör parçaları',
           body: 'Akümülatör üst ve alt kapakları ile akümülatör saplamaları.',
         },
         'asinma-plakasi': {
           name: 'Aşınma plakası',
+          h1: 'Hidrolik kırıcı aşınma plakası',
           body: 'Kırıcı gövdesini kutu içinde koruyan aşınma plakaları.',
         },
         'tamir-takimi': {
           name: 'Tamir takımı',
+          h1: 'Hidrolik kırıcı tamir takımı',
           body: 'Kırıcı modeline göre sızdırmazlık takımı: o-ringler, keçeler, toz keçeleri, destek ve teflon ringler; içerik listesiyle.',
         },
       },
       view: 'İncele',
+      groupAlt: (h1) => `${h1}, Kervan üretimi`,
       groupsTitle: 'Ürün grupları',
       fitNote:
         'Ürünlerimiz Kervan Makina üretimidir; marka ve model adları yalnızca uyumu belirtir.',
@@ -1215,7 +1279,7 @@ export const DICT: Record<Lang, Dict> = {
   },
   en: {
     meta: {
-      siteName: 'Kervan Shop',
+      siteName: 'Kervan Makina',
       brand: 'Kervan Makina',
       homeTitle: 'Hydraulic breaker spare parts and tips | Kervan Makina',
       homeDesc:
@@ -1227,8 +1291,8 @@ export const DICT: Record<Lang, Dict> = {
       familyDesc: (code, d, types) =>
         `${code}: Ø${d} mm hydraulic breaker tip (${types}). Breaker spare part made by Kervan; same-day shipping from stock.`,
       breakerTitle: (name, d) => `${name} breaker tip${d ? ` Ø${d}` : ''} | Kervan Makina`,
-      breakerDesc: (name, d, types) =>
-        `${name} hydraulic breaker tip: ${d ? `Ø${d} mm, ` : ''}${types}. Breaker spare part made by Kervan; same-day shipping from stock.`,
+      breakerDesc: (name, d, types, alias) =>
+        `${name}${alias ? ` (${alias})` : ''} hydraulic breaker tip: ${d ? `Ø${d} mm, ` : ''}${types}. Breaker spare part made by Kervan; same-day shipping from stock.`,
       notFoundTitle: 'Page not found | Kervan Makina',
       popularTitle: 'Best-selling breaker tips and spare parts | Kervan Makina',
       popularDesc:
@@ -1323,7 +1387,6 @@ export const DICT: Record<Lang, Dict> = {
         popular: 'Best-selling breakers',
         forModel: 'Parts we make for this breaker',
         breakerPage: 'Breaker page',
-        tipSize: (d, len) => `Ø${d}${len ? ` × ${len}` : ''} mm`,
         noParts:
           'For this breaker’s other parts, send us your model on WhatsApp and we will get back to you.',
         tipN: (n) => `Tool ${n}`,
@@ -1357,7 +1420,23 @@ export const DICT: Record<Lang, Dict> = {
       ],
     },
     card: { view: 'View tip' },
-    breaker: { title: (name) => `${name} breaker tip` },
+    tipSize: (d, ord) => (ord ? `Ø${d} · type ${ord}` : `Ø${d} mm`),
+    breaker: {
+      title: (name) => `${name} breaker tip`,
+      aliases: (list) => `Also written: ${list}`,
+      facts: {
+        title: (name) => `${name} breaker tip facts`,
+        size: 'Tip size',
+        types: 'Tip types',
+        carrier: 'Carrier class (approx.)',
+        parts: 'We also make for this breaker',
+      },
+      siblings: {
+        title: 'The same tip also fits these breakers',
+        sized: (size) => `The ${size} tip also fits these breakers`,
+        more: (n) => `and ${n} more models`,
+      },
+    },
     list: {
       title: 'All breaker tips',
       lead: 'Type your breaker make and model. The most ordered tips have their own page.',
@@ -1369,6 +1448,8 @@ export const DICT: Record<Lang, Dict> = {
       priceNote: 'export price',
       priceAsk: 'Ask for a price',
       sampleBadge: 'Sample picture',
+      cardAlt: (name, sample) =>
+        sample ? `Sample picture for the ${name} breaker tip` : `${name} breaker tip`,
       more: (left) => `Show more (${left} more models)`,
       groovedBadgeLabel: (name) => `Tools with dust grooves for the ${name}`,
     },
@@ -1422,7 +1503,10 @@ export const DICT: Record<Lang, Dict> = {
       partsTitle: 'Parts we make for this breaker',
       renderAlt: (name, type) => `${name} ${type} breaker tip`,
       sample: (name) => `Sample picture: the ${name} tip`,
-      sampleAlt: (name) => `Sample picture, ${name} breaker tip`,
+      sampleAlt: (name, sample) => `Sample picture for the ${name} breaker tip: the ${sample} tip`,
+      realPhoto: (name) => `Our own make: ${name}-compatible chisel and moil tips (real photo)`,
+      realPhotoAlt: (name, n) =>
+        `${name}-compatible chisel and moil breaker tips made by Kervan: real photo ${n}`,
       sideAlt: (name, type) => `${name} ${type} breaker tip, side view`,
       rearAlt: (name) => `${name} breaker tip key slot and rear end, close-up`,
       viewRear: 'Key slot and rear end',
@@ -1571,35 +1655,47 @@ export const DICT: Record<Lang, Dict> = {
       items: {
         'alt-govde': {
           name: 'Front head',
+          h1: 'Hydraulic breaker front heads',
           body: 'The lower body that holds the tip and bushings; replaces a worn or cracked one.',
         },
         burc: {
           name: 'Bushings',
+          h1: 'Hydraulic breaker bushings',
           body: 'Tool bushings and upper bushings that guide the tip, and thrust rings; on some breakers the thrust ring and upper bushing are one piece. A worn bushing breaks tips early; check them with the tip.',
         },
         kama: {
           name: 'Retainer keys',
+          h1: 'Hydraulic breaker retainer keys',
           body: 'Keys and retainer pins that hold the tip in the front head.',
         },
         saplama: {
           name: 'Tie rods',
+          h1: 'Hydraulic breaker tie rods',
           body: 'Tie rods that hold the breaker body together; sets come with their nuts, and washers where the drawing has them.',
         },
-        piston: { name: 'Pistons', body: 'The breaker’s impact piston, by breaker model.' },
+        piston: {
+          name: 'Pistons',
+          h1: 'Hydraulic breaker pistons',
+          body: 'The breaker’s impact piston, by breaker model.',
+        },
         akumulator: {
           name: 'Accumulator parts',
+          h1: 'Hydraulic breaker accumulator parts',
           body: 'Accumulator covers (upper and lower) and accumulator bolts.',
         },
         'asinma-plakasi': {
           name: 'Wear plates',
+          h1: 'Hydraulic breaker wear plates',
           body: 'Wear plates that protect the breaker body inside its box.',
         },
         'tamir-takimi': {
           name: 'Repair kits',
+          h1: 'Hydraulic breaker repair kits',
           body: 'Seal kits by breaker model: o-rings, rod seals, wipers, back-up and PTFE rings, with a list of contents.',
         },
       },
       view: 'View',
+      groupAlt: (h1) => `${h1}, made by Kervan`,
       groupsTitle: 'Product groups',
       fitNote: 'Our products are made by Kervan Makina; make and model names only show the fit.',
       plant: {

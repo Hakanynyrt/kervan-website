@@ -25,7 +25,7 @@ export interface PrerenderPage {
   headTags: string;
   appHtml: string;
   props: PageProps;
-  /** Listed in the sitemap (everything but the cart and 404). */
+  /** Listed in the sitemap (everything but the cart, the /urun/ code pages and 404). */
   indexable: boolean;
 }
 
@@ -87,18 +87,14 @@ const SITEMAP_MAX = 45000;
 
 /**
  * sitemap.xml for every indexable page in both languages, each with its hreflang alternates
- * (tr, en, x-default = tr). One file while it fits (the Pages file limit); past SITEMAP_MAX
+ * (tr, en, x-default = tr), without <lastmod> (see prerender.mjs). One file while it fits (the Pages file limit); past SITEMAP_MAX
  * URLs, sitemap-1.xml, sitemap-2.xml, … and sitemap.xml becomes their index.
  */
-export function sitemapFiles(
-  pages: PrerenderPage[],
-  lastmod: string,
-): { file: string; xml: string }[] {
+export function sitemapFiles(pages: PrerenderPage[]): { file: string; xml: string }[] {
   const entries: SitemapEntry[] = pages
     .filter((p) => p.indexable)
     .map((p) => ({
       loc: SITE + localePath(p.props.path, p.lang),
-      lastmod,
       alternates: {
         tr: SITE + localePath(p.props.path, 'tr'),
         en: SITE + localePath(p.props.path, 'en'),
@@ -115,7 +111,7 @@ export function sitemapFiles(
   return [
     {
       file: 'sitemap.xml',
-      xml: buildSitemapIndexXml(files.map((f) => ({ loc: `${SITE}/${f.file}`, lastmod }))),
+      xml: buildSitemapIndexXml(files.map((f) => ({ loc: `${SITE}/${f.file}` }))),
     },
     ...files,
   ];
