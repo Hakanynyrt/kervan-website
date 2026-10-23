@@ -15,7 +15,7 @@ const PARCA = '/photos/parcalar';
 export const PRODUCTS: Product[] = [
   {
     slug: 'keski',
-    image: '/photos/uclar/uclar-yard.jpeg',
+    image: '/photos/uclar/uclar-yard-v2.jpeg',
     tr: {
       name: 'Keski',
       tagline: 'Kırıcının ucu — taşla, betonla, asfaltla ilk temas.',
@@ -91,7 +91,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'tamir-kiti',
-    image: '/photos/kit/seal-kit.jpeg',
+    image: '/photos/kit/seal-kit-v2.jpeg',
     tr: {
       name: 'Tamir Kiti',
       tagline: 'Sızdırmazlık ve bağlantı parçaları. Ayrıntıların tümü.',

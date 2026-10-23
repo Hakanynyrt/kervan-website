@@ -88,7 +88,7 @@ export default function RenderGallery({
             src={photoImg(cur.base, 'lg')}
             width={isHero ? 1600 : 960}
             height={isHero ? 900 : 720}
-            alt={`${caption}, ${name(cur.view)}`}
+            alt={g.alt(caption, name(cur.view))}
             loading={lazy ? 'lazy' : undefined}
             decoding="async"
             draggable={false}
@@ -142,7 +142,7 @@ export default function RenderGallery({
                   src={photoImg(it.base, it.view === 'hero' ? 'xs' : 'lg')}
                   width={it.view === 'hero' ? 320 : 960}
                   height={it.view === 'hero' ? 180 : 720}
-                  alt=""
+                  alt={g.alt(caption, name(it.view))}
                   loading="lazy"
                   decoding="async"
                   className="block aspect-[4/3] h-auto w-full object-contain"

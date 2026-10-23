@@ -82,7 +82,7 @@ Any failure stops the job before the Pages deploy, so production keeps the previ
 
 ## Shared media at the repo root
 
-- Root `public/` now holds only shared media: `photos/` (symlinked as `apps/heat-treatment/public/photos`), `videos/` (symlinked by both apps) and `kirici-uc.glb` (symlinked by breaker-parts). `deploy.yml`'s `paths-filter` watches these paths. Do not delete or move them without updating the symlinks and the filter.
+- Root `public/` now holds only shared media: `photos/` (symlinked as `apps/heat-treatment/public/photos`), `videos/` (symlinked by both apps) and `kirici-uc.glb` (symlinked by breaker-parts). `deploy.yml`'s `paths-filter` watches these paths. Do not delete or move them without updating the symlinks and the filter. kervanbreaker.com plays the `-v2` encodes of the phone clips (720×1280 H.264 High, CRF 24 capped at 1.6 Mb/s, 30 fps, no audio, `+faststart`; ffmpeg `-vf scale=720:-2:flags=lanczos,fps=30 -c:v libx264 -profile:v high -preset slow -crf 24 -maxrate 1600k -bufsize 3200k -an -movflags +faststart`); the 1080p originals stay as the cutting sources. A re-encode gets a new name (immutable cache).
 - The old `kervan-website` Worker (`src/worker/`, root `wrangler.jsonc`, the Babel-in-browser root site) was removed; its RFQ logic lives in `functions/api/rfq.ts`. The Worker itself is deleted in the Cloudflare dashboard.
 
 ## Media

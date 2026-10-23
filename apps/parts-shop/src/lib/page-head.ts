@@ -18,7 +18,7 @@ import { renderModel, renderTitle } from './part-caption';
 import { findRender } from './part-links';
 import { brandPath, LIST_PATH, PARTS_PATH, partPath, type PartKey } from './routes';
 import { tipImgAbs } from './tip-img';
-import { tipOptions } from './tip-options';
+import { shownTip } from './tip-options';
 import type { PageProps } from './page-props';
 import { SITE } from './site';
 import { photoImgAbs } from './photo-url';
@@ -270,16 +270,16 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
         withAlias && withAlias.length <= DESC_MAX
           ? withAlias
           : m.breakerDesc(model.name, d, types.join(', '), null);
-      // The type the prerender shows (TipProduct): its picture and price. No Kervan code: the
-      // breaker page never shows it (owner).
-      const { opts, types: order } = tipOptions(model.families, model.extra);
-      const opt = order.length ? opts.get(order[0]) : undefined;
+      // The size and type the prerender shows (TipProduct): its picture and price. No Kervan
+      // code: the breaker page never shows it (owner).
+      const shown = shownTip(model.families, model.extra);
+      const opt = shown.opt;
       // The owner's real photo of the model's tips (BREAKER_PHOTOS) leads, like on the page.
       const photo = model.photos?.[0];
       const image = photo
         ? photoImgAbs(photo, 'lg', SITE)
-        : opt?.sku?.image
-          ? tipImgAbs(opt.sku.image, SITE)
+        : shown.image
+          ? tipImgAbs(shown.image, SITE)
           : undefined;
       return {
         ...page,
@@ -308,9 +308,8 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       const d = fmtNum(f.attrs.diameterMm, lang);
       const types = f.skus.map((s) => t.tip[s.tipType]).join(', ');
       const description = m.familyDesc(f.code, d, types);
-      const { opts, types: order } = tipOptions([f]);
-      const opt = order.length ? opts.get(order[0]) : undefined;
-      const image = opt?.sku?.image ? tipImgAbs(opt.sku.image, SITE) : undefined;
+      const { opt, image: own } = shownTip([f]);
+      const image = own ? tipImgAbs(own, SITE) : undefined;
       return {
         ...page,
         title: m.familyTitle(f.code, d),

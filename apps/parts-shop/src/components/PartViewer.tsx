@@ -177,7 +177,7 @@ export default function PartViewer({
         camera.updateProjectionMatrix();
         controls.minDistance = d * 0.4;
         controls.maxDistance = d * 2;
-        const caps: THREE.Mesh[] = [];
+        const caps: [THREE.Mesh, THREE.Mesh][] = [];
         const fittedList: THREE.Object3D[] = [];
         model.traverse((o) => {
           const m = o as THREE.Mesh;
@@ -212,18 +212,16 @@ export default function PartViewer({
               polygonOffsetUnits: -4,
             }),
           );
-          caps.push(cap);
+          caps.push([m, cap]);
           if (fitted) fittedList.push(m, cap);
         });
-        for (const c of caps) {
-          // Same transform as the mesh it caps (the geometry is shared).
-          const m = model.getObjectByProperty('geometry', c.geometry);
-          m?.parent?.add(c);
-          if (m) {
-            c.position.copy(m.position);
-            c.quaternion.copy(m.quaternion);
-            c.scale.copy(m.scale);
-          }
+        // Each cap beside its own mesh, with its transform (added after the traverse). Not looked up by
+        // geometry: nodes may share one mesh (two fitted pins), and the first match took every cap.
+        for (const [m, c] of caps) {
+          m.parent?.add(c);
+          c.position.copy(m.position);
+          c.quaternion.copy(m.quaternion);
+          c.scale.copy(m.scale);
         }
         for (const o of fittedList) o.visible = fittedOn.current;
         fittedParts.current = fittedList;

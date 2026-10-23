@@ -86,3 +86,18 @@ export function sizeOrdinals(variants: readonly { diameterMm: number }[]): (numb
     return n;
   });
 }
+
+/**
+ * What the prerendered breaker / family page shows (TipProduct: the first size, its first
+ * type): that option and its own render. The page head uses the same choice for `og:image`
+ * and the offer, so the link preview and the price match the page.
+ */
+export function shownTip(
+  families: PublicFamily[],
+  extra?: PublicExtra,
+): { opt: TipOption | undefined; image: string | null } {
+  const variants = tipVariants(families);
+  const { opts, types } = tipOptions(variants.length > 1 ? variants[0].families : families, extra);
+  const opt = types.length ? opts.get(types[0]) : undefined;
+  return { opt, image: opt?.sku?.image ?? null };
+}
