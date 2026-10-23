@@ -41,6 +41,7 @@ export default function Breaker({
       families={model.families}
       extra={model.extra}
       sample={model.sample}
+      photos={model.photos}
       parts={model.parts}
       grooved={grooved}
       path={path}

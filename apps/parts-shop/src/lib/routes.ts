@@ -24,7 +24,7 @@ import { groovedFor } from './grooved';
 import { tipOptions, tipVariants } from './tip-options';
 import { OEM_NUMBERS } from './oem-numbers';
 import { modelAliases } from './model-aliases';
-import { GROOVED_TOOLS, PART_RENDERS, type PartRender } from './photos';
+import { BREAKER_PHOTOS, GROOVED_TOOLS, PART_RENDERS, type PartRender } from './photos';
 import type { FinderMake } from './finder';
 import type { TipGroupStats } from '../types';
 
@@ -74,6 +74,8 @@ export interface BreakerCard {
   variant?: { n: number; lengthMm: number | null };
   /** No picture of its own: the nearest-diameter pictured tip (as the breaker page's sample), shown labelled. */
   sample?: string;
+  /** The owner's real photo of this model's tips (`BREAKER_PHOTOS` base): shown before `image`, unlabelled. */
+  photo?: string;
   popularTier: 1 | 2 | null;
   /** We model a tool with dust grooves for this breaker (`groovedFor`). */
   grooved?: true;
@@ -156,6 +158,8 @@ export type PageModel =
       extra?: PublicExtra;
       /** Extra products: the tip of the same maker's nearest-sized breaker, shown as a sample picture. */
       sample?: { name: string; family: PublicFamily };
+      /** The owner's real photos of this model's tips (`BREAKER_PHOTOS` bases): they lead the page. */
+      photos?: string[];
       brand: string;
       model: string;
       /** Tip families that fit this breaker (usually one). */
@@ -461,8 +465,9 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     sampleFor(e, breakers)?.family.skus.find((s) => s.image)?.image ?? undefined;
   const cards: BreakerCard[] = [...breakers].flatMap(([slug, e]): BreakerCard[] => {
     const f = e.families[0] as PublicFamily | undefined;
+    const photo = BREAKER_PHOTOS[slug]?.[0];
     if (!f) {
-      const sample = sampleImg(e);
+      const sample = photo ? undefined : sampleImg(e);
       return [
         {
           slug,
@@ -474,6 +479,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
           types: e.extra?.tipTypes ?? [],
           image: null,
           ...(sample ? { sample } : {}),
+          ...(photo ? { photo } : {}),
           popularTier: null,
           price: null,
         },
@@ -483,7 +489,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     const variants = tipVariants(e.families);
     return variants.map((v, i) => {
       const image = v.families.flatMap((x) => x.skus).find((s) => s.image)?.image ?? null;
-      const sample = image ? undefined : sampleImg(e);
+      const sample = image || photo ? undefined : sampleImg(e);
       return {
         slug,
         path: breakerPath(slug),
@@ -494,6 +500,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         types: [...new Set(v.families.flatMap((x) => x.skus.map((s) => s.tipType)))],
         image,
         ...(sample ? { sample } : {}),
+        ...(photo ? { photo } : {}),
         ...(variants.length > 1 ? { variant: { n: i + 1, lengthMm: v.lengthMm } } : {}),
         popularTier: v.families.reduce<1 | 2 | null>(
           (t, x) => (tierRank(x.popularTier) < tierRank(t) ? x.popularTier : t),
@@ -577,6 +584,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         ...(x.variant ? { n: x.variant.n, len: x.variant.lengthMm } : {}),
         ...(img ? { img } : {}),
         ...(!x.image && x.sample ? { sample: true as const } : {}),
+        ...(x.photo ? { photo: x.photo } : {}),
       });
       models.set(x.slug, m);
     }
@@ -676,8 +684,13 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         ...(e.extra ? { extra: e.extra } : {}),
         ...(() => {
           const pictured = e.families.some((f) => f.skus.some((x) => x.image));
+          const photos = BREAKER_PHOTOS[slug] ?? [];
+          // The sample stays for the type tiles; with a real photo the page leads with the photo instead.
           const sample = pictured ? null : sampleFor(e, breakers);
-          return sample ? { sample } : {};
+          return {
+            ...(sample ? { sample } : {}),
+            ...(photos.length ? { photos: [...photos] } : {}),
+          };
         })(),
         brand: e.brand,
         model: e.model,

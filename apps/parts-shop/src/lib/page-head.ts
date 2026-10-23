@@ -237,7 +237,13 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       // breaker page never shows it (owner).
       const { opts, types: order } = tipOptions(model.families, model.extra);
       const opt = order.length ? opts.get(order[0]) : undefined;
-      const image = opt?.sku?.image ? tipImgAbs(opt.sku.image, SITE) : undefined;
+      // The owner's real photo of the model's tips (BREAKER_PHOTOS) leads, like on the page.
+      const photo = model.photos?.[0];
+      const image = photo
+        ? photoImgAbs(photo, 'lg', SITE)
+        : opt?.sku?.image
+          ? tipImgAbs(opt.sku.image, SITE)
+          : undefined;
       return {
         ...page,
         title: m.breakerTitle(model.name, d),

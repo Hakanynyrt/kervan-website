@@ -8,7 +8,7 @@ import { PartGroups } from '../components/PartGroups';
 import { FOCUS, whatsappHref } from '../components/Layout';
 import { CardPrice } from '../components/ModelSearch';
 import { priceNote } from '../components/PartOrder';
-import { cardHref, cardKey, cardName } from '../lib/card';
+import { cardHref, cardKey, cardName, cardPic } from '../lib/card';
 import type { Dict } from '../lib/dict';
 import { exactHit, findModels, finderName, makesByModels, type FinderHit } from '../lib/finder';
 import { fmtNum } from '../lib/format';
@@ -412,9 +412,9 @@ function Finder({
                 <PanelRow
                   key={`tip-${i}`}
                   href={`${localePath(breakerPath(sel.model.slug), lang)}${x.n ? `?uc=${x.n}` : ''}`}
-                  img={x.img ? tipImg(x.img) : null}
+                  img={cardPic(x)?.src ?? null}
                   stage="tip"
-                  badge={x.sample ? t.list.sampleBadge : undefined}
+                  badge={cardPic(x)?.sample ? t.list.sampleBadge : undefined}
                   title={many ? `${t.parts.tips.name} · ${f.tipN(i + 1)}` : t.parts.tips.name}
                   sub={
                     x.d === null
@@ -470,8 +470,8 @@ function Finder({
                         e.preventDefault();
                         pick(hit);
                       }}
-                      img={(c.image ?? c.sample) ? tipImg((c.image ?? c.sample)!) : null}
-                      badge={!c.image && c.sample ? t.list.sampleBadge : undefined}
+                      img={cardPic(c)?.src ?? null}
+                      badge={cardPic(c)?.sample ? t.list.sampleBadge : undefined}
                       stage="tip"
                       title={cardName(c, lang)}
                       sub={

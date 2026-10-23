@@ -209,6 +209,9 @@ export interface Dict {
     sample: (name: string) => string;
     /** `name`: this page's model; `sample`: the breaker whose tip the picture shows. */
     sampleAlt: (name: string, sample: string) => string;
+    /** The owner's real photos of the model's tips (`BREAKER_PHOTOS`): caption, and alt of the n-th (1-based). */
+    realPhoto: (name: string) => string;
+    realPhotoAlt: (name: string, n: number) => string;
     sideAlt: (name: string, type: string) => string;
     rearAlt: (name: string) => string;
     viewRear: string;
@@ -701,6 +704,9 @@ export const DICT: Record<Lang, Dict> = {
       renderAlt: (name, type) => `${name} ${type} kırıcı ucu`,
       sample: (name) => `Temsili görsel: ${name} ucu`,
       sampleAlt: (name, sample) => `${name} kırıcı ucu için temsili görsel: ${sample} ucu`,
+      realPhoto: (name) => `Kendi üretimimiz: ${name} uyumlu keski ve sivri uç (gerçek fotoğraf)`,
+      realPhotoAlt: (name, n) =>
+        `${name} uyumlu keski ve sivri kırıcı ucu, Kervan üretimi: gerçek fotoğraf ${n}`,
       sideAlt: (name, type) => `${name} ${type} kırıcı ucu, yandan görünüş`,
       rearAlt: (name) => `${name} kırıcı ucunun kama kanalı ve arka ucu, yakın görünüş`,
       viewRear: 'Kama kanalı ve arka uç',
@@ -1496,6 +1502,9 @@ export const DICT: Record<Lang, Dict> = {
       renderAlt: (name, type) => `${name} ${type} breaker tip`,
       sample: (name) => `Sample picture: the ${name} tip`,
       sampleAlt: (name, sample) => `Sample picture for the ${name} breaker tip: the ${sample} tip`,
+      realPhoto: (name) => `Our own make: ${name}-compatible chisel and moil tips (real photo)`,
+      realPhotoAlt: (name, n) =>
+        `${name}-compatible chisel and moil breaker tips made by Kervan: real photo ${n}`,
       sideAlt: (name, type) => `${name} ${type} breaker tip, side view`,
       rearAlt: (name) => `${name} breaker tip key slot and rear end, close-up`,
       viewRear: 'Key slot and rear end',

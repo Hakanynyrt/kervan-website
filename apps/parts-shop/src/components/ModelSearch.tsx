@@ -22,8 +22,7 @@ import { localePath } from '../lib/locale-path';
 import { LIST_PATH, type BrandLink, type BreakerCard } from '../lib/routes';
 import type { Lang } from '../types';
 import { fmtTry, fmtUsd } from '../lib/price';
-import { cardHref, cardKey, cardName } from '../lib/card';
-import { tipImg } from '../lib/tip-img';
+import { cardHref, cardKey, cardName, cardPic } from '../lib/card';
 import { replaceSearch } from '../lib/url-state';
 import { chipClass, MissingModel } from './Bits';
 import { FOCUS } from './Layout';
@@ -420,57 +419,64 @@ function Cards({
     r.diameterMm === null ? '—' : `Ø${fmtNum(r.diameterMm, lang)} mm`;
   return (
     <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-      {rows.map((r, i) => (
-        <li key={cardKey(r)} hidden={i >= limit}>
-          <a
-            href={href(r)}
-            className={`group flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg transition-colors hover:border-hair-strong ${FOCUS}`}
-          >
-            {(r.image ?? r.sample) ? (
-              <span className="relative block">
-                <img
-                  src={tipImg((r.image ?? r.sample)!)}
-                  alt={t.list.cardAlt(r.name, !r.image)}
-                  width={480}
-                  height={320}
-                  loading="lazy"
-                  decoding="async"
-                  className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain"
-                />
-                {!r.image && (
-                  <span className="absolute bottom-1.5 left-1.5 rounded-sm bg-bg/90 px-1.5 py-0.5 font-sans text-xs text-ink-mid">
-                    {t.list.sampleBadge}
-                  </span>
-                )}
-              </span>
-            ) : (
-              <span className="flex aspect-[3/2] w-full flex-col items-center justify-center gap-1 border-b border-hair bg-bg-soft px-2 text-center font-sans">
-                <span className="text-2xl font-bold tabular-nums text-ink sm:text-3xl">
-                  {dia(r)}
+      {rows.map((r, i) => {
+        const pic = cardPic(r);
+        return (
+          <li key={cardKey(r)} hidden={i >= limit}>
+            <a
+              href={href(r)}
+              className={`group flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg transition-colors hover:border-hair-strong ${FOCUS}`}
+            >
+              {pic ? (
+                <span className="relative block">
+                  <img
+                    src={pic.src}
+                    alt={
+                      pic.photo
+                        ? t.family.realPhotoAlt(r.name, 1)
+                        : t.list.cardAlt(r.name, pic.sample)
+                    }
+                    width={480}
+                    height={pic.photo ? 360 : 320}
+                    loading="lazy"
+                    decoding="async"
+                    className={`block aspect-[3/2] h-auto w-full border-b border-hair bg-stage ${pic.photo ? 'object-cover' : 'object-contain'}`}
+                  />
+                  {pic.sample && (
+                    <span className="absolute bottom-1.5 left-1.5 rounded-sm bg-bg/90 px-1.5 py-0.5 font-sans text-xs text-ink-mid">
+                      {t.list.sampleBadge}
+                    </span>
+                  )}
                 </span>
-                {r.types.length > 0 && (
-                  <span className="text-xs text-ink-mid sm:text-sm">
-                    {r.types.map((x) => t.tip[x]).join(', ')}
+              ) : (
+                <span className="flex aspect-[3/2] w-full flex-col items-center justify-center gap-1 border-b border-hair bg-bg-soft px-2 text-center font-sans">
+                  <span className="text-2xl font-bold tabular-nums text-ink sm:text-3xl">
+                    {dia(r)}
                   </span>
-                )}
-              </span>
-            )}
-            <span className="flex flex-1 flex-col gap-1 p-3 font-sans">
-              <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
-                {cardName(r, lang)}
-              </span>
-              {/* without a picture the diameter is already set large above: only the badge here */}
-              {(r.image || r.sample || r.grooved) && (
-                <span className="text-sm text-ink-mid tabular-nums">
-                  {r.image || r.sample ? dia(r) : ''}
-                  {r.grooved && `${r.image || r.sample ? ' · ' : ''}${t.list.groovedBadge}`}
+                  {r.types.length > 0 && (
+                    <span className="text-xs text-ink-mid sm:text-sm">
+                      {r.types.map((x) => t.tip[x]).join(', ')}
+                    </span>
+                  )}
                 </span>
               )}
-              <CardPrice price={r.price} fx={fx} lang={lang} t={t} />
-            </span>
-          </a>
-        </li>
-      ))}
+              <span className="flex flex-1 flex-col gap-1 p-3 font-sans">
+                <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
+                  {cardName(r, lang)}
+                </span>
+                {/* without a picture the diameter is already set large above: only the badge here */}
+                {(pic || r.grooved) && (
+                  <span className="text-sm text-ink-mid tabular-nums">
+                    {pic ? dia(r) : ''}
+                    {r.grooved && `${pic ? ' · ' : ''}${t.list.groovedBadge}`}
+                  </span>
+                )}
+                <CardPrice price={r.price} fx={fx} lang={lang} t={t} />
+              </span>
+            </a>
+          </li>
+        );
+      })}
     </ul>
   );
 }

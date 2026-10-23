@@ -38,7 +38,7 @@ import {
 } from './Bits';
 import { FOCUS, whatsappHref } from './Layout';
 import { ORDER_EMAIL, SITE } from '../lib/site';
-import { cardSet, photoImg } from '../lib/photo-url';
+import { cardSet, photoImg, photoSet } from '../lib/photo-url';
 
 function availabilityText(s: PublicSku, t: Dict): string {
   const a = s.availability;
@@ -67,6 +67,8 @@ interface Props {
   extra?: PublicExtra;
   /** Extra products: a nearby tip shown as a labelled sample picture. */
   sample?: { name: string; family: PublicFamily };
+  /** The owner's real photos of this model's tips (`BREAKER_PHOTOS` bases): first in the picture area, no sample there. */
+  photos?: string[];
   /** Neutral path of this page (cart line link and id). */
   path: string;
   /** Other parts we model for this breaker (cards on the part pages). */
@@ -95,6 +97,7 @@ export default function TipProduct({
   families,
   extra,
   sample,
+  photos = [],
   path,
   parts = [],
   grooved = [],
@@ -245,88 +248,111 @@ export default function TipProduct({
       </ul>
 
       <div className="mt-6 grid gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
-        {sampleSku?.image && sample && (
-          <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
-            <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
-              <img
-                key={sampleSku.image}
-                src={tipImg(sampleSku.image)}
-                width={800}
-                height={533}
-                alt={tf.sampleAlt(quoteName, sample.name)}
-                decoding="async"
-                className="block h-auto w-full"
-              />
-              <figcaption className="border-t border-hair bg-bg px-3 py-2 font-sans text-sm text-ink">
-                {tf.sample(sample.name)}
+        <div className="flex min-w-0 flex-col gap-6">
+          {photos.length > 0 && (
+            <figure className={`m-0 grid gap-3 ${photos.length > 1 ? 'sm:grid-cols-2' : ''}`}>
+              {photos.map((base, i) => (
+                <img
+                  key={base}
+                  src={photoImg(base, 'lg')}
+                  srcSet={photoSet(base, ['sm', 480], ['lg', 960])}
+                  sizes="(min-width: 1024px) 420px, (min-width: 640px) 50vw, 100vw"
+                  width={960}
+                  height={720}
+                  alt={tf.realPhotoAlt(quoteName, i + 1)}
+                  loading={i ? 'lazy' : undefined}
+                  decoding="async"
+                  className="block h-auto w-full rounded-md border border-hair bg-bg-warm"
+                />
+              ))}
+              <figcaption className="font-sans text-sm text-ink sm:col-span-2">
+                {tf.realPhoto(quoteName)}
               </figcaption>
             </figure>
-            <ImgNote t={t} />
-          </div>
-        )}
-        {(sku?.image || f?.imageRear) && (
-          <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
-            {sku?.image && (
+          )}
+          {sampleSku?.image && sample && !photos.length && (
+            <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
               <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
                 <img
-                  key={sku.image}
-                  src={tipImg(sku.image)}
+                  key={sampleSku.image}
+                  src={tipImg(sampleSku.image)}
                   width={800}
                   height={533}
-                  alt={tf.renderAlt(quoteName, t.tip[opt.tipType])}
+                  alt={tf.sampleAlt(quoteName, sample.name)}
                   decoding="async"
                   className="block h-auto w-full"
                 />
-                {sku.imageSide && (
-                  <img
-                    key={sku.imageSide}
-                    src={tipImg(sku.imageSide)}
-                    width={800}
-                    height={267}
-                    alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
-                    loading="lazy"
-                    decoding="async"
-                    className="hidden h-auto w-full sm:block"
-                  />
-                )}
+                <figcaption className="border-t border-hair bg-bg px-3 py-2 font-sans text-sm text-ink">
+                  {tf.sample(sample.name)}
+                </figcaption>
               </figure>
-            )}
-            {/* Phones: the side and rear views as two small pictures under the main one. */}
-            <div className="grid grid-cols-2 items-start gap-3 sm:block">
-              {sku?.imageSide && (
-                <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage sm:hidden">
-                  <img
-                    key={sku.imageSide}
-                    src={tipImg(sku.imageSide)}
-                    width={600}
-                    height={200}
-                    alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
-                    loading="lazy"
-                    decoding="async"
-                    className="block h-24 w-full object-contain"
-                  />
-                </figure>
-              )}
-              {f?.imageRear && (
-                <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage sm:max-w-sm">
-                  <img
-                    src={tipImg(f.imageRear)}
-                    width={480}
-                    height={320}
-                    alt={tf.rearAlt(quoteName)}
-                    loading="lazy"
-                    decoding="async"
-                    className="block h-24 w-full object-contain sm:h-auto"
-                  />
-                  <figcaption className="sr-only border-t border-hair bg-bg px-3 py-2 font-sans text-sm text-ink sm:not-sr-only sm:block">
-                    {tf.viewRear}
-                  </figcaption>
-                </figure>
-              )}
+              <ImgNote t={t} />
             </div>
-            <ImgNote t={t} />
-          </div>
-        )}
+          )}
+          {(sku?.image || f?.imageRear) && (
+            <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
+              {sku?.image && (
+                <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
+                  <img
+                    key={sku.image}
+                    src={tipImg(sku.image)}
+                    width={800}
+                    height={533}
+                    alt={tf.renderAlt(quoteName, t.tip[opt.tipType])}
+                    decoding="async"
+                    className="block h-auto w-full"
+                  />
+                  {sku.imageSide && (
+                    <img
+                      key={sku.imageSide}
+                      src={tipImg(sku.imageSide)}
+                      width={800}
+                      height={267}
+                      alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
+                      loading="lazy"
+                      decoding="async"
+                      className="hidden h-auto w-full sm:block"
+                    />
+                  )}
+                </figure>
+              )}
+              {/* Phones: the side and rear views as two small pictures under the main one. */}
+              <div className="grid grid-cols-2 items-start gap-3 sm:block">
+                {sku?.imageSide && (
+                  <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage sm:hidden">
+                    <img
+                      key={sku.imageSide}
+                      src={tipImg(sku.imageSide)}
+                      width={600}
+                      height={200}
+                      alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
+                      loading="lazy"
+                      decoding="async"
+                      className="block h-24 w-full object-contain"
+                    />
+                  </figure>
+                )}
+                {f?.imageRear && (
+                  <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage sm:max-w-sm">
+                    <img
+                      src={tipImg(f.imageRear)}
+                      width={480}
+                      height={320}
+                      alt={tf.rearAlt(quoteName)}
+                      loading="lazy"
+                      decoding="async"
+                      className="block h-24 w-full object-contain sm:h-auto"
+                    />
+                    <figcaption className="sr-only border-t border-hair bg-bg px-3 py-2 font-sans text-sm text-ink sm:not-sr-only sm:block">
+                      {tf.viewRear}
+                    </figcaption>
+                  </figure>
+                )}
+              </div>
+              <ImgNote t={t} />
+            </div>
+          )}
+        </div>
 
         <aside className="flex flex-col gap-6 lg:col-start-2">
           <Chips

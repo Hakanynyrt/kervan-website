@@ -2,7 +2,9 @@ import type { TipType } from '@kervan/tips';
 import type { Lang } from '../types';
 import { fmtNum } from './format';
 import { localePath } from './locale-path';
+import { photoImg } from './photo-url';
 import type { BreakerCard } from './routes';
+import { tipImg } from './tip-img';
 
 /** React key of a breaker card: a breaker with two tip sizes has two cards. */
 export const cardKey = (c: BreakerCard): string =>
@@ -25,4 +27,20 @@ export const cardHref = (c: BreakerCard, lang: Lang, tip?: TipType | null): stri
   if (tip && c.types.includes(tip)) sp.set('tip', tip);
   const q = sp.toString();
   return localePath(c.path, lang) + (q ? `?${q}` : '');
+};
+
+/**
+ * A card's picture: the owner's real photo of the model's tips (`BREAKER_PHOTOS`, unlabelled),
+ * else its own tip render, else the labelled sample render; null when it has none.
+ */
+export const cardPic = (c: {
+  photo?: string;
+  image?: string | null;
+  sample?: string | true;
+  img?: string;
+}): { src: string; photo: boolean; sample: boolean } | null => {
+  if (c.photo) return { src: photoImg(c.photo, 'sm'), photo: true, sample: false };
+  const key = c.image ?? (typeof c.sample === 'string' ? c.sample : undefined) ?? c.img;
+  if (!key) return null;
+  return { src: tipImg(key), photo: false, sample: c.sample === true || (!c.image && !c.img) };
 };

@@ -16,6 +16,8 @@ export interface FinderTip {
   /** Tip render key (tip-img.ts); `sample` = another breaker's tip, shown labelled. */
   img?: string;
   sample?: true;
+  /** The owner's real photo of the model's tips (`BREAKER_PHOTOS` base), shown instead of `img`. */
+  photo?: string;
 }
 
 export interface FinderModel {
