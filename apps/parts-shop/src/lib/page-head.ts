@@ -186,7 +186,9 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       const r = findRender(model.part, model.anchor);
       const name = t.parts.items[model.part].name;
       const caption = r ? renderTitle(r, name, t) : name;
-      const pic = r?.hero ?? r?.views[0]?.base;
+      // A representative picture (a similar model's part) is not this part's image: no preview, no JSON-LD
+      // image, as the tip pages' representative pictures.
+      const pic = r?.representative ? undefined : (r?.hero ?? r?.views[0]?.base);
       const image = pic ? photoImgAbs(pic, 'lg', SITE) : undefined;
       // The price the prerendered page shows: front heads open Burçlu (PartItem.tsx).
       const cents = r?.fitted ? model.priceFitted : model.price;

@@ -674,7 +674,7 @@ export function RenderFigure({
             ...(shown.hero ? [{ base: shown.hero, view: 'hero' as const }] : []),
             ...shown.views,
           ]}
-          caption={caption}
+          caption={r.representative ? `${caption} (${t.parts.listed.sample})` : caption}
           lazy={lazy}
           t={t}
           overlay={(k) =>
@@ -691,6 +691,10 @@ export function RenderFigure({
           }
           below={choice}
         />
+      )}
+      {r.representative && (
+        // No drawing of this breaker's part: a similar model's pictures, said so under them.
+        <p className="m-0 mt-2 font-sans text-sm text-ink-mid">{t.parts.listed.sample}</p>
       )}
       {r.kit && <KitTable items={r.kit} t={t} lang={ctx.lang} />}
       {item ? (
