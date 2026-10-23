@@ -1,5 +1,6 @@
 import type { ImportFamily } from './from-catalog.ts';
 import { normalisePartRows, type PartSheetRow } from './part-prices.ts';
+import { DRAWING_FAMILY, parseDrawingOverride } from './drawings.ts';
 
 /** SQLite literal. Strings are single-quoted with '' escaping; non-finite numbers become NULL. */
 export function sqlValue(v: string | number | null | undefined): string {
@@ -61,6 +62,14 @@ export interface PriceSheet {
   parts?: PartSheetRow[];
   /** true = switch back to the previous part price batch (with an empty `prices`). */
   rollbackParts?: boolean;
+  /**
+   * Kervan's own approved drawings: family code → override (see DrawingOverride in drawings.ts)
+   * stored in `drawing_overrides`, replacing that family's previous override. `source` is a
+   * private note (the drawing's file name), never read by the build.
+   */
+  drawings?: { family: string; data: unknown; source?: string }[];
+  /** Family codes whose drawing override is removed (back to the catalogue data). */
+  removeDrawings?: string[];
 }
 
 const CODE = /^KU\d+(?:\.\d+)?-\d{2}-[CMBPKA]$/;
@@ -113,6 +122,17 @@ export function toPricesSql(
       out.push(
         `INSERT OR IGNORE INTO fitments (family_id, breaker_id) SELECT f.id, b.id FROM families f, breakers b WHERE f.code = ${q(f)} AND b.slug = ${q(slug)};`,
       );
+  }
+  for (const d of sheet.drawings ?? []) {
+    if (!d || !DRAWING_FAMILY.test(d.family)) throw new Error('bad drawing row');
+    const data = JSON.stringify(parseDrawingOverride(d.data));
+    out.push(
+      `INSERT INTO drawing_overrides (family_code, data, source, updated_at) VALUES (${q(d.family)}, ${q(data)}, ${q(d.source ?? null)}, ${q(now)}) ON CONFLICT(family_code) DO UPDATE SET data = excluded.data, source = excluded.source, updated_at = excluded.updated_at;`,
+    );
+  }
+  for (const f of sheet.removeDrawings ?? []) {
+    if (!DRAWING_FAMILY.test(f)) throw new Error('bad drawing removal');
+    out.push(`DELETE FROM drawing_overrides WHERE family_code = ${q(f)};`);
   }
   if (parts && sheet.rollbackParts) throw new Error('parts and rollbackParts together');
   const prev = "(SELECT value FROM settings WHERE key = 'part_prices_batch_prev')";

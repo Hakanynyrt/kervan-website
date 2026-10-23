@@ -5,6 +5,7 @@
   "exclude": [
     "/assets/*",
     "/photos/*",
+    "/og/*",
     "/tips/*",
     "/models/*",
     "/sister/*",
@@ -17,6 +18,9 @@
     "/icon-maskable-512-02.png",
     "/manifest.webmanifest",
     "/favicon-16-02.png",
+    "/favicon-32.png",
+    "/favicon-16.png",
+    "/icon-192.png",
     "/logo-krv-v2.svg",
     "/logo-krv-v2-256.png",
     "/robots.txt",

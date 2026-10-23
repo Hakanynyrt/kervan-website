@@ -8,7 +8,7 @@ import { PartGroups } from '../components/PartGroups';
 import { FOCUS, whatsappHref } from '../components/Layout';
 import { CardPrice } from '../components/ModelSearch';
 import { priceNote } from '../components/PartOrder';
-import { cardHref, cardKey, cardName } from '../lib/card';
+import { cardHref, cardKey, cardName, cardPic } from '../lib/card';
 import type { Dict } from '../lib/dict';
 import { exactHit, findModels, finderName, makesByModels, type FinderHit } from '../lib/finder';
 import { fmtNum } from '../lib/format';
@@ -412,15 +412,11 @@ function Finder({
                 <PanelRow
                   key={`tip-${i}`}
                   href={`${localePath(breakerPath(sel.model.slug), lang)}${x.n ? `?uc=${x.n}` : ''}`}
-                  img={x.img ? tipImg(x.img) : null}
+                  img={cardPic(x)?.src ?? null}
                   stage="tip"
-                  badge={x.sample ? t.list.sampleBadge : undefined}
+                  badge={cardPic(x)?.sample ? t.list.sampleBadge : undefined}
                   title={many ? `${t.parts.tips.name} · ${f.tipN(i + 1)}` : t.parts.tips.name}
-                  sub={
-                    x.d === null
-                      ? undefined
-                      : f.tipSize(fmtNum(x.d, lang), x.len ? fmtNum(x.len, lang) : null)
-                  }
+                  sub={x.d === null ? undefined : t.tipSize(fmtNum(x.d, lang), x.ord ?? null)}
                   action={t.card.view}
                 />
               ))}
@@ -470,14 +466,14 @@ function Finder({
                         e.preventDefault();
                         pick(hit);
                       }}
-                      img={(c.image ?? c.sample) ? tipImg((c.image ?? c.sample)!) : null}
-                      badge={!c.image && c.sample ? t.list.sampleBadge : undefined}
+                      img={cardPic(c)?.src ?? null}
+                      badge={cardPic(c)?.sample ? t.list.sampleBadge : undefined}
                       stage="tip"
-                      title={cardName(c, lang)}
+                      title={cardName(c, lang, t)}
                       sub={
                         c.diameterMm === null
                           ? undefined
-                          : f.tipSize(fmtNum(c.diameterMm, lang), null)
+                          : t.tipSize(fmtNum(c.diameterMm, lang), null)
                       }
                       action={t.card.view}
                     />
@@ -518,7 +514,7 @@ function MadeCard({ x, fx, lang, t }: { x: MadeItem; fx: FxRate | null; lang: La
         {c.image && (
           <img
             src={tipImg(c.image)}
-            alt={t.breaker.title(cardName(c, lang))}
+            alt={t.list.cardAlt(c.name, false)}
             width={480}
             height={320}
             loading="lazy"
@@ -529,7 +525,7 @@ function MadeCard({ x, fx, lang, t }: { x: MadeItem; fx: FxRate | null; lang: La
         <span className="flex flex-1 flex-col gap-0.5 p-3 font-sans">
           <span className="text-xs text-ink-mid">{t.parts.tips.name}</span>
           <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
-            {cardName(c, lang)}
+            {cardName(c, lang, t)}
           </span>
           <CardPrice price={c.price} fx={fx} lang={lang} t={t} />
           <span className="pt-1 text-sm font-medium text-brand-hi group-hover:underline">
@@ -555,7 +551,7 @@ function MadeCard({ x, fx, lang, t }: { x: MadeItem; fx: FxRate | null; lang: La
       {r?.hero && (
         <img
           src={photoImg(r.hero, 'xs')}
-          alt={t.parts.gallery.alt(renderTitle(r, name, t), t.parts.gallery.hero)}
+          alt={renderTitle(r, x.fitted ? t.parts.fitted.name(name, true) : name, t)}
           width={320}
           height={180}
           loading="lazy"

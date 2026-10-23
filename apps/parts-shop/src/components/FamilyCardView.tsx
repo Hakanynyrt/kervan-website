@@ -15,7 +15,7 @@ export default function FamilyCardView({ c, lang, t }: { c: BreakerCard; lang: L
       {c.image && (
         <img
           src={tipImg(c.image)}
-          alt={t.breaker.title(cardName(c, lang))}
+          alt={t.list.cardAlt(c.name, false)}
           width={480}
           height={320}
           loading="lazy"
@@ -25,7 +25,7 @@ export default function FamilyCardView({ c, lang, t }: { c: BreakerCard; lang: L
       )}
       <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
         <span className="font-sans text-base font-semibold text-ink sm:text-lg">
-          {cardName(c, lang)}
+          {cardName(c, lang, t)}
         </span>
         <span className="mt-auto pt-1 font-sans text-sm font-medium text-brand-hi group-hover:underline sm:pt-2">
           {t.card.view} →

@@ -54,13 +54,11 @@ function PartCard({ x, lang, t }: { x: PopularPart; lang: Lang; t: Dict }) {
             sizes="(min-width: 1024px) 25vw, 50vw"
             width={320}
             height={180}
-            alt={t.parts.gallery.alt(
-              t.parts.renderCaption(
-                x.model,
-                x.kind ? t.parts.renderKindShort[x.kind] : t.parts.items[k].name,
-              ),
-              t.parts.gallery.hero,
-            )}
+            alt={
+              x.kind
+                ? `${x.model} ${t.parts.renderKind[x.kind]}`
+                : t.parts.renderCaption(x.model, t.parts.items[k].name)
+            }
             loading="lazy"
             decoding="async"
             className="block h-full w-full object-contain"

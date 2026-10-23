@@ -8,7 +8,7 @@ import type {
 } from './types.ts';
 
 /** Bump when the renderer's look or geometry rules change: every image gets a new key. */
-export const RENDER_VERSION = 12;
+export const RENDER_VERSION = 13;
 
 /**
  * Moil (sivri) nose, relative to the body diameter D (read off the real points' photos, owner
@@ -30,11 +30,20 @@ export const MOIL_NOSE_MATERIAL: ReadonlyArray<'g' | 'b'> = ['g', 'g', 'g', 'b']
 export const DEFAULT_INCLUDED_ANGLE: Record<'moil' | 'conical' | 'chisel' | 'pyramid', number> = {
   moil: 28,
   conical: 60,
-  chisel: 45,
+  // Kervan's chisel drawings print 30° on 16 of 20 sheets (34–40° on the rest); was 45°
+  // (owner, 2026-10-23: "Evet, 30° olsun"). A family's own tipAngleDeg still wins.
+  chisel: 30,
   // Face to face (what a side view square to a face shows). About 26-30° on OEM pyramid points
   // (Rammer's own render): faces about 2 × D long. Was 40°, too blunt (owner asked to check).
   pyramid: 30,
 };
+
+/**
+ * Chisel edge land (flat width at the edge) per unit D when the data has none: the median of
+ * the lands printed on Kervan's chisel drawings (6/Ø45 … 50/Ø210, range 0.12–0.22 D). With the
+ * 30° wedge it gives the drawings' wedge length, (D − land) / (2 tan 15°) ≈ 1.55 D.
+ */
+export const CHISEL_LAND_PER_D = 0.17;
 
 /** One axisymmetric section of the tool: radius r from y0 to y1 (step into the next included). */
 export interface SpecSection {
@@ -73,6 +82,8 @@ export interface TipSpec {
   };
   /** Included tip angle; null for blunt. */
   angle: number | null;
+  /** Chisel / pyramid only: width of the flat land at the edge (pyramid: side of the square). */
+  land?: number;
   /**
    * Moil only: the nose profile in mm ([distance back from the tip face, radius, fillet], see
    * MOIL_NOSE); the renderer draws it instead of a plain cone at `angle`.
@@ -220,6 +231,15 @@ export function renderSpec(
     angle = sku.tipAngleDeg ?? DEFAULT_INCLUDED_ANGLE[type];
     if (sku.tipAngleDeg == null) A.push(`tip angle unknown → ${angle}° (default for ${type})`);
   }
+  let land: number | undefined;
+  if (type === 'chisel') {
+    const own = a.chiselLandMm != null && a.chiselLandMm > 0 && a.chiselLandMm < D;
+    land = r1(own ? a.chiselLandMm! : Math.max(3, CHISEL_LAND_PER_D * D));
+    if (!own) A.push(`chisel edge land unknown → ${CHISEL_LAND_PER_D}·D`);
+  } else if (type === 'pyramid') {
+    // A square land of about 0.06 × D (4 mm min), like OEM points.
+    land = r1(Math.max(4, 0.06 * D));
+  }
   const chiselEdge = a.chiselEdge ?? 'perpendicular';
   if ((type === 'chisel' || type === 'pyramid') && a.chiselEdge == null)
     A.push('chisel edge drawn perpendicular to the key slots');
@@ -243,6 +263,7 @@ export function renderSpec(
         chamfer: r1(Math.min(5, Math.max(1.5, 0.03 * 2 * rs))),
       },
       angle,
+      ...(land !== undefined ? { land } : {}),
       ...(type === 'moil'
         ? {
             nose: {

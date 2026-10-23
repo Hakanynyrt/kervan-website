@@ -221,7 +221,7 @@ export default function Part({
   return (
     <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">
       <Breadcrumb trail={[[t.parts.title, PARTS_PATH]]} current={p.name} lang={lang} t={t} />
-      <PageTitle>{p.name}</PageTitle>
+      <PageTitle>{p.h1}</PageTitle>
       <OemLine t={t} kit={model.part === 'tamir-takimi'} />
       <p className="m-0 mt-3 max-w-3xl font-sans text-ink-mid">{p.body}</p>
       {all.length > 0 && (
@@ -318,10 +318,7 @@ export default function Part({
                             sizes="(min-width: 1280px) 210px, (min-width: 1024px) 17vw, (min-width: 640px) 31vw, 47vw"
                             width={320}
                             height={180}
-                            alt={t.parts.gallery.alt(
-                              renderTitle(r, b ? t.parts.fitted.name(p.name, true) : p.name, t),
-                              t.parts.gallery.hero,
-                            )}
+                            alt={renderTitle(r, b ? t.parts.fitted.name(p.name, true) : p.name, t)}
                             loading={i > 3 ? 'lazy' : undefined}
                             decoding="async"
                             className="block h-auto w-full bg-pstage"
@@ -677,7 +674,7 @@ export function RenderFigure({
             ...(shown.hero ? [{ base: shown.hero, view: 'hero' as const }] : []),
             ...shown.views,
           ]}
-          caption={caption}
+          caption={r.representative ? `${caption} (${t.parts.listed.sample})` : caption}
           lazy={lazy}
           t={t}
           overlay={(k) =>
@@ -694,6 +691,10 @@ export function RenderFigure({
           }
           below={choice}
         />
+      )}
+      {r.representative && (
+        // No drawing of this breaker's part: a similar model's pictures, said so under them.
+        <p className="m-0 mt-2 font-sans text-sm text-ink-mid">{t.parts.listed.sample}</p>
       )}
       {r.kit && <KitTable items={r.kit} t={t} lang={ctx.lang} />}
       {item ? (

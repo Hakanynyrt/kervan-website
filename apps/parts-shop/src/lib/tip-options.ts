@@ -71,25 +71,33 @@ export function tipVariants(families: PublicFamily[]): TipVariant[] {
 }
 
 /**
+ * The ordinal of each tip size among the sizes of the same diameter (1-based), null when its
+ * diameter is unique. The tip length is never shown (owner, 2026-10-23: "boyu hiçbir yerde
+ * söyleme"), so two sizes that differ only in length are told apart by `t.tipSize`'s ordinal.
+ */
+export function sizeOrdinals(variants: readonly { diameterMm: number }[]): (number | null)[] {
+  const count = new Map<number, number>();
+  for (const v of variants) count.set(v.diameterMm, (count.get(v.diameterMm) ?? 0) + 1);
+  const seen = new Map<number, number>();
+  return variants.map((v) => {
+    if ((count.get(v.diameterMm) ?? 0) < 2) return null;
+    const n = (seen.get(v.diameterMm) ?? 0) + 1;
+    seen.set(v.diameterMm, n);
+    return n;
+  });
+}
+
+/**
  * What the prerendered breaker / family page shows (TipProduct: the first size, its first
- * type): that option, its own render, and, when it has none, the sample's picture (another
- * breaker's tip, shown labelled). The page head uses the same choice for `og:image` and the
- * offer, so the link preview and the price match the page.
+ * type): that option and its own render. The page head uses the same choice for `og:image`
+ * and the offer, so the link preview and the price match the page.
  */
 export function shownTip(
   families: PublicFamily[],
   extra?: PublicExtra,
-  sample?: { family: PublicFamily },
-): { opt: TipOption | undefined; image: string | null; sampleImage: string | null } {
+): { opt: TipOption | undefined; image: string | null } {
   const variants = tipVariants(families);
   const { opts, types } = tipOptions(variants.length > 1 ? variants[0].families : families, extra);
   const opt = types.length ? opts.get(types[0]) : undefined;
-  const image = opt?.sku?.image ?? null;
-  const sampleImage = image
-    ? null
-    : ((
-        sample?.family.skus.find((x) => x.tipType === opt?.tipType && x.image) ??
-        sample?.family.skus.find((x) => x.image)
-      )?.image ?? null);
-  return { opt, image, sampleImage };
+  return { opt, image: opt?.sku?.image ?? null };
 }

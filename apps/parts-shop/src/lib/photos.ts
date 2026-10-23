@@ -16,6 +16,16 @@ export const STOCK_TIP_PHOTOS = [
   '/photos/stok/uc-stok-02',
 ] as const;
 
+/**
+ * The owner's real photos of the tips we make for one breaker model, keyed by the breaker page
+ * slug (`/kirici/<make>/<model>`), same files and naming as the stock photos above. The first
+ * one leads that model's page and replaces the sample picture on its cards, og:image and
+ * JSON-LD. Data only: add a model by adding a line.
+ */
+export const BREAKER_PHOTOS: Readonly<Record<string, readonly string[]>> = {
+  'furukawa/hb-20g': ['/photos/stok/hb-20g-uc-01', '/photos/stok/hb-20g-uc-02'],
+};
+
 export const PART_PHOTOS: Record<PartKey, readonly string[]> = {
   'alt-govde': [],
   burc: ['/photos/parca/burc-01'],
@@ -63,6 +73,10 @@ export interface PartRender {
   hero?: string;
   /** Interactive 3D model (GLB, metres), opened on demand in PartViewer. */
   model3d?: string;
+  /** No drawing of this breaker's part: the pictures are a similar model's part (owner: "benzer modelin
+   *  görselini kullan"), labelled "Temsili görsel" under the picture; no 3D model and no picture in the
+   *  page's structured data or link preview (as the tip pages' representative pictures). */
+  representative?: true;
   /** Front heads: the same head with its bushings and pins fitted ("burçlu"), shown by the Burçsuz / Burçlu switch.
    *  No hero: the 16:9 burçlu picture was a section, and the section must not come first (owner);
    *  the front view leads, the assembly section comes last. */
@@ -1422,7 +1436,8 @@ const kitRender =
  * More MTB tie rods (boy saplama), one sheet each, outside the 20-model kit (no kama or piston drawn for them):
  * `/photos/parca/saplama-<file>-{vitrin,yan,on}-01`. Coated rods carry their coating as a variant: PU on the
  * grooved bands (yellow), rubber (lastik) on the MTB 36 band; the MTB 275 II has an O-ring type and a
- * urethane-coated ("lastikli") type. The MTB 36's parts are also the new-model MSB 250's.
+ * urethane-coated ("lastikli") type. The MTB 36's parts are also the new-model MSB 250's. The Hanwoo RHB 325 rod
+ * (plain steel, outside the kit too) is listed here as well.
  */
 const MTB_TIE_RODS: {
   make: string;
@@ -1440,6 +1455,8 @@ const MTB_TIE_RODS: {
   { make: 'MTB', model: '275 II', file: 'mtb-275-ii', variant: 'oRingType' },
   { make: 'MTB', model: '275 II', file: 'mtb-275-ii-lastikli', variant: 'puCoated' },
   { make: 'MTB', model: '365', file: 'mtb-365', variant: 'puCoated' },
+  // Hanwoo RHB 325 (2026-10-23): plain steel rod, Rd 42 threads, square drive on the wrench end.
+  { make: 'Hanwoo', model: 'RHB 325', file: 'hanwoo-rhb-325' },
 ];
 const tieRodRender = ({
   make,
@@ -1469,6 +1486,39 @@ interface OtherPart {
   kind: NonNullable<PartRender['kind']>;
   views: RenderView[];
 }
+/**
+ * Kama (tool pins) outside the 20-model kit, one sheet each: the Indeco MES 5000 kama from the owner's drawing photo
+ * (2026-10-23; the archive sheet agrees): obround section with full round ends, a half-round notch in each rounded
+ * edge near one end, chamfered ends. Black finish like the kit kamas.
+ */
+const OTHER_KEYS: OtherPart[] = [
+  {
+    make: 'Indeco',
+    model: 'MES 5000',
+    file: 'kama-indeco-mes-5000',
+    kind: 'retainerKey',
+    views: ['front', 'rear', 'side'],
+  },
+];
+
+/**
+ * Furukawa FX pistons from the owner's drawings (photos of paper sheets, 2026-10-23): FX 175, FX 225, FX 275 and
+ * FX 375. FX and FXJ of one size take the same piston (owner's sales list), so the 275 and 375 name both. No
+ * drawing exists for the FXJ 475: its card shows the FX 375 / FXJ 375 pictures as a representative picture.
+ */
+const FX_PISTONS: OtherPart[] = [
+  ['FX 175', '175'],
+  ['FX 225', '225'],
+  ['FX 275 / FXJ 275', '275'],
+  ['FX 375 / FXJ 375', '375'],
+].map(([model, n]) => ({
+  make: 'Furukawa',
+  model,
+  file: `piston-furukawa-fx-${n}`,
+  kind: 'piston',
+  views: ['front', 'rear', 'side', 'section'],
+}));
+
 const RETAINER_PINS: OtherPart[] = [
   {
     make: 'Furukawa',
@@ -2229,7 +2279,7 @@ const DRAWN: Record<PartKey, readonly PartRender[]> = {
         model: 'Rammer E68',
         series: 'Rammer',
         hero: '/photos/parca/alt-govde-rammer-e68-vitrin-01',
-        model3d: '/models/alt-govde-rammer-e68-03.glb',
+        model3d: '/models/alt-govde-rammer-e68-04.glb',
         views: [
           { base: '/photos/parca/alt-govde-rammer-e68-on-03', view: 'front' },
           { base: '/photos/parca/alt-govde-rammer-e68-arka-03', view: 'rear' },
@@ -2302,6 +2352,7 @@ const DRAWN: Record<PartKey, readonly PartRender[]> = {
   ],
   kama: [
     ...PART_KIT.map(kitRender('kama', 'retainerKey', ['front', 'rear', 'side'])),
+    ...OTHER_KEYS.map(otherRender),
     ...RETAINER_PINS.map(otherRender),
     ...SMALL_PARTS.kama.map(smallRender),
   ],
@@ -2312,7 +2363,11 @@ const DRAWN: Record<PartKey, readonly PartRender[]> = {
     ...ROD_SETS.map(smallRender),
     ...SMALL_PARTS.saplama.map(smallRender),
   ],
-  piston: PART_KIT.map(kitRender('piston', 'piston', ['front', 'rear', 'side', 'section'])),
+  piston: [
+    ...PART_KIT.map(kitRender('piston', 'piston', ['front', 'rear', 'side', 'section'])),
+    ...FX_PISTONS.map(otherRender),
+    { ...otherRender({ ...FX_PISTONS[3], model: 'FXJ 475' }), representative: true },
+  ],
   akumulator: [...ACCUMULATOR_PARTS.map(otherRender), ...SMALL_PARTS.akumulator.map(smallRender)],
   'asinma-plakasi': [
     ...WEAR_PLATES.map(otherRender),
@@ -2363,7 +2418,7 @@ function reviseGroup(list: readonly PartRender[]): PartRender[] {
 const with3d = (r: PartRender): PartRender => {
   const stem = r.hero?.match(/^\/photos\/parca\/(.+)-vitrin-\d\d$/)?.[1];
   const m = stem ? MODELS_3D[stem] : undefined;
-  return r.model3d || !m ? r : { ...r, model3d: m };
+  return r.model3d || r.representative || !m ? r : { ...r, model3d: m };
 };
 
 export const PART_RENDERS = Object.fromEntries(

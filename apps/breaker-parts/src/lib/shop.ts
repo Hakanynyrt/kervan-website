@@ -7,12 +7,13 @@ export function shopUrl(path: string, lang: Lang): string {
   return KERVAN_SHOP_URL + localePath(path, lang);
 }
 
-/** Product slug → the shop page selling the same part. Slugs without a shop page get no link
- *  (`saplama`, the adapter-plate stud, is not sold in the shop). */
+/** Product slug → the shop page selling the same part. Slugs without a shop page get no link. */
 export const SHOP_PATH: Readonly<Record<string, string>> = {
   keski: '/kirici-ucu',
   piston: '/yedek-parca/piston',
   burc: '/yedek-parca/burc',
+  // The shop's saplama group: tie-rod sets and side bolts.
+  saplama: '/yedek-parca/saplama',
   // Tie rods are sold as sets with their nuts and washers.
   'tie-rod': '/yedek-parca/saplama?tur=sets',
   'tamir-kiti': '/yedek-parca/tamir-takimi',

@@ -30,29 +30,9 @@ test('shownTip takes the first size like the page, not the first family with the
   const r = shownTip([small, big]);
   assert.equal(r.opt?.family?.code, 'A');
   assert.equal(r.image, 'small-chisel');
-  assert.equal(r.sampleImage, null);
 });
 
-test('shownTip falls back to the sample picture when the breaker has none of its own', () => {
-  const sample = fam('S', 145, [
-    sku('moil', 1000, 'other-moil'),
-    sku('chisel', 1000, 'other-chisel'),
-  ]);
-  const extra = {
-    brand: 'Make',
-    model: 'M1',
-    slug: 'make/m1',
-    tipTypes: ['chisel' as const],
-    diameterMm: 145,
-    priceUsdNetCents: 1000,
-  };
-  const r = shownTip([], extra, { family: sample });
-  assert.equal(r.image, null);
-  assert.equal(r.sampleImage, 'other-chisel');
-  assert.equal(r.opt?.cents, 1000);
-});
-
-test('shownTip has no picture for a breaker without its own or a sample', () => {
+test('shownTip has no picture for a breaker without a render of its own', () => {
   const extra = {
     brand: 'Make',
     model: 'M2',
@@ -63,5 +43,5 @@ test('shownTip has no picture for a breaker without its own or a sample', () => 
   };
   const r = shownTip([], extra);
   assert.equal(r.image, null);
-  assert.equal(r.sampleImage, null);
+  assert.equal(r.opt?.cents, null);
 });

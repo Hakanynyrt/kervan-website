@@ -37,6 +37,7 @@ export function PartGroups({
       contain: false,
       xs: true,
       ...t.parts.tips,
+      alt: t.parts.groupAlt(t.parts.tips.name),
     },
     ...PART_KEYS.map((k) => ({
       key: k as string,
@@ -45,6 +46,7 @@ export function PartGroups({
       contain: GROUP_COVERS[k]?.contain ?? false,
       xs: GROUP_COVERS[k] ? (GROUP_COVERS[k].xs ?? false) : true,
       ...t.parts.items[k],
+      alt: t.parts.groupAlt(t.parts.items[k].h1),
     })),
   ];
 
@@ -63,7 +65,7 @@ export function PartGroups({
                     src={photoImg(g.hero, g.xs ? 'xs' : 'lg')}
                     width={320}
                     height={180}
-                    alt={g.name}
+                    alt={g.alt}
                     loading="lazy"
                     decoding="async"
                     className={`absolute inset-0 h-full w-full ${g.contain ? 'object-contain' : 'object-cover'}`}
@@ -73,7 +75,7 @@ export function PartGroups({
                     src={tipImg(tips.image)}
                     width={800}
                     height={533}
-                    alt={g.name}
+                    alt={g.alt}
                     loading="lazy"
                     decoding="async"
                     className="absolute inset-0 h-full w-full object-contain"
@@ -83,7 +85,7 @@ export function PartGroups({
                     src={photoImg(stock, 'sm')}
                     width={480}
                     height={360}
-                    alt={t.family.stockAlt(1)}
+                    alt={g.alt}
                     loading="lazy"
                     decoding="async"
                     className="absolute inset-0 h-full w-full object-cover"
@@ -119,7 +121,7 @@ export function PartGroups({
                   src={g.hero ? photoImg(g.hero, g.xs ? 'xs' : 'lg') : photoImg(stock, 'sm')}
                   width={320}
                   height={180}
-                  alt={g.hero ? g.name : t.family.stockAlt(1)}
+                  alt={g.alt}
                   loading="lazy"
                   decoding="async"
                   className={`absolute inset-0 h-full w-full ${g.contain ? 'object-contain' : 'object-cover'}`}
@@ -158,7 +160,7 @@ export function PartGroups({
                         ? '(min-width: 1024px) 380px, (min-width: 640px) 50vw, calc(100vw - 2rem)'
                         : undefined
                     }
-                    alt={g.name}
+                    alt={g.alt}
                     loading="lazy"
                     decoding="async"
                     className={`absolute inset-0 h-full w-full ${g.contain ? 'object-contain' : 'object-cover'}`}
@@ -168,7 +170,7 @@ export function PartGroups({
                     src={tipImg(tips.image)}
                     width={800}
                     height={533}
-                    alt={g.name}
+                    alt={g.alt}
                     loading="lazy"
                     decoding="async"
                     className="absolute inset-0 h-full w-full object-contain p-2"
@@ -180,7 +182,7 @@ export function PartGroups({
                     sizes="(min-width: 1024px) 760px, (min-width: 640px) 50vw, 100vw"
                     width={960}
                     height={720}
-                    alt={t.family.stockAlt(1)}
+                    alt={g.alt}
                     loading="lazy"
                     decoding="async"
                     className="absolute inset-0 h-full w-full object-cover"

@@ -699,6 +699,7 @@ export const ROD_SETS: readonly SmallPart[] = [
   { make: 'Furukawa', model: 'F22', file: 'saplama-takim-furukawa-f22', kind: 'tieRodSet' },
   { make: 'Furukawa', model: 'HB20G', file: 'saplama-takim-furukawa-hb20g', kind: 'tieRodSet' },
   { make: 'Furukawa', model: 'HB30G', file: 'saplama-takim-furukawa-hb30g', kind: 'tieRodSet' },
+  { make: 'Hanwoo', model: 'RHB 325', file: 'saplama-takim-hanwoo-rhb-325', kind: 'tieRodSet' },
   { make: 'Krupp', model: 'HM 1500', file: 'saplama-takim-krupp-hm-1500', kind: 'tieRodSet' },
   { make: 'Krupp', model: 'HM 560', file: 'saplama-takim-krupp-hm-560', kind: 'tieRodSet' },
   { make: 'Krupp', model: 'HM 720', file: 'saplama-takim-krupp-hm-720', kind: 'tieRodSet' },

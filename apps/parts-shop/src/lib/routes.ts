@@ -21,9 +21,10 @@ import {
 import { listedParts, type ListedPart } from './listed-parts';
 import { groupPrices, resolvePartPrices } from './part-prices';
 import { groovedFor } from './grooved';
-import { tipOptions, tipVariants } from './tip-options';
+import { sizeOrdinals, tipOptions, tipVariants } from './tip-options';
 import { OEM_NUMBERS } from './oem-numbers';
-import { GROOVED_TOOLS, PART_RENDERS, type PartRender } from './photos';
+import { modelAliases } from './model-aliases';
+import { BREAKER_PHOTOS, GROOVED_TOOLS, PART_RENDERS, type PartRender } from './photos';
 import type { FinderMake } from './finder';
 import type { TipGroupStats } from '../types';
 
@@ -69,10 +70,13 @@ export interface BreakerCard {
   types: TipType[];
   /** Render key of the first SKU that has one (see tip-img.ts). */
   image: string | null;
-  /** One of a breaker's several tip sizes (`tipVariants`): its 1-based number (`?uc=`) and length. */
-  variant?: { n: number; lengthMm: number | null };
+  /** One of a breaker's several tip sizes (`tipVariants`): its 1-based number (`?uc=`) and its
+   *  ordinal among sizes of the same diameter (`sizeOrdinals`; the length is never shown). */
+  variant?: { n: number; ord: number | null };
   /** No picture of its own: the nearest-diameter pictured tip (as the breaker page's sample), shown labelled. */
   sample?: string;
+  /** The owner's real photo of this model's tips (`BREAKER_PHOTOS` base): shown before `image`, unlabelled. */
+  photo?: string;
   popularTier: 1 | 2 | null;
   /** We model a tool with dust grooves for this breaker (`groovedFor`). */
   grooved?: true;
@@ -155,10 +159,18 @@ export type PageModel =
       extra?: PublicExtra;
       /** Extra products: the tip of the same maker's nearest-sized breaker, shown as a sample picture. */
       sample?: { name: string; family: PublicFamily };
+      /** The owner's real photos of this model's tips (`BREAKER_PHOTOS` bases): they lead the page. */
+      photos?: string[];
       brand: string;
       model: string;
       /** Tip families that fit this breaker (usually one). */
       families: PublicFamily[];
+      /** Other spellings of the model ("HB20G"): merged catalogue spellings and the no-space form. */
+      aliases: string[];
+      /** Other breakers per tip size of this page (`tipVariants`, the sizes its picker offers;
+       *  each capped at SIBLINGS, `more` past it): a breaker is listed only under the size whose
+       *  family it shares, so a two-size page never claims that its other tip fits it. */
+      siblings: SiblingGroup[];
       /** Other parts we model for this breaker (links to their cards). */
       parts: PartLink[];
       demo: boolean;
@@ -324,8 +336,23 @@ interface BreakerEntry {
   name: string;
   brand: string;
   model: string;
+  /** Other spellings of the model: the catalogue spellings merged into this page, then the
+   *  no-space form of a "letters digits" model ("HB 20G" → "HB20G"). Model only, no make. */
+  aliases: string[];
   families: PublicFamily[];
   extra?: PublicExtra;
+}
+
+/** Sibling breakers shown per tip family on a breaker page ("Aynı uç bu kırıcılara da uyar"). */
+const SIBLINGS = 12;
+
+/** Breakers that take one tip size of a breaker page (a family of it): the size, and the links. */
+export interface SiblingGroup {
+  diameterMm: number;
+  /** Ordinal among the page's sizes of the same diameter (`sizeOrdinals`), else null. */
+  ord: number | null;
+  items: { name: string; path: string }[];
+  more: number;
 }
 
 /**
@@ -374,12 +401,14 @@ export function groupBreakers(c: PublicCatalog): {
     const same = breakers.get(slug);
     if (same) {
       for (const f of g.families) if (!same.families.includes(f)) same.families.push(f);
+      same.aliases = modelAliases(same.model, [...same.aliases, ...g.spellings.keys()]);
       continue;
     }
     breakers.set(slug, {
       name: breakerName({ brand: g.brand, model }),
       brand: g.brand,
       model,
+      aliases: modelAliases(model, [...g.spellings.keys()]),
       families: g.families,
       ...(g.extra ? { extra: g.extra } : {}),
     });
@@ -438,8 +467,9 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     sampleFor(e, breakers)?.family.skus.find((s) => s.image)?.image ?? undefined;
   const cards: BreakerCard[] = [...breakers].flatMap(([slug, e]): BreakerCard[] => {
     const f = e.families[0] as PublicFamily | undefined;
+    const photo = BREAKER_PHOTOS[slug]?.[0];
     if (!f) {
-      const sample = sampleImg(e);
+      const sample = photo ? undefined : sampleImg(e);
       return [
         {
           slug,
@@ -451,6 +481,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
           types: e.extra?.tipTypes ?? [],
           image: null,
           ...(sample ? { sample } : {}),
+          ...(photo ? { photo } : {}),
           popularTier: null,
           price: null,
         },
@@ -458,9 +489,10 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     }
     // A breaker that takes tips of two sizes sells two tips: one card per size (owner).
     const variants = tipVariants(e.families);
+    const ords = sizeOrdinals(variants);
     return variants.map((v, i) => {
       const image = v.families.flatMap((x) => x.skus).find((s) => s.image)?.image ?? null;
-      const sample = image ? undefined : sampleImg(e);
+      const sample = image || photo ? undefined : sampleImg(e);
       return {
         slug,
         path: breakerPath(slug),
@@ -471,7 +503,8 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         types: [...new Set(v.families.flatMap((x) => x.skus.map((s) => s.tipType)))],
         image,
         ...(sample ? { sample } : {}),
-        ...(variants.length > 1 ? { variant: { n: i + 1, lengthMm: v.lengthMm } } : {}),
+        ...(photo ? { photo } : {}),
+        ...(variants.length > 1 ? { variant: { n: i + 1, ord: ords[i] } } : {}),
         popularTier: v.families.reduce<1 | 2 | null>(
           (t, x) => (tierRank(x.popularTier) < tierRank(t) ? x.popularTier : t),
           null,
@@ -495,6 +528,36 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       if (!groovedSeen.has(b))
         console.warn(`buildPages: grooved tools of "${b}" match no breaker of the catalog`);
   const tipPaths = new Map(cards.map((x) => [fold(x.name), x.path]));
+  // Breakers by tip family, for each breaker page's "same tip also fits" links.
+  const byFamily = new Map<PublicFamily, string[]>();
+  for (const [slug, e] of breakers)
+    for (const f of e.families) byFamily.set(f, [...(byFamily.get(f) ?? []), slug]);
+  const siblingsOf = (slug: string, e: BreakerEntry): SiblingGroup[] => {
+    const variants = tipVariants(e.families);
+    const ords = sizeOrdinals(variants);
+    return variants.flatMap((v, i) => {
+      const others = [...new Set(v.families.flatMap((f) => byFamily.get(f) ?? []))]
+        .filter((x) => x !== slug)
+        .map((x) => [x, breakers.get(x)!] as const)
+        // Same make first, then by name.
+        .sort(
+          ([, a], [, b]) =>
+            Number(b.brand === e.brand) - Number(a.brand === e.brand) ||
+            a.name.localeCompare(b.name, 'tr', { numeric: true }),
+        );
+      if (!others.length) return [];
+      return [
+        {
+          diameterMm: v.diameterMm,
+          ord: ords[i],
+          items: others
+            .slice(0, SIBLINGS)
+            .map(([x, o]) => ({ name: o.name, path: breakerPath(x) })),
+          more: Math.max(0, others.length - SIBLINGS),
+        },
+      ];
+    });
+  };
   const popular = cards.filter((x) => x.popularTier !== null).sort(byPopularity);
   const hasPopular = popular.length > 0;
   const partPrices = resolvePartPrices(c.partPrices ?? []);
@@ -524,9 +587,10 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       const img = x.image ?? x.sample;
       m.tips.push({
         d: x.diameterMm,
-        ...(x.variant ? { n: x.variant.n, len: x.variant.lengthMm } : {}),
+        ...(x.variant ? { n: x.variant.n, ord: x.variant.ord } : {}),
         ...(img ? { img } : {}),
         ...(!x.image && x.sample ? { sample: true as const } : {}),
+        ...(x.photo ? { photo: x.photo } : {}),
       });
       models.set(x.slug, m);
     }
@@ -626,12 +690,19 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         ...(e.extra ? { extra: e.extra } : {}),
         ...(() => {
           const pictured = e.families.some((f) => f.skus.some((x) => x.image));
+          const photos = BREAKER_PHOTOS[slug] ?? [];
+          // The sample stays for the type tiles; with a real photo the page leads with the photo instead.
           const sample = pictured ? null : sampleFor(e, breakers);
-          return sample ? { sample } : {};
+          return {
+            ...(sample ? { sample } : {}),
+            ...(photos.length ? { photos: [...photos] } : {}),
+          };
         })(),
         brand: e.brand,
         model: e.model,
         families: e.families,
+        aliases: e.aliases,
+        siblings: siblingsOf(slug, e),
         parts: partsForBreaker(e.name),
         demo,
         hasPopular,

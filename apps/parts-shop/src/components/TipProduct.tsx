@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   carrierTons,
   isTipType,
@@ -20,7 +20,7 @@ import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
 import type { PartLink } from '../lib/part-links';
 import { tipImg } from '../lib/tip-img';
-import { tipOptions, tipVariants } from '../lib/tip-options';
+import { sizeOrdinals, tipOptions, tipVariants } from '../lib/tip-options';
 import { replaceSearch } from '../lib/url-state';
 import type { Lang } from '../types';
 import {
@@ -38,7 +38,7 @@ import {
 } from './Bits';
 import { FOCUS, whatsappHref } from './Layout';
 import { ORDER_EMAIL, SITE } from '../lib/site';
-import { cardSet, photoImg } from '../lib/photo-url';
+import { cardSet, photoImg, photoSet } from '../lib/photo-url';
 
 function availabilityText(s: PublicSku, t: Dict): string {
   const a = s.availability;
@@ -52,6 +52,10 @@ function availabilityText(s: PublicSku, t: Dict): string {
 interface Props {
   /** Page heading (the breaker model, or the diameter on a family page). */
   title: string;
+  /** Line under the heading (a breaker's other spellings). */
+  subtitle?: string;
+  /** Page-specific sections after the parts links (a breaker's facts and sibling breakers). */
+  children?: ReactNode;
   /** Breadcrumb's last item. */
   crumb: string;
   /** What the quote message names: the breaker model or the tip code. */
@@ -63,6 +67,8 @@ interface Props {
   extra?: PublicExtra;
   /** Extra products: a nearby tip shown as a labelled sample picture. */
   sample?: { name: string; family: PublicFamily };
+  /** The owner's real photos of this model's tips (`BREAKER_PHOTOS` bases): first in the picture area, no sample there. */
+  photos?: string[];
   /** Neutral path of this page (cart line link and id). */
   path: string;
   /** Other parts we model for this breaker (cards on the part pages). */
@@ -83,12 +89,15 @@ interface Props {
  */
 export default function TipProduct({
   title,
+  subtitle,
+  children,
   crumb,
   quoteName,
   trail = [],
   families,
   extra,
   sample,
+  photos = [],
   path,
   parts = [],
   grooved = [],
@@ -103,8 +112,10 @@ export default function TipProduct({
   const [vi, setVi] = useState(0);
   const variant = variants.length > 1 ? variants[Math.min(vi, variants.length - 1)] : null;
   const { opts, types } = tipOptions(variant ? variant.families : families, extra);
+  // Diameter only, never the length (owner, 2026-10-23); same-diameter sizes get an ordinal.
+  const ords = sizeOrdinals(variants);
   const sizeLabel = (v: (typeof variants)[number]) =>
-    `Ø${fmtNum(v.diameterMm, lang)}${v.lengthMm ? ` × ${fmtNum(v.lengthMm, lang)}` : ''} mm`;
+    t.tipSize(fmtNum(v.diameterMm, lang), ords[variants.indexOf(v)]);
   const name = variant ? `${quoteName} (${sizeLabel(variant)})` : quoteName;
   const [type, setType] = useState<TipType>(types[0]);
   const [qty, setQty] = useState(1);
@@ -162,6 +173,7 @@ export default function TipProduct({
         t={t}
       />
       <PageTitle>{title}</PageTitle>
+      {subtitle && <p className="m-0 mt-1 font-sans text-sm text-ink-mid">{subtitle}</p>}
       <OemLine t={t} />
       {opt.cents !== null && (
         <p className="m-0 mt-2 font-sans text-base text-ink-mid tabular-nums lg:hidden">
@@ -225,7 +237,7 @@ export default function TipProduct({
                     alt={
                       o.sku?.image || !sample
                         ? tf.renderAlt(quoteName, t.tip[x])
-                        : tf.sampleAlt(sample.name)
+                        : tf.sampleAlt(quoteName, sample.name)
                     }
                     loading="lazy"
                     decoding="async"
@@ -242,88 +254,111 @@ export default function TipProduct({
       </ul>
 
       <div className="mt-6 grid gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
-        {sampleSku?.image && sample && (
-          <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
-            <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
-              <img
-                key={sampleSku.image}
-                src={tipImg(sampleSku.image)}
-                width={800}
-                height={533}
-                alt={tf.sampleAlt(sample.name)}
-                decoding="async"
-                className="block h-auto w-full"
-              />
-              <figcaption className="border-t border-hair bg-bg px-3 py-2 font-sans text-sm text-ink">
-                {tf.sample(sample.name)}
+        <div className="flex min-w-0 flex-col gap-6">
+          {photos.length > 0 && (
+            <figure className={`m-0 grid gap-3 ${photos.length > 1 ? 'sm:grid-cols-2' : ''}`}>
+              {photos.map((base, i) => (
+                <img
+                  key={base}
+                  src={photoImg(base, 'lg')}
+                  srcSet={photoSet(base, ['sm', 480], ['lg', 960])}
+                  sizes="(min-width: 1024px) 420px, (min-width: 640px) 50vw, 100vw"
+                  width={960}
+                  height={720}
+                  alt={tf.realPhotoAlt(quoteName, i + 1)}
+                  loading={i ? 'lazy' : undefined}
+                  decoding="async"
+                  className="block h-auto w-full rounded-md border border-hair bg-bg-warm"
+                />
+              ))}
+              <figcaption className="font-sans text-sm text-ink sm:col-span-2">
+                {tf.realPhoto(quoteName)}
               </figcaption>
             </figure>
-            <ImgNote t={t} />
-          </div>
-        )}
-        {(sku?.image || f?.imageRear) && (
-          <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
-            {sku?.image && (
+          )}
+          {sampleSku?.image && sample && !photos.length && (
+            <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
               <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
                 <img
-                  key={sku.image}
-                  src={tipImg(sku.image)}
+                  key={sampleSku.image}
+                  src={tipImg(sampleSku.image)}
                   width={800}
                   height={533}
-                  alt={tf.renderAlt(quoteName, t.tip[opt.tipType])}
+                  alt={tf.sampleAlt(quoteName, sample.name)}
                   decoding="async"
                   className="block h-auto w-full"
                 />
-                {sku.imageSide && (
-                  <img
-                    key={sku.imageSide}
-                    src={tipImg(sku.imageSide)}
-                    width={800}
-                    height={267}
-                    alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
-                    loading="lazy"
-                    decoding="async"
-                    className="hidden h-auto w-full sm:block"
-                  />
-                )}
+                <figcaption className="border-t border-hair bg-bg px-3 py-2 font-sans text-sm text-ink">
+                  {tf.sample(sample.name)}
+                </figcaption>
               </figure>
-            )}
-            {/* Phones: the side and rear views as two small pictures under the main one. */}
-            <div className="grid grid-cols-2 items-start gap-3 sm:block">
-              {sku?.imageSide && (
-                <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage sm:hidden">
-                  <img
-                    key={sku.imageSide}
-                    src={tipImg(sku.imageSide)}
-                    width={600}
-                    height={200}
-                    alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
-                    loading="lazy"
-                    decoding="async"
-                    className="block h-24 w-full object-contain"
-                  />
-                </figure>
-              )}
-              {f?.imageRear && (
-                <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage sm:max-w-sm">
-                  <img
-                    src={tipImg(f.imageRear)}
-                    width={480}
-                    height={320}
-                    alt={tf.rearAlt(quoteName)}
-                    loading="lazy"
-                    decoding="async"
-                    className="block h-24 w-full object-contain sm:h-auto"
-                  />
-                  <figcaption className="sr-only border-t border-hair bg-bg px-3 py-2 font-sans text-sm text-ink sm:not-sr-only sm:block">
-                    {tf.viewRear}
-                  </figcaption>
-                </figure>
-              )}
+              <ImgNote t={t} />
             </div>
-            <ImgNote t={t} />
-          </div>
-        )}
+          )}
+          {(sku?.image || f?.imageRear) && (
+            <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
+              {sku?.image && (
+                <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
+                  <img
+                    key={sku.image}
+                    src={tipImg(sku.image)}
+                    width={800}
+                    height={533}
+                    alt={tf.renderAlt(quoteName, t.tip[opt.tipType])}
+                    decoding="async"
+                    className="block h-auto w-full"
+                  />
+                  {sku.imageSide && (
+                    <img
+                      key={sku.imageSide}
+                      src={tipImg(sku.imageSide)}
+                      width={800}
+                      height={267}
+                      alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
+                      loading="lazy"
+                      decoding="async"
+                      className="hidden h-auto w-full sm:block"
+                    />
+                  )}
+                </figure>
+              )}
+              {/* Phones: the side and rear views as two small pictures under the main one. */}
+              <div className="grid grid-cols-2 items-start gap-3 sm:block">
+                {sku?.imageSide && (
+                  <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage sm:hidden">
+                    <img
+                      key={sku.imageSide}
+                      src={tipImg(sku.imageSide)}
+                      width={600}
+                      height={200}
+                      alt={tf.sideAlt(quoteName, t.tip[opt.tipType])}
+                      loading="lazy"
+                      decoding="async"
+                      className="block h-24 w-full object-contain"
+                    />
+                  </figure>
+                )}
+                {f?.imageRear && (
+                  <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage sm:max-w-sm">
+                    <img
+                      src={tipImg(f.imageRear)}
+                      width={480}
+                      height={320}
+                      alt={tf.rearAlt(quoteName)}
+                      loading="lazy"
+                      decoding="async"
+                      className="block h-24 w-full object-contain sm:h-auto"
+                    />
+                    <figcaption className="sr-only border-t border-hair bg-bg px-3 py-2 font-sans text-sm text-ink sm:not-sr-only sm:block">
+                      {tf.viewRear}
+                    </figcaption>
+                  </figure>
+                )}
+              </div>
+              <ImgNote t={t} />
+            </div>
+          )}
+        </div>
 
         <aside className="flex flex-col gap-6 lg:col-start-2">
           <Chips
@@ -471,6 +506,8 @@ export default function TipProduct({
           </ul>
         </section>
       )}
+
+      {children}
 
       {grooved.length > 0 && (
         <section id="toz-kanalli" aria-labelledby="grooved" className="mt-12 scroll-mt-6">

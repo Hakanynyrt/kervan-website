@@ -25,6 +25,8 @@ export interface HeadInput {
   alternates?: HeadAlternates;
   /** Absolute og:image URL. */
   ogImage?: string;
+  /** og:image:width / og:image:height in pixels, when the picture's size is known. */
+  ogImageSize?: { width: number; height: number };
   /** og:type, defaults to "website". */
   ogType?: 'website' | 'article' | 'product';
   /** og:site_name. */
@@ -70,6 +72,7 @@ export function buildHeadTags(input: HeadInput): string {
     canonical,
     alternates,
     ogImage,
+    ogImageSize,
     ogType = 'website',
     siteName,
     robots,
@@ -102,6 +105,10 @@ export function buildHeadTags(input: HeadInput): string {
     );
   }
   if (ogImage) tags.push(`<meta property="og:image" content="${a(ogImage)}" />`);
+  if (ogImage && ogImageSize) {
+    tags.push(`<meta property="og:image:width" content="${ogImageSize.width}" />`);
+    tags.push(`<meta property="og:image:height" content="${ogImageSize.height}" />`);
+  }
 
   tags.push(`<meta name="twitter:card" content="summary_large_image" />`);
   tags.push(`<meta name="twitter:title" content="${a(title)}" />`);

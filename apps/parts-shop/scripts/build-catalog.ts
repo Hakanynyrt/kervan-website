@@ -10,10 +10,12 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import {
+  applyDrawings,
   demoCatalog,
   publicExtras,
   publicPartPrices,
   toPublicCatalog,
+  type DrawingRow,
   type ExtraRow,
   type PartPrice,
   type PartPriceRow,
@@ -50,6 +52,8 @@ const DEMO_PART_PRICES: PartPrice[] = [
 
 const PART_PRICES_SQL =
   "SELECT brand, model, part_type, variant, item, price_usd_net_cents FROM part_prices WHERE batch = (SELECT value FROM settings WHERE key = 'part_prices_batch')";
+/** Kervan's own drawings over the catalogue data (migration 0004; see drawings.ts). */
+const DRAWINGS_SQL = 'SELECT family_code, data FROM drawing_overrides';
 const EXTRAS_SQL =
   'SELECT brand, model, slug, tip_types, diameter_mm, price_usd_net_cents FROM extra_products WHERE published = 1 ORDER BY brand, model';
 const FITS_SQL =
@@ -101,11 +105,20 @@ const required = process.env.SHOP_REQUIRE_CATALOG === '1';
 
 if (db && process.env.CLOUDFLARE_API_TOKEN) {
   try {
-    const c = toPublicCatalog(
+    // The drawings table comes with migration 0004; before it exists there are none.
+    let drawings: DrawingRow[] = [];
+    try {
+      drawings = query<DrawingRow>(db, DRAWINGS_SQL);
+    } catch {
+      drawings = [];
+    }
+    const own = applyDrawings(
       query<FamilyRow>(db, FAMILIES_SQL),
       query<SkuRow>(db, SKUS_SQL),
-      query<FitRow>(db, FITS_SQL),
+      drawings,
     );
+    log(`${own.applied} families from Kervan's own drawings`);
+    const c = toPublicCatalog(own.families, own.skus, query<FitRow>(db, FITS_SQL));
     // The extras table comes with migration 0002; before it exists there are none.
     try {
       c.extras = publicExtras(query<ExtraRow>(db, EXTRAS_SQL));

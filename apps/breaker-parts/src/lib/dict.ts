@@ -464,6 +464,7 @@ export const DICT: Dict = {
       quoteCta: 'Bu parça için teklif al',
       notFound: 'Bu ürün bulunamadı.',
       notFoundCta: 'Tüm ürünlere dön',
+      illustrativeNote: 'Görseller temsilidir',
     },
     contact: {
       eyebrow: 'İletişim',
@@ -1005,6 +1006,7 @@ export const DICT: Dict = {
       quoteCta: 'Get a quote for this part',
       notFound: 'Product not found.',
       notFoundCta: 'Back to all products',
+      illustrativeNote: 'Images are illustrative',
     },
     contact: {
       eyebrow: 'Contact',

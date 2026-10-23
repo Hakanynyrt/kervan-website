@@ -9,6 +9,9 @@ import type { Product } from '../types';
      formdadır.
 ═══════════════════════════════════════════════════════════════════════ */
 
+/** Studio renders of the shop's own 3D part models (kiriciparca.com), real size, no logos. */
+const PARCA = '/photos/parcalar';
+
 export const PRODUCTS: Product[] = [
   {
     slug: 'keski',
@@ -71,7 +74,10 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'tie-rod',
-    image: '',
+    image: `${PARCA}/tie-rod-1536-v2.webp`,
+    imageSrcSet: `${PARCA}/tie-rod-1024-v2.webp 1024w, ${PARCA}/tie-rod-1536-v2.webp 1536w`,
+    ogImage: `${PARCA}/og-tie-rod-v3.jpg`,
+    illustrative: true,
     tr: {
       name: 'Tie Rod (Gergi çubuğu)',
       tagline: 'Üst ve alt gövdeyi tek beden tutar.',
@@ -99,7 +105,10 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'kama',
-    image: '',
+    image: `${PARCA}/kama-1536-v6.webp`,
+    imageSrcSet: `${PARCA}/kama-1024-v6.webp 1024w, ${PARCA}/kama-1536-v6.webp 1536w`,
+    ogImage: `${PARCA}/og-kama-v7.jpg`,
+    illustrative: true,
     tr: {
       name: 'Kama (Wedge)',
       tagline: 'Keskiyi kilitleyen sessiz parça.',
@@ -113,7 +122,10 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'alt-govde',
-    image: '',
+    image: `${PARCA}/alt-govde-1536-v2.webp`,
+    imageSrcSet: `${PARCA}/alt-govde-1024-v2.webp 1024w, ${PARCA}/alt-govde-1536-v2.webp 1536w`,
+    ogImage: `${PARCA}/og-alt-govde-v3.jpg`,
+    illustrative: true,
     tr: {
       name: 'Alt Gövde (Lower Housing)',
       tagline: 'Burçların ve keskinin yaşadığı yer.',
@@ -127,21 +139,27 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'saplama',
-    image: '',
+    image: `${PARCA}/saplama-1536-v2.webp`,
+    imageSrcSet: `${PARCA}/saplama-1024-v2.webp 1024w, ${PARCA}/saplama-1536-v2.webp 1536w`,
+    ogImage: `${PARCA}/og-saplama-v3.jpg`,
+    illustrative: true,
     tr: {
       name: 'Saplama (Stud)',
-      tagline: 'Gövdeyi taşıyıcı plakaya bağlayan.',
-      body: 'Hidrolik kırıcıyı ekskavatör adapter plakasına bağlayan dişli pim. Doğru tork, doğru malzeme — en sık kopan ama en az dikkat edilen parça.',
+      tagline: 'Kırıcı gövdesini bir arada tutan saplamalar.',
+      body: 'Kırıcının gövdesini bir arada tutan boy saplamalar ve yan saplamalar. Takımlar somunlarıyla, çizimde varsa pullarıyla birlikte gelir; marka ve modele göre eşleştirilir.',
     },
     en: {
       name: 'Stud',
-      tagline: 'Connects the body to the carrier plate.',
-      body: 'The threaded pin that fastens the breaker to the excavator adapter plate. Right torque, right material — the part most often broken, least often inspected.',
+      tagline: 'The studs that hold the breaker body together.',
+      body: 'Tie rods and side bolts that hold the breaker body together. Sets come with their nuts, and with washers where the drawing calls for them; matched per brand and model.',
     },
   },
   {
     slug: 'yan-saplama',
-    image: '',
+    image: `${PARCA}/yan-saplama-1536-v6.webp`,
+    imageSrcSet: `${PARCA}/yan-saplama-1024-v6.webp 1024w, ${PARCA}/yan-saplama-1536-v6.webp 1536w`,
+    ogImage: `${PARCA}/og-yan-saplama-v7.jpg`,
+    illustrative: true,
     tr: {
       name: 'Yan Saplama (Side Stud)',
       tagline: 'Yan yüzeyleri kilitleyen sabitleyici.',

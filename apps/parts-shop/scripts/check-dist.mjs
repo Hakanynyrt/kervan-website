@@ -1,11 +1,14 @@
 // Last build step: fails the build if a page could leak, or is indexed (or hidden) by mistake.
 // - every HTML page has the embedded page props;
-// - only the cart (/palet) and 404 pages carry meta robots noindex, and they must; every other
-//   page is indexable, has a self canonical on SITE and is listed in the sitemap, and its
-//   JSON-LD parses;
+// - only the cart (/palet), the /urun/<code> tip pages and 404 pages carry meta robots noindex,
+//   and they must; every other page is indexable, has a self canonical on SITE, is listed in the
+//   sitemap, is reachable from the home page through plain <a href> links to its clean URL (no
+//   query) on indexable prerendered pages (so crawlers find it without the sitemap; part item
+//   pages only warn, see PART_ITEM), and its JSON-LD parses;
 // - no file in dist/ contains a forbidden string (third-party catalogue names, VEGA part
 //   numbers, private D1 columns); genuine OEM numbers are allowed, only through the
 //   "Muadil OEM no." field (src/lib/oem-numbers.ts, owner's decision);
+// - every og:image in /og/ on this host is in dist;
 // - at most MAX_FILES files (Pages limit).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -23,6 +26,7 @@ const FORBIDDEN = [
   /price_usd_net_cents/,
   /part_prices/,
   /part_type/,
+  /drawing_overrides/,
 ];
 
 const files = [];
@@ -49,8 +53,8 @@ const count = (d) => {
 count(DIST);
 
 const SITE = 'https://kiriciparca.com';
-// Pages kept out of search results (src/lib/page-head.ts NOINDEX_KINDS): cart and 404.
-const NOINDEX_PAGES = /^(en\/)?(404|palet)\.html$/;
+// Pages kept out of search results (src/lib/page-head.ts NOINDEX_KINDS): cart, /urun/ and 404.
+const NOINDEX_PAGES = /^(en\/)?(404|palet|urun\/[^/]+)\.html$/;
 // Every <loc> of the sitemap (sitemap.xml, or its children when it is an index).
 const sitemapLocs = new Set();
 for (const f of files)
@@ -62,15 +66,37 @@ const urlOf = (rel) => {
   return p === 'index' ? `${SITE}/` : p === 'en/index' ? `${SITE}/en/` : `${SITE}/${p}`;
 };
 
+// Internal links of the indexable pages: every href to this site as the page URL it names. Only
+// clean URLs count (fragment dropped): a `?uc=` / `?tip=` link reaches a parameter URL, not the
+// canonical page, and Google treats long-term noindex pages (cart, /urun/, 404) as nofollow, so
+// their links are left out of the graph.
+const linksOf = new Map();
+const pageUrlOfHref = (href) => {
+  let h = href.replace(/&amp;/g, '&');
+  if (h.startsWith(SITE)) h = h.slice(SITE.length) || '/';
+  if (!h.startsWith('/') || h.startsWith('//')) return null;
+  h = h.replace(/#.*$/, '');
+  if (h.includes('?')) return null;
+  if (h === '' || h === '/') return `${SITE}/`;
+  if (h === '/en' || h === '/en/') return `${SITE}/en/`;
+  return `${SITE}${h.replace(/\/$/, '')}`;
+};
+
 const problems = [];
 let pages = 0;
 let indexable = 0;
+const indexableUrls = [];
 for (const f of files) {
   const s = fs.readFileSync(f, 'utf8');
   const rel = path.relative(DIST, f);
   for (const re of FORBIDDEN) if (re.test(s)) problems.push(`${rel}: forbidden ${re}`);
   if (f.endsWith('.html')) {
     pages++;
+    const out = new Set();
+    for (const m of s.matchAll(/<a\b[^>]*?\shref="([^"]+)"/g)) {
+      const u = pageUrlOfHref(m[1]);
+      if (u) out.add(u);
+    }
     if (!s.includes('id="kv-page"')) problems.push(`${rel}: no page props`);
     for (const m of s.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
       try {
@@ -79,6 +105,13 @@ for (const f of files) {
         problems.push(`${rel}: JSON-LD does not parse`);
       }
     }
+    // A link-preview picture of our own /og/ folder must ship (public/og/, named in page-head.ts).
+    for (const m of s.matchAll(/<meta property="og:image" content="([^"]+)"/g))
+      if (
+        m[1].startsWith(`${SITE}/og/`) &&
+        !fs.existsSync(path.join(DIST, m[1].slice(SITE.length)))
+      )
+        problems.push(`${rel}: og:image ${m[1]} not in dist`);
     const noindex = /<meta name="robots" content="[^"]*noindex/.test(s);
     if (NOINDEX_PAGES.test(rel.replace(/\\/g, '/'))) {
       if (!noindex) problems.push(`${rel}: should be noindex`);
@@ -87,11 +120,39 @@ for (const f of files) {
     indexable++;
     if (noindex) problems.push(`${rel}: indexable page has noindex`);
     const url = urlOf(rel);
+    indexableUrls.push(url);
+    linksOf.set(url, out);
     if (!s.includes(`<link rel="canonical" href="${url}" />`))
       problems.push(`${rel}: no self canonical ${url}`);
     if (!sitemapLocs.has(url)) problems.push(`${rel}: not in the sitemap`);
   }
 }
+// An indexable page only the sitemap knows ranks poorly: each must be reachable from the home
+// page (either language) by following plain links of indexable pages to its exact clean URL.
+const reached = new Set([`${SITE}/`, `${SITE}/en/`]);
+const queue = [...reached];
+while (queue.length)
+  for (const u of linksOf.get(queue.pop()) ?? [])
+    if (!reached.has(u)) {
+      reached.add(u);
+      queue.push(u);
+    }
+// Part item pages (/yedek-parca/<group>/<item>) are linked from their breaker's page where we
+// have one; the rest are reached only through the group page's search and the sitemap, since the
+// owner decided against make/model lists on the site. They are counted as a warning until the
+// owner decides otherwise; any other unreachable page fails the build.
+const PART_ITEM = new RegExp(`^${SITE}/(en/)?yedek-parca/[^/]+/[^/]+$`);
+const orphans = indexableUrls.filter((u) => !reached.has(u));
+const itemOrphans = orphans.filter((u) => PART_ITEM.test(u));
+const otherOrphans = orphans.filter((u) => !PART_ITEM.test(u));
+if (otherOrphans.length)
+  problems.push(
+    `links: ${otherOrphans.length} indexable pages not reachable by links from home, e.g. ${otherOrphans.slice(0, 5).join(' ')}`,
+  );
+if (itemOrphans.length)
+  process.stdout.write(
+    `check-dist: warning: ${itemOrphans.length} part item pages are reached only through search and the sitemap\n`,
+  );
 if (sitemapLocs.size !== indexable)
   problems.push(`sitemap: ${sitemapLocs.size} URLs for ${indexable} indexable pages`);
 // With the R2 base set (CI on main) the part photos must be out of dist except the opening
@@ -118,5 +179,5 @@ if (problems.length) {
   process.exit(1);
 }
 process.stdout.write(
-  `check-dist: ${pages} pages ok (${indexable} indexable, all in the sitemap), ${total} files\n`,
+  `check-dist: ${pages} pages ok (${indexable} indexable, all in the sitemap; reachable by links except the part items warned about), ${total} files\n`,
 );
