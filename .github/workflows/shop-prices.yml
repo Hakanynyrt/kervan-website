@@ -1,7 +1,7 @@
 name: Shop prices
 
 # Manual: the owner's price sheet → D1 kervan-shop (SKU prices, extra products, alias breaker
-# names), then a shop redeploy. Paste the ENCRYPTED sheet (enc:v1:…, made with
+# names, Kervan's own drawing overrides), then a shop redeploy. Paste the ENCRYPTED sheet (enc:v1:…, made with
 # apps/parts-shop/scripts/sheet-crypt.ts and the key in secret SHOP_SHEET_KEY; JSON inside, see
 # PriceSheet in packages/tips/src/sql.ts) into the input. The input is never put in an env
 # variable (step logs print env values, and this repo's logs are public): it is read from the

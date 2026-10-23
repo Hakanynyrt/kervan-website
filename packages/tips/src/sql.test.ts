@@ -76,3 +76,33 @@ test('price sheet: prices by code, extras upserted, aliases added; bad rows thro
   assert.throws(() => toPricesSql({ schema: 1, prices: { "x'; DROP": 1 } }, 'n', slug));
   assert.throws(() => toPricesSql({ schema: 1, prices: { 'KU130-09-C': 1.5 } }, 'n', slug));
 });
+
+test('price sheet: Kervan drawings upsert or remove an override; bad rows throw', () => {
+  const slug = (b: string, m: string) => `${b}/${m}`;
+  const sql = toPricesSql(
+    {
+      schema: 1,
+      prices: {},
+      drawings: [
+        { family: 'KU100-01', data: { skus: { chisel: { tipAngleDeg: 30 } } }, source: "a'b.dwg" },
+      ],
+      removeDrawings: ['KU100-02'],
+    },
+    '2026-10-23',
+    slug,
+  );
+  assert.match(
+    sql,
+    /INSERT INTO drawing_overrides \(family_code, data, source, updated_at\) VALUES \('KU100-01', '\{"skus":\{"chisel":\{"tipAngleDeg":30\}\}\}', 'a''b\.dwg', '2026-10-23'\) ON CONFLICT\(family_code\) DO UPDATE/,
+  );
+  assert.match(sql, /DELETE FROM drawing_overrides WHERE family_code = 'KU100-02';/);
+  const bad = (d: unknown) =>
+    toPricesSql(
+      { schema: 1, prices: {}, drawings: [d as { family: string; data: unknown }] },
+      'n',
+      slug,
+    );
+  assert.throws(() => bad({ family: 'KU100-01-C', data: {} }));
+  assert.throws(() => bad({ family: 'KU100-01', data: { attrs: { note: 'x' } } }));
+  assert.throws(() => toPricesSql({ schema: 1, prices: {}, removeDrawings: ["x'"] }, 'n', slug));
+});
