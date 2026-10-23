@@ -13,6 +13,11 @@
   Cache-Control: public, max-age=31536000, immutable
   Cross-Origin-Resource-Policy: same-site
 
+# Link-preview pictures (og:image of the home, listing and part pages): a changed picture gets a
+# new file name. No CORP header: social-network crawlers fetch them cross-site.
+/og/*
+  Cache-Control: public, max-age=31536000, immutable
+
 # Interactive 3D part models (GLB): a changed model gets a new file name.
 /models/*
   Cache-Control: public, max-age=31536000, immutable

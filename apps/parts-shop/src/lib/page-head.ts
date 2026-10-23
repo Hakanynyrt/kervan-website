@@ -16,7 +16,7 @@ import { joinedSpelling } from './model-aliases';
 import { fmtNum } from './format';
 import { renderModel, renderTitle } from './part-caption';
 import { findRender } from './part-links';
-import { brandPath, LIST_PATH, PARTS_PATH, partPath } from './routes';
+import { brandPath, LIST_PATH, PARTS_PATH, partPath, type PartKey } from './routes';
 import { tipImgAbs } from './tip-img';
 import { tipOptions } from './tip-options';
 import type { PageProps } from './page-props';
@@ -64,6 +64,33 @@ const RETURN_POLICY = merchantReturnPolicy({
 
 /** The seller on every Offer, written out: its full node is on the home page only. */
 const SELLER_REF = { id: ORG_ID, name: ORG_TRADING_NAME, url: `${SITE}/` };
+
+/**
+ * Link-preview pictures (1200×630, `public/og/`) of the part group pages: a studio render of the
+ * shop's own 3D models (tamir-takimi: the shop's own kit render) with the group name and
+ * "Görseller temsilidir" in Turkish, so the Turkish pages only (no EN variant yet). A group
+ * missing here keeps no og:image. A changed picture gets a new file name.
+ */
+const PART_OG: Partial<Record<PartKey, string>> = {
+  'alt-govde': '/og/og-alt-govde-v2.jpg',
+  burc: '/og/og-burc-v2.jpg',
+  saplama: '/og/og-saplama-v2.jpg',
+  piston: '/og/og-piston-v2.jpg',
+  akumulator: '/og/og-akumulator-v2.jpg',
+  'asinma-plakasi': '/og/og-asinma-plakasi-v2.jpg',
+  kama: '/og/og-kama-v1.jpg',
+  'tamir-takimi': '/og/og-tamir-takimi-v1.jpg',
+};
+/** The same kind of picture for the home page, /kirici-ucu and /cok-satanlar (Turkish only). */
+const PAGE_OG = {
+  home: '/og/og-anasayfa-v2.jpg',
+  list: '/og/og-kirici-ucu-v2.jpg',
+  popular: '/og/og-cok-satanlar-v2.jpg',
+} as const;
+const OG_SIZE = { width: 1200, height: 630 } as const;
+/** og:image head fields of one of our /og/ pictures on a Turkish page; nothing on English. */
+const ogOf = (lang: PageProps['lang'], file: string | undefined): Partial<HeadInput> =>
+  lang === 'tr' && file ? { ogImage: SITE + file, ogImageSize: OG_SIZE } : {};
 
 /** Meta descriptions longer than this lose the alias (Google cuts snippets around 155–160). */
 const DESC_MAX = 155;
@@ -115,6 +142,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
         ...page,
         title: m.homeTitle,
         description: m.homeDesc,
+        ...ogOf(lang, PAGE_OG.home),
         jsonLd: [
           {
             ...organization({
@@ -143,10 +171,16 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
         ...page,
         title: m.listTitle,
         description: m.listDesc,
+        ...ogOf(lang, PAGE_OG.list),
         jsonLd: crumbs([partsCrumb], t.parts.tips.name),
       };
     case 'popular':
-      return { ...page, title: m.popularTitle, description: m.popularDesc };
+      return {
+        ...page,
+        title: m.popularTitle,
+        description: m.popularDesc,
+        ...ogOf(lang, PAGE_OG.popular),
+      };
     case 'brand':
       return {
         ...page,
@@ -178,6 +212,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
         ...page,
         title: m.partTitle(name),
         description: m.partDesc(name, model.part === 'tamir-takimi'),
+        ...ogOf(lang, PART_OG[model.part]),
         jsonLd: crumbs([partsCrumb], name),
       };
     }
