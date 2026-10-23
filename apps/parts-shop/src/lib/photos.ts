@@ -2239,7 +2239,7 @@ const DRAWN: Record<PartKey, readonly PartRender[]> = {
         model: 'Rammer E68',
         series: 'Rammer',
         hero: '/photos/parca/alt-govde-rammer-e68-vitrin-01',
-        model3d: '/models/alt-govde-rammer-e68-03.glb',
+        model3d: '/models/alt-govde-rammer-e68-04.glb',
         views: [
           { base: '/photos/parca/alt-govde-rammer-e68-on-03', view: 'front' },
           { base: '/photos/parca/alt-govde-rammer-e68-arka-03', view: 'rear' },
