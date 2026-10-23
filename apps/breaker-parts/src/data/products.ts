@@ -76,7 +76,8 @@ export const PRODUCTS: Product[] = [
     slug: 'tie-rod',
     image: `${PARCA}/tie-rod-1536-v2.webp`,
     imageSrcSet: `${PARCA}/tie-rod-1024-v2.webp 1024w, ${PARCA}/tie-rod-1536-v2.webp 1536w`,
-    ogImage: `${PARCA}/og-tie-rod-v2.jpg`,
+    ogImage: `${PARCA}/og-tie-rod-v3.jpg`,
+    illustrative: true,
     tr: {
       name: 'Tie Rod (Gergi çubuğu)',
       tagline: 'Üst ve alt gövdeyi tek beden tutar.',
@@ -104,7 +105,10 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'kama',
-    image: '',
+    image: `${PARCA}/kama-1536-v6.webp`,
+    imageSrcSet: `${PARCA}/kama-1024-v6.webp 1024w, ${PARCA}/kama-1536-v6.webp 1536w`,
+    ogImage: `${PARCA}/og-kama-v7.jpg`,
+    illustrative: true,
     tr: {
       name: 'Kama (Wedge)',
       tagline: 'Keskiyi kilitleyen sessiz parça.',
@@ -120,7 +124,8 @@ export const PRODUCTS: Product[] = [
     slug: 'alt-govde',
     image: `${PARCA}/alt-govde-1536-v2.webp`,
     imageSrcSet: `${PARCA}/alt-govde-1024-v2.webp 1024w, ${PARCA}/alt-govde-1536-v2.webp 1536w`,
-    ogImage: `${PARCA}/og-alt-govde-v2.jpg`,
+    ogImage: `${PARCA}/og-alt-govde-v3.jpg`,
+    illustrative: true,
     tr: {
       name: 'Alt Gövde (Lower Housing)',
       tagline: 'Burçların ve keskinin yaşadığı yer.',
@@ -148,7 +153,10 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'yan-saplama',
-    image: '',
+    image: `${PARCA}/yan-saplama-1536-v6.webp`,
+    imageSrcSet: `${PARCA}/yan-saplama-1024-v6.webp 1024w, ${PARCA}/yan-saplama-1536-v6.webp 1536w`,
+    ogImage: `${PARCA}/og-yan-saplama-v7.jpg`,
+    illustrative: true,
     tr: {
       name: 'Yan Saplama (Side Stud)',
       tagline: 'Yan yüzeyleri kilitleyen sabitleyici.',

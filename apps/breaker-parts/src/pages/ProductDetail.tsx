@@ -86,6 +86,11 @@ export default function ProductDetail({ t, lang }: Props) {
                   </div>
                 )}
               </div>
+              {product.image && product.illustrative && (
+                <p className="mt-3 font-sans text-xs tracking-[0.04em] text-ink-soft">
+                  {t.productDetail.illustrativeNote}
+                </p>
+              )}
             </motion.div>
 
             {/* Info — right */}

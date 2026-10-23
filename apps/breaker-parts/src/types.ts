@@ -318,6 +318,8 @@ export interface DictBlock {
     quoteCta: string;
     notFound: string;
     notFoundCta: string;
+    /** Caption under a product picture that is a 3D render, not a photo. */
+    illustrativeNote: string;
   };
   contact: {
     eyebrow: string;
@@ -401,6 +403,9 @@ export interface Product {
   imageSrcSet?: string;
   /** Optional 1200×630 link-preview picture (og:image) relative to /public; else `image`. */
   ogImage?: string;
+  /** True when `image` is a studio render of a 3D model (not a photo): pages then caption it
+   *  "Görseller temsilidir" / "Images are illustrative". */
+  illustrative?: boolean;
   tr: ProductLocale;
   en: ProductLocale;
   /** Optional sub-types — e.g. moil/blunt/asphalt for keski. */

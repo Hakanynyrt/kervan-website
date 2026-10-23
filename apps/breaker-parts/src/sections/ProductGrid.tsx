@@ -49,6 +49,11 @@ export default function ProductGrid({ lang, limit }: Props) {
                 ) : (
                   <Placeholder label={loc.name} />
                 )}
+                {p.image && p.illustrative && (
+                  <span className="absolute right-2 bottom-2 rounded-sm bg-black/45 px-1.5 py-0.5 font-sans text-[10px] leading-tight tracking-[0.04em] text-white/80 pointer-events-none">
+                    {DICT[lang].productDetail.illustrativeNote}
+                  </span>
+                )}
               </div>
               <div className="p-6 md:p-8 flex flex-col gap-3 flex-1">
                 <h3 className="font-serif italic text-2xl md:text-3xl text-ink leading-tight">
