@@ -600,7 +600,7 @@ export const REDRAWN: Record<string, string> = {
   'burc-toyo-1400-kafa': '04',
   'piston-krupp-hm-1500': '03',
   'piston-mtb-150': '03',
-  'piston-montabert-brh-501': '03',
+  'piston-montabert-brh-501': '04',
   'yansaplama-indeco-mes-series': '03',
   // Final bulk re-render (black finish, C′ quality, rest pose, kama chamfers, keyless burçlu sets, alpha for the
   // theme-aware stage): every other stem below.

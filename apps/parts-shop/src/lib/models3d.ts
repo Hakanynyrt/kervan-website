@@ -1065,7 +1065,7 @@ export const MODELS_3D: Record<string, string> = {
   'piston-krupp-hm-560': '/models/piston-krupp-hm-560-tasli-04.glb',
   'piston-krupp-hm-720': '/models/piston-krupp-hm-720-tasli-04.glb',
   'piston-krupp-hm-960': '/models/piston-krupp-hm-960-tasli-05.glb',
-  'piston-montabert-brh-501': '/models/piston-montabert-brh-501-tasli-04.glb',
+  'piston-montabert-brh-501': '/models/piston-montabert-brh-501-tasli-05.glb',
   'piston-montabert-brv-32': '/models/piston-montabert-brv-32-tasli-05.glb',
   'piston-mtb-150': '/models/piston-mtb-150-tasli-04.glb',
   'piston-mtb-210': '/models/piston-mtb-210-tasli-05.glb',
