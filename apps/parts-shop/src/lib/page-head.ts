@@ -67,22 +67,25 @@ const SELLER_REF = { id: ORG_ID, name: ORG_TRADING_NAME, url: `${SITE}/` };
 
 /**
  * Link-preview pictures (1200×630, `public/og/`) of the part group pages: a studio render of the
- * shop's own 3D models with the group name in Turkish, so the Turkish pages only (no EN variant
- * yet). A group missing here keeps no og:image. A changed picture gets a new file name.
+ * shop's own 3D models (tamir-takimi: the shop's own kit render) with the group name and
+ * "Görseller temsilidir" in Turkish, so the Turkish pages only (no EN variant yet). A group
+ * missing here keeps no og:image. A changed picture gets a new file name.
  */
 const PART_OG: Partial<Record<PartKey, string>> = {
-  'alt-govde': '/og/og-alt-govde-v1.jpg',
-  burc: '/og/og-burc-v1.jpg',
-  saplama: '/og/og-saplama-v1.jpg',
-  piston: '/og/og-piston-v1.jpg',
-  akumulator: '/og/og-akumulator-v1.jpg',
-  'asinma-plakasi': '/og/og-asinma-plakasi-v1.jpg',
+  'alt-govde': '/og/og-alt-govde-v2.jpg',
+  burc: '/og/og-burc-v2.jpg',
+  saplama: '/og/og-saplama-v2.jpg',
+  piston: '/og/og-piston-v2.jpg',
+  akumulator: '/og/og-akumulator-v2.jpg',
+  'asinma-plakasi': '/og/og-asinma-plakasi-v2.jpg',
+  kama: '/og/og-kama-v1.jpg',
+  'tamir-takimi': '/og/og-tamir-takimi-v1.jpg',
 };
 /** The same kind of picture for the home page, /kirici-ucu and /cok-satanlar (Turkish only). */
 const PAGE_OG = {
-  home: '/og/og-anasayfa-v1.jpg',
-  list: '/og/og-kirici-ucu-v1.jpg',
-  popular: '/og/og-cok-satanlar-v1.jpg',
+  home: '/og/og-anasayfa-v2.jpg',
+  list: '/og/og-kirici-ucu-v2.jpg',
+  popular: '/og/og-cok-satanlar-v2.jpg',
 } as const;
 const OG_SIZE = { width: 1200, height: 630 } as const;
 /** og:image head fields of one of our /og/ pictures on a Turkish page; nothing on English. */
