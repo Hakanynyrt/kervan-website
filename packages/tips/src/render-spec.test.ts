@@ -193,3 +193,19 @@ test('moil nose: the shared relative profile scaled to D; other types have none'
   for (const type of ['conical', 'chisel', 'pyramid', 'blunt'] as const)
     assert.equal(renderSpec(attrs(), { ...sku, tipType: type })!.spec.nose, undefined);
 });
+
+test('chisel: 30° and a 0.17·D edge land by default; the data wins when it has them', () => {
+  const sku = { tipType: 'chisel' as const, lengthMm: { min: 1300, max: 1300 }, tipAngleDeg: null };
+  const d = renderSpec(attrs(), sku)!;
+  assert.equal(d.spec.angle, 30);
+  assert.equal(d.spec.land, 35.7); // 0.17 × 210
+  assert.ok(d.assumptions.some((a) => a.includes('edge land unknown')));
+  const own = renderSpec(attrs({ chiselLandMm: 40 }), { ...sku, tipAngleDeg: 34 })!;
+  assert.equal(own.spec.angle, 34);
+  assert.equal(own.spec.land, 40);
+  assert.ok(!own.assumptions.some((a) => a.includes('edge land')));
+  // A land as wide as the tool is not plausible: back to the default.
+  assert.equal(renderSpec(attrs({ chiselLandMm: 300 }), sku)!.spec.land, 35.7);
+  assert.equal(renderSpec(attrs(), { ...sku, tipType: 'pyramid' })!.spec.land, 12.6);
+  assert.equal(renderSpec(attrs(), { ...sku, tipType: 'moil' })!.spec.land, undefined);
+});
