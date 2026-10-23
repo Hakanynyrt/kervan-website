@@ -139,16 +139,19 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'saplama',
-    image: '',
+    image: `${PARCA}/saplama-1536-v2.webp`,
+    imageSrcSet: `${PARCA}/saplama-1024-v2.webp 1024w, ${PARCA}/saplama-1536-v2.webp 1536w`,
+    ogImage: `${PARCA}/og-saplama-v3.jpg`,
+    illustrative: true,
     tr: {
       name: 'Saplama (Stud)',
-      tagline: 'Gövdeyi taşıyıcı plakaya bağlayan.',
-      body: 'Hidrolik kırıcıyı ekskavatör adapter plakasına bağlayan dişli pim. Doğru tork, doğru malzeme — en sık kopan ama en az dikkat edilen parça.',
+      tagline: 'Kırıcı gövdesini bir arada tutan saplamalar.',
+      body: 'Kırıcının gövdesini bir arada tutan boy saplamalar ve yan saplamalar. Takımlar somunlarıyla, çizimde varsa pullarıyla birlikte gelir; marka ve modele göre eşleştirilir.',
     },
     en: {
       name: 'Stud',
-      tagline: 'Connects the body to the carrier plate.',
-      body: 'The threaded pin that fastens the breaker to the excavator adapter plate. Right torque, right material — the part most often broken, least often inspected.',
+      tagline: 'The studs that hold the breaker body together.',
+      body: 'Tie rods and side bolts that hold the breaker body together. Sets come with their nuts, and with washers where the drawing calls for them; matched per brand and model.',
     },
   },
   {
