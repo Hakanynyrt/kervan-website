@@ -134,9 +134,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'saplama',
-    image: `${PARCA}/saplama-1536-v2.webp`,
-    imageSrcSet: `${PARCA}/saplama-1024-v2.webp 1024w, ${PARCA}/saplama-1536-v2.webp 1536w`,
-    ogImage: `${PARCA}/og-saplama-v2.jpg`,
+    image: '',
     tr: {
       name: 'Saplama (Stud)',
       tagline: 'Gövdeyi taşıyıcı plakaya bağlayan.',
