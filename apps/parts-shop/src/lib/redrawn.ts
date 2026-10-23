@@ -1640,4 +1640,9 @@ export const REDRAWN: Record<string, string> = {
   'saplama-takim-mtb-365': '02',
   'saplama-takim-mtb-85': '02',
   'saplama-takim-mtb-210': '02',
+  // 2026-10-23: Furukawa FX pistons, the rear nose's outer diameter black (unground), owner
+  'piston-furukawa-fx-175': '02',
+  'piston-furukawa-fx-225': '02',
+  'piston-furukawa-fx-275': '02',
+  'piston-furukawa-fx-375': '02',
 };
