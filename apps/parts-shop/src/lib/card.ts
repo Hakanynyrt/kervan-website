@@ -14,10 +14,14 @@ export const cardName = (c: BreakerCard, lang: Lang): string =>
     ? `${c.name} · Ø${fmtNum(c.diameterMm, lang)}${c.variant.lengthMm ? ` × ${fmtNum(c.variant.lengthMm, lang)}` : ''} mm`
     : c.name;
 
-/** The breaker page, opened on the card's tip size (`?uc=`) and, from a filtered search, its type. */
+/**
+ * The breaker page, opened on the card's tip size (`?uc=`) and, from a filtered search, its type.
+ * The first size is the page's default, so its card links the clean URL (the canonical): every
+ * breaker page then has a plain link without a query, and crawl budget is not spent on `?uc=1`.
+ */
 export const cardHref = (c: BreakerCard, lang: Lang, tip?: TipType | null): string => {
   const sp = new URLSearchParams();
-  if (c.variant) sp.set('uc', String(c.variant.n));
+  if (c.variant && c.variant.n > 1) sp.set('uc', String(c.variant.n));
   if (tip && c.types.includes(tip)) sp.set('tip', tip);
   const q = sp.toString();
   return localePath(c.path, lang) + (q ? `?${q}` : '');

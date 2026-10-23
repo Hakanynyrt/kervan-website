@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   carrierTons,
   isTipType,
@@ -52,6 +52,10 @@ function availabilityText(s: PublicSku, t: Dict): string {
 interface Props {
   /** Page heading (the breaker model, or the diameter on a family page). */
   title: string;
+  /** Line under the heading (a breaker's other spellings). */
+  subtitle?: string;
+  /** Page-specific sections after the parts links (a breaker's facts and sibling breakers). */
+  children?: ReactNode;
   /** Breadcrumb's last item. */
   crumb: string;
   /** What the quote message names: the breaker model or the tip code. */
@@ -83,6 +87,8 @@ interface Props {
  */
 export default function TipProduct({
   title,
+  subtitle,
+  children,
   crumb,
   quoteName,
   trail = [],
@@ -162,6 +168,7 @@ export default function TipProduct({
         t={t}
       />
       <PageTitle>{title}</PageTitle>
+      {subtitle && <p className="m-0 mt-1 font-sans text-sm text-ink-mid">{subtitle}</p>}
       <OemLine t={t} />
       {opt.cents !== null && (
         <p className="m-0 mt-2 font-sans text-base text-ink-mid tabular-nums lg:hidden">
@@ -246,7 +253,7 @@ export default function TipProduct({
                 src={tipImg(sampleSku.image)}
                 width={800}
                 height={533}
-                alt={tf.sampleAlt(sample.name)}
+                alt={tf.sampleAlt(quoteName, sample.name)}
                 decoding="async"
                 className="block h-auto w-full"
               />
@@ -467,6 +474,8 @@ export default function TipProduct({
           </ul>
         </section>
       )}
+
+      {children}
 
       {grooved.length > 0 && (
         <section id="toz-kanalli" aria-labelledby="grooved" className="mt-12 scroll-mt-6">

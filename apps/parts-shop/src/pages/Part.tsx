@@ -221,7 +221,7 @@ export default function Part({
   return (
     <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">
       <Breadcrumb trail={[[t.parts.title, PARTS_PATH]]} current={p.name} lang={lang} t={t} />
-      <PageTitle>{p.name}</PageTitle>
+      <PageTitle>{p.h1}</PageTitle>
       <OemLine t={t} kit={model.part === 'tamir-takimi'} />
       <p className="m-0 mt-3 max-w-3xl font-sans text-ink-mid">{p.body}</p>
       {all.length > 0 && (
@@ -318,7 +318,7 @@ export default function Part({
                             sizes="(min-width: 1280px) 210px, (min-width: 1024px) 17vw, (min-width: 640px) 31vw, 47vw"
                             width={320}
                             height={180}
-                            alt=""
+                            alt={renderTitle(r, b ? t.parts.fitted.name(p.name, true) : p.name, t)}
                             loading={i > 3 ? 'lazy' : undefined}
                             decoding="async"
                             className="block h-auto w-full bg-pstage"

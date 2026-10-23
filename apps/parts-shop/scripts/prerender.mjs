@@ -1,6 +1,5 @@
 // Build step after `vite build` and `vite build --ssr src/entry-server.tsx`: one HTML file per
 // page and language with its page props embedded (the client hydrates them), then deletes dist-ssr/.
-import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -134,19 +133,10 @@ try {
     fs.writeFileSync(out, html);
     count++;
   }
-  // sitemap.xml (one file while it fits): every indexable page in both languages. lastmod is
-  // the last commit's date (stable across the daily rebuilds), else the build date.
-  let lastmod = new Date().toISOString().slice(0, 10);
-  try {
-    const d = execFileSync('git', ['log', '-1', '--format=%cs'], {
-      cwd: APP,
-      encoding: 'utf8',
-    }).trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) lastmod = d;
-  } catch {
-    /* no git: build date */
-  }
-  const sitemaps = ssr.sitemapFiles(pages, lastmod);
+  // sitemap.xml (one file while it fits): every indexable page in both languages, without
+  // <lastmod>: one date for every URL, changing with each commit, taught Google to ignore it. A
+  // per-page date (a hash of the page's own content, prices left out) can come later.
+  const sitemaps = ssr.sitemapFiles(pages);
   for (const f of sitemaps) fs.writeFileSync(path.join(DIST, f.file), f.xml);
   const urls = pages.filter((p) => p.indexable).length;
   // Breaker pages merged into another spelling of the same model keep their old URL working.

@@ -10,7 +10,7 @@ import {
   ORG_REGION,
   ORG_COUNTRY,
   ORG_SAME_AS,
-} from './constants.js';
+} from './constants.ts';
 
 /* ═══════════════════════════════════════════════════════════════════════
    schema.org JSON-LD builders.
@@ -33,6 +33,8 @@ interface BuildOrgOpts {
 }
 
 export function organization({ primaryUrl, alternateName, logoUrl, street }: BuildOrgOpts) {
+  // `primaryUrl` may be the canonical home URL with its slash; compare and build paths without it.
+  const base = primaryUrl.replace(/\/$/, '');
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -40,8 +42,8 @@ export function organization({ primaryUrl, alternateName, logoUrl, street }: Bui
     legalName: ORG_REGISTERED_NAME,
     alternateName: alternateName ?? ORG_TRADING_NAME,
     url: primaryUrl,
-    logo: logoUrl ?? `${primaryUrl}/logo-krv-v2-256.png`,
-    sameAs: ORG_SAME_AS.filter((u) => u !== primaryUrl),
+    logo: logoUrl ?? `${base}/logo-krv-v2-256.png`,
+    sameAs: ORG_SAME_AS.filter((u) => u.replace(/\/$/, '') !== base),
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: ORG_PHONE,
@@ -62,20 +64,76 @@ export function organization({ primaryUrl, alternateName, logoUrl, street }: Bui
 
 interface BuildWebsiteOpts {
   url: string;
+  /** The site name Google shows over results: the same name the titles and the page use. */
   name: string;
+  /** Other names the site is known by (e.g. the domain), most likely first. */
+  alternateName?: string[];
   description: string;
   inLanguage?: string;
 }
 
-export function website({ url, name, description, inLanguage = 'tr' }: BuildWebsiteOpts) {
+export function website({
+  url,
+  name,
+  alternateName,
+  description,
+  inLanguage = 'tr',
+}: BuildWebsiteOpts) {
+  // `url` may be the canonical home URL with its slash ("https://example.com/"); the ids stay
+  // "https://example.com/#website" either way.
+  const base = url.replace(/\/$/, '');
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': `${base}/#website`,
     url,
     name,
+    ...(alternateName && alternateName.length ? { alternateName } : {}),
     description,
     inLanguage,
-    publisher: { '@id': `${url}/#organization` },
+    publisher: { '@id': `${base}/#organization` },
+  } as const;
+}
+
+interface BuildReturnPolicyOpts {
+  /** Stable id, e.g. "https://example.com/yasal/iade#policy" (the returns page + #policy). */
+  id: string;
+  /** ISO 3166-1 alpha-2 country the policy applies to. */
+  country: string;
+  /** Days from delivery within which an item can be returned. */
+  days: number;
+  /** Return shipping exactly as the returns page states it; omit when it depends on the buyer
+   *  (e.g. free for consumers, by agreement for businesses). */
+  fees?: 'FreeReturn' | 'ReturnFeesCustomerResponsibility';
+  /** How the item is sent back; omit when it depends on the buyer. */
+  method?: 'ReturnByMail' | 'ReturnInStore';
+  /** Refund kind; omit when it depends on the buyer. */
+  refund?: 'FullRefund' | 'ExchangeRefund' | 'StoreCreditRefund';
+  /** Where the policy is written out (the returns page). */
+  url?: string;
+}
+
+/** A schema.org MerchantReturnPolicy with a finite window; method, fees and refund only when given. */
+export function merchantReturnPolicy({
+  id,
+  country,
+  days,
+  fees,
+  method,
+  refund,
+  url,
+}: BuildReturnPolicyOpts) {
+  return {
+    '@type': 'MerchantReturnPolicy',
+    '@id': id,
+    ...(url ? { url } : {}),
+    applicableCountry: country,
+    returnPolicyCountry: country,
+    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+    merchantReturnDays: days,
+    ...(method ? { returnMethod: `https://schema.org/${method}` } : {}),
+    ...(fees ? { returnFees: `https://schema.org/${fees}` } : {}),
+    ...(refund ? { refundType: `https://schema.org/${refund}` } : {}),
   } as const;
 }
 
@@ -171,6 +229,8 @@ interface BuildShopProductOpts {
   category?: string;
   /** Public product code; only one the site already shows. */
   sku?: string;
+  /** Other names the page shows for the same product (e.g. other spellings of the model). */
+  alternateName?: string[];
   /** The price exactly as the page shows it; omit when the page only takes quotes. */
   offer?: {
     /** Decimal string, e.g. "125.00". */
@@ -178,6 +238,11 @@ interface BuildShopProductOpts {
     priceCurrency: string;
     /** The shown price excludes VAT. */
     valueAddedTaxIncluded?: boolean;
+    /** The seller, written out (its full Organization node sits on the home page only, and
+     *  Google does not follow an `@id` to another page). */
+    seller?: { id: string; name: string; url: string };
+    /** The return policy, written out in full (Google does not follow an `@id` to another page). */
+    returnPolicy?: ReturnType<typeof merchantReturnPolicy>;
   };
 }
 
@@ -191,12 +256,14 @@ export function shopProduct({
   brand,
   category,
   sku,
+  alternateName,
   offer,
 }: BuildShopProductOpts) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name,
+    ...(alternateName && alternateName.length ? { alternateName } : {}),
     ...(description ? { description } : {}),
     url,
     ...(image ? { image } : {}),
@@ -212,6 +279,17 @@ export function shopProduct({
             priceCurrency: offer.priceCurrency,
             availability: 'https://schema.org/InStock',
             itemCondition: 'https://schema.org/NewCondition',
+            ...(offer.seller
+              ? {
+                  seller: {
+                    '@type': 'Organization',
+                    '@id': offer.seller.id,
+                    name: offer.seller.name,
+                    url: offer.seller.url,
+                  },
+                }
+              : {}),
+            ...(offer.returnPolicy ? { hasMerchantReturnPolicy: offer.returnPolicy } : {}),
             ...(offer.valueAddedTaxIncluded === undefined
               ? {}
               : {
@@ -238,13 +316,17 @@ export function productWebPage({
   brand,
   category,
   sku,
+  alternateName,
   publisherId,
 }: Omit<BuildShopProductOpts, 'offer'> & { publisherId?: string }) {
-  const keywords = [name, category, brand, sku].filter(Boolean).join(', ');
+  const keywords = [name, ...(alternateName ?? []), category, brand, sku]
+    .filter(Boolean)
+    .join(', ');
   return {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name,
+    ...(alternateName && alternateName.length ? { alternateName } : {}),
     ...(description ? { description } : {}),
     url,
     ...(image ? { primaryImageOfPage: { '@type': 'ImageObject', url: image } } : {}),
@@ -305,6 +387,7 @@ export type {
   BreadcrumbItem,
   BuildOrgOpts,
   BuildWebsiteOpts,
+  BuildReturnPolicyOpts,
   BuildServiceOpts,
   BuildProductOpts,
   BuildShopProductOpts,

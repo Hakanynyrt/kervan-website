@@ -13,7 +13,7 @@ import type { Dict } from '../lib/dict';
 import { exactHit, findModels, finderName, makesByModels, type FinderHit } from '../lib/finder';
 import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
-import { renderModel } from '../lib/part-caption';
+import { renderModel, renderTitle } from '../lib/part-caption';
 import { findRender, partsForBreaker } from '../lib/part-links';
 import { GROUP_COVERS } from '../lib/photos';
 import { photoImg } from '../lib/photo-url';
@@ -518,7 +518,7 @@ function MadeCard({ x, fx, lang, t }: { x: MadeItem; fx: FxRate | null; lang: La
         {c.image && (
           <img
             src={tipImg(c.image)}
-            alt=""
+            alt={t.list.cardAlt(c.name, false)}
             width={480}
             height={320}
             loading="lazy"
@@ -555,7 +555,7 @@ function MadeCard({ x, fx, lang, t }: { x: MadeItem; fx: FxRate | null; lang: La
       {r?.hero && (
         <img
           src={photoImg(r.hero, 'xs')}
-          alt=""
+          alt={renderTitle(r, x.fitted ? t.parts.fitted.name(name, true) : name, t)}
           width={320}
           height={180}
           loading="lazy"

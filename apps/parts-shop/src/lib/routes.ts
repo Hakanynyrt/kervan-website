@@ -23,6 +23,7 @@ import { groupPrices, resolvePartPrices } from './part-prices';
 import { groovedFor } from './grooved';
 import { tipOptions, tipVariants } from './tip-options';
 import { OEM_NUMBERS } from './oem-numbers';
+import { modelAliases } from './model-aliases';
 import { GROOVED_TOOLS, PART_RENDERS, type PartRender } from './photos';
 import type { FinderMake } from './finder';
 import type { TipGroupStats } from '../types';
@@ -159,6 +160,12 @@ export type PageModel =
       model: string;
       /** Tip families that fit this breaker (usually one). */
       families: PublicFamily[];
+      /** Other spellings of the model ("HB20G"): merged catalogue spellings and the no-space form. */
+      aliases: string[];
+      /** Other breakers per tip size of this page (`tipVariants`, the sizes its picker offers;
+       *  each capped at SIBLINGS, `more` past it): a breaker is listed only under the size whose
+       *  family it shares, so a two-size page never claims that its other tip fits it. */
+      siblings: SiblingGroup[];
       /** Other parts we model for this breaker (links to their cards). */
       parts: PartLink[];
       demo: boolean;
@@ -324,8 +331,22 @@ interface BreakerEntry {
   name: string;
   brand: string;
   model: string;
+  /** Other spellings of the model: the catalogue spellings merged into this page, then the
+   *  no-space form of a "letters digits" model ("HB 20G" → "HB20G"). Model only, no make. */
+  aliases: string[];
   families: PublicFamily[];
   extra?: PublicExtra;
+}
+
+/** Sibling breakers shown per tip family on a breaker page ("Aynı uç bu kırıcılara da uyar"). */
+const SIBLINGS = 12;
+
+/** Breakers that take one tip size of a breaker page (a family of it): the size, and the links. */
+export interface SiblingGroup {
+  diameterMm: number;
+  lengthMm: number | null;
+  items: { name: string; path: string }[];
+  more: number;
 }
 
 /**
@@ -374,12 +395,14 @@ export function groupBreakers(c: PublicCatalog): {
     const same = breakers.get(slug);
     if (same) {
       for (const f of g.families) if (!same.families.includes(f)) same.families.push(f);
+      same.aliases = modelAliases(same.model, [...same.aliases, ...g.spellings.keys()]);
       continue;
     }
     breakers.set(slug, {
       name: breakerName({ brand: g.brand, model }),
       brand: g.brand,
       model,
+      aliases: modelAliases(model, [...g.spellings.keys()]),
       families: g.families,
       ...(g.extra ? { extra: g.extra } : {}),
     });
@@ -495,6 +518,33 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       if (!groovedSeen.has(b))
         console.warn(`buildPages: grooved tools of "${b}" match no breaker of the catalog`);
   const tipPaths = new Map(cards.map((x) => [fold(x.name), x.path]));
+  // Breakers by tip family, for each breaker page's "same tip also fits" links.
+  const byFamily = new Map<PublicFamily, string[]>();
+  for (const [slug, e] of breakers)
+    for (const f of e.families) byFamily.set(f, [...(byFamily.get(f) ?? []), slug]);
+  const siblingsOf = (slug: string, e: BreakerEntry): SiblingGroup[] =>
+    tipVariants(e.families).flatMap((v) => {
+      const others = [...new Set(v.families.flatMap((f) => byFamily.get(f) ?? []))]
+        .filter((x) => x !== slug)
+        .map((x) => [x, breakers.get(x)!] as const)
+        // Same make first, then by name.
+        .sort(
+          ([, a], [, b]) =>
+            Number(b.brand === e.brand) - Number(a.brand === e.brand) ||
+            a.name.localeCompare(b.name, 'tr', { numeric: true }),
+        );
+      if (!others.length) return [];
+      return [
+        {
+          diameterMm: v.diameterMm,
+          lengthMm: v.lengthMm,
+          items: others
+            .slice(0, SIBLINGS)
+            .map(([x, o]) => ({ name: o.name, path: breakerPath(x) })),
+          more: Math.max(0, others.length - SIBLINGS),
+        },
+      ];
+    });
   const popular = cards.filter((x) => x.popularTier !== null).sort(byPopularity);
   const hasPopular = popular.length > 0;
   const partPrices = resolvePartPrices(c.partPrices ?? []);
@@ -632,6 +682,8 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         brand: e.brand,
         model: e.model,
         families: e.families,
+        aliases: e.aliases,
+        siblings: siblingsOf(slug, e),
         parts: partsForBreaker(e.name),
         demo,
         hasPopular,

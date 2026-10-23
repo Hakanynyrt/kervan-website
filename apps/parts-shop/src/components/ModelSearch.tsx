@@ -130,6 +130,7 @@ export function ModelTable({
   t,
   all = false,
   cards = false,
+  crawlAll = false,
 }: {
   rows: BreakerCard[];
   /** CBRT rate for the cards' TL price (owner: "tl fiyatı da gözüksün"). */
@@ -140,6 +141,9 @@ export function ModelTable({
   all?: boolean;
   /** Picture cards instead of the table (brand pages, owner: "modelleri fotoğrafları ile birlikte"). */
   cards?: boolean;
+  /** Every card is in the HTML, those past the current page `hidden` (brand pages): each model
+   *  page then has a plain link a crawler follows. Without it only the page's cards are rendered. */
+  crawlAll?: boolean;
 }) {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<TipFilter>(EMPTY_FILTER);
@@ -200,7 +204,14 @@ export function ModelTable({
     visible.length > 0 ? (
       cards ? (
         <>
-          <Cards rows={visible.slice(0, page)} tip={filter.tip} fx={fx} lang={lang} t={t} />
+          <Cards
+            rows={crawlAll ? visible : visible.slice(0, page)}
+            limit={page}
+            tip={filter.tip}
+            fx={fx}
+            lang={lang}
+            t={t}
+          />
           {visible.length > page && (
             <button
               type="button"
@@ -390,12 +401,15 @@ function FilterBar({
  *  the picture's place with its tip types, never a borrowed picture (owner), then name and diameter. */
 function Cards({
   rows,
+  limit,
   tip,
   fx,
   lang,
   t,
 }: {
   rows: BreakerCard[];
+  /** Cards past this many are rendered `hidden` (still linked in the HTML). */
+  limit: number;
   tip: TipType | null;
   fx: FxRate | null;
   lang: Lang;
@@ -406,8 +420,8 @@ function Cards({
     r.diameterMm === null ? '—' : `Ø${fmtNum(r.diameterMm, lang)} mm`;
   return (
     <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-      {rows.map((r) => (
-        <li key={cardKey(r)}>
+      {rows.map((r, i) => (
+        <li key={cardKey(r)} hidden={i >= limit}>
           <a
             href={href(r)}
             className={`group flex h-full flex-col overflow-hidden rounded-md border border-hair bg-bg transition-colors hover:border-hair-strong ${FOCUS}`}
@@ -416,7 +430,7 @@ function Cards({
               <span className="relative block">
                 <img
                   src={tipImg((r.image ?? r.sample)!)}
-                  alt=""
+                  alt={t.list.cardAlt(r.name, !r.image)}
                   width={480}
                   height={320}
                   loading="lazy"
