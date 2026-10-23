@@ -1,5 +1,6 @@
 import type { TipType } from '@kervan/tips';
 import type { Lang } from '../types';
+import type { Dict } from './dict';
 import { fmtNum } from './format';
 import { localePath } from './locale-path';
 import { photoImg } from './photo-url';
@@ -10,10 +11,10 @@ import { tipImg } from './tip-img';
 export const cardKey = (c: BreakerCard): string =>
   c.variant ? `${c.slug}~${c.variant.n}` : c.slug;
 
-/** A card's name: the breaker, plus the tip size when the breaker takes more than one. */
-export const cardName = (c: BreakerCard, lang: Lang): string =>
+/** A card's name: the breaker, plus the tip size (diameter, never length) when it takes more than one. */
+export const cardName = (c: BreakerCard, lang: Lang, t: Dict): string =>
   c.variant && c.diameterMm !== null
-    ? `${c.name} · Ø${fmtNum(c.diameterMm, lang)}${c.variant.lengthMm ? ` × ${fmtNum(c.variant.lengthMm, lang)}` : ''} mm`
+    ? `${c.name} · ${t.tipSize(fmtNum(c.diameterMm, lang), c.variant.ord)}`
     : c.name;
 
 /**

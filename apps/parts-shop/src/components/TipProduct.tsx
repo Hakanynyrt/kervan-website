@@ -20,7 +20,7 @@ import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
 import type { PartLink } from '../lib/part-links';
 import { tipImg } from '../lib/tip-img';
-import { tipOptions, tipVariants } from '../lib/tip-options';
+import { sizeOrdinals, tipOptions, tipVariants } from '../lib/tip-options';
 import { replaceSearch } from '../lib/url-state';
 import type { Lang } from '../types';
 import {
@@ -112,8 +112,10 @@ export default function TipProduct({
   const [vi, setVi] = useState(0);
   const variant = variants.length > 1 ? variants[Math.min(vi, variants.length - 1)] : null;
   const { opts, types } = tipOptions(variant ? variant.families : families, extra);
+  // Diameter only, never the length (owner, 2026-10-23); same-diameter sizes get an ordinal.
+  const ords = sizeOrdinals(variants);
   const sizeLabel = (v: (typeof variants)[number]) =>
-    `Ø${fmtNum(v.diameterMm, lang)}${v.lengthMm ? ` × ${fmtNum(v.lengthMm, lang)}` : ''} mm`;
+    t.tipSize(fmtNum(v.diameterMm, lang), ords[variants.indexOf(v)]);
   const name = variant ? `${quoteName} (${sizeLabel(variant)})` : quoteName;
   const [type, setType] = useState<TipType>(types[0]);
   const [qty, setQty] = useState(1);

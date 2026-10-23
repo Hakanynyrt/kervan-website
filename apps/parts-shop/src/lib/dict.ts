@@ -98,7 +98,6 @@ export interface Dict {
       /** Panel for a picked model. */
       forModel: string;
       breakerPage: string;
-      tipSize: (d: string, len: string | null) => string;
       noParts: string;
       /** Tip rows of a breaker with several tip sizes. */
       tipN: (n: number) => string;
@@ -110,6 +109,9 @@ export interface Dict {
     trust: { title: string; body: string }[];
   };
   card: { view: string };
+  /** A tip size: the working diameter only (owner, 2026-10-23: never the length), plus an
+   *  ordinal when a breaker has two tips of one diameter (`sizeOrdinals` in tip-options.ts). */
+  tipSize: (d: string, ord: number | null) => string;
   breaker: {
     title: (name: string) => string;
     /** Under the title: other spellings of the model the catalogue merged into this page. */
@@ -123,7 +125,7 @@ export interface Dict {
       parts: string;
     };
     /** Other breakers that take the same tip (catalogue families), capped. `title` when the page
-     *  has one tip family; `sized` per family when it has several ("Ø135 × 1.200 mm"). */
+     *  has one tip family; `sized` per family when it has several ("Ø135 mm"). */
     siblings: { title: string; sized: (size: string) => string; more: (n: number) => string };
   };
   popular: {
@@ -588,7 +590,6 @@ export const DICT: Record<Lang, Dict> = {
         popular: 'Çok satan kırıcılar',
         forModel: 'Bu kırıcı için ürettiğimiz parçalar',
         breakerPage: 'Kırıcı sayfası',
-        tipSize: (d, len) => `Ø${d}${len ? ` × ${len}` : ''} mm`,
         noParts: 'Bu kırıcının diğer parçaları için modelinizi WhatsApp’tan yazın, size dönelim.',
         tipN: (n) => `${n}. uç`,
       },
@@ -621,6 +622,7 @@ export const DICT: Record<Lang, Dict> = {
       ],
     },
     card: { view: 'Ucu gör' },
+    tipSize: (d, ord) => (ord ? `Ø${d} · ${ord}. tip` : `Ø${d} mm`),
     breaker: {
       title: (name) => `${name} kırıcı ucu`,
       aliases: (list) => `Diğer yazılışlar: ${list}`,
@@ -1385,7 +1387,6 @@ export const DICT: Record<Lang, Dict> = {
         popular: 'Best-selling breakers',
         forModel: 'Parts we make for this breaker',
         breakerPage: 'Breaker page',
-        tipSize: (d, len) => `Ø${d}${len ? ` × ${len}` : ''} mm`,
         noParts:
           'For this breaker’s other parts, send us your model on WhatsApp and we will get back to you.',
         tipN: (n) => `Tool ${n}`,
@@ -1419,6 +1420,7 @@ export const DICT: Record<Lang, Dict> = {
       ],
     },
     card: { view: 'View tip' },
+    tipSize: (d, ord) => (ord ? `Ø${d} · type ${ord}` : `Ø${d} mm`),
     breaker: {
       title: (name) => `${name} breaker tip`,
       aliases: (list) => `Also written: ${list}`,

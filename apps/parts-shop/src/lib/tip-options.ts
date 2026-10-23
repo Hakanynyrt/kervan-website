@@ -69,3 +69,20 @@ export function tipVariants(families: PublicFamily[]): TipVariant[] {
   }
   return [...out.values()];
 }
+
+/**
+ * The ordinal of each tip size among the sizes of the same diameter (1-based), null when its
+ * diameter is unique. The tip length is never shown (owner, 2026-10-23: "boyu hiçbir yerde
+ * söyleme"), so two sizes that differ only in length are told apart by `t.tipSize`'s ordinal.
+ */
+export function sizeOrdinals(variants: readonly { diameterMm: number }[]): (number | null)[] {
+  const count = new Map<number, number>();
+  for (const v of variants) count.set(v.diameterMm, (count.get(v.diameterMm) ?? 0) + 1);
+  const seen = new Map<number, number>();
+  return variants.map((v) => {
+    if ((count.get(v.diameterMm) ?? 0) < 2) return null;
+    const n = (seen.get(v.diameterMm) ?? 0) + 1;
+    seen.set(v.diameterMm, n);
+    return n;
+  });
+}

@@ -462,7 +462,7 @@ function Cards({
               )}
               <span className="flex flex-1 flex-col gap-1 p-3 font-sans">
                 <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
-                  {cardName(r, lang)}
+                  {cardName(r, lang, t)}
                 </span>
                 {/* without a picture the diameter is already set large above: only the badge here */}
                 {(pic || r.grooved) && (
@@ -560,7 +560,7 @@ function Table({
                   href={href(r)}
                   className={`inline-flex min-h-11 items-center text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
                 >
-                  {cardName(r, lang)}
+                  {cardName(r, lang, t)}
                 </a>
                 {r.grooved && (
                   // Under the name on phones (the types column is hidden there), beside it wider.

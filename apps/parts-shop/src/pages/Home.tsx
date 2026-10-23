@@ -416,11 +416,7 @@ function Finder({
                   stage="tip"
                   badge={cardPic(x)?.sample ? t.list.sampleBadge : undefined}
                   title={many ? `${t.parts.tips.name} · ${f.tipN(i + 1)}` : t.parts.tips.name}
-                  sub={
-                    x.d === null
-                      ? undefined
-                      : f.tipSize(fmtNum(x.d, lang), x.len ? fmtNum(x.len, lang) : null)
-                  }
+                  sub={x.d === null ? undefined : t.tipSize(fmtNum(x.d, lang), x.ord ?? null)}
                   action={t.card.view}
                 />
               ))}
@@ -473,11 +469,11 @@ function Finder({
                       img={cardPic(c)?.src ?? null}
                       badge={cardPic(c)?.sample ? t.list.sampleBadge : undefined}
                       stage="tip"
-                      title={cardName(c, lang)}
+                      title={cardName(c, lang, t)}
                       sub={
                         c.diameterMm === null
                           ? undefined
-                          : f.tipSize(fmtNum(c.diameterMm, lang), null)
+                          : t.tipSize(fmtNum(c.diameterMm, lang), null)
                       }
                       action={t.card.view}
                     />
@@ -529,7 +525,7 @@ function MadeCard({ x, fx, lang, t }: { x: MadeItem; fx: FxRate | null; lang: La
         <span className="flex flex-1 flex-col gap-0.5 p-3 font-sans">
           <span className="text-xs text-ink-mid">{t.parts.tips.name}</span>
           <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
-            {cardName(c, lang)}
+            {cardName(c, lang, t)}
           </span>
           <CardPrice price={c.price} fx={fx} lang={lang} t={t} />
           <span className="pt-1 text-sm font-medium text-brand-hi group-hover:underline">

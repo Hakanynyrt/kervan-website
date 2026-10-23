@@ -6,7 +6,7 @@ import { fmtNum } from '../lib/format';
 import { groovedFor } from '../lib/grooved';
 import { localePath } from '../lib/locale-path';
 import { brandPath, type PageModel } from '../lib/routes';
-import { tipVariants } from '../lib/tip-options';
+import { sizeOrdinals, tipVariants } from '../lib/tip-options';
 import type { Lang } from '../types';
 
 type Model = Extract<PageModel, { kind: 'breaker' }>;
@@ -65,13 +65,12 @@ function Facts({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const f = t.breaker.facts;
   const variants = tipVariants(model.families);
   const primary = model.families[0]?.attrs.diameterMm ?? model.extra?.diameterMm ?? null;
+  // Diameters only, never the length (owner, 2026-10-23); same-diameter sizes get an ordinal.
+  const ords = sizeOrdinals(variants);
   const sizes = variants.length
-    ? variants.map(
-        (v) =>
-          `Ø${fmtNum(v.diameterMm, lang)}${v.lengthMm ? ` × ${fmtNum(v.lengthMm, lang)}` : ''} mm`,
-      )
+    ? variants.map((v, i) => t.tipSize(fmtNum(v.diameterMm, lang), ords[i]))
     : primary !== null
-      ? [`Ø${fmtNum(primary, lang)} mm`]
+      ? [t.tipSize(fmtNum(primary, lang), null)]
       : [];
   const types = [
     ...new Set([
@@ -127,9 +126,7 @@ function Siblings({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
         <section key={i} aria-labelledby={`siblings-${i}`} className="mt-12 font-sans">
           <h2 id={`siblings-${i}`} className="m-0 text-xl font-bold text-ink">
             {sized
-              ? t.breaker.siblings.sized(
-                  `Ø${fmtNum(g.diameterMm, lang)}${g.lengthMm ? ` × ${fmtNum(g.lengthMm, lang)}` : ''} mm`,
-                )
+              ? t.breaker.siblings.sized(t.tipSize(fmtNum(g.diameterMm, lang), g.ord))
               : t.breaker.siblings.title}
           </h2>
           <ul className="m-0 mt-3 flex list-none flex-wrap gap-2 p-0 text-sm">

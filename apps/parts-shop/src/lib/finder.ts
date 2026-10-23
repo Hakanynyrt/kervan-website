@@ -7,10 +7,11 @@ import { fold, matches, rewriteQuery, searchName } from '@kervan/tips';
  * here. Built at build time (routes.ts) and embedded in the home page's props.
  */
 
-/** One tip size of a breaker: working diameter and length (mm), `?uc=` number, picture. */
+/** One tip size of a breaker: working diameter (mm; never the length), `?uc=` number, picture. */
 export interface FinderTip {
   d: number | null;
-  len?: number | null;
+  /** Ordinal among the breaker's sizes of the same diameter (`sizeOrdinals`), else null. */
+  ord?: number | null;
   /** 1-based tip size (`?uc=`) of a breaker that takes more than one. */
   n?: number;
   /** Tip render key (tip-img.ts); `sample` = another breaker's tip, shown labelled. */
