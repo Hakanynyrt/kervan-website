@@ -600,7 +600,7 @@ export const REDRAWN: Record<string, string> = {
   'burc-toyo-1400-kafa': '04',
   'piston-krupp-hm-1500': '03',
   'piston-mtb-150': '03',
-  'piston-montabert-brh-501': '03',
+  'piston-montabert-brh-501': '04',
   'yansaplama-indeco-mes-series': '03',
   // Final bulk re-render (black finish, C′ quality, rest pose, kama chamfers, keyless burçlu sets, alpha for the
   // theme-aware stage): every other stem below.
@@ -1640,4 +1640,9 @@ export const REDRAWN: Record<string, string> = {
   'saplama-takim-mtb-365': '02',
   'saplama-takim-mtb-85': '02',
   'saplama-takim-mtb-210': '02',
+  // 2026-10-23: Furukawa FX pistons, the rear nose's outer diameter black (unground), owner
+  'piston-furukawa-fx-175': '02',
+  'piston-furukawa-fx-225': '02',
+  'piston-furukawa-fx-275': '02',
+  'piston-furukawa-fx-375': '02',
 };
