@@ -258,6 +258,9 @@ function publicAttrs(raw: string): FamilyAttrs | null {
     collarEndMm: num(a.collarEndMm),
     chiselEdge:
       a.chiselEdge === 'parallel' || a.chiselEdge === 'perpendicular' ? a.chiselEdge : null,
+    ...(pos(a.chiselLandMm) !== null && pos(a.chiselLandMm)! < d
+      ? { chiselLandMm: pos(a.chiselLandMm)! }
+      : {}),
     ...profileField(a.profile),
   };
 }

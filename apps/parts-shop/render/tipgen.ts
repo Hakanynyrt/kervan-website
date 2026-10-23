@@ -694,9 +694,9 @@ export function buildTip(s: TipSpec, materials: THREE.Material[], segs = 160): T
   }
 
   if (s.type === 'chisel' || s.type === 'pyramid') {
-    // Edge land; a pyramid ends in a wider square land, like OEM points (about 0.06 × D, 4 mm min).
-    // Only pyramids change: their angle is in the spec, so their render keys change with it.
-    const e = s.type === 'pyramid' ? Math.max(4, 0.06 * s.D) : Math.max(3, 0.03 * s.D);
+    // Edge land from the spec (renderSpec: the drawing's value, else CHISEL_LAND_PER_D × D; a
+    // pyramid's square land about 0.06 × D). Older specs without it keep the old rule.
+    const e = s.land ?? (s.type === 'pyramid' ? Math.max(4, 0.06 * s.D) : Math.max(3, 0.03 * s.D));
     const wedge = wedgePrism(s, e);
     // Default flats face ±X, so the edge runs along Z: perpendicular to the slot faces.
     const base = s.chiselEdge === 'parallel' ? Math.PI / 2 : 0;

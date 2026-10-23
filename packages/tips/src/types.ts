@@ -61,6 +61,8 @@ export interface FamilyAttrs {
   collarEndMm?: number | null;
   /** Chisel edge relative to the key slots, read from the drawing (render only). */
   chiselEdge?: 'parallel' | 'perpendicular' | null;
+  /** Chisel edge land (flat width at the edge), from Kervan's own drawing (render only). */
+  chiselLandMm?: number | null;
   /** Full shank outline read from the drawing (render only); replaces the defaults above. */
   profile?: ShankProfile | null;
 }

@@ -25,6 +25,7 @@ const FORBIDDEN = [
   /price_usd_net_cents/,
   /part_prices/,
   /part_type/,
+  /drawing_overrides/,
 ];
 
 const files = [];

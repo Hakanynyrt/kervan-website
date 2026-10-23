@@ -1004,6 +1004,7 @@ export const MODELS_3D: Record<string, string> = {
   'kama-furukawa-f22': '/models/kama-furukawa-f22-03.glb',
   'kama-furukawa-hb20g': '/models/kama-furukawa-hb20g-02.glb',
   'kama-furukawa-hb30g': '/models/kama-furukawa-hb30g-02.glb',
+  'kama-indeco-mes-5000': '/models/kama-indeco-mes-5000-01.glb',
   'kama-krupp-hm-1500': '/models/kama-krupp-hm-1500-02.glb',
   'kama-krupp-hm-560': '/models/kama-krupp-hm-560-02.glb',
   'kama-krupp-hm-720': '/models/kama-krupp-hm-720-02.glb',
