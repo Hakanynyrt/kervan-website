@@ -116,7 +116,9 @@ for (const f of files) {
     brandOg++;
     if (!og) problems.push(`${rel}: brand with a pictured tip has no og:image`);
     else if (!og.startsWith(`${TIP_HOST}/tips/${key}-`))
-      problems.push(`${rel}: og:image ${og} is not its first pictured tip (${TIP_HOST}/tips/${key}-*)`);
+      problems.push(
+        `${rel}: og:image ${og} is not its first pictured tip (${TIP_HOST}/tips/${key}-*)`,
+      );
   } else {
     brandNoOg++;
     if (og) problems.push(`${rel}: sample-only brand must not use a borrowed og:image (${og})`);
@@ -148,5 +150,6 @@ if (problems.length) {
   process.exit(1);
 }
 process.stdout.write(
-  `check-dist: ${pages} pages ok (${indexable} indexable, all in the sitemap), ${total} files\n`,
+  `check-dist: ${pages} pages ok (${indexable} indexable, all in the sitemap), ${total} files; ` +
+    `/marka/ og:image ${brandOg} pages, ${brandNoOg} sample-only without\n`,
 );
