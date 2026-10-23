@@ -193,12 +193,13 @@ export function pageHead(pathname: string): PageHead {
   if (prod) {
     const loc = prod[lang];
     const image = prod.image ? `${SITE}${prod.image}` : undefined;
+    const preview = prod.ogImage ? `${SITE}${prod.ogImage}` : image;
     const title = `${loc.name} — ${m.siteName}`;
     return {
       ...common,
       title,
       description: loc.tagline,
-      ogImage: image ?? OG_IMAGE,
+      ogImage: preview ?? OG_IMAGE,
       ogType: 'product',
       jsonLd: [
         webPage(url, title, loc.tagline, lang),

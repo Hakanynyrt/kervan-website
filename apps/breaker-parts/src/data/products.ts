@@ -9,6 +9,9 @@ import type { Product } from '../types';
      formdadır.
 ═══════════════════════════════════════════════════════════════════════ */
 
+/** Studio renders of the shop's own 3D part models (kiriciparca.com), real size, no logos. */
+const PARCA = '/photos/parcalar';
+
 export const PRODUCTS: Product[] = [
   {
     slug: 'keski',
@@ -71,7 +74,9 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'tie-rod',
-    image: '',
+    image: `${PARCA}/tie-rod-1536-v2.webp`,
+    imageSrcSet: `${PARCA}/tie-rod-1024-v2.webp 1024w, ${PARCA}/tie-rod-1536-v2.webp 1536w`,
+    ogImage: `${PARCA}/og-tie-rod-v2.jpg`,
     tr: {
       name: 'Tie Rod (Gergi çubuğu)',
       tagline: 'Üst ve alt gövdeyi tek beden tutar.',
@@ -113,7 +118,9 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'alt-govde',
-    image: '',
+    image: `${PARCA}/alt-govde-1536-v2.webp`,
+    imageSrcSet: `${PARCA}/alt-govde-1024-v2.webp 1024w, ${PARCA}/alt-govde-1536-v2.webp 1536w`,
+    ogImage: `${PARCA}/og-alt-govde-v2.jpg`,
     tr: {
       name: 'Alt Gövde (Lower Housing)',
       tagline: 'Burçların ve keskinin yaşadığı yer.',
@@ -127,7 +134,9 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'saplama',
-    image: '',
+    image: `${PARCA}/saplama-1536-v2.webp`,
+    imageSrcSet: `${PARCA}/saplama-1024-v2.webp 1024w, ${PARCA}/saplama-1536-v2.webp 1536w`,
+    ogImage: `${PARCA}/og-saplama-v2.jpg`,
     tr: {
       name: 'Saplama (Stud)',
       tagline: 'Gövdeyi taşıyıcı plakaya bağlayan.',

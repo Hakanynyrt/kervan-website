@@ -61,6 +61,12 @@ export default function ProductDetail({ t, lang }: Props) {
                 {product.image ? (
                   <img
                     src={product.image}
+                    srcSet={product.imageSrcSet}
+                    sizes={
+                      product.imageSrcSet
+                        ? '(min-width: 1280px) 616px, (min-width: 1024px) 50vw, 100vw'
+                        : undefined
+                    }
                     alt={loc.name}
                     className="absolute inset-0 w-full h-full object-cover"
                     loading="eager"

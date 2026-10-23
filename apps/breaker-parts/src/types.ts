@@ -396,6 +396,11 @@ export interface Product {
   slug: string;
   /** Main image relative to /public, e.g. `/photos/uclar/uclar-yard.jpeg`. */
   image: string;
+  /** Optional `srcset` of the main image (same picture at more widths), e.g.
+   *  `/photos/parcalar/kama-1024-v2.webp 1024w, /photos/parcalar/kama-1536-v2.webp 1536w`. */
+  imageSrcSet?: string;
+  /** Optional 1200×630 link-preview picture (og:image) relative to /public; else `image`. */
+  ogImage?: string;
   tr: ProductLocale;
   en: ProductLocale;
   /** Optional sub-types — e.g. moil/blunt/asphalt for keski. */
