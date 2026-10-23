@@ -16,7 +16,7 @@ import { joinedSpelling } from './model-aliases';
 import { fmtNum } from './format';
 import { renderModel, renderTitle } from './part-caption';
 import { findRender } from './part-links';
-import { brandPath, LIST_PATH, PARTS_PATH, partPath } from './routes';
+import { brandPath, LIST_PATH, PARTS_PATH, partPath, type PartKey } from './routes';
 import { tipImgAbs } from './tip-img';
 import { tipOptions } from './tip-options';
 import type { PageProps } from './page-props';
@@ -64,6 +64,20 @@ const RETURN_POLICY = merchantReturnPolicy({
 
 /** The seller on every Offer, written out: its full node is on the home page only. */
 const SELLER_REF = { id: ORG_ID, name: ORG_TRADING_NAME, url: `${SITE}/` };
+
+/**
+ * Link-preview pictures (1200×630, `public/og/`) of the part group pages: a studio render of the
+ * shop's own 3D models with the group name in Turkish, so the Turkish pages only (no EN variant
+ * yet). A group missing here keeps no og:image. A changed picture gets a new file name.
+ */
+const PART_OG: Partial<Record<PartKey, string>> = {
+  'alt-govde': '/og/og-alt-govde-v1.jpg',
+  burc: '/og/og-burc-v1.jpg',
+  saplama: '/og/og-saplama-v1.jpg',
+  piston: '/og/og-piston-v1.jpg',
+  'asinma-plakasi': '/og/og-asinma-plakasi-v1.jpg',
+};
+const OG_SIZE = { width: 1200, height: 630 } as const;
 
 /** Meta descriptions longer than this lose the alias (Google cuts snippets around 155–160). */
 const DESC_MAX = 155;
@@ -174,10 +188,12 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       };
     case 'part': {
       const name = t.parts.items[model.part].name;
+      const og = lang === 'tr' ? PART_OG[model.part] : undefined;
       return {
         ...page,
         title: m.partTitle(name),
         description: m.partDesc(name, model.part === 'tamir-takimi'),
+        ...(og ? { ogImage: SITE + og, ogImageSize: OG_SIZE } : {}),
         jsonLd: crumbs([partsCrumb], name),
       };
     }

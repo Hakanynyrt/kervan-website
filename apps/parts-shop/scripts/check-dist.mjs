@@ -8,6 +8,7 @@
 // - no file in dist/ contains a forbidden string (third-party catalogue names, VEGA part
 //   numbers, private D1 columns); genuine OEM numbers are allowed, only through the
 //   "Muadil OEM no." field (src/lib/oem-numbers.ts, owner's decision);
+// - every og:image in /og/ on this host is in dist;
 // - at most MAX_FILES files (Pages limit).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -103,6 +104,13 @@ for (const f of files) {
         problems.push(`${rel}: JSON-LD does not parse`);
       }
     }
+    // A link-preview picture of our own /og/ folder must ship (public/og/, named in page-head.ts).
+    for (const m of s.matchAll(/<meta property="og:image" content="([^"]+)"/g))
+      if (
+        m[1].startsWith(`${SITE}/og/`) &&
+        !fs.existsSync(path.join(DIST, m[1].slice(SITE.length)))
+      )
+        problems.push(`${rel}: og:image ${m[1]} not in dist`);
     const noindex = /<meta name="robots" content="[^"]*noindex/.test(s);
     if (NOINDEX_PAGES.test(rel.replace(/\\/g, '/'))) {
       if (!noindex) problems.push(`${rel}: should be noindex`);
