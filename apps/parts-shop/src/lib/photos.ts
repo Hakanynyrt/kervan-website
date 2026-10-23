@@ -1487,6 +1487,21 @@ interface OtherPart {
   views: RenderView[];
 }
 /**
+ * Kama (tool pins) outside the 20-model kit, one sheet each: the Indeco MES 5000 kama from the owner's drawing photo
+ * (2026-10-23; the archive sheet agrees): obround section with full round ends, a half-round notch in each rounded
+ * edge near one end, chamfered ends. Black finish like the kit kamas.
+ */
+const OTHER_KEYS: OtherPart[] = [
+  {
+    make: 'Indeco',
+    model: 'MES 5000',
+    file: 'kama-indeco-mes-5000',
+    kind: 'retainerKey',
+    views: ['front', 'rear', 'side'],
+  },
+];
+
+/**
  * Furukawa FX pistons from the owner's drawings (photos of paper sheets, 2026-10-23): FX 175, FX 225, FX 275 and
  * FX 375. FX and FXJ of one size take the same piston (owner's sales list), so the 275 and 375 name both. No
  * drawing exists for the FXJ 475: its card shows the FX 375 / FXJ 375 pictures as a representative picture.
@@ -2337,6 +2352,7 @@ const DRAWN: Record<PartKey, readonly PartRender[]> = {
   ],
   kama: [
     ...PART_KIT.map(kitRender('kama', 'retainerKey', ['front', 'rear', 'side'])),
+    ...OTHER_KEYS.map(otherRender),
     ...RETAINER_PINS.map(otherRender),
     ...SMALL_PARTS.kama.map(smallRender),
   ],
