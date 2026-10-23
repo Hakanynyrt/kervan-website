@@ -98,13 +98,19 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       };
     case 'popular':
       return { ...page, title: m.popularTitle, description: m.popularDesc };
-    case 'brand':
+    case 'brand': {
+      // Link previews show the brand's most popular tip that has a picture of its own (rows are
+      // sorted by popularity). Never a borrowed sample picture (another maker's tip, shown
+      // labelled on the card): a brand with sample-only rows keeps the site default.
+      const key = model.rows.find((r) => r.image)?.image;
       return {
         ...page,
         title: m.brandTitle(model.brand),
         description: m.brandDesc(model.brand, model.rows.length),
+        ...(key ? { ogImage: tipImgAbs(key, SITE) } : {}),
         jsonLd: crumbs([partsCrumb, tipsCrumb], model.brand),
       };
+    }
     case 'cart':
       return { ...page, title: m.cartTitle };
     case 'legal': {
