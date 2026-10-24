@@ -132,6 +132,6 @@ if [[ -n $pimg ]]; then
 else
   echo "skip  no R2 part photo on https://kiriciparca.com/yedek-parca/burc yet"
 fi
-check https://kiriciparca.com/photos/parca/acilis-kabin-05-00-lg.webp 200 image/webp
+check https://kiriciparca.com/photos/parca/acilis-kabin-06-00-lg.webp 200 image/webp
 
 exit $fail
