@@ -27,6 +27,8 @@ const FORBIDDEN = [
   /part_prices/,
   /part_type/,
   /drawing_overrides/,
+  // Which breakers share a tip is ours alone: page data carries families with `fits: []`.
+  /"fits":\[\{/,
 ];
 
 const files = [];

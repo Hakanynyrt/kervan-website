@@ -124,9 +124,6 @@ export interface Dict {
       carrier: string;
       parts: string;
     };
-    /** Other breakers that take the same tip (catalogue families), capped. `title` when the page
-     *  has one tip family; `sized` per family when it has several ("Ø135 mm"). */
-    siblings: { title: string; sized: (size: string) => string; more: (n: number) => string };
   };
   popular: {
     title: string;
@@ -634,11 +631,6 @@ export const DICT: Record<Lang, Dict> = {
         types: 'Uç tipleri',
         carrier: 'Taşıyıcı sınıfı (yaklaşık)',
         parts: 'Bu kırıcı için ayrıca ürettiklerimiz',
-      },
-      siblings: {
-        title: 'Aynı uç bu kırıcılara da uyar',
-        sized: (size) => `${size} uç şu kırıcılara da uyar`,
-        more: (n) => `ve ${n} model daha`,
       },
     },
     list: {
@@ -1433,11 +1425,6 @@ export const DICT: Record<Lang, Dict> = {
         types: 'Tip types',
         carrier: 'Carrier class (approx.)',
         parts: 'We also make for this breaker',
-      },
-      siblings: {
-        title: 'The same tip also fits these breakers',
-        sized: (size) => `The ${size} tip also fits these breakers`,
-        more: (n) => `and ${n} more models`,
       },
     },
     list: {

@@ -1,10 +1,8 @@
 import { carrierTons, type FxRate } from '@kervan/tips';
 import TipProduct from '../components/TipProduct';
-import { FOCUS } from '../components/Layout';
 import type { Dict } from '../lib/dict';
 import { fmtNum } from '../lib/format';
 import { groovedFor } from '../lib/grooved';
-import { localePath } from '../lib/locale-path';
 import { brandPath, type PageModel } from '../lib/routes';
 import { sizeOrdinals, tipVariants } from '../lib/tip-options';
 import type { Lang } from '../types';
@@ -50,7 +48,6 @@ export default function Breaker({
       t={t}
     >
       <Facts model={model} lang={lang} t={t} />
-      <Siblings model={model} lang={lang} t={t} />
     </TipProduct>
   );
 }
@@ -108,44 +105,5 @@ function Facts({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
         ))}
       </dl>
     </section>
-  );
-}
-
-/**
- * Other breakers that take one of this page's tip families, as plain links. With several tip
- * sizes, one list per size under its size, so no breaker is listed as taking a size it does not.
- */
-function Siblings({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
-  const groups = model.siblings ?? [];
-  if (!groups.length) return null;
-  // One heading per tip size when the page has several (the size picker's sizes).
-  const sized = tipVariants(model.families).length > 1;
-  return (
-    <>
-      {groups.map((g, i) => (
-        <section key={i} aria-labelledby={`siblings-${i}`} className="mt-12 font-sans">
-          <h2 id={`siblings-${i}`} className="m-0 text-xl font-bold text-ink">
-            {sized
-              ? t.breaker.siblings.sized(t.tipSize(fmtNum(g.diameterMm, lang), g.ord))
-              : t.breaker.siblings.title}
-          </h2>
-          <ul className="m-0 mt-3 flex list-none flex-wrap gap-2 p-0 text-sm">
-            {g.items.map((x) => (
-              <li key={x.path}>
-                <a
-                  href={localePath(x.path, lang)}
-                  className={`inline-flex min-h-11 items-center rounded-sm border border-hair bg-bg px-3 text-ink hover:border-hair-strong ${FOCUS}`}
-                >
-                  {x.name}
-                </a>
-              </li>
-            ))}
-          </ul>
-          {g.more > 0 && (
-            <p className="m-0 mt-2 text-sm text-ink-mid">{t.breaker.siblings.more(g.more)}</p>
-          )}
-        </section>
-      ))}
-    </>
   );
 }
