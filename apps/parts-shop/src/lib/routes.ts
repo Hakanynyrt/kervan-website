@@ -401,14 +401,14 @@ export function groupBreakers(c: PublicCatalog): {
     const same = breakers.get(slug);
     if (same) {
       for (const f of g.families) if (!same.families.includes(f)) same.families.push(f);
-      same.aliases = modelAliases(same.model, [...same.aliases, ...g.spellings.keys()]);
+      same.aliases = modelAliases(same.model, [...same.aliases, ...g.spellings.keys()], same.brand);
       continue;
     }
     breakers.set(slug, {
       name: breakerName({ brand: g.brand, model }),
       brand: g.brand,
       model,
-      aliases: modelAliases(model, [...g.spellings.keys()]),
+      aliases: modelAliases(model, [...g.spellings.keys()], g.brand),
       families: g.families,
       ...(g.extra ? { extra: g.extra } : {}),
     });

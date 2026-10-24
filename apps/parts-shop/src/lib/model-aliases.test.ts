@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { joinedSpelling, modelAliases } from './model-aliases.ts';
+import { brandNumberSpelling, joinedSpelling, modelAliases } from './model-aliases.ts';
 
 test('joinedSpelling joins the letters to the first number only', () => {
   assert.equal(joinedSpelling('HB 20G'), 'HB20G');
@@ -28,4 +28,13 @@ test('modelAliases: spellings with stray punctuation are left out', () => {
   assert.deepEqual(modelAliases('HM 60', ['HM60 (61 , 62)']), ['HM60']);
   assert.deepEqual(modelAliases('PMV 90/ P 3SH', ['PMV90/ P 3 SH']), []);
   assert.deepEqual(modelAliases('PMV 1000', ['PMV 1000/ P 23SH']), ['PMV1000']);
+});
+
+test('modelAliases: series letters that repeat the make add the make-plus-number form', () => {
+  assert.equal(brandNumberSpelling('MSB', 'MS 200'), '200');
+  assert.equal(brandNumberSpelling('MTB', 'MTB 215'), null);
+  assert.equal(brandNumberSpelling('Furukawa', 'HB 20G'), null);
+  assert.equal(brandNumberSpelling('Furukawa', 'F 22'), null);
+  assert.deepEqual(modelAliases('MS 200', ['MS 200'], 'MSB'), ['MS200', '200']);
+  assert.deepEqual(modelAliases('HB 20G', ['HB 20G'], 'Furukawa'), ['HB20G']);
 });
