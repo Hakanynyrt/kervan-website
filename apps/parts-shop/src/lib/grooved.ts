@@ -1,14 +1,21 @@
 import { breakerKeys } from '@kervan/tips';
-import { GROOVED_TOOLS } from './photos';
+import { SPECIAL_TOOLS } from './photos';
 
-export type GroovedTool = (typeof GROOVED_TOOLS)[number];
+export type SpecialTool = (typeof SPECIAL_TOOLS)[number];
 
 /**
- * The tools with dust grooves we model for a breaker ("Brand Model"), matched with
- * `breakerKeys`. The list rows' "Toz kanallı" badge and the product page's section both use
- * this, so a badge never points at a page without the section.
+ * The special tools we model for a breaker ("Brand Model"), matched with `breakerKeys`: tools
+ * with dust grooves and relieved tools. The product page's section shows all of them.
  */
-export function groovedFor(name: string): GroovedTool[] {
+export function specialToolsFor(name: string): SpecialTool[] {
   const keys = new Set(breakerKeys(name));
-  return GROOVED_TOOLS.filter((g) => breakerKeys(g.breaker).some((k) => keys.has(k)));
+  return SPECIAL_TOOLS.filter((g) => breakerKeys(g.breaker).some((k) => keys.has(k)));
+}
+
+/**
+ * Only the tools with dust grooves of a breaker. The list rows' "Toz kanallı" badge and filter
+ * use this, so a badge never points at a page without such a tool.
+ */
+export function groovedFor(name: string): SpecialTool[] {
+  return specialToolsFor(name).filter((g) => g.kind === 'grooved');
 }

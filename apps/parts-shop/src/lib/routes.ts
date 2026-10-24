@@ -20,11 +20,11 @@ import {
 } from './part-links';
 import { listedParts, type ListedPart } from './listed-parts';
 import { groupPrices, resolvePartPrices } from './part-prices';
-import { groovedFor } from './grooved';
+import { groovedFor, specialToolsFor } from './grooved';
 import { sizeOrdinals, tipOptions, tipVariants } from './tip-options';
 import { OEM_NUMBERS } from './oem-numbers';
 import { modelAliases } from './model-aliases';
-import { BREAKER_PHOTOS, GROOVED_TOOLS, PART_RENDERS, type PartRender } from './photos';
+import { BREAKER_PHOTOS, PART_RENDERS, SPECIAL_TOOLS, type PartRender } from './photos';
 import type { FinderMake } from './finder';
 import type { TipGroupStats } from '../types';
 
@@ -508,17 +508,15 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
   });
   cards.sort(byName);
   // Tools with dust grooves: a badge on the list rows, linking to the product page's section.
-  const groovedSeen = new Set<string>();
+  const specialSeen = new Set<string>();
   for (const x of cards) {
-    const g = groovedFor(x.name);
-    if (!g.length) continue;
-    x.grooved = true;
-    for (const t of g) groovedSeen.add(t.breaker);
+    for (const t of specialToolsFor(x.name)) specialSeen.add(t.breaker);
+    if (groovedFor(x.name).length) x.grooved = true;
   }
   if (!demo)
-    for (const b of new Set(GROOVED_TOOLS.map((g) => g.breaker)))
-      if (!groovedSeen.has(b))
-        console.warn(`buildPages: grooved tools of "${b}" match no breaker of the catalog`);
+    for (const b of new Set(SPECIAL_TOOLS.map((g) => g.breaker)))
+      if (!specialSeen.has(b))
+        console.warn(`buildPages: special tools of "${b}" match no breaker of the catalog`);
   const tipPaths = new Map(cards.map((x) => [fold(x.name), x.path]));
   const popular = cards.filter((x) => x.popularTier !== null).sort(byPopularity);
   const hasPopular = popular.length > 0;

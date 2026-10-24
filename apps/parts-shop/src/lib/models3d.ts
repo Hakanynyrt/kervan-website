@@ -1062,6 +1062,7 @@ export const MODELS_3D: Record<string, string> = {
   'piston-furukawa-fx-375': '/models/piston-furukawa-fx-375-tasli-02.glb',
   'piston-furukawa-hb20g': '/models/piston-furukawa-hb20g-tasli-05.glb',
   'piston-furukawa-hb30g': '/models/piston-furukawa-hb30g-tasli-05.glb',
+  'piston-indeco-mes-5000': '/models/piston-indeco-mes-5000-tasli-01.glb',
   'piston-krupp-hm-1500': '/models/piston-krupp-hm-1500-tasli-04.glb',
   'piston-krupp-hm-560': '/models/piston-krupp-hm-560-tasli-04.glb',
   'piston-krupp-hm-720': '/models/piston-krupp-hm-720-tasli-04.glb',
