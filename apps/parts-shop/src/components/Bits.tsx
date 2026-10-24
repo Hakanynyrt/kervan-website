@@ -5,6 +5,8 @@ import type { Dict } from '../lib/dict';
 import { LEGAL, legalPath } from '../lib/legal';
 import { localePath } from '../lib/locale-path';
 import { PLANT_PHOTOS } from '../lib/photos';
+import type { PartKey } from '../lib/routes';
+import { warrantyMonths } from '../lib/warranty';
 import type { Lang } from '../types';
 import { FOCUS, whatsappHref } from './Layout';
 import { photoImg, photoSet } from '../lib/photo-url';
@@ -265,14 +267,18 @@ export function PageTitle({ children }: { children: ReactNode }) {
 }
 
 /** Quality, shipping, payment and warranty lines, with the warranty scope below. */
-export function Terms({ t }: { t: Dict }) {
+export function Terms({ t, part }: { t: Dict; part?: PartKey }) {
+  const rows: [string, string][] = [
+    ...t.terms.rows,
+    [t.terms.warrantyLabel, t.terms.warranty(warrantyMonths(part))],
+  ];
   return (
     <section aria-labelledby="terms" className="font-sans text-sm">
       <h2 id="terms" className="m-0 text-base font-bold text-ink">
         {t.terms.title}
       </h2>
       <dl className="m-0 mt-2">
-        {t.terms.rows.map(([k, v]) => (
+        {rows.map(([k, v]) => (
           <div key={k} className="flex justify-between gap-4 border-t border-hair py-2.5">
             <dt className="text-ink-mid">{k}</dt>
             <dd className="m-0 text-right text-ink">{v}</dd>

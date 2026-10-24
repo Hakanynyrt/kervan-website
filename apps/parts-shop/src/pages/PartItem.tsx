@@ -155,6 +155,7 @@ export default function PartItem({
               lang={lang}
               t={t}
               note={priceNote(r.kind, t)}
+              part={model.part}
             />
           ) : (
             <QuotePanel
@@ -165,6 +166,7 @@ export default function PartItem({
               setQty={setQty}
               text={text}
               t={t}
+              part={model.part}
             />
           )}
         </aside>

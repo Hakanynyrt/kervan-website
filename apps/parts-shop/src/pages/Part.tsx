@@ -402,6 +402,7 @@ export default function Part({
             setQty={setQty}
             text={text}
             t={t}
+            part={model.part}
           />
         </aside>
       </div>
@@ -524,6 +525,7 @@ export function QuotePanel({
   setQty,
   text,
   t,
+  part,
 }: {
   name: string;
   breaker: string;
@@ -532,6 +534,8 @@ export function QuotePanel({
   setQty: (v: number) => void;
   text: string;
   t: Dict;
+  /** The part group, for its warranty period in the sale terms. */
+  part?: PartKey;
 }) {
   return (
     <div className="lg:sticky lg:top-6">
@@ -572,7 +576,7 @@ export function QuotePanel({
         </div>
       </div>
       <div className="mt-6">
-        <Terms t={t} />
+        <Terms t={t} part={part} />
       </div>
     </div>
   );

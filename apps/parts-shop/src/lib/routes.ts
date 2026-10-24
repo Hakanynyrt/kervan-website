@@ -167,10 +167,6 @@ export type PageModel =
       families: PublicFamily[];
       /** Other spellings of the model ("HB20G"): merged catalogue spellings and the no-space form. */
       aliases: string[];
-      /** Other breakers per tip size of this page (`tipVariants`, the sizes its picker offers;
-       *  each capped at SIBLINGS, `more` past it): a breaker is listed only under the size whose
-       *  family it shares, so a two-size page never claims that its other tip fits it. */
-      siblings: SiblingGroup[];
       /** Other parts we model for this breaker (links to their cards). */
       parts: PartLink[];
       demo: boolean;
@@ -343,18 +339,6 @@ interface BreakerEntry {
   extra?: PublicExtra;
 }
 
-/** Sibling breakers shown per tip family on a breaker page ("Aynı uç bu kırıcılara da uyar"). */
-const SIBLINGS = 12;
-
-/** Breakers that take one tip size of a breaker page (a family of it): the size, and the links. */
-export interface SiblingGroup {
-  diameterMm: number;
-  /** Ordinal among the page's sizes of the same diameter (`sizeOrdinals`), else null. */
-  ord: number | null;
-  items: { name: string; path: string }[];
-  more: number;
-}
-
 /**
  * The breakers of a catalog, one per model: names as the catalogue spells them are cleaned up
  * for display (one spelling per maker, lists split), spellings of one model that differ only
@@ -447,7 +431,9 @@ function sampleFor(
           best = { name: o.name, family: f, gap, dm };
       }
     }
-    return best && best.gap <= maxGap ? { name: best.name, family: best.family } : null;
+    return best && best.gap <= maxGap
+      ? { name: best.name, family: withoutFits(best.family) }
+      : null;
   };
   return pick(true, 15) ?? pick(false, 30);
 }
@@ -458,6 +444,12 @@ function sampleFor(
  * breaker. Family pages stay for the permanent codes and for tips with no listed breaker.
  * Best-sellers are their own page, not a badge on every card.
  */
+/**
+ * A family as page data, without the breakers it fits: which breakers share a tip is ours alone
+ * (owner, 2026-10-24: "bu bilgilere yalnız biz ulaşalım"), so it never reaches a page or its JSON.
+ */
+const withoutFits = (f: PublicFamily): PublicFamily => ({ ...f, fits: [] });
+
 export function buildPages(c: PublicCatalog): BuiltPage[] {
   const demo = c.demo === true;
   const { breakers } = groupBreakers(c);
@@ -528,36 +520,6 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       if (!groovedSeen.has(b))
         console.warn(`buildPages: grooved tools of "${b}" match no breaker of the catalog`);
   const tipPaths = new Map(cards.map((x) => [fold(x.name), x.path]));
-  // Breakers by tip family, for each breaker page's "same tip also fits" links.
-  const byFamily = new Map<PublicFamily, string[]>();
-  for (const [slug, e] of breakers)
-    for (const f of e.families) byFamily.set(f, [...(byFamily.get(f) ?? []), slug]);
-  const siblingsOf = (slug: string, e: BreakerEntry): SiblingGroup[] => {
-    const variants = tipVariants(e.families);
-    const ords = sizeOrdinals(variants);
-    return variants.flatMap((v, i) => {
-      const others = [...new Set(v.families.flatMap((f) => byFamily.get(f) ?? []))]
-        .filter((x) => x !== slug)
-        .map((x) => [x, breakers.get(x)!] as const)
-        // Same make first, then by name.
-        .sort(
-          ([, a], [, b]) =>
-            Number(b.brand === e.brand) - Number(a.brand === e.brand) ||
-            a.name.localeCompare(b.name, 'tr', { numeric: true }),
-        );
-      if (!others.length) return [];
-      return [
-        {
-          diameterMm: v.diameterMm,
-          ord: ords[i],
-          items: others
-            .slice(0, SIBLINGS)
-            .map(([x, o]) => ({ name: o.name, path: breakerPath(x) })),
-          more: Math.max(0, others.length - SIBLINGS),
-        },
-      ];
-    });
-  };
   const popular = cards.filter((x) => x.popularTier !== null).sort(byPopularity);
   const hasPopular = popular.length > 0;
   const partPrices = resolvePartPrices(c.partPrices ?? []);
@@ -700,9 +662,8 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         })(),
         brand: e.brand,
         model: e.model,
-        families: e.families,
+        families: e.families.map(withoutFits),
         aliases: e.aliases,
-        siblings: siblingsOf(slug, e),
         parts: partsForBreaker(e.name),
         demo,
         hasPopular,
@@ -710,7 +671,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     })),
     ...c.families.map((family) => ({
       path: familyPath(family.code),
-      model: { kind: 'family' as const, family, demo, hasPopular },
+      model: { kind: 'family' as const, family: withoutFits(family), demo, hasPopular },
     })),
   ];
   // Item pages are named after renderAnchor: two renders with one anchor would share a URL.

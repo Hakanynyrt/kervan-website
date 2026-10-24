@@ -25,14 +25,17 @@ import {
   type PublicCatalog,
   type SkuRow,
 } from '../../../packages/tips/src/index.ts';
+import {
+  DRAWINGS_SQL,
+  FAMILIES_SQL,
+  FITS_SQL,
+  SKUS_SQL,
+} from '../../../packages/tips/src/catalog-sql.ts';
 
 const APP = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(APP, '.catalog', 'catalog.json');
 const log = (s: string) => process.stdout.write(`build-catalog: ${s}\n`);
 
-const FAMILIES_SQL = 'SELECT id, code, attrs, popular_tier FROM families WHERE published = 1';
-const SKUS_SQL =
-  'SELECT s.family_id, s.code, s.tip_type, s.length_min_mm, s.length_max_mm, s.weight_min_kg, s.weight_max_kg, s.tip_angle_deg, s.price_usd_net_cents, s.stock_qty, s.lead_time_days FROM skus s JOIN families f ON f.id = s.family_id WHERE s.published = 1 AND f.published = 1';
 /** Invented part prices for SHOP_DEMO_PART_PRICES=1 (local look at the UI; not real prices). */
 const DEMO_PART_PRICES: PartPrice[] = [
   ['Rammer', 'E68', 'KAFA_BURCU', 9900],
@@ -52,12 +55,8 @@ const DEMO_PART_PRICES: PartPrice[] = [
 
 const PART_PRICES_SQL =
   "SELECT brand, model, part_type, variant, item, price_usd_net_cents FROM part_prices WHERE batch = (SELECT value FROM settings WHERE key = 'part_prices_batch')";
-/** Kervan's own drawings over the catalogue data (migration 0004; see drawings.ts). */
-const DRAWINGS_SQL = 'SELECT family_code, data FROM drawing_overrides';
 const EXTRAS_SQL =
   'SELECT brand, model, slug, tip_types, diameter_mm, price_usd_net_cents FROM extra_products WHERE published = 1 ORDER BY brand, model';
-const FITS_SQL =
-  'SELECT ft.family_id, b.brand, b.model, b.slug FROM fitments ft JOIN breakers b ON b.id = ft.breaker_id JOIN families f ON f.id = ft.family_id WHERE f.published = 1 ORDER BY b.brand, b.model';
 
 function query<T>(db: string, sql: string): T[] {
   const out = execFileSync(

@@ -124,9 +124,6 @@ export interface Dict {
       carrier: string;
       parts: string;
     };
-    /** Other breakers that take the same tip (catalogue families), capped. `title` when the page
-     *  has one tip family; `sized` per family when it has several ("Ø135 mm"). */
-    siblings: { title: string; sized: (size: string) => string; more: (n: number) => string };
   };
   popular: {
     title: string;
@@ -315,7 +312,17 @@ export interface Dict {
   };
   brand: { title: (brand: string) => string; lead: (n: number) => string };
   /** Sales terms shown on every product page: quality, shipping, payment, warranty. */
-  terms: { title: string; rows: [string, string][]; note: string };
+  terms: {
+    title: string;
+    /** Fit, shipping, payment; the warranty row follows (`warranty` / `warrantyAll`). */
+    rows: [string, string][];
+    warrantyLabel: string;
+    /** One product's warranty row, by months from `warrantyMonths` (`src/lib/warranty.ts`). */
+    warranty: (months: number) => string;
+    /** Where no single product is meant (home order box): both periods. */
+    warrantyAll: string;
+    note: string;
+  };
   parts: {
     title: string;
     lead: string;
@@ -635,11 +642,6 @@ export const DICT: Record<Lang, Dict> = {
         carrier: 'Taşıyıcı sınıfı (yaklaşık)',
         parts: 'Bu kırıcı için ayrıca ürettiklerimiz',
       },
-      siblings: {
-        title: 'Aynı uç bu kırıcılara da uyar',
-        sized: (size) => `${size} uç şu kırıcılara da uyar`,
-        more: (n) => `ve ${n} model daha`,
-      },
     },
     list: {
       title: 'Tüm kırıcı uçları',
@@ -845,8 +847,11 @@ export const DICT: Record<Lang, Dict> = {
         ['Uyum', 'OEM ölçülerinde üretilir, birebir uyumludur'],
         ['Kargo', 'Alıcıya aittir; tutarı sipariş onayında bildirilir'],
         ['Ödeme', 'Kredi kartı veya havale/EFT'],
-        ['Garanti', 'Teslimden itibaren 2 ay, malzeme ve üretim hatalarına karşı'],
       ],
+      warrantyLabel: 'Garanti',
+      warranty: (m) => `Teslimden itibaren ${m} ay, malzeme ve üretim hatalarına karşı`,
+      warrantyAll:
+        'Teslimden itibaren alt gövde ve pistonlarda 6 ay, diğer ürünlerde 2 ay; malzeme ve üretim hatalarına karşı',
       note: 'Ürünlerimiz Kervan Makina üretimidir, kırıcı üreticisinin orijinal parçası değildir; marka ve model adları yalnızca uyumu belirtir. Garanti malzeme ve üretim (ısıl işlem dahil) hatalarını kapsar; normal aşınma, boşta vuruş, ucu levye gibi kullanma, yanal veya eğik vuruş, aşınmış burç ile çalışma, yağlamasız kullanma ve yanlış uç seçiminden doğan hasarlar kapsam dışıdır. İnceleme için kırık parça ve fotoğrafları istenir.',
     },
     parts: {
@@ -1434,11 +1439,6 @@ export const DICT: Record<Lang, Dict> = {
         carrier: 'Carrier class (approx.)',
         parts: 'We also make for this breaker',
       },
-      siblings: {
-        title: 'The same tip also fits these breakers',
-        sized: (size) => `The ${size} tip also fits these breakers`,
-        more: (n) => `and ${n} more models`,
-      },
     },
     list: {
       title: 'All breaker tips',
@@ -1644,8 +1644,11 @@ export const DICT: Record<Lang, Dict> = {
         ['Fit', 'Made to OEM dimensions, a direct fit'],
         ['Shipping', 'Paid by the buyer; the amount is given in the order confirmation'],
         ['Payment', 'Credit card or bank transfer'],
-        ['Warranty', '2 months from delivery, against material and manufacturing defects'],
       ],
+      warrantyLabel: 'Warranty',
+      warranty: (m) => `${m} months from delivery, against material and manufacturing defects`,
+      warrantyAll:
+        'From delivery: 6 months on front heads and pistons, 2 months on all other products; against material and manufacturing defects',
       note: 'Our products are made by Kervan Makina and are not the breaker maker’s original parts; make and model names only show the fit. The warranty covers material and manufacturing (including heat treatment) defects; normal wear, blank firing, prying with the tip, side or angled strikes, working with a worn bushing, running without grease and choosing the wrong tip are not covered. We ask for the broken part and photos to assess a claim.',
     },
     parts: {
