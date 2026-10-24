@@ -20,18 +20,18 @@ import { FOCUS } from './Layout';
 type Group = 'tips' | PartKey;
 
 const BASE = '/photos/parca/acilis';
-/** Final (opened) picture, `-{sm,lg}.webp`; the frames are `<BASE>-kabin-05-NN` (top cover off,
- *  housing sliding away, KABIN of them) and `<BASE>-kare-05-NN` (our parts opening, FRAMES of
+/** Final (opened) picture, `-{sm,lg}.webp`; the frames are `<BASE>-kabin-06-NN` (top cover off,
+ *  housing sliding away, KABIN of them) and `<BASE>-kare-06-NN` (our parts opening, FRAMES of
  *  them). All are transparent (part, contact shadow, faint floor reflection): the stage behind
  *  them is drawn by the page per theme (globals.css `--kv-stage`). */
-const FINAL = `${BASE}-acik-04`;
+const FINAL = `${BASE}-acik-05`;
 const KABIN = 36;
 const FRAMES = 48;
 /** Two sizes (the frames count against Pages' file limit): the full 2864 px render (`-lg`) and,
  *  for screens up to SMALL_MQ, a 1280 px copy (`-md`, 2026-10-22: phones fetched ~3 MB of 2864 px
  *  frames; the 1280 px set is ~1.6 MB). */
 const src = (kind: 'kabin' | 'kare', i: number, size: 'md' | 'lg' = 'lg') =>
-  `${BASE}-${kind}-05-${String(i).padStart(2, '0')}-${size}.webp`;
+  `${BASE}-${kind}-06-${String(i).padStart(2, '0')}-${size}.webp`;
 const SMALL_MQ = '(max-width: 900px)';
 /** Width of the `-md` frames. */
 const FRAME_MD_PX = 1280;
@@ -50,39 +50,40 @@ type Box = [number, number, number, number];
 /** Left to right along the breaker: group, boxes (pointer targets), callout (number position) and
  *  the point its leader line ends on. */
 const SPOTS: { g: Group; boxes: Box[]; at: [number, number]; to: [number, number] }[] = [
-  { g: 'akumulator', boxes: [[58, 186, 472, 374]], at: [200, 96], to: [200, 196] },
+  { g: 'akumulator', boxes: [[44, 168, 548, 392]], at: [296, 96], to: [296, 176] },
   {
     g: 'saplama',
     boxes: [
-      [516, 90, 1144, 198],
-      [528, 404, 1148, 540],
+      [516, 72, 1228, 240],
+      [524, 368, 1228, 560],
     ],
-    at: [830, 42],
-    to: [830, 116],
+    at: [1290, 90],
+    to: [1222, 120],
   },
-  { g: 'piston', boxes: [[684, 272, 1114, 344]], at: [900, 236], to: [900, 280] },
+  { g: 'piston', boxes: [[716, 262, 1228, 376]], at: [960, 440], to: [960, 370] },
   {
     g: 'burc',
     boxes: [
-      [1164, 272, 1264, 366],
-      [1750, 288, 1888, 402],
+      [1220, 248, 1372, 392],
+      [1828, 264, 1996, 432],
     ],
-    at: [1819, 222],
-    to: [1819, 292],
+    at: [1912, 190],
+    to: [1912, 266],
   },
-  { g: 'alt-govde', boxes: [[1306, 230, 1696, 436]], at: [1250, 196], to: [1318, 244] },
-  { g: 'kama', boxes: [[1534, 70, 1586, 238]], at: [1652, 56], to: [1586, 88] },
+  { g: 'alt-govde', boxes: [[1380, 232, 1792, 432]], at: [1300, 470], to: [1392, 420] },
+  { g: 'kama', boxes: [[1630, 64, 1732, 250]], at: [1560, 56], to: [1630, 96] },
   {
     g: 'asinma-plakasi',
     boxes: [
-      [1344, 496, 1700, 556],
-      [1344, 116, 1706, 156],
-      [1948, 254, 1984, 446],
+      [1389, 130, 1504, 162],
+      [1389, 484, 1504, 522],
+      [1606, 500, 1786, 536],
+      [2004, 232, 2092, 480],
     ],
-    at: [1764, 572],
-    to: [1700, 534],
+    at: [2048, 570],
+    to: [2048, 482],
   },
-  { g: 'tips', boxes: [[2050, 316, 2806, 418]], at: [2430, 254], to: [2430, 330] },
+  { g: 'tips', boxes: [[2100, 288, 2828, 448]], at: [2470, 226], to: [2470, 300] },
 ];
 /** Groups not in the picture, listed after the numbered ones. */
 const EXTRA: Group[] = ['tamir-takimi'];
