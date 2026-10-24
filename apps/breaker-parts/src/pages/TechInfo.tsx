@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { Suspense, lazy, useEffect, useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import {
   durations,
@@ -12,11 +12,21 @@ import type { DictBlock, Lang, TechContent } from '../types';
 import type { TechAuth } from '../lib/use-tech-auth';
 import { useVegaCatalog } from '../lib/use-vega-catalog';
 import { DrawingsContext, useVegaDrawings } from '../lib/use-vega-drawings';
+import { useTechFits } from '../lib/use-tech-fits';
 import CatalogTab from './tech/CatalogTab';
+import { FITS_HASH } from './tech/fits-hash';
 
-type Tab = 'general' | 'catalog';
-const tabFromHash = (): Tab =>
-  typeof window !== 'undefined' && window.location.hash === '#katalog' ? 'catalog' : 'general';
+// Its own chunk (search code, make spellings): downloaded only when the tab is opened.
+const FitsTab = lazy(() => import('./tech/FitsTab'));
+
+type Tab = 'general' | 'catalog' | 'fits';
+const tabFromHash = (): Tab => {
+  if (typeof window === 'undefined') return 'general';
+  const h = window.location.hash;
+  if (h === '#katalog') return 'catalog';
+  if (h === FITS_HASH || h.startsWith(`${FITS_HASH}/`)) return 'fits';
+  return 'general';
+};
 
 interface Props {
   t: DictBlock;
@@ -44,11 +54,13 @@ export default function TechInfo({ t, lang, tech }: Props) {
     window.history.replaceState(
       null,
       '',
-      next === 'catalog' ? '#katalog' : window.location.pathname,
+      next === 'catalog' ? '#katalog' : next === 'fits' ? FITS_HASH : window.location.pathname,
     );
   };
   // The catalog is fetched only after sign-in and only when its tab is opened.
   const catalog = useVegaCatalog(tech.state === 'authed' && tab === 'catalog', tech.logout);
+  // Shared tips: fetched when its tab is first opened, kept until sign-out.
+  const fits = useTechFits(tech.state === 'authed', tab === 'fits', tech.logout);
 
   if (tech.state === 'authed' && tech.content) {
     const c = tech.content[lang] ?? tech.content.tr;
@@ -62,6 +74,7 @@ export default function TechInfo({ t, lang, tech }: Props) {
           tab={tab}
           selectTab={selectTab}
           catalog={catalog}
+          fits={fits}
         />
       );
   }
@@ -80,8 +93,13 @@ export default function TechInfo({ t, lang, tech }: Props) {
 }
 
 function Tabs({ t, tab, onSelect }: { t: DictBlock; tab: Tab; onSelect: (x: Tab) => void }) {
-  const order: Tab[] = ['general', 'catalog'];
-  const label = (x: Tab) => (x === 'general' ? t.catalogUi.tabGeneral : t.catalogUi.tabCatalog);
+  const order: Tab[] = ['general', 'catalog', 'fits'];
+  const label = (x: Tab) =>
+    x === 'general'
+      ? t.catalogUi.tabGeneral
+      : x === 'catalog'
+        ? t.catalogUi.tabCatalog
+        : t.fitsUi.tab;
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
     e.preventDefault();
@@ -91,7 +109,12 @@ function Tabs({ t, tab, onSelect }: { t: DictBlock; tab: Tab; onSelect: (x: Tab)
     document.getElementById(`tech-tab-${next}`)?.focus();
   };
   return (
-    <div role="tablist" aria-label={t.catalogUi.tabsLabel} className="flex gap-2" onKeyDown={onKey}>
+    <div
+      role="tablist"
+      aria-label={t.catalogUi.tabsLabel}
+      className="flex flex-wrap gap-2"
+      onKeyDown={onKey}
+    >
       {order.map((x) => (
         <button
           key={x}
@@ -123,6 +146,7 @@ function Content({
   tab,
   selectTab,
   catalog,
+  fits,
 }: {
   c: TechContent;
   t: DictBlock;
@@ -131,6 +155,7 @@ function Content({
   tab: Tab;
   selectTab: (x: Tab) => void;
   catalog: ReturnType<typeof useVegaCatalog>;
+  fits: ReturnType<typeof useTechFits>;
 }) {
   // Drawings are fetched when the first detail panel opens; the state lives here so it
   // survives tab switches and is dropped with this component on sign-out.
@@ -164,6 +189,19 @@ function Content({
             />
           </DrawingsContext.Provider>
         </motion.div>
+      )}
+      {tab === 'fits' && (
+        <div
+          id="tech-panel-fits"
+          role="tabpanel"
+          tabIndex={-1}
+          aria-labelledby="tech-tab-fits"
+          className="max-w-[1280px] mx-auto px-4 md:px-8"
+        >
+          <Suspense fallback={<p className="font-sans text-ink-mid m-0">{t.fitsUi.loading}</p>}>
+            <FitsTab t={t} status={fits.status} fits={fits.fits} retry={fits.retry} />
+          </Suspense>
+        </div>
       )}
       {tab === 'general' && (
         <div
