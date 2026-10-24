@@ -2451,7 +2451,7 @@ export const PART_RENDERS = Object.fromEntries(
 export const GROUP_COVERS: Partial<
   Record<PartKey, { base: string; contain?: boolean; xs?: boolean }>
 > = {
-  'alt-govde': { base: redrawn('/photos/parca/alt-govde-mtb-220-burclu-on-01'), contain: true },
+  'alt-govde': { base: redrawn('/photos/parca/alt-govde-mtb-210-ii-burclu-on-01'), contain: true },
   kama: { base: redrawn('/photos/parca/kama-mtb-150-vitrin-02'), xs: true },
   saplama: { base: redrawn('/photos/parca/saplama-takim-mtb-150-vitrin-01'), xs: true },
   'asinma-plakasi': { base: redrawn('/photos/parca/asinma-set-mtb-150-vitrin-01'), xs: true },
