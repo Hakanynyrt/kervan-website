@@ -851,7 +851,7 @@ export const DICT: Record<Lang, Dict> = {
       warrantyLabel: 'Garanti',
       warranty: (m) => `Teslimden itibaren ${m} ay, malzeme ve üretim hatalarına karşı`,
       warrantyAll:
-        'Teslimden itibaren alt gövde ve pistonlarda 6 ay, diğer ürünlerde 2 ay; malzeme ve üretim hatalarına karşı',
+        'Teslimden itibaren alt gövde ve pistonlarda 6 ay, burçlarda 3 ay, diğer ürünlerde 2 ay; malzeme ve üretim hatalarına karşı',
       note: 'Ürünlerimiz Kervan Makina üretimidir, kırıcı üreticisinin orijinal parçası değildir; marka ve model adları yalnızca uyumu belirtir. Garanti malzeme ve üretim (ısıl işlem dahil) hatalarını kapsar; normal aşınma, boşta vuruş, ucu levye gibi kullanma, yanal veya eğik vuruş, aşınmış burç ile çalışma, yağlamasız kullanma ve yanlış uç seçiminden doğan hasarlar kapsam dışıdır. İnceleme için kırık parça ve fotoğrafları istenir.',
     },
     parts: {
@@ -1648,7 +1648,7 @@ export const DICT: Record<Lang, Dict> = {
       warrantyLabel: 'Warranty',
       warranty: (m) => `${m} months from delivery, against material and manufacturing defects`,
       warrantyAll:
-        'From delivery: 6 months on front heads and pistons, 2 months on all other products; against material and manufacturing defects',
+        'From delivery: 6 months on front heads and pistons, 3 months on bushings, 2 months on all other products; against material and manufacturing defects',
       note: 'Our products are made by Kervan Makina and are not the breaker maker’s original parts; make and model names only show the fit. The warranty covers material and manufacturing (including heat treatment) defects; normal wear, blank firing, prying with the tip, side or angled strikes, working with a worn bushing, running without grease and choosing the wrong tip are not covered. We ask for the broken part and photos to assess a claim.',
     },
     parts: {
