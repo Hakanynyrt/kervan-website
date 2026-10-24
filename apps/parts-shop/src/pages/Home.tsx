@@ -678,7 +678,7 @@ export default function Home({
                 </a>
               </div>
               <dl className="m-0 mt-4">
-                {t.terms.rows.map(([k, v]) => (
+                {[...t.terms.rows, [t.terms.warrantyLabel, t.terms.warrantyAll]].map(([k, v]) => (
                   <div key={k} className="flex gap-4 border-t border-hair py-2">
                     <dt className="w-16 shrink-0 text-ink-mid">{k}</dt>
                     <dd className="m-0 text-ink">{v}</dd>

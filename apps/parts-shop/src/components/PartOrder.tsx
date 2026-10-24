@@ -5,7 +5,7 @@ import { addToCart } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { fmtDate, fmtTry, fmtUsd } from '../lib/price';
-import { CART_PATH } from '../lib/routes';
+import { CART_PATH, type PartKey } from '../lib/routes';
 import type { Lang } from '../types';
 import { QtyStepper, Terms } from './Bits';
 import { FOCUS, whatsappHref } from './Layout';
@@ -72,6 +72,7 @@ export function PartOrder({
   lang,
   t,
   note,
+  part,
 }: {
   /** Cart line id: the item path, plus `#b` for a burçlu head. */
   id: string;
@@ -88,6 +89,8 @@ export function PartOrder({
   t: Dict;
   /** What the price covers, when it is more than the part (see priceNote). */
   note?: string | null;
+  /** The part group, for its warranty period in the sale terms. */
+  part?: PartKey;
 }) {
   const [added, setAdded] = useState(false);
   const o = t.parts.order;
@@ -164,7 +167,7 @@ export function PartOrder({
         </div>
       </div>
       <div className="mt-6">
-        <Terms t={t} />
+        <Terms t={t} part={part} />
       </div>
     </div>
   );
