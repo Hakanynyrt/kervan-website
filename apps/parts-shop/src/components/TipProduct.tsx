@@ -13,7 +13,7 @@ import { ORDER_CONVERSION } from '../lib/ads';
 import type { Dict } from '../lib/dict';
 import { fmtMm, fmtNum } from '../lib/format';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
-import type { GroovedTool } from '../lib/grooved';
+import type { SpecialTool } from '../lib/grooved';
 import { addToCart } from '../lib/cart';
 import { fmtDate, fmtTry, fmtUsd } from '../lib/price';
 import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
@@ -73,8 +73,8 @@ interface Props {
   path: string;
   /** Other parts we model for this breaker (cards on the part pages). */
   parts?: PartLink[];
-  /** Tools with dust grooves we model for this breaker (renders), shown before our stock photos. */
-  grooved?: GroovedTool[];
+  /** Special tools we model for this breaker (renders: dust grooves, relieved), shown before our stock photos. */
+  special?: SpecialTool[];
   fx: FxRate | null;
   lang: Lang;
   t: Dict;
@@ -100,12 +100,21 @@ export default function TipProduct({
   photos = [],
   path,
   parts = [],
-  grooved = [],
+  special = [],
   fx,
   lang,
   t,
 }: Props) {
   const tf = t.family;
+  // Special tools: only dust-groove tools keep the "Toz kanallı" wording and the `#toz-kanalli`
+  // anchor the list badges link to; relieved tools make it "Özel uçlar".
+  const onlyGrooved = special.every((g) => g.kind === 'grooved');
+  const anyGrooved = special.some((g) => g.kind === 'grooved');
+  const specialId = anyGrooved ? 'toz-kanalli' : 'ozel-uclar';
+  const specialName = (g: SpecialTool) =>
+    g.kind === 'relieved'
+      ? tf.relievedAlt(t.tip[g.tipType])
+      : tf.groovedAlt(t.tip[g.tipType], g.special);
   // A breaker that takes tips of two sizes sells both: a size picker over the type picker
   // (owner: "İki farklı uç varsa ... iki tane uç yap"); `?uc=` from its list card opens one.
   const variants = tipVariants(families);
@@ -371,13 +380,13 @@ export default function TipProduct({
               setAdded(false);
             }}
           />
-          {grooved.length > 0 && (
+          {special.length > 0 && (
             <p className="m-0 -mt-3 font-sans text-sm">
               <a
-                href="#toz-kanalli"
+                href={`#${specialId}`}
                 className={`font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
               >
-                {tf.groovedJump}
+                {onlyGrooved ? tf.groovedJump : tf.specialJump}
               </a>
             </p>
           )}
@@ -509,14 +518,16 @@ export default function TipProduct({
 
       {children}
 
-      {grooved.length > 0 && (
-        <section id="toz-kanalli" aria-labelledby="grooved" className="mt-12 scroll-mt-6">
+      {special.length > 0 && (
+        <section id={specialId} aria-labelledby="grooved" className="mt-12 scroll-mt-6">
           <h2 id="grooved" className="m-0 font-sans text-xl font-bold text-ink">
-            {tf.groovedTitle}
+            {onlyGrooved ? tf.groovedTitle : tf.specialTitle}
           </h2>
-          <p className="m-0 mt-1 font-sans text-sm text-ink-mid">{tf.groovedNote}</p>
+          <p className="m-0 mt-1 font-sans text-sm text-ink-mid">
+            {onlyGrooved ? tf.groovedNote : tf.specialNote}
+          </p>
           <ul className="m-0 mt-4 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-3">
-            {grooved.map((g) => (
+            {special.map((g) => (
               <li key={g.base}>
                 <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
                   <img
@@ -525,13 +536,13 @@ export default function TipProduct({
                     sizes="(min-width: 640px) 33vw, 100vw"
                     width={1600}
                     height={900}
-                    alt={tf.groovedAlt(t.tip[g.tipType], g.special)}
+                    alt={specialName(g)}
                     loading="lazy"
                     decoding="async"
                     className="block aspect-video h-auto w-full"
                   />
                   <figcaption className="bg-bg px-3 py-2 font-sans text-sm font-medium text-ink">
-                    {tf.groovedAlt(t.tip[g.tipType], g.special)}
+                    {specialName(g)}
                   </figcaption>
                 </figure>
               </li>

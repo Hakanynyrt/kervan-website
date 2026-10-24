@@ -1519,6 +1519,22 @@ const FX_PISTONS: OtherPart[] = [
   views: ['front', 'rear', 'side', 'section'],
 }));
 
+/**
+ * More pistons outside the kit, one archive drawing each: the Indeco MES 5000 piston (2026-10-24, from the archive
+ * sheet): striking end a reduced Ø125 stub (black), the ground running lands (the Ø140 land and the oil-grooved
+ * Ø145 land are drawn slightly tapered at their ends, ground like cylinders), black reliefs, an M30 handling hole in the
+ * rear end. Same views and `-tasli` GLB as the kit pistons; no sales-list price (quote form).
+ */
+const OTHER_PISTONS: OtherPart[] = [
+  {
+    make: 'Indeco',
+    model: 'MES 5000',
+    file: 'piston-indeco-mes-5000',
+    kind: 'piston',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+];
+
 const RETAINER_PINS: OtherPart[] = [
   {
     make: 'Furukawa',
@@ -2367,6 +2383,7 @@ const DRAWN: Record<PartKey, readonly PartRender[]> = {
     ...PART_KIT.map(kitRender('piston', 'piston', ['front', 'rear', 'side', 'section'])),
     ...FX_PISTONS.map(otherRender),
     { ...otherRender({ ...FX_PISTONS[3], model: 'FXJ 475' }), representative: true },
+    ...OTHER_PISTONS.map(otherRender),
   ],
   akumulator: [...ACCUMULATOR_PARTS.map(otherRender), ...SMALL_PARTS.akumulator.map(smallRender)],
   'asinma-plakasi': [
@@ -2465,12 +2482,16 @@ export const PLANT_PHOTOS = [
 ] as const;
 
 /**
- * Tools with dust grooves ("toz kanallı"), modelled from our drawings: shown on the breaker's tip
- * page next to the catalogue tips (`/photos/parca/uc-<breaker>-grooved-tool-<type>-…-01`).
+ * Special tools modelled from our drawings, shown on the breaker's tip page next to the catalogue
+ * tips, before "Stoğumuzdan" (hero only, `<base>-vitrin-<v>`): tools with dust grooves ("toz
+ * kanallı", `/photos/parca/uc-<breaker>-grooved-tool-<type>-…`; only these give the list rows'
+ * "Toz kanallı" badge and filter), relieved tools ("boşaltmalı": the working part turned a little
+ * under the guide diameter, `uc-<breaker>-relieved-tool-<type>`). Never a length.
  */
-export const GROOVED_TOOLS: readonly {
+export const SPECIAL_TOOLS: readonly {
   breaker: string;
-  tipType: 'moil' | 'conical';
+  kind: 'grooved' | 'relieved';
+  tipType: 'moil' | 'conical' | 'chisel';
   /** The drawing's "ÖZEL" (special) version: captioned so, apart from the standard tool. */
   special?: true;
   base: string;
@@ -2481,12 +2502,14 @@ export const GROOVED_TOOLS: readonly {
   // (owner confirmed: conical), so the pictures are version 02 (01 drew a flat end).
   {
     breaker: 'MTB 700',
+    kind: 'grooved',
     tipType: 'conical',
     base: '/photos/parca/uc-mtb-700-grooved-tool',
     v: '03',
   },
   {
     breaker: 'MTB 700',
+    kind: 'grooved',
     tipType: 'moil',
     base: '/photos/parca/uc-mtb-700-grooved-tool-moil',
     v: '02',
@@ -2494,9 +2517,26 @@ export const GROOVED_TOOLS: readonly {
   // 2009 "ÖZEL KONİK TOZ KANALLI": the slimmed (Ø180) working body.
   {
     breaker: 'MTB 700',
+    kind: 'grooved',
     tipType: 'conical',
     special: true,
     base: '/photos/parca/uc-mtb-700-grooved-tool-conical',
     v: '02',
+  },
+  // Indeco MES 5000 "boşaltmalı" sheet (2005): the working part relieved under the guide
+  // diameter, drawn as a cone point (main view) and as a chisel.
+  {
+    breaker: 'Indeco MES 5000',
+    kind: 'relieved',
+    tipType: 'conical',
+    base: '/photos/parca/uc-indeco-mes-5000-relieved-tool-conical',
+    v: '01',
+  },
+  {
+    breaker: 'Indeco MES 5000',
+    kind: 'relieved',
+    tipType: 'chisel',
+    base: '/photos/parca/uc-indeco-mes-5000-relieved-tool-chisel',
+    v: '01',
   },
 ];

@@ -2,7 +2,7 @@ import { carrierTons, type FxRate } from '@kervan/tips';
 import TipProduct from '../components/TipProduct';
 import type { Dict } from '../lib/dict';
 import { fmtNum } from '../lib/format';
-import { groovedFor } from '../lib/grooved';
+import { specialToolsFor } from '../lib/grooved';
 import { brandPath, type PageModel } from '../lib/routes';
 import { sizeOrdinals, tipVariants } from '../lib/tip-options';
 import type { Lang } from '../types';
@@ -23,7 +23,7 @@ export default function Breaker({
   lang: Lang;
   t: Dict;
 }) {
-  const grooved = groovedFor(model.name);
+  const special = specialToolsFor(model.name);
   const aliases = model.aliases ?? [];
   return (
     <TipProduct
@@ -41,7 +41,7 @@ export default function Breaker({
       sample={model.sample}
       photos={model.photos}
       parts={model.parts}
-      grooved={grooved}
+      special={special}
       path={path}
       fx={fx}
       lang={lang}

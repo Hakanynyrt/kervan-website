@@ -166,12 +166,18 @@ export interface Dict {
     stockTitle: string;
     stockNote: string;
     stockAlt: (i: number) => string;
-    /** Tools with dust grooves we model for the breaker (`GROOVED_TOOLS`). */
+    /** Tools with dust grooves we model for the breaker (`SPECIAL_TOOLS`, kind `grooved`). */
     groovedTitle: string;
     groovedNote: string;
     groovedAlt: (type: string, special?: boolean) => string;
     /** Line under the type selector, jumping to the dust-groove section. */
     groovedJump: string;
+    /** The same section when the breaker also has other special tools (relieved). */
+    specialTitle: string;
+    specialNote: string;
+    specialJump: string;
+    /** Relieved ("boşaltmalı") tool of a tip type. */
+    relievedAlt: (type: string) => string;
     angle: string;
     availability: string;
     inStock: (n: number) => string;
@@ -684,6 +690,11 @@ export const DICT: Record<Lang, Dict> = {
       groovedAlt: (type, special) =>
         `Toz kanallı ${special ? 'özel ' : ''}${type.toLocaleLowerCase('tr')} uç`,
       groovedJump: 'Bu kırıcı için toz kanallı uçlar da var →',
+      specialTitle: 'Özel uçlar',
+      specialNote:
+        'Bu kırıcı için ürettiğimiz özel uçlar; görseller 3B modeldir. Fiyat için teklif isteyin.',
+      specialJump: 'Bu kırıcı için özel uçlar da var →',
+      relievedAlt: (type) => `Boşaltmalı ${type.toLocaleLowerCase('tr')} uç`,
       angle: 'Uç açısı',
       availability: 'Durum',
       inStock: (n) => (n >= 10 ? 'Stokta (10+)' : `Stokta (${n})`),
@@ -1481,6 +1492,11 @@ export const DICT: Record<Lang, Dict> = {
       groovedAlt: (type, special) =>
         `${special ? 'Special ' : ''}${special ? type.toLowerCase() : type} tool with dust grooves`,
       groovedJump: 'Tools with dust grooves are also available for this breaker →',
+      specialTitle: 'Special tools',
+      specialNote:
+        'Special tools we make for this breaker; the pictures are 3D models. Ask for a quote.',
+      specialJump: 'Special tools are also available for this breaker →',
+      relievedAlt: (type) => `Relieved ${type.toLowerCase()} tool`,
       angle: 'Tip angle',
       availability: 'Availability',
       inStock: (n) => (n >= 10 ? 'In stock (10+)' : `In stock (${n})`),
