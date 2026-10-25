@@ -112,6 +112,21 @@ export const SPOTS: Spot[] = [
   },
 ];
 
+/**
+ * Desktop: the room a name has, `k` of the picture's width plus `px` (CSS px): up to the next name
+ * on its side less a 6 px gap; the last one up to 8 px from the window's edge (the picture is
+ * 20 px in from it, a name starts 14 px before its line). A longer name (larger text, WCAG text
+ * spacing) wraps instead of running into the next one.
+ */
+export function nameRoom(s: Spot): { k: number; px: number } {
+  const next = SPOTS.filter((o) => o.name.up === s.name.up && o.name.x > s.name.x).sort(
+    (a, b) => a.name.x - b.name.x,
+  )[0];
+  return next
+    ? { k: (next.name.x - s.name.x) / OPEN_W, px: -6 }
+    : { k: (OPEN_W - s.name.x) / OPEN_W, px: 20 + 14 - 8 };
+}
+
 /** A group's name on the picture: its own name (the group cards use it too), or a shorter one
  *  where that does not fit between its neighbours (`home.pick.names`, EN "Keys"). */
 export const groupName = (t: Dict, g: OpeningGroup): string =>

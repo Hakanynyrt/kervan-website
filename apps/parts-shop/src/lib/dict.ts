@@ -232,9 +232,9 @@ export interface Dict {
   };
   search: {
     label: string;
+    /** The search box's example: the longest of the three that fits the box is shown. */
     placeholder: string;
-    /** The header box below 1280 px and the home panel's box, where the long example does not
-     *  fit. */
+    placeholderMid: string;
     placeholderShort: string;
     button: string;
     none: (q: string) => string;
@@ -746,6 +746,7 @@ export const DICT: Record<Lang, Dict> = {
     search: {
       label: 'Kırıcı modeli ara',
       placeholder: 'Kırıcınızın marka ve modeli, ör. Furukawa HB 20G',
+      placeholderMid: 'Marka ve model, ör. Furukawa HB 20G',
       placeholderShort: 'Marka ve model, ör. HB 20G',
       button: 'Ara',
       none: (q) => `"${q}" için model bulunamadı.`,
@@ -1561,6 +1562,7 @@ export const DICT: Record<Lang, Dict> = {
     search: {
       label: 'Search breaker model',
       placeholder: 'Your breaker make and model, e.g. Furukawa HB 20G',
+      placeholderMid: 'Make and model, e.g. Furukawa HB 20G',
       placeholderShort: 'Make and model, e.g. HB 20G',
       button: 'Search',
       none: (q) => `No model found for "${q}".`,

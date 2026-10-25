@@ -275,6 +275,9 @@
 .kv-open-names li {
   position: absolute;
   left: var(--x);
+  /* As wide as the name, up to the next one (`nameRoom`): a longer name wraps, never overlaps. */
+  width: max-content;
+  max-width: var(--w);
   /* The number's centre on the line. */
   transform: translate(-14px, -50%);
   pointer-events: auto;
@@ -369,7 +372,11 @@
   .kv-open-names .kv-extra {
     display: block;
     left: var(--kv-name);
-    right: 0.75rem;
+    /* The longest name (TR "Akümülatör parçaları") still fits on one line at 360 px; narrower,
+       or with larger text spacing, a name wraps in its column. */
+    right: 0.25rem;
+    width: auto;
+    max-width: none;
     top: calc(var(--y) - 22px);
     transform: none;
   }

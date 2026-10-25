@@ -25,6 +25,10 @@ import { SHOP_EMAIL } from '../lib/site';
 export const FOCUS =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2';
 
+/** The column of the header, the footer and the home (design E): 1328 px of content on a 1376 px
+ *  band, 24 px gutters (16 px on phones). Other pages keep `Container` for their content. */
+export const WRAP = 'mx-auto w-full max-w-[1376px] px-4 md:px-6';
+
 /** The same ring drawn inside the element, for links inside a clipping box (overflow, scroller). */
 export const FOCUS_INSET =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:-outline-offset-2';
@@ -56,8 +60,19 @@ interface Props {
 }
 
 /** "Sipariş: WhatsApp · +90 …": how to order, in the header of every page; `note` ("Online ödeme
- *  henüz yok", home) after it, on a line of its own on phones. */
-function OrderLine({ t, note, className = '' }: { t: Dict; note?: string; className?: string }) {
+ *  henüz yok", home) after it, on a line of its own on phones; `phoneClass` hides the number where
+ *  the bar is short of room. */
+function OrderLine({
+  t,
+  note,
+  phoneClass = '',
+  className = '',
+}: {
+  t: Dict;
+  note?: string;
+  phoneClass?: string;
+  className?: string;
+}) {
   const link = `underline decoration-hair-strong underline-offset-[3px] hover:text-brand-hi ${FOCUS}`;
   return (
     <p className={`m-0 font-sans text-ink-mid ${className}`}>
@@ -65,10 +80,12 @@ function OrderLine({ t, note, className = '' }: { t: Dict; note?: string; classN
       <a href={whatsappHref(t.nav.quoteText)} className={`text-ink ${link}`}>
         {t.nav.order.whatsapp}
       </a>
-      {' · '}
-      <a href={`tel:${ORG_PHONE_E164}`} className={`whitespace-nowrap text-ink ${link}`}>
-        {ORG_PHONE}
-      </a>
+      <span className={phoneClass}>
+        {' · '}
+        <a href={`tel:${ORG_PHONE_E164}`} className={`whitespace-nowrap text-ink ${link}`}>
+          {ORG_PHONE}
+        </a>
+      </span>
       {note && (
         <span className="text-ink-soft max-md:block">
           <span className="max-md:hidden"> · </span>
@@ -113,7 +130,8 @@ export default function Layout({
       current: path === partPath(k) || path.startsWith(`${partPath(k)}/`),
     })),
   ];
-  // "Çok satanlar": the last item of the bar below 1280 px, on its right side above.
+  // "Çok satanlar": the last item of the bar on phones; from 768 px on its right side, outside the
+  // part of the bar that may scroll, so it always shows (as on the old header).
   const popular = hasPopular
     ? { href: localePath(POPULAR_PATH, lang), label: t.nav.popular, current: path === POPULAR_PATH }
     : null;
@@ -128,12 +146,12 @@ export default function Layout({
         {t.nav.skip}
       </a>
       {/* Logo, the make/model search (its own row below 1024 px) and the tools, how to order (a
-          line under the search below 1024 px); then the groups, one line that scrolls sideways
-          when it does not fit, with "Çok satanlar" and how to order on its right. */}
+          line under the search below 1024 px); then the groups, one line (it scrolls sideways
+          on phones), with "Çok satanlar" and how to order on its right. The DOM has the desktop
+          order; `reading-flow` lets the Tab key follow the rows below 1024 px (Chromium). */}
       <header className="relative z-20 border-b border-hair bg-bg">
-        <Container
-          wide
-          className="flex flex-wrap items-center gap-x-2.5 gap-y-2.5 py-2.5 max-md:px-4 min-[23.4375rem]:gap-x-3 sm:gap-x-5 lg:min-h-[68px] lg:flex-nowrap lg:gap-x-4 lg:py-0 min-[73.75rem]:gap-x-7"
+        <div
+          className={`${WRAP} flex flex-wrap items-center gap-x-2.5 gap-y-2 pb-2.5 pt-[9px] [reading-flow:flex-visual] min-[23.4375rem]:gap-x-3 sm:gap-x-5 md:gap-y-2.5 md:py-2.5 lg:min-h-[68px] lg:flex-nowrap lg:gap-x-4 lg:py-0 min-[73.75rem]:gap-x-7`}
         >
           <a
             href={localePath('/', lang)}
@@ -166,8 +184,9 @@ export default function Layout({
           <div
             role="group"
             aria-label={t.nav.tools}
-            className="ml-auto flex items-center gap-x-2.5 font-sans text-sm min-[23.4375rem]:gap-x-3.5 sm:gap-x-[18px] lg:gap-x-3 xl:gap-x-[18px]"
+            className="ml-auto flex items-center gap-x-2.5 font-sans text-sm max-md:-my-[3px] min-[23.4375rem]:gap-x-3.5 sm:gap-x-[18px] lg:gap-x-3 xl:gap-x-[18px]"
           >
+            {/* Phones: the 44 px targets reach 3 px into the row's padding (row as in design E). */}
             {/* The corporate site, as on the old header from 1024 px; on the bar's right from 1280. */}
             <a
               href={corporate}
@@ -200,15 +219,19 @@ export default function Layout({
             note={home ? t.nav.order.note : undefined}
             className="order-4 -mt-0.5 basis-full text-[12.5px] leading-snug md:text-[13px] lg:hidden"
           />
-        </Container>
+        </div>
         <nav
           aria-label={t.nav.label}
           className={`border-t border-hair ${home ? 'hidden md:block' : ''}`}
         >
-          <Container wide className="flex items-center justify-between gap-6 lg:gap-5">
+          {/* From 768 px every item fits (lib/header-bar.test.ts: TR and EN, 768-1440 px): 13.5 px
+              type below 1024 px, the phone number on the right only from 1280 px. */}
+          <div
+            className={`${WRAP} flex items-center justify-between gap-2 min-[56.25rem]:gap-4 lg:gap-5`}
+          >
             <ul
               ref={barRef}
-              className="-mx-6 my-0 flex min-w-0 list-none gap-x-1 overflow-x-auto px-4 py-0 font-sans text-[15px] font-semibold [scrollbar-width:none] sm:mx-0 sm:gap-x-[18px] sm:px-0 md:gap-x-3.5 md:text-sm xl:gap-x-5 xl:text-[14.5px] [&::-webkit-scrollbar]:hidden"
+              className="-mx-4 my-0 flex min-w-0 list-none gap-x-1 overflow-x-auto px-4 py-0 font-sans text-[15px] font-semibold [scrollbar-width:none] sm:mx-0 sm:gap-x-[18px] sm:px-0 md:gap-x-2 md:text-[13.5px] min-[56.25rem]:gap-x-4 lg:gap-x-3.5 lg:text-sm xl:gap-x-5 xl:text-[14.5px] [&::-webkit-scrollbar]:hidden"
             >
               {groups.map((n) => (
                 <li key={n.href} className="shrink-0">
@@ -222,7 +245,7 @@ export default function Layout({
                 </li>
               ))}
               {popular && (
-                <li className="ml-2 shrink-0 border-l border-hair pl-2 sm:ml-0 sm:pl-[18px] md:pl-3.5 xl:hidden">
+                <li className="ml-2 shrink-0 border-l border-hair pl-2 sm:ml-0 sm:pl-[18px] md:hidden">
                   <a
                     href={popular.href}
                     aria-current={popular.current ? 'page' : undefined}
@@ -233,15 +256,17 @@ export default function Layout({
                 </li>
               )}
             </ul>
-            <div className="hidden shrink-0 items-center gap-5 font-sans lg:flex">
+            <div className="hidden shrink-0 items-center gap-5 font-sans md:flex">
               {popular && (
-                <a
-                  href={popular.href}
-                  aria-current={popular.current ? 'page' : undefined}
-                  className={`hidden text-[14.5px] font-semibold xl:flex ${navLink}`}
-                >
-                  {popular.label}
-                </a>
+                <div className="border-l border-hair pl-2 min-[56.25rem]:pl-4 lg:border-0 lg:pl-0">
+                  <a
+                    href={popular.href}
+                    aria-current={popular.current ? 'page' : undefined}
+                    className={`text-[13.5px] font-semibold lg:text-sm xl:text-[14.5px] ${navLink}`}
+                  >
+                    {popular.label}
+                  </a>
+                </div>
               )}
               <a
                 href={corporate}
@@ -251,10 +276,11 @@ export default function Layout({
               </a>
               <OrderLine
                 t={t}
-                className="whitespace-nowrap border-l border-hair pl-4 text-[13.5px] xl:pl-5"
+                phoneClass="hidden xl:inline"
+                className="hidden whitespace-nowrap border-l border-hair pl-4 text-[13.5px] lg:block xl:pl-5"
               />
             </div>
-          </Container>
+          </div>
         </nav>
       </header>
       <div
@@ -295,9 +321,8 @@ export default function Layout({
         {children}
       </main>
       <footer className="mt-24 border-t-2 border-ink bg-bg-soft">
-        <Container
-          wide
-          className="flex flex-col gap-4 border-b border-hair py-8 sm:flex-row sm:items-center sm:justify-between"
+        <div
+          className={`${WRAP} flex flex-col gap-4 border-b border-hair py-8 sm:flex-row sm:items-center sm:justify-between`}
         >
           <a href={localePath('/', lang)} className={`flex items-center gap-3 ${FOCUS}`}>
             <img
@@ -316,10 +341,9 @@ export default function Layout({
           <p className="m-0 max-w-md font-sans text-xs text-ink-soft sm:text-right">
             {t.footer.fit}
           </p>
-        </Container>
-        <Container
-          wide
-          className="grid gap-8 py-10 font-sans text-sm text-ink-mid sm:grid-cols-2 lg:grid-cols-5"
+        </div>
+        <div
+          className={`${WRAP} grid gap-8 py-10 font-sans text-sm text-ink-mid sm:grid-cols-2 lg:grid-cols-5`}
         >
           <div>
             <p className={HEAD}>{t.footer.legal}</p>
@@ -426,15 +450,14 @@ export default function Layout({
               </ul>
             </div>
           </div>
-        </Container>
+        </div>
         <div className="border-t border-hair">
-          <Container
-            wide
-            className="flex flex-col gap-1 py-5 font-sans text-xs text-ink-soft sm:flex-row sm:justify-between sm:gap-6"
+          <div
+            className={`${WRAP} flex flex-col gap-1 py-5 font-sans text-xs text-ink-soft sm:flex-row sm:justify-between sm:gap-6`}
           >
             <p className="m-0">{t.footer.images}</p>
             <p className="m-0">{SELLER.name}</p>
-          </Container>
+          </div>
         </div>
       </footer>
       <ConsentBanner lang={lang} t={t} />

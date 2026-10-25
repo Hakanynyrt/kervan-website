@@ -5,6 +5,7 @@ import {
   EXTRA,
   groupName,
   NAME_GAP,
+  nameRoom,
   nameRows,
   OPEN_H,
   OPEN_W,
@@ -63,28 +64,31 @@ const ADV = new Map<string, number>([
 const textWidth = (s: string, px: number) =>
   ([...s].reduce((w, c) => w + (ADV.get(c) ?? 900), 0) / 1000) * px * 1.05;
 
-test('desktop names in a row never run into the next one, in both languages', () => {
-  // Viewport → picture width (`--kv-pw`: the page less 40 px) and name size (globals.css).
+test('desktop names fit their room on one line, in both languages', () => {
+  // Viewport → picture width (`--kv-pw`: the page less 40 px) and name size (globals.css). The
+  // room (`nameRoom`, the li's max-width) ends 6 px before the next name on that side, the last
+  // one 8 px before the window's edge; a name wider than its room would wrap.
   for (const vw of [768, 900, 1023, 1184, 1440]) {
     const pw = vw - 40;
     const px = vw < 1184 ? 13.5 : 15;
-    const scale = pw / OPEN_W;
     for (const lang of ['tr', 'en'] as const) {
-      for (const up of [true, false]) {
+      for (const s of SPOTS) {
+        const { k, px: extra } = nameRoom(s);
         // A name: its number (28 px, centred on the line) and gap (10 px), then the text.
-        const row = SPOTS.filter((s) => s.name.up === up)
-          .map((s) => {
-            const left = 20 + s.name.x * scale - 14;
-            return { g: s.g, left, right: left + 38 + textWidth(groupName(DICT[lang], s.g), px) };
-          })
-          .sort((a, b) => a.left - b.left);
-        for (let i = 1; i < row.length; i++)
-          assert.ok(
-            row[i - 1].right + 6 <= row[i].left,
-            `${lang} ${vw} px: ${row[i - 1].g} runs into ${row[i].g}`,
-          );
-        assert.ok(row[0].left >= 0 && row[row.length - 1].right <= vw, `${lang} ${vw} px: off`);
+        const need = 38 + textWidth(groupName(DICT[lang], s.g), px);
+        assert.ok(need <= k * pw + extra, `${lang} ${vw} px: ${s.g} wraps (${need} px)`);
+        assert.ok(20 + s.name.x * (pw / OPEN_W) - 14 >= 0, `${lang} ${vw} px: ${s.g} off`);
       }
     }
+  }
+});
+
+test('the last name on each side may reach to 8 px from the window', () => {
+  for (const up of [true, false]) {
+    const last = SPOTS.filter((s) => s.name.up === up).sort((a, b) => b.name.x - a.name.x)[0];
+    const { k, px } = nameRoom(last);
+    // At 768 px: picture 728 px from x = 20; the name starts 14 px before its line.
+    const left = 20 + (last.name.x / OPEN_W) * 728 - 14;
+    assert.equal(Math.round(left + k * 728 + px), 768 - 8);
   }
 });

@@ -1,16 +1,24 @@
-import { useContext, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+} from 'react';
 import type { FxRate } from '@kervan/tips';
 import { ORG_PHONE, ORG_PHONE_E164 } from '@kervan/seo';
-import { Container } from '@kervan/ui';
 import { useReducedMotion } from '@kervan/motion';
 import { OrderSteps, PlantPhotos } from '../components/Bits';
 import { BreakerSearch, FinderPick } from '../components/BreakerSearch';
 import ExplodedPicker from '../components/ExplodedPicker';
 import { PartGroups } from '../components/PartGroups';
-import { FOCUS, SELLER_TEL, whatsappHref } from '../components/Layout';
+import { FOCUS, SELLER_TEL, whatsappHref, WRAP } from '../components/Layout';
 import { CardPrice } from '../components/ModelSearch';
 import { priceNote } from '../components/PartOrder';
 import { cardHref, cardKey, cardName, cardPic } from '../lib/card';
+import { fitChips } from '../lib/chip-rows';
 import type { Dict } from '../lib/dict';
 import { finderName, makesByModels, type FinderHit } from '../lib/finder';
 import { fmtNum } from '../lib/format';
@@ -38,9 +46,14 @@ import type { Lang } from '../types';
 
 type Model = Extract<PageModel, { kind: 'home' }>;
 
-/** Make chips shown before "Tüm markalar"; model chips shown before "Tüm … modelleri". */
+/** Make chips shown before "Tüm markalar". */
 const MAKES_SHOWN = 16;
-const MODELS_SHOWN = 40;
+/** Model chips: two rows of them before "Tüm … modelleri" (design E), worked out from the first
+ *  MODELS_MAX laid out once (`fitChips`); the picked model is always among them. */
+const MODEL_ROWS = 2;
+const MODELS_MAX = 40;
+/** The chips are measured before paint in the browser; the prerender never shows them. */
+const useLayoutEffectSafe = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 /** Best-selling breakers listed in the empty panel. */
 const PANEL_POPULAR = 6;
 
@@ -152,14 +165,15 @@ function PanelRow({
 }
 
 /**
- * Under the opening: the h1 and the lead, the make chips (a make lists its models), the order box
- * and the trust points; beside them (between the chips and the order box below 1024 px, in the
- * page's order too, so reading and Tab order follow the screen) the panel: the best-selling
- * breakers until a model is picked, then that model's tip and the parts we make for it. A model
- * is picked here (make, model and best-seller rows), with "Ara" in the header search or in the
- * panel's own box on small screens (`FinderPick`, shared through the layout). The prerender (and a
- * visitor without JS) gets the empty state: the make chips link to the make pages, the
- * best-selling breakers to their pages.
+ * Under the opening: the h1 and the lead, the make chips (a make lists two rows of its models),
+ * the order box and the trust points; beside them (between the chips and the order box below
+ * 1024 px, in the page's order too, so reading and Tab order follow the screen; design E has the
+ * order box first on tablets, here the result shows right under the chips there too) the panel:
+ * the best-selling breakers until a model is picked, then that model's tip and the parts we make
+ * for it. A model is picked here (make, model and best-seller rows), with "Ara" in the header
+ * search or in the panel's own box on small screens (`FinderPick`, shared through the layout).
+ * The prerender (and a visitor without JS) gets the empty state: the make chips link to the make
+ * pages, the best-selling breakers to their pages.
  */
 function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const h = t.home;
@@ -167,40 +181,96 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const reduce = useReducedMotion();
   const pick = useContext(FinderPick);
   const sel = pick?.sel ?? null;
-  const [brand, setBrand] = useState<string | null>(null);
+  // The make whose models are listed: the one clicked here, until a model is picked anywhere
+  // (then that model's make, in the same render, so the panel's place is final when it is shown).
+  const [clicked, setClicked] = useState<{ brand: string; sel: typeof sel } | null>(null);
+  const brand = clicked && clicked.sel === sel ? clicked.brand : (sel?.brand ?? null);
   const [allMakes, setAllMakes] = useState(false);
-  const [allModels, setAllModels] = useState(false);
+  const [allFor, setAllFor] = useState<string | null>(null);
+  const allModels = brand !== null && allFor === brand;
   const panel = useRef<HTMLElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
+  const chipList = useRef<HTMLUListElement>(null);
   const makes = useMemo(() => makesByModels(model.finder), [model.finder]);
 
-  // A model picked anywhere shows its make's models here.
+  const shownMakes = allMakes ? makes : makes.slice(0, MAKES_SHOWN);
+  const make = brand ? model.finder.find((x) => x.brand === brand) : undefined;
+  const picked = make && sel?.brand === make.brand ? sel.model.slug : null;
+  const makeModels = useMemo(() => {
+    if (!make) return [];
+    if (allModels) return make.models;
+    const first = make.models.slice(0, MODELS_MAX);
+    const own = make.models.find((m) => m.slug === picked);
+    return own && !first.includes(own) ? [...first, own] : first;
+  }, [make, allModels, picked]);
+
+  // Two rows of model chips: laid out once per make and width (before paint), then only those
+  // that fit are rendered.
+  const [chipW, setChipW] = useState<{ key: string; ws: number[]; width: number; gap: number }>();
+  const chipKey = `${brand} ${makeModels.length}`;
+  const measured = !allModels && chipW?.key === chipKey ? chipW : undefined;
+  const fits = measured
+    ? new Set(
+        fitChips(
+          measured.ws,
+          makeModels.findIndex((m) => m.slug === picked),
+          measured.width,
+          measured.gap,
+          MODEL_ROWS,
+        ),
+      )
+    : null;
+  useLayoutEffectSafe(() => {
+    const ul = chipList.current;
+    if (!ul || !brand || allModels || measured) return;
+    setChipW({
+      key: chipKey,
+      ws: [...ul.children].map((li) => li.getBoundingClientRect().width),
+      width: ul.clientWidth,
+      gap: parseFloat(getComputedStyle(ul).columnGap) || 0,
+    });
+  });
   useEffect(() => {
-    if (sel) setBrand(sel.brand);
-  }, [sel]);
+    const ul = chipList.current;
+    if (!ul || typeof ResizeObserver === 'undefined') return;
+    let width = ul.clientWidth;
+    const ro = new ResizeObserver(() => {
+      if (ul.clientWidth === width) return;
+      width = ul.clientWidth;
+      setChipW(undefined);
+    });
+    ro.observe(ul);
+    return () => ro.disconnect();
+  }, [brand]);
+
   // Bring the panel up when a pick asks for it (it sits under the chips on phones, and the header
-  // search may be used anywhere on the page); a pick from the header box also takes the focus to
-  // the panel's heading, so the keyboard carries on from the result (the list it came from is gone).
+  // search may be used anywhere on the page), once the chips above it are in place; a pick from
+  // the header box also takes the focus to the panel's heading, so the keyboard carries on from
+  // the result (the list it came from is gone). A pick from the panel's own box keeps that box
+  // where it was on screen, with the focus and the phone's keyboard (the results are under it).
   const shown = pick?.shown;
   useEffect(() => {
     if (!shown?.n) return;
-    requestAnimationFrame(() => {
+    const raf = requestAnimationFrame(() => {
+      const box = document.getElementById('kv-q-panel');
+      if (shown.from === 'box' && box && shown.top !== undefined) {
+        window.scrollBy(0, box.getBoundingClientRect().top - shown.top);
+        return;
+      }
       const top = panel.current?.getBoundingClientRect().top;
       if (top !== undefined && (top < 0 || top > window.innerHeight * 0.7))
         panel.current?.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' });
-      if (shown.focus) heading.current?.focus({ preventScroll: true });
+      if (shown.from === 'header') heading.current?.focus({ preventScroll: true });
     });
+    return () => cancelAnimationFrame(raf);
   }, [shown, reduce]);
 
-  const choose = (hit: FinderHit) => pick?.select(hit, true);
+  const choose = (hit: FinderHit) => pick?.select(hit, 'page');
   const hitFor = (brandName: string, slug: string): FinderHit | null => {
     const m = model.finder.find((x) => x.brand === brandName)?.models.find((x) => x.slug === slug);
     return m ? { brand: brandName, model: m, name: finderName(brandName, m) } : null;
   };
 
-  const shownMakes = allMakes ? makes : makes.slice(0, MAKES_SHOWN);
-  const make = brand ? model.finder.find((x) => x.brand === brand) : undefined;
-  const makeModels = make ? (allModels ? make.models : make.models.slice(0, MODELS_SHOWN)) : [];
   const parts = sel ? partsForBreaker(sel.name) : [];
   const many = (sel?.model.tips.length ?? 0) > 1;
 
@@ -208,9 +278,8 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
     // No label on this band: the panel and the order box are landmarks of their own (asides),
     // which must not sit inside another one (axe landmark-complementary-is-top-level).
     <section className="border-b border-hair bg-bg">
-      <Container
-        wide
-        className="grid grid-cols-[minmax(0,1fr)] pb-7 pt-[18px] max-md:px-4 lg:grid-cols-[minmax(0,1fr)_24rem] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-9 lg:pb-[30px] lg:pt-6 xl:grid-cols-[minmax(0,1fr)_27rem] xl:gap-x-12"
+      <div
+        className={`${WRAP} grid grid-cols-[minmax(0,1fr)] pb-7 pt-[18px] lg:grid-cols-[minmax(0,1fr)_24rem] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-9 lg:pb-[30px] lg:pt-6 xl:grid-cols-[minmax(0,1fr)_27rem] xl:gap-x-12`}
       >
         {/* Phones and tablets: one column, in the page's order (h1 … makes, the panel, the order
             box and the trust points); desktop: the panel on the right of both blocks. */}
@@ -225,27 +294,16 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
             {h.lead}
           </p>
 
+          {/* "Tüm markalar" after the chips (it ends their first row from 768 px); on phones it
+              stands beside "Marka", where `reading-flow` lets the Tab key reach it first. */}
           <nav
             aria-labelledby="finder-makes"
-            className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 gap-y-2 font-sans md:mt-[18px] md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-start md:gap-x-3.5"
+            className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 gap-y-2 font-sans [reading-flow:grid-rows] md:mt-[18px] md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-start md:gap-x-3.5"
           >
             <h2 id="finder-makes" className="m-0 text-[15px] font-semibold text-ink md:leading-9">
               {f.makes}
             </h2>
-            {!allMakes && makes.length > MAKES_SHOWN && (
-              <a
-                href={localePath(LIST_PATH, lang)}
-                onClick={(e) => {
-                  if (!plain(e)) return;
-                  e.preventDefault();
-                  setAllMakes(true);
-                }}
-                className={`whitespace-nowrap text-sm font-medium text-brand-hi hover:underline md:col-start-3 md:row-start-1 md:leading-9 ${FOCUS}`}
-              >
-                {f.allMakes(makes.length)} →
-              </a>
-            )}
-            <ul className="col-span-2 m-0 flex list-none flex-wrap gap-2 p-0 md:col-span-1 md:col-start-2 md:row-start-1">
+            <ul className="col-span-2 row-start-2 m-0 flex list-none flex-wrap gap-2 p-0 md:col-span-1 md:col-start-2 md:row-start-1">
               {shownMakes.map((x) => (
                 <li key={x.brand}>
                   <a
@@ -253,8 +311,8 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                     onClick={(e) => {
                       if (!plain(e)) return;
                       e.preventDefault();
-                      setBrand(x.brand);
-                      setAllModels(false);
+                      setClicked({ brand: x.brand, sel });
+                      setAllFor(null);
                     }}
                     aria-current={brand === x.brand ? 'true' : undefined}
                     className={chip(brand === x.brand, true)}
@@ -264,6 +322,19 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                 </li>
               ))}
             </ul>
+            {!allMakes && makes.length > MAKES_SHOWN && (
+              <a
+                href={localePath(LIST_PATH, lang)}
+                onClick={(e) => {
+                  if (!plain(e)) return;
+                  e.preventDefault();
+                  setAllMakes(true);
+                }}
+                className={`col-start-2 row-start-1 whitespace-nowrap text-sm font-medium text-brand-hi hover:underline md:col-start-3 md:leading-9 ${FOCUS}`}
+              >
+                {f.allMakes(makes.length)} →
+              </a>
+            )}
           </nav>
 
           {make && (
@@ -275,18 +346,18 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                 <a
                   href={localePath(brandPath(make.brand), lang)}
                   onClick={(e) => {
-                    if (allModels || make.models.length <= MODELS_SHOWN || !plain(e)) return;
+                    if (allModels || (fits && fits.size >= make.models.length) || !plain(e)) return;
                     e.preventDefault();
-                    setAllModels(true);
+                    setAllFor(make.brand);
                   }}
                   className={`text-sm font-medium text-brand-hi hover:underline ${FOCUS}`}
                 >
                   {f.allModels(make.brand, make.models.length)} →
                 </a>
               </div>
-              <ul className="m-0 mt-2 flex list-none flex-wrap gap-2 p-0">
-                {makeModels.map((m) => (
-                  <li key={m.slug}>
+              <ul ref={chipList} className="m-0 mt-2 flex list-none flex-wrap gap-2 p-0">
+                {makeModels.map((m, i) => (
+                  <li key={m.slug} hidden={fits ? !fits.has(i) : undefined}>
                     <a
                       href={localePath(breakerPath(m.slug), lang)}
                       onClick={(e) => {
@@ -323,7 +394,7 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                     id="finder-panel"
                     ref={heading}
                     tabIndex={-1}
-                    className="m-0 text-[17px] font-bold text-ink focus:outline-none"
+                    className={`m-0 rounded-sm text-[17px] font-bold text-ink ${FOCUS}`}
                   >
                     {sel.name}
                   </h2>
@@ -342,7 +413,7 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                   id="finder-panel"
                   ref={heading}
                   tabIndex={-1}
-                  className="m-0 text-[17px] font-bold text-ink focus:outline-none"
+                  className={`m-0 rounded-sm text-[17px] font-bold text-ink ${FOCUS}`}
                 >
                   {f.startTitle}
                 </h2>
@@ -503,7 +574,7 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
             ))}
           </ul>
         </div>
-      </Container>
+      </div>
     </section>
   );
 }
@@ -615,10 +686,11 @@ export default function Home({
       <Finder model={model} lang={lang} t={t} />
 
       {/* Phones: the names beside the opening already link every group, so the priced parts
-          come before the group cards. */}
-      <div className="flex flex-col">
+          come before the group cards (design E). The DOM has the desktop order; `reading-flow`
+          lets the Tab key follow the screen on phones too (Chromium). */}
+      <div className="flex flex-col [reading-flow:flex-visual]">
         <section aria-labelledby="groups" className="bg-bg max-md:border-t max-md:border-hair">
-          <Container wide className="py-8 max-md:px-4 md:pt-7">
+          <div className={`${WRAP} py-8 md:pt-7`}>
             <SectionHead
               id="groups"
               title={h.groups}
@@ -628,12 +700,12 @@ export default function Home({
             <p className="m-0 mt-2.5 font-sans text-[12.5px] text-ink-soft md:hidden">
               {h.pick.kitNotShown}
             </p>
-          </Container>
+          </div>
         </section>
 
         {model.made.length > 0 && (
           <section aria-labelledby="made" className="bg-bg max-md:-order-1">
-            <Container wide className="py-8 max-md:px-4">
+            <div className={`${WRAP} py-8`}>
               <SectionHead
                 id="made"
                 title={h.made.title}
@@ -654,19 +726,19 @@ export default function Home({
               <p className="m-0 mt-3.5 font-sans text-xs text-ink-soft">
                 {fx && t.price.fxNote(fmtDate(fx.date, lang))} {t.price.note} {t.renderNote}
               </p>
-            </Container>
+            </div>
           </section>
         )}
       </div>
 
       <div className="border-y border-hair bg-bg-soft">
-        <Container wide className="py-8 max-md:px-4">
+        <div className={`${WRAP} py-8`}>
           <PlantPhotos t={t} hall />
-        </Container>
+        </div>
       </div>
 
       <section id="siparis-adimlari" aria-labelledby="order" className="scroll-mt-6 bg-bg">
-        <Container wide className="py-8 max-md:px-4">
+        <div className={`${WRAP} py-8`}>
           <SectionHead id="order" title={t.cart.steps.title} />
           <OrderSteps lang={lang} t={t} note={false} className="md:grid-cols-3" />
           <dl className="m-0 mt-[18px] grid grid-cols-[minmax(0,1fr)] gap-x-7 font-sans text-sm md:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1.6fr]">
@@ -711,7 +783,7 @@ export default function Home({
               </a>
             </p>
           </div>
-        </Container>
+        </div>
       </section>
     </>
   );

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { Container } from '@kervan/ui';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import {
   EXTRA,
   groupName,
+  nameRoom,
   nameRows,
   OPEN_H as H,
   OPEN_W as W,
@@ -17,7 +17,7 @@ import {
 } from '../lib/opening';
 import { LIST_PATH, partPath } from '../lib/routes';
 import type { Lang } from '../types';
-import { FOCUS } from './Layout';
+import { FOCUS, WRAP } from './Layout';
 
 /** Home opening, right under the header, edge to edge: our parts of one breaker (rendered from
  *  our drawings, no make or model named). The breaker first stands in its housing (kabin), seen
@@ -389,6 +389,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
             <ol className="m-0 list-none p-0">
               {[...SPOTS.map((s) => s.g), ...EXTRA].map((g, i) => {
                 const spot = SPOTS[i];
+                const room = spot ? nameRoom(spot) : null;
                 return (
                   <li
                     key={g}
@@ -396,6 +397,9 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
                     style={
                       {
                         '--x': spot ? pct(spot.name.x, W) : undefined,
+                        '--w': room
+                          ? `calc(var(--kv-pw) * ${room.k.toFixed(4)} ${room.px < 0 ? '-' : '+'} ${Math.abs(room.px)}px)`
+                          : undefined,
                         '--y': `${ROWS[i]}px`,
                       } as CSSProperties
                     }
@@ -405,7 +409,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
                       {...light(g)}
                       onFocus={() => setHover(g)}
                       onBlur={() => setHover(null)}
-                      className={`inline-flex min-h-10 items-center gap-2.5 whitespace-nowrap rounded-sm font-sans font-medium hover:text-brand-hi ${lit(g) ? 'text-brand-hi' : 'text-ink'} ${FOCUS}`}
+                      className={`inline-flex min-h-10 items-center gap-2.5 rounded-sm font-sans font-medium leading-tight hover:text-brand-hi ${lit(g) ? 'text-brand-hi' : 'text-ink'} ${FOCUS}`}
                     >
                       {spot ? (
                         <span
@@ -426,7 +430,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
         </div>
       </div>
       {/* In the page's content column on desktop, under the h1 and the panel's edges. */}
-      <Container wide className="kv-open-capbox">
+      <div className={`${WRAP} kv-open-capbox`}>
         <p className="kv-open-cap m-0 font-sans text-xs text-ink-soft">
           <span>
             {p.caption}
@@ -434,7 +438,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
           </span>
           <span className="kv-open-kit">{p.kitNotShown}</span>
         </p>
-      </Container>
+      </div>
     </section>
   );
 }

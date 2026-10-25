@@ -41,26 +41,31 @@ import { FOCUS, FOCUS_INSET, whatsappHref } from './Layout';
 /** Model rows under the box before "n models →". */
 const ROWS = 8;
 
+/** Where a pick was made: the header box (far from the panel: the focus moves to the panel too),
+ *  the panel's own box (the focus and the phone's keyboard stay in it), or the page's chips and
+ *  rows. */
+export type PickFrom = 'header' | 'box' | 'page';
+
 /** Home: the breaker shown in the panel, set by the header search, the panel's own box and the
- *  chips. `shown.n` counts picks that should bring the panel into view; `shown.focus`: the pick
- *  came from the header box, far from the panel, so the focus moves to the panel too. */
+ *  chips. `shown.n` counts picks that should bring the panel into view, `shown.from` says where
+ *  the last one came from; `shown.top`: where the panel's box was on screen (a pick from it). */
 interface Pick {
   sel: FinderHit | null;
-  select: (hit: FinderHit | null, show?: boolean, focus?: boolean) => void;
-  shown: { n: number; focus: boolean };
+  select: (hit: FinderHit | null, from?: PickFrom, top?: number) => void;
+  shown: { n: number; from: PickFrom; top?: number };
 }
 export const FinderPick = createContext<Pick | null>(null);
 
 export function FinderPickProvider({ children }: { children: ReactNode }) {
   const [sel, setSel] = useState<FinderHit | null>(null);
-  const [shown, setShown] = useState({ n: 0, focus: false });
+  const [shown, setShown] = useState<Pick['shown']>({ n: 0, from: 'page' });
   const value = useMemo<Pick>(
     () => ({
       sel,
       shown,
-      select: (hit, show = false, focus = false) => {
+      select: (hit, from, top) => {
         setSel(hit);
-        if (hit && show) setShown((x) => ({ n: x.n + 1, focus }));
+        if (hit && from) setShown((x) => ({ n: x.n + 1, from, top }));
       },
     }),
     [sel, shown],
@@ -78,6 +83,26 @@ const loadIndex = (): Promise<Index> =>
       indexReq = null;
       throw e;
     }));
+
+/** Index of the longest example that fits the box, measured in its placeholder font (the last one
+ *  when none does). */
+function fitPlaceholder(
+  el: HTMLInputElement,
+  ctx: CanvasRenderingContext2D,
+  examples: readonly string[],
+): number {
+  const box = getComputedStyle(el);
+  let font = box;
+  try {
+    font = getComputedStyle(el, '::placeholder');
+  } catch {
+    /* no placeholder style: the box's own font, a little larger, errs on the short side */
+  }
+  ctx.font = `${font.fontWeight} ${font.fontSize} ${font.fontFamily}`;
+  const room = el.clientWidth - parseFloat(box.paddingLeft) - parseFloat(box.paddingRight) - 2;
+  const i = examples.findIndex((s) => ctx.measureText(s).width <= room);
+  return i < 0 ? examples.length - 1 : i;
+}
 
 export function BreakerSearch({
   lang,
@@ -97,7 +122,7 @@ export function BreakerSearch({
   /** Home header: `?q=` naming one model exactly opens it on load. */
   fromUrl?: boolean;
   /** The home panel's own box (below 1024 px): a plain form (the header box is the page's
-   *  search landmark), the example always short, and the focus stays in it after a pick. */
+   *  search landmark), and the focus stays in it after a pick. */
   panel?: boolean;
   className?: string;
 }) {
@@ -106,7 +131,8 @@ export function BreakerSearch({
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState<Index | null>(null);
-  const [narrow, setNarrow] = useState(false);
+  /** The example in the box: the longest of the three that fits (`fitPlaceholder`). */
+  const [ph, setPh] = useState(0);
   const input = useRef<HTMLInputElement>(null);
   const list = useRef<HTMLDivElement>(null);
   const data: Index | null = finder ?? index;
@@ -120,14 +146,25 @@ export function BreakerSearch({
     return m ? { brand: h.brand, model: m, name: h.name } : null;
   };
 
+  const examples = [t.search.placeholder, t.search.placeholderMid, t.search.placeholderShort];
   useEffect(() => {
-    // The long example does not fit the box below 1280 px.
-    const mq = window.matchMedia('(max-width: 1279px)');
-    const on = () => setNarrow(mq.matches);
-    on();
-    mq.addEventListener('change', on);
-    return () => mq.removeEventListener('change', on);
-  }, []);
+    // The prerender has the long example; the box shows the longest one that fits its width, in
+    // the placeholder's own font (measured again when the box or the font changes).
+    const el = input.current;
+    const ctx = document.createElement('canvas').getContext('2d');
+    if (!el || !ctx) return;
+    const fit = () => setPh(fitPlaceholder(el, ctx, examples));
+    fit();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fit);
+    ro?.observe(el);
+    document.fonts?.addEventListener('loadingdone', fit);
+    return () => {
+      ro?.disconnect();
+      document.fonts?.removeEventListener('loadingdone', fit);
+    };
+    // The examples change with the language only (a new page).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t]);
 
   useEffect(() => {
     if (!fromUrl || !finder || !home) return;
@@ -158,7 +195,9 @@ export function BreakerSearch({
   const pick = (h: FinderHit<ModelRef>) => {
     setQ(h.name);
     setOpen(false);
-    home?.select(full(h), true, !panel);
+    // The panel's box stays where it is on screen (the chips above it change), with the keyboard.
+    if (panel) home?.select(full(h), 'box', input.current?.getBoundingClientRect().top);
+    else home?.select(full(h), 'header');
   };
   const submit = (e: FormEvent) => {
     // Nothing found (or the index not here): the tip list's search takes over.
@@ -249,10 +288,10 @@ export function BreakerSearch({
             load();
             setOpen(true);
           }}
-          placeholder={panel || narrow ? t.search.placeholderShort : t.search.placeholder}
+          placeholder={examples[ph]}
           autoComplete="off"
           aria-controls={open && found ? listId : undefined}
-          className={`h-[46px] w-full min-w-0 rounded-l-sm border border-r-0 border-ink-soft bg-bg pl-3 pr-2.5 text-base text-ink placeholder:text-[13.5px] placeholder:text-ink-soft md:pl-[42px] md:placeholder:text-sm lg:placeholder:text-[13.5px] xl:placeholder:text-[15px] ${FOCUS}`}
+          className={`h-[46px] w-full min-w-0 rounded-l-sm border border-r-0 border-ink-soft bg-bg pl-3 pr-2.5 text-base text-ink placeholder:text-sm placeholder:text-ink-soft max-[374px]:placeholder:text-[12.5px] md:pl-[42px] lg:placeholder:text-[13.5px] xl:placeholder:text-[15px] ${FOCUS}`}
         />
       </span>
       <button
