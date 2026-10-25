@@ -71,6 +71,7 @@
   --color-hair-strong: #767d86;
   --color-on-brand: #1c1f23;
   --kv-stage: var(--kv-stage-night);
+  --kv-stage-up: var(--kv-stage-night-up);
   --pstage: var(--kv-stage-night);
   --pstage-deep: var(--kv-stage-night);
   color-scheme: dark;
@@ -91,6 +92,7 @@
     --color-hair-strong: #767d86;
     --color-on-brand: #1c1f23;
     --kv-stage: var(--kv-stage-night);
+    --kv-stage-up: var(--kv-stage-night-up);
     --pstage: var(--kv-stage-night);
     --pstage-deep: var(--kv-stage-night);
     color-scheme: dark;
@@ -107,6 +109,9 @@
 :root {
   --kv-stage-night:
     radial-gradient(ellipse 60% 85% at 50% 78%, rgba(122, 42, 18, 0.32), transparent 72%), #141416;
+  /* The same glow under the upright breaker on phones. */
+  --kv-stage-night-up:
+    radial-gradient(ellipse 80% 40% at 50% 92%, rgba(122, 42, 18, 0.32), transparent 72%), #141416;
 }
 
 @font-face {
@@ -181,79 +186,222 @@
   opacity: 0;
   visibility: hidden;
 }
-/* The stage behind the transparent frames, for the whole opening and the final picture: by day
-   a light studio (owner: "Açık stüdyo zemini"; backdrop, soft horizon, a darker floor the
-   contact shadows fall on; here, so phones can turn its direction), the ember glow by night
-   (`--kv-stage`). No frame or box around it: its edges are always faded into the page. */
-.kv-open-pic {
-  /* The ground shadow is drawn here, not in the frames (they hold the part only), so it stays
-     under the breaker when phones turn the picture upright (owner: "dik ise gölgesi aşağıda"). */
-  --kv-shadow: radial-gradient(ellipse 47% 6% at 50% 91%, rgba(0, 0, 0, 0.2), transparent 70%);
-  background:
-    var(--kv-shadow),
-    var(
-      --kv-stage,
-      linear-gradient(
-        var(--kv-floor-dir, 180deg),
-        #f4f5f6 0%,
-        #eceef0 60%,
-        #dfe2e5 66%,
-        #d6d9dd 100%
-      )
-    );
-  -webkit-mask-image:
-    linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent),
-    linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent),
-    linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
-  mask-composite: intersect;
+/*
+ * The opening band, right under the header and edge to edge (ExplodedPicker): the stage behind
+ * the transparent frames and the final picture, by day a light studio (owner: "Açık stüdyo
+ * zemini"; backdrop, soft horizon, a darker floor the contact shadows fall on), by night the
+ * ember glow (`--kv-stage`). The stage is a layer of its own, faded into the page at every edge
+ * (no frame, no box), so the picture and the names stay sharp. Desktop: the picture lies along
+ * the page, its names above and below it; the band grows with the picture, so the names never
+ * reach the header or the caption. Phones (< 48rem): the same picture and frames stand upright
+ * (tip down, `--kv-l` tall), the names beside them (lib/opening.ts holds the geometry).
+ */
+.kv-open {
+  --kv-open-bg: var(--color-bg-soft);
+  --kv-pw: min(calc(100cqw - 40px), 1960px);
+  position: relative;
+  container-type: inline-size;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-hair);
+  background: var(--kv-open-bg);
 }
-/* The strip under the home's make/model finder: the picture, then the numbered part list (a
-   wrapping row of links). It stays inside its column (owner's "Önce arama" layout: the finder
-   leads, the opening is a smaller strip). */
-.kv-pick {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0.5rem 0;
+:root[data-theme='dark'] .kv-open,
+:root[data-sun='night']:not([data-theme='light']) .kv-open {
+  --kv-open-bg: var(--color-bg);
 }
-/* The stage is a band around the picture that carries the studio floor / ember glow and the
-   faded edges, so the picture itself keeps only the ground shadow. */
-.kv-open-turn {
-  padding-block: 1.25rem;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-sun]):not([data-theme='light']) .kv-open {
+    --kv-open-bg: var(--color-bg);
+  }
+}
+.kv-open-stage {
+  position: relative;
+  /* A name's centre is 82/2864 of the picture's width above or below it (NAME_DY). */
+  padding: calc(var(--kv-pw) * 0.0286 + 28px) 0 calc(var(--kv-pw) * 0.0286 + 30px);
+}
+.kv-open-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   background: var(
     --kv-stage,
     linear-gradient(180deg, #f4f5f6 0%, #eceef0 62%, #dfe2e5 68%, #d6d9dd 100%)
   );
   -webkit-mask-image:
-    linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent),
-    linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
+    linear-gradient(to bottom, transparent, #000 9%, #000 91%, transparent),
+    linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
   -webkit-mask-composite: source-in;
   mask-image:
-    linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent),
-    linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
+    linear-gradient(to bottom, transparent, #000 9%, #000 91%, transparent),
+    linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
   mask-composite: intersect;
 }
 .kv-open-pic {
-  background: var(--kv-shadow);
-  -webkit-mask-image: none;
-  mask-image: none;
+  position: relative;
+  width: var(--kv-pw);
+  margin: 0 auto;
+  aspect-ratio: 2864 / 620;
+  /* The ground shadow is drawn here, not in the frames (they hold the part only), so it stays
+     under the breaker when phones stand it upright (owner: "dik ise gölgesi aşağıda"). */
+  background: radial-gradient(ellipse 47% 6% at 50% 91%, rgba(0, 0, 0, 0.2), transparent 70%);
 }
-/* Phones: the strip runs edge to edge (the picture is 4.6:1); the numbers on the picture would
-   be too small to read or tap there, so only the numbered list under it names the parts (each
-   part on the picture is still a link). */
-@media (max-width: 39.999rem) {
+.kv-open-img {
+  position: absolute;
+  inset: 0;
+}
+.kv-open-lines,
+.kv-open-leads {
+  position: absolute;
+  pointer-events: none;
+}
+.kv-open-lines {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.kv-open-leads {
+  display: none;
+}
+.kv-open-names {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.kv-open-names ol {
+  position: relative;
+  height: 100%;
+}
+.kv-open-names li {
+  position: absolute;
+  left: var(--x);
+  /* The number's centre on the line. */
+  transform: translate(-14px, -50%);
+  pointer-events: auto;
+}
+.kv-open-names .kv-up {
+  top: -13.226%;
+}
+.kv-open-names .kv-dn {
+  top: 113.226%;
+}
+.kv-open-names .kv-extra {
+  display: none;
+}
+.kv-open-names a {
+  font-size: 15px;
+}
+.kv-num {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-width: 1.5px;
+  border-style: solid;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.kv-open-cap {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: var(--kv-pw);
+  margin: 0 auto;
+}
+@media (width < 74rem) {
+  .kv-open-names a {
+    font-size: 13.5px;
+  }
+}
+/* Phones: the picture layer turned upright, tip down, its left edge at --kv-x; each name beside
+   its part, linked by a leader line; the repair kit named last, without a number. */
+@media (width < 48rem) {
   .kv-open {
-    margin-inline: -1.5rem;
+    --kv-t: calc(var(--kv-l) * 620 / 2864);
+    padding-bottom: 0;
+    border-bottom: 0;
+    background: var(--color-bg);
   }
-  .kv-open figcaption {
-    padding-inline: 1.5rem;
+  .kv-open-stage {
+    padding: 1rem 0 2.125rem;
   }
-  .kv-open-turn {
-    padding-block: 0.75rem;
+  .kv-open-stage::before {
+    background: var(
+      --kv-stage-up,
+      linear-gradient(180deg, #f4f5f6 0%, #eceef0 84%, #dfe2e5 89%, #d6d9dd 100%)
+    );
   }
-  .kv-open-spots svg {
+  .kv-open-pic {
+    width: 100%;
+    max-width: 440px;
+    height: var(--kv-l);
+    aspect-ratio: auto;
+    background: radial-gradient(
+      ellipse 36px 6px at calc(var(--kv-x) + var(--kv-t) / 2) calc(var(--kv-l) - 6px),
+      rgba(0, 0, 0, 0.2),
+      transparent 100%
+    );
+  }
+  .kv-open-img {
+    inset: auto;
+    left: calc(var(--kv-x) + var(--kv-t) / 2 - var(--kv-l) / 2);
+    top: calc(var(--kv-l) / 2 - var(--kv-t) / 2);
+    width: var(--kv-l);
+    height: var(--kv-t);
+    transform: rotate(90deg);
+  }
+  .kv-open-lines {
+    display: none;
+  }
+  .kv-open-leads {
+    display: block;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: var(--kv-l);
+    overflow: visible;
+  }
+  .kv-open-names li,
+  .kv-open-names .kv-up,
+  .kv-open-names .kv-dn,
+  .kv-open-names .kv-extra {
+    display: block;
+    left: var(--kv-name);
+    right: 0.75rem;
+    top: calc(var(--y) - 22px);
+    transform: none;
+  }
+  .kv-open-names a {
+    min-height: 44px;
+    gap: 9px;
+    font-size: 15px;
+  }
+  .kv-num {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+  }
+  .kv-dash {
+    flex: none;
+    width: 22px;
+    border-top: 1px solid var(--color-hair-strong);
+  }
+  .kv-open-cap {
+    position: absolute;
+    left: calc((100% - min(100%, 440px)) / 2 + var(--kv-name));
+    right: 0.875rem;
+    top: calc(1rem + var(--kv-l) - 4px);
+    display: block;
+    width: auto;
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
+  .kv-open-click,
+  .kv-open-kit {
     display: none;
   }
 }

@@ -133,6 +133,8 @@ try {
     fs.writeFileSync(out, html);
     count++;
   }
+  // The header search's model names for the pages other than the home (it embeds its own).
+  fs.writeFileSync(path.join(DIST, ssr.MODEL_INDEX_PATH.slice(1)), ssr.modelIndexJson(pages));
   // sitemap.xml (one file while it fits): every indexable page in both languages, without
   // <lastmod>: one date for every URL, changing with each commit, taught Google to ignore it. A
   // per-page date (a hash of the page's own content, prices left out) can come later.

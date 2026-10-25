@@ -64,8 +64,11 @@ export interface Dict {
     tools: string;
     /** Theme select: the sun decides (auto), or the visitor. */
     theme: { label: string; auto: string; light: string; dark: string };
+    /** How to order, in the header on every page: "Sipariş: WhatsApp · <phone>"; `note` under it
+     *  on phones (home). */
+    order: { label: string; whatsapp: string; note: string };
   };
-  top: { tagline: string; shop: string };
+  top: { shop: string };
   banner: { label: string; preview: string; demo: string; how: string };
   tip: Record<TipType, string>;
   home: {
@@ -77,8 +80,12 @@ export interface Dict {
     pick: {
       alt: string;
       caption: string;
+      /** After the caption where the names are on the picture (not on phones). */
+      click: string;
       listLabel: string;
       tips: string;
+      /** The repair kit is a group of its own but not a part on the picture. */
+      kitNotShown: string;
     };
     allGroups: string;
     /** "Önce arama": the make/model finder and the panel listing the chosen model's parts. */
@@ -104,8 +111,8 @@ export interface Dict {
     };
     /** "Ürettiklerimizden": priced tips and parts, linked to their pages. */
     made: { title: string; lead: string };
-    /** "Nasıl sipariş verilir?": the steps (cart.steps) and the contact box. */
-    order: { body: string; whatsapp: string; mail: string };
+    /** The order box under the opening and "Nasıl sipariş verilir?" (with cart.steps). */
+    order: { title: string; body: string; whatsapp: string; mail: string };
     trust: { title: string; body: string }[];
   };
   card: { view: string };
@@ -224,6 +231,8 @@ export interface Dict {
   search: {
     label: string;
     placeholder: string;
+    /** The header box below 1280 px, where the long example does not fit. */
+    placeholderShort: string;
     button: string;
     none: (q: string) => string;
     count: (n: number) => string;
@@ -332,9 +341,10 @@ export interface Dict {
   parts: {
     title: string;
     lead: string;
-    tips: { name: string; body: string };
+    /** `short`: one line of `body` for the home's numbered group cards. */
+    tips: { name: string; body: string; short: string };
     /** `h1`: the group page's heading ("Hidrolik kırıcı burcu"); `name` stays short (nav, crumbs). */
-    items: Record<PartKey, { name: string; h1: string; body: string }>;
+    items: Record<PartKey, { name: string; h1: string; body: string; short: string }>;
     /** Picture of a part-group card (home, parts page). */
     groupAlt: (h1: string) => string;
     view: string;
@@ -558,9 +568,9 @@ export const DICT: Record<Lang, Dict> = {
       langOther: 'EN',
       tools: 'Hızlı erişim',
       theme: { label: 'Tema', auto: 'Otomatik', light: 'Açık', dark: 'Koyu' },
+      order: { label: 'Sipariş:', whatsapp: 'WhatsApp', note: 'Online ödeme henüz yok' },
     },
     top: {
-      tagline: 'Hidrolik kırıcı yedek parça üreticisi',
       shop: 'Kırıcı yedek parça mağazası',
     },
     banner: {
@@ -585,10 +595,11 @@ export const DICT: Record<Lang, Dict> = {
       groups: 'Ürün gruplarımız',
       pick: {
         alt: 'Bir hidrolik kırıcının ürettiğimiz parçaları yan yana: akümülatör, saplamalar, piston, burçlar, alt gövde, kama, aşınma plakaları ve kırıcı ucu',
-        caption:
-          'Ürettiğimiz parçalar, 3B görsel. Bir parçaya tıklayın, o parçanın sayfası açılır.',
+        caption: 'Ürettiğimiz parçalar, 3B görsel.',
+        click: 'Bir parçaya tıklayın, o parçanın sayfası açılır.',
         listLabel: 'Parçalar',
         tips: 'Kırıcı ucu',
+        kitNotShown: 'Tamir takımı resimde gösterilmemiştir.',
       },
       allGroups: 'Tüm yedek parçalar',
       finder: {
@@ -613,6 +624,7 @@ export const DICT: Record<Lang, Dict> = {
         lead: 'Ürettiğimiz uç ve parçalardan bir seçki. Fiyatlar nettir; TL karşılığı altında.',
       },
       order: {
+        title: 'Sipariş talebi',
         body: 'Online ödeme henüz yok. Kırıcınızı ve parçayı yazın, size hemen dönelim.',
         whatsapp: 'WhatsApp ile sor',
         mail: 'E-posta gönder',
@@ -731,6 +743,7 @@ export const DICT: Record<Lang, Dict> = {
     search: {
       label: 'Kırıcı modeli ara',
       placeholder: 'Kırıcınızın marka ve modeli, ör. Furukawa HB 20G',
+      placeholderShort: 'Marka ve model, ör. Furukawa HB 20G',
       button: 'Ara',
       none: (q) => `"${q}" için model bulunamadı.`,
       count: (n) => `${n} model`,
@@ -871,47 +884,56 @@ export const DICT: Record<Lang, Dict> = {
       tips: {
         name: 'Kırıcı ucu',
         body: 'Keski, sivri, küt, piramit ve konik uçlar; kırıcı modeline göre.',
+        short: 'Keski, sivri, küt, piramit ve konik uçlar.',
       },
       items: {
         'alt-govde': {
           name: 'Alt gövde',
           h1: 'Hidrolik kırıcı alt gövdesi',
           body: 'Ucu ve burçları taşıyan alt gövde (ön kafa). Aşınmış ya da çatlamış gövdenin yerine.',
+          short: 'Ucu ve burçları taşıyan alt gövde (ön kafa).',
         },
         burc: {
           name: 'Burç',
           h1: 'Hidrolik kırıcı burcu',
           body: 'Ucu yönlendiren kafa burçları, merkezlemeler ve dayama burçları; bazı kırıcılarda dayama ve merkezleme tek parçadır. Aşınmış burç ucu erken kırar; uçla birlikte kontrol edin.',
+          short: 'Kafa burçları, merkezlemeler ve dayama burçları.',
         },
         kama: {
           name: 'Kama',
           h1: 'Hidrolik kırıcı kaması',
           body: 'Ucu gövdede tutan kamalar ve tutucu pimler.',
+          short: 'Ucu gövdede tutan kamalar ve tutucu pimler.',
         },
         saplama: {
           name: 'Saplama',
           h1: 'Hidrolik kırıcı saplaması',
           body: 'Kırıcı gövdesini bir arada tutan saplamalar; takımlar somunlarıyla, çizimde varsa pullarıyla.',
+          short: 'Gövdeyi bir arada tutan saplamalar, somunlarıyla.',
         },
         piston: {
           name: 'Piston',
           h1: 'Hidrolik kırıcı pistonu',
           body: 'Kırıcının darbe pistonu; kırıcı modeline göre.',
+          short: 'Kırıcının darbe pistonu; kırıcı modeline göre.',
         },
         akumulator: {
           name: 'Akümülatör parçaları',
           h1: 'Hidrolik kırıcı akümülatör parçaları',
           body: 'Akümülatör üst ve alt kapakları ile akümülatör saplamaları.',
+          short: 'Akümülatör üst ve alt kapakları ile saplamaları.',
         },
         'asinma-plakasi': {
           name: 'Aşınma plakası',
           h1: 'Hidrolik kırıcı aşınma plakası',
           body: 'Kırıcı gövdesini kutu içinde koruyan aşınma plakaları.',
+          short: 'Gövdeyi kutu içinde koruyan aşınma plakaları.',
         },
         'tamir-takimi': {
           name: 'Tamir takımı',
           h1: 'Hidrolik kırıcı tamir takımı',
           body: 'Kırıcı modeline göre sızdırmazlık takımı: o-ringler, keçeler, toz keçeleri, destek ve teflon ringler; içerik listesiyle.',
+          short: 'Modele göre sızdırmazlık takımı, içerik listesiyle.',
         },
       },
       view: 'İncele',
@@ -1360,9 +1382,9 @@ export const DICT: Record<Lang, Dict> = {
       langOther: 'TR',
       tools: 'Quick links',
       theme: { label: 'Theme', auto: 'Auto', light: 'Light', dark: 'Dark' },
+      order: { label: 'Order:', whatsapp: 'WhatsApp', note: 'No online payment yet' },
     },
     top: {
-      tagline: 'Hydraulic breaker spare parts maker',
       shop: 'Breaker spare parts shop',
     },
     banner: {
@@ -1387,9 +1409,11 @@ export const DICT: Record<Lang, Dict> = {
       groups: 'Our product groups',
       pick: {
         alt: 'The parts we make for a hydraulic breaker, side by side: accumulator, tie rods, piston, bushings, front head, key, wear plates and tool',
-        caption: 'The parts we make, as 3D images. Click a part to open its page.',
+        caption: 'The parts we make, as 3D images.',
+        click: 'Click a part to open its page.',
         listLabel: 'Parts',
         tips: 'Breaker tool',
+        kitNotShown: 'Repair kits are not shown in the picture.',
       },
       allGroups: 'All spare parts',
       finder: {
@@ -1415,6 +1439,7 @@ export const DICT: Record<Lang, Dict> = {
         lead: 'A selection of the tips and parts we make, at export prices.',
       },
       order: {
+        title: 'Order request',
         body: 'No online payment yet. Tell us your breaker and the part, and we will get back to you.',
         whatsapp: 'Ask on WhatsApp',
         mail: 'Send an e-mail',
@@ -1533,6 +1558,7 @@ export const DICT: Record<Lang, Dict> = {
     search: {
       label: 'Search breaker model',
       placeholder: 'Your breaker make and model, e.g. Furukawa HB 20G',
+      placeholderShort: 'Make and model, e.g. Furukawa HB 20G',
       button: 'Search',
       none: (q) => `No model found for "${q}".`,
       count: (n) => `${n} models`,
@@ -1673,47 +1699,56 @@ export const DICT: Record<Lang, Dict> = {
       tips: {
         name: 'Breaker tips',
         body: 'Chisel, moil, blunt, pyramid and conical tips, by breaker model.',
+        short: 'Chisel, moil, blunt, pyramid and conical tips.',
       },
       items: {
         'alt-govde': {
           name: 'Front head',
           h1: 'Hydraulic breaker front heads',
           body: 'The lower body that holds the tip and bushings; replaces a worn or cracked one.',
+          short: 'The lower body that holds the tip and bushings.',
         },
         burc: {
           name: 'Bushings',
           h1: 'Hydraulic breaker bushings',
           body: 'Tool bushings and upper bushings that guide the tip, and thrust rings; on some breakers the thrust ring and upper bushing are one piece. A worn bushing breaks tips early; check them with the tip.',
+          short: 'Tool bushings, upper bushings and thrust rings.',
         },
         kama: {
           name: 'Retainer keys',
           h1: 'Hydraulic breaker retainer keys',
           body: 'Keys and retainer pins that hold the tip in the front head.',
+          short: 'Keys and retainer pins that hold the tip.',
         },
         saplama: {
           name: 'Tie rods',
           h1: 'Hydraulic breaker tie rods',
           body: 'Tie rods that hold the breaker body together; sets come with their nuts, and washers where the drawing has them.',
+          short: 'Tie rods that hold the body together, with their nuts.',
         },
         piston: {
           name: 'Pistons',
           h1: 'Hydraulic breaker pistons',
           body: 'The breaker’s impact piston, by breaker model.',
+          short: 'The breaker’s impact piston, by breaker model.',
         },
         akumulator: {
           name: 'Accumulator parts',
           h1: 'Hydraulic breaker accumulator parts',
           body: 'Accumulator covers (upper and lower) and accumulator bolts.',
+          short: 'Accumulator covers (upper and lower) and bolts.',
         },
         'asinma-plakasi': {
           name: 'Wear plates',
           h1: 'Hydraulic breaker wear plates',
           body: 'Wear plates that protect the breaker body inside its box.',
+          short: 'Wear plates that protect the body inside its box.',
         },
         'tamir-takimi': {
           name: 'Repair kits',
           h1: 'Hydraulic breaker repair kits',
           body: 'Seal kits by breaker model: o-rings, rod seals, wipers, back-up and PTFE rings, with a list of contents.',
+          short: 'Seal kits by model, with a list of contents.',
         },
       },
       view: 'View',
