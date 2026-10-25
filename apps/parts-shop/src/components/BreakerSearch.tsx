@@ -181,9 +181,16 @@ export function BreakerSearch({
   const load = () => {
     if (!finder && !index) loadIndex().then(setIndex, () => undefined);
   };
-  // The search text of every model is worked out once the box is in use, not on the first key.
+  // The search text of every model is worked out once the box is in use, not on the first key,
+  // and after the focus has painted (a long task in the tap's effects would delay it).
   useEffect(() => {
-    if (open && data) prepareSearch(data);
+    if (!open || !data) return;
+    if (typeof window.requestIdleCallback === 'function') {
+      const id = window.requestIdleCallback(() => prepareSearch(data), { timeout: 300 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(() => prepareSearch(data), 0);
+    return () => window.clearTimeout(id);
   }, [open, data]);
   // Typing only lists models: a model whose name is still being typed ("Furukawa F 2" on the way
   // to "F22") must not open (owner, 2026-10-22: never a wrong breaker).

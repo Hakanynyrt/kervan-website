@@ -80,8 +80,8 @@ export const SPOTS: Spot[] = [
   {
     g: 'alt-govde',
     boxes: [[1380, 232, 1792, 432]],
-    name: { x: 1450, up: false },
-    to: [1440, 395],
+    name: { x: 1500, up: false },
+    to: [1545, 410],
     side: [1590, 265],
   },
   {

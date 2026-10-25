@@ -191,6 +191,15 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const panel = useRef<HTMLElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const chipList = useRef<HTMLUListElement>(null);
+  // "Tüm markalar" goes away when pressed: move focus to the first make it revealed (WCAG 2.4.3),
+  // in every browser (the Tab order on phones only follows the grid where `reading-flow` works).
+  const makeList = useRef<HTMLUListElement>(null);
+  const focusMore = useRef(false);
+  useEffect(() => {
+    if (!allMakes || !focusMore.current) return;
+    focusMore.current = false;
+    makeList.current?.children[MAKES_SHOWN]?.querySelector('a')?.focus();
+  }, [allMakes]);
   const makes = useMemo(() => makesByModels(model.finder), [model.finder]);
 
   const shownMakes = allMakes ? makes : makes.slice(0, MAKES_SHOWN);
@@ -303,7 +312,10 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
             <h2 id="finder-makes" className="m-0 text-[15px] font-semibold text-ink md:leading-9">
               {f.makes}
             </h2>
-            <ul className="col-span-2 row-start-2 m-0 flex list-none flex-wrap gap-2 p-0 md:col-span-1 md:col-start-2 md:row-start-1">
+            <ul
+              ref={makeList}
+              className="col-span-2 row-start-2 m-0 flex list-none flex-wrap gap-2 p-0 md:col-span-1 md:col-start-2 md:row-start-1"
+            >
               {shownMakes.map((x) => (
                 <li key={x.brand}>
                   <a
@@ -328,6 +340,7 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                 onClick={(e) => {
                   if (!plain(e)) return;
                   e.preventDefault();
+                  focusMore.current = true;
                   setAllMakes(true);
                 }}
                 className={`col-start-2 row-start-1 whitespace-nowrap text-sm font-medium text-brand-hi hover:underline md:col-start-3 md:leading-9 ${FOCUS}`}
@@ -686,25 +699,12 @@ export default function Home({
       <Finder model={model} lang={lang} t={t} />
 
       {/* Phones: the names beside the opening already link every group, so the priced parts
-          come before the group cards (design E). The DOM has the desktop order; `reading-flow`
-          lets the Tab key follow the screen on phones too (Chromium). */}
+          come before the group cards (design E). The DOM has the phone order, right in every
+          browser; from 768 px the group cards move first, and `reading-flow` lets the Tab key
+          follow them there (Chromium). */}
       <div className="flex flex-col [reading-flow:flex-visual]">
-        <section aria-labelledby="groups" className="bg-bg max-md:border-t max-md:border-hair">
-          <div className={`${WRAP} py-8 md:pt-7`}>
-            <SectionHead
-              id="groups"
-              title={h.groups}
-              link={{ href: localePath(PARTS_PATH, lang), label: h.allGroups }}
-            />
-            <PartGroups numbered={NUMBERED} tips={model.tips} lang={lang} t={t} />
-            <p className="m-0 mt-2.5 font-sans text-[12.5px] text-ink-soft md:hidden">
-              {h.pick.kitNotShown}
-            </p>
-          </div>
-        </section>
-
         {model.made.length > 0 && (
-          <section aria-labelledby="made" className="bg-bg max-md:-order-1">
+          <section aria-labelledby="made" className="bg-bg">
             <div className={`${WRAP} py-8`}>
               <SectionHead
                 id="made"
@@ -729,6 +729,23 @@ export default function Home({
             </div>
           </section>
         )}
+
+        <section
+          aria-labelledby="groups"
+          className="bg-bg max-md:border-t max-md:border-hair md:-order-1"
+        >
+          <div className={`${WRAP} py-8 md:pt-7`}>
+            <SectionHead
+              id="groups"
+              title={h.groups}
+              link={{ href: localePath(PARTS_PATH, lang), label: h.allGroups }}
+            />
+            <PartGroups numbered={NUMBERED} tips={model.tips} lang={lang} t={t} />
+            <p className="m-0 mt-2.5 font-sans text-[12.5px] text-ink-soft md:hidden">
+              {h.pick.kitNotShown}
+            </p>
+          </div>
+        </section>
       </div>
 
       <div className="border-y border-hair bg-bg-soft">

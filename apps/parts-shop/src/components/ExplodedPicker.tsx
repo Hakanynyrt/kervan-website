@@ -293,7 +293,7 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
           <div className="kv-open-img">
             <picture>
               <source
-                srcSet={`${FINAL}-sm.webp 1000w, ${FINAL}-lg.webp 1600w`}
+                srcSet={`${FINAL}-sm.webp 1000w, ${FINAL}-lg.webp 1600w, ${BASE}-kare-06-47-lg.webp 2864w`}
                 sizes={`(max-width: 767px) ${PHONE_L}px, 100vw`}
               />
               <img
