@@ -9,6 +9,7 @@
 //   numbers, private D1 columns); genuine OEM numbers are allowed, only through the
 //   "Muadil OEM no." field (src/lib/oem-numbers.ts, owner's decision);
 // - every og:image in /og/ on this host is in dist;
+// - no HTML page carries an ad tag URL (TAG_URL): the tags load from the JS bundle, after consent;
 // - at most MAX_FILES files (Pages limit).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -30,6 +31,12 @@ const FORBIDDEN = [
   // Which breakers share a tip is ours alone: page data carries families with `fits: []`.
   /"fits":\[\{/,
 ];
+
+// Ad tags may only be injected by src/lib/ad-tags.ts after the visitor accepts the cookie
+// banner; a tag URL in a prerendered page (a pasted base code, Meta's <noscript> image) would
+// fire without consent. Never a plain "facebook": the footer links the Facebook page.
+const TAG_URL =
+  /connect\.facebook\.net|facebook\.com\/tr\b|fbevents\.js|googletagmanager\.com|bzrcdn\.openai\.com/;
 
 const files = [];
 const walk = (d) => {
@@ -94,6 +101,7 @@ for (const f of files) {
   for (const re of FORBIDDEN) if (re.test(s)) problems.push(`${rel}: forbidden ${re}`);
   if (f.endsWith('.html')) {
     pages++;
+    if (TAG_URL.test(s)) problems.push(`${rel}: ad tag URL (tags load only after consent)`);
     const out = new Set();
     for (const m of s.matchAll(/<a\b[^>]*?\shref="([^"]+)"/g)) {
       const u = pageUrlOfHref(m[1]);

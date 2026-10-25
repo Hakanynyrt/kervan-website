@@ -28,6 +28,7 @@ test('blocks secrets and private data in added lines', () => {
     ['token = "gh' + 'p_' + 'a1'.repeat(18) + '"', 'GitHub token'],
     ['OPENAI = "s' + 'k-proj-' + 'x'.repeat(30) + '"', 'API key'],
     ['BREVO=xkey' + 'sib-' + 'ab12'.repeat(16), 'Brevo key'],
+    ['META_CAPI = "EA' + 'A' + 'Zx9'.repeat(30) + '"', 'Meta access token'],
     ['SHOP_SHEET_KEY' + '=' + 'Q'.repeat(32), 'price sheet key value'],
     ['const s = "enc:' + 'v1:' + 'A'.repeat(60) + '"', 'encrypted price sheet'],
     ['part: "V' + 'T0' + '103041"', 'VEGA part number'],

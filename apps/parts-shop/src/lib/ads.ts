@@ -1,10 +1,14 @@
 import { BOT_UA_PATTERN } from '@kervan/motion';
+import { readStoredConsent, storeConsent, type ConsentChoice, type Conversion } from './ad-events';
+import { createAdTags, type AdIds, type AdTags, type Fbq } from './ad-tags';
 
 /**
- * Ad conversion measurement: the Google Ads tag and the OpenAI (ChatGPT) Ads pixel, both loaded
- * ONLY after the visitor accepts the cookie banner (KVKK: explicit consent; the data goes to
- * Google and OpenAI abroad). Until then nothing is requested from either and no cookie is set.
- * Google part: same design as heat-treatment's `src/lib/ads.ts` (the pixel is shop-only).
+ * Ad conversion measurement: the Google Ads tag, the OpenAI (ChatGPT) Ads pixel and the Meta
+ * (Facebook, Instagram) Pixel, all loaded ONLY after the visitor accepts the cookie banner
+ * (KVKK: explicit consent; the data goes to Google, OpenAI and Meta abroad). Until then nothing
+ * is requested from any of them and no cookie is set. The tags themselves are in `ad-tags.ts`,
+ * the pure mappings in `ad-events.ts` (both unit-tested). The Google part follows the same design
+ * as heat-treatment's `src/lib/ads.ts`; the pixels are shop-only.
  *
  * Same Google Ads account as kervanheat.com (owner: one account), with the shop's own
  * conversion actions (owner, 2026-10-22): "kiriciparca - Sipariş talebi" (primary) for order
@@ -16,33 +20,44 @@ const SEND_TO = {
   form: 'AW-16701476208/rQaaCIP5_aUdEPCa8Zs-',
   phone: 'AW-16701476208/8CXFCIn5_aUdEPCa8Zs-',
   whatsapp: 'AW-16701476208/OXtKCIb5_aUdEPCa8Zs-',
-} as const;
-export type Conversion = keyof typeof SEND_TO;
+} as const satisfies Record<Conversion, string>;
 
 /** OpenAI Ads Manager → Conversions → kiriciparca.com (public by design, like the AW ids). */
 const OAI_PIXEL_ID = '5YVim7txH512swvibTBM67';
 const OAI_SDK = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
+
 /**
- * The OpenAI event each conversion sends (developers.openai.com/ads/supported-events): an order
- * or quote request is the standard `lead_created` ("a lead form submission or a contact
- * request"); phone and WhatsApp clicks have no standard event, so they are custom events.
+ * Meta Events Manager → Data sources → kiriciparca.com (public by design, like the AW ids; never
+ * an access token). Empty: the Meta Pixel is off and nothing Meta-related loads. Automatic
+ * advanced matching and automatic events must stay off in Events Manager (the cart has name and
+ * phone fields; the KVKK text promises Meta none of them); checked 2026-10-25.
  */
-const OAI_EVENT: Record<Conversion, [string, Record<string, string>, Record<string, string>]> = {
-  form: ['lead_created', { type: 'customer_action' }, {}],
-  phone: ['custom', { type: 'custom' }, { custom_event_name: 'phone_click' }],
-  whatsapp: ['custom', { type: 'custom' }, { custom_event_name: 'whatsapp_click' }],
+const META_PIXEL_ID = '1752709229141667';
+const META_SDK = 'https://connect.facebook.net/en_US/fbevents.js';
+
+const IDS: AdIds = {
+  aw: AW_ID,
+  sendTo: SEND_TO,
+  oaiPixel: OAI_PIXEL_ID,
+  oaiSdk: OAI_SDK,
+  metaPixel: META_PIXEL_ID,
+  metaSdk: META_SDK,
 };
+
+export {
+  conversionForHref,
+  conversionsForLink,
+  type ConsentChoice,
+  type Conversion,
+} from './ad-events';
 
 /**
  * Spread onto a link that sends an order request or a quote (palet, product pages): a click
  * on it counts as one `form` conversion only, even when it is a WhatsApp link, so one order
- * is never counted twice in Google Ads.
+ * is never counted twice.
  */
 export const ORDER_CONVERSION = { 'data-kv-conversion': 'form' } as const;
 
-export type ConsentChoice = 'granted' | 'denied';
-/** Bump the suffix if the banner's wording/purpose changes, to ask again (per origin). */
-const CONSENT_KEY = 'kv_ads_consent_v2'; // v2: the OpenAI pixel joined the banner's purpose
 /** Footer "cookie preferences" → reopen the banner. */
 export const CONSENT_OPEN_EVENT = 'kv:consent-open';
 
@@ -51,13 +66,15 @@ declare global {
     dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
     oaiq?: ((...args: unknown[]) => void) & { q?: unknown[] };
+    fbq?: Fbq;
+    _fbq?: Fbq;
   }
 }
 
+/** The stored choice (`kv_ads_consent_v3`, with the v2 "denied" carry-over: `ad-events.ts`). */
 export function readConsent(): ConsentChoice | null {
   try {
-    const v = localStorage.getItem(CONSENT_KEY);
-    return v === 'granted' || v === 'denied' ? v : null;
+    return readStoredConsent(localStorage);
   } catch {
     return null;
   }
@@ -65,7 +82,7 @@ export function readConsent(): ConsentChoice | null {
 
 export function writeConsent(choice: ConsentChoice): void {
   try {
-    localStorage.setItem(CONSENT_KEY, choice);
+    storeConsent(localStorage, choice);
   } catch {
     /* private mode: the choice lasts for this page view only */
   }
@@ -77,103 +94,49 @@ export function isAutomatedClient(): boolean {
   return navigator.webdriver === true || new RegExp(BOT_UA_PATTERN, 'i').test(navigator.userAgent);
 }
 
-let loaded = false;
-
-const GRANTED = { ad_storage: 'granted', ad_user_data: 'granted', analytics_storage: 'granted' };
-const DENIED = { ad_storage: 'denied', ad_user_data: 'denied', analytics_storage: 'denied' };
-
-/** A withdrawn consent: already loaded tags stop storing and sending ad data at once. */
-export function revokeAdsConsent(): void {
-  if (loaded && window.gtag) window.gtag('consent', 'update', DENIED);
-  // The pixel sends nothing while consent is false and drops its cookies (__oppref, __obref).
-  if (loaded && window.oaiq) window.oaiq('consent', false);
+let tags: AdTags | null = null;
+/** The one instance, made on first use in the browser (never in the prerender). */
+function adTags(): AdTags | null {
+  if (typeof document === 'undefined') return null;
+  tags ??= createAdTags(
+    {
+      win: window,
+      addScript(src) {
+        const s = document.createElement('script');
+        s.async = true;
+        s.src = src;
+        document.head.appendChild(s);
+      },
+      setCookie(cookie) {
+        document.cookie = cookie;
+      },
+      hostname: location.hostname,
+    },
+    IDS,
+  );
+  return tags;
 }
 
-/** `tel:` links → phone; wa.me / WhatsApp links → whatsapp; anything else → null. */
-export function conversionForHref(href: string): Conversion | null {
-  if (/^tel:/i.test(href)) return 'phone';
-  if (/wa\.me|whatsapp/i.test(href)) return 'whatsapp';
-  return null;
-}
-
-/** The conversions one click on this link counts: an order link only `form`, else by href. */
-export function conversionsForLink(a: Element): Conversion[] {
-  // A send link held back by the page (e.g. the English cart's required country is empty).
-  if (a.getAttribute('aria-disabled') === 'true') return [];
-  if (a.getAttribute('data-kv-conversion') === 'form') return ['form'];
-  const byHref = conversionForHref(a.getAttribute('href') ?? '');
-  return byHref ? [byHref] : [];
-}
-
-/** Injects gtag.js and the OpenAI pixel once. Call only after consent. */
+/** Injects the tags once. Call only after consent (a stored "granted" on mount). */
 export function loadAdsTag(): void {
-  if (loaded || typeof document === 'undefined') return;
-  loaded = true;
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = function gtag() {
-    // gtag.js expects the `arguments` object itself, not an array.
-    // eslint-disable-next-line prefer-rest-params
-    window.dataLayer!.push(arguments);
-  };
-  // Consent mode: everything denied by default, then granted for measurement only.
-  // ad_personalization stays denied (no remarketing).
-  window.gtag('consent', 'default', {
-    ad_storage: 'denied',
-    ad_user_data: 'denied',
-    ad_personalization: 'denied',
-    analytics_storage: 'denied',
-  });
-  window.gtag('consent', 'update', GRANTED);
-  window.gtag('js', new Date());
-  window.gtag('config', AW_ID);
-  const s = document.createElement('script');
-  s.async = true;
-  s.src = `https://www.googletagmanager.com/gtag/js?id=${AW_ID}`;
-  document.head.appendChild(s);
-  loadOpenAiPixel();
+  adTags()?.load();
 }
 
-/** OpenAI's base snippet (developers.openai.com/ads/measurement-pixel), once, after consent. */
-function loadOpenAiPixel(): void {
-  if (window.oaiq) return;
-  const q = function oaiq() {
-    // eslint-disable-next-line prefer-rest-params
-    q.q.push(arguments);
-  } as ((...args: unknown[]) => void) & { q: unknown[] };
-  q.q = [];
-  window.oaiq = q;
-  // An earlier withdrawal is stored by the pixel itself: this visit's consent overrides it.
-  q('consent', true);
-  q('init', { pixelId: OAI_PIXEL_ID });
-  const s = document.createElement('script');
-  s.async = true;
-  s.src = OAI_SDK;
-  document.head.appendChild(s);
+/** "Kabul et": loads the tags, or lets them resume after a withdrawal on the same page. */
+export function grantAdsConsent(): void {
+  adTags()?.grant();
 }
 
-/** No-op unless the tag was loaded (i.e. the visitor consented). */
+/**
+ * A withdrawn consent: loaded tags stop storing and sending ad data at once (Google consent
+ * update `denied`, OpenAI `consent false`, Meta `consent revoke` with `_fbp` / `_fbc` deleted);
+ * from the next page load they are not loaded at all.
+ */
+export function revokeAdsConsent(): void {
+  adTags()?.revoke();
+}
+
+/** No-op unless the tags were loaded and consent still stands on this page. */
 export function trackConversion(kind: Conversion): void {
-  if (!loaded || !window.gtag) return;
-  // A tel: / wa.me link may leave the page at once: send with the beacon transport, which
-  // the browser delivers even after the page is gone.
-  window.gtag('event', 'conversion', {
-    send_to: SEND_TO[kind],
-    value: 1.0,
-    currency: 'TRY',
-    transport_type: 'beacon',
-  });
-  // Same click, one OpenAI event. The SDK sends with sendBeacon / fetch keepalive, so the
-  // event survives a same-tab navigation to WhatsApp; event_id lets OpenAI drop a duplicate.
-  if (window.oaiq) {
-    const [name, data, options] = OAI_EVENT[kind];
-    window.oaiq('measure', name, data, { ...options, event_id: eventId() });
-  }
-}
-
-function eventId(): string {
-  try {
-    return crypto.randomUUID();
-  } catch {
-    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-  }
+  adTags()?.track(kind);
 }

@@ -500,7 +500,7 @@ export interface Dict {
     /** aria-label of each social profile link (icon only). */
     socials: Record<OrgSocialKey, string>;
   };
-  /** Cookie banner for Google Ads measurement (ConsentBanner). */
+  /** Cookie banner for ad measurement (ConsentBanner). */
   consent: { title: string; body: string; accept: string; reject: string; policy: string };
   notFound: { title: string; body: string; home: string; ask: string };
 }
@@ -1310,7 +1310,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     consent: {
       title: 'Çerez tercihi',
-      body: 'Reklam ölçümü için Google Ads ve OpenAI (ChatGPT) Ads çerezlerini yalnızca izin verirseniz kullanırız; veriler yurt dışına (ABD) aktarılır. Reddederseniz site ve sipariş aynen çalışır.',
+      body: 'Reklam ölçümü için Google Ads, Meta (Facebook, Instagram) ve OpenAI (ChatGPT) Ads çerezlerini yalnızca izin verirseniz kullanırız; veriler yurt dışına (İrlanda ve ABD) aktarılır. Reddederseniz site ve sipariş aynen çalışır.',
       accept: 'Kabul et',
       reject: 'Reddet',
       policy: 'Ayrıntılar',
@@ -2131,7 +2131,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     consent: {
       title: 'Cookie preference',
-      body: 'We use Google Ads and OpenAI (ChatGPT) Ads cookies to measure our ads only if you allow it; the data goes abroad (USA). If you decline, the site and ordering work the same.',
+      body: 'We use Google Ads, Meta (Facebook, Instagram) and OpenAI (ChatGPT) Ads cookies to measure our ads only if you allow it; the data goes abroad (Ireland and USA). If you decline, the site and ordering work the same.',
       accept: 'Accept',
       reject: 'Decline',
       policy: 'Details',
