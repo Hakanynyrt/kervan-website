@@ -1489,13 +1489,22 @@ interface OtherPart {
 /**
  * Kama (tool pins) outside the 20-model kit, one sheet each: the Indeco MES 5000 kama from the owner's drawing photo
  * (2026-10-23; the archive sheet agrees): obround section with full round ends, a half-round notch in each rounded
- * edge near one end, chamfered ends. Black finish like the kit kamas.
+ * edge near one end, chamfered ends. Black finish like the kit kamas. The MTB 215 (MTB 210 II) kama (2026-10-25,
+ * from the complete MTB 215 model): 280 × 100 × 50 obround, C2 ends, the Ø30 cross hole and one M8 extraction hole in
+ * the end next to it (both C1); same views and look as the kit's MTB 210 kama.
  */
 const OTHER_KEYS: OtherPart[] = [
   {
     make: 'Indeco',
     model: 'MES 5000',
     file: 'kama-indeco-mes-5000',
+    kind: 'retainerKey',
+    views: ['front', 'rear', 'side'],
+  },
+  {
+    make: 'MTB',
+    model: '210 II',
+    file: 'kama-mtb-210-ii',
     kind: 'retainerKey',
     views: ['front', 'rear', 'side'],
   },
@@ -1523,13 +1532,23 @@ const FX_PISTONS: OtherPart[] = [
  * More pistons outside the kit, one archive drawing each: the Indeco MES 5000 piston (2026-10-24, from the archive
  * sheet): striking end a reduced Ø125 stub (black), the ground running lands (the Ø140 land and the oil-grooved
  * Ø145 land are drawn slightly tapered at their ends, ground like cylinders), black reliefs, an M30 handling hole in the
- * rear end. Same views and `-tasli` GLB as the kit pistons; no sales-list price (quote form).
+ * rear end. Same views and `-tasli` GLB as the kit pistons; no sales-list price (quote form). The MTB 215 (MTB 210 II)
+ * piston (2026-10-25, from the complete MTB 215 model; a different part from the kit's MTB 210 piston): L 978, Ø154
+ * collar, Ø137.5 running lands, Ø135 / Ø117 rods ground; the R80-waisted Ø107 striking nose, reliefs and grooves black;
+ * drawn like the kit pistons (striking end at the rear, the puller hole in the front end).
  */
 const OTHER_PISTONS: OtherPart[] = [
   {
     make: 'Indeco',
     model: 'MES 5000',
     file: 'piston-indeco-mes-5000',
+    kind: 'piston',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'MTB',
+    model: '210 II',
+    file: 'piston-mtb-210-ii',
     kind: 'piston',
     views: ['front', 'rear', 'side', 'section'],
   },
@@ -1887,6 +1906,23 @@ const ACCUMULATOR_PARTS: OtherPart[] = [
     make: 'MTB',
     model: '210',
     file: 'akumulator-mtb-mtb-210-01-1h020090-akumulator-tupu-alt',
+    kind: 'accumulatorLower',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  // MTB 215 (MTB 210 II) accumulator tubes (2026-10-25, from the complete MTB 215 model): the upper tube with the
+  // detailed gas port, the lower tube with the diaphragm bead ridge and the C10 boss (the 1146 oil holes of its plate
+  // are left out, as on every accumulator here).
+  {
+    make: 'MTB',
+    model: '210 II',
+    file: 'akumulator-mtb-210-ii-tupu-ust',
+    kind: 'accumulatorUpper',
+    views: ['front', 'rear', 'side', 'section'],
+  },
+  {
+    make: 'MTB',
+    model: '210 II',
+    file: 'akumulator-mtb-210-ii-tupu-alt',
     kind: 'accumulatorLower',
     views: ['front', 'rear', 'side', 'section'],
   },
