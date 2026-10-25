@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   MOIL_NOSE,
   MOIL_NOSE_MATERIAL,
+  RENDER_VERSION,
   rearSpec,
   renderFixes,
   renderSpec,
@@ -157,26 +158,53 @@ test('specKey: stable, changes with geometry and view; the rear view ignores the
   assert.equal(specKey(rearSpec(a), 'rear'), specKey(rearSpec(m), 'rear'));
 });
 
-test('specKey: a radius slot end as long as the cut is deep gets a new key, others keep theirs', () => {
+/** The key formula before renderFixes: untagged specs must keep these keys (and their images). */
+const oldKey = (spec: unknown, view = 'hero'): string => {
+  const text = JSON.stringify([RENDER_VERSION, view, spec]);
+  let h = 0xcbf29ce484222325n;
+  for (let i = 0; i < text.length; i++) {
+    h ^= BigInt(text.charCodeAt(i));
+    h = (h * 0x100000001b3n) & 0xffffffffffffffffn;
+  }
+  return h.toString(16).padStart(16, '0');
+};
+const oneEnd = (rs: number, floor: number, len: number, kind: 'radius' | 'ramp' = 'radius') => ({
+  slot: {
+    count: 1,
+    start: 160,
+    len: 120,
+    rs,
+    floor,
+    floorB: floor,
+    back: { kind, len },
+    front: { kind: 'ramp', len: 10 },
+    chamfer: 2,
+  },
+});
+
+test('renderFixes: tags the radius slot ends the old renderer drew wrong, and only those', () => {
+  assert.deepEqual(renderFixes(oneEnd(52.5, 17.5, 35)), ['slot-quarter']); // l = d: the long way round
+  assert.deepEqual(renderFixes(oneEnd(70, 40, 36.6)), ['slot-rim']); // arc start an ulp under rs
+  assert.deepEqual(renderFixes(oneEnd(70, 40, 36.7)), []);
+  assert.deepEqual(renderFixes(oneEnd(70, 40, 20)), []); // shorter than deep: drawn another way
+  assert.deepEqual(renderFixes(oneEnd(52.5, 17.5, 35, 'ramp')), []);
+  // Two keys: the far side's depth counts too.
+  const two = oneEnd(70, 40, 20).slot;
+  assert.deepEqual(renderFixes({ slot: { ...two, count: 2, floorB: 50 } }), ['slot-quarter']);
+  assert.deepEqual(renderFixes({}), []);
+});
+
+test('specKey: tagged specs get new keys, every other key stays as it was', () => {
   const sku = { tipType: 'chisel' as const, lengthMm: { min: 1300, max: 1300 }, tipAngleDeg: null };
-  const t = renderSpec(attrs(), sku)!.spec; // depth 105 − 70 = 35; table ends are min(35, 445 / 4)
+  const t = renderSpec(attrs(), sku)!.spec; // table ends: min(depth 35, 445 / 4) = 35
   assert.deepEqual(renderFixes(t), ['slot-quarter']);
+  for (const view of ['hero', 'side']) assert.notEqual(specKey(t, view), oldKey(t, view));
+  assert.notEqual(specKey(rearSpec(t), 'rear'), oldKey(rearSpec(t), 'rear'));
   const r20 = { kind: 'radius' as const, len: 20 };
   const a = { ...t, slot: { ...t.slot, back: r20, front: r20 } };
   assert.deepEqual(renderFixes(a), []);
-  assert.deepEqual(renderFixes(rearSpec(a)), []);
-  const q = { ...a, slot: { ...a.slot, back: { kind: 'radius' as const, len: 35 } } };
-  assert.deepEqual(renderFixes(q), ['slot-quarter']);
-  assert.deepEqual(renderFixes(rearSpec(q)), ['slot-quarter']);
-  // Uneven two-key cut: the far side's depth counts too.
-  const u = { ...a, slot: { ...a.slot, floorB: 80, front: { kind: 'radius' as const, len: 25 } } };
-  assert.deepEqual(renderFixes(u), ['slot-quarter']);
-  const ramp = { ...q, slot: { ...q.slot, back: { kind: 'ramp' as const, len: 35 } } };
-  assert.deepEqual(renderFixes(ramp), []);
-  assert.notEqual(
-    specKey(q),
-    specKey({ ...q, slot: { ...q.slot, back: { kind: 'radius', len: 35.1 } } }),
-  );
+  for (const view of ['hero', 'side']) assert.equal(specKey(a, view), oldKey(a, view));
+  assert.equal(specKey(rearSpec(a), 'rear'), oldKey(rearSpec(a), 'rear'));
 });
 
 test('uneven two-key slot: the cut depth is split between the key side and the far side', () => {

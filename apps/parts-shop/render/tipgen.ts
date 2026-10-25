@@ -408,6 +408,9 @@ export function slotEnd(
       const t = a0 + ((a1 - a0) * i) / 16;
       pts.push([cy + rho * Math.cos(t), cz + rho * Math.sin(t)]);
     }
+    // Start exactly on the rim: a start an ulp below rs made slotCutter's x = 0 slice (whose
+    // surface height is exactly rs) miss the curve in below(), leaving a thin uncut fin.
+    pts[0] = [y, rs];
   } else {
     pts.push([y, rs]);
     for (let i = 0; i <= 12; i++) {

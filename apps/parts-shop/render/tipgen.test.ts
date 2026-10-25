@@ -29,3 +29,13 @@ test('slotEnd: the curve does not jump when the end length crosses the cut depth
     assert.ok(gap < 1, `len ${len}: midpoint ${gap.toFixed(2)} mm from the l = d curve`);
   }
 });
+
+test('slotEnd: a radius arc starts exactly on the shank surface', () => {
+  // Computed starts landed an ulp under rs, and slotCutter's x = 0 slice then missed the curve.
+  for (const [len, rs, floor] of [
+    [35, 52.5, 17.5],
+    [36.6, 70, 40],
+    [36.8, 70, 40],
+  ])
+    assert.deepEqual(slotEnd(radius(len), 160, rs, floor, 3)[0], [160, rs]);
+});
