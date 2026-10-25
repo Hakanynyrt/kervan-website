@@ -26,6 +26,8 @@ export const MODELS_3D: Record<string, string> = {
     '/models/akumulator-montabert-brh-501-brh-501-akumulator-alt-tupu-03.glb',
   'akumulator-montabert-brh-501-brh-501-akumulator-saplamasi':
     '/models/akumulator-montabert-brh-501-brh-501-akumulator-saplamasi-03.glb',
+  'akumulator-mtb-210-ii-tupu-alt': '/models/akumulator-mtb-210-ii-tupu-alt-01.glb',
+  'akumulator-mtb-210-ii-tupu-ust': '/models/akumulator-mtb-210-ii-tupu-ust-01.glb',
   'akumulator-mtb-mtb-210-01-1h020080-akumulator-tupu-ust':
     '/models/akumulator-mtb-mtb-210-01-1h020080-akumulator-tupu-ust-03.glb',
   'akumulator-mtb-mtb-210-01-1h020090-akumulator-tupu-alt':
@@ -1013,6 +1015,7 @@ export const MODELS_3D: Record<string, string> = {
   'kama-montabert-brv-32': '/models/kama-montabert-brv-32-02.glb',
   'kama-mtb-150': '/models/kama-mtb-150-03.glb',
   'kama-mtb-210': '/models/kama-mtb-210-03.glb',
+  'kama-mtb-210-ii': '/models/kama-mtb-210-ii-01.glb',
   'kama-mtb-85': '/models/kama-mtb-85-03.glb',
   'kama-npk-h-7x': '/models/kama-npk-h-7x-03.glb',
   'kama-rammer-e64': '/models/kama-rammer-e64-02.glb',
@@ -1071,6 +1074,7 @@ export const MODELS_3D: Record<string, string> = {
   'piston-montabert-brv-32': '/models/piston-montabert-brv-32-tasli-05.glb',
   'piston-mtb-150': '/models/piston-mtb-150-tasli-04.glb',
   'piston-mtb-210': '/models/piston-mtb-210-tasli-05.glb',
+  'piston-mtb-210-ii': '/models/piston-mtb-210-ii-tasli-01.glb',
   'piston-mtb-85': '/models/piston-mtb-85-tasli-05.glb',
   'piston-npk-h-7x': '/models/piston-npk-h-7x-tasli-04.glb',
   'piston-rammer-e64': '/models/piston-rammer-e64-tasli-04.glb',

@@ -369,7 +369,7 @@ function blend(
   return [toward(b, a, r), toward(b, c, r)];
 }
 
-function slotEnd(
+export function slotEnd(
   e: TipSpec['slot']['back'],
   y: number,
   rs: number,
@@ -399,12 +399,18 @@ function slotEnd(
     const rho = (l * l + d * d) / (2 * d); // through (y, rs), tangent to the floor at y + l
     const cy = y + l;
     const cz = floor + rho;
-    const a0 = Math.atan2(rs - cz, y - cy);
+    // l = d makes the start level with the centre, where atan2 gives +π rather than −π and the
+    // arc swept the long way round: keep a0 in [−π, −π/2] so it always turns the short way.
+    let a0 = Math.atan2(rs - cz, y - cy);
+    if (a0 > 0) a0 -= 2 * Math.PI;
     const a1 = -Math.PI / 2;
     for (let i = 0; i <= 16; i++) {
       const t = a0 + ((a1 - a0) * i) / 16;
       pts.push([cy + rho * Math.cos(t), cz + rho * Math.sin(t)]);
     }
+    // Start exactly on the rim: a start an ulp below rs made slotCutter's x = 0 slice (whose
+    // surface height is exactly rs) miss the curve in below(), leaving a thin uncut fin.
+    pts[0] = [y, rs];
   } else {
     pts.push([y, rs]);
     for (let i = 0; i <= 12; i++) {
