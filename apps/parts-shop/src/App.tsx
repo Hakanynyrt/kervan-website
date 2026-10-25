@@ -45,6 +45,7 @@ export default function App({ lang, path, model, fx }: PageProps) {
       hasPopular={hasPopular}
       quoteText={quoteText}
       home={model.kind === 'home'}
+      finder={model.kind === 'home' ? model.finder : undefined}
     >
       {model.kind === 'home' && <Home model={model} fx={fx} lang={lang} t={t} />}
       {model.kind === 'list' && <TipList model={model} fx={fx} lang={lang} t={t} />}

@@ -16,7 +16,7 @@ export function fold(s: string): string {
 }
 
 /** The folded words of a query ("Ramer E 68" → ["ramer", "e", "68"]). */
-const words = (q: string): string[] =>
+export const queryWords = (q: string): string[] =>
   q
     .split(/[\s,;/]+/)
     .map(fold)
@@ -25,7 +25,7 @@ const words = (q: string): string[] =>
 /** Every word of the query appears in the name (spaces, dashes and case ignored). */
 export function matches(q: string, name: string): boolean {
   const n = fold(name);
-  const w = words(q);
+  const w = queryWords(q);
   return w.length > 0 && w.every((x) => n.includes(x));
 }
 
@@ -93,6 +93,14 @@ export function guessMake(word: string, makes: readonly string[]): string | null
   return best;
 }
 
+/** `names` folded, kept per list: the same list is searched on every keystroke. */
+const FOLDED = new WeakMap<readonly string[], string[]>();
+const foldedNames = (names: readonly string[]): string[] => {
+  let f = FOLDED.get(names);
+  if (!f) FOLDED.set(names, (f = names.map(fold)));
+  return f;
+};
+
 /**
  * When a query matches nothing: the query rewritten to something that does. Misspelt or
  * other-named makes are replaced by the make ("ramer e68" → "Rammer e68"); if that still
@@ -109,10 +117,15 @@ export function rewriteQuery(
 ): string | null {
   const ws = q.split(/[\s,;/]+/).filter((x) => fold(x));
   if (!ws.length) return null;
-  const folded = names.map(fold);
-  const seen = (w: string) => folded.some((n) => n.includes(fold(w)));
-  const hits = (list: string[]) =>
-    list.length > 0 && folded.some((n) => list.every((w) => n.includes(fold(w))));
+  const folded = foldedNames(names);
+  const seen = (w: string) => {
+    const f = fold(w);
+    return folded.some((n) => n.includes(f));
+  };
+  const hits = (list: string[]) => {
+    const fl = list.map(fold);
+    return fl.length > 0 && folded.some((n) => fl.every((w) => n.includes(w)));
+  };
   const digits = ws.some((w) => /\d/.test(w));
   // A bare number is no suggestion: "Hyundai HDB 20" must not become "20" (owner, 2026-10-22:
   // it listed unrelated models and opened Mega 20). A word with a letter must be left.
@@ -140,9 +153,12 @@ export function rewriteQuery(
   return null;
 }
 
-/** Every make spelling, longest first, for finding the make at the start of a name. */
-const LEADING: [string, string][] = Object.entries(BREAKER_BRANDS)
-  .flatMap(([canon, alts]) => [canon, ...alts].map((s): [string, string] => [s, canon]))
+/** Every make spelling (as written, upper-cased once), longest first, for finding the make at
+ *  the start of a name. */
+const LEADING: [string, string, string][] = Object.entries(BREAKER_BRANDS)
+  .flatMap(([canon, alts]) =>
+    [canon, ...alts].map((s): [string, string, string] => [s, canon, s.toLocaleUpperCase('tr')]),
+  )
   .sort((a, b) => b[0].length - a[0].length);
 
 /**
@@ -157,9 +173,7 @@ export function breakerKeys(name: string): string[] {
     .replace(/\s+/g, ' ')
     .trim();
   const up = text.toLocaleUpperCase('tr');
-  const lead = LEADING.find(
-    ([s]) => up.startsWith(`${s.toLocaleUpperCase('tr')} `) || up === s.toLocaleUpperCase('tr'),
-  );
+  const lead = LEADING.find(([, , u]) => up === u || up.startsWith(`${u} `));
   if (!lead) return [];
   const make = lead[1];
   const parts = text
@@ -184,15 +198,14 @@ export const SAME_MODELS: readonly (readonly [string, string])[] = [
   ['MTB 285', 'MTB 275 II'],
 ];
 
+/** SAME_MODELS with each name's keys, worked out once (searchName runs for every model). */
+const SAME_KEYS = SAME_MODELS.map(([a, b]) => ({ a, b, ka: breakerKeys(a), kb: breakerKeys(b) }));
+
 /** The text a breaker search matches: the name plus the other name of the same model, if any. */
 export function searchName(name: string): string {
   const keys = new Set(breakerKeys(name));
-  const also = SAME_MODELS.flatMap(([a, b]) =>
-    breakerKeys(a).some((k) => keys.has(k))
-      ? [b]
-      : breakerKeys(b).some((k) => keys.has(k))
-        ? [a]
-        : [],
+  const also = SAME_KEYS.flatMap(({ a, b, ka, kb }) =>
+    ka.some((k) => keys.has(k)) ? [b] : kb.some((k) => keys.has(k)) ? [a] : [],
   );
   return also.length ? `${name} / ${also.join(' / ')}` : name;
 }

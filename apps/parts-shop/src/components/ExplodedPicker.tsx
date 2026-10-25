@@ -1,23 +1,38 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { LIST_PATH, partPath, type PartKey } from '../lib/routes';
+import {
+  EXTRA,
+  groupName,
+  nameRoom,
+  nameRows,
+  OPEN_H as H,
+  OPEN_W as W,
+  PHONE_L,
+  PHONE_NAME_X,
+  PHONE_X,
+  SPOTS,
+  upright,
+  type OpeningGroup as Group,
+} from '../lib/opening';
+import { LIST_PATH, partPath } from '../lib/routes';
 import type { Lang } from '../types';
-import { FOCUS } from './Layout';
+import { FOCUS, WRAP } from './Layout';
 
-/** Home opening, in the strip under the make/model finder: our parts of one breaker (rendered
- *  from our drawings, no make or model named). The breaker first stands in its housing (kabin),
- *  seen from the side; the top cover comes off and the breaker comes out through the top (the
- *  housing slides away past the tool), the cylinder (not ours) fades out, and the breaker opens
- *  into its parts, laid out side by side along its axis; then the parts are numbered like a parts
- *  catalogue. Every part (on the picture and in the numbered list) is a plain link to its page.
+/** Home opening, right under the header, edge to edge: our parts of one breaker (rendered from
+ *  our drawings, no make or model named). The breaker first stands in its housing (kabin), seen
+ *  from the side; the top cover comes off and the breaker comes out through the top (the housing
+ *  slides away past the tool), the cylinder (not ours) fades out, and the breaker opens into its
+ *  parts, laid out side by side along its axis. Each part group is named on the picture with a
+ *  leader line (above or below it on desktop; beside it on phones, where the same picture and
+ *  frames stand upright, tip down), and every name and every part is a plain link to its group.
+ *  Geometry in `lib/opening.ts`.
  *
  *  The opening plays once per session for JS visitors without reduced motion, Save-Data or a slow
  *  (2g / 3g) connection, and not on an ad click's landing (gclid / gbraid / wbraid): the inline script
  *  in index.html marks <html data-kv-open> before paint (the first frame shows instead of the
  *  final picture), this component plays the frames on a canvas once the picture is in view and
  *  removes the mark. The prerendered markup is the final, opened state. */
-type Group = 'tips' | PartKey;
 
 const BASE = '/photos/parca/acilis';
 /** Final (opened) picture, `-{sm,lg}.webp`; the frames are `<BASE>-kabin-06-NN` (top cover off,
@@ -43,61 +58,20 @@ const OPEN = 900;
 const OPEN_KEY = 'kv_open_played';
 /** Width of the opening frames in their own pixels (`-lg`). */
 const FRAME_PX = 2864;
-/** Picture size in render pixels (the boxes and callouts below are in the same pixels). */
-const W = 2864;
-const H = 620;
-type Box = [number, number, number, number];
-/** Left to right along the breaker: group, boxes (pointer targets), callout (number position) and
- *  the point its leader line ends on. */
-const SPOTS: { g: Group; boxes: Box[]; at: [number, number]; to: [number, number] }[] = [
-  { g: 'akumulator', boxes: [[44, 168, 548, 392]], at: [296, 96], to: [296, 176] },
-  {
-    g: 'saplama',
-    boxes: [
-      [516, 72, 1228, 240],
-      [524, 368, 1228, 560],
-    ],
-    at: [1290, 90],
-    to: [1222, 120],
-  },
-  { g: 'piston', boxes: [[716, 262, 1228, 376]], at: [960, 440], to: [960, 370] },
-  {
-    g: 'burc',
-    boxes: [
-      [1220, 248, 1372, 392],
-      [1828, 264, 1996, 432],
-    ],
-    at: [1912, 190],
-    to: [1912, 266],
-  },
-  { g: 'alt-govde', boxes: [[1380, 232, 1792, 432]], at: [1300, 470], to: [1392, 420] },
-  { g: 'kama', boxes: [[1630, 64, 1732, 250]], at: [1560, 56], to: [1630, 96] },
-  {
-    g: 'asinma-plakasi',
-    boxes: [
-      [1389, 130, 1504, 162],
-      [1389, 484, 1504, 522],
-      [1606, 500, 1786, 536],
-      [2004, 232, 2092, 480],
-    ],
-    at: [2048, 570],
-    to: [2048, 482],
-  },
-  { g: 'tips', boxes: [[2100, 288, 2828, 448]], at: [2470, 226], to: [2470, 300] },
-];
-/** Groups not in the picture, listed after the numbered ones. */
-const EXTRA: Group[] = ['tamir-takimi'];
-const GROUPS: Group[] = [...SPOTS.map((s) => s.g), ...EXTRA];
-
+/** Desktop: a name's centre sits this far (render px) above or below the picture. */
+const NAME_DY = 82;
+/** Pointer targets reach a little past their part. */
 const PAD = 12;
 const pct = (v: number, s: number) => `${((v / s) * 100).toFixed(3)}%`;
-const boxStyle = ([x0, y0, x1, y1]: Box) => ({
+const boxStyle = ([x0, y0, x1, y1]: [number, number, number, number]) => ({
   left: pct(x0 - PAD, W),
   top: pct(y0 - PAD, H),
   width: pct(x1 - x0 + 2 * PAD, W),
   height: pct(y1 - y0 + 2 * PAD, H),
 });
 const groupPath = (g: Group) => (g === 'tips' ? LIST_PATH : partPath(g));
+/** Phones: each name's height beside the upright breaker. */
+const ROWS = nameRows();
 
 /** Plays the frames on the canvas, then clears the opening mark. Safe to call when unmarked. */
 function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
@@ -127,8 +101,8 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     };
     // All frames in playing order, fetched in that order a few at a time; the opening starts once
     // the first START are decoded and the rest keep coming while it plays. Each frame is decoded
-    // at the size it is shown (not its full 2864 px), AHEAD of the one on screen, and released
-    // once passed: all of them decoded at once would take more memory than a phone gives a page.
+    // AHEAD of the one on screen and released once passed: all of them decoded at once would take
+    // more memory than a phone gives a page. Phones decode them at the size shown.
     const urls = [
       ...Array.from({ length: KABIN }, (_, i) => src('kabin', i, size)),
       ...Array.from({ length: FRAMES }, (_, i) => src('kare', i, size)),
@@ -154,10 +128,12 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     };
     const dw = Math.min(framePx, Math.ceil(shown) || framePx);
     const dh = Math.round((dw * H) / W);
-    // Resizing while decoding costs more than it saves when the size shown is close to the
-    // frame's own (desktop): then the frames decode as they are.
+    // Desktop decodes the frames as they are: resizing while decoding cost more than it saved
+    // (2026-10-25, edge-to-edge picture: 1920 px played in up to 7 s with many dropped frames,
+    // 3 s without the resize; 7 MB a frame is fine on a desktop). Phones resize unless the size
+    // shown is close to the frame's own.
     const decode = (b: Blob) =>
-      dw > framePx * 0.75
+      !small || dw > framePx * 0.75
         ? createImageBitmap(b)
         : createImageBitmap(b, { resizeWidth: dw, resizeHeight: dh, resizeQuality: 'high' }).catch(
             () => createImageBitmap(b),
@@ -260,8 +236,8 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
       giveUp = window.setTimeout(() => finish(), 1500);
       raf = requestAnimationFrame(waitStart);
     };
-    // The strip sits under the finder: the opening starts once half of it is on screen (a phone
-    // scrolls down to it), so it is not played unseen.
+    // It starts once half of the picture is on screen (a page opened scrolled down, or a short
+    // window), so it is not played unseen.
     let io: IntersectionObserver | null = null;
     if (pic && 'IntersectionObserver' in window) {
       io = new IntersectionObserver(
@@ -287,32 +263,50 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
 
 export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
   const p = t.home.pick;
-  const name = (g: Group) => (g === 'tips' ? p.tips : t.parts.items[g].name);
+  const name = (g: Group) => groupName(t, g);
   const [hover, setHover] = useState<Group | null>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   useOpening(canvas);
   const lit = (g: Group) => g === hover;
+  const light = (g: Group) => ({
+    onMouseEnter: () => setHover(g),
+    onMouseLeave: () => setHover(null),
+  });
 
-  // The picture (the stage), then the numbered part list as a row of links; only the callouts on
-  // the picture wait for the breaker to come apart.
+  // The stage (studio / night, faded edges) holds the picture box: the picture layer (turned
+  // upright on phones), the leader lines and the names. Only the lines and the pointer targets
+  // wait for the breaker to come apart; the names are links from the first paint.
   return (
-    <div className="kv-pick">
-      <figure className="kv-open m-0 min-w-0 overflow-hidden">
-        <div className="kv-open-turn">
-          <div className="kv-open-pic relative">
+    <section
+      aria-label={p.caption}
+      className="kv-open"
+      style={
+        {
+          '--kv-l': `${PHONE_L}px`,
+          '--kv-x': `${PHONE_X}px`,
+          '--kv-name': `${PHONE_NAME_X}px`,
+        } as CSSProperties
+      }
+    >
+      <div className="kv-open-stage">
+        <div className="kv-open-pic">
+          <div className="kv-open-img">
             <picture>
-              <source media="(max-width: 1023px)" srcSet={`${FINAL}-sm.webp`} />
+              <source
+                srcSet={`${FINAL}-sm.webp 1000w, ${FINAL}-lg.webp 1600w, ${BASE}-kare-06-47-lg.webp 2864w`}
+                sizes={`(max-width: 767px) ${PHONE_L}px, 100vw`}
+              />
               <img
                 src={`${FINAL}-lg.webp`}
                 width={W}
                 height={H}
                 alt={p.alt}
                 decoding="async"
-                className="kv-open-final block h-auto w-full"
+                className="kv-open-final block h-full w-full"
               />
             </picture>
-            {/* The breaker in its housing, shown only while the opening is pending (lazy: never fetched
-              otherwise), and the canvas the frames play on. */}
+            {/* The breaker in its housing, shown only while the opening is pending (lazy: never
+                fetched otherwise), and the canvas the frames play on. */}
             <picture>
               <source media={SMALL_MQ} srcSet={src('kabin', 0, 'md')} />
               <img
@@ -330,90 +324,121 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
               aria-hidden="true"
               className="kv-open-canvas absolute inset-0 h-full w-full"
             />
-
             <div className="kv-open-spots">
-              <svg
-                aria-hidden="true"
-                viewBox={`0 0 ${W} ${H}`}
-                overflow="visible"
-                className="pointer-events-none absolute inset-0 h-full w-full"
-              >
-                {SPOTS.map(({ g, at, to }, i) => (
-                  <g
-                    key={g}
-                    className={lit(g) ? 'text-brand-hi' : 'text-ink-mid'}
-                    stroke="currentColor"
-                    fill="currentColor"
-                  >
-                    <line x1={at[0]} y1={at[1]} x2={to[0]} y2={to[1]} strokeWidth={4} />
-                    <circle cx={to[0]} cy={to[1]} r={9} stroke="none" />
-                    <circle
-                      cx={at[0]}
-                      cy={at[1]}
-                      r={40}
-                      strokeWidth={5}
-                      className={`kv-num ${lit(g) ? 'fill-brand-hi' : 'fill-bg'}`}
-                    />
-                    <text
-                      x={at[0]}
-                      y={at[1]}
-                      dy="0.36em"
-                      textAnchor="middle"
-                      stroke="none"
-                      fontSize={46}
-                      fontWeight={600}
-                      className={`font-sans ${lit(g) ? 'fill-on-brand' : 'fill-ink'}`}
-                    >
-                      {i + 1}
-                    </text>
-                  </g>
-                ))}
-              </svg>
-              {SPOTS.map(({ g, boxes }, i) => (
-                <div key={g} onMouseEnter={() => setHover(g)} onMouseLeave={() => setHover(null)}>
+              {SPOTS.map(({ g, boxes }) => (
+                <div key={g} {...light(g)}>
                   {boxes.map((b, j) => (
+                    // Pointer targets only: the names are the links for the keyboard.
                     <a
                       key={j}
                       href={localePath(groupPath(g), lang)}
-                      // One tab stop per part: the extra boxes are pointer targets only.
-                      tabIndex={j === 0 ? undefined : -1}
-                      aria-hidden={j === 0 ? undefined : true}
-                      aria-label={j === 0 ? `${i + 1}. ${name(g)}` : undefined}
-                      onFocus={() => setHover(g)}
-                      onBlur={() => setHover(null)}
+                      tabIndex={-1}
+                      aria-hidden="true"
                       style={boxStyle(b)}
-                      className={`absolute rounded-sm border-2 ${lit(g) ? 'border-brand-hi' : 'border-transparent'} focus-visible:outline-none`}
+                      className={`absolute rounded-sm border-2 ${lit(g) ? 'border-brand-hi' : 'border-transparent'}`}
                     />
                   ))}
                 </div>
               ))}
             </div>
           </div>
-        </div>
-        <figcaption className="mt-2 font-sans text-xs text-ink-soft">{p.caption}</figcaption>
-      </figure>
 
-      <nav aria-label={p.listLabel}>
-        <ol className="m-0 flex list-none flex-wrap gap-x-1 gap-y-0 p-0 font-sans text-sm">
-          {GROUPS.map((g, i) => (
-            <li key={g}>
-              <a
-                href={localePath(groupPath(g), lang)}
-                onMouseEnter={() => setHover(g)}
-                onMouseLeave={() => setHover(null)}
-                onFocus={() => setHover(g)}
-                onBlur={() => setHover(null)}
-                className={`flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-sm px-2 sm:min-h-9 ${lit(g) ? 'text-brand-hi' : 'text-ink'} hover:underline ${FOCUS}`}
-              >
-                {i < SPOTS.length && (
-                  <span className="tabular-nums text-xs font-semibold text-ink-mid">{i + 1}</span>
-                )}
-                {name(g)}
-              </a>
-            </li>
-          ))}
-        </ol>
-      </nav>
-    </div>
+          <div className="kv-open-spots" aria-hidden="true">
+            {/* Desktop: from each name, above or below the picture, to its part. */}
+            <svg
+              viewBox={`0 0 ${W} ${H}`}
+              preserveAspectRatio="none"
+              overflow="visible"
+              className="kv-open-lines"
+            >
+              {SPOTS.map(({ g, name: n, to }) => (
+                <g key={g} className={lit(g) ? 'text-brand-hi' : 'text-ink-mid'}>
+                  <line
+                    x1={n.x}
+                    y1={n.up ? -NAME_DY : H + NAME_DY}
+                    x2={to[0]}
+                    y2={to[1]}
+                    stroke="currentColor"
+                    strokeWidth={1.25}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <circle cx={to[0]} cy={to[1]} r={6.5} fill="currentColor" />
+                </g>
+              ))}
+            </svg>
+            {/* Phones: from each part of the upright picture to its name beside it. */}
+            <svg className="kv-open-leads">
+              {SPOTS.map(({ g, side }, i) => {
+                const [x, y] = upright(side);
+                return (
+                  <g key={g} className={lit(g) ? 'text-brand-hi' : 'text-ink-mid'}>
+                    <polyline
+                      points={`${x},${y} ${PHONE_NAME_X - 11},${ROWS[i]} ${PHONE_NAME_X - 4},${ROWS[i]}`}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.2}
+                    />
+                    <circle cx={x} cy={y} r={2.6} fill="currentColor" />
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+
+          <nav aria-label={p.listLabel} className="kv-open-names">
+            <ol className="m-0 list-none p-0">
+              {[...SPOTS.map((s) => s.g), ...EXTRA].map((g, i) => {
+                const spot = SPOTS[i];
+                const room = spot ? nameRoom(spot) : null;
+                return (
+                  <li
+                    key={g}
+                    className={spot ? (spot.name.up ? 'kv-up' : 'kv-dn') : 'kv-extra'}
+                    style={
+                      {
+                        '--x': spot ? pct(spot.name.x, W) : undefined,
+                        '--w': room
+                          ? `calc(var(--kv-pw) * ${room.k.toFixed(4)} ${room.px < 0 ? '-' : '+'} ${Math.abs(room.px)}px)`
+                          : undefined,
+                        '--y': `${ROWS[i]}px`,
+                      } as CSSProperties
+                    }
+                  >
+                    <a
+                      href={localePath(groupPath(g), lang)}
+                      {...light(g)}
+                      onFocus={() => setHover(g)}
+                      onBlur={() => setHover(null)}
+                      className={`inline-flex min-h-10 items-center gap-2.5 rounded-sm font-sans font-medium leading-tight hover:text-brand-hi ${lit(g) ? 'text-brand-hi' : 'text-ink'} ${FOCUS}`}
+                    >
+                      {spot ? (
+                        <span
+                          className={`kv-num ${lit(g) ? 'border-brand bg-brand text-on-brand' : 'border-ink-mid bg-bg text-ink'}`}
+                        >
+                          {i + 1}
+                        </span>
+                      ) : (
+                        <span aria-hidden="true" className="kv-dash" />
+                      )}
+                      {name(g)}
+                    </a>
+                  </li>
+                );
+              })}
+            </ol>
+          </nav>
+        </div>
+      </div>
+      {/* In the page's content column on desktop, under the h1 and the panel's edges. */}
+      <div className={`${WRAP} kv-open-capbox`}>
+        <p className="kv-open-cap m-0 font-sans text-xs text-ink-soft">
+          <span>
+            {p.caption}
+            <span className="kv-open-click"> {p.click}</span>
+          </span>
+          <span className="kv-open-kit">{p.kitNotShown}</span>
+        </p>
+      </div>
+    </section>
   );
 }

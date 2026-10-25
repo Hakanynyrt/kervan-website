@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { Container, SocialIcon } from '@kervan/ui';
 import { ORG_PHONE, ORG_PHONE_E164, ORG_SOCIALS, ORG_TRADING_NAME } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
+import type { FinderMake } from '../lib/finder';
 import { localePath } from '../lib/locale-path';
 import {
   CART_PATH,
@@ -14,6 +15,7 @@ import {
 } from '../lib/routes';
 import { LEGAL, LEGAL_KEYS, legalPath, SELLER } from '../lib/legal';
 import { CONSENT_OPEN_EVENT } from '../lib/ads';
+import { BreakerSearch, FinderPickProvider } from './BreakerSearch';
 import { CartLink } from './CartLink';
 import { ConsentBanner } from './ConsentBanner';
 import { ThemeSelect } from './ThemeSelect';
@@ -22,6 +24,10 @@ import { SHOP_EMAIL } from '../lib/site';
 
 export const FOCUS =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2';
+
+/** The column of the header, the footer and the home (design E): 1328 px of content on a 1376 px
+ *  band, 24 px gutters (16 px on phones). Other pages keep `Container` for their content. */
+export const WRAP = 'mx-auto w-full max-w-[1376px] px-4 md:px-6';
 
 /** The same ring drawn inside the element, for links inside a clipping box (overflow, scroller). */
 export const FOCUS_INSET =
@@ -34,7 +40,7 @@ export const whatsappHref = (text: string): string =>
 /** Footer column label (every column has one: plain labels, not kickers). */
 const HEAD = 'm-0 text-xs font-semibold uppercase tracking-wide text-ink';
 /** The seller's landline as a tel: link ("0 (262) 371 10 05" → +902623711005). */
-const SELLER_TEL = `tel:+90${SELLER.phone.replace(/\D/g, '').slice(1)}`;
+export const SELLER_TEL = `tel:+90${SELLER.phone.replace(/\D/g, '').slice(1)}`;
 
 interface Props {
   lang: Lang;
@@ -45,9 +51,49 @@ interface Props {
   hasPopular: boolean;
   /** Header quote button's message (the page's product); the generic tip message without it. */
   quoteText?: string;
-  /** Home page: the order notice is a thin line in the top bar instead of its own band. */
+  /** Home page: no notice band (the order box is on the page) and, on phones, no category bar
+   *  (the names beside the opening link every group). */
   home?: boolean;
+  /** Home: the finder data, so the header search picks into the page's panel without a fetch. */
+  finder?: readonly FinderMake[];
   children: ReactNode;
+}
+
+/** "Sipariş: WhatsApp · +90 …": how to order, in the header of every page; `note` ("Online ödeme
+ *  henüz yok", home) after it, on a line of its own on phones; `phoneClass` hides the number where
+ *  the bar is short of room. */
+function OrderLine({
+  t,
+  note,
+  phoneClass = '',
+  className = '',
+}: {
+  t: Dict;
+  note?: string;
+  phoneClass?: string;
+  className?: string;
+}) {
+  const link = `underline decoration-hair-strong underline-offset-[3px] hover:text-brand-hi ${FOCUS}`;
+  return (
+    <p className={`m-0 font-sans text-ink-mid ${className}`}>
+      <strong className="font-semibold text-ink">{t.nav.order.label}</strong>{' '}
+      <a href={whatsappHref(t.nav.quoteText)} className={`text-ink ${link}`}>
+        {t.nav.order.whatsapp}
+      </a>
+      <span className={phoneClass}>
+        {' · '}
+        <a href={`tel:${ORG_PHONE_E164}`} className={`whitespace-nowrap text-ink ${link}`}>
+          {ORG_PHONE}
+        </a>
+      </span>
+      {note && (
+        <span className="text-ink-soft max-md:block">
+          <span className="max-md:hidden"> · </span>
+          {note}
+        </span>
+      )}
+    </p>
+  );
 }
 
 export default function Layout({
@@ -58,6 +104,7 @@ export default function Layout({
   hasPopular,
   quoteText,
   home,
+  finder,
   children,
 }: Props) {
   const other: Lang = lang === 'tr' ? 'en' : 'tr';
@@ -83,96 +130,68 @@ export default function Layout({
       current: path === partPath(k) || path.startsWith(`${partPath(k)}/`),
     })),
   ];
-  const nav = [
-    ...groups,
-    ...(hasPopular
-      ? [
-          {
-            href: localePath(POPULAR_PATH, lang),
-            label: t.nav.popular,
-            current: path === POPULAR_PATH,
-          },
-        ]
-      : []),
-  ];
+  // "Çok satanlar": the last item of the bar on phones; from 768 px on its right side, outside the
+  // part of the bar that may scroll, so it always shows (as on the old header).
+  const popular = hasPopular
+    ? { href: localePath(POPULAR_PATH, lang), label: t.nav.popular, current: path === POPULAR_PATH }
+    : null;
+  const nav = popular ? [...groups, popular] : groups;
+  const navLink = `flex min-h-11 items-center whitespace-nowrap border-b-2 border-transparent text-ink hover:text-brand-hi aria-[current=page]:border-brand aria-[current=page]:text-brand-hi ${FOCUS_INSET}`;
   return (
-    <>
+    <FinderPickProvider>
       <a
         href="#icerik"
         className={`sr-only rounded-sm bg-brand px-4 py-2 font-sans text-sm font-medium text-on-brand focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 ${FOCUS}`}
       >
         {t.nav.skip}
       </a>
-      <div className="border-b border-hair bg-bg-soft font-sans text-xs text-ink-mid">
-        <Container className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-0 sm:py-2">
-          {home ? (
-            // Home: the order notice is this thin line (owner's "Önce arama" layout), its link
-            // goes to the ordering steps on the page itself. On phones it takes up to three lines;
-            // a fixed three-line height keeps the page from moving when Inter replaces the fallback
-            // font and the text wraps once more (2026-10-22: CLS 0.336 on /en/ at 412 px).
-            <p className="m-0 min-h-16 w-full py-2 sm:min-h-0 sm:w-auto sm:flex-1 sm:py-0">
-              <strong className="font-semibold text-ink">{t.banner.label}</strong>{' '}
-              {t.banner.preview}{' '}
-              <a
-                href="#siparis-adimlari"
-                className={`whitespace-nowrap font-medium text-brand-hi underline underline-offset-2 hover:text-ink ${FOCUS}`}
-              >
-                {t.banner.how}
-              </a>
-            </p>
-          ) : (
-            <span className="hidden sm:inline">
-              {ORG_TRADING_NAME} · {t.top.tagline}
-            </span>
-          )}
-          <span className="flex flex-1 justify-between gap-4 sm:flex-none">
-            <a
-              href={`tel:${ORG_PHONE_E164}`}
-              className={`inline-flex min-h-11 items-center font-medium text-ink hover:text-brand-hi sm:min-h-0 ${FOCUS}`}
-            >
-              {ORG_PHONE}
-            </a>
-            <a href={`mailto:${SHOP_EMAIL}`} className={`hidden hover:text-ink sm:inline ${FOCUS}`}>
-              {SHOP_EMAIL}
-            </a>
-            <a
-              href={localePath(path, other)}
-              hrefLang={other}
-              lang={other}
-              aria-label={t.nav.langLabel}
-              className={`inline-flex min-h-11 min-w-11 items-center justify-end font-medium text-ink hover:text-brand-hi sm:hidden ${FOCUS}`}
-            >
-              {t.nav.langOther}
-            </a>
-          </span>
-        </Container>
-      </div>
-      <header className="border-b border-hair bg-bg">
-        <Container className="flex items-center gap-x-3 py-3 sm:gap-x-10 sm:py-4">
+      {/* Logo, the make/model search (its own row below 1024 px) and the tools, how to order (a
+          line under the search below 1024 px); then the groups, one line (it scrolls sideways
+          on phones), with "Çok satanlar" and how to order on its right. The DOM has the desktop
+          order; `reading-flow` lets the Tab key follow the rows below 1024 px (Chromium). */}
+      <header className="relative z-20 border-b border-hair bg-bg">
+        <div
+          className={`${WRAP} flex flex-wrap items-center gap-x-2.5 gap-y-2 pb-2.5 pt-[9px] [reading-flow:flex-visual] min-[23.4375rem]:gap-x-3 sm:gap-x-5 md:gap-y-2.5 md:py-2.5 lg:min-h-[68px] lg:flex-nowrap lg:gap-x-4 lg:py-0 min-[73.75rem]:gap-x-7`}
+        >
           <a
             href={localePath('/', lang)}
-            className={`flex shrink-0 items-center gap-2 sm:gap-3 ${FOCUS}`}
+            className={`flex shrink-0 items-center gap-1.5 min-[23.4375rem]:gap-2 sm:gap-2.5 ${FOCUS}`}
           >
             <img
               src="/logo-krv-v2.svg"
               alt=""
               width={112}
               height={36}
-              className="h-8 w-auto sm:h-9"
+              className="h-6 w-auto sm:h-8"
             />
             <span className="flex flex-col leading-tight">
-              <span className="whitespace-nowrap font-sans text-base font-bold text-ink sm:text-lg">
+              <span className="whitespace-nowrap font-sans text-[13.5px] font-bold text-ink min-[23.4375rem]:text-[14.5px] sm:text-base">
                 {ORG_TRADING_NAME}
               </span>
-              <span className="hidden font-sans text-xs text-ink-mid sm:inline">{t.top.shop}</span>
+              <span className="hidden font-sans text-xs text-ink-mid min-[73.75rem]:inline">
+                {t.top.shop}
+              </span>
             </span>
           </a>
+          <BreakerSearch
+            lang={lang}
+            t={t}
+            id="kv-q"
+            finder={finder}
+            fromUrl
+            className="order-3 basis-full lg:order-none lg:max-w-[680px] lg:flex-1 lg:basis-0"
+          />
           <div
             role="group"
             aria-label={t.nav.tools}
-            className="ml-auto flex items-center gap-x-2.5 font-sans text-sm sm:gap-x-5"
+            className="ml-auto flex items-center gap-x-2.5 font-sans text-sm max-md:-my-[3px] min-[23.4375rem]:gap-x-3.5 sm:gap-x-[18px] lg:gap-x-3 xl:gap-x-[18px]"
           >
-            <a href={corporate} className={`hidden text-ink-mid hover:text-ink lg:inline ${FOCUS}`}>
+            {/* Phones: the 44 px targets reach 3 px into the row's padding (row as in design E). */}
+            {/* The corporate site, as on the old header from 1024 px; on the bar's right from 1280. */}
+            <a
+              href={corporate}
+              className={`hidden min-h-11 items-center whitespace-nowrap text-ink-mid hover:text-ink lg:inline-flex xl:hidden ${FOCUS}`}
+            >
               {t.nav.catalogSite}
             </a>
             <a
@@ -180,7 +199,7 @@ export default function Layout({
               hrefLang={other}
               lang={other}
               aria-label={t.nav.langLabel}
-              className={`hidden border-l border-hair pl-5 text-ink-mid hover:text-ink sm:inline ${FOCUS}`}
+              className={`inline-flex min-h-11 items-center font-medium text-ink hover:text-brand-hi ${FOCUS}`}
             >
               {t.nav.langOther}
             </a>
@@ -188,35 +207,80 @@ export default function Layout({
             <CartLink lang={lang} t={t} current={path === CART_PATH} />
             <a
               href={whatsappHref(quoteText ?? t.nav.quoteText)}
-              className={`inline-block whitespace-nowrap rounded-sm bg-brand px-3 py-2 font-medium text-on-brand sm:px-4 hover:bg-brand-hi ${FOCUS}`}
+              className={`inline-flex min-h-[38px] items-center whitespace-nowrap rounded-sm bg-brand px-2.5 font-semibold min-[23.4375rem]:px-3 text-on-brand hover:bg-brand-hi sm:min-h-10 sm:px-[18px] ${FOCUS}`}
             >
-              <span className="sm:hidden">{t.nav.quoteShort}</span>
-              <span className="hidden sm:inline">{t.nav.quote}</span>
+              {/* Short where the row is tight: phones, and beside the search below 1280 px. */}
+              <span className="sm:hidden lg:inline xl:hidden">{t.nav.quoteShort}</span>
+              <span className="hidden sm:inline lg:hidden xl:inline">{t.nav.quote}</span>
             </a>
           </div>
-        </Container>
-        <nav aria-label={t.nav.label} className="border-t border-hair">
-          <Container>
+          <OrderLine
+            t={t}
+            note={home ? t.nav.order.note : undefined}
+            className="order-4 -mt-0.5 basis-full text-[12.5px] leading-snug md:text-[13px] lg:hidden"
+          />
+        </div>
+        <nav
+          aria-label={t.nav.label}
+          className={`border-t border-hair ${home ? 'hidden md:block' : ''}`}
+        >
+          {/* From 768 px every item fits (lib/header-bar.test.ts: TR and EN, 768-1440 px): 13.5 px
+              type below 1024 px, the phone number on the right only from 1280 px. */}
+          <div
+            className={`${WRAP} flex items-center justify-between gap-2 min-[56.25rem]:gap-4 lg:gap-5`}
+          >
             <ul
               ref={barRef}
-              className="-mx-6 my-0 flex list-none gap-x-1 overflow-x-auto py-0 px-4 font-sans text-[15px] font-semibold [scrollbar-width:none] sm:-mx-2 sm:flex-wrap sm:gap-x-2 sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden"
+              className="-mx-4 my-0 flex min-w-0 list-none gap-x-1 overflow-x-auto px-4 py-0 font-sans text-[15px] font-semibold [scrollbar-width:none] sm:mx-0 sm:gap-x-[18px] sm:px-0 md:gap-x-2 md:text-[13.5px] min-[56.25rem]:gap-x-4 lg:gap-x-3.5 lg:text-sm xl:gap-x-5 xl:text-[14.5px] [&::-webkit-scrollbar]:hidden"
             >
-              {nav.map((n, i) => (
-                <li
-                  key={n.href}
-                  className={`shrink-0 ${i === groups.length ? 'ml-2 border-l border-hair pl-2 sm:ml-auto sm:border-l-0 sm:pl-0' : ''}`}
-                >
+              {groups.map((n) => (
+                <li key={n.href} className="shrink-0">
                   <a
                     href={n.href}
                     aria-current={n.current ? 'page' : undefined}
-                    className={`flex min-h-11 items-center whitespace-nowrap border-b-2 border-transparent px-2 text-ink hover:text-brand-hi aria-[current=page]:border-brand aria-[current=page]:text-brand-hi ${FOCUS_INSET}`}
+                    className={`${navLink} px-2 sm:px-0`}
                   >
                     {n.label}
                   </a>
                 </li>
               ))}
+              {popular && (
+                <li className="ml-2 shrink-0 border-l border-hair pl-2 sm:ml-0 sm:pl-[18px] md:hidden">
+                  <a
+                    href={popular.href}
+                    aria-current={popular.current ? 'page' : undefined}
+                    className={`${navLink} px-2 sm:px-0`}
+                  >
+                    {popular.label}
+                  </a>
+                </li>
+              )}
             </ul>
-          </Container>
+            <div className="hidden shrink-0 items-center gap-5 font-sans md:flex">
+              {popular && (
+                <div className="border-l border-hair pl-2 min-[56.25rem]:pl-4 lg:border-0 lg:pl-0">
+                  <a
+                    href={popular.href}
+                    aria-current={popular.current ? 'page' : undefined}
+                    className={`text-[13.5px] font-semibold lg:text-sm xl:text-[14.5px] ${navLink}`}
+                  >
+                    {popular.label}
+                  </a>
+                </div>
+              )}
+              <a
+                href={corporate}
+                className={`hidden min-h-11 items-center text-sm text-ink-mid hover:text-ink xl:inline-flex ${FOCUS}`}
+              >
+                {t.nav.catalogSite}
+              </a>
+              <OrderLine
+                t={t}
+                phoneClass="hidden xl:inline"
+                className="hidden whitespace-nowrap border-l border-hair pl-4 text-[13.5px] lg:block xl:pl-5"
+              />
+            </div>
+          </div>
         </nav>
       </header>
       <div
@@ -257,7 +321,9 @@ export default function Layout({
         {children}
       </main>
       <footer className="mt-24 border-t-2 border-ink bg-bg-soft">
-        <Container className="flex flex-col gap-4 border-b border-hair py-8 sm:flex-row sm:items-center sm:justify-between">
+        <div
+          className={`${WRAP} flex flex-col gap-4 border-b border-hair py-8 sm:flex-row sm:items-center sm:justify-between`}
+        >
           <a href={localePath('/', lang)} className={`flex items-center gap-3 ${FOCUS}`}>
             <img
               src="/logo-krv-v2.svg"
@@ -275,8 +341,10 @@ export default function Layout({
           <p className="m-0 max-w-md font-sans text-xs text-ink-soft sm:text-right">
             {t.footer.fit}
           </p>
-        </Container>
-        <Container className="grid gap-8 py-10 font-sans text-sm text-ink-mid sm:grid-cols-2 lg:grid-cols-5">
+        </div>
+        <div
+          className={`${WRAP} grid gap-8 py-10 font-sans text-sm text-ink-mid sm:grid-cols-2 lg:grid-cols-5`}
+        >
           <div>
             <p className={HEAD}>{t.footer.legal}</p>
             <p className="m-0 mt-3">{SELLER.name}</p>
@@ -382,15 +450,17 @@ export default function Layout({
               </ul>
             </div>
           </div>
-        </Container>
+        </div>
         <div className="border-t border-hair">
-          <Container className="flex flex-col gap-1 py-5 font-sans text-xs text-ink-soft sm:flex-row sm:justify-between sm:gap-6">
+          <div
+            className={`${WRAP} flex flex-col gap-1 py-5 font-sans text-xs text-ink-soft sm:flex-row sm:justify-between sm:gap-6`}
+          >
             <p className="m-0">{t.footer.images}</p>
             <p className="m-0">{SELLER.name}</p>
-          </Container>
+          </div>
         </div>
       </footer>
       <ConsentBanner lang={lang} t={t} />
-    </>
+    </FinderPickProvider>
   );
 }

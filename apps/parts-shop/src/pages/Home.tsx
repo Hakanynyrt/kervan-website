@@ -1,18 +1,30 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type MouseEvent } from 'react';
+import {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+} from 'react';
 import type { FxRate } from '@kervan/tips';
-import { Container } from '@kervan/ui';
+import { ORG_PHONE, ORG_PHONE_E164 } from '@kervan/seo';
 import { useReducedMotion } from '@kervan/motion';
-import { MissingModel, OrderSteps, PlantPhotos } from '../components/Bits';
+import { OrderSteps, PlantPhotos } from '../components/Bits';
+import { BreakerSearch, FinderPick } from '../components/BreakerSearch';
 import ExplodedPicker from '../components/ExplodedPicker';
 import { PartGroups } from '../components/PartGroups';
-import { FOCUS, whatsappHref } from '../components/Layout';
+import { FOCUS, SELLER_TEL, whatsappHref, WRAP } from '../components/Layout';
 import { CardPrice } from '../components/ModelSearch';
 import { priceNote } from '../components/PartOrder';
 import { cardHref, cardKey, cardName, cardPic } from '../lib/card';
+import { fitChips } from '../lib/chip-rows';
 import type { Dict } from '../lib/dict';
-import { exactHit, findModels, finderName, makesByModels, type FinderHit } from '../lib/finder';
+import { finderName, makesByModels, type FinderHit } from '../lib/finder';
 import { fmtNum } from '../lib/format';
+import { LEGAL, legalPath, SELLER } from '../lib/legal';
 import { localePath } from '../lib/locale-path';
+import { NUMBERED } from '../lib/opening';
 import { renderModel, renderTitle } from '../lib/part-caption';
 import { findRender, partsForBreaker } from '../lib/part-links';
 import { GROUP_COVERS } from '../lib/photos';
@@ -34,9 +46,14 @@ import type { Lang } from '../types';
 
 type Model = Extract<PageModel, { kind: 'home' }>;
 
-/** Make chips shown before "Tüm markalar"; model chips shown before "Tüm … modelleri". */
+/** Make chips shown before "Tüm markalar". */
 const MAKES_SHOWN = 16;
-const MODELS_SHOWN = 40;
+/** Model chips: two rows of them before "Tüm … modelleri" (design E), worked out from the first
+ *  MODELS_MAX laid out once (`fitChips`); the picked model is always among them. */
+const MODEL_ROWS = 2;
+const MODELS_MAX = 40;
+/** The chips are measured before paint in the browser; the prerender never shows them. */
+const useLayoutEffectSafe = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 /** Best-selling breakers listed in the empty panel. */
 const PANEL_POPULAR = 6;
 
@@ -53,12 +70,15 @@ function SectionHead({
   link?: { href: string; label: string };
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="mb-3.5 flex flex-wrap items-end justify-between gap-x-6 gap-y-2 md:mb-[18px]">
       <div>
-        <h2 id={id} className="m-0 font-sans text-2xl font-bold text-ink md:text-[1.75rem]">
+        <h2
+          id={id}
+          className="m-0 font-sans text-[22px] font-bold leading-tight text-ink md:text-[26px]"
+        >
           {title}
         </h2>
-        {lead && <p className="m-0 mt-2 max-w-2xl font-sans text-ink-mid">{lead}</p>}
+        {lead && <p className="m-0 mt-1.5 max-w-2xl font-sans text-ink-mid">{lead}</p>}
       </div>
       {link && (
         <a
@@ -77,7 +97,7 @@ const plain = (e: MouseEvent) =>
   !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0);
 
 const chip = (on: boolean, strong = false) =>
-  `inline-flex items-center rounded-sm border px-2.5 py-1.5 font-sans text-sm ${
+  `inline-flex min-h-11 items-center rounded-sm border px-2.5 font-sans text-sm sm:min-h-9 sm:px-[11px] ${
     on
       ? strong
         ? 'border-ink bg-ink text-bg'
@@ -85,7 +105,8 @@ const chip = (on: boolean, strong = false) =>
       : 'border-hair bg-bg text-ink hover:border-hair-strong'
   } ${FOCUS}`;
 
-/** A row of the finder panel: thumbnail, name and detail, the link label on the right. */
+/** A row of the finder panel: thumbnail, name and detail (left out when it is the name), the link
+ *  label on the right. */
 function PanelRow({
   href,
   img,
@@ -110,10 +131,10 @@ function PanelRow({
       <a
         href={href}
         onClick={onClick}
-        className={`group flex items-center gap-3 px-4 py-2.5 font-sans ${FOCUS}`}
+        className={`group flex min-h-[50px] items-center gap-3 px-4 py-[5px] font-sans hover:bg-bg-soft ${FOCUS}`}
       >
         <span
-          className={`relative block aspect-[4/3] w-16 shrink-0 overflow-hidden rounded-sm border border-hair ${stage === 'tip' ? 'bg-stage' : 'bg-pstage'}`}
+          className={`relative block aspect-[4/3] w-[52px] shrink-0 overflow-hidden rounded-sm border border-hair ${stage === 'tip' ? 'bg-stage' : 'bg-pstage'}`}
         >
           {img && (
             <img
@@ -129,7 +150,10 @@ function PanelRow({
         </span>
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="text-sm font-semibold text-ink group-hover:text-brand-hi">{title}</span>
-          {sub && <span className="text-xs text-ink-mid tabular-nums">{sub}</span>}
+          {/* No sub line that only repeats the title ("Kama / Kama"). */}
+          {sub && sub !== title && (
+            <span className="text-[12.5px] text-ink-mid tabular-nums">{sub}</span>
+          )}
           {badge && <span className="text-xs text-ink-soft">{badge}</span>}
         </span>
         <span className="shrink-0 text-sm font-medium text-brand-hi group-hover:underline">
@@ -141,361 +165,430 @@ function PanelRow({
 }
 
 /**
- * "Önce arama": the make/model finder, the panel with the chosen model's parts beside it (under
- * it on phones), and the opening strip under the finder. The prerender (and a visitor without
- * JS) gets the empty state: the box (it sends `?q=` to the tip list), the make chips linking to
- * the make pages, and the best-selling breakers in the panel linking to their pages. With JS a
- * make chip lists its models, a model (picked or typed) fills the panel from `partsForBreaker`.
- * `?q=` on the home opens a typed model, as the old home search box did.
+ * Under the opening: the h1 and the lead, the make chips (a make lists two rows of its models),
+ * the order box and the trust points; beside them (between the chips and the order box below
+ * 1024 px, in the page's order too, so reading and Tab order follow the screen; design E has the
+ * order box first on tablets, here the result shows right under the chips there too) the panel:
+ * the best-selling breakers until a model is picked, then that model's tip and the parts we make
+ * for it. A model is picked here (make, model and best-seller rows), with "Ara" in the header
+ * search or in the panel's own box on small screens (`FinderPick`, shared through the layout).
+ * The prerender (and a visitor without JS) gets the empty state: the make chips link to the make
+ * pages, the best-selling breakers to their pages.
  */
-function Finder({
-  model,
-  lang,
-  t,
-  strip,
-}: {
-  model: Model;
-  lang: Lang;
-  t: Dict;
-  strip: React.ReactNode;
-}) {
+function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const h = t.home;
   const f = h.finder;
   const reduce = useReducedMotion();
-  const [q, setQ] = useState('');
-  const [brand, setBrand] = useState<string | null>(null);
-  const [sel, setSel] = useState<FinderHit | null>(null);
+  const pick = useContext(FinderPick);
+  const sel = pick?.sel ?? null;
+  // The make whose models are listed: the one clicked here, until a model is picked anywhere
+  // (then that model's make, in the same render, so the panel's place is final when it is shown).
+  const [clicked, setClicked] = useState<{ brand: string; sel: typeof sel } | null>(null);
+  const brand = clicked && clicked.sel === sel ? clicked.brand : (sel?.brand ?? null);
   const [allMakes, setAllMakes] = useState(false);
-  const [allModels, setAllModels] = useState(false);
+  const [allFor, setAllFor] = useState<string | null>(null);
+  const allModels = brand !== null && allFor === brand;
   const panel = useRef<HTMLElement>(null);
-  const makes = useMemo(() => makesByModels(model.finder), [model.finder]);
-  const query = q.trim();
-  const found = useMemo(() => (query ? findModels(model.finder, query) : null), [model, query]);
-
+  const heading = useRef<HTMLHeadingElement>(null);
+  const chipList = useRef<HTMLUListElement>(null);
+  // "Tüm markalar" goes away when pressed: move focus to the first make it revealed (WCAG 2.4.3),
+  // in every browser (the Tab order on phones only follows the grid where `reading-flow` works).
+  const makeList = useRef<HTMLUListElement>(null);
+  const focusMore = useRef(false);
   useEffect(() => {
-    const v = new URLSearchParams(window.location.search).get('q');
-    if (!v) return;
-    setQ(v);
-    const r = findModels(model.finder, v);
-    // Only a query that names one model exactly opens it, never a corrected guess.
-    setSel(r.guess ? null : exactHit(r.hits, v));
-    // Only on load.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!allMakes || !focusMore.current) return;
+    focusMore.current = false;
+    makeList.current?.children[MAKES_SHOWN]?.querySelector('a')?.focus();
+  }, [allMakes]);
+  const makes = useMemo(() => makesByModels(model.finder), [model.finder]);
 
-  /** Phones: the panel sits under the chips; bring it up when a model is picked. */
-  const show = () =>
-    requestAnimationFrame(() => {
-      const el = panel.current;
-      if (el && el.getBoundingClientRect().top > window.innerHeight * 0.6)
-        el.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' });
+  const shownMakes = allMakes ? makes : makes.slice(0, MAKES_SHOWN);
+  const make = brand ? model.finder.find((x) => x.brand === brand) : undefined;
+  const picked = make && sel?.brand === make.brand ? sel.model.slug : null;
+  const makeModels = useMemo(() => {
+    if (!make) return [];
+    if (allModels) return make.models;
+    const first = make.models.slice(0, MODELS_MAX);
+    const own = make.models.find((m) => m.slug === picked);
+    return own && !first.includes(own) ? [...first, own] : first;
+  }, [make, allModels, picked]);
+
+  // Two rows of model chips: laid out once per make and width (before paint), then only those
+  // that fit are rendered.
+  const [chipW, setChipW] = useState<{ key: string; ws: number[]; width: number; gap: number }>();
+  const chipKey = `${brand} ${makeModels.length}`;
+  const measured = !allModels && chipW?.key === chipKey ? chipW : undefined;
+  const fits = measured
+    ? new Set(
+        fitChips(
+          measured.ws,
+          makeModels.findIndex((m) => m.slug === picked),
+          measured.width,
+          measured.gap,
+          MODEL_ROWS,
+        ),
+      )
+    : null;
+  useLayoutEffectSafe(() => {
+    const ul = chipList.current;
+    if (!ul || !brand || allModels || measured) return;
+    setChipW({
+      key: chipKey,
+      ws: [...ul.children].map((li) => li.getBoundingClientRect().width),
+      width: ul.clientWidth,
+      gap: parseFloat(getComputedStyle(ul).columnGap) || 0,
     });
-  const pick = (hit: FinderHit) => {
-    setSel(hit);
-    setBrand(hit.brand);
-    show();
-  };
+  });
+  useEffect(() => {
+    const ul = chipList.current;
+    if (!ul || typeof ResizeObserver === 'undefined') return;
+    let width = ul.clientWidth;
+    const ro = new ResizeObserver(() => {
+      if (ul.clientWidth === width) return;
+      width = ul.clientWidth;
+      setChipW(undefined);
+    });
+    ro.observe(ul);
+    return () => ro.disconnect();
+  }, [brand]);
+
+  // Bring the panel up when a pick asks for it (it sits under the chips on phones, and the header
+  // search may be used anywhere on the page), once the chips above it are in place; a pick from
+  // the header box also takes the focus to the panel's heading, so the keyboard carries on from
+  // the result (the list it came from is gone). A pick from the panel's own box keeps that box
+  // where it was on screen, with the focus and the phone's keyboard (the results are under it).
+  const shown = pick?.shown;
+  useEffect(() => {
+    if (!shown?.n) return;
+    const raf = requestAnimationFrame(() => {
+      const box = document.getElementById('kv-q-panel');
+      if (shown.from === 'box' && box && shown.top !== undefined) {
+        window.scrollBy(0, box.getBoundingClientRect().top - shown.top);
+        return;
+      }
+      const top = panel.current?.getBoundingClientRect().top;
+      if (top !== undefined && (top < 0 || top > window.innerHeight * 0.7))
+        panel.current?.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' });
+      if (shown.from === 'header') heading.current?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [shown, reduce]);
+
+  const choose = (hit: FinderHit) => pick?.select(hit, 'page');
   const hitFor = (brandName: string, slug: string): FinderHit | null => {
     const m = model.finder.find((x) => x.brand === brandName)?.models.find((x) => x.slug === slug);
     return m ? { brand: brandName, model: m, name: finderName(brandName, m) } : null;
   };
-  const onType = (v: string) => {
-    setQ(v);
-    const r = v.trim() ? findModels(model.finder, v) : null;
-    const exact = r && !r.guess ? exactHit(r.hits, v) : null;
-    if (exact) setSel(exact);
-    else if (sel && r && !r.hits.some((x) => x.model.slug === sel.model.slug)) setSel(null);
-  };
-  const submit = (e: FormEvent) => {
-    // Nothing found: the tip list's search takes over (its suggestions and "model not listed").
-    if (!found?.hits.length) return;
-    e.preventDefault();
-    // "Ara" opens the model the query names, or the only one it finds; a corrected guess or
-    // several hits stay chips to pick from (owner, 2026-10-22: never open a wrong breaker).
-    const one = found.guess
-      ? null
-      : (exactHit(found.hits, query) ?? (found.hits.length === 1 ? found.hits[0] : null));
-    if (one) pick(one);
-  };
 
-  const shownMakes = allMakes ? makes : makes.slice(0, MAKES_SHOWN);
-  const make = brand ? model.finder.find((x) => x.brand === brand) : undefined;
-  const makeModels = make ? (allModels ? make.models : make.models.slice(0, MODELS_SHOWN)) : [];
-  const hits = found ? found.hits.slice(0, MODELS_SHOWN) : [];
   const parts = sel ? partsForBreaker(sel.name) : [];
   const many = (sel?.model.tips.length ?? 0) > 1;
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-x-10 xl:grid-cols-[minmax(0,1fr)_26rem]">
-      <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-        <h1 className="m-0 font-sans text-base font-semibold text-ink-mid">{h.title}</h1>
-        <form
-          action={localePath(LIST_PATH, lang)}
-          method="get"
-          role="search"
-          onSubmit={submit}
-          className="mt-2"
-        >
-          <h2 className="m-0 font-sans text-2xl font-bold leading-tight text-ink md:text-[2rem]">
-            <label htmlFor="finder-q">{f.title}</label>
-          </h2>
-          <div className="mt-4 flex gap-2">
-            <input
-              id="finder-q"
-              name="q"
-              type="search"
-              value={q}
-              onChange={(e) => onType(e.target.value)}
-              placeholder={t.search.placeholder}
-              autoComplete="off"
-              className={`min-w-0 flex-1 rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft ${FOCUS}`}
-            />
-            <button
-              type="submit"
-              className={`rounded-sm bg-brand px-6 py-3 font-sans text-sm font-semibold text-on-brand hover:bg-brand-hi ${FOCUS}`}
-            >
-              {t.search.button}
-            </button>
-          </div>
-        </form>
-        <p className="m-0 mt-3 max-w-3xl font-sans text-sm text-ink-mid">{h.lead}</p>
+    // No label on this band: the panel and the order box are landmarks of their own (asides),
+    // which must not sit inside another one (axe landmark-complementary-is-top-level).
+    <section className="border-b border-hair bg-bg">
+      <div
+        className={`${WRAP} grid grid-cols-[minmax(0,1fr)] pb-7 pt-[18px] lg:grid-cols-[minmax(0,1fr)_24rem] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-9 lg:pb-[30px] lg:pt-6 xl:grid-cols-[minmax(0,1fr)_27rem] xl:gap-x-12`}
+      >
+        {/* Phones and tablets: one column, in the page's order (h1 … makes, the panel, the order
+            box and the trust points); desktop: the panel on the right of both blocks. */}
+        <div className="contents lg:col-start-1 lg:row-start-1 lg:block lg:min-w-0">
+          <h1
+            id="home-title"
+            className="m-0 font-sans text-[21px] font-normal leading-tight text-ink md:text-[26px]"
+          >
+            {h.title}
+          </h1>
+          <p className="m-0 mt-1.5 max-w-[860px] font-sans text-sm text-ink-mid md:text-[15px]">
+            {h.lead}
+          </p>
 
-        {found ? (
-          <div className="mt-5 font-sans">
-            <p className="m-0 text-sm font-semibold text-ink" aria-live="polite">
-              {found.hits.length
-                ? found.guess
-                  ? t.search.didYouMean(found.guess)
-                  : `${f.found}: ${t.search.count(found.hits.length)}`
-                : t.search.none(query)}
-            </p>
-            {hits.length > 0 && (
-              <ul className="m-0 mt-2 flex list-none flex-wrap gap-2 p-0">
-                {hits.map((x) => (
-                  <li key={x.model.slug}>
-                    <a
-                      href={localePath(breakerPath(x.model.slug), lang)}
-                      onClick={(e) => {
-                        if (!plain(e)) return;
-                        e.preventDefault();
-                        pick(x);
-                      }}
-                      aria-current={sel?.model.slug === x.model.slug ? 'true' : undefined}
-                      className={chip(sel?.model.slug === x.model.slug)}
-                    >
-                      {x.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {!found.hits.length && <MissingModel t={t} query={query} className="mt-3" />}
-            {found.hits.length > hits.length && (
-              <a
-                href={`${localePath(LIST_PATH, lang)}?q=${encodeURIComponent(query)}`}
-                className={`mt-3 inline-block text-sm font-medium text-brand-hi hover:underline ${FOCUS}`}
-              >
-                {t.search.count(found.hits.length)} →
-              </a>
-            )}
-          </div>
-        ) : null}
-
-        <nav aria-labelledby="finder-makes" className="mt-5 font-sans">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-            <h3 id="finder-makes" className="m-0 text-sm font-semibold text-ink">
+          {/* "Tüm markalar" after the chips (it ends their first row from 768 px); on phones it
+              stands beside "Marka", where `reading-flow` lets the Tab key reach it first. */}
+          <nav
+            aria-labelledby="finder-makes"
+            className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 gap-y-2 font-sans [reading-flow:grid-rows] md:mt-[18px] md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-start md:gap-x-3.5"
+          >
+            <h2 id="finder-makes" className="m-0 text-[15px] font-semibold text-ink md:leading-9">
               {f.makes}
-            </h3>
+            </h2>
+            <ul
+              ref={makeList}
+              className="col-span-2 row-start-2 m-0 flex list-none flex-wrap gap-2 p-0 md:col-span-1 md:col-start-2 md:row-start-1"
+            >
+              {shownMakes.map((x) => (
+                <li key={x.brand}>
+                  <a
+                    href={localePath(brandPath(x.brand), lang)}
+                    onClick={(e) => {
+                      if (!plain(e)) return;
+                      e.preventDefault();
+                      setClicked({ brand: x.brand, sel });
+                      setAllFor(null);
+                    }}
+                    aria-current={brand === x.brand ? 'true' : undefined}
+                    className={chip(brand === x.brand, true)}
+                  >
+                    {x.brand}
+                  </a>
+                </li>
+              ))}
+            </ul>
             {!allMakes && makes.length > MAKES_SHOWN && (
               <a
                 href={localePath(LIST_PATH, lang)}
                 onClick={(e) => {
                   if (!plain(e)) return;
                   e.preventDefault();
+                  focusMore.current = true;
                   setAllMakes(true);
                 }}
-                className={`text-sm font-medium text-brand-hi hover:underline ${FOCUS}`}
+                className={`col-start-2 row-start-1 whitespace-nowrap text-sm font-medium text-brand-hi hover:underline md:col-start-3 md:leading-9 ${FOCUS}`}
               >
                 {f.allMakes(makes.length)} →
               </a>
             )}
-          </div>
-          <ul className="m-0 mt-2 flex list-none flex-wrap gap-2 p-0">
-            {shownMakes.map((x) => (
-              <li key={x.brand}>
+          </nav>
+
+          {make && (
+            <section aria-labelledby="finder-models" className="mt-4 font-sans">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
+                <h3 id="finder-models" className="m-0 text-[15px] font-semibold text-ink">
+                  {f.models(make.brand)}
+                </h3>
                 <a
-                  href={localePath(brandPath(x.brand), lang)}
+                  href={localePath(brandPath(make.brand), lang)}
                   onClick={(e) => {
-                    if (!plain(e)) return;
+                    if (allModels || (fits && fits.size >= make.models.length) || !plain(e)) return;
                     e.preventDefault();
-                    setBrand(x.brand);
-                    setAllModels(false);
-                    setQ('');
+                    setAllFor(make.brand);
                   }}
-                  aria-current={brand === x.brand ? 'true' : undefined}
-                  className={chip(brand === x.brand, true)}
+                  className={`text-sm font-medium text-brand-hi hover:underline ${FOCUS}`}
                 >
-                  {x.brand}
+                  {f.allModels(make.brand, make.models.length)} →
                 </a>
+              </div>
+              <ul ref={chipList} className="m-0 mt-2 flex list-none flex-wrap gap-2 p-0">
+                {makeModels.map((m, i) => (
+                  <li key={m.slug} hidden={fits ? !fits.has(i) : undefined}>
+                    <a
+                      href={localePath(breakerPath(m.slug), lang)}
+                      onClick={(e) => {
+                        if (!plain(e)) return;
+                        e.preventDefault();
+                        choose({ brand: make.brand, model: m, name: finderName(make.brand, m) });
+                      }}
+                      aria-current={sel?.model.slug === m.slug ? 'true' : undefined}
+                      className={chip(sel?.model.slug === m.slug)}
+                    >
+                      {m.model}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          <p className="m-0 mt-3 max-w-3xl font-sans text-[12.5px] text-ink-soft">{f.note}</p>
+        </div>
+
+        <aside
+          ref={panel}
+          aria-labelledby="finder-panel"
+          className="mt-[18px] scroll-mt-4 rounded-md border border-hair bg-bg font-sans lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0"
+        >
+          <p className="sr-only" aria-live="polite">
+            {sel ? `${sel.name}: ${f.forModel}` : ''}
+          </p>
+          <div className="border-b border-hair px-4 py-3">
+            {sel ? (
+              <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                <div>
+                  <h2
+                    id="finder-panel"
+                    ref={heading}
+                    tabIndex={-1}
+                    className={`m-0 rounded-sm text-[17px] font-bold text-ink ${FOCUS}`}
+                  >
+                    {sel.name}
+                  </h2>
+                  <p className="m-0 mt-0.5 text-[13.5px] text-ink-mid">{f.forModel}</p>
+                </div>
+                <a
+                  href={localePath(breakerPath(sel.model.slug), lang)}
+                  className={`text-sm font-medium text-brand-hi hover:underline ${FOCUS}`}
+                >
+                  {f.breakerPage} →
+                </a>
+              </div>
+            ) : (
+              <div>
+                <h2
+                  id="finder-panel"
+                  ref={heading}
+                  tabIndex={-1}
+                  className={`m-0 rounded-sm text-[17px] font-bold text-ink ${FOCUS}`}
+                >
+                  {f.startTitle}
+                </h2>
+                <p className="m-0 mt-1 text-[13.5px] text-ink-mid">{f.startBody}</p>
+              </div>
+            )}
+            {/* Small screens: the header box is far above, so the panel has its own. It stays in
+                place (and keeps the focus and the phone's keyboard) when a model is shown. */}
+            <BreakerSearch
+              lang={lang}
+              t={t}
+              id="kv-q-panel"
+              finder={model.finder}
+              panel
+              className="mt-3 lg:hidden"
+            />
+          </div>
+          {sel ? (
+            <>
+              <ul className="m-0 list-none p-0">
+                {sel.model.tips.map((x, i) => (
+                  <PanelRow
+                    key={`tip-${i}`}
+                    href={`${localePath(breakerPath(sel.model.slug), lang)}${x.n ? `?uc=${x.n}` : ''}`}
+                    img={cardPic(x)?.src ?? null}
+                    stage="tip"
+                    badge={cardPic(x)?.sample ? t.list.sampleBadge : undefined}
+                    title={many ? `${t.parts.tips.name} · ${f.tipN(i + 1)}` : t.parts.tips.name}
+                    sub={x.d === null ? undefined : t.tipSize(fmtNum(x.d, lang), x.ord ?? null)}
+                    action={t.card.view}
+                  />
+                ))}
+                {parts.map((l) => {
+                  const r = findRender(l.part, l.anchor);
+                  const hero = r?.hero ?? GROUP_COVERS[l.part]?.base;
+                  return (
+                    <PanelRow
+                      key={`${l.part}-${l.anchor}`}
+                      href={localePath(partItemPath(l.part, l.anchor), lang)}
+                      img={
+                        hero
+                          ? photoImg(hero, r?.hero || GROUP_COVERS[l.part]?.xs ? 'xs' : 'lg')
+                          : null
+                      }
+                      stage="part"
+                      title={t.parts.items[l.part].name}
+                      sub={r?.kind ? t.parts.renderKindShort[r.kind] : undefined}
+                      action={t.parts.view}
+                    />
+                  );
+                })}
+              </ul>
+              {parts.length === 0 && (
+                <p className="m-0 border-t border-hair px-4 py-3 text-sm text-ink-mid">
+                  {f.noParts}
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              {model.featuredArePopular && model.featured.length > 0 && (
+                <>
+                  <h3 className="m-0 px-4 pb-0.5 pt-3 text-sm font-semibold text-ink">
+                    {f.popular}
+                  </h3>
+                  <ul className="m-0 list-none p-0">
+                    {model.featured.slice(0, PANEL_POPULAR).map((c) => (
+                      <PanelRow
+                        key={cardKey(c)}
+                        href={cardHref(c, lang)}
+                        onClick={(e) => {
+                          const hit = hitFor(c.brand, c.slug);
+                          if (!hit || !plain(e)) return;
+                          e.preventDefault();
+                          choose(hit);
+                        }}
+                        img={cardPic(c)?.src ?? null}
+                        badge={cardPic(c)?.sample ? t.list.sampleBadge : undefined}
+                        stage="tip"
+                        title={cardName(c, lang, t)}
+                        sub={
+                          c.diameterMm === null
+                            ? undefined
+                            : t.tipSize(fmtNum(c.diameterMm, lang), null)
+                        }
+                        action={t.card.view}
+                      />
+                    ))}
+                  </ul>
+                </>
+              )}
+            </>
+          )}
+          <div className="flex items-center justify-between gap-3 rounded-b-md border-t border-hair bg-bg-soft px-4 py-3 max-sm:flex-wrap">
+            <p className="m-0 min-w-0 text-[13.5px] text-ink">{t.missing.title}</p>
+            <a
+              href={whatsappHref(sel ? t.missing.textFor(sel.name) : t.missing.text)}
+              className={`inline-flex min-h-[38px] shrink-0 items-center rounded-sm bg-whatsapp px-4 text-sm font-medium text-white ${FOCUS}`}
+            >
+              {t.missing.button}
+            </a>
+          </div>
+        </aside>
+
+        <div className="contents lg:col-start-1 lg:row-start-2 lg:block lg:min-w-0">
+          <aside
+            aria-labelledby="order-box"
+            className="mt-4 grid grid-cols-[minmax(0,1fr)] items-center gap-x-6 gap-y-2.5 rounded-md border border-hair bg-bg px-3.5 py-3.5 font-sans md:mt-5 md:grid-cols-[minmax(0,1fr)_auto] md:px-4"
+          >
+            <div>
+              <h2 id="order-box" className="m-0 text-base font-bold text-ink">
+                {h.order.title}
+              </h2>
+              <p className="m-0 mt-0.5 text-sm text-ink-mid">
+                {h.order.body}{' '}
+                <a
+                  href="#siparis-adimlari"
+                  className={`font-medium text-brand-hi hover:underline ${FOCUS}`}
+                >
+                  {t.banner.how}
+                </a>
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 md:flex">
+              <a
+                href={whatsappHref(t.nav.quoteText)}
+                className={`inline-flex min-h-[42px] items-center justify-center whitespace-nowrap rounded-sm bg-whatsapp px-2 text-sm font-medium text-white md:px-[18px] ${FOCUS}`}
+              >
+                {h.order.whatsapp}
+              </a>
+              <a
+                href={`mailto:${ORDER_EMAIL}`}
+                className={`inline-flex min-h-[42px] items-center justify-center whitespace-nowrap rounded-sm border border-ink-soft bg-bg px-2 text-sm text-ink hover:bg-bg-warm md:px-[18px] ${FOCUS}`}
+              >
+                {h.order.mail}
+              </a>
+            </div>
+          </aside>
+
+          <ul className="m-0 mt-[18px] grid list-none grid-cols-2 gap-x-4 gap-y-2.5 border-t border-hair p-0 pt-3.5 font-sans md:mt-[22px] md:gap-x-8 md:gap-y-3.5 md:pt-[18px]">
+            {h.trust.map((x) => (
+              <li key={x.title} className="grid grid-cols-[18px_minmax(0,1fr)] gap-x-2.5 gap-y-0.5">
+                <svg aria-hidden="true" viewBox="0 0 16 16" className="mt-[3px] size-4 text-brand">
+                  <path
+                    d="M3 8.5l3 3 7-7"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span className="text-[13.5px] font-semibold text-ink md:text-sm">{x.title}</span>
+                <span className="col-start-2 hidden text-[13px] text-ink-mid md:block">
+                  {x.body}
+                </span>
               </li>
             ))}
           </ul>
-        </nav>
-
-        {make && !found && (
-          <section aria-labelledby="finder-models" className="mt-5 font-sans">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-              <h3 id="finder-models" className="m-0 text-sm font-semibold text-ink">
-                {f.models(make.brand)}
-              </h3>
-              <a
-                href={localePath(brandPath(make.brand), lang)}
-                onClick={(e) => {
-                  if (allModels || make.models.length <= MODELS_SHOWN || !plain(e)) return;
-                  e.preventDefault();
-                  setAllModels(true);
-                }}
-                className={`text-sm font-medium text-brand-hi hover:underline ${FOCUS}`}
-              >
-                {f.allModels(make.brand, make.models.length)} →
-              </a>
-            </div>
-            <ul className="m-0 mt-2 flex list-none flex-wrap gap-2 p-0">
-              {makeModels.map((m) => (
-                <li key={m.slug}>
-                  <a
-                    href={localePath(breakerPath(m.slug), lang)}
-                    onClick={(e) => {
-                      if (!plain(e)) return;
-                      e.preventDefault();
-                      pick({ brand: make.brand, model: m, name: finderName(make.brand, m) });
-                    }}
-                    aria-current={sel?.model.slug === m.slug ? 'true' : undefined}
-                    className={chip(sel?.model.slug === m.slug)}
-                  >
-                    {m.model}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-        <p className="m-0 mt-4 max-w-3xl font-sans text-xs text-ink-soft">{f.note}</p>
-      </div>
-
-      <aside
-        ref={panel}
-        aria-labelledby="finder-panel"
-        className="scroll-mt-4 self-start overflow-hidden rounded-md border border-hair bg-bg font-sans lg:col-start-2 lg:row-span-2 lg:row-start-1"
-      >
-        <p className="sr-only" aria-live="polite">
-          {sel ? `${sel.name}: ${f.forModel}` : ''}
-        </p>
-        {sel ? (
-          <>
-            <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 border-b border-hair px-4 py-3">
-              <div>
-                <h2 id="finder-panel" className="m-0 text-lg font-bold text-ink">
-                  {sel.name}
-                </h2>
-                <p className="m-0 text-sm text-ink-mid">{f.forModel}</p>
-              </div>
-              <a
-                href={localePath(breakerPath(sel.model.slug), lang)}
-                className={`text-sm font-medium text-brand-hi hover:underline ${FOCUS}`}
-              >
-                {f.breakerPage} →
-              </a>
-            </div>
-            <ul className="m-0 list-none p-0">
-              {sel.model.tips.map((x, i) => (
-                <PanelRow
-                  key={`tip-${i}`}
-                  href={`${localePath(breakerPath(sel.model.slug), lang)}${x.n ? `?uc=${x.n}` : ''}`}
-                  img={cardPic(x)?.src ?? null}
-                  stage="tip"
-                  badge={cardPic(x)?.sample ? t.list.sampleBadge : undefined}
-                  title={many ? `${t.parts.tips.name} · ${f.tipN(i + 1)}` : t.parts.tips.name}
-                  sub={x.d === null ? undefined : t.tipSize(fmtNum(x.d, lang), x.ord ?? null)}
-                  action={t.card.view}
-                />
-              ))}
-              {parts.map((l) => {
-                const r = findRender(l.part, l.anchor);
-                const hero = r?.hero ?? GROUP_COVERS[l.part]?.base;
-                return (
-                  <PanelRow
-                    key={`${l.part}-${l.anchor}`}
-                    href={localePath(partItemPath(l.part, l.anchor), lang)}
-                    img={
-                      hero
-                        ? photoImg(hero, r?.hero || GROUP_COVERS[l.part]?.xs ? 'xs' : 'lg')
-                        : null
-                    }
-                    stage="part"
-                    title={t.parts.items[l.part].name}
-                    sub={r?.kind ? t.parts.renderKindShort[r.kind] : undefined}
-                    action={t.parts.view}
-                  />
-                );
-              })}
-            </ul>
-            {parts.length === 0 && (
-              <p className="m-0 border-t border-hair px-4 py-3 text-sm text-ink-mid">{f.noParts}</p>
-            )}
-          </>
-        ) : (
-          <>
-            <div className="border-b border-hair px-4 py-3">
-              <h2 id="finder-panel" className="m-0 text-lg font-bold text-ink">
-                {f.startTitle}
-              </h2>
-              <p className="m-0 mt-1 text-sm text-ink-mid">{f.startBody}</p>
-            </div>
-            {model.featuredArePopular && model.featured.length > 0 && (
-              <>
-                <h3 className="m-0 px-4 pt-3 text-sm font-semibold text-ink">{f.popular}</h3>
-                <ul className="m-0 list-none p-0">
-                  {model.featured.slice(0, PANEL_POPULAR).map((c) => (
-                    <PanelRow
-                      key={cardKey(c)}
-                      href={cardHref(c, lang)}
-                      onClick={(e) => {
-                        const hit = hitFor(c.brand, c.slug);
-                        if (!hit || !plain(e)) return;
-                        e.preventDefault();
-                        pick(hit);
-                      }}
-                      img={cardPic(c)?.src ?? null}
-                      badge={cardPic(c)?.sample ? t.list.sampleBadge : undefined}
-                      stage="tip"
-                      title={cardName(c, lang, t)}
-                      sub={
-                        c.diameterMm === null
-                          ? undefined
-                          : t.tipSize(fmtNum(c.diameterMm, lang), null)
-                      }
-                      action={t.card.view}
-                    />
-                  ))}
-                </ul>
-              </>
-            )}
-          </>
-        )}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-hair bg-bg-soft px-4 py-3">
-          <p className="m-0 text-sm text-ink">{t.missing.title}</p>
-          <a
-            href={whatsappHref(sel ? t.missing.textFor(sel.name) : t.missing.text)}
-            className={`rounded-sm bg-whatsapp px-4 py-2 text-sm font-medium text-white ${FOCUS}`}
-          >
-            {t.missing.button}
-          </a>
         </div>
-      </aside>
-
-      <div className="min-w-0 lg:col-start-1 lg:row-start-2">{strip}</div>
-    </div>
+      </div>
+    </section>
   );
 }
 
@@ -519,7 +612,7 @@ function MadeCard({ x, fx, lang, t }: { x: MadeItem; fx: FxRate | null; lang: La
             height={320}
             loading="lazy"
             decoding="async"
-            className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain"
+            className="block aspect-[3/2] h-auto w-full border-b border-hair bg-stage object-contain lg:aspect-[12/5]"
           />
         )}
         <span className="flex flex-1 flex-col gap-0.5 p-3 font-sans">
@@ -527,9 +620,11 @@ function MadeCard({ x, fx, lang, t }: { x: MadeItem; fx: FxRate | null; lang: La
           <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
             {cardName(c, lang, t)}
           </span>
-          <CardPrice price={c.price} fx={fx} lang={lang} t={t} />
-          <span className="pt-1 text-sm font-medium text-brand-hi group-hover:underline">
-            {t.card.view} →
+          <span className="mt-auto flex flex-col gap-x-2 sm:flex-row sm:items-end sm:justify-between">
+            <CardPrice price={c.price} fx={fx} lang={lang} t={t} />
+            <span className="pt-1 text-sm font-medium text-brand-hi group-hover:underline">
+              {t.card.view} →
+            </span>
           </span>
         </span>
       </a>
@@ -556,7 +651,7 @@ function MadeCard({ x, fx, lang, t }: { x: MadeItem; fx: FxRate | null; lang: La
           height={180}
           loading="lazy"
           decoding="async"
-          className="block aspect-[3/2] h-auto w-full border-b border-hair bg-pstage object-contain"
+          className="block aspect-[3/2] h-auto w-full border-b border-hair bg-pstage object-contain lg:aspect-[12/5]"
         />
       )}
       <span className="flex flex-1 flex-col gap-0.5 p-3 font-sans">
@@ -564,10 +659,14 @@ function MadeCard({ x, fx, lang, t }: { x: MadeItem; fx: FxRate | null; lang: La
         <span className="text-sm font-semibold text-ink group-hover:text-brand-hi sm:text-base">
           {r ? renderModel(r, t) : name}
         </span>
-        <CardPrice price={[x.cents, x.cents]} fx={fx} lang={lang} t={t} />
-        {note && <span className="text-xs text-ink-mid">{note}</span>}
-        <span className="pt-1 text-sm font-medium text-brand-hi group-hover:underline">
-          {t.parts.view} →
+        <span className="mt-auto flex flex-col gap-x-2 sm:flex-row sm:items-end sm:justify-between">
+          <span className="flex flex-col">
+            <CardPrice price={[x.cents, x.cents]} fx={fx} lang={lang} t={t} />
+            {note && <span className="text-xs text-ink-mid">{note}</span>}
+          </span>
+          <span className="pt-1 text-sm font-medium text-brand-hi group-hover:underline">
+            {t.parts.view} →
+          </span>
         </span>
       </span>
     </a>
@@ -586,115 +685,123 @@ export default function Home({
   t: Dict;
 }) {
   const h = t.home;
+  // The terms in the order of the "Birleşik" design: fit, payment, shipping, then the warranty.
+  const [fit, shipping, payment] = t.terms.rows;
+  const terms = [fit, payment, shipping, [t.terms.warrantyLabel, t.terms.warrantyAll]].filter(
+    (x): x is [string, string] => Boolean(x),
+  );
+  const line = `text-ink underline underline-offset-2 hover:text-brand-hi ${FOCUS}`;
   return (
     <>
-      <section className="border-b border-hair bg-bg-soft">
-        <Container className="py-6 md:py-8">
-          {/* Owner's "Önce arama" layout: the finder and its panel first, the opening as a strip
-              under the finder, then the thin trust row. */}
-          <Finder model={model} lang={lang} t={t} strip={<ExplodedPicker lang={lang} t={t} />} />
-          <ul className="m-0 mt-6 grid list-none grid-cols-2 gap-x-4 gap-y-2 border-y border-hair p-0 py-3 font-sans text-[13px] text-ink-mid lg:grid-cols-4 lg:gap-x-0 lg:py-2.5">
-            {h.trust.map((x) => (
-              <li
-                key={x.title}
-                className="flex items-center gap-2 border-hair lg:border-l lg:pl-4 lg:first:border-l-0 lg:first:pl-0"
-              >
-                <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 shrink-0 text-brand">
-                  <path
-                    d="M3 8.5l3 3 7-7"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span className="font-medium text-ink">{x.title}</span>
-              </li>
-            ))}
-          </ul>
-        </Container>
-      </section>
+      {/* Owner's choice (2026-10-25, "Birleşik"): the opening first, edge to edge, its parts
+          named on it; then the h1, the makes and the breaker panel. */}
+      <ExplodedPicker lang={lang} t={t} />
+      <Finder model={model} lang={lang} t={t} />
 
-      {model.made.length > 0 && (
-        <section aria-labelledby="made" className="bg-bg">
-          <Container className="py-14 md:py-16">
+      {/* Phones: the names beside the opening already link every group, so the priced parts
+          come before the group cards (design E). The DOM has the phone order, right in every
+          browser; from 768 px the group cards move first, and `reading-flow` lets the Tab key
+          follow them there (Chromium). */}
+      <div className="flex flex-col [reading-flow:flex-visual]">
+        {model.made.length > 0 && (
+          <section aria-labelledby="made" className="bg-bg">
+            <div className={`${WRAP} py-8`}>
+              <SectionHead
+                id="made"
+                title={h.made.title}
+                lead={h.made.lead}
+                link={
+                  model.featuredArePopular
+                    ? { href: localePath(POPULAR_PATH, lang), label: h.morePopular }
+                    : undefined
+                }
+              />
+              <ul className="m-0 grid list-none grid-cols-2 gap-2.5 p-0 sm:gap-4 min-[73.75rem]:grid-cols-4">
+                {model.made.map((x) => (
+                  <li key={x.kind === 'tip' ? `tip-${cardKey(x.card)}` : `${x.part}-${x.anchor}`}>
+                    <MadeCard x={x} fx={fx} lang={lang} t={t} />
+                  </li>
+                ))}
+              </ul>
+              <p className="m-0 mt-3.5 font-sans text-xs text-ink-soft">
+                {fx && t.price.fxNote(fmtDate(fx.date, lang))} {t.price.note} {t.renderNote}
+              </p>
+            </div>
+          </section>
+        )}
+
+        <section
+          aria-labelledby="groups"
+          className="bg-bg max-md:border-t max-md:border-hair md:-order-1"
+        >
+          <div className={`${WRAP} py-8 md:pt-7`}>
             <SectionHead
-              id="made"
-              title={h.made.title}
-              lead={h.made.lead}
-              link={
-                model.featuredArePopular
-                  ? { href: localePath(POPULAR_PATH, lang), label: h.morePopular }
-                  : undefined
-              }
+              id="groups"
+              title={h.groups}
+              link={{ href: localePath(PARTS_PATH, lang), label: h.allGroups }}
             />
-            <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:gap-4 lg:grid-cols-4">
-              {model.made.map((x) => (
-                <li key={x.kind === 'tip' ? `tip-${cardKey(x.card)}` : `${x.part}-${x.anchor}`}>
-                  <MadeCard x={x} fx={fx} lang={lang} t={t} />
-                </li>
-              ))}
-            </ul>
-            <p className="m-0 mt-4 font-sans text-xs text-ink-soft">
-              {fx && t.price.fxNote(fmtDate(fx.date, lang))} {t.price.note} {t.renderNote}
+            <PartGroups numbered={NUMBERED} tips={model.tips} lang={lang} t={t} />
+            <p className="m-0 mt-2.5 font-sans text-[12.5px] text-ink-soft md:hidden">
+              {h.pick.kitNotShown}
             </p>
-          </Container>
+          </div>
         </section>
-      )}
+      </div>
 
-      <section aria-labelledby="groups" className="border-y border-hair bg-bg-soft">
-        <Container className="py-14 md:py-16">
-          <SectionHead
-            id="groups"
-            title={h.groups}
-            link={{ href: localePath(PARTS_PATH, lang), label: h.allGroups }}
-          />
-          <PartGroups tips={model.tips} lang={lang} t={t} list />
-        </Container>
-      </section>
+      <div className="border-y border-hair bg-bg-soft">
+        <div className={`${WRAP} py-8`}>
+          <PlantPhotos t={t} hall />
+        </div>
+      </div>
 
       <section id="siparis-adimlari" aria-labelledby="order" className="scroll-mt-6 bg-bg">
-        <Container className="py-14 md:py-16">
+        <div className={`${WRAP} py-8`}>
           <SectionHead id="order" title={t.cart.steps.title} />
-          <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
-            <div>
-              <OrderSteps lang={lang} t={t} className="sm:grid-cols-3" />
-            </div>
-            <div className="rounded-md border border-hair bg-bg-soft p-5 font-sans text-sm">
-              <p className="m-0 text-ink">{h.order.body}</p>
-              <div className="mt-4 flex flex-col gap-2.5">
-                <a
-                  href={whatsappHref(t.nav.quoteText)}
-                  className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
-                >
-                  {h.order.whatsapp}
-                </a>
-                <a
-                  href={`mailto:${ORDER_EMAIL}`}
-                  className={`rounded-sm border border-ink-soft bg-bg px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
-                >
-                  {h.order.mail} · {ORDER_EMAIL}
-                </a>
+          <OrderSteps lang={lang} t={t} note={false} className="md:grid-cols-3" />
+          <dl className="m-0 mt-[18px] grid grid-cols-[minmax(0,1fr)] gap-x-7 font-sans text-sm md:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1.6fr]">
+            {terms.map(([k, v]) => (
+              <div
+                key={k}
+                className="flex gap-3.5 border-t border-hair py-2 md:block md:pb-0 md:pt-2.5"
+              >
+                <dt className="w-16 shrink-0 text-ink-mid md:w-auto md:font-semibold md:text-ink">
+                  {k}
+                </dt>
+                <dd className="m-0 text-ink md:mt-0.5 md:text-ink-mid">{v}</dd>
               </div>
-              <dl className="m-0 mt-4">
-                {[...t.terms.rows, [t.terms.warrantyLabel, t.terms.warrantyAll]].map(([k, v]) => (
-                  <div key={k} className="flex gap-4 border-t border-hair py-2">
-                    <dt className="w-16 shrink-0 text-ink-mid">{k}</dt>
-                    <dd className="m-0 text-ink">{v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
+            ))}
+          </dl>
+          <div className="mt-4 flex flex-col gap-2.5 font-sans text-sm md:flex-row md:flex-wrap md:items-center md:gap-x-3 md:gap-y-2.5">
+            <a
+              href={whatsappHref(t.nav.quoteText)}
+              className={`inline-flex min-h-11 items-center justify-center rounded-sm bg-whatsapp px-5 font-medium text-white ${FOCUS}`}
+            >
+              {h.order.whatsapp}
+            </a>
+            <a
+              href={`mailto:${ORDER_EMAIL}`}
+              className={`inline-flex min-h-11 items-center justify-center rounded-sm border border-ink-soft bg-bg px-5 text-ink hover:bg-bg-warm ${FOCUS}`}
+            >
+              {h.order.mail} · {ORDER_EMAIL}
+            </a>
+            <p className="m-0 text-[13px] text-ink-mid md:ml-2">
+              {t.cart.phone}:{' '}
+              <a href={`tel:${ORG_PHONE_E164}`} className={`${line} whitespace-nowrap`}>
+                {ORG_PHONE}
+              </a>
+              {' · '}
+              <a href={SELLER_TEL} className={`${line} whitespace-nowrap`}>
+                {SELLER.phone}
+              </a>
+              {' · '}
+              {t.cart.steps.note}{' '}
+              <a href={localePath(legalPath('on-bilgilendirme'), lang)} className={line}>
+                {LEGAL[lang]['on-bilgilendirme'].title}
+              </a>
+            </p>
           </div>
-        </Container>
+        </div>
       </section>
-
-      <div className="border-t border-hair bg-bg-soft">
-        <Container className="py-14 md:py-16">
-          <PlantPhotos t={t} />
-        </Container>
-      </div>
     </>
   );
 }

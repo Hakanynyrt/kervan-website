@@ -356,10 +356,13 @@ export function OemLine({ t, kit = false }: { t: Dict; kit?: boolean }) {
 export function OrderSteps({
   lang,
   t,
+  note = true,
   className = '',
 }: {
   lang: Lang;
   t: Dict;
+  /** "Ayrıntılar: Ön bilgilendirme formu" under the steps (the home has it with its phones). */
+  note?: boolean;
   className?: string;
 }) {
   const c = t.cart;
@@ -379,22 +382,96 @@ export function OrderSteps({
           </li>
         ))}
       </ol>
-      <p className="m-0 mt-4 font-sans text-xs text-ink-soft">
-        {c.steps.note}{' '}
-        <a
-          href={localePath(legalPath('on-bilgilendirme'), lang)}
-          className={`underline hover:text-ink ${FOCUS}`}
-        >
-          {LEGAL[lang]['on-bilgilendirme'].title}
-        </a>
-      </p>
+      {note && (
+        <p className="m-0 mt-4 font-sans text-xs text-ink-soft">
+          {c.steps.note}{' '}
+          <a
+            href={localePath(legalPath('on-bilgilendirme'), lang)}
+            className={`underline hover:text-ink ${FOCUS}`}
+          >
+            {LEGAL[lang]['on-bilgilendirme'].title}
+          </a>
+        </p>
+      )}
     </>
   );
 }
 
-/** "Tesisimiz": our four plant photos (4:5) with captions (`/yedek-parca` and the home). */
-export function PlantPhotos({ t, className = '' }: { t: Dict; className?: string }) {
+/** PLANT_PHOTOS index of the heat-treatment hall, which opens the home's "Tesisimiz". */
+const HALL = 1;
+
+/**
+ * "Tesisimiz": our four plant photos (4:5) with captions (`/yedek-parca`). `hall` is the home's
+ * layout: the heat-treatment hall large beside the title, the sentence and the other three (on
+ * phones under the sentence).
+ */
+export function PlantPhotos({
+  t,
+  hall = false,
+  className = '',
+}: {
+  t: Dict;
+  hall?: boolean;
+  className?: string;
+}) {
   const pl = t.parts.plant;
+  if (hall) {
+    const h = PLANT_PHOTOS[HALL];
+    return (
+      <section
+        aria-labelledby="plant"
+        className={`grid grid-cols-[minmax(0,1fr)] gap-x-10 font-sans lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-start ${className}`}
+      >
+        <figure className="order-3 m-0 mt-4 lg:order-none lg:mt-0">
+          <img
+            src={photoImg(h, 'lg')}
+            srcSet={photoSet(h, ['sm', 480], ['lg', 960])}
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            width={960}
+            height={1200}
+            alt={pl.items[HALL].alt}
+            loading="lazy"
+            decoding="async"
+            className="block aspect-[3/2] h-auto w-full rounded-sm bg-bg-warm object-cover object-[50%_66%] lg:aspect-[2/1]"
+          />
+          <figcaption className="mt-2 text-[13px] text-ink-mid">
+            {pl.items[HALL].caption}
+          </figcaption>
+        </figure>
+        <div className="contents lg:block">
+          <h2 id="plant" className="order-1 m-0 text-[22px] font-bold text-ink md:text-[26px]">
+            {pl.title}
+          </h2>
+          <p className="order-2 m-0 mt-2 max-w-[34em] text-[16.5px] leading-snug text-ink lg:mt-2.5 lg:text-[19px]">
+            {pl.lead}
+          </p>
+          <ul className="order-4 m-0 mt-4 grid list-none grid-cols-3 gap-2 p-0 lg:mt-[22px] lg:gap-3.5">
+            {PLANT_PHOTOS.map((p, i) =>
+              i === HALL ? null : (
+                <li key={p}>
+                  <figure className="m-0">
+                    <img
+                      src={photoImg(p, 'sm')}
+                      width={480}
+                      height={600}
+                      alt={pl.items[i].alt}
+                      loading="lazy"
+                      decoding="async"
+                      className="block aspect-[4/5] h-auto w-full rounded-sm bg-bg-warm object-cover lg:aspect-[5/4]"
+                    />
+                    <figcaption className="mt-2 text-xs leading-snug text-ink-mid lg:text-[13px]">
+                      {pl.items[i].caption}
+                    </figcaption>
+                  </figure>
+                </li>
+              ),
+            )}
+          </ul>
+          <p className="order-5 m-0 mt-3 text-xs text-ink-soft">{pl.note}</p>
+        </div>
+      </section>
+    );
+  }
   return (
     <section aria-labelledby="plant" className={className}>
       <h2 id="plant" className="m-0 font-sans text-2xl font-bold text-ink">

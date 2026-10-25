@@ -10,6 +10,7 @@ import type { PublicCatalog } from '@kervan/tips';
 import App from './App';
 import { isIndexable, pageHead, SITE } from './lib/page-head';
 import { LANGS, localePath } from './lib/locale-path';
+import { modelIndex } from './lib/finder';
 import type { PageProps } from './lib/page-props';
 import { breakerPath, buildPages, groupBreakers } from './lib/routes';
 import type { Lang } from './types';
@@ -18,6 +19,7 @@ import type { Lang } from './types';
 
 export { injectHead, jsonForScript } from '@kervan/seo';
 export { PROPS_ID } from './lib/page-props';
+export { MODEL_INDEX_PATH } from './lib/finder';
 
 export interface PrerenderPage {
   file: string;
@@ -66,6 +68,12 @@ export function prerender(catalog: PublicCatalog): PrerenderPage[] {
     });
   }
   return out;
+}
+
+/** The header search's names-only model index (`MODEL_INDEX_PATH`), from the home's finder. */
+export function modelIndexJson(pages: PrerenderPage[]): string {
+  const home = pages.find((p) => p.props.model.kind === 'home')?.props.model;
+  return JSON.stringify(home?.kind === 'home' ? modelIndex(home.finder) : []);
 }
 
 /**

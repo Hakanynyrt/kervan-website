@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { exactHit, findModels, makesByModels, type FinderMake } from './finder.ts';
+import { exactHit, findModels, makesByModels, modelIndex, type FinderMake } from './finder.ts';
 
 // Made-up rows for the search logic only (not catalogue data).
 const MAKES: FinderMake[] = [
@@ -89,4 +89,16 @@ test('makesByModels puts makes with more models first', () => {
     makesByModels(MAKES).map((m) => m.brand),
     ['Furukawa', 'MTB', 'Mega', 'Rammer'],
   );
+});
+
+test('the header index keeps names and pages only, and finds the same models', () => {
+  const index = modelIndex(MAKES);
+  assert.deepEqual(index[0].models[0], { model: 'HB 20G', slug: 'furukawa-hb-20g' });
+  assert.ok(!JSON.stringify(index).includes('tips'));
+  for (const q of ['hb 20g', 'Ramer E68', 'F 22', 'mtb'])
+    assert.deepEqual(
+      findModels(index, q).hits.map((h) => h.model.slug),
+      findModels(MAKES, q).hits.map((h) => h.model.slug),
+    );
+  assert.equal(exactHit(findModels(index, 'F22').hits, 'F22')?.name, 'Furukawa F22');
 });

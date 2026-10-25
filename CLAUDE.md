@@ -89,3 +89,6 @@ deploy's `verify` job runs the same four and blocks every deploy.
 - When a request matches a template in `docs/komut-kaliplari.md`, end the reply with one line
   naming it (e.g. "İpucu: bir dahaki sefere B2 kalıbını kullanabilirsiniz"); the owner asked to be
   reminded of the templates when they apply.
+- Before starting work, propose a cheaper, faster or simpler route when one exists (e.g. run bulk
+  scripts on the owner's own PC instead of the cloud); do not wait for him to ask (owner,
+  2026-10-25).
