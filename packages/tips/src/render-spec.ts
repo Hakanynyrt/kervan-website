@@ -293,9 +293,47 @@ export function rearSpec(spec: TipSpec): unknown {
   };
 }
 
+/**
+ * Renderer fixes that change only some images, added to the key of the specs they touch so only
+ * those re-render (a RENDER_VERSION bump re-renders all ~5,400). Both are found by redoing the
+ * old tipgen.ts `slotEnd` float steps for each radius slot end, so a tag lands on exactly the
+ * images that change. Drop them at the next bump.
+ * - 'slot-quarter' (2026-10-25): an end exactly as long as the cut is deep, where atan2 gave +π
+ *   and the arc swept the long way round.
+ * - 'slot-rim' (2026-10-25): a longer end whose arc started an ulp below the shank radius, so
+ *   `slotCutter`'s middle slice (x = 0) missed it and left a thin uncut fin.
+ */
+export function renderFixes(spec: unknown): string[] {
+  const s = (spec as { slot?: TipSpec['slot'] } | null)?.slot;
+  if (!s) return [];
+  const fixes = new Set<string>();
+  const x = -s.rs + (2 * s.rs * 80) / 160; // slotCutter's middle slice (SL = 160)
+  const zx = Math.sqrt(Math.max(0, s.rs * s.rs - x * x)); // the shank surface height there
+  const ends = [
+    [s.back, s.start],
+    [s.front, -(s.start + s.len)],
+  ] as const;
+  for (const f of s.count === 2 ? [s.floor, s.floorB] : [s.floor]) {
+    for (const [e, y] of ends) {
+      const d = s.rs - f;
+      const l = Math.max(0, e.len);
+      if (e.kind !== 'radius' || l < 0.2 || l < d) continue;
+      const rho = (l * l + d * d) / (2 * d);
+      const cz = f + rho;
+      const a0 = Math.atan2(s.rs - cz, y - (y + l));
+      if (a0 > 0) fixes.add('slot-quarter');
+      else if (cz + rho * Math.sin(a0) < Math.max(f + 0.5, zx)) fixes.add('slot-rim');
+    }
+  }
+  return [...fixes].sort();
+}
+
 /** 64-bit FNV-1a over a value and RENDER_VERSION, as 16 hex chars: the image file name. */
 export function specKey(spec: unknown, view = 'hero'): string {
-  const text = JSON.stringify([RENDER_VERSION, view, spec]);
+  const fixes = renderFixes(spec);
+  const text = JSON.stringify(
+    fixes.length ? [RENDER_VERSION, view, spec, fixes] : [RENDER_VERSION, view, spec],
+  );
   let h = 0xcbf29ce484222325n;
   for (let i = 0; i < text.length; i++) {
     h ^= BigInt(text.charCodeAt(i));
