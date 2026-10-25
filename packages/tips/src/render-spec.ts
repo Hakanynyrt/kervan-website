@@ -293,9 +293,28 @@ export function rearSpec(spec: TipSpec): unknown {
   };
 }
 
+/**
+ * Renderer fixes that change only a few images, added to the key of the specs they touch so only
+ * those re-render (a RENDER_VERSION bump re-renders all ~5,400). Drop them at the next bump.
+ * - 'slot-quarter' (2026-10-25): a radius slot end exactly as long as the cut is deep; tipgen.ts
+ *   `slotEnd` swept its arc the long way round.
+ */
+export function renderFixes(spec: unknown): string[] {
+  const s = (spec as { slot?: TipSpec['slot'] } | null)?.slot;
+  if (!s) return [];
+  const floors = s.count === 2 ? [s.floor, s.floorB] : [s.floor];
+  const quarter = floors.some((f) =>
+    [s.back, s.front].some((e) => e.kind === 'radius' && Math.abs(e.len - (s.rs - f)) < 0.05),
+  );
+  return quarter ? ['slot-quarter'] : [];
+}
+
 /** 64-bit FNV-1a over a value and RENDER_VERSION, as 16 hex chars: the image file name. */
 export function specKey(spec: unknown, view = 'hero'): string {
-  const text = JSON.stringify([RENDER_VERSION, view, spec]);
+  const fixes = renderFixes(spec);
+  const text = JSON.stringify(
+    fixes.length ? [RENDER_VERSION, view, spec, fixes] : [RENDER_VERSION, view, spec],
+  );
   let h = 0xcbf29ce484222325n;
   for (let i = 0; i < text.length; i++) {
     h ^= BigInt(text.charCodeAt(i));

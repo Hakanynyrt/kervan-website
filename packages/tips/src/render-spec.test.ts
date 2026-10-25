@@ -1,6 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { MOIL_NOSE, MOIL_NOSE_MATERIAL, rearSpec, renderSpec, specKey } from './render-spec.ts';
+import {
+  MOIL_NOSE,
+  MOIL_NOSE_MATERIAL,
+  rearSpec,
+  renderFixes,
+  renderSpec,
+  specKey,
+} from './render-spec.ts';
 import type { FamilyAttrs, ShankProfile } from './types.ts';
 
 const attrs = (over: Partial<FamilyAttrs> = {}): FamilyAttrs => ({
@@ -148,6 +155,28 @@ test('specKey: stable, changes with geometry and view; the rear view ignores the
   assert.notEqual(specKey(a), specKey(c));
   assert.notEqual(specKey(a), specKey(a, 'side'));
   assert.equal(specKey(rearSpec(a), 'rear'), specKey(rearSpec(m), 'rear'));
+});
+
+test('specKey: a radius slot end as long as the cut is deep gets a new key, others keep theirs', () => {
+  const sku = { tipType: 'chisel' as const, lengthMm: { min: 1300, max: 1300 }, tipAngleDeg: null };
+  const t = renderSpec(attrs(), sku)!.spec; // depth 105 − 70 = 35; table ends are min(35, 445 / 4)
+  assert.deepEqual(renderFixes(t), ['slot-quarter']);
+  const r20 = { kind: 'radius' as const, len: 20 };
+  const a = { ...t, slot: { ...t.slot, back: r20, front: r20 } };
+  assert.deepEqual(renderFixes(a), []);
+  assert.deepEqual(renderFixes(rearSpec(a)), []);
+  const q = { ...a, slot: { ...a.slot, back: { kind: 'radius' as const, len: 35 } } };
+  assert.deepEqual(renderFixes(q), ['slot-quarter']);
+  assert.deepEqual(renderFixes(rearSpec(q)), ['slot-quarter']);
+  // Uneven two-key cut: the far side's depth counts too.
+  const u = { ...a, slot: { ...a.slot, floorB: 80, front: { kind: 'radius' as const, len: 25 } } };
+  assert.deepEqual(renderFixes(u), ['slot-quarter']);
+  const ramp = { ...q, slot: { ...q.slot, back: { kind: 'ramp' as const, len: 35 } } };
+  assert.deepEqual(renderFixes(ramp), []);
+  assert.notEqual(
+    specKey(q),
+    specKey({ ...q, slot: { ...q.slot, back: { kind: 'radius', len: 35.1 } } }),
+  );
 });
 
 test('uneven two-key slot: the cut depth is split between the key side and the far side', () => {
