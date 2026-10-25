@@ -83,7 +83,9 @@ export interface Dict {
       /** After the caption where the names are on the picture (not on phones). */
       click: string;
       listLabel: string;
-      tips: string;
+      /** Names on the picture where the group's own name (`parts.items`, `parts.tips`) does not
+       *  fit between its neighbours at 768 px (`opening.test.ts` checks the widths). */
+      names: Partial<Record<'tips' | PartKey, string>>;
       /** The repair kit is a group of its own but not a part on the picture. */
       kitNotShown: string;
     };
@@ -231,7 +233,8 @@ export interface Dict {
   search: {
     label: string;
     placeholder: string;
-    /** The header box below 1280 px, where the long example does not fit. */
+    /** The header box below 1280 px and the home panel's box, where the long example does not
+     *  fit. */
     placeholderShort: string;
     button: string;
     none: (q: string) => string;
@@ -598,7 +601,7 @@ export const DICT: Record<Lang, Dict> = {
         caption: 'Ürettiğimiz parçalar, 3B görsel.',
         click: 'Bir parçaya tıklayın, o parçanın sayfası açılır.',
         listLabel: 'Parçalar',
-        tips: 'Kırıcı ucu',
+        names: {},
         kitNotShown: 'Tamir takımı resimde gösterilmemiştir.',
       },
       allGroups: 'Tüm yedek parçalar',
@@ -743,7 +746,7 @@ export const DICT: Record<Lang, Dict> = {
     search: {
       label: 'Kırıcı modeli ara',
       placeholder: 'Kırıcınızın marka ve modeli, ör. Furukawa HB 20G',
-      placeholderShort: 'Marka ve model, ör. Furukawa HB 20G',
+      placeholderShort: 'Marka ve model, ör. HB 20G',
       button: 'Ara',
       none: (q) => `"${q}" için model bulunamadı.`,
       count: (n) => `${n} model`,
@@ -1412,7 +1415,7 @@ export const DICT: Record<Lang, Dict> = {
         caption: 'The parts we make, as 3D images.',
         click: 'Click a part to open its page.',
         listLabel: 'Parts',
-        tips: 'Breaker tool',
+        names: { kama: 'Keys' },
         kitNotShown: 'Repair kits are not shown in the picture.',
       },
       allGroups: 'All spare parts',
@@ -1558,7 +1561,7 @@ export const DICT: Record<Lang, Dict> = {
     search: {
       label: 'Search breaker model',
       placeholder: 'Your breaker make and model, e.g. Furukawa HB 20G',
-      placeholderShort: 'Make and model, e.g. Furukawa HB 20G',
+      placeholderShort: 'Make and model, e.g. HB 20G',
       button: 'Search',
       none: (q) => `No model found for "${q}".`,
       count: (n) => `${n} models`,

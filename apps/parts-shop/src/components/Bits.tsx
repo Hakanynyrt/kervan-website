@@ -356,10 +356,13 @@ export function OemLine({ t, kit = false }: { t: Dict; kit?: boolean }) {
 export function OrderSteps({
   lang,
   t,
+  note = true,
   className = '',
 }: {
   lang: Lang;
   t: Dict;
+  /** "Ayrıntılar: Ön bilgilendirme formu" under the steps (the home has it with its phones). */
+  note?: boolean;
   className?: string;
 }) {
   const c = t.cart;
@@ -379,15 +382,17 @@ export function OrderSteps({
           </li>
         ))}
       </ol>
-      <p className="m-0 mt-4 font-sans text-xs text-ink-soft">
-        {c.steps.note}{' '}
-        <a
-          href={localePath(legalPath('on-bilgilendirme'), lang)}
-          className={`underline hover:text-ink ${FOCUS}`}
-        >
-          {LEGAL[lang]['on-bilgilendirme'].title}
-        </a>
-      </p>
+      {note && (
+        <p className="m-0 mt-4 font-sans text-xs text-ink-soft">
+          {c.steps.note}{' '}
+          <a
+            href={localePath(legalPath('on-bilgilendirme'), lang)}
+            className={`underline hover:text-ink ${FOCUS}`}
+          >
+            {LEGAL[lang]['on-bilgilendirme'].title}
+          </a>
+        </p>
+      )}
     </>
   );
 }

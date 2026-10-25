@@ -1,18 +1,20 @@
 import { useContext, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import type { FxRate } from '@kervan/tips';
+import { ORG_PHONE, ORG_PHONE_E164 } from '@kervan/seo';
 import { Container } from '@kervan/ui';
 import { useReducedMotion } from '@kervan/motion';
 import { OrderSteps, PlantPhotos } from '../components/Bits';
 import { BreakerSearch, FinderPick } from '../components/BreakerSearch';
 import ExplodedPicker from '../components/ExplodedPicker';
 import { PartGroups } from '../components/PartGroups';
-import { FOCUS, whatsappHref } from '../components/Layout';
+import { FOCUS, SELLER_TEL, whatsappHref } from '../components/Layout';
 import { CardPrice } from '../components/ModelSearch';
 import { priceNote } from '../components/PartOrder';
 import { cardHref, cardKey, cardName, cardPic } from '../lib/card';
 import type { Dict } from '../lib/dict';
 import { finderName, makesByModels, type FinderHit } from '../lib/finder';
 import { fmtNum } from '../lib/format';
+import { LEGAL, legalPath, SELLER } from '../lib/legal';
 import { localePath } from '../lib/locale-path';
 import { NUMBERED } from '../lib/opening';
 import { renderModel, renderTitle } from '../lib/part-caption';
@@ -90,7 +92,8 @@ const chip = (on: boolean, strong = false) =>
       : 'border-hair bg-bg text-ink hover:border-hair-strong'
   } ${FOCUS}`;
 
-/** A row of the finder panel: thumbnail, name and detail, the link label on the right. */
+/** A row of the finder panel: thumbnail, name and detail (left out when it is the name), the link
+ *  label on the right. */
 function PanelRow({
   href,
   img,
@@ -115,10 +118,10 @@ function PanelRow({
       <a
         href={href}
         onClick={onClick}
-        className={`group flex items-center gap-3 px-4 py-2.5 font-sans ${FOCUS}`}
+        className={`group flex min-h-[50px] items-center gap-3 px-4 py-[5px] font-sans hover:bg-bg-soft ${FOCUS}`}
       >
         <span
-          className={`relative block aspect-[4/3] w-16 shrink-0 overflow-hidden rounded-sm border border-hair ${stage === 'tip' ? 'bg-stage' : 'bg-pstage'}`}
+          className={`relative block aspect-[4/3] w-[52px] shrink-0 overflow-hidden rounded-sm border border-hair ${stage === 'tip' ? 'bg-stage' : 'bg-pstage'}`}
         >
           {img && (
             <img
@@ -134,7 +137,10 @@ function PanelRow({
         </span>
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="text-sm font-semibold text-ink group-hover:text-brand-hi">{title}</span>
-          {sub && <span className="text-xs text-ink-mid tabular-nums">{sub}</span>}
+          {/* No sub line that only repeats the title ("Kama / Kama"). */}
+          {sub && sub !== title && (
+            <span className="text-[12.5px] text-ink-mid tabular-nums">{sub}</span>
+          )}
           {badge && <span className="text-xs text-ink-soft">{badge}</span>}
         </span>
         <span className="shrink-0 text-sm font-medium text-brand-hi group-hover:underline">
@@ -147,12 +153,13 @@ function PanelRow({
 
 /**
  * Under the opening: the h1 and the lead, the make chips (a make lists its models), the order box
- * and the trust points; beside them (under the chips on phones) the panel: the best-selling
+ * and the trust points; beside them (between the chips and the order box below 1024 px, in the
+ * page's order too, so reading and Tab order follow the screen) the panel: the best-selling
  * breakers until a model is picked, then that model's tip and the parts we make for it. A model
- * is picked here (make, model and best-seller rows), in the header search or in the panel's own
- * box on small screens (`FinderPick`, shared through the layout). The prerender (and a visitor
- * without JS) gets the empty state: the make chips link to the make pages, the best-selling
- * breakers to their pages.
+ * is picked here (make, model and best-seller rows), with "Ara" in the header search or in the
+ * panel's own box on small screens (`FinderPick`, shared through the layout). The prerender (and a
+ * visitor without JS) gets the empty state: the make chips link to the make pages, the
+ * best-selling breakers to their pages.
  */
 function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const h = t.home;
@@ -164,6 +171,7 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const [allMakes, setAllMakes] = useState(false);
   const [allModels, setAllModels] = useState(false);
   const panel = useRef<HTMLElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
   const makes = useMemo(() => makesByModels(model.finder), [model.finder]);
 
   // A model picked anywhere shows its make's models here.
@@ -171,14 +179,16 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
     if (sel) setBrand(sel.brand);
   }, [sel]);
   // Bring the panel up when a pick asks for it (it sits under the chips on phones, and the header
-  // search may be used anywhere on the page).
-  const shown = pick?.shown ?? 0;
+  // search may be used anywhere on the page); a pick from the header box also takes the focus to
+  // the panel's heading, so the keyboard carries on from the result (the list it came from is gone).
+  const shown = pick?.shown;
   useEffect(() => {
-    if (!shown) return;
+    if (!shown?.n) return;
     requestAnimationFrame(() => {
       const top = panel.current?.getBoundingClientRect().top;
       if (top !== undefined && (top < 0 || top > window.innerHeight * 0.7))
         panel.current?.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' });
+      if (shown.focus) heading.current?.focus({ preventScroll: true });
     });
   }, [shown, reduce]);
 
@@ -195,26 +205,29 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const many = (sel?.model.tips.length ?? 0) > 1;
 
   return (
-    <section aria-labelledby="home-title" className="border-b border-hair bg-bg">
+    // No label on this band: the panel and the order box are landmarks of their own (asides),
+    // which must not sit inside another one (axe landmark-complementary-is-top-level).
+    <section className="border-b border-hair bg-bg">
       <Container
         wide
-        className="grid grid-cols-[minmax(0,1fr)] pb-7 pt-[18px] max-md:px-4 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start lg:gap-x-9 lg:pb-[30px] lg:pt-6 xl:grid-cols-[minmax(0,1fr)_27rem] xl:gap-x-12"
+        className="grid grid-cols-[minmax(0,1fr)] pb-7 pt-[18px] max-md:px-4 lg:grid-cols-[minmax(0,1fr)_24rem] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-9 lg:pb-[30px] lg:pt-6 xl:grid-cols-[minmax(0,1fr)_27rem] xl:gap-x-12"
       >
-        {/* Phones and tablets: one column, the panel after the makes; desktop: two. */}
-        <div className="contents lg:block lg:min-w-0">
+        {/* Phones and tablets: one column, in the page's order (h1 … makes, the panel, the order
+            box and the trust points); desktop: the panel on the right of both blocks. */}
+        <div className="contents lg:col-start-1 lg:row-start-1 lg:block lg:min-w-0">
           <h1
             id="home-title"
-            className="m-0 font-sans text-[21px] font-normal leading-tight text-ink max-lg:order-1 md:text-[26px]"
+            className="m-0 font-sans text-[21px] font-normal leading-tight text-ink md:text-[26px]"
           >
             {h.title}
           </h1>
-          <p className="m-0 mt-1.5 max-w-[860px] font-sans text-sm text-ink-mid max-lg:order-2 md:text-[15px]">
+          <p className="m-0 mt-1.5 max-w-[860px] font-sans text-sm text-ink-mid md:text-[15px]">
             {h.lead}
           </p>
 
           <nav
             aria-labelledby="finder-makes"
-            className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 gap-y-2 font-sans max-lg:order-3 md:mt-[18px] md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-start md:gap-x-3.5"
+            className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 gap-y-2 font-sans md:mt-[18px] md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-start md:gap-x-3.5"
           >
             <h2 id="finder-makes" className="m-0 text-[15px] font-semibold text-ink md:leading-9">
               {f.makes}
@@ -254,7 +267,7 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
           </nav>
 
           {make && (
-            <section aria-labelledby="finder-models" className="mt-4 font-sans max-lg:order-4">
+            <section aria-labelledby="finder-models" className="mt-4 font-sans">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
                 <h3 id="finder-models" className="m-0 text-[15px] font-semibold text-ink">
                   {f.models(make.brand)}
@@ -291,79 +304,27 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
               </ul>
             </section>
           )}
-          <p className="m-0 mt-3 max-w-3xl font-sans text-[12.5px] text-ink-soft max-lg:order-5">
-            {f.note}
-          </p>
-
-          <aside
-            aria-labelledby="order-box"
-            className="mt-4 grid grid-cols-[minmax(0,1fr)] items-center gap-x-6 gap-y-2.5 rounded-md border border-hair bg-bg px-3.5 py-3.5 font-sans max-lg:order-7 md:mt-5 md:grid-cols-[minmax(0,1fr)_auto] md:px-4"
-          >
-            <div>
-              <h2 id="order-box" className="m-0 text-base font-bold text-ink">
-                {h.order.title}
-              </h2>
-              <p className="m-0 mt-0.5 text-sm text-ink-mid">
-                {h.order.body}{' '}
-                <a
-                  href="#siparis-adimlari"
-                  className={`font-medium text-brand-hi hover:underline ${FOCUS}`}
-                >
-                  {t.banner.how}
-                </a>
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-2 md:flex">
-              <a
-                href={whatsappHref(t.nav.quoteText)}
-                className={`inline-flex min-h-[42px] items-center justify-center whitespace-nowrap rounded-sm bg-whatsapp px-2 text-sm font-medium text-white md:px-[18px] ${FOCUS}`}
-              >
-                {h.order.whatsapp}
-              </a>
-              <a
-                href={`mailto:${ORDER_EMAIL}`}
-                className={`inline-flex min-h-[42px] items-center justify-center whitespace-nowrap rounded-sm border border-ink-soft bg-bg px-2 text-sm text-ink hover:bg-bg-warm md:px-[18px] ${FOCUS}`}
-              >
-                {h.order.mail}
-              </a>
-            </div>
-          </aside>
-
-          <ul className="m-0 mt-[18px] grid list-none grid-cols-2 gap-x-4 gap-y-2.5 border-t border-hair p-0 pt-3.5 font-sans max-lg:order-8 md:mt-[22px] md:gap-x-8 md:gap-y-3.5 md:pt-[18px]">
-            {h.trust.map((x) => (
-              <li key={x.title} className="grid grid-cols-[18px_minmax(0,1fr)] gap-x-2.5 gap-y-0.5">
-                <svg aria-hidden="true" viewBox="0 0 16 16" className="mt-[3px] size-4 text-brand">
-                  <path
-                    d="M3 8.5l3 3 7-7"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span className="text-[13.5px] font-semibold text-ink md:text-sm">{x.title}</span>
-                <span className="col-start-2 hidden text-[13px] text-ink-mid md:block">
-                  {x.body}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <p className="m-0 mt-3 max-w-3xl font-sans text-[12.5px] text-ink-soft">{f.note}</p>
         </div>
 
         <aside
           ref={panel}
           aria-labelledby="finder-panel"
-          className="mt-[18px] scroll-mt-4 rounded-md border border-hair bg-bg font-sans max-lg:order-6 lg:col-start-2 lg:row-start-1 lg:mt-0"
+          className="mt-[18px] scroll-mt-4 rounded-md border border-hair bg-bg font-sans lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0"
         >
           <p className="sr-only" aria-live="polite">
             {sel ? `${sel.name}: ${f.forModel}` : ''}
           </p>
-          {sel ? (
-            <>
-              <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 border-b border-hair px-4 py-3">
+          <div className="border-b border-hair px-4 py-3">
+            {sel ? (
+              <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
                 <div>
-                  <h2 id="finder-panel" className="m-0 text-[17px] font-bold text-ink">
+                  <h2
+                    id="finder-panel"
+                    ref={heading}
+                    tabIndex={-1}
+                    className="m-0 text-[17px] font-bold text-ink focus:outline-none"
+                  >
                     {sel.name}
                   </h2>
                   <p className="m-0 mt-0.5 text-[13.5px] text-ink-mid">{f.forModel}</p>
@@ -375,6 +336,32 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                   {f.breakerPage} →
                 </a>
               </div>
+            ) : (
+              <div>
+                <h2
+                  id="finder-panel"
+                  ref={heading}
+                  tabIndex={-1}
+                  className="m-0 text-[17px] font-bold text-ink focus:outline-none"
+                >
+                  {f.startTitle}
+                </h2>
+                <p className="m-0 mt-1 text-[13.5px] text-ink-mid">{f.startBody}</p>
+              </div>
+            )}
+            {/* Small screens: the header box is far above, so the panel has its own. It stays in
+                place (and keeps the focus and the phone's keyboard) when a model is shown. */}
+            <BreakerSearch
+              lang={lang}
+              t={t}
+              id="kv-q-panel"
+              finder={model.finder}
+              panel
+              className="mt-3 lg:hidden"
+            />
+          </div>
+          {sel ? (
+            <>
               <ul className="m-0 list-none p-0">
                 {sel.model.tips.map((x, i) => (
                   <PanelRow
@@ -416,21 +403,6 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
             </>
           ) : (
             <>
-              <div className="border-b border-hair px-4 py-3">
-                <h2 id="finder-panel" className="m-0 text-[17px] font-bold text-ink">
-                  {f.startTitle}
-                </h2>
-                <p className="m-0 mt-1 text-[13.5px] text-ink-mid">{f.startBody}</p>
-                {/* Small screens: the header box is far above, so the panel has its own. */}
-                <BreakerSearch
-                  lang={lang}
-                  t={t}
-                  id="kv-q-panel"
-                  finder={model.finder}
-                  landmark={false}
-                  className="mt-3 lg:hidden"
-                />
-              </div>
               {model.featuredArePopular && model.featured.length > 0 && (
                 <>
                   <h3 className="m-0 px-4 pb-0.5 pt-3 text-sm font-semibold text-ink">
@@ -474,6 +446,63 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
             </a>
           </div>
         </aside>
+
+        <div className="contents lg:col-start-1 lg:row-start-2 lg:block lg:min-w-0">
+          <aside
+            aria-labelledby="order-box"
+            className="mt-4 grid grid-cols-[minmax(0,1fr)] items-center gap-x-6 gap-y-2.5 rounded-md border border-hair bg-bg px-3.5 py-3.5 font-sans md:mt-5 md:grid-cols-[minmax(0,1fr)_auto] md:px-4"
+          >
+            <div>
+              <h2 id="order-box" className="m-0 text-base font-bold text-ink">
+                {h.order.title}
+              </h2>
+              <p className="m-0 mt-0.5 text-sm text-ink-mid">
+                {h.order.body}{' '}
+                <a
+                  href="#siparis-adimlari"
+                  className={`font-medium text-brand-hi hover:underline ${FOCUS}`}
+                >
+                  {t.banner.how}
+                </a>
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 md:flex">
+              <a
+                href={whatsappHref(t.nav.quoteText)}
+                className={`inline-flex min-h-[42px] items-center justify-center whitespace-nowrap rounded-sm bg-whatsapp px-2 text-sm font-medium text-white md:px-[18px] ${FOCUS}`}
+              >
+                {h.order.whatsapp}
+              </a>
+              <a
+                href={`mailto:${ORDER_EMAIL}`}
+                className={`inline-flex min-h-[42px] items-center justify-center whitespace-nowrap rounded-sm border border-ink-soft bg-bg px-2 text-sm text-ink hover:bg-bg-warm md:px-[18px] ${FOCUS}`}
+              >
+                {h.order.mail}
+              </a>
+            </div>
+          </aside>
+
+          <ul className="m-0 mt-[18px] grid list-none grid-cols-2 gap-x-4 gap-y-2.5 border-t border-hair p-0 pt-3.5 font-sans md:mt-[22px] md:gap-x-8 md:gap-y-3.5 md:pt-[18px]">
+            {h.trust.map((x) => (
+              <li key={x.title} className="grid grid-cols-[18px_minmax(0,1fr)] gap-x-2.5 gap-y-0.5">
+                <svg aria-hidden="true" viewBox="0 0 16 16" className="mt-[3px] size-4 text-brand">
+                  <path
+                    d="M3 8.5l3 3 7-7"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span className="text-[13.5px] font-semibold text-ink md:text-sm">{x.title}</span>
+                <span className="col-start-2 hidden text-[13px] text-ink-mid md:block">
+                  {x.body}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </Container>
     </section>
   );
@@ -572,6 +601,12 @@ export default function Home({
   t: Dict;
 }) {
   const h = t.home;
+  // The terms in the order of the "Birleşik" design: fit, payment, shipping, then the warranty.
+  const [fit, shipping, payment] = t.terms.rows;
+  const terms = [fit, payment, shipping, [t.terms.warrantyLabel, t.terms.warrantyAll]].filter(
+    (x): x is [string, string] => Boolean(x),
+  );
+  const line = `text-ink underline underline-offset-2 hover:text-brand-hi ${FOCUS}`;
   return (
     <>
       {/* Owner's choice (2026-10-25, "Birleşik"): the opening first, edge to edge, its parts
@@ -633,9 +668,9 @@ export default function Home({
       <section id="siparis-adimlari" aria-labelledby="order" className="scroll-mt-6 bg-bg">
         <Container wide className="py-8 max-md:px-4">
           <SectionHead id="order" title={t.cart.steps.title} />
-          <OrderSteps lang={lang} t={t} className="md:grid-cols-3" />
+          <OrderSteps lang={lang} t={t} note={false} className="md:grid-cols-3" />
           <dl className="m-0 mt-[18px] grid grid-cols-[minmax(0,1fr)] gap-x-7 font-sans text-sm md:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1.6fr]">
-            {[...t.terms.rows, [t.terms.warrantyLabel, t.terms.warrantyAll]].map(([k, v]) => (
+            {terms.map(([k, v]) => (
               <div
                 key={k}
                 className="flex gap-3.5 border-t border-hair py-2 md:block md:pb-0 md:pt-2.5"
@@ -647,7 +682,7 @@ export default function Home({
               </div>
             ))}
           </dl>
-          <div className="mt-4 flex flex-col gap-2.5 font-sans text-sm md:flex-row md:flex-wrap md:items-center md:gap-3">
+          <div className="mt-4 flex flex-col gap-2.5 font-sans text-sm md:flex-row md:flex-wrap md:items-center md:gap-x-3 md:gap-y-2.5">
             <a
               href={whatsappHref(t.nav.quoteText)}
               className={`inline-flex min-h-11 items-center justify-center rounded-sm bg-whatsapp px-5 font-medium text-white ${FOCUS}`}
@@ -660,6 +695,21 @@ export default function Home({
             >
               {h.order.mail} · {ORDER_EMAIL}
             </a>
+            <p className="m-0 text-[13px] text-ink-mid md:ml-2">
+              {t.cart.phone}:{' '}
+              <a href={`tel:${ORG_PHONE_E164}`} className={`${line} whitespace-nowrap`}>
+                {ORG_PHONE}
+              </a>
+              {' · '}
+              <a href={SELLER_TEL} className={`${line} whitespace-nowrap`}>
+                {SELLER.phone}
+              </a>
+              {' · '}
+              {t.cart.steps.note}{' '}
+              <a href={localePath(legalPath('on-bilgilendirme'), lang)} className={line}>
+                {LEGAL[lang]['on-bilgilendirme'].title}
+              </a>
+            </p>
           </div>
         </Container>
       </section>

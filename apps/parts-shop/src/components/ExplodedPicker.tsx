@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { Container } from '@kervan/ui';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import {
   EXTRA,
+  groupName,
   nameRows,
   OPEN_H as H,
   OPEN_W as W,
@@ -99,8 +101,8 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     };
     // All frames in playing order, fetched in that order a few at a time; the opening starts once
     // the first START are decoded and the rest keep coming while it plays. Each frame is decoded
-    // at the size it is shown (not its full 2864 px), AHEAD of the one on screen, and released
-    // once passed: all of them decoded at once would take more memory than a phone gives a page.
+    // AHEAD of the one on screen and released once passed: all of them decoded at once would take
+    // more memory than a phone gives a page. Phones decode them at the size shown.
     const urls = [
       ...Array.from({ length: KABIN }, (_, i) => src('kabin', i, size)),
       ...Array.from({ length: FRAMES }, (_, i) => src('kare', i, size)),
@@ -126,10 +128,12 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
     };
     const dw = Math.min(framePx, Math.ceil(shown) || framePx);
     const dh = Math.round((dw * H) / W);
-    // Resizing while decoding costs more than it saves when the size shown is close to the
-    // frame's own (desktop): then the frames decode as they are.
+    // Desktop decodes the frames as they are: resizing while decoding cost more than it saved
+    // (2026-10-25, edge-to-edge picture: 1920 px played in up to 7 s with many dropped frames,
+    // 3 s without the resize; 7 MB a frame is fine on a desktop). Phones resize unless the size
+    // shown is close to the frame's own.
     const decode = (b: Blob) =>
-      dw > framePx * 0.75
+      !small || dw > framePx * 0.75
         ? createImageBitmap(b)
         : createImageBitmap(b, { resizeWidth: dw, resizeHeight: dh, resizeQuality: 'high' }).catch(
             () => createImageBitmap(b),
@@ -259,7 +263,7 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
 
 export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
   const p = t.home.pick;
-  const name = (g: Group) => (g === 'tips' ? p.tips : t.parts.items[g].name);
+  const name = (g: Group) => groupName(t, g);
   const [hover, setHover] = useState<Group | null>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   useOpening(canvas);
@@ -421,13 +425,16 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
           </nav>
         </div>
       </div>
-      <p className="kv-open-cap m-0 font-sans text-xs text-ink-soft">
-        <span>
-          {p.caption}
-          <span className="kv-open-click"> {p.click}</span>
-        </span>
-        <span className="kv-open-kit">{p.kitNotShown}</span>
-      </p>
+      {/* In the page's content column on desktop, under the h1 and the panel's edges. */}
+      <Container wide className="kv-open-capbox">
+        <p className="kv-open-cap m-0 font-sans text-xs text-ink-soft">
+          <span>
+            {p.caption}
+            <span className="kv-open-click"> {p.click}</span>
+          </span>
+          <span className="kv-open-kit">{p.kitNotShown}</span>
+        </p>
+      </Container>
     </section>
   );
 }

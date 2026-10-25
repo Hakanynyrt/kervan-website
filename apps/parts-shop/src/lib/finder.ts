@@ -1,4 +1,4 @@
-import { fold, matches, rewriteQuery, searchName } from '@kervan/tips';
+import { fold, queryWords, rewriteQuery, searchName } from '@kervan/tips';
 
 /**
  * The make/model search of the header (every page) and the home page's finder: every breaker of
@@ -60,10 +60,37 @@ export const modelIndex = (makes: readonly FinderMake[]): MakeModels<ModelRef>[]
 
 export const finderName = (brand: string, m: ModelRef): string => `${brand} ${m.model}`.trim();
 
-const hitsOf = <M extends ModelRef>(makes: readonly MakeModels<M>[]): FinderHit<M>[] =>
-  makes.flatMap((x) =>
-    x.models.map((model) => ({ brand: x.brand, model, name: finderName(x.brand, model) })),
-  );
+/** Every model of a make list as a hit, with the folded text the search matches (`searchName`:
+ *  the name and the model's other name). Worked out once per list: the search runs on every
+ *  keystroke, and doing this for all ~1200 names each time took most of a second on a phone. */
+interface Searchable<M extends ModelRef> {
+  all: FinderHit<M>[];
+  names: string[];
+  text: string[];
+}
+const searchable = new WeakMap<readonly MakeModels<ModelRef>[], Searchable<ModelRef>>();
+function searchableOf<M extends ModelRef>(makes: readonly MakeModels<M>[]): Searchable<M> {
+  let s = searchable.get(makes) as Searchable<M> | undefined;
+  if (!s) {
+    const all = makes.flatMap((x) =>
+      x.models.map((model) => ({ brand: x.brand, model, name: finderName(x.brand, model) })),
+    );
+    s = { all, names: all.map((h) => h.name), text: all.map((h) => fold(searchName(h.name))) };
+    searchable.set(makes, s as Searchable<ModelRef>);
+  }
+  return s;
+}
+
+/** Builds the search text of a make list ahead of the first keystroke (the box got focus). */
+export const prepareSearch = (makes: readonly MakeModels<ModelRef>[]): void => {
+  searchableOf(makes);
+};
+
+/** The hits whose search text holds every word of `q` (`matches` of the tip search). */
+const matching = <M extends ModelRef>({ all, text }: Searchable<M>, q: string): FinderHit<M>[] => {
+  const w = queryWords(q);
+  return w.length ? all.filter((_, i) => w.every((x) => text[i].includes(x))) : [];
+};
 
 /**
  * The models a typed query finds, matched like the tip search (make spellings, "F 2" = "F2").
@@ -75,18 +102,15 @@ export function findModels<M extends ModelRef>(
 ): { hits: FinderHit<M>[]; guess: string | null } {
   const q = query.trim();
   if (!fold(q)) return { hits: [], guess: null };
-  const all = hitsOf(makes);
-  const hits = all.filter((h) => matches(q, searchName(h.name)));
+  const s = searchableOf(makes);
+  const hits = matching(s, q);
   if (hits.length) return { hits, guess: null };
   const guess = rewriteQuery(
     q,
-    all.map((h) => h.name),
+    s.names,
     makes.map((x) => x.brand),
   );
-  return {
-    hits: guess ? all.filter((h) => matches(guess, searchName(h.name))) : [],
-    guess,
-  };
+  return { hits: guess ? matching(s, guess) : [], guess };
 }
 
 /**

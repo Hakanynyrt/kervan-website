@@ -309,8 +309,6 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  width: var(--kv-pw);
-  margin: 0 auto;
 }
 @media (width < 74rem) {
   .kv-open-names a {

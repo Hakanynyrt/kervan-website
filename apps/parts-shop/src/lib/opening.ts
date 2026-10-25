@@ -1,3 +1,4 @@
+import type { Dict } from './dict';
 import type { PartKey } from './routes';
 
 /**
@@ -38,7 +39,8 @@ export interface Spot {
 /**
  * Left to right along the breaker; the order gives the numbers (1–8, also on the home's group
  * cards). Owner, 2026-10-25 ("buralar tam uyuşmuyor"): every line ends on its part, checked on
- * overlays of `acilis-acik-05-lg`.
+ * overlays of `acilis-acik-05-lg` and against its alpha (the whole dot on the part: desktop
+ * r 6.5, phones r 2.6 CSS px ≈ 13 render px; the thin tie rods and wear plate ≥ 75 %).
  */
 export const SPOTS: Spot[] = [
   {
@@ -46,7 +48,7 @@ export const SPOTS: Spot[] = [
     boxes: [[44, 168, 548, 392]],
     name: { x: 270, up: true },
     to: [258, 280],
-    side: [296, 200],
+    side: [296, 235],
   },
   {
     g: 'saplama',
@@ -56,7 +58,7 @@ export const SPOTS: Spot[] = [
     ],
     name: { x: 1000, up: true },
     to: [1000, 128],
-    side: [680, 122],
+    side: [600, 128],
   },
   {
     g: 'piston',
@@ -73,14 +75,14 @@ export const SPOTS: Spot[] = [
     ],
     name: { x: 1990, up: true },
     to: [1915, 350],
-    side: [1296, 280],
+    side: [1296, 295],
   },
   {
     g: 'alt-govde',
     boxes: [[1380, 232, 1792, 432]],
     name: { x: 1450, up: false },
-    to: [1420, 412],
-    side: [1590, 245],
+    to: [1440, 395],
+    side: [1590, 265],
   },
   {
     g: 'kama',
@@ -99,16 +101,21 @@ export const SPOTS: Spot[] = [
     ],
     name: { x: 1990, up: false },
     to: [2040, 444],
-    side: [2048, 262],
+    side: [2048, 290],
   },
   {
     g: 'tips',
     boxes: [[2100, 288, 2828, 448]],
     name: { x: 2470, up: true },
     to: [2470, 362],
-    side: [2450, 330],
+    side: [2450, 350],
   },
 ];
+
+/** A group's name on the picture: its own name (the group cards use it too), or a shorter one
+ *  where that does not fit between its neighbours (`home.pick.names`, EN "Keys"). */
+export const groupName = (t: Dict, g: OpeningGroup): string =>
+  t.home.pick.names[g] ?? (g === 'tips' ? t.parts.tips.name : t.parts.items[g].name);
 
 /** Groups not on the picture: named after the numbered ones on phones, a note on desktop. */
 export const EXTRA: OpeningGroup[] = ['tamir-takimi'];

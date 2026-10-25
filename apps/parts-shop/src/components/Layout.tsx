@@ -36,7 +36,7 @@ export const whatsappHref = (text: string): string =>
 /** Footer column label (every column has one: plain labels, not kickers). */
 const HEAD = 'm-0 text-xs font-semibold uppercase tracking-wide text-ink';
 /** The seller's landline as a tel: link ("0 (262) 371 10 05" → +902623711005). */
-const SELLER_TEL = `tel:+90${SELLER.phone.replace(/\D/g, '').slice(1)}`;
+export const SELLER_TEL = `tel:+90${SELLER.phone.replace(/\D/g, '').slice(1)}`;
 
 interface Props {
   lang: Lang;
@@ -55,8 +55,9 @@ interface Props {
   children: ReactNode;
 }
 
-/** "Sipariş: WhatsApp · +90 …": how to order, in the header of every page. */
-function OrderLine({ t, className = '' }: { t: Dict; className?: string }) {
+/** "Sipariş: WhatsApp · +90 …": how to order, in the header of every page; `note` ("Online ödeme
+ *  henüz yok", home) after it, on a line of its own on phones. */
+function OrderLine({ t, note, className = '' }: { t: Dict; note?: string; className?: string }) {
   const link = `underline decoration-hair-strong underline-offset-[3px] hover:text-brand-hi ${FOCUS}`;
   return (
     <p className={`m-0 font-sans text-ink-mid ${className}`}>
@@ -68,6 +69,12 @@ function OrderLine({ t, className = '' }: { t: Dict; className?: string }) {
       <a href={`tel:${ORG_PHONE_E164}`} className={`whitespace-nowrap text-ink ${link}`}>
         {ORG_PHONE}
       </a>
+      {note && (
+        <span className="text-ink-soft max-md:block">
+          <span className="max-md:hidden"> · </span>
+          {note}
+        </span>
+      )}
     </p>
   );
 }
@@ -106,7 +113,7 @@ export default function Layout({
       current: path === partPath(k) || path.startsWith(`${partPath(k)}/`),
     })),
   ];
-  // "Çok satanlar": the last item of the scrolling bar below 1280 px, on its right side above.
+  // "Çok satanlar": the last item of the bar below 1280 px, on its right side above.
   const popular = hasPopular
     ? { href: localePath(POPULAR_PATH, lang), label: t.nav.popular, current: path === POPULAR_PATH }
     : null;
@@ -120,12 +127,13 @@ export default function Layout({
       >
         {t.nav.skip}
       </a>
-      {/* Logo, the make/model search (its own row below 1024 px) and the tools, how to order (its
-          own line below 1280 px); then the groups with "Çok satanlar" and "Kurumsal". */}
+      {/* Logo, the make/model search (its own row below 1024 px) and the tools, how to order (a
+          line under the search below 1024 px); then the groups, one line that scrolls sideways
+          when it does not fit, with "Çok satanlar" and how to order on its right. */}
       <header className="relative z-20 border-b border-hair bg-bg">
         <Container
           wide
-          className="flex flex-wrap items-center gap-x-2.5 gap-y-2.5 py-2.5 max-md:px-4 min-[23.4375rem]:gap-x-3 sm:gap-x-5 xl:min-h-[68px] xl:flex-nowrap xl:gap-x-7 xl:py-0"
+          className="flex flex-wrap items-center gap-x-2.5 gap-y-2.5 py-2.5 max-md:px-4 min-[23.4375rem]:gap-x-3 sm:gap-x-5 lg:min-h-[68px] lg:flex-nowrap lg:gap-x-4 lg:py-0 min-[73.75rem]:gap-x-7"
         >
           <a
             href={localePath('/', lang)}
@@ -158,8 +166,15 @@ export default function Layout({
           <div
             role="group"
             aria-label={t.nav.tools}
-            className="ml-auto flex items-center gap-x-2.5 font-sans text-sm min-[23.4375rem]:gap-x-3.5 sm:gap-x-[18px] lg:gap-x-3.5 xl:gap-x-[18px]"
+            className="ml-auto flex items-center gap-x-2.5 font-sans text-sm min-[23.4375rem]:gap-x-3.5 sm:gap-x-[18px] lg:gap-x-3 xl:gap-x-[18px]"
           >
+            {/* The corporate site, as on the old header from 1024 px; on the bar's right from 1280. */}
+            <a
+              href={corporate}
+              className={`hidden min-h-11 items-center whitespace-nowrap text-ink-mid hover:text-ink lg:inline-flex xl:hidden ${FOCUS}`}
+            >
+              {t.nav.catalogSite}
+            </a>
             <a
               href={localePath(path, other)}
               hrefLang={other}
@@ -180,19 +195,20 @@ export default function Layout({
               <span className="hidden sm:inline lg:hidden xl:inline">{t.nav.quote}</span>
             </a>
           </div>
-          <div className="order-4 basis-full text-[13px] leading-snug xl:hidden">
-            <OrderLine t={t} />
-            {home && <p className="m-0 font-sans text-ink-soft">{t.nav.order.note}</p>}
-          </div>
+          <OrderLine
+            t={t}
+            note={home ? t.nav.order.note : undefined}
+            className="order-4 -mt-0.5 basis-full text-[12.5px] leading-snug md:text-[13px] lg:hidden"
+          />
         </Container>
         <nav
           aria-label={t.nav.label}
           className={`border-t border-hair ${home ? 'hidden md:block' : ''}`}
         >
-          <Container wide className="flex items-center justify-between gap-6">
+          <Container wide className="flex items-center justify-between gap-6 lg:gap-5">
             <ul
               ref={barRef}
-              className="-mx-6 my-0 flex min-w-0 list-none gap-x-1 overflow-x-auto px-4 py-0 font-sans text-[15px] font-semibold [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-x-[22px] sm:overflow-visible sm:px-0 lg:text-[14.5px] [&::-webkit-scrollbar]:hidden"
+              className="-mx-6 my-0 flex min-w-0 list-none gap-x-1 overflow-x-auto px-4 py-0 font-sans text-[15px] font-semibold [scrollbar-width:none] sm:mx-0 sm:gap-x-[18px] sm:px-0 md:gap-x-3.5 md:text-sm xl:gap-x-5 xl:text-[14.5px] [&::-webkit-scrollbar]:hidden"
             >
               {groups.map((n) => (
                 <li key={n.href} className="shrink-0">
@@ -206,7 +222,7 @@ export default function Layout({
                 </li>
               ))}
               {popular && (
-                <li className="ml-2 shrink-0 border-l border-hair pl-2 sm:pl-[22px] xl:hidden">
+                <li className="ml-2 shrink-0 border-l border-hair pl-2 sm:ml-0 sm:pl-[18px] md:pl-3.5 xl:hidden">
                   <a
                     href={popular.href}
                     aria-current={popular.current ? 'page' : undefined}
@@ -217,7 +233,7 @@ export default function Layout({
                 </li>
               )}
             </ul>
-            <div className="hidden shrink-0 items-center gap-5 font-sans xl:flex">
+            <div className="hidden shrink-0 items-center gap-5 font-sans lg:flex">
               {popular && (
                 <a
                   href={popular.href}
@@ -229,13 +245,13 @@ export default function Layout({
               )}
               <a
                 href={corporate}
-                className={`hidden text-sm text-ink-mid hover:text-ink min-[85rem]:inline ${FOCUS}`}
+                className={`hidden min-h-11 items-center text-sm text-ink-mid hover:text-ink xl:inline-flex ${FOCUS}`}
               >
                 {t.nav.catalogSite}
               </a>
               <OrderLine
                 t={t}
-                className="whitespace-nowrap border-l border-hair pl-5 text-[13.5px]"
+                className="whitespace-nowrap border-l border-hair pl-4 text-[13.5px] xl:pl-5"
               />
             </div>
           </Container>

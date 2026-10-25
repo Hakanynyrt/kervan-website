@@ -8,7 +8,6 @@ import {
   type FocusEvent,
   type FormEvent,
   type KeyboardEvent,
-  type MouseEvent,
   type ReactNode,
 } from 'react';
 import type { Dict } from '../lib/dict';
@@ -16,6 +15,7 @@ import {
   exactHit,
   findModels,
   MODEL_INDEX_PATH,
+  prepareSearch,
   type FinderHit,
   type FinderMake,
   type MakeModels,
@@ -30,35 +30,37 @@ import { FOCUS, FOCUS_INSET, whatsappHref } from './Layout';
  * The make/model search box, in the header of every page (and in the home's breaker panel on
  * small screens). Typing lists the models it finds under the box, matched like the tip search
  * (`findModels`); each row goes to that model's page, which lists its tip and the parts we make
- * for it. On the home a plain click on a row (or a query naming one model exactly) shows that
- * model in the "Kırıcınızı seçin" panel instead (`FinderPick`), as the make and model chips there
- * do. The home has the finder data in its page props; the other pages fetch the names only
- * (`MODEL_INDEX_PATH`) the first time the box is used. Without JS (or without a hit) the form sends
- * `?q=` to the tip list, whose search suggests a spelling and offers "model not listed".
+ * for it. "Ara" (Enter) opens the model the query names, or its only hit: on the home in the
+ * "Kırıcınızı seçin" panel (`FinderPick`), as the make and model chips there do, elsewhere its
+ * page. Typing alone never opens a model. The home has the finder data in its page props; the
+ * other pages fetch the names only (`MODEL_INDEX_PATH`) the first time the box is used. Without JS
+ * (or without a hit) the form sends `?q=` to the tip list, whose search suggests a spelling and
+ * offers "model not listed".
  */
 
 /** Model rows under the box before "n models →". */
 const ROWS = 8;
 
 /** Home: the breaker shown in the panel, set by the header search, the panel's own box and the
- *  chips. `shown` counts picks that should bring the panel into view. */
+ *  chips. `shown.n` counts picks that should bring the panel into view; `shown.focus`: the pick
+ *  came from the header box, far from the panel, so the focus moves to the panel too. */
 interface Pick {
   sel: FinderHit | null;
-  select: (hit: FinderHit | null, show?: boolean) => void;
-  shown: number;
+  select: (hit: FinderHit | null, show?: boolean, focus?: boolean) => void;
+  shown: { n: number; focus: boolean };
 }
 export const FinderPick = createContext<Pick | null>(null);
 
 export function FinderPickProvider({ children }: { children: ReactNode }) {
   const [sel, setSel] = useState<FinderHit | null>(null);
-  const [shown, setShown] = useState(0);
+  const [shown, setShown] = useState({ n: 0, focus: false });
   const value = useMemo<Pick>(
     () => ({
       sel,
       shown,
-      select: (hit, show = false) => {
+      select: (hit, show = false, focus = false) => {
         setSel(hit);
-        if (hit && show) setShown((n) => n + 1);
+        if (hit && show) setShown((x) => ({ n: x.n + 1, focus }));
       },
     }),
     [sel, shown],
@@ -77,17 +79,13 @@ const loadIndex = (): Promise<Index> =>
       throw e;
     }));
 
-/** Plain clicks are handled on the page; modified clicks (new tab) keep the link. */
-const plain = (e: MouseEvent) =>
-  !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0);
-
 export function BreakerSearch({
   lang,
   t,
   id,
   finder,
   fromUrl = false,
-  landmark = true,
+  panel = false,
   className = '',
 }: {
   lang: Lang;
@@ -98,8 +96,9 @@ export function BreakerSearch({
   finder?: readonly FinderMake[];
   /** Home header: `?q=` naming one model exactly opens it on load. */
   fromUrl?: boolean;
-  /** The header box is the page's search landmark; a second box is a plain form. */
-  landmark?: boolean;
+  /** The home panel's own box (below 1024 px): a plain form (the header box is the page's
+   *  search landmark), the example always short, and the focus stays in it after a pick. */
+  panel?: boolean;
   className?: string;
 }) {
   const ctx = useContext(FinderPick);
@@ -145,21 +144,21 @@ export function BreakerSearch({
   const load = () => {
     if (!finder && !index) loadIndex().then(setIndex, () => undefined);
   };
+  // The search text of every model is worked out once the box is in use, not on the first key.
+  useEffect(() => {
+    if (open && data) prepareSearch(data);
+  }, [open, data]);
+  // Typing only lists models: a model whose name is still being typed ("Furukawa F 2" on the way
+  // to "F22") must not open (owner, 2026-10-22: never a wrong breaker).
   const onType = (v: string) => {
     setQ(v);
     setOpen(true);
     load();
-    if (!home || !finder) return;
-    const r = v.trim() ? findModels(finder, v) : null;
-    const exact = r && !r.guess ? exactHit(r.hits, v) : null;
-    if (exact) home.select(exact);
-    else if (home.sel && r && !r.hits.some((x) => x.model.slug === home.sel?.model.slug))
-      home.select(null);
   };
   const pick = (h: FinderHit<ModelRef>) => {
     setQ(h.name);
     setOpen(false);
-    home?.select(full(h), true);
+    home?.select(full(h), true, !panel);
   };
   const submit = (e: FormEvent) => {
     // Nothing found (or the index not here): the tip list's search takes over.
@@ -176,8 +175,9 @@ export function BreakerSearch({
   };
   const onKey = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
-      setOpen(false);
+      // Focus first: the input's focus handler opens the list.
       input.current?.focus();
+      setOpen(false);
       return;
     }
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
@@ -219,8 +219,8 @@ export function BreakerSearch({
       ref={form}
       action={localePath(LIST_PATH, lang)}
       method="get"
-      role={landmark ? 'search' : undefined}
-      aria-label={landmark ? t.search.label : undefined}
+      role={panel ? undefined : 'search'}
+      aria-label={panel ? undefined : t.search.label}
       onSubmit={submit}
       onKeyDown={onKey}
       onBlur={onBlur}
@@ -249,15 +249,15 @@ export function BreakerSearch({
             load();
             setOpen(true);
           }}
-          placeholder={narrow ? t.search.placeholderShort : t.search.placeholder}
+          placeholder={panel || narrow ? t.search.placeholderShort : t.search.placeholder}
           autoComplete="off"
-          aria-controls={listId}
-          className={`h-[46px] w-full min-w-0 rounded-l-sm border border-r-0 border-ink-soft bg-bg pl-3 pr-2.5 text-base text-ink placeholder:text-[13.5px] placeholder:text-ink-soft md:pl-[42px] md:placeholder:text-sm xl:placeholder:text-[15px] ${FOCUS}`}
+          aria-controls={open && found ? listId : undefined}
+          className={`h-[46px] w-full min-w-0 rounded-l-sm border border-r-0 border-ink-soft bg-bg pl-3 pr-2.5 text-base text-ink placeholder:text-[13.5px] placeholder:text-ink-soft md:pl-[42px] md:placeholder:text-sm lg:placeholder:text-[13.5px] xl:placeholder:text-[15px] ${FOCUS}`}
         />
       </span>
       <button
         type="submit"
-        className={`h-[46px] shrink-0 rounded-r-sm bg-brand px-4 text-[15px] font-semibold text-on-brand hover:bg-brand-hi md:px-6 ${FOCUS}`}
+        className={`h-[46px] shrink-0 rounded-r-sm bg-brand px-4 text-[15px] font-semibold text-on-brand hover:bg-brand-hi md:px-6 lg:px-4 min-[73.75rem]:px-6 ${FOCUS}`}
       >
         {t.search.button}
       </button>
@@ -279,15 +279,6 @@ export function BreakerSearch({
                 <li key={h.model.slug} className="border-t border-hair">
                   <a
                     href={localePath(breakerPath(h.model.slug), lang)}
-                    onClick={
-                      home
-                        ? (e) => {
-                            if (!plain(e)) return;
-                            e.preventDefault();
-                            pick(h);
-                          }
-                        : undefined
-                    }
                     className={`flex min-h-[46px] items-center justify-between gap-3 px-3.5 text-[15px] text-ink hover:bg-bg-soft focus:bg-bg-soft ${FOCUS_INSET}`}
                   >
                     <span className="font-semibold">{h.name}</span>
