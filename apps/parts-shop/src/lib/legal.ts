@@ -40,7 +40,7 @@ export interface LegalDoc {
   sections: LegalSection[];
 }
 
-export const UPDATED = '2026-10-24';
+export const UPDATED = '2026-10-25';
 
 const sellerTr: LegalSection = {
   h: 'Satıcı bilgileri',
@@ -231,7 +231,7 @@ const TR: Record<LegalKey, LegalDoc> = {
       {
         h: 'Amaç ve hukuki sebep',
         p: [
-          'Veriler; sipariş talebinizi yanıtlamak, sözleşmeyi kurup ifa etmek, ürünü teslim etmek, faturalandırmak, iade ve garanti taleplerini yürütmek ve yasal yükümlülüklerimizi yerine getirmek için işlenir (KVKK m.5/2-c, ç ve f). Teknik kayıtlar sitenin güvenliği için meşru menfaat kapsamında tutulur. Google Ads ve OpenAI (ChatGPT) Ads reklam ölçümü ve bu kapsamda verilerin yurt dışına aktarılması yalnızca açık rızanıza dayanır (KVKK m.5/1 ve m.9); onay vermezseniz bu işleme yapılmaz.',
+          'Veriler; sipariş talebinizi yanıtlamak, sözleşmeyi kurup ifa etmek, ürünü teslim etmek, faturalandırmak, iade ve garanti taleplerini yürütmek ve yasal yükümlülüklerimizi yerine getirmek için işlenir (KVKK m.5/2-c, ç ve f). Teknik kayıtlar sitenin güvenliği için meşru menfaat kapsamında tutulur. Google Ads, Meta (Facebook, Instagram) ve OpenAI (ChatGPT) Ads reklam ölçümü ve bu kapsamda verilerin yurt dışına aktarılması yalnızca açık rızanıza dayanır (KVKK m.5/1 ve m.9); onay vermezseniz bu işleme yapılmaz.',
         ],
       },
       {
@@ -239,18 +239,19 @@ const TR: Record<LegalKey, LegalDoc> = {
         p: [
           'Veriler, siparişin teslimi için kargo firmasına, ödemenin alınması için bankalara, yasal yükümlülükler için yetkili kamu kurumlarına ve muhasebe hizmeti alınan kişilere aktarılabilir.',
           'WhatsApp (Meta), e-posta sağlayıcıları ve Cloudflare yurt dışında sunucuları bulunan hizmetlerdir. Bu kanalları kullanarak bize ulaştığınızda verileriniz, sizin seçtiğiniz iletişim aracı üzerinden KVKK m.9 kapsamında yurt dışına aktarılmış olur. İsterseniz telefonla da sipariş verebilirsiniz.',
-          'Çerez bandında onay verdiyseniz reklam ölçümü verileri Google Ireland Limited ve Google LLC’ye (ABD) ve OpenAI’ye (ABD) aktarılır; ayrıntılar “Çerezler ve reklam ölçümü” bölümündedir.',
+          'Çerez bandında onay verdiyseniz reklam ölçümü verileri Google Ireland Limited ve Google LLC’ye (ABD), Meta Platforms Ireland Limited ve Meta Platforms, Inc.’e (ABD) ve OpenAI’ye (ABD) aktarılır; ayrıntılar “Çerezler ve reklam ölçümü” bölümündedir.',
         ],
       },
       {
         id: 'cerezler',
         h: 'Çerezler ve reklam ölçümü',
         p: [
-          'Reklamlarımızın sonuç verip vermediğini ölçmek için Google Ads dönüşüm ölçümü etiketini ve OpenAI (ChatGPT) Ads ölçüm pikselini kullanırız. Bunlar ve çerezleri yalnızca çerez bandında “Kabul et” derseniz yüklenir. “Reddet” derseniz veya seçim yapmazsanız Google’a ve OpenAI’ye bu kapsamda hiçbir istek gönderilmez, çerez bırakılmaz; site ve sipariş süreci aynen çalışır.',
+          'Reklamlarımızın sonuç verip vermediğini ölçmek için Google Ads dönüşüm ölçümü etiketini, Meta Pikseli’ni (Facebook ve Instagram reklamları) ve OpenAI (ChatGPT) Ads ölçüm pikselini kullanırız. Bunlar ve çerezleri yalnızca çerez bandında “Kabul et” derseniz yüklenir. “Reddet” derseniz veya seçim yapmazsanız Google’a, Meta’ya ve OpenAI’ye bu kapsamda hiçbir istek gönderilmez, çerez bırakılmaz; site ve sipariş süreci aynen çalışır.',
           'Onay verdiğinizde Google Ads çerez kimliği ve reklam tıklama kimliği, IP adresi, tarayıcı bilgisi ve sitedeki dönüşüm bilgisi (paletten veya ürün sayfasından WhatsApp ya da e-posta ile sipariş veya teklif talebi gönderme, telefon ve WhatsApp bağlantılarına tıklama) işlenir. Sipariş mesajınızın içeriğini, adınızı veya iletişim bilgilerinizi Google’a göndermeyiz. Bu veriler Google Ireland Limited ve Google LLC (ABD) tarafından işlenir ve KVKK m.9 uyarınca açık rızanıza dayanılarak yurt dışına aktarılır.',
+          'Onay verdiğinizde Meta Pikseli ziyaret ettiğiniz sayfanın adresini, aynı dönüşüm bilgisini (sipariş veya teklif talebi, telefon ve WhatsApp bağlantısına tıklama), Meta çerez kimliklerini (_fbp, _fbc), reklam tıklama kimliğini, IP adresini ve tarayıcı bilgisini işler. Sipariş mesajınızın içeriğini, adınızı veya iletişim bilgilerinizi Meta’ya göndermeyiz; sayfadaki alanlardan otomatik eşleştirme (gelişmiş eşleştirme) kapalıdır. Bu veriler Meta Platforms Ireland Limited ve Meta Platforms, Inc. (ABD) tarafından işlenir ve KVKK m.9 uyarınca açık rızanıza dayanılarak yurt dışına aktarılır.',
           'Onay verdiğinizde OpenAI ölçüm pikseli de aynı dönüşüm bilgisini (sipariş veya teklif talebi, telefon ve WhatsApp bağlantısına tıklama), OpenAI çerez kimliklerini (__oppref, __obref), reklam tıklama kimliğini, IP adresini ve tarayıcı bilgisini işler. Sipariş mesajınızın içeriğini, adınızı veya iletişim bilgilerinizi OpenAI’ye göndermeyiz. Bu veriler OpenAI (ABD) tarafından işlenir ve KVKK m.9 uyarınca açık rızanıza dayanılarak yurt dışına aktarılır.',
-          'Kişiselleştirilmiş reklam (yeniden pazarlama) için izin istemiyoruz ve bu amaçla veri kullanmıyoruz.',
-          'Tercihinizi her sayfanın altındaki “Çerez tercihleri” düğmesiyle istediğiniz zaman değiştirebilirsiniz. Onayınızı geri aldığınızda etiket ve piksel o andan itibaren reklam verisi saklamaz ve göndermez (OpenAI çerezleri silinir); sonraki sayfa yüklemesinden itibaren hiç yüklenmez. Tarayıcınızın ayarlarından da çerezleri silebilirsiniz.',
+          'Kişiselleştirilmiş reklam (yeniden pazarlama) için izin istemiyoruz; bu verilerle site ziyaretçilerinden reklam kitlesi oluşturmuyoruz.',
+          'Tercihinizi her sayfanın altındaki “Çerez tercihleri” düğmesiyle istediğiniz zaman değiştirebilirsiniz. Onayınızı geri aldığınızda etiket ve pikseller o andan itibaren reklam verisi saklamaz ve göndermez (Meta ve OpenAI çerezleri silinir); sonraki sayfa yüklemesinden itibaren hiç yüklenmez. Tarayıcınızın ayarlarından da çerezleri silebilirsiniz.',
           'Ziyaret istatistikleri Cloudflare Web Analytics ile çerezsiz ve sizi tanımlamayan biçimde tutulur. Paletiniz, tema ve çerez tercihiniz yalnızca tarayıcınızın yerel belleğinde (localStorage / sessionStorage) tutulur ve bize iletilmez.',
         ],
       },
@@ -392,11 +393,12 @@ const EN: Record<LegalKey, LegalDoc> = {
         id: 'cerezler',
         h: 'Cookies and ad measurement',
         p: [
-          'We use the Google Ads conversion measurement tag and the OpenAI (ChatGPT) Ads measurement pixel to see whether our ads work. They and their cookies load only if you click “Accept” in the cookie banner. If you decline or do not choose, nothing is requested from Google or OpenAI for this purpose and no cookie is set; the site and ordering work exactly the same.',
+          'We use the Google Ads conversion measurement tag, the Meta Pixel (Facebook and Instagram ads) and the OpenAI (ChatGPT) Ads measurement pixel to see whether our ads work. They and their cookies load only if you click “Accept” in the cookie banner. If you decline or do not choose, nothing is requested from Google, Meta or OpenAI for this purpose and no cookie is set; the site and ordering work exactly the same.',
           'With your consent, the Google Ads cookie and ad click identifiers, your IP address, browser details and the conversion on the site (sending an order or quote request by WhatsApp or e-mail from the cart or a product page, clicking a phone or WhatsApp link) are processed. We do not send the content of your order message, your name or your contact details to Google. The data is processed by Google Ireland Limited and Google LLC (USA) and transferred abroad on the basis of your explicit consent (Article 9 of the Law).',
+          'With your consent the Meta Pixel processes the address of the page you visit, the same conversion (an order or quote request, a click on a phone or WhatsApp link), the Meta cookie identifiers (_fbp, _fbc), the ad click identifier, your IP address and browser details. We do not send the content of your order message, your name or your contact details to Meta; automatic matching from the page’s fields (advanced matching) is off. The data is processed by Meta Platforms Ireland Limited and Meta Platforms, Inc. (USA) and transferred abroad on the basis of your explicit consent (Article 9 of the Law).',
           'With your consent the OpenAI pixel processes the same conversion (an order or quote request, a click on a phone or WhatsApp link), the OpenAI cookie identifiers (__oppref, __obref), the ad click identifier, your IP address and browser details. We do not send the content of your order message, your name or your contact details to OpenAI. The data is processed by OpenAI (USA) and transferred abroad on the basis of your explicit consent (Article 9 of the Law).',
-          'We do not ask for or use personalised advertising (remarketing).',
-          'You can change your choice at any time with the “Cookie preferences” button at the bottom of every page. Once you withdraw consent the tag and the pixel stop storing and sending ad data at once (the OpenAI cookies are deleted) and is not loaded at all from the next page load. You can also delete cookies in your browser settings.',
+          'We do not ask for personalised advertising (remarketing) and build no ad audiences of site visitors from this data.',
+          'You can change your choice at any time with the “Cookie preferences” button at the bottom of every page. Once you withdraw consent the tag and the pixels stop storing and sending ad data at once (the Meta and OpenAI cookies are deleted) and are not loaded at all from the next page load. You can also delete cookies in your browser settings.',
           'Visit statistics are kept with Cloudflare Web Analytics, which sets no cookies and does not identify you. Your cart, theme and cookie choice stay in your own browser (localStorage / sessionStorage) and are not sent to us.',
         ],
       },

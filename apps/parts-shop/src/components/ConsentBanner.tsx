@@ -5,6 +5,7 @@ import { localePath } from '../lib/locale-path';
 import {
   CONSENT_OPEN_EVENT,
   conversionsForLink,
+  grantAdsConsent,
   isAutomatedClient,
   loadAdsTag,
   readConsent,
@@ -17,10 +18,10 @@ import { FOCUS } from './Layout';
 import type { Lang } from '../types';
 
 /**
- * Cookie consent for Google Ads measurement (same design as heat-treatment's). Client-only:
- * the first render is null in the prerender and the hydrate, so the markup always matches;
- * the banner appears after mount for humans who have not chosen yet. Non-modal (no focus
- * trap), no motion (the shop has none in M1).
+ * Cookie consent for ad measurement (Google Ads, OpenAI, Meta; the Google part is the same
+ * design as heat-treatment's). Client-only: the first render is null in the prerender and the
+ * hydrate, so the markup always matches; the banner appears after mount for humans who have
+ * not chosen yet. Non-modal (no focus trap), no motion (the shop has none in M1).
  */
 export function ConsentBanner({ lang, t }: { lang: Lang; t: Dict }) {
   const [open, setOpen] = useState(false);
@@ -51,9 +52,10 @@ export function ConsentBanner({ lang, t }: { lang: Lang; t: Dict }) {
 
   const choose = (choice: ConsentChoice) => {
     writeConsent(choice);
-    if (choice === 'granted') loadAdsTag();
-    // The tag cannot be unloaded, but consent mode stops it from storing or sending ad data
-    // at once; from the next page load it is not loaded at all.
+    // A second "Kabul et" after "Reddet" on the same page lets the loaded tags resume.
+    if (choice === 'granted') grantAdsConsent();
+    // The tags cannot be unloaded, but their consent switches stop them from storing or
+    // sending ad data at once; from the next page load they are not loaded at all.
     else revokeAdsConsent();
     setOpen(false);
   };

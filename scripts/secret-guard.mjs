@@ -34,6 +34,8 @@ export const LINE_RULES = [
   [/\bAKIA[0-9A-Z]{16}\b/, 'AWS key'],
   [/\bAIza[0-9A-Za-z_-]{35}\b/, 'Google API key'],
   [/\bxox[abprs]-[A-Za-z0-9-]{10,}/, 'Slack token'],
+  // A Conversions API / Graph API token (the pixel id itself is public, like the AW- id).
+  [/\bEAA[A-Za-z0-9]{60,}/, 'Meta access token'],
   [/SHOP_SHEET_KEY\s*[:=]\s*['"]?[A-Za-z0-9+/_=-]{16,}/, 'price sheet key value'],
   [/enc:v1:[A-Za-z0-9+/=]{40,}/, 'encrypted price sheet'],
   [/\bVT\d{7}\b/, 'VEGA part number'],
