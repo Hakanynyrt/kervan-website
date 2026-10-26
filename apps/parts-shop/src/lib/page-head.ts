@@ -14,7 +14,13 @@ import { LEGAL, legalPath, SELLER } from './legal';
 import { localePath } from './locale-path';
 import { joinedSpelling } from './model-aliases';
 import { fmtNum } from './format';
-import { renderModel, renderTitle } from './part-caption';
+import {
+  isRockDrill,
+  otherSpelling,
+  renderModel,
+  renderSeoName,
+  renderTitle,
+} from './part-caption';
 import { findRender } from './part-links';
 import { brandPath, LIST_PATH, PARTS_PATH, partPath, type PartKey } from './routes';
 import { tipImgAbs } from './tip-img';
@@ -227,19 +233,34 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
       const image = pic ? photoImgAbs(pic, 'lg', SITE) : undefined;
       // The price the prerendered page shows: front heads open Burçlu (PartItem.tsx).
       const cents = r?.fitted ? model.priceFitted : model.price;
-      const description = m.partItemDesc(caption, {
-        kit: model.part === 'tamir-takimi',
-        priced: cents !== null,
-      });
+      const seoName = r ? renderSeoName(r, model.part, t) : caption;
+      const other = r ? otherSpelling(r.model) : null;
+      const desc = (o: string | null) =>
+        m.partItemDesc(seoName, {
+          kit: model.part === 'tamir-takimi',
+          priced: cents !== null,
+          other: o,
+          rockDrill: r ? isRockDrill(r) : false,
+        });
+      // The other spelling ("MTB210", "SB 50") only while the description stays short.
+      const description = other && desc(other).length <= DESC_MAX ? desc(other) : desc(null);
+      // Other names of the part (no OEM numbers here): its caption and the other spelling.
+      const alternateName = [
+        ...new Set([
+          caption,
+          ...(other && r ? [renderSeoName({ ...r, model: other }, model.part, t)] : []),
+        ]),
+      ].filter((x) => x !== seoName);
       return {
         ...page,
-        title: m.partItemTitle(caption),
+        title: m.partItemTitle(seoName),
         description,
         ...(image ? { ogImage: image } : {}),
         jsonLd: [
           productLd({
             url,
-            name: caption,
+            name: seoName,
+            ...(alternateName.length ? { alternateName } : {}),
             description,
             image,
             brand: ORG_TRADING_NAME,

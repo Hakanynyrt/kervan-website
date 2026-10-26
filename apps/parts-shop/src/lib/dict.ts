@@ -32,10 +32,14 @@ export interface Dict {
     partTitle: (name: string) => string;
     /** `kit`: repair kits are put together for the breaker, not made by us. */
     partDesc: (name: string, kit: boolean) => string;
-    /** One modelled part's own page: caption = "Montabert BRV 32 piston". */
-    partItemTitle: (caption: string) => string;
-    /** `priced`: the page shows a price (order), else a quote. */
-    partItemDesc: (caption: string, o: { kit: boolean; priced: boolean }) => string;
+    /** One modelled part's own page: `name` = parts.item.seoName ("MTB 210 kırıcı kaması"). */
+    partItemTitle: (name: string) => string;
+    /** `priced`: the page shows a price (order), else a quote. `other`: the model's other
+     *  spelling ("MTB210", "SB 50"), null when there is none; `rockDrill`: a rock drill part. */
+    partItemDesc: (
+      name: string,
+      o: { kit: boolean; priced: boolean; other: string | null; rockDrill: boolean },
+    ) => string;
     cartTitle: string;
   };
   nav: {
@@ -360,6 +364,10 @@ export interface Dict {
     renderCaption: (model: string, name: string) => string;
     renderView: Record<RenderView, string>;
     renderKind: Record<NonNullable<PartRender['kind']>, string>;
+    /** An item page's title and h1 noun after "<model> kırıcı": the group's noun ("kaması",
+     *  `itemNoun`), or the kind's (`renderKindNoun`, else `renderKind`) when the render has one. */
+    itemNoun: Record<PartKey, string>;
+    renderKindNoun: Partial<Record<NonNullable<PartRender['kind']>, string>>;
     /** Under the model in a series strip, so the bushings of one breaker tell apart. */
     renderKindShort: Record<NonNullable<PartRender['kind']>, string>;
     renderVariant: Record<NonNullable<PartRender['variant']>, string>;
@@ -423,6 +431,15 @@ export interface Dict {
       back: (group: string) => string;
       related: string;
       linksLabel: string;
+      /** "MTB 210 kırıcı kaması": the item page's title and h1; a rock drill part's noun
+       *  already names the machine ("COP 1032 kaya delici dayama burcu"). */
+      seoName: (model: string, noun: string, rockDrill: boolean) => string;
+      /** "Uyduğu kırıcı: Soosan SB50 (Soosan SB 50), eski tip." under the h1: the model, its
+       *  other spelling and its variant, each when it has one. */
+      fits: (
+        model: string,
+        o: { other: string | null; variant: string | null; rockDrill: boolean },
+      ) => string;
     };
     /** Genuine OEM numbers of the part ours replaces (owner's decision), cross-reference only. */
     oemRef: {
@@ -538,9 +555,9 @@ export const DICT: Record<Lang, Dict> = {
         kit
           ? 'Hidrolik kırıcı tamir takımı: kırıcınızın modeline göre eksiksiz hazırlanan sızdırmazlık takımı. Marka ve modelinizi yazın.'
           : `Hidrolik kırıcı ${name.toLocaleLowerCase('tr')}: Kervan üretimi kırıcı yedek parça, kırıcınızın marka ve modeline göre. Marka ve modelinizi yazın.`,
-      partItemTitle: (caption) => `${caption} | Kervan Makina`,
-      partItemDesc: (caption, { kit, priced }) =>
-        `${caption}: ${kit ? 'kırıcı modeline göre hazırlanan sızdırmazlık takımı' : 'Kervan üretimi hidrolik kırıcı yedek parçası'}. ${priced ? 'Fiyatı sayfada, stoktan aynı gün kargo.' : 'Fiyat teklifi için yazın.'}`,
+      partItemTitle: (name) => `${name} | Kervan Makina`,
+      partItemDesc: (name, { kit, priced, other, rockDrill }) =>
+        `${name}${other ? `, ${other} olarak da yazılır` : ''}. ${kit ? 'Modele göre hazırlanan sızdırmazlık takımı' : `Kervan üretimi ${rockDrill ? 'kaya delici' : 'hidrolik kırıcı'} yedek parçası`}. ${priced ? 'Fiyatı sayfada, stoktan aynı gün kargo.' : 'Fiyat teklifi için yazın.'}`,
       cartTitle: 'Palet | Kervan Makina',
     },
     nav: {
@@ -1033,6 +1050,23 @@ export const DICT: Record<Lang, Dict> = {
         wearPlateSet: 'aşınma plakası ve takoz seti',
         bushingSet: 'burç takımı',
       },
+      itemNoun: {
+        'alt-govde': 'alt gövdesi',
+        burc: 'burcu',
+        kama: 'kaması',
+        saplama: 'saplaması',
+        piston: 'pistonu',
+        akumulator: 'akümülatör parçaları',
+        'asinma-plakasi': 'aşınma plakası',
+        'tamir-takimi': 'tamir takımı',
+      },
+      renderKindNoun: {
+        retainerKey: 'kaması',
+        piston: 'pistonu',
+        retainerPin: 'kama tutucu pimi',
+        tieRod: 'boy saplaması',
+        sideBolt: 'yan saplaması',
+      },
       renderKindShort: {
         toolBushing: 'Kafa burcu',
         upperBushing: 'Merkezleme',
@@ -1212,6 +1246,9 @@ export const DICT: Record<Lang, Dict> = {
         back: (group) => `Tüm ${group.toLocaleLowerCase('tr')} modelleri`,
         related: 'Bu kırıcı için ürettiğimiz diğer parçalar',
         linksLabel: 'Parça bağlantıları',
+        seoName: (model, noun, rockDrill) => `${model}${rockDrill ? '' : ' kırıcı'} ${noun}`,
+        fits: (model, { other, variant, rockDrill }) =>
+          `Uyduğu ${rockDrill ? 'kaya delici' : 'kırıcı'}: ${model}${other ? ` (${other})` : ''}${variant ? `, ${variant}` : ''}.`,
       },
       oemRef: {
         label: 'Muadil OEM no.',
@@ -1353,9 +1390,9 @@ export const DICT: Record<Lang, Dict> = {
         kit
           ? 'Hydraulic breaker repair kits: complete seal kits put together for your breaker model. Type your make and model.'
           : `Hydraulic breaker ${name.toLowerCase()} made by Kervan, by breaker make and model. Type your make and model.`,
-      partItemTitle: (caption) => `${caption} | Kervan Makina`,
-      partItemDesc: (caption, { kit, priced }) =>
-        `${caption}: ${kit ? 'seal kit put together for the breaker model' : 'hydraulic breaker spare part made by Kervan'}. ${priced ? 'Price on the page, same-day shipping from stock.' : 'Write to us for a quote.'}`,
+      partItemTitle: (name) => `${name} | Kervan Makina`,
+      partItemDesc: (name, { kit, priced, other, rockDrill }) =>
+        `${name}${other ? `, also written ${other}` : ''}. ${kit ? 'Seal kit put together for the model' : `${rockDrill ? 'Rock drill' : 'Hydraulic breaker'} spare part made by Kervan`}. ${priced ? 'Price on the page, same-day shipping from stock.' : 'Write to us for a quote.'}`,
       cartTitle: 'Cart | Kervan Makina',
     },
     nav: {
@@ -1853,6 +1890,22 @@ export const DICT: Record<Lang, Dict> = {
         wearPlateSet: 'wear plate and buffer set',
         bushingSet: 'bushing set',
       },
+      itemNoun: {
+        'alt-govde': 'front head',
+        burc: 'bushing',
+        kama: 'retainer key',
+        saplama: 'through bolt',
+        piston: 'piston',
+        akumulator: 'accumulator parts',
+        'asinma-plakasi': 'wear plate',
+        'tamir-takimi': 'repair kit',
+      },
+      renderKindNoun: {
+        retainerKey: 'retainer key',
+        retainerPin: 'retainer pin',
+        tieRod: 'through bolt',
+        sideBolt: 'side bolt',
+      },
       renderKindShort: {
         toolBushing: 'Tool bushing',
         upperBushing: 'Upper bushing',
@@ -2032,6 +2085,9 @@ export const DICT: Record<Lang, Dict> = {
         back: (group) => `All ${group.toLowerCase()} models`,
         related: 'Other parts we make for this breaker',
         linksLabel: 'Part links',
+        seoName: (model, noun, rockDrill) => `${model}${rockDrill ? '' : ' breaker'} ${noun}`,
+        fits: (model, { other, variant }) =>
+          `Fits: ${model}${other ? ` (${other})` : ''}${variant ? `, ${variant}` : ''}.`,
       },
       oemRef: {
         label: 'Equivalent OEM no.',

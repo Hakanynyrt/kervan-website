@@ -39,6 +39,38 @@ export function partsForBreaker(name: string): PartLink[] {
   return cached.get(fold(name)) ?? [];
 }
 
+/** One item page for a breaker page's parts block: its group, anchor and the render's kind and
+ *  variant, so the block can label several items of one group ("Kafa burcu", "Merkezleme"). */
+export interface PartItemLink extends PartLink {
+  /** The render's model name, to tell apart two items that would get the same label. */
+  model: string;
+  kind?: PartRender['kind'];
+  variant?: PartRender['variant'];
+}
+
+/**
+ * Every item page we have for a breaker ("Brand Model"), in PART_KEYS order, each once: the
+ * breaker page links them all, so no item page is reached only through search and the sitemap.
+ */
+export function partItemsForBreaker(name: string): PartItemLink[] {
+  const k = fold(name);
+  const out: PartItemLink[] = [];
+  for (const [part, list] of Object.entries(PART_RENDERS) as [PartKey, readonly PartRender[]][])
+    for (const r of list)
+      if (breakerKeys(r.model).includes(k)) {
+        const anchor = renderAnchor(r);
+        if (out.some((x) => x.part === part && x.anchor === anchor)) continue;
+        out.push({
+          part,
+          anchor,
+          model: r.model,
+          ...(r.kind ? { kind: r.kind } : {}),
+          ...(r.variant ? { variant: r.variant } : {}),
+        });
+      }
+  return out;
+}
+
 /** The render of one part page behind an anchor (its item page), if any. */
 export const findRender = (part: PartKey, anchor: string): PartRender | undefined =>
   PART_RENDERS[part].find((r) => renderAnchor(r) === anchor);

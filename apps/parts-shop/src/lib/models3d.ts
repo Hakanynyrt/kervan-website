@@ -1023,6 +1023,8 @@ export const MODELS_3D: Record<string, string> = {
   'kama-rammer-g80': '/models/kama-rammer-g80-02.glb',
   'kama-rammer-s25': '/models/kama-rammer-s25-02.glb',
   'kama-rammer-s84': '/models/kama-rammer-s84-03.glb',
+  'kama-soosan-sb-50': '/models/kama-soosan-sb-50-01.glb',
+  'kama-soosan-sb-50-ts-p': '/models/kama-soosan-sb-50-ts-p-01.glb',
   'kama-soosan-sb121-ts-p': '/models/kama-soosan-sb121-ts-p-03.glb',
   'kama-soosan-sb81-ts-p': '/models/kama-soosan-sb81-ts-p-02.glb',
   'pim-furukawa-f22-tool-bushing-pin': '/models/pim-furukawa-f22-tool-bushing-pin-02.glb',

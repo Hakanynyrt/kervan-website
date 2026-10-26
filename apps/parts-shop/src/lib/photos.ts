@@ -1491,7 +1491,10 @@ interface OtherPart {
  * (2026-10-23; the archive sheet agrees): obround section with full round ends, a half-round notch in each rounded
  * edge near one end, chamfered ends. Black finish like the kit kamas. The MTB 215 (MTB 210 II) kama (2026-10-25,
  * from the complete MTB 215 model): 280 × 100 × 50 obround, C2 ends, the Ø30 cross hole and one M8 extraction hole in
- * the end next to it (both C1); same views and look as the kit's MTB 210 kama.
+ * the end next to it (both C1); same views and look as the kit's MTB 210 kama. The Soosan SB50 TS-P kama (2026-10-26,
+ * from the archive sheet): 229 × 60 × 32 obround (R16), C1 ends, two 19-wide obround slots (29 long) through the 32
+ * side, 24.5 from each end. The old-type SB50 kama: 162.5 × 60 × 32 obround, C2 ends, no holes. Black finish like the
+ * kit kamas.
  */
 const OTHER_KEYS: OtherPart[] = [
   {
@@ -1505,6 +1508,20 @@ const OTHER_KEYS: OtherPart[] = [
     make: 'MTB',
     model: '210 II',
     file: 'kama-mtb-210-ii',
+    kind: 'retainerKey',
+    views: ['front', 'rear', 'side'],
+  },
+  {
+    make: 'Soosan',
+    model: 'SB50 TS-P',
+    file: 'kama-soosan-sb-50-ts-p',
+    kind: 'retainerKey',
+    views: ['front', 'rear', 'side'],
+  },
+  {
+    make: 'Soosan',
+    model: 'SB50',
+    file: 'kama-soosan-sb-50',
     kind: 'retainerKey',
     views: ['front', 'rear', 'side'],
   },
