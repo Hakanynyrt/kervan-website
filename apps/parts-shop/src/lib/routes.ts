@@ -12,10 +12,12 @@ import {
 } from '@kervan/tips';
 import { LEGAL_KEYS, legalPath, type LegalKey } from './legal';
 import {
+  partItemsForBreaker,
   partsForBreaker,
   relatedParts,
   renderAnchor,
   tipLinksForPart,
+  type PartItemLink,
   type PartLink,
 } from './part-links';
 import { listedParts, type ListedPart } from './listed-parts';
@@ -167,8 +169,8 @@ export type PageModel =
       families: PublicFamily[];
       /** Other spellings of the model ("HB20G"): merged catalogue spellings and the no-space form. */
       aliases: string[];
-      /** Other parts we model for this breaker (links to their cards). */
-      parts: PartLink[];
+      /** Every part item page we have for this breaker (links to each). */
+      parts: PartItemLink[];
       demo: boolean;
       hasPopular: boolean;
     }
@@ -662,7 +664,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
         model: e.model,
         families: e.families.map(withoutFits),
         aliases: e.aliases,
-        parts: partsForBreaker(e.name),
+        parts: partItemsForBreaker(e.name),
         demo,
         hasPopular,
       },

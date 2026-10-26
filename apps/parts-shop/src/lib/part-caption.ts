@@ -1,5 +1,6 @@
 import type { Dict } from './dict';
 import type { PartRender } from './photos';
+import type { PartKey } from './routes';
 
 /** The breaker model a render fits, with its variant (e.g. old type) when it has one. */
 export const renderModel = (r: PartRender, t: Dict): string =>
@@ -10,3 +11,21 @@ export const renderTitle = (r: PartRender, partName: string, t: Dict): string =>
   r.kind
     ? `${renderModel(r, t)} ${t.parts.renderKind[r.kind]}`
     : t.parts.renderCaption(renderModel(r, t), partName);
+
+/** The model's other common spelling, letters and number joined or apart: "MTB 210" → "MTB210",
+ *  "Soosan SB50" → "Soosan SB 50"; null when it has neither form. */
+export function otherSpelling(model: string): string | null {
+  const joined = model.replace(/\b([A-Za-z]+)[\s-]+(?=\d)/, '$1');
+  if (joined !== model) return joined;
+  const spaced = model.replace(/\b([A-Za-z]{2,})(?=\d)/, '$1 ');
+  return spaced === model ? null : spaced;
+}
+
+/** An item page's title and h1: "MTB 210 kırıcı kaması", "Soosan SB 50 kırıcı kafa burcu". */
+export const renderSeoName = (r: PartRender, part: PartKey, t: Dict): string =>
+  t.parts.item.seoName(
+    renderModel(r, t),
+    r.kind
+      ? (t.parts.renderKindNoun[r.kind] ?? t.parts.renderKind[r.kind])
+      : t.parts.itemNoun[part],
+  );

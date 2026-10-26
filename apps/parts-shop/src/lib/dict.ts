@@ -32,10 +32,14 @@ export interface Dict {
     partTitle: (name: string) => string;
     /** `kit`: repair kits are put together for the breaker, not made by us. */
     partDesc: (name: string, kit: boolean) => string;
-    /** One modelled part's own page: caption = "Montabert BRV 32 piston". */
-    partItemTitle: (caption: string) => string;
-    /** `priced`: the page shows a price (order), else a quote. */
-    partItemDesc: (caption: string, o: { kit: boolean; priced: boolean }) => string;
+    /** One modelled part's own page: `name` = parts.item.seoName ("MTB 210 kırıcı kaması"). */
+    partItemTitle: (name: string) => string;
+    /** `priced`: the page shows a price (order), else a quote. `model`: the breaker it fits;
+     *  `other`: its other spelling ("MTB210", "SB 50"), null when there is none. */
+    partItemDesc: (
+      name: string,
+      o: { kit: boolean; priced: boolean; model: string; other: string | null },
+    ) => string;
     cartTitle: string;
   };
   nav: {
@@ -360,6 +364,10 @@ export interface Dict {
     renderCaption: (model: string, name: string) => string;
     renderView: Record<RenderView, string>;
     renderKind: Record<NonNullable<PartRender['kind']>, string>;
+    /** An item page's title and h1 noun after "<model> kırıcı": the group's noun ("kaması",
+     *  `itemNoun`), or the kind's (`renderKindNoun`, else `renderKind`) when the render has one. */
+    itemNoun: Record<PartKey, string>;
+    renderKindNoun: Partial<Record<NonNullable<PartRender['kind']>, string>>;
     /** Under the model in a series strip, so the bushings of one breaker tell apart. */
     renderKindShort: Record<NonNullable<PartRender['kind']>, string>;
     renderVariant: Record<NonNullable<PartRender['variant']>, string>;
@@ -423,6 +431,10 @@ export interface Dict {
       back: (group: string) => string;
       related: string;
       linksLabel: string;
+      /** "MTB 210 kırıcı kaması": the item page's title and h1. */
+      seoName: (model: string, noun: string) => string;
+      /** "Uyduğu kırıcı: MTB 210 (MTB210 olarak da yazılır)." under the h1. */
+      fits: (model: string, other: string | null) => string;
     };
     /** Genuine OEM numbers of the part ours replaces (owner's decision), cross-reference only. */
     oemRef: {
@@ -538,9 +550,9 @@ export const DICT: Record<Lang, Dict> = {
         kit
           ? 'Hidrolik kırıcı tamir takımı: kırıcınızın modeline göre eksiksiz hazırlanan sızdırmazlık takımı. Marka ve modelinizi yazın.'
           : `Hidrolik kırıcı ${name.toLocaleLowerCase('tr')}: Kervan üretimi kırıcı yedek parça, kırıcınızın marka ve modeline göre. Marka ve modelinizi yazın.`,
-      partItemTitle: (caption) => `${caption} | Kervan Makina`,
-      partItemDesc: (caption, { kit, priced }) =>
-        `${caption}: ${kit ? 'kırıcı modeline göre hazırlanan sızdırmazlık takımı' : 'Kervan üretimi hidrolik kırıcı yedek parçası'}. ${priced ? 'Fiyatı sayfada, stoktan aynı gün kargo.' : 'Fiyat teklifi için yazın.'}`,
+      partItemTitle: (name) => `${name} | Kervan Makina`,
+      partItemDesc: (name, { kit, priced, model, other }) =>
+        `${name}${other ? ` (${other})` : ''}: ${model} hidrolik kırıcıya uygun, ${kit ? 'modele göre hazırlanan sızdırmazlık takımı' : 'Kervan üretimi yedek parça'}. ${priced ? 'Fiyatı sayfada, stoktan aynı gün kargo.' : 'Fiyat teklifi için yazın.'}`,
       cartTitle: 'Palet | Kervan Makina',
     },
     nav: {
@@ -1033,6 +1045,23 @@ export const DICT: Record<Lang, Dict> = {
         wearPlateSet: 'aşınma plakası ve takoz seti',
         bushingSet: 'burç takımı',
       },
+      itemNoun: {
+        'alt-govde': 'alt gövdesi',
+        burc: 'burcu',
+        kama: 'kaması',
+        saplama: 'saplaması',
+        piston: 'pistonu',
+        akumulator: 'akümülatör parçaları',
+        'asinma-plakasi': 'aşınma plakası',
+        'tamir-takimi': 'tamir takımı',
+      },
+      renderKindNoun: {
+        retainerKey: 'kaması',
+        piston: 'pistonu',
+        retainerPin: 'kama tutucu pimi',
+        tieRod: 'boy saplaması',
+        sideBolt: 'yan saplaması',
+      },
       renderKindShort: {
         toolBushing: 'Kafa burcu',
         upperBushing: 'Merkezleme',
@@ -1212,6 +1241,9 @@ export const DICT: Record<Lang, Dict> = {
         back: (group) => `Tüm ${group.toLocaleLowerCase('tr')} modelleri`,
         related: 'Bu kırıcı için ürettiğimiz diğer parçalar',
         linksLabel: 'Parça bağlantıları',
+        seoName: (model, noun) => `${model} kırıcı ${noun}`,
+        fits: (model, other) =>
+          `Uyduğu kırıcı: ${model}${other ? ` (${other} olarak da yazılır)` : ''}.`,
       },
       oemRef: {
         label: 'Muadil OEM no.',
@@ -1353,9 +1385,9 @@ export const DICT: Record<Lang, Dict> = {
         kit
           ? 'Hydraulic breaker repair kits: complete seal kits put together for your breaker model. Type your make and model.'
           : `Hydraulic breaker ${name.toLowerCase()} made by Kervan, by breaker make and model. Type your make and model.`,
-      partItemTitle: (caption) => `${caption} | Kervan Makina`,
-      partItemDesc: (caption, { kit, priced }) =>
-        `${caption}: ${kit ? 'seal kit put together for the breaker model' : 'hydraulic breaker spare part made by Kervan'}. ${priced ? 'Price on the page, same-day shipping from stock.' : 'Write to us for a quote.'}`,
+      partItemTitle: (name) => `${name} | Kervan Makina`,
+      partItemDesc: (name, { kit, priced, model, other }) =>
+        `${name}${other ? ` (${other})` : ''}: fits the ${model} hydraulic breaker, ${kit ? 'seal kit put together for the model' : 'spare part made by Kervan'}. ${priced ? 'Price on the page, same-day shipping from stock.' : 'Write to us for a quote.'}`,
       cartTitle: 'Cart | Kervan Makina',
     },
     nav: {
@@ -1853,6 +1885,19 @@ export const DICT: Record<Lang, Dict> = {
         wearPlateSet: 'wear plate and buffer set',
         bushingSet: 'bushing set',
       },
+      itemNoun: {
+        'alt-govde': 'front head',
+        burc: 'bushing',
+        kama: 'retainer key',
+        saplama: 'tie rod',
+        piston: 'piston',
+        akumulator: 'accumulator parts',
+        'asinma-plakasi': 'wear plate',
+        'tamir-takimi': 'repair kit',
+      },
+      renderKindNoun: {
+        retainerKey: 'retainer key',
+      },
       renderKindShort: {
         toolBushing: 'Tool bushing',
         upperBushing: 'Upper bushing',
@@ -2032,6 +2077,8 @@ export const DICT: Record<Lang, Dict> = {
         back: (group) => `All ${group.toLowerCase()} models`,
         related: 'Other parts we make for this breaker',
         linksLabel: 'Part links',
+        seoName: (model, noun) => `${model} breaker ${noun}`,
+        fits: (model, other) => `Fits: ${model}${other ? ` (also written ${other})` : ''}.`,
       },
       oemRef: {
         label: 'Equivalent OEM no.',
