@@ -13,7 +13,7 @@ import { FOCUS } from '../components/Layout';
 import { PartOrder, PartPriceLine, partOrderText, priceNote } from '../components/PartOrder';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { otherSpelling, renderModel, renderSeoName, renderTitle } from '../lib/part-caption';
+import { renderFits, renderModel, renderSeoName, renderTitle } from '../lib/part-caption';
 import { findRender } from '../lib/part-links';
 import { PARTS_PATH, partItemPath, partPath, type PageModel } from '../lib/routes';
 import type { Lang } from '../types';
@@ -85,7 +85,7 @@ export default function PartItem({
       />
       <PageTitle>{renderSeoName(r, model.part, t)}</PageTitle>
       <p className="m-0 mt-3 max-w-prose font-sans text-base text-ink-soft">
-        {t.parts.item.fits(renderModel(r, t), otherSpelling(r.model))} {p.body}
+        {renderFits(r, t)} {p.body}
       </p>
       <OemLine t={t} kit={model.part === 'tamir-takimi'} />
       <OemNumbers numbers={model.oem} t={t} note className="mt-3" />

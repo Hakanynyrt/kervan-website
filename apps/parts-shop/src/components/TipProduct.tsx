@@ -19,6 +19,7 @@ import { fmtDate, fmtTry, fmtUsd } from '../lib/price';
 import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
 import type { PartItemLink } from '../lib/part-links';
+import { distinctLabels } from '../lib/part-caption';
 import { tipImg } from '../lib/tip-img';
 import { sizeOrdinals, tipOptions, tipVariants } from '../lib/tip-options';
 import { replaceSearch } from '../lib/url-state';
@@ -505,20 +506,25 @@ export default function TipProduct({
           <ul className="m-0 mt-3 flex list-none flex-col gap-3 p-0 text-sm">
             {[...new Set(parts.map((x) => x.part))].map((g) => {
               const items = parts.filter((x) => x.part === g);
+              const labels = distinctLabels(
+                items.map((x) => ({
+                  label: `${x.kind ? t.parts.renderKindShort[x.kind] : t.parts.items[g].name}${x.variant ? ` (${t.parts.renderVariant[x.variant]})` : ''}`,
+                  model: x.model,
+                })),
+              );
               return (
                 <li key={g}>
                   <span className="mb-1.5 block font-semibold text-ink">
                     {t.parts.items[g].name}
                   </span>
                   <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-                    {items.map((x) => (
+                    {items.map((x, i) => (
                       <li key={x.anchor}>
                         <a
                           href={localePath(partItemPath(x.part, x.anchor), lang)}
                           className={`inline-flex min-h-11 items-center rounded-sm border border-ink-soft bg-bg px-4 font-medium text-ink hover:bg-bg-warm ${FOCUS}`}
                         >
-                          {x.kind ? t.parts.renderKindShort[x.kind] : t.parts.items[g].name}
-                          {x.variant ? ` (${t.parts.renderVariant[x.variant]})` : ''} →
+                          {labels[i]} →
                         </a>
                       </li>
                     ))}

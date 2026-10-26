@@ -42,6 +42,8 @@ export function partsForBreaker(name: string): PartLink[] {
 /** One item page for a breaker page's parts block: its group, anchor and the render's kind and
  *  variant, so the block can label several items of one group ("Kafa burcu", "Merkezleme"). */
 export interface PartItemLink extends PartLink {
+  /** The render's model name, to tell apart two items that would get the same label. */
+  model: string;
   kind?: PartRender['kind'];
   variant?: PartRender['variant'];
 }
@@ -61,6 +63,7 @@ export function partItemsForBreaker(name: string): PartItemLink[] {
         out.push({
           part,
           anchor,
+          model: r.model,
           ...(r.kind ? { kind: r.kind } : {}),
           ...(r.variant ? { variant: r.variant } : {}),
         });

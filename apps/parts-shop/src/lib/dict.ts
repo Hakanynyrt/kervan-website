@@ -34,11 +34,11 @@ export interface Dict {
     partDesc: (name: string, kit: boolean) => string;
     /** One modelled part's own page: `name` = parts.item.seoName ("MTB 210 kırıcı kaması"). */
     partItemTitle: (name: string) => string;
-    /** `priced`: the page shows a price (order), else a quote. `model`: the breaker it fits;
-     *  `other`: its other spelling ("MTB210", "SB 50"), null when there is none. */
+    /** `priced`: the page shows a price (order), else a quote. `other`: the model's other
+     *  spelling ("MTB210", "SB 50"), null when there is none; `rockDrill`: a rock drill part. */
     partItemDesc: (
       name: string,
-      o: { kit: boolean; priced: boolean; model: string; other: string | null },
+      o: { kit: boolean; priced: boolean; other: string | null; rockDrill: boolean },
     ) => string;
     cartTitle: string;
   };
@@ -431,10 +431,15 @@ export interface Dict {
       back: (group: string) => string;
       related: string;
       linksLabel: string;
-      /** "MTB 210 kırıcı kaması": the item page's title and h1. */
-      seoName: (model: string, noun: string) => string;
-      /** "Uyduğu kırıcı: MTB 210 (MTB210 olarak da yazılır)." under the h1. */
-      fits: (model: string, other: string | null) => string;
+      /** "MTB 210 kırıcı kaması": the item page's title and h1; a rock drill part's noun
+       *  already names the machine ("COP 1032 kaya delici dayama burcu"). */
+      seoName: (model: string, noun: string, rockDrill: boolean) => string;
+      /** "Uyduğu kırıcı: Soosan SB50 (Soosan SB 50), eski tip." under the h1: the model, its
+       *  other spelling and its variant, each when it has one. */
+      fits: (
+        model: string,
+        o: { other: string | null; variant: string | null; rockDrill: boolean },
+      ) => string;
     };
     /** Genuine OEM numbers of the part ours replaces (owner's decision), cross-reference only. */
     oemRef: {
@@ -551,8 +556,8 @@ export const DICT: Record<Lang, Dict> = {
           ? 'Hidrolik kırıcı tamir takımı: kırıcınızın modeline göre eksiksiz hazırlanan sızdırmazlık takımı. Marka ve modelinizi yazın.'
           : `Hidrolik kırıcı ${name.toLocaleLowerCase('tr')}: Kervan üretimi kırıcı yedek parça, kırıcınızın marka ve modeline göre. Marka ve modelinizi yazın.`,
       partItemTitle: (name) => `${name} | Kervan Makina`,
-      partItemDesc: (name, { kit, priced, model, other }) =>
-        `${name}${other ? ` (${other})` : ''}: ${model} hidrolik kırıcıya uygun, ${kit ? 'modele göre hazırlanan sızdırmazlık takımı' : 'Kervan üretimi yedek parça'}. ${priced ? 'Fiyatı sayfada, stoktan aynı gün kargo.' : 'Fiyat teklifi için yazın.'}`,
+      partItemDesc: (name, { kit, priced, other, rockDrill }) =>
+        `${name}${other ? `, ${other} olarak da yazılır` : ''}. ${kit ? 'Modele göre hazırlanan sızdırmazlık takımı' : `Kervan üretimi ${rockDrill ? 'kaya delici' : 'hidrolik kırıcı'} yedek parçası`}. ${priced ? 'Fiyatı sayfada, stoktan aynı gün kargo.' : 'Fiyat teklifi için yazın.'}`,
       cartTitle: 'Palet | Kervan Makina',
     },
     nav: {
@@ -1241,9 +1246,9 @@ export const DICT: Record<Lang, Dict> = {
         back: (group) => `Tüm ${group.toLocaleLowerCase('tr')} modelleri`,
         related: 'Bu kırıcı için ürettiğimiz diğer parçalar',
         linksLabel: 'Parça bağlantıları',
-        seoName: (model, noun) => `${model} kırıcı ${noun}`,
-        fits: (model, other) =>
-          `Uyduğu kırıcı: ${model}${other ? ` (${other} olarak da yazılır)` : ''}.`,
+        seoName: (model, noun, rockDrill) => `${model}${rockDrill ? '' : ' kırıcı'} ${noun}`,
+        fits: (model, { other, variant, rockDrill }) =>
+          `Uyduğu ${rockDrill ? 'kaya delici' : 'kırıcı'}: ${model}${other ? ` (${other})` : ''}${variant ? `, ${variant}` : ''}.`,
       },
       oemRef: {
         label: 'Muadil OEM no.',
@@ -1386,8 +1391,8 @@ export const DICT: Record<Lang, Dict> = {
           ? 'Hydraulic breaker repair kits: complete seal kits put together for your breaker model. Type your make and model.'
           : `Hydraulic breaker ${name.toLowerCase()} made by Kervan, by breaker make and model. Type your make and model.`,
       partItemTitle: (name) => `${name} | Kervan Makina`,
-      partItemDesc: (name, { kit, priced, model, other }) =>
-        `${name}${other ? ` (${other})` : ''}: fits the ${model} hydraulic breaker, ${kit ? 'seal kit put together for the model' : 'spare part made by Kervan'}. ${priced ? 'Price on the page, same-day shipping from stock.' : 'Write to us for a quote.'}`,
+      partItemDesc: (name, { kit, priced, other, rockDrill }) =>
+        `${name}${other ? `, also written ${other}` : ''}. ${kit ? 'Seal kit put together for the model' : `${rockDrill ? 'Rock drill' : 'Hydraulic breaker'} spare part made by Kervan`}. ${priced ? 'Price on the page, same-day shipping from stock.' : 'Write to us for a quote.'}`,
       cartTitle: 'Cart | Kervan Makina',
     },
     nav: {
@@ -1889,7 +1894,7 @@ export const DICT: Record<Lang, Dict> = {
         'alt-govde': 'front head',
         burc: 'bushing',
         kama: 'retainer key',
-        saplama: 'tie rod',
+        saplama: 'through bolt',
         piston: 'piston',
         akumulator: 'accumulator parts',
         'asinma-plakasi': 'wear plate',
@@ -1897,6 +1902,9 @@ export const DICT: Record<Lang, Dict> = {
       },
       renderKindNoun: {
         retainerKey: 'retainer key',
+        retainerPin: 'retainer pin',
+        tieRod: 'through bolt',
+        sideBolt: 'side bolt',
       },
       renderKindShort: {
         toolBushing: 'Tool bushing',
@@ -2077,8 +2085,9 @@ export const DICT: Record<Lang, Dict> = {
         back: (group) => `All ${group.toLowerCase()} models`,
         related: 'Other parts we make for this breaker',
         linksLabel: 'Part links',
-        seoName: (model, noun) => `${model} breaker ${noun}`,
-        fits: (model, other) => `Fits: ${model}${other ? ` (also written ${other})` : ''}.`,
+        seoName: (model, noun, rockDrill) => `${model}${rockDrill ? '' : ' breaker'} ${noun}`,
+        fits: (model, { other, variant }) =>
+          `Fits: ${model}${other ? ` (${other})` : ''}${variant ? `, ${variant}` : ''}.`,
       },
       oemRef: {
         label: 'Equivalent OEM no.',
