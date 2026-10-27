@@ -8,7 +8,7 @@ import {
 } from '@kervan/seo';
 import type { PublicCatalog } from '@kervan/tips';
 import App from './App';
-import { isIndexable, pageHead, SITE } from './lib/page-head';
+import { hasAlternates, isIndexable, pageHead, SITE } from './lib/page-head';
 import { LANGS, localePath } from './lib/locale-path';
 import { modelIndex } from './lib/finder';
 import type { PageProps } from './lib/page-props';
@@ -28,7 +28,8 @@ export interface PrerenderPage {
   headTags: string;
   appHtml: string;
   props: PageProps;
-  /** Listed in the sitemap (everything but the cart, the /urun/ code pages and 404). */
+  /** Listed in the sitemap (everything but the cart, the /urun/ code pages, 404 and, while
+   *  HOLD_EN_PART_ITEMS is on, the English part item pages). */
   indexable: boolean;
 }
 
@@ -160,10 +161,15 @@ export function sitemapFiles(
     list.push({
       loc: SITE + localePath(p.props.path, p.lang),
       ...(date ? { lastmod: date } : {}),
-      alternates: {
-        tr: SITE + localePath(p.props.path, 'tr'),
-        en: SITE + localePath(p.props.path, 'en'),
-      },
+      // No hreflang where the other language is held out of the index (HOLD_EN_PART_ITEMS).
+      ...(hasAlternates(p.props)
+        ? {
+            alternates: {
+              tr: SITE + localePath(p.props.path, 'tr'),
+              en: SITE + localePath(p.props.path, 'en'),
+            },
+          }
+        : {}),
     });
     groups.set(key, list);
   }

@@ -1,7 +1,8 @@
 // Last build step: fails the build if a page could leak, or is indexed (or hidden) by mistake.
 // - every HTML page has the embedded page props;
-// - only the cart (/palet), the /urun/<code> tip pages and 404 pages carry meta robots noindex,
-//   and they must; every other page is indexable, has a self canonical on SITE, is listed in the
+// - only the cart (/palet), the /urun/<code> tip pages, 404 pages and (HOLD_EN_PART_ITEMS in
+//   page-head.ts) the English part item pages carry meta robots noindex, and they must; no
+//   noindex page is in a sitemap or the target of an hreflang (indexable page or sitemap); every other page is indexable, has a self canonical on SITE, is listed in the
 //   sitemap, is reachable from the home page through plain <a href> links to its clean URL (no
 //   query) on indexable prerendered pages (so crawlers find it without the sitemap; part item
 //   pages only warn, see PART_ITEM), and its JSON-LD parses;
@@ -57,8 +58,14 @@ const count = (d) => {
 count(DIST);
 
 const SITE = 'https://kiriciparca.com';
-// Pages kept out of search results (src/lib/page-head.ts NOINDEX_KINDS): cart, /urun/ and 404.
-const NOINDEX_PAGES = /^(en\/)?(404|palet|urun\/[^/]+)\.html$/;
+// Pages kept out of search results (src/lib/page-head.ts NOINDEX_KINDS): cart, /urun/ and 404;
+// and, while page-head.ts's HOLD_EN_PART_ITEMS switch is on, the English part item pages.
+const HOLD_EN_PART_ITEMS = /export const HOLD_EN_PART_ITEMS = true;/.test(
+  fs.readFileSync(path.join(DIST, '..', 'src', 'lib', 'page-head.ts'), 'utf8'),
+);
+const NOINDEX_PAGES = new RegExp(
+  `^((en/)?(404|palet|urun/[^/]+)${HOLD_EN_PART_ITEMS ? '|en/yedek-parca/[^/]+/[^/]+' : ''})\\.html$`,
+);
 // The sitemaps (src/entry-server.tsx sitemapFiles): robots.txt names the index, sitemap.xml is
 // the same index, every child it lists ships, and every <url> of the children is collected. A
 // <lastmod> must be a YYYY-MM-DD date no later than today, and not one shared by every dated URL
@@ -67,6 +74,10 @@ const problems = [];
 const SITEMAP_INDEX = 'sitemap-index.xml';
 const sitemapLocs = new Set();
 const lastmods = [];
+// hreflang href → where it was seen (a page or a sitemap), and every noindex page URL: no
+// hreflang may point at a noindexed page, and none may be in a sitemap.
+const hreflangTargets = new Map();
+const noindexUrls = new Set();
 {
   const read = (f) =>
     fs.existsSync(path.join(DIST, f)) ? fs.readFileSync(path.join(DIST, f), 'utf8') : null;
@@ -90,6 +101,8 @@ const lastmods = [];
       problems.push(`${SITEMAP_INDEX}: child ${m[1]} not in dist`);
       continue;
     }
+    for (const h of xml.matchAll(/<xhtml:link rel="alternate" hreflang="[^"]+" href="([^"]+)"/g))
+      hreflangTargets.set(h[1], `${child} hreflang`);
     for (const u of xml.matchAll(
       /<url>\s*<loc>([^<]+)<\/loc>(?:\s*<lastmod>([^<]+)<\/lastmod>)?/g,
     )) {
@@ -155,11 +168,15 @@ for (const f of files) {
       )
         problems.push(`${rel}: og:image ${m[1]} not in dist`);
     const noindex = /<meta name="robots" content="[^"]*noindex/.test(s);
+    if (noindex) noindexUrls.add(urlOf(rel));
     if (NOINDEX_PAGES.test(rel.replace(/\\/g, '/'))) {
       if (!noindex) problems.push(`${rel}: should be noindex`);
       continue;
     }
     indexable++;
+    // hreflang of indexable pages only (the cart and /urun/ pages pair with each other, noindex).
+    for (const h of s.matchAll(/<link rel="alternate" hreflang="[^"]+" href="([^"]+)"/g))
+      hreflangTargets.set(h[1], rel);
     if (noindex) problems.push(`${rel}: indexable page has noindex`);
     const url = urlOf(rel);
     indexableUrls.push(url);
@@ -195,6 +212,9 @@ if (itemOrphans.length)
   process.stdout.write(
     `check-dist: warning: ${itemOrphans.length} part item pages are reached only through search and the sitemap\n`,
   );
+for (const u of noindexUrls) if (sitemapLocs.has(u)) problems.push(`sitemap: noindex page ${u}`);
+for (const [u, where] of hreflangTargets)
+  if (noindexUrls.has(u)) problems.push(`${where}: hreflang to noindex page ${u}`);
 if (sitemapLocs.size !== indexable)
   problems.push(`sitemap: ${sitemapLocs.size} URLs for ${indexable} indexable pages`);
 // With the R2 base set (CI on main) the part photos must be out of dist except the opening
