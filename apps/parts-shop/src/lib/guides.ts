@@ -12,6 +12,7 @@ export const GUIDE_KEYS = [
   'kirici-burcu-ne-zaman-degisir',
   'kirici-kamasi-neden-kirilir',
   'keski-mi-sivri-uc-mu',
+  'kirici-yaglamasi-nasil-yapilir',
 ] as const;
 export type GuideKey = (typeof GUIDE_KEYS)[number];
 
@@ -166,6 +167,43 @@ export const GUIDES: Record<
         ],
         links: ['tips', 'burc'],
       },
+      'kirici-yaglamasi-nasil-yapilir': {
+        title: 'Hidrolik kırıcı yağlaması nasıl yapılır?',
+        lead: 'Uç ile burçlar arasında sürekli sürtünme vardır; doğru gres doğru şekilde verilmezse uç, burç ve kama erken aşınır. Kırıcı yağlamasının temel kuralları.',
+        sections: [
+          {
+            h: 'Ne zaman yağlanır',
+            p: [
+              'Yağlama aralığı kırıcının kullanım kılavuzunda yazar; çalışma şartları ağırlaştıkça daha sık yağlanır. Uç gövdesi kuru ve parlak görünüyorsa yağlama geç kalmış demektir. Her uç değişiminde de uç gövdesine ve burçlara gres sürülür.',
+            ],
+          },
+          {
+            h: 'Nasıl yağlanır',
+            p: [
+              'Kırıcıyı dik tutun ve ucu zemine bastırarak sonuna kadar içeri itin; böylece gres pistonun çalıştığı bölgeye değil, uç ile burçların arasına gider. Gresi kırıcının gres nipelinden, kılavuzda yazan miktarda verin. Fazla gres de zararlıdır: taşan gres darbe bölgesine dolabilir.',
+            ],
+          },
+          {
+            h: 'Hangi gres',
+            p: [
+              'Uç ve burçlar için kılavuzun önerdiği, yüksek sıcaklığa ve darbeye dayanıklı uç gresi kullanılır. Sıradan makine gresi bu sıcaklıkta erir ve akar, uçla burç arasında koruyucu film bırakmaz.',
+            ],
+          },
+          {
+            h: 'Otomatik yağlama',
+            p: [
+              'Kırıcıya ya da iş makinesine bağlanan otomatik yağlama sistemi gresi çalışma sırasında düzenli verir; elle yağlamanın unutulmasını önler. Sistemin deposunu ve hortumlarını düzenli kontrol edin.',
+            ],
+          },
+          {
+            h: 'Yağlamasız çalışmanın sonucu',
+            p: [
+              'Kuru çalışan uçta gövde çizilir ve renk değiştirir, burçlar çabuk aşınır, kama ve uç kanalı çentiklenir. Bu hasarlar normal aşınma değildir ve parçaların ömrünü belirgin şekilde kısaltır.',
+            ],
+          },
+        ],
+        links: ['tips', 'burc', 'kama'],
+      },
     },
   },
   en: {
@@ -302,6 +340,43 @@ export const GUIDES: Record<
           },
         ],
         links: ['tips', 'burc'],
+      },
+      'kirici-yaglamasi-nasil-yapilir': {
+        title: 'How to grease a hydraulic breaker',
+        lead: 'The tool rubs against the bushings all the time; without the right grease applied the right way, tool, bushings and retainer key wear early. The basic rules of breaker greasing.',
+        sections: [
+          {
+            h: 'When to grease',
+            p: [
+              'The greasing interval is in the breaker’s manual; the harder the conditions, the more often. A dry, shiny tool shank means greasing is overdue. Grease the tool shank and bushings at every tool change too.',
+            ],
+          },
+          {
+            h: 'How to grease',
+            p: [
+              'Hold the breaker upright and press the tool fully in against the ground, so the grease goes between tool and bushings rather than into the piston area. Grease through the breaker’s grease nipple, in the amount the manual gives. Too much grease does harm as well: the surplus can fill the impact area.',
+            ],
+          },
+          {
+            h: 'Which grease',
+            p: [
+              'Use the high-temperature, impact-resistant chisel paste the manual recommends for tool and bushings. Ordinary machine grease melts and runs at these temperatures and leaves no protective film between tool and bushing.',
+            ],
+          },
+          {
+            h: 'Automatic greasing',
+            p: [
+              'An automatic lubrication system on the breaker or the carrier feeds grease steadily while working and keeps greasing from being forgotten. Check its reservoir and hoses regularly.',
+            ],
+          },
+          {
+            h: 'What running dry does',
+            p: [
+              'A tool run dry gets a scored, discoloured shank, the bushings wear fast and the key and tool slot notch. This is not normal wear and it shortens the life of the parts markedly.',
+            ],
+          },
+        ],
+        links: ['tips', 'burc', 'kama'],
       },
     },
   },
