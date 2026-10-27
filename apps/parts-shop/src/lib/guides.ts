@@ -13,6 +13,7 @@ export const GUIDE_KEYS = [
   'kirici-kamasi-neden-kirilir',
   'keski-mi-sivri-uc-mu',
   'kirici-yaglamasi-nasil-yapilir',
+  'kirici-alt-govdesi-ne-zaman-degisir',
 ] as const;
 export type GuideKey = (typeof GUIDE_KEYS)[number];
 
@@ -204,6 +205,43 @@ export const GUIDES: Record<
         ],
         links: ['tips', 'burc', 'kama'],
       },
+      'kirici-alt-govdesi-ne-zaman-degisir': {
+        title: 'Kırıcı alt gövdesi ne zaman değiştirilir?',
+        lead: 'Alt gövde (ön kafa) ucu ve burçları taşır, kamayı yerinde tutar. Burç değiştirmekle düzelmeyen aşınma ve çatlaklar gövdenin değişme zamanının geldiğini gösterir.',
+        sections: [
+          {
+            h: 'Burç yuvası aşındıysa',
+            p: [
+              'Burçlar alt gövdedeki yuvalarına sıkı oturur. Yuva aşınır ya da ovalleşirse yeni burç da yerinde oynar veya döner; uç eğik çalışır ve yeni burç kısa sürede bozulur. Yuvanın ölçüsü kırıcının kullanım kılavuzundaki sınırı aştıysa gövde değiştirilmelidir.',
+            ],
+          },
+          {
+            h: 'Kama delikleri ovalleştiyse',
+            p: [
+              'Kama alt gövdedeki deliklerden geçer. Delikler ovalleşirse kama oynar, darbeli yük alır ve sık kırılır. Yeni kama takıldığında da boşluk kalıyorsa sorun gövdededir.',
+            ],
+          },
+          {
+            h: 'Gövdede çatlak varsa',
+            p: [
+              'Çatlaklar çoğunlukla kama deliklerinin, saplama deliklerinin ve köşelerin çevresinde başlar. Çatlak darbe altında büyür ve gövde çalışırken kırılabilir. Çatlak görülen gövde ile çalışmaya devam etmeyin; durumunu bir uzmana kontrol ettirin.',
+            ],
+          },
+          {
+            h: 'Gövdenin ömrünü uzatmak için',
+            p: [
+              'Burçları ve ucu zamanında değiştirin; aşınmış burç ile çalışmak yükü doğrudan gövdeye aktarır. Düzenli gres verin, boşta vuruş yapmayın, ucu levye gibi kullanmayın ve saplama somunlarını kılavuzda yazan şekilde sıkılı tutun.',
+            ],
+          },
+          {
+            h: 'Alt gövde seçerken',
+            p: [
+              'Alt gövde kırıcının modeline göre üretilir; burç yuvaları, kama delikleri ve saplama delikleri o modele uymalıdır. Kırıcınızın marka ve modelini alt gövde sayfasında arayın; bazı modellerde gövde burçları takılı olarak da sunulur.',
+            ],
+          },
+        ],
+        links: ['alt-govde', 'burc', 'kama', 'saplama'],
+      },
     },
   },
   en: {
@@ -377,6 +415,43 @@ export const GUIDES: Record<
           },
         ],
         links: ['tips', 'burc', 'kama'],
+      },
+      'kirici-alt-govdesi-ne-zaman-degisir': {
+        title: 'When should a breaker front head be replaced?',
+        lead: 'The front head carries the tool and the bushings and holds the retainer key. Wear and cracks that new bushings do not cure show that the head is due for replacement.',
+        sections: [
+          {
+            h: 'The bushing seat is worn',
+            p: [
+              'Bushings sit tight in their seats in the front head. A worn or oval seat lets even a new bushing move or turn; the tool works at an angle and the new bushing soon fails. If the seat is past the limit in the breaker’s manual, replace the head.',
+            ],
+          },
+          {
+            h: 'The key holes are oval',
+            p: [
+              'The retainer key passes through holes in the front head. Oval holes let the key move, take shock loads and break often. If a new key is still loose, the problem is in the head.',
+            ],
+          },
+          {
+            h: 'The head is cracked',
+            p: [
+              'Cracks mostly start around the key holes, the tie-rod holes and the corners. A crack grows under impact and the head can break in work. Do not keep working with a cracked head; have it checked by a specialist.',
+            ],
+          },
+          {
+            h: 'To make the head last',
+            p: [
+              'Replace bushings and tools in time; working with worn bushings passes the load straight to the head. Grease regularly, avoid blank firing, never pry with the tool and keep the tie-rod nuts tightened as the manual says.',
+            ],
+          },
+          {
+            h: 'When you choose a front head',
+            p: [
+              'A front head is made for one breaker model; its bushing seats, key holes and tie-rod holes must fit that model. Search your breaker’s make and model on the front head page; for some models the head is also offered with the bushings fitted.',
+            ],
+          },
+        ],
+        links: ['alt-govde', 'burc', 'kama', 'saplama'],
       },
     },
   },
