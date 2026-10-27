@@ -64,6 +64,8 @@ export interface DictBlock {
     listCta: string;
     /** Compatibility (brands) page link sentence. */
     brandsCta: string;
+    /** Under a make on the compatibility page: its page on the shop (all its models). */
+    makeLink: (make: string) => string;
     /** 404 page link sentence. */
     notFoundCta: string;
     /** Contact page info label. */
