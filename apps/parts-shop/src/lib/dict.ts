@@ -1091,7 +1091,10 @@ export const DICT: Record<Lang, Dict> = {
         lead: 'Parçalarımızı Kartepe’deki tesisimizde işliyor, ısıl işlemini kendi fırınlarımızda yapıyoruz.',
         note: 'Fotoğraflar tesisimizde çekilmiştir.',
         items: [
-          { caption: 'CNC tezgâhında işleme', alt: 'Kervan tesisinde CNC tezgâhında parça işleme' },
+          {
+            caption: 'Kırıcı ucunda kama kanalı imalatı',
+            alt: 'Kervan tesisinde CNC tezgâhında kırıcı ucunun kama kanalının işlenmesi',
+          },
           {
             caption: 'Isıl işlem holü ve fırınlarımız',
             alt: 'Kervan ısıl işlem holünde kuyu tipi fırınlar ve işlenmiş parçalar',
@@ -1116,8 +1119,8 @@ export const DICT: Record<Lang, Dict> = {
             alt: 'Kervan tesisinde işlenmiş alt gövde blokları, uçlar ve büyük CNC torna',
           },
           {
-            caption: 'CNC frezede gövde işleme',
-            alt: 'Kervan tesisinde CNC freze tezgâhında blok işleme',
+            caption: 'CNC frezede kırıcı kaması imalatı',
+            alt: 'Kervan tesisinde CNC freze tezgâhında kırıcı kaması işleme',
           },
           { caption: 'Saplama stoğumuz', alt: 'Kervan tesisinde raflarda kırıcı saplamaları' },
         ],
@@ -2075,8 +2078,8 @@ export const DICT: Record<Lang, Dict> = {
         note: 'Photos taken at our plant.',
         items: [
           {
-            caption: 'CNC machining',
-            alt: 'Machining a part on a CNC machine at the Kervan plant',
+            caption: 'Machining the key slot of a breaker tool',
+            alt: 'Machining the retainer-key slot of a breaker tool on a CNC machine at the Kervan plant',
           },
           {
             caption: 'Heat-treatment hall and furnaces',
@@ -2105,8 +2108,8 @@ export const DICT: Record<Lang, Dict> = {
             alt: 'Machined front-head blocks, tools and a large CNC lathe at the Kervan plant',
           },
           {
-            caption: 'Milling a body on a CNC mill',
-            alt: 'Machining a block on a CNC milling machine at the Kervan plant',
+            caption: 'Machining a retainer key on a CNC mill',
+            alt: 'Machining a breaker retainer key on a CNC milling machine at the Kervan plant',
           },
           { caption: 'Our tie-rod stock', alt: 'Breaker tie rods on shelves at the Kervan plant' },
         ],

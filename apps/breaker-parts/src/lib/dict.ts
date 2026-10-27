@@ -155,7 +155,7 @@ export const DICT: Dict = {
         },
         {
           name: 'CNC freze',
-          desc: 'Gövde ve blok işleme',
+          desc: 'Kırıcı kaması imalatı',
           img: '/photos/atolye/cnc-freze-01.jpg',
         },
         {
@@ -778,7 +778,7 @@ export const DICT: Dict = {
         },
         {
           name: 'CNC milling',
-          desc: 'Bodies and blocks',
+          desc: 'Machining retainer keys',
           img: '/photos/atolye/cnc-freze-01.jpg',
         },
         {
