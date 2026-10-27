@@ -51,3 +51,24 @@ export function distinctLabels(items: readonly { label: string; model: string }[
     items.filter((x) => x.label === label).length > 1 ? `${label} · ${model}` : label,
   );
 }
+
+/** An item page's paragraph (owner, 2026-10-27): the fit sentence ("MTB 210 hidrolik kırıcısına
+ *  uyumlu kama.") and what the part does, by its kind where the dict has one, else its group. */
+export function partAbout(
+  r: PartRender,
+  part: PartKey,
+  t: Dict,
+  lang: 'tr' | 'en',
+): { fit: string; body: string } {
+  const a = t.parts.item.about;
+  // The title's noun ("kaması", "pistonu"), never the caption with its English gloss.
+  const base = r.kind
+    ? (t.parts.renderKindNoun[r.kind] ?? t.parts.renderKind[r.kind].replace(/\s*\(.*\)/, ''))
+    : t.parts.itemNoun[part];
+  const noun = lang === 'tr' && !isRockDrill(r) ? `kırıcı ${base}` : base;
+  const lower = noun.toLocaleLowerCase(lang);
+  return {
+    fit: a.fit(renderModel(r, t), lower, isRockDrill(r)),
+    body: (r.kind && a.kinds[r.kind]) || a.groups[part],
+  };
+}

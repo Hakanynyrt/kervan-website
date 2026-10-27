@@ -203,7 +203,7 @@ export function MissingModel({
       <p className="m-0 mt-2 max-w-3xl text-sm text-ink-mid">{t.missing.body}</p>
       <a
         href={whatsappHref(query ? t.missing.textFor(query, filters) : t.missing.text)}
-        className={`mt-4 inline-block rounded-sm bg-whatsapp px-5 py-3 text-sm font-medium text-white ${FOCUS}`}
+        className={`mt-4 inline-flex min-h-11 items-center rounded-sm bg-whatsapp px-5 py-3 text-sm font-medium text-white ${FOCUS}`}
       >
         {t.missing.button}
       </a>
@@ -532,6 +532,34 @@ export function PlantPhotos({
         ))}
       </ul>
       <p className="m-0 mt-4 font-sans text-xs text-ink-soft">{pl.note}</p>
+    </section>
+  );
+}
+
+/** A short "nasıl seçilir" guide at the foot of a listing page: plain paragraphs under an h2
+ *  (no list, no cards), general facts only (2026-10-27). */
+export function Guide({
+  id,
+  title,
+  body,
+  intro,
+}: {
+  id: string;
+  title: string;
+  body: readonly string[];
+  intro?: string;
+}) {
+  return (
+    <section aria-labelledby={id} className="mt-12 max-w-3xl border-t border-hair pt-8 font-sans">
+      {intro && <p className="m-0 mb-6 text-base text-ink-mid">{intro}</p>}
+      <h2 id={id} className="m-0 text-xl font-bold text-ink">
+        {title}
+      </h2>
+      {body.map((x) => (
+        <p key={x} className="m-0 mt-3 text-base text-ink-mid">
+          {x}
+        </p>
+      ))}
     </section>
   );
 }

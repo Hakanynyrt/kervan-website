@@ -8,6 +8,7 @@ import {
   MissingModel,
   OemLine,
   OemNumbers,
+  Guide,
   PageTitle,
   Photo,
   QtyStepper,
@@ -406,6 +407,11 @@ export default function Part({
           />
         </aside>
       </div>
+      <Guide
+        id="part-guide"
+        title={t.parts.guide[model.part].title}
+        body={t.parts.guide[model.part].body}
+      />
       <StickyQuote text={text} t={t} />
     </Container>
   );

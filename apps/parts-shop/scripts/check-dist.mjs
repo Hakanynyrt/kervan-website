@@ -84,6 +84,13 @@ const noindexUrls = new Set();
   const robots = read('robots.txt') ?? '';
   if (!robots.includes(`Sitemap: ${SITE}/${SITEMAP_INDEX}`))
     problems.push(`robots.txt: no Sitemap line for ${SITEMAP_INDEX}`);
+  // llms.txt (public/llms.txt): shipped, served as text/plain by _headers, and never a price.
+  const llms = read('llms.txt');
+  if (!llms || !llms.startsWith('# kiriciparca.com')) problems.push('llms.txt: missing');
+  else if (/\$|USD|₺|\bTL\b|\d[\d.,]*\s*(?:dolar|lira)/i.test(llms))
+    problems.push('llms.txt: looks like it carries a price');
+  if (!/^\/llms\.txt\n\s+Content-Type: text\/plain/m.test(read('_headers') ?? ''))
+    problems.push('_headers: /llms.txt is not served as text/plain');
   const index = read(SITEMAP_INDEX);
   if (!index || !index.includes('<sitemapindex')) problems.push(`${SITEMAP_INDEX}: missing`);
   else if (read('sitemap.xml') !== index) problems.push('sitemap.xml: not the same index');

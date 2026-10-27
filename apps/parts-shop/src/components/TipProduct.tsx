@@ -412,6 +412,16 @@ export default function TipProduct({
                     {t.price.fxNote(fmtDate(fx.date, lang))}
                   </p>
                 )}
+                {/* Desktop: the order button right under the price, above the fold (2026-10-27). */}
+                {order && (
+                  <a
+                    href={whatsappHref(text)}
+                    {...ORDER_CONVERSION}
+                    className={`mt-4 hidden rounded-sm bg-whatsapp px-5 py-3 text-center font-sans font-medium text-white lg:block ${FOCUS}`}
+                  >
+                    {tf.orderWa}
+                  </a>
+                )}
               </>
             )}
           </div>
@@ -477,7 +487,7 @@ export default function TipProduct({
               <a
                 href={whatsappHref(text)}
                 {...ORDER_CONVERSION}
-                className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
+                className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${order ? 'lg:hidden' : ''} ${FOCUS}`}
               >
                 {order ? tf.orderWa : tf.whatsapp}
               </a>

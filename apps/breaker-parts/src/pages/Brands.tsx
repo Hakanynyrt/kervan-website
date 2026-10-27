@@ -4,6 +4,10 @@ import { BRANDS } from '../data/brands';
 import type { DictBlock } from '../types';
 import { useLocale } from '../lib/locale-path';
 import ShopLink from '../components/ShopLink';
+import { SHOP_MAKE_PATH, shopUrl } from '../lib/shop';
+import { KERVAN_SHOP_URL } from '@kervan/seo';
+
+const SHOP_HOST = KERVAN_SHOP_URL.replace(/^https:\/\//, '');
 
 interface Props {
   t: DictBlock;
@@ -60,6 +64,18 @@ export default function Brands({ t }: Props) {
               <span className="font-sans text-xs tracking-[0.18em] uppercase text-ink-soft mt-2">
                 {b.country}
               </span>
+              {SHOP_MAKE_PATH[b.slug] && (
+                <a
+                  href={shopUrl(SHOP_MAKE_PATH[b.slug]!, lang)}
+                  hrefLang={lang}
+                  className="inline-flex min-h-11 items-center text-center font-sans text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+                >
+                  {/* Colour on the span: the global `a { color: inherit }` outranks utilities. */}
+                  <span className="text-brand underline decoration-1 underline-offset-4 hover:text-brand-hi">
+                    {t.shop.makeLink(b.name)} — {SHOP_HOST}
+                  </span>
+                </a>
+              )}
             </motion.li>
           ))}
         </motion.ul>

@@ -348,7 +348,7 @@ export function BreakerSearch({
             <span>{t.missing.title}</span>
             <a
               href={whatsappHref(t.missing.textFor(query))}
-              className={`inline-flex min-h-[34px] items-center rounded-sm bg-whatsapp px-3 font-medium text-white ${FOCUS}`}
+              className={`inline-flex min-h-11 items-center rounded-sm bg-whatsapp px-3 lg:min-h-[34px] font-medium text-white ${FOCUS}`}
             >
               {t.missing.button}
             </a>

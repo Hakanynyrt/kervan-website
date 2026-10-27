@@ -25,6 +25,7 @@
 
 - WCAG AA contrast: 4.5:1 body text, 3:1 large text and non-text UI.
 - Focus ring: `2px solid` brand with `outline-offset: 2px` (`focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2`). Restyle focus rings, never remove them.
+- Tap targets (kiriciparca.com, 2026-10-27): below `lg`, WhatsApp, phone and order links and the header quote button are at least 44 px high (`min-h-11`), reached with padding, never with a larger font; an inline text link gets vertical padding (`max-lg:py-[14px]`), which enlarges its hit area without moving the line.
 - Every interactive element (buttons, links, form fields, carousel/gallery controls, language toggle, menu) must be keyboard-reachable and Enter/Space-activatable.
 
 ## 21st.dev Magic usage

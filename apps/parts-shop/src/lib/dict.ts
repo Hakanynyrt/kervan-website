@@ -36,6 +36,8 @@ export interface Dict {
     partItemTitle: (name: string) => string;
     /** `priced`: the page shows a price (order), else a quote. `other`: the model's other
      *  spelling ("MTB210", "SB 50"), null when there is none; `rockDrill`: a rock drill part. */
+    /** Item page meta description from its fit sentence (`parts.item.about.fit`). */
+    partItemFitDesc: (fit: string, o: { kit: boolean; priced: boolean }) => string;
     partItemDesc: (
       name: string,
       o: { kit: boolean; priced: boolean; other: string | null; rockDrill: boolean },
@@ -156,6 +158,8 @@ export interface Dict {
     types: string;
     /** One sentence under the lead: we make tools with dust grooves for some breakers (no model named). */
     groovedHint: string;
+    /** Short guide under the models (2026-10-27): what a tip is, then how to choose one. */
+    guide: { intro: string; title: string; body: string[] };
     /** Badge on a result row whose breaker has tools with dust grooves; link to the section. */
     groovedBadge: string;
     /** Brand page cards: net list price (or span) and the note under it; no price yet. */
@@ -359,6 +363,8 @@ export interface Dict {
     tips: { name: string; body: string; short: string };
     /** `h1`: the group page's heading ("Hidrolik kırıcı burcu"); `name` stays short (nav, crumbs). */
     items: Record<PartKey, { name: string; h1: string; body: string; short: string }>;
+    /** "… nasıl seçilir": a short guide at the foot of each group page (2026-10-27). */
+    guide: Record<PartKey, { title: string; body: string[] }>;
     /** Picture of a part-group card (home, parts page). */
     groupAlt: (h1: string) => string;
     view: string;
@@ -457,6 +463,15 @@ export interface Dict {
         aliases: string;
         variant: string;
         diameter: string;
+      };
+      /** Item page paragraph (owner, 2026-10-27): "<Model> hidrolik kırıcısına uyumlu <noun>."
+       *  then what the part does, where it sits and when it is checked: general mechanical facts
+       *  per group, or per kind where one group holds different parts. No numbers, lifetimes,
+       *  brands or "orijinal". */
+      about: {
+        fit: (model: string, noun: string, rockDrill: boolean) => string;
+        groups: Record<PartKey, string>;
+        kinds: Partial<Record<NonNullable<PartRender['kind']>, string>>;
       };
     };
     /** Genuine OEM numbers of the part ours replaces (owner's decision), cross-reference only. */
@@ -574,6 +589,8 @@ export const DICT: Record<Lang, Dict> = {
           ? 'Hidrolik kırıcı tamir takımı: kırıcınızın modeline göre eksiksiz hazırlanan sızdırmazlık takımı. Marka ve modelinizi yazın.'
           : `Hidrolik kırıcı ${name.toLocaleLowerCase('tr')}: Kervan üretimi kırıcı yedek parça, kırıcınızın marka ve modeline göre. Marka ve modelinizi yazın.`,
       partItemTitle: (name) => `${name} | Kervan Makina`,
+      partItemFitDesc: (fit, { kit, priced }) =>
+        `${fit} ${kit ? 'Modele göre hazırlanan sızdırmazlık takımı.' : 'Kervan üretimi.'} ${priced ? 'Fiyatı sayfada, stoktan aynı gün kargo.' : 'Fiyat teklifi için yazın.'}`,
       partItemDesc: (name, { kit, priced, other, rockDrill }) =>
         `${name}${other ? `, ${other} olarak da yazılır` : ''}. ${kit ? 'Modele göre hazırlanan sızdırmazlık takımı' : `Kervan üretimi ${rockDrill ? 'kaya delici' : 'hidrolik kırıcı'} yedek parçası`}. ${priced ? 'Fiyatı sayfada, stoktan aynı gün kargo.' : 'Fiyat teklifi için yazın.'}`,
       cartTitle: 'Palet | Kervan Makina',
@@ -708,6 +725,17 @@ export const DICT: Record<Lang, Dict> = {
       diameter: 'Çalışma çapı',
       types: 'Uç tipleri',
       groovedHint: 'Bazı kırıcılar için toz kanallı uç da yapıyoruz; kırıcınızı yazın.',
+      guide: {
+        intro:
+          'Kırıcı ucu, hidrolik kırıcının pistonundan aldığı darbeyi kırılacak malzemeye ileten parçadır. Uç, alt gövdedeki burçlarda çalışır ve kama ile yerinde tutulur; bu yüzden ucun çapı, boyu ve kama yuvası kırıcı modeline göre belirlenir.',
+        title: 'Kırıcı ucu nasıl seçilir',
+        body: [
+          'Uç önce kırıcınızın modeline uymalıdır; uç tipi ise yapılacak işe göre seçilir.',
+          'Keski (yassı) uç toprak, yumuşak kaya, asfalt ve beton yarmada, bir çizgi boyunca kırmak ya da kanal açmak için kullanılır. Sivri uç darbeyi tek noktaya toplar; beton ve kayada genel kırım işlerinde en yaygın uçtur.',
+          'Küt uç darbeyi geniş bir yüzeye yayar; iri blokları, sert ve kırılgan kayayı ve cürufu parçalamak için kullanılır. Piramit uç sivri ucun delici etkisini daha dayanıklı bir uç biçimiyle birleştirir; sert kaya ve betonarme yıkımında tercih edilir.',
+          'Hidrolik kırıcı ucu bir delme ucu (matkap ya da kaya delici ucu) değildir: kırıcı ucu dönmeden, ileri geri darbeyle kırar; delme uçları ise dönerek delik açar ve başka makinelere takılır.',
+        ],
+      },
       groovedBadge: 'Toz kanallı',
       priceNote: '+ vergiler',
       priceAsk: 'Fiyat için sorun',
@@ -978,6 +1006,72 @@ export const DICT: Record<Lang, Dict> = {
           h1: 'Hidrolik kırıcı tamir takımı',
           body: 'Kırıcı modeline göre sızdırmazlık takımı: o-ringler, keçeler, toz keçeleri, destek ve teflon ringler; içerik listesiyle.',
           short: 'Modele göre sızdırmazlık takımı, içerik listesiyle.',
+        },
+      },
+      guide: {
+        'alt-govde': {
+          title: 'Alt gövde nasıl seçilir',
+          body: [
+            'Alt gövde kırıcının marka ve modeline, varsa eski ya da yeni tip gövdesine göre seçilir.',
+            'Burç yuvaları ve kama yuvası o modele göre işlendiği için başka bir modelin gövdesi uymaz.',
+            'Alt gövde burçsuz ya da burçları takılı olarak istenebilir; siparişte hangisini istediğinizi belirtin.',
+          ],
+        },
+        burc: {
+          title: 'Burç nasıl seçilir',
+          body: [
+            'Burç kırıcının marka ve modeline göre seçilir; kafa burcu, merkezleme ve dayama burcu çoğu kırıcıda ayrı parçalardır, bazı modellerde ise tek parçadır.',
+            'Siparişte kırıcının modelini ve hangi burcu istediğinizi belirtin; eski ve yeni tip gövdesi olan modellerde gövde tipini de yazın.',
+            'Burç değiştirirken ucu da kontrol edin: aşınmış uç yeni burcu, aşınmış burç da yeni ucu çabuk bozar.',
+          ],
+        },
+        kama: {
+          title: 'Kama nasıl seçilir',
+          body: [
+            'Kama kırıcının marka ve modeline göre seçilir; aynı kırıcının farklı tip uçlarında genellikle aynı kama kullanılır.',
+            'Bazı kırıcılarda tek, bazılarında iki kama bulunur; kamayı tutan pim ya da tapa da modele göre değişir.',
+            'Siparişte kırıcının marka ve modelini yazın; kama ile tutucu pimini birlikte değiştirmek iyi bir uygulamadır.',
+          ],
+        },
+        saplama: {
+          title: 'Saplama nasıl seçilir',
+          body: [
+            'Saplama kırıcının modeline ve yerine göre seçilir: boy saplamaları gövdeyi boydan boya bağlar, yan saplamalar yandan.',
+            'Bir saplama koptuğunda diğerleri de aynı yükü taşımış olduğundan, saplamalar çoğu zaman takım olarak değiştirilir.',
+            'Siparişte kırıcının marka ve modelini ve somun ile pul isteyip istemediğinizi yazın.',
+          ],
+        },
+        piston: {
+          title: 'Piston nasıl seçilir',
+          body: [
+            'Piston kırıcının marka ve modeline göre seçilir; ölçüleri ve kademeleri o kırıcının silindirine göredir.',
+            'Piston değiştirirken silindiri ve burçları da kontrol ettirin: çizik bir silindirde yeni piston da kısa sürede çizilir.',
+            'Siparişte kırıcının marka ve modelini, varsa eski ya da yeni tip olduğunu yazın.',
+          ],
+        },
+        akumulator: {
+          title: 'Akümülatör parçaları nasıl seçilir',
+          body: [
+            'Akümülatör parçaları kırıcının modeline göre seçilir; üst kapak, alt kapak ve saplamalar ayrı parçalardır.',
+            'Kapakların oturma yüzeyleri ve saplama delikleri modele özeldir.',
+            'Siparişte kırıcının marka ve modelini ve hangi parçayı istediğinizi belirtin; azot dolumu ve diyafram değişimi bu işi bilen bir servis tarafından yapılmalıdır.',
+          ],
+        },
+        'asinma-plakasi': {
+          title: 'Aşınma plakası nasıl seçilir',
+          body: [
+            'Aşınma plakası kırıcının modeline ve gövdenin oturduğu kutuya göre seçilir; üst, yan ve ön plakalar ayrı parçalardır.',
+            'Plakalar çoğu zaman vibrasyon takozlarıyla birlikte değiştirilir.',
+            'Siparişte kırıcının marka ve modelini ve hangi plakaları istediğinizi yazın.',
+          ],
+        },
+        'tamir-takimi': {
+          title: 'Tamir takımı nasıl seçilir',
+          body: [
+            'Tamir takımı kırıcının marka ve modeline göre seçilir; takımdaki contalar o modelin silindirine ve pistonuna göredir.',
+            'Takımda hangi parçaların olduğunu sayfadaki içerik listesinden görebilirsiniz.',
+            'Contaları değiştirirken piston ve silindir yüzeylerini de kontrol ettirin; çizik bir yüzey yeni contayı da kısa sürede bozar.',
+          ],
         },
       },
       view: 'İncele',
@@ -1281,6 +1375,42 @@ export const DICT: Record<Lang, Dict> = {
           variant: 'Tip',
           diameter: 'Kırıcının uç çapı',
         },
+        about: {
+          fit: (model, noun, rockDrill) =>
+            `${model} ${rockDrill ? 'kaya delicisine' : 'hidrolik kırıcısına'} uyumlu ${noun}.`,
+          groups: {
+            'alt-govde':
+              'Alt gövde (ön kafa), kırıcının uç tarafındaki gövde parçasıdır; ucu, burçları, kamayı ve tutucu pimi taşır. Darbe yükünü ilk karşılayan gövde olduğu için zamanla burç yuvaları aşınır, kama yuvası bozulur ya da gövde çatlayabilir. Burç ve kama değişimlerinde yuvalar ve gövde yüzeyi kontrol edilir.',
+            burc: 'Kafa burcu alt gövdenin içinde ucu taşır ve yönlendirir; uç her darbede bu burcun içinde kayar. Uçla burç arasındaki boşluk zamanla açılır; boşluk büyüdükçe uç eğik çalışır, erken kırılır ve piston da zarar görebilir. Burç boşluğu her uç değişiminde kontrol edilmeli, sınırı aşan burç yenilenmelidir.',
+            kama: 'Kama, ucun üzerindeki kama yuvasından geçerek ucu alt gövdede tutar; ucun düşmesini önler ve ileri geri hareketini sınırlar. Her darbede yük aldığı için zamanla aşınır ya da şekli bozulur. Uç değiştirilirken kama ve tutucu pimi de kontrol edilmeli; aşınmış kama ucun yuvasını da bozar.',
+            saplama:
+              'Boy saplamalar kırıcının silindirini, alt gövdesini ve üst kapağını birbirine bağlayıp sıkı tutar. Darbe titreşimi altında gevşeyen saplama gövde parçalarının ayrılmasına ve saplamanın kırılmasına yol açabilir. Somunların sıkılığı düzenli bakımlarda kontrol edilir; kırılan saplama yenisiyle değiştirilir, diğerleri de gözden geçirilir.',
+            piston:
+              'Piston, hidrolik basınçla ileri geri hareket ederek uca vuran darbe parçasıdır; kırıcının vuruşunu o üretir. Kirlenmiş hidrolik yağ ya da aşınmış burçlar yüzünden eğik çalışma pistonu ve silindiri çizer. Piston, kırıcının revizyonunda silindirle birlikte kontrol edilir; çizik, çatlak ya da ezik uç yüzeyi olan piston değiştirilir.',
+            akumulator:
+              'Akümülatör, darbe sırasında oluşan basınç dalgalanmalarını dengeleyen ve vuruşa enerji katan, azot gazı dolu bölümdür; üst ve alt kapakları ile saplamaları bu bölümü kapatır. Kapakların oturma yüzeyleri ve saplama dişleri zamanla bozulabilir. Diyafram değişiminde ve revizyonda kapaklar ile saplamalar da kontrol edilir.',
+            'asinma-plakasi':
+              'Aşınma plakaları kırıcı gövdesi ile kutu (muhafaza) arasında durur; gövdenin kutu içinde yerinde kalmasını ve kutuya sürtünmemesini sağlar. Titreşimle aşındıkça gövde kutu içinde boşluk yapar ve darbe kutuya ve bom bağlantısına yayılır. Gövde kutu içinde oynamaya başladığında plakalar ve vibrasyon takozları kontrol edilir.',
+            'tamir-takimi':
+              'Tamir takımı, kırıcının hidrolik bölümündeki o-ringleri, keçeleri, toz keçelerini, destek ve teflon ringleri bir arada toplar. Bu sızdırmazlık elemanları ısı ve basınç altında zamanla sertleşir ve aşınır; yağ kaçağı, vuruş gücünün düşmesi ya da içeri toz girmesi değişim zamanının belirtileridir. Takım genellikle kırıcı revizyonunda, sökülen contaların tümü birlikte değiştirilerek kullanılır.',
+          },
+          kinds: {
+            upperBushing:
+              'Merkezleme, ucun üst kısmını gövdede ortalayan burçtur; ucu pistonun eksenine hizalar. Aşındığında piston uca eğik vurur, bu da ucu, burçları ve pistonu birlikte yıpratır. Kafa burcuyla birlikte uç değişimlerinde kontrol edilir.',
+            thrustRing:
+              'Dayama burcu alt gövdede ucun yukarı doğru hareketini sınırlayan burçtur; ucun pistonla doğru konumda buluşmasına yardım eder. Darbe yükü altında yüzeyi ezilir ve aşınır. Burç değişimlerinde diğer burçlarla birlikte kontrol edilir.',
+            retainerPin:
+              'Kama tutucu pim, kamayı yerinde kilitler; darbe titreşimiyle kamanın yuvasından çıkmasını önler. Uç ve kama değişimlerinde sökülüp takılır. Eğilmiş, aşınmış ya da yerine sıkı oturmayan pim yenisiyle değiştirilmelidir.',
+            sideBolt:
+              'Yan saplamalar kırıcının gövde parçalarını yandan bağlar ya da gövdeyi kutu içinde tutar. Titreşim altında gevşeyebildikleri için düzenli bakımlarda kontrol edilir. Ezilen ya da kırılan saplama somunuyla birlikte yenilenir.',
+            rockDrillThrustRing:
+              'Dayama burcu kaya delicinin ön kısmında şankın (matkap bağlantısının) dayandığı ve yönlendirildiği parçadır. Delme sırasında hem darbe hem dönme yükü aldığı için aşınır. Şank değişimlerinde yüzeyleri ve şankla arasındaki boşluk kontrol edilir.',
+            rockDrillChuckBushing:
+              'Şank arka dayama burcu, kaya delicide şankın arka tarafını taşıyan ve dayanak sağlayan burçtur. Delme sırasında hem darbe hem dönme yükü aldığı için aşınır. Şank değişimlerinde yüzeyleri ve şankla arasındaki boşluk kontrol edilir.',
+            rockDrillHead:
+              'Ön kafa, kaya delicinin şankı ve burçlarını taşıyan ön gövde parçasıdır. Delme sırasında darbe ve dönme yükünü karşıladığı için yuvaları zamanla aşınır. Şank ve burç değişimlerinde yuvalar ve gövde yüzeyi kontrol edilir.',
+          },
+        },
       },
       oemRef: {
         label: 'Muadil OEM no.',
@@ -1423,6 +1553,8 @@ export const DICT: Record<Lang, Dict> = {
           ? 'Hydraulic breaker repair kits: complete seal kits put together for your breaker model. Type your make and model.'
           : `Hydraulic breaker ${name.toLowerCase()} made by Kervan, by breaker make and model. Type your make and model.`,
       partItemTitle: (name) => `${name} | Kervan Makina`,
+      partItemFitDesc: (fit, { kit, priced }) =>
+        `${fit} ${kit ? 'Seal kit put together for the model.' : 'Made by Kervan.'} ${priced ? 'Price on the page, same-day shipping from stock.' : 'Write to us for a quote.'}`,
       partItemDesc: (name, { kit, priced, other, rockDrill }) =>
         `${name}${other ? `, also written ${other}` : ''}. ${kit ? 'Seal kit put together for the model' : `${rockDrill ? 'Rock drill' : 'Hydraulic breaker'} spare part made by Kervan`}. ${priced ? 'Price on the page, same-day shipping from stock.' : 'Write to us for a quote.'}`,
       cartTitle: 'Cart | Kervan Makina',
@@ -1558,6 +1690,17 @@ export const DICT: Record<Lang, Dict> = {
       diameter: 'Working diameter',
       types: 'Tip types',
       groovedHint: 'For some breakers we also make tools with dust grooves; type your breaker.',
+      guide: {
+        intro:
+          'A breaker tip (tool) passes the blow it takes from the piston of the hydraulic breaker on to the material being broken. The tip works in the bushings of the front head and is held there by the retainer key, so its diameter, length and key slot are set by the breaker model.',
+        title: 'How to choose a breaker tip',
+        body: [
+          'The tip must first fit your breaker model; its type is then chosen for the job.',
+          'A chisel (flat) tip is used in soil, soft rock, asphalt and concrete splitting, to break along a line or cut a trench. A moil (pointed) tip concentrates the blow on one point; it is the most common tip for general breaking in concrete and rock.',
+          'A blunt tip spreads the blow over a wide face; it is used to break up large blocks, hard and brittle rock and slag. A pyramid tip combines the penetration of a moil with a sturdier point; it is preferred in hard rock and reinforced concrete demolition.',
+          'A hydraulic breaker tip is not a drill bit: a breaker tip breaks by impact, back and forth, without turning, while drill bits turn to make a hole and fit other machines.',
+        ],
+      },
       groovedBadge: 'Dust grooves',
       priceNote: 'export price',
       priceAsk: 'Ask for a price',
@@ -1831,6 +1974,72 @@ export const DICT: Record<Lang, Dict> = {
         },
       },
       view: 'View',
+      guide: {
+        'alt-govde': {
+          title: 'How to choose a front head',
+          body: [
+            'A front head is chosen by the make and model of the breaker, and by its old or new type body where it has one.',
+            'Its bushing bores and key slot are machined for that model, so the front head of another model does not fit.',
+            'A front head can be ordered without bushings or with them fitted; say which you want when you order.',
+          ],
+        },
+        burc: {
+          title: 'How to choose a bushing',
+          body: [
+            'A bushing is chosen by the make and model of the breaker; on most breakers the tool bushing, upper bushing and thrust ring are separate parts, on some models one piece.',
+            'When you order, give the breaker model and the bushing you need; for models with an old and a new type body, give the body type too.',
+            'Check the tip when you change a bushing: a worn tip soon wears a new bushing, and a worn bushing a new tip.',
+          ],
+        },
+        kama: {
+          title: 'How to choose a retainer key',
+          body: [
+            'A retainer key is chosen by the make and model of the breaker; the different tip types of one breaker usually take the same key.',
+            'Some breakers have one key, some two, and the pin or plug that holds the key also differs by model.',
+            'Give the make and model of the breaker when you order; changing the key and its retainer pin together is good practice.',
+          ],
+        },
+        saplama: {
+          title: 'How to choose tie rods and bolts',
+          body: [
+            'A tie rod or bolt is chosen by the breaker model and its place: tie rods join the body end to end, side bolts from the side.',
+            'When one tie rod breaks the others have carried the same load, so they are often changed as a set.',
+            'Give the make and model of the breaker when you order, and whether you need nuts and washers.',
+          ],
+        },
+        piston: {
+          title: 'How to choose a piston',
+          body: [
+            'A piston is chosen by the make and model of the breaker; its sizes and steps follow that breaker’s cylinder.',
+            'Have the cylinder and bushings checked when you change the piston: a scored cylinder soon scores a new piston too.',
+            'Give the make and model of the breaker when you order, and whether it is the old or new type where there are both.',
+          ],
+        },
+        akumulator: {
+          title: 'How to choose accumulator parts',
+          body: [
+            'Accumulator parts are chosen by the breaker model; the upper cover, lower cover and bolts are separate parts.',
+            'The seating faces of the covers and the bolt holes are specific to the model.',
+            'Give the make and model of the breaker and the part you need when you order; nitrogen charging and diaphragm changes should be done by a service that knows the work.',
+          ],
+        },
+        'asinma-plakasi': {
+          title: 'How to choose wear plates',
+          body: [
+            'A wear plate is chosen by the breaker model and the box the body sits in; top, side and front plates are separate parts.',
+            'Plates are often changed together with the buffers.',
+            'Give the make and model of the breaker and the plates you need when you order.',
+          ],
+        },
+        'tamir-takimi': {
+          title: 'How to choose a repair kit',
+          body: [
+            'A repair kit is chosen by the make and model of the breaker; its seals are made for that model’s cylinder and piston.',
+            'The contents list on the page shows which parts are in the kit.',
+            'Have the piston and cylinder surfaces checked when the seals are changed; a scored surface soon damages new seals too.',
+          ],
+        },
+      },
       groupAlt: (h1) => `${h1}, made by Kervan`,
       groupsTitle: 'Product groups',
       fitNote: 'Our products are made by Kervan Makina; make and model names only show the fit.',
@@ -2133,6 +2342,42 @@ export const DICT: Record<Lang, Dict> = {
           aliases: 'Other spellings',
           variant: 'Type',
           diameter: 'Breaker tip diameter',
+        },
+        about: {
+          fit: (model, noun, rockDrill) =>
+            `${noun.charAt(0).toUpperCase()}${noun.slice(1)} compatible with the ${model} ${rockDrill ? 'rock drill' : 'hydraulic breaker'}.`,
+          groups: {
+            'alt-govde':
+              'The front head is the body part at the tip end of the breaker; it carries the tip, the bushings, the retainer key and its pin. As the first part of the body to take the impact, its bushing bores wear, the key slot deforms or the body can crack over time. The bores and body surface are checked whenever bushings or keys are changed.',
+            burc: 'The tool bushing holds and guides the tip inside the front head; the tip slides in it at every blow. The clearance between tip and bushing opens up over time; as it grows the tip works at an angle, breaks early and can damage the piston. Check bushing clearance at every tip change and replace a bushing past its limit.',
+            kama: 'The retainer key passes through the slot on the tip and holds it in the front head; it keeps the tip from falling out and limits its travel. It takes load at every blow, so it wears or deforms over time. Check the key and its retainer pin whenever the tip is changed; a worn key also damages the slot of the tip.',
+            saplama:
+              'Tie rods bolt the cylinder, front head and back head of the breaker together and keep them tight. A tie rod that loosens under impact vibration can let the body parts separate and break. Nut tightness is checked at regular maintenance; a broken tie rod is replaced and the others are checked too.',
+            piston:
+              'The piston is the impact part driven back and forth by hydraulic pressure to strike the tip; it makes the blow of the breaker. Working at an angle, from contaminated oil or worn bushings, scores the piston and cylinder. The piston is checked with the cylinder at the breaker overhaul; a piston with scoring, cracks or a dented striking face is replaced.',
+            akumulator:
+              'The accumulator is the nitrogen-charged chamber that evens out pressure peaks during the blow and adds energy to it; its upper and lower covers and bolts close that chamber. The seating faces of the covers and the bolt threads can wear over time. The covers and bolts are checked at a diaphragm change and at overhaul.',
+            'asinma-plakasi':
+              'Wear plates sit between the breaker body and the box (housing); they keep the body in place in the box and stop it rubbing on the box. As they wear from vibration, the body gets play in the box and the blows spread to the box and the boom. Check the plates and buffers when the body starts to move in the box.',
+            'tamir-takimi':
+              'A repair kit brings together the o-rings, seals, dust seals, back-up and PTFE rings of the hydraulic section of the breaker. These seals harden and wear under heat and pressure; oil leaks, weaker blows or dust getting in are signs they are due. The kit is usually fitted at the breaker overhaul, replacing all the seals removed.',
+          },
+          kinds: {
+            upperBushing:
+              'The upper bushing centres the upper end of the tip in the body and lines it up with the piston. When it wears, the piston strikes the tip at an angle, which wears the tip, bushings and piston together. Check it with the tool bushing at tip changes.',
+            thrustRing:
+              'The thrust ring limits how far the tip can travel up into the front head and helps it meet the piston in the right position. Its face is pressed and worn by the blows. Check it with the other bushings when bushings are changed.',
+            retainerPin:
+              'The retainer pin locks the key in place and stops vibration pushing it out of its slot. It is removed and refitted at tip and key changes. Replace a pin that is bent, worn or no longer a tight fit.',
+            sideBolt:
+              'Side bolts join the body parts of the breaker from the side or hold the body in its box. They can loosen under vibration, so they are checked at regular maintenance. Replace a crushed or broken bolt together with its nut.',
+            rockDrillThrustRing:
+              'The thrust ring sits at the front of the rock drill, where the shank adapter bears and is guided. It wears from both impact and rotation while drilling. Check its faces and its clearance to the shank at shank changes.',
+            rockDrillChuckBushing:
+              'The chuck bushing carries and supports the rear of the shank adapter in the rock drill. It wears from both impact and rotation while drilling. Check its faces and its clearance to the shank at shank changes.',
+            rockDrillHead:
+              'The front head is the front body part of the rock drill that carries the shank adapter and its bushings. It takes the impact and rotation loads while drilling, so its bores wear over time. Check the bores and body surface at shank and bushing changes.',
+          },
         },
       },
       oemRef: {

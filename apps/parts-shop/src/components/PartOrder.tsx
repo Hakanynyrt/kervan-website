@@ -112,6 +112,15 @@ export function PartOrder({
         {tl && fx && (
           <p className="m-0 mt-1 text-xs text-ink-soft">{t.price.fxNote(fmtDate(fx.date, lang))}</p>
         )}
+        {/* Desktop: the order button right under the price, above the fold (2026-10-27); phones
+            keep it in the order box below, next to the sticky bar. */}
+        <a
+          href={whatsappHref(text)}
+          {...ORDER_CONVERSION}
+          className={`mt-4 hidden rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white lg:block ${FOCUS}`}
+        >
+          {o.wa}
+        </a>
         <p className="m-0 mt-3 border-t border-hair pt-3 text-ink">{o.delivery}</p>
         <p className="m-0 mt-4 text-lg font-bold text-ink">{o.title}</p>
         <p className="m-0 mt-2 text-ink-mid">{o.body}</p>
@@ -153,7 +162,7 @@ export function PartOrder({
           <a
             href={whatsappHref(text)}
             {...ORDER_CONVERSION}
-            className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
+            className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white lg:hidden ${FOCUS}`}
           >
             {o.wa}
           </a>
