@@ -133,6 +133,10 @@
   dd {
     text-wrap: pretty;
   }
+  h1,
+  h2 {
+    text-wrap: balance;
+  }
   html {
     background: var(--color-bg);
     color: var(--color-ink);
