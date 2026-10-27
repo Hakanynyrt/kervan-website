@@ -4,4 +4,4 @@ User-agent: *
 Allow: /
 Disallow: /cdn-cgi/
 
-Sitemap: https://kiriciparca.com/sitemap.xml
+Sitemap: https://kiriciparca.com/sitemap-index.xml

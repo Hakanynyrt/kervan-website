@@ -167,7 +167,7 @@ export function PartOrder({
         </div>
       </div>
       <div className="mt-6">
-        <Terms t={t} part={part} />
+        <Terms t={t} part={part} compact={lang} />
       </div>
     </div>
   );

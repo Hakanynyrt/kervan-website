@@ -136,6 +136,9 @@ export interface Dict {
       types: string;
       carrier: string;
       parts: string;
+      /** "Ürün grubu": the spare-part group (tips). */
+      group: string;
+      aliases: string;
     };
   };
   popular: {
@@ -344,6 +347,10 @@ export interface Dict {
     /** Where no single product is meant (home order box): both periods. */
     warrantyAll: string;
     note: string;
+    /** The one-line form on item and breaker pages: shipping, payment, this product's warranty
+     *  period and the not-original line; `more` links the full terms (pre-contract information). */
+    short: (months: number) => string;
+    more: string;
   };
   parts: {
     title: string;
@@ -440,6 +447,17 @@ export interface Dict {
         model: string,
         o: { other: string | null; variant: string | null; rockDrill: boolean },
       ) => string;
+      /** The item's facts block: its group, the breakers it fits (linked to their pages) with
+       *  their other spellings and working diameter, only data the site already shows. */
+      facts: {
+        title: (name: string) => string;
+        group: string;
+        part: string;
+        fits: (rockDrill: boolean) => string;
+        aliases: string;
+        variant: string;
+        diameter: string;
+      };
     };
     /** Genuine OEM numbers of the part ours replaces (owner's decision), cross-reference only. */
     oemRef: {
@@ -679,6 +697,8 @@ export const DICT: Record<Lang, Dict> = {
         types: 'Uç tipleri',
         carrier: 'Taşıyıcı sınıfı (yaklaşık)',
         parts: 'Bu kırıcı için ayrıca ürettiklerimiz',
+        group: 'Ürün grubu',
+        aliases: 'Diğer yazılışlar',
       },
     },
     list: {
@@ -897,6 +917,9 @@ export const DICT: Record<Lang, Dict> = {
       warranty: (m) => `Teslimden itibaren ${m} ay, malzeme ve üretim hatalarına karşı`,
       warrantyAll:
         'Teslimden itibaren alt gövde ve pistonlarda 6 ay, burçlarda 3 ay, diğer ürünlerde 2 ay; malzeme ve üretim hatalarına karşı',
+      short: (m) =>
+        `Kargo alıcıya aittir; ödeme kredi kartı veya havale/EFT ile; ${m} ay garanti. Kervan Makina üretimidir, orijinal parça değildir; marka ve model adları yalnızca uyumu belirtir.`,
+      more: 'Tüm satış koşulları ve garanti kapsamı',
       note: 'Ürünlerimiz Kervan Makina üretimidir, kırıcı üreticisinin orijinal parçası değildir; marka ve model adları yalnızca uyumu belirtir. Garanti malzeme ve üretim (ısıl işlem dahil) hatalarını kapsar; normal aşınma, boşta vuruş, ucu levye gibi kullanma, yanal veya eğik vuruş, aşınmış burç ile çalışma, yağlamasız kullanma ve yanlış uç seçiminden doğan hasarlar kapsam dışıdır. İnceleme için kırık parça ve fotoğrafları istenir.',
     },
     parts: {
@@ -1249,6 +1272,15 @@ export const DICT: Record<Lang, Dict> = {
         seoName: (model, noun, rockDrill) => `${model}${rockDrill ? '' : ' kırıcı'} ${noun}`,
         fits: (model, { other, variant, rockDrill }) =>
           `Uyduğu ${rockDrill ? 'kaya delici' : 'kırıcı'}: ${model}${other ? ` (${other})` : ''}${variant ? `, ${variant}` : ''}.`,
+        facts: {
+          title: (name) => `${name} bilgileri`,
+          group: 'Parça grubu',
+          part: 'Parça',
+          fits: (rockDrill) => (rockDrill ? 'Uyduğu kaya delici' : 'Uyduğu kırıcı'),
+          aliases: 'Diğer yazılışlar',
+          variant: 'Tip',
+          diameter: 'Kırıcının uç çapı',
+        },
       },
       oemRef: {
         label: 'Muadil OEM no.',
@@ -1515,6 +1547,8 @@ export const DICT: Record<Lang, Dict> = {
         types: 'Tip types',
         carrier: 'Carrier class (approx.)',
         parts: 'We also make for this breaker',
+        group: 'Product group',
+        aliases: 'Other spellings',
       },
     },
     list: {
@@ -1733,6 +1767,9 @@ export const DICT: Record<Lang, Dict> = {
       warranty: (m) => `${m} months from delivery, against material and manufacturing defects`,
       warrantyAll:
         'From delivery: 6 months on front heads and pistons, 3 months on bushings, 2 months on all other products; against material and manufacturing defects',
+      short: (m) =>
+        `Shipping paid by the buyer; payment by credit card or bank transfer; ${m}-month warranty. Made by Kervan Makina, not an original part; make and model names only show the fit.`,
+      more: 'Full terms of sale and warranty scope',
       note: 'Our products are made by Kervan Makina and are not the breaker maker’s original parts; make and model names only show the fit. The warranty covers material and manufacturing (including heat treatment) defects; normal wear, blank firing, prying with the tip, side or angled strikes, working with a worn bushing, running without grease and choosing the wrong tip are not covered. We ask for the broken part and photos to assess a claim.',
     },
     parts: {
@@ -2088,6 +2125,15 @@ export const DICT: Record<Lang, Dict> = {
         seoName: (model, noun, rockDrill) => `${model}${rockDrill ? '' : ' breaker'} ${noun}`,
         fits: (model, { other, variant }) =>
           `Fits: ${model}${other ? ` (${other})` : ''}${variant ? `, ${variant}` : ''}.`,
+        facts: {
+          title: (name) => `${name} facts`,
+          group: 'Part group',
+          part: 'Part',
+          fits: (rockDrill) => (rockDrill ? 'Fits rock drill' : 'Fits breaker'),
+          aliases: 'Other spellings',
+          variant: 'Type',
+          diameter: 'Breaker tip diameter',
+        },
       },
       oemRef: {
         label: 'Equivalent OEM no.',

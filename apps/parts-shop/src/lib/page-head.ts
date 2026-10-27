@@ -257,6 +257,9 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
         description,
         ...(image ? { ogImage: image } : {}),
         jsonLd: [
+          // Product (with its Offer) only where the page shows a price AND has its own picture:
+          // Google needs an image for a product result. Without either, a WebPage, as before. No
+          // sku: an item has no permanent Kervan code (its URL slug is not one); never OEM numbers.
           productLd({
             url,
             name: seoName,
@@ -265,7 +268,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
             image,
             brand: ORG_TRADING_NAME,
             category: name,
-            ...(cents !== null ? { offer: offerOf(cents) } : {}),
+            ...(cents !== null && image ? { offer: offerOf(cents) } : {}),
           }),
           crumbs([partsCrumb, [name, partPath(model.part)]], r ? renderModel(r, t) : model.anchor),
         ],

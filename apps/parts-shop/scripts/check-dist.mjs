@@ -8,6 +8,8 @@
 // - no file in dist/ contains a forbidden string (third-party catalogue names, VEGA part
 //   numbers, private D1 columns); genuine OEM numbers are allowed, only through the
 //   "Muadil OEM no." field (src/lib/oem-numbers.ts, owner's decision);
+// - robots.txt names the sitemap index, which lists only shipped children; <lastmod> dates are
+//   valid, not in the future and not one date for every URL;
 // - every og:image in /og/ on this host is in dist;
 // - at most MAX_FILES files (Pages limit).
 import fs from 'node:fs';
@@ -57,12 +59,51 @@ count(DIST);
 const SITE = 'https://kiriciparca.com';
 // Pages kept out of search results (src/lib/page-head.ts NOINDEX_KINDS): cart, /urun/ and 404.
 const NOINDEX_PAGES = /^(en\/)?(404|palet|urun\/[^/]+)\.html$/;
-// Every <loc> of the sitemap (sitemap.xml, or its children when it is an index).
+// The sitemaps (src/entry-server.tsx sitemapFiles): robots.txt names the index, sitemap.xml is
+// the same index, every child it lists ships, and every <url> of the children is collected. A
+// <lastmod> must be a YYYY-MM-DD date no later than today, and not one shared by every dated URL
+// (that is a build time, not a page date).
+const problems = [];
+const SITEMAP_INDEX = 'sitemap-index.xml';
 const sitemapLocs = new Set();
-for (const f of files)
-  if (/^sitemap(-\d+)?\.xml$/.test(path.basename(f)) && path.dirname(f) === DIST)
-    for (const m of fs.readFileSync(f, 'utf8').matchAll(/<url>\s*<loc>([^<]+)<\/loc>/g))
-      sitemapLocs.add(m[1]);
+const lastmods = [];
+{
+  const read = (f) =>
+    fs.existsSync(path.join(DIST, f)) ? fs.readFileSync(path.join(DIST, f), 'utf8') : null;
+  const robots = read('robots.txt') ?? '';
+  if (!robots.includes(`Sitemap: ${SITE}/${SITEMAP_INDEX}`))
+    problems.push(`robots.txt: no Sitemap line for ${SITEMAP_INDEX}`);
+  const index = read(SITEMAP_INDEX);
+  if (!index || !index.includes('<sitemapindex')) problems.push(`${SITEMAP_INDEX}: missing`);
+  else if (read('sitemap.xml') !== index) problems.push('sitemap.xml: not the same index');
+  const today = new Date().toISOString().slice(0, 10);
+  const checkDate = (where, d) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || d > today) problems.push(`${where}: bad lastmod ${d}`);
+  };
+  for (const m of (index ?? '').matchAll(
+    /<sitemap>\s*<loc>([^<]+)<\/loc>(?:\s*<lastmod>([^<]+)<\/lastmod>)?/g,
+  )) {
+    const child = m[1].startsWith(`${SITE}/`) ? m[1].slice(SITE.length + 1) : null;
+    if (m[2]) checkDate(m[1], m[2]);
+    const xml = child && !child.includes('/') ? read(child) : null;
+    if (!xml) {
+      problems.push(`${SITEMAP_INDEX}: child ${m[1]} not in dist`);
+      continue;
+    }
+    for (const u of xml.matchAll(
+      /<url>\s*<loc>([^<]+)<\/loc>(?:\s*<lastmod>([^<]+)<\/lastmod>)?/g,
+    )) {
+      if (sitemapLocs.has(u[1])) problems.push(`sitemap: ${u[1]} listed twice`);
+      sitemapLocs.add(u[1]);
+      if (u[2]) {
+        checkDate(u[1], u[2]);
+        lastmods.push(u[2]);
+      }
+    }
+  }
+  if (lastmods.length > 50 && new Set(lastmods).size === 1)
+    problems.push(`sitemap: all ${lastmods.length} lastmod dates are the same (a build date?)`);
+}
 const urlOf = (rel) => {
   const p = rel.replace(/\\/g, '/').replace(/\.html$/, '');
   return p === 'index' ? `${SITE}/` : p === 'en/index' ? `${SITE}/en/` : `${SITE}/${p}`;
@@ -84,7 +125,6 @@ const pageUrlOfHref = (href) => {
   return `${SITE}${h.replace(/\/$/, '')}`;
 };
 
-const problems = [];
 let pages = 0;
 let indexable = 0;
 const indexableUrls = [];
@@ -181,5 +221,5 @@ if (problems.length) {
   process.exit(1);
 }
 process.stdout.write(
-  `check-dist: ${pages} pages ok (${indexable} indexable, all in the sitemap; reachable by links except the part items warned about), ${total} files\n`,
+  `check-dist: ${pages} pages ok (${indexable} indexable, all in the sitemaps, ${lastmods.length} with lastmod; reachable by links except the part items warned about), ${total} files\n`,
 );

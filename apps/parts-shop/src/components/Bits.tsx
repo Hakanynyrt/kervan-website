@@ -266,8 +266,39 @@ export function PageTitle({ children }: { children: ReactNode }) {
   return <h1 className="m-0 mt-5 font-sans text-3xl font-bold text-ink md:text-4xl">{children}</h1>;
 }
 
-/** Quality, shipping, payment and warranty lines, with the warranty scope below. */
-export function Terms({ t, part }: { t: Dict; part?: PartKey }) {
+/**
+ * Quality, shipping, payment and warranty lines, with the warranty scope below. `compact` (part
+ * item and breaker pages, thousands of them): one short line with this product's warranty period
+ * and the not-original disclaimer, linking the pre-contract information page that carries the full
+ * terms and the warranty scope (`legal.ts`); the full block stays on the group pages.
+ */
+export function Terms({
+  t,
+  part,
+  compact,
+}: {
+  t: Dict;
+  part?: PartKey;
+  /** The page language, for the terms link: set it for the one-line form. */
+  compact?: Lang;
+}) {
+  if (compact)
+    return (
+      <section aria-labelledby="terms" className="font-sans text-sm">
+        <h2 id="terms" className="m-0 text-base font-bold text-ink">
+          {t.terms.title}
+        </h2>
+        <p className="m-0 mt-2 text-ink-mid">
+          {t.terms.short(warrantyMonths(part))}{' '}
+          <a
+            href={localePath(legalPath('on-bilgilendirme'), compact)}
+            className={`underline hover:text-ink ${FOCUS}`}
+          >
+            {t.terms.more}
+          </a>
+        </p>
+      </section>
+    );
   const rows: [string, string][] = [
     ...t.terms.rows,
     [t.terms.warrantyLabel, t.terms.warranty(warrantyMonths(part))],
