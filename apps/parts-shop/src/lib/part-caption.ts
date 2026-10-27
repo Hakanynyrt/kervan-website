@@ -61,7 +61,11 @@ export function partAbout(
   lang: 'tr' | 'en',
 ): { fit: string; body: string } {
   const a = t.parts.item.about;
-  const noun = r.kind ? t.parts.renderKind[r.kind] : t.parts.items[part].name;
+  // The title's noun ("kaması", "pistonu"), never the caption with its English gloss.
+  const base = r.kind
+    ? (t.parts.renderKindNoun[r.kind] ?? t.parts.renderKind[r.kind].replace(/\s*\(.*\)/, ''))
+    : t.parts.itemNoun[part];
+  const noun = lang === 'tr' && !isRockDrill(r) ? `kırıcı ${base}` : base;
   const lower = noun.toLocaleLowerCase(lang);
   return {
     fit: a.fit(renderModel(r, t), lower, isRockDrill(r)),

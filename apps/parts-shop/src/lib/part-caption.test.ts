@@ -59,7 +59,7 @@ test('item page names: rock drill parts are not breaker parts, no double bracket
 
 test('partAbout: fit sentence names the model, every group has its own text, no numbers', () => {
   const tr = partAbout({ model: 'Soosan SB60' } as PartRender, 'kama', DICT.tr, 'tr');
-  assert.equal(tr.fit, 'Soosan SB60 hidrolik kırıcısına uyumlu kama.');
+  assert.equal(tr.fit, 'Soosan SB60 hidrolik kırıcısına uyumlu kırıcı kaması.');
   const drill = partAbout(
     { model: 'COP 1032', kind: 'rockDrillThrustRing' } as PartRender,
     'burc',
