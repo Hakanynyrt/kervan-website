@@ -89,7 +89,7 @@ export default function StackedCarousel({ items }: Props) {
         onTouchEnd={onTouchEnd}
       >
         {/* Counter — top right of card stack */}
-        <div className="absolute top-4 right-4 z-30 font-sans text-xs tracking-widest uppercase text-ink-soft tabular-nums pointer-events-none">
+        <div className="absolute top-4 right-4 z-30 font-sans text-xs tracking-widest uppercase text-ink-mid tabular-nums pointer-events-none">
           {String(active + 1).padStart(2, '0')} / {String(N).padStart(2, '0')}
         </div>
 
@@ -109,7 +109,7 @@ export default function StackedCarousel({ items }: Props) {
       {/* Dots indicator — replaces the ←/→ buttons. Active dot is a
           longer brand-coloured bar; tap any dot to jump. The shape of
           this strip reads as "this slides" without needing words. */}
-      <div className="mt-6 md:mt-8 flex justify-center items-center gap-2">
+      <div className="mt-6 md:mt-8 flex justify-center items-center gap-0">
         {items.map((_, i) => {
           const isActive = i === active;
           return (
@@ -119,11 +119,16 @@ export default function StackedCarousel({ items }: Props) {
               onClick={() => setActive(i)}
               aria-label={`Slayt ${i + 1}`}
               aria-current={isActive ? 'true' : undefined}
-              className={
-                'h-1.5 rounded-full transition-all duration-300 ease-out ' +
-                (isActive ? 'w-8 bg-brand' : 'w-1.5 bg-ink-soft/40 hover:bg-ink-soft/70')
-              }
-            />
+              className="group flex h-6 min-w-6 cursor-pointer items-center justify-center"
+            >
+              <span
+                aria-hidden="true"
+                className={
+                  'block h-1.5 rounded-full transition-all duration-300 ease-out ' +
+                  (isActive ? 'w-8 bg-brand' : 'w-1.5 bg-ink-soft/40 group-hover:bg-ink-soft/70')
+                }
+              />
+            </button>
           );
         })}
       </div>
@@ -313,7 +318,7 @@ function Lightbox({ items, active, onPrev, onNext, onClose }: LightboxProps) {
       {/* Counter — top left, mirrors the in-card counter; tells the
           user "n / total" so the swipe-between-videos affordance is
           obvious. */}
-      <div className="absolute top-4 left-4 z-10 font-sans text-xs tracking-widest uppercase text-ink-soft tabular-nums pointer-events-none">
+      <div className="absolute top-4 left-4 z-10 font-sans text-xs tracking-widest uppercase text-ink-mid tabular-nums pointer-events-none">
         {String(active + 1).padStart(2, '0')} / {String(N).padStart(2, '0')}
       </div>
 
@@ -392,7 +397,7 @@ function Lightbox({ items, active, onPrev, onNext, onClose }: LightboxProps) {
 
       {/* Dots indicator inside lightbox — same shape as the in-page
           one, gives the user a tap-target alternative to swipe. */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-0">
         {items.map((_, i) => {
           const isActive = i === active;
           return (
@@ -409,11 +414,16 @@ function Lightbox({ items, active, onPrev, onNext, onClose }: LightboxProps) {
               }}
               aria-label={`Slayt ${i + 1}`}
               aria-current={isActive ? 'true' : undefined}
-              className={
-                'h-1.5 rounded-full transition-all duration-300 ease-out ' +
-                (isActive ? 'w-8 bg-brand' : 'w-1.5 bg-ink-soft/40 hover:bg-ink-soft/70')
-              }
-            />
+              className="group flex h-6 min-w-6 cursor-pointer items-center justify-center"
+            >
+              <span
+                aria-hidden="true"
+                className={
+                  'block h-1.5 rounded-full transition-all duration-300 ease-out ' +
+                  (isActive ? 'w-8 bg-brand' : 'w-1.5 bg-ink-soft/40 group-hover:bg-ink-soft/70')
+                }
+              />
+            </button>
           );
         })}
       </div>

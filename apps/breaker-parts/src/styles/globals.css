@@ -54,13 +54,17 @@
 }
 
 /* Links ignore Tailwind's text colour (the unlayered `a { color: inherit }`
-   below), so day-theme brand buttons would inherit the dark ink: give them
-   the page colour (5.64:1 on brand). The night look is left as it is. */
-:root[data-theme='light'] a.text-bg,
-:root[data-sun='day']:not([data-theme='dark']) a.text-bg,
-:root[data-theme='light'] a.hover\:text-bg:hover,
-:root[data-sun='day']:not([data-theme='dark']) a.hover\:text-bg:hover {
+   below), so brand buttons would inherit the ink: give them the page colour
+   in both themes (day 5.64:1 on brand; night the dark page on the ember,
+   where the inherited light ink read 3.1:1, audit 2026-10-27). */
+a.text-bg,
+a.hover\:text-bg:hover {
   color: var(--color-bg);
+}
+
+/* No paragraph ends on a single word. */
+p {
+  text-wrap: pretty;
 }
 
 /* Brand logo tiles (BrandMarquee): the wordmark SVGs are drawn in the night

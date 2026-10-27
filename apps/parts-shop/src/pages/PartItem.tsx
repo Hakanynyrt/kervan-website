@@ -95,10 +95,10 @@ export default function PartItem({
         t={t}
       />
       <PageTitle>{renderSeoName(r, model.part, t)}</PageTitle>
-      <p className="m-0 mt-3 max-w-prose font-sans text-base text-ink-soft">
+      <p className="m-0 mt-3 max-w-[60ch] font-sans text-base text-ink-soft">
         {renderFits(r, t)} {p.body}
       </p>
-      <p className="m-0 mt-3 max-w-prose font-sans text-base text-ink-mid">
+      <p className="m-0 mt-3 max-w-[60ch] font-sans text-base text-ink-mid">
         {about.fit} {about.body}
       </p>
       <OemLine t={t} kit={model.part === 'tamir-takimi'} />
