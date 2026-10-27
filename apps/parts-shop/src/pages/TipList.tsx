@@ -1,6 +1,6 @@
 import type { FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
-import { Breadcrumb, PageTitle } from '../components/Bits';
+import { Breadcrumb, Guide, PageTitle } from '../components/Bits';
 import { BrandChips, ModelTable } from '../components/ModelSearch';
 import type { Dict } from '../lib/dict';
 import { PARTS_PATH, type PageModel } from '../lib/routes';
@@ -42,6 +42,12 @@ export default function TipList({
       <div className="mt-8 sm:hidden">
         <BrandChips brands={model.brands} only="phone" lang={lang} t={t} />
       </div>
+      <Guide
+        id="tip-guide"
+        intro={t.list.guide.intro}
+        title={t.list.guide.title}
+        body={t.list.guide.body}
+      />
     </Container>
   );
 }
