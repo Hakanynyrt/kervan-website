@@ -11,6 +11,7 @@ export const GUIDE_KEYS = [
   'kirici-ucu-ne-zaman-degisir',
   'kirici-burcu-ne-zaman-degisir',
   'kirici-kamasi-neden-kirilir',
+  'keski-mi-sivri-uc-mu',
 ] as const;
 export type GuideKey = (typeof GUIDE_KEYS)[number];
 
@@ -128,6 +129,43 @@ export const GUIDES: Record<
         ],
         links: ['kama', 'tips', 'burc'],
       },
+      'keski-mi-sivri-uc-mu': {
+        title: 'Keski mi, sivri uç mu? Kırıcı ucu tipi nasıl seçilir',
+        lead: 'Uç önce kırıcınızın modeline uymalıdır; tipi ise yapılacak işe göre seçilir. Keski, sivri, küt ve piramit uçların farkı.',
+        sections: [
+          {
+            h: 'Keski (yassı) uç',
+            p: [
+              'Ağzı yassıdır; darbeyi bir çizgi boyunca verir. Toprak, yumuşak kaya, asfalt ve beton yarmada, bir hat boyunca kırmak ya da kanal açmak için kullanılır. Ağzın yönü işe göre ayarlanır.',
+            ],
+          },
+          {
+            h: 'Sivri uç',
+            p: [
+              'Darbeyi tek noktaya toplar ve malzemeye girer. Beton ve kayada genel kırım işlerinde en yaygın uçtur; hangisini seçeceğinizden emin değilseniz çoğu iş için sivri uçla başlanır.',
+            ],
+          },
+          {
+            h: 'Küt ve piramit uç',
+            p: [
+              'Küt uç darbeyi geniş bir yüzeye yayar; iri blokları, sert ve kırılgan kayayı ve cürufu parçalamak için kullanılır. Piramit uç, sivri ucun delici etkisini daha dayanıklı bir uç biçimiyle birleştirir; sert kaya ve betonarme yıkımında tercih edilir.',
+            ],
+          },
+          {
+            h: 'Hangi işe hangisi',
+            p: [
+              'Kanal, hendek ve asfalt kesmek için keski; beton ve kayada genel kırım için sivri; iri blok ve sert kaya parçalamak için küt; sert kaya ve betonarme için piramit uç seçilir. Hangi ucu kullanırsanız kullanın ucu dik tutun, boşta vurmayın ve ucu levye gibi kullanmayın.',
+            ],
+          },
+          {
+            h: 'Uç seçerken',
+            p: [
+              'Uç tipi ne olursa olsun çapı, boyu ve kama yuvası kırıcınızın modeline göre belirlenir. Kırıcınızın marka ve modelini kırıcı ucu sayfalarında arayın; o modele uyan uçları tipleriyle birlikte görebilirsiniz.',
+            ],
+          },
+        ],
+        links: ['tips', 'burc'],
+      },
     },
   },
   en: {
@@ -227,6 +265,43 @@ export const GUIDES: Record<
           },
         ],
         links: ['kama', 'tips', 'burc'],
+      },
+      'keski-mi-sivri-uc-mu': {
+        title: 'Chisel or moil point? How to choose a breaker tool type',
+        lead: 'A tool must first fit your breaker model; its type is chosen for the job. The difference between chisel, moil, blunt and pyramid tools.',
+        sections: [
+          {
+            h: 'Chisel (flat) tool',
+            p: [
+              'It has a flat edge and strikes along a line. It is used in soil, soft rock, asphalt and for splitting concrete, to break along a line or to open a trench. The edge is turned to suit the job.',
+            ],
+          },
+          {
+            h: 'Moil point',
+            p: [
+              'It focuses the blow on a single point and penetrates. It is the most common tool for general breaking in concrete and rock; if you are not sure which to choose, most jobs start with a moil point.',
+            ],
+          },
+          {
+            h: 'Blunt and pyramid tools',
+            p: [
+              'A blunt tool spreads the blow over a wide face; it breaks large blocks, hard and brittle rock and slag. A pyramid tool combines the penetration of a moil point with a tougher tip; it is preferred for hard rock and reinforced-concrete demolition.',
+            ],
+          },
+          {
+            h: 'Which tool for which job',
+            p: [
+              'A chisel for trenches, ditches and cutting asphalt; a moil point for general breaking in concrete and rock; a blunt tool for large blocks and hard rock; a pyramid tool for hard rock and reinforced concrete. Whatever the tool, keep it square, avoid blank firing and never pry with it.',
+            ],
+          },
+          {
+            h: 'When you choose a tool',
+            p: [
+              'Whatever the type, the diameter, length and key slot are set by your breaker model. Search your breaker’s make and model on the tool pages to see the tools that fit it, with their types.',
+            ],
+          },
+        ],
+        links: ['tips', 'burc'],
       },
     },
   },
