@@ -117,7 +117,7 @@ export const sitemapGroup = (path: string): SitemapGroup =>
  * each by its last git commit and takes the latest). Paths are relative to the app; a picture
  * is its base (`public/photos/parca/<stem>`), standing for all its sizes. Only inputs that are
  * this page's alone count: a part item's pictures and 3D model, a breaker's own tip photos, the
- * legal texts. Shared code, the dictionary and D1 rows do not (D1 rows carry the import time,
+ * legal texts and the guides. Shared code, the dictionary and D1 rows do not (D1 rows carry the import time,
  * not a change time): a page with no input of its own gets no <lastmod> rather than a date that
  * changes with every commit or build.
  */
@@ -139,6 +139,8 @@ export function pageInputs(p: PrerenderPage): string[] {
       return (m.photos ?? []).flatMap(pic);
     case 'legal':
       return ['src/lib/legal.ts'];
+    case 'guide':
+      return ['src/lib/guides.ts'];
     default:
       return [];
   }

@@ -150,8 +150,8 @@ function PanelRow({
         </span>
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="text-sm font-semibold text-ink group-hover:text-brand-hi">{title}</span>
-          {/* No sub line that only repeats the title ("Kama / Kama"). */}
-          {sub && sub !== title && (
+          {/* No sub line the title already holds ("Kama / Kama", "BT 810 · Ø135 mm / Ø135 mm"). */}
+          {sub && !title.includes(sub) && (
             <span className="text-[12.5px] text-ink-mid tabular-nums">{sub}</span>
           )}
           {badge && <span className="text-xs text-ink-soft">{badge}</span>}

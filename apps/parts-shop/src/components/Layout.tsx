@@ -14,6 +14,7 @@ import {
   TIP_PATHS,
 } from '../lib/routes';
 import { LEGAL, LEGAL_KEYS, legalPath, SELLER } from '../lib/legal';
+import { GUIDES_PATH } from '../lib/guides';
 import { CONSENT_OPEN_EVENT } from '../lib/ads';
 import { BreakerSearch, FinderPickProvider } from './BreakerSearch';
 import { CartLink } from './CartLink';
@@ -366,6 +367,11 @@ export default function Layout({
               <li>
                 <a href={localePath(PARTS_PATH, lang)} className={`hover:text-ink ${FOCUS}`}>
                   {t.home.allGroups}
+                </a>
+              </li>
+              <li>
+                <a href={localePath(GUIDES_PATH, lang)} className={`hover:text-ink ${FOCUS}`}>
+                  {t.footer.guides}
                 </a>
               </li>
               <li>

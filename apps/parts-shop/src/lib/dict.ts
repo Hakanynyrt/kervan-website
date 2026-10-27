@@ -43,6 +43,8 @@ export interface Dict {
       o: { kit: boolean; priced: boolean; other: string | null; rockDrill: boolean },
     ) => string;
     cartTitle: string;
+    /** The /rehber index (guides.ts holds the articles). */
+    guidesTitle: string;
   };
   nav: {
     label: string;
@@ -543,6 +545,8 @@ export interface Dict {
   footer: {
     legal: string;
     docs: string;
+    /** Link to the /rehber guides. */
+    guides: string;
     images: string;
     shop: string;
     company: string;
@@ -601,6 +605,7 @@ export const DICT: Record<Lang, Dict> = {
       partItemDesc: (name, { kit, priced, other, rockDrill }) =>
         `${name}${other ? `, ${other} olarak da yazılır` : ''}. ${kit ? 'Modele göre hazırlanan sızdırmazlık takımı' : `Kervan üretimi ${rockDrill ? 'kaya delici' : 'hidrolik kırıcı'} yedek parçası`}. ${priced ? 'Fiyatı sayfada, stoktan aynı gün kargo.' : 'Fiyat teklifi için yazın.'}`,
       cartTitle: 'Palet | Kervan Makina',
+      guidesTitle: 'Kırıcı bakım rehberi | Kervan Makina',
     },
     nav: {
       label: 'Ana menü',
@@ -1516,6 +1521,7 @@ export const DICT: Record<Lang, Dict> = {
     footer: {
       legal: 'Üretici ve satıcı',
       docs: 'Yasal',
+      guides: 'Rehber',
       shop: 'Mağaza',
       company: 'Kurumsal',
       contact: 'İletişim',
@@ -1587,6 +1593,7 @@ export const DICT: Record<Lang, Dict> = {
       partItemDesc: (name, { kit, priced, other, rockDrill }) =>
         `${name}${other ? `, also written ${other}` : ''}. ${kit ? 'Seal kit put together for the model' : `${rockDrill ? 'Rock drill' : 'Hydraulic breaker'} spare part made by Kervan`}. ${priced ? 'Price on the page, same-day shipping from stock.' : 'Write to us for a quote.'}`,
       cartTitle: 'Cart | Kervan Makina',
+      guidesTitle: 'Breaker maintenance guides | Kervan Makina',
     },
     nav: {
       label: 'Main menu',
@@ -2504,6 +2511,7 @@ export const DICT: Record<Lang, Dict> = {
     footer: {
       legal: 'Manufacturer and seller',
       docs: 'Legal',
+      guides: 'Guides',
       shop: 'Shop',
       company: 'Company',
       contact: 'Contact',

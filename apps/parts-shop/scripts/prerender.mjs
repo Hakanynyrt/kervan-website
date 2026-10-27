@@ -74,6 +74,7 @@ function gitDates() {
       'public/photos',
       'public/models',
       'src/lib/legal.ts',
+      'src/lib/guides.ts',
     ]);
     for (const line of log.split('\n')) {
       if (line.startsWith('\x01')) date = line.slice(1);
@@ -183,7 +184,7 @@ try {
   fs.writeFileSync(path.join(DIST, ssr.MODEL_INDEX_PATH.slice(1)), ssr.modelIndexJson(pages));
   // The sitemaps (an index and one file per page type and language), each URL with a <lastmod>
   // only where the page has inputs of its own (ssr.pageInputs: a part's pictures and 3D model, a
-  // breaker's own photos, the legal texts): the date of the last git commit that touched one of
+  // breaker's own photos, the legal texts, the guides): the date of the last git commit that touched one of
   // them. Never the build time: one date on every URL, changing with each build, teaches Google
   // to ignore the field. A shallow clone has no history, so it writes no <lastmod> at all.
   const dates = gitDates();

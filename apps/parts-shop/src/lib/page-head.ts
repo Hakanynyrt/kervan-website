@@ -10,6 +10,7 @@ import {
   type HeadInput,
 } from '@kervan/seo';
 import { DICT } from './dict';
+import { GUIDES, GUIDES_PATH } from './guides';
 import { LEGAL, legalPath, SELLER } from './legal';
 import { localePath } from './locale-path';
 import { joinedSpelling } from './model-aliases';
@@ -89,6 +90,13 @@ const RETURN_POLICY = merchantReturnPolicy({
 
 /** The seller on every Offer, written out: its full node is on the home page only. */
 const SELLER_REF = { id: ORG_ID, name: ORG_TRADING_NAME, url: `${SITE}/` };
+/** The same, as a JSON-LD node (the guides' author and publisher). */
+const SELLER_REF_LD = {
+  '@type': 'Organization',
+  '@id': ORG_ID,
+  name: ORG_TRADING_NAME,
+  url: `${SITE}/`,
+} as const;
 
 /**
  * Link-preview pictures (1200×630, `public/og/`) of the part group pages: a studio render of the
@@ -222,6 +230,37 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
         title: `${d.title} | ${m.brand}`,
         description: d.desc,
         jsonLd: crumbs([], t.legal.nav),
+      };
+    }
+    case 'guide': {
+      const g = GUIDES[lang];
+      if (!model.doc)
+        return {
+          ...page,
+          title: m.guidesTitle,
+          description: g.lead,
+          jsonLd: crumbs([], g.title),
+        };
+      const d = g.items[model.doc];
+      return {
+        ...page,
+        title: `${d.title} | ${m.brand}`,
+        description: d.lead,
+        jsonLd: [
+          // No dates or author name: the page shows none (never invent them).
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: d.title,
+            description: d.lead,
+            inLanguage: lang,
+            url,
+            mainEntityOfPage: url,
+            author: SELLER_REF_LD,
+            publisher: SELLER_REF_LD,
+          },
+          crumbs([[g.title, GUIDES_PATH]], d.title),
+        ],
       };
     }
     case 'parts':
