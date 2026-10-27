@@ -48,6 +48,14 @@ const FRAMES = 48;
 const src = (kind: 'kabin' | 'kare', i: number, size: 'md' | 'lg' = 'lg') =>
   `${BASE}-${kind}-06-${String(i).padStart(2, '0')}-${size}.webp`;
 const SMALL_MQ = '(max-width: 900px)';
+/** The final picture's sources, shared with its `<link rel="preload">` in the prerendered head
+ *  of the home (`openingPreload`, entry-server.tsx): it is the home's LCP image on phones. */
+const FINAL_SRCSET = `${FINAL}-sm.webp 1000w, ${FINAL}-lg.webp 1600w, ${BASE}-kare-06-47-lg.webp 2864w`;
+/** React 18 does not know `fetchPriority`; the lowercase attribute goes through as it is. */
+const HIGH = { fetchpriority: 'high' } as Record<string, string>;
+const FINAL_SIZES = `(max-width: 767px) ${PHONE_L}px, 100vw`;
+export const openingPreload = (): string =>
+  `<link rel="preload" as="image" href="${FINAL}-lg.webp" imagesrcset="${FINAL_SRCSET}" imagesizes="${FINAL_SIZES}" fetchpriority="high" />`;
 /** Width of the `-md` frames. */
 const FRAME_MD_PX = 1280;
 /** Timeline (ms): pause on the housed breaker, housing slide, cylinder fade, opening. */
@@ -138,13 +146,22 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
         : createImageBitmap(b, { resizeWidth: dw, resizeHeight: dh, resizeQuality: 'high' }).catch(
             () => createImageBitmap(b),
           );
+    // One decode at a time, with a yield to the main thread before each, so taps and scrolling
+    // are not held behind a burst of decodes (mobile INP / TBT).
+    let queue: Promise<unknown> = Promise.resolve();
+    const yieldNow = () => new Promise<void>((res) => window.setTimeout(res, 0));
+    const decodeQueued = (b: Blob) => {
+      const done = queue.then(yieldNow).then(() => decode(b));
+      queue = done.catch(() => undefined);
+      return done;
+    };
     const bitmaps: (ImageBitmap | null | undefined)[] = [];
     const want = (i: number) => {
       for (let j = i; j < Math.min(urls.length, i + AHEAD); j++) {
         const b = blobs[j];
         if (bitmaps[j] !== undefined || !b) continue;
         bitmaps[j] = null;
-        b.then(decode).then(
+        b.then(decodeQueued).then(
           (bm) => {
             if (cancelled) bm.close();
             else bitmaps[j] = bm;
@@ -230,7 +247,18 @@ function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
       root.setAttribute('data-kv-open', 'play');
       raf = requestAnimationFrame(step);
     };
-    const start = () => {
+    // Frames start after the page has loaded and the browser is idle, so they never compete with
+    // the page's own first paint (the housed breaker shows meanwhile).
+    const afterLoad = (go: () => void) => {
+      const idle = () =>
+        typeof window.requestIdleCallback === 'function'
+          ? window.requestIdleCallback(go, { timeout: 600 })
+          : setTimeout(go, 50);
+      if (document.readyState === 'complete') idle();
+      else window.addEventListener('load', idle, { once: true });
+    };
+    const start = () => afterLoad(startNow);
+    const startNow = () => {
       if (cancelled) return;
       pump();
       giveUp = window.setTimeout(() => finish(), 1500);
@@ -292,21 +320,20 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
         <div className="kv-open-pic">
           <div className="kv-open-img">
             <picture>
-              <source
-                srcSet={`${FINAL}-sm.webp 1000w, ${FINAL}-lg.webp 1600w, ${BASE}-kare-06-47-lg.webp 2864w`}
-                sizes={`(max-width: 767px) ${PHONE_L}px, 100vw`}
-              />
+              <source srcSet={FINAL_SRCSET} sizes={FINAL_SIZES} />
               <img
                 src={`${FINAL}-lg.webp`}
                 width={W}
                 height={H}
                 alt={p.alt}
+                {...HIGH}
                 decoding="async"
                 className="kv-open-final block h-full w-full"
               />
             </picture>
-            {/* The breaker in its housing, shown only while the opening is pending (lazy: never
-                fetched otherwise), and the canvas the frames play on. */}
+            {/* The breaker in its housing, shown only while the opening is pending, and the canvas
+                the frames play on. Not lazy: it is the first thing painted when the opening plays
+                (index.html also preloads it then); otherwise it costs one small frame. */}
             <picture>
               <source media={SMALL_MQ} srcSet={src('kabin', 0, 'md')} />
               <img
@@ -314,7 +341,6 @@ export default function ExplodedPicker({ lang, t }: { lang: Lang; t: Dict }) {
                 width={W}
                 height={H}
                 alt=""
-                loading="lazy"
                 decoding="async"
                 className="kv-open-first absolute inset-0 h-full w-full"
               />

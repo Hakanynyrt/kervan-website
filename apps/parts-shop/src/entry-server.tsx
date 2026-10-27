@@ -8,6 +8,7 @@ import {
 } from '@kervan/seo';
 import type { PublicCatalog } from '@kervan/tips';
 import App from './App';
+import { openingPreload } from './components/ExplodedPicker';
 import { hasAlternates, isIndexable, pageHead, SITE } from './lib/page-head';
 import { LANGS, localePath } from './lib/locale-path';
 import { modelIndex } from './lib/finder';
@@ -53,7 +54,9 @@ export function prerender(catalog: PublicCatalog): PrerenderPage[] {
       out.push({
         file: fileFor(localePath(p.path, lang)),
         lang,
-        headTags: buildHeadTags(pageHead(props)),
+        headTags:
+          buildHeadTags(pageHead(props)) +
+          (p.model.kind === 'home' ? `\n    ${openingPreload()}` : ''),
         appHtml: render(props),
         props,
         indexable: isIndexable(props),

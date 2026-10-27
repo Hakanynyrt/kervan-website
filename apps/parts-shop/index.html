@@ -42,6 +42,17 @@
             !sessionStorage.getItem('kv_open_played')
           ) {
             h.setAttribute('data-kv-open', '1');
+            // The housed breaker is the first thing painted: fetch it first (same sources as
+            // ExplodedPicker's .kv-open-first).
+            var l = document.createElement('link');
+            l.rel = 'preload';
+            l.as = 'image';
+            l.setAttribute('fetchpriority', 'high');
+            l.href =
+              '/photos/parca/acilis-kabin-06-00-' +
+              (window.matchMedia('(max-width: 900px)').matches ? 'md' : 'lg') +
+              '.webp';
+            document.head.appendChild(l);
             setTimeout(function () {
               if (!window.__kvOpen) h.removeAttribute('data-kv-open');
             }, 6000);
