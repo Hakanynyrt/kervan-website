@@ -17,6 +17,7 @@ import { fmtNum } from '../lib/format';
 import {
   isRockDrill,
   otherSpelling,
+  partAbout,
   renderFits,
   renderModel,
   renderSeoName,
@@ -66,6 +67,7 @@ export default function PartItem({
   const fittedNow = !!r.fitted && withB;
   const cents = fittedNow ? model.priceFitted : model.price;
   const itemPath = partItemPath(model.part, model.anchor);
+  const about = partAbout(r, model.part, t, lang);
   const ctx: Ctx = {
     part: model.part,
     name: p.name,
@@ -95,6 +97,9 @@ export default function PartItem({
       <PageTitle>{renderSeoName(r, model.part, t)}</PageTitle>
       <p className="m-0 mt-3 max-w-prose font-sans text-base text-ink-soft">
         {renderFits(r, t)} {p.body}
+      </p>
+      <p className="m-0 mt-3 max-w-prose font-sans text-base text-ink-mid">
+        {about.fit} {about.body}
       </p>
       <OemLine t={t} kit={model.part === 'tamir-takimi'} />
       <OemNumbers numbers={model.oem} t={t} note className="mt-3" />

@@ -17,6 +17,7 @@ import { fmtNum } from './format';
 import {
   isRockDrill,
   otherSpelling,
+  partAbout,
   renderModel,
   renderSeoName,
   renderTitle,
@@ -261,7 +262,19 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
           rockDrill: r ? isRockDrill(r) : false,
         });
       // The other spelling ("MTB210", "SB 50") only while the description stays short.
-      const description = other && desc(other).length <= DESC_MAX ? desc(other) : desc(null);
+      // The fit sentence ("MTB 210 hidrolik kırıcısına uyumlu kama.") leads when it fits.
+      const fitDesc = r
+        ? m.partItemFitDesc(partAbout(r, model.part, t, lang).fit, {
+            kit: model.part === 'tamir-takimi',
+            priced: cents !== null,
+          })
+        : null;
+      const description =
+        fitDesc && fitDesc.length <= DESC_MAX
+          ? fitDesc
+          : other && desc(other).length <= DESC_MAX
+            ? desc(other)
+            : desc(null);
       // Other names of the part (no OEM numbers here): its caption and the other spelling.
       const alternateName = [
         ...new Set([

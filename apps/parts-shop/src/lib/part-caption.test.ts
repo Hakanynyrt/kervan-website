@@ -2,7 +2,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DICT } from './dict.ts';
 import type { PartRender } from './photos.ts';
-import { distinctLabels, otherSpelling, renderFits, renderSeoName } from './part-caption.ts';
+import {
+  distinctLabels,
+  otherSpelling,
+  partAbout,
+  renderFits,
+  renderSeoName,
+} from './part-caption.ts';
 
 test('otherSpelling: joins a spaced model, spaces a joined one', () => {
   assert.equal(otherSpelling('MTB 210'), 'MTB210');
@@ -48,5 +54,28 @@ test('item page names: rock drill parts are not breaker parts, no double bracket
       rockDrill: false,
     });
     assert.equal(desc.split('MTB 210').length - 1 + desc.split('MTB210').length - 1, 2);
+  }
+});
+
+test('partAbout: fit sentence names the model, every group has its own text, no numbers', () => {
+  const tr = partAbout({ model: 'Soosan SB60' } as PartRender, 'kama', DICT.tr, 'tr');
+  assert.equal(tr.fit, 'Soosan SB60 hidrolik kırıcısına uyumlu kama.');
+  const drill = partAbout(
+    { model: 'COP 1032', kind: 'rockDrillThrustRing' } as PartRender,
+    'burc',
+    DICT.tr,
+    'tr',
+  );
+  assert.match(drill.fit, /kaya delicisine/);
+  for (const lang of ['tr', 'en'] as const) {
+    const a = DICT[lang].parts.item.about;
+    const bodies = [...Object.values(a.groups), ...Object.values(a.kinds)];
+    assert.equal(new Set(bodies).size, bodies.length);
+    for (const b of bodies) {
+      assert.doesNotMatch(b, /\d|orijinal|original/i);
+      const n = b.split(/[.!?](\s|$)/).filter((x) => x.trim().length > 1).length;
+      assert.ok(n >= 2 && n <= 4, b);
+    }
+    for (const k of Object.keys(DICT[lang].parts.items)) assert.ok(a.groups[k as 'kama']);
   }
 });
