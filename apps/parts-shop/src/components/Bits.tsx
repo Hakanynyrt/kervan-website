@@ -4,7 +4,7 @@ import { MAX_QTY } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { LEGAL, legalPath } from '../lib/legal';
 import { localePath } from '../lib/locale-path';
-import { PLANT_PHOTOS } from '../lib/photos';
+import { PLANT_PHOTOS, PLANT_WIDE } from '../lib/photos';
 import type { PartKey } from '../lib/routes';
 import { warrantyMonths } from '../lib/warranty';
 import type { Lang } from '../types';
@@ -526,6 +526,28 @@ export function PlantPhotos({
               />
               <figcaption className="mt-2 font-sans text-sm text-ink-mid">
                 {pl.items[i].caption}
+              </figcaption>
+            </figure>
+          </li>
+        ))}
+      </ul>
+      <ul className="m-0 mt-4 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+        {PLANT_WIDE.map((p, i) => (
+          <li key={p}>
+            <figure className="m-0">
+              <img
+                src={photoImg(p, 'sm')}
+                srcSet={photoSet(p, ['sm', 640], ['lg', 1280])}
+                sizes="(min-width: 1024px) 390px, (min-width: 640px) 50vw, 100vw"
+                width={640}
+                height={480}
+                alt={pl.wide[i].alt}
+                loading="lazy"
+                decoding="async"
+                className="block h-auto w-full rounded-sm border border-hair bg-bg-warm"
+              />
+              <figcaption className="mt-2 font-sans text-sm text-ink-mid">
+                {pl.wide[i].caption}
               </figcaption>
             </figure>
           </li>

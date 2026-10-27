@@ -139,6 +139,31 @@ export const DICT: Dict = {
           img: '/photos/atolye/cnc-machining.jpeg',
         },
         {
+          name: 'Torna holü',
+          desc: 'CNC tornalar, vinç ve burç rafları',
+          img: '/photos/atolye/torna-holu-01.jpg',
+        },
+        {
+          name: 'Büyük CNC torna',
+          desc: 'Alt gövdeler burada işlenir',
+          img: '/photos/atolye/puma-torna-01.jpg',
+        },
+        {
+          name: 'Alt gövde blokları',
+          desc: 'İşlenmiş gövdeler ve uçlar',
+          img: '/photos/atolye/puma-torna-yan-01.jpg',
+        },
+        {
+          name: 'CNC freze',
+          desc: 'Kırıcı kaması imalatı',
+          img: '/photos/atolye/cnc-freze-01.jpg',
+        },
+        {
+          name: 'Saplama stoğu',
+          desc: 'Modele göre raflarda',
+          img: '/photos/atolye/saplama-rafi-01.jpg',
+        },
+        {
           name: 'Isıl işlem',
           desc: 'Sertleştirme fırını, lot kontrolü',
           img: '/videos/atolye/furnace-01.jpg',
@@ -735,6 +760,31 @@ export const DICT: Dict = {
           name: 'CNC machining',
           desc: 'Tight tolerance, under sparks',
           img: '/photos/atolye/cnc-machining.jpeg',
+        },
+        {
+          name: 'Turning hall',
+          desc: 'CNC lathes, crane and bushing shelves',
+          img: '/photos/atolye/torna-holu-01.jpg',
+        },
+        {
+          name: 'Large CNC lathe',
+          desc: 'Where front heads are machined',
+          img: '/photos/atolye/puma-torna-01.jpg',
+        },
+        {
+          name: 'Front-head blocks',
+          desc: 'Machined bodies and tools',
+          img: '/photos/atolye/puma-torna-yan-01.jpg',
+        },
+        {
+          name: 'CNC milling',
+          desc: 'Machining retainer keys',
+          img: '/photos/atolye/cnc-freze-01.jpg',
+        },
+        {
+          name: 'Tie-rod stock',
+          desc: 'On shelves by model',
+          img: '/photos/atolye/saplama-rafi-01.jpg',
         },
         {
           name: 'Heat treatment',
