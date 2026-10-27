@@ -10,6 +10,7 @@ export default tseslint.config(
       '**/dist/**',
       '**/dist-ssr/**',
       '**/node_modules/**',
+      '.impeccable/**',
       '**/.turbo/**',
       '**/.wrangler/**',
       // parts-shop build artefacts (gitignored)

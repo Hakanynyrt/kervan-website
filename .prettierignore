@@ -12,3 +12,4 @@ apps/*/dist
 *.svg
 package-lock.json
 pnpm-lock.yaml
+.impeccable
