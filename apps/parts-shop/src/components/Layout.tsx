@@ -73,7 +73,9 @@ function OrderLine({
   phoneClass?: string;
   className?: string;
 }) {
-  const link = `underline decoration-hair-strong underline-offset-[3px] hover:text-brand-hi ${FOCUS}`;
+  // Phones: vertical padding on the inline links gives a 44 px tap target without changing the
+  // line (inline padding does not move the line box).
+  const link = `underline decoration-hair-strong underline-offset-[3px] hover:text-brand-hi max-lg:py-[14px] ${FOCUS}`;
   return (
     <p className={`m-0 font-sans text-ink-mid ${className}`}>
       <strong className="font-semibold text-ink">{t.nav.order.label}</strong>{' '}
@@ -207,7 +209,7 @@ export default function Layout({
             <CartLink lang={lang} t={t} current={path === CART_PATH} />
             <a
               href={whatsappHref(quoteText ?? t.nav.quoteText)}
-              className={`inline-flex min-h-[38px] items-center whitespace-nowrap rounded-sm bg-brand px-2.5 font-semibold min-[23.4375rem]:px-3 text-on-brand hover:bg-brand-hi sm:min-h-10 sm:px-[18px] ${FOCUS}`}
+              className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-sm bg-brand px-2.5 font-semibold min-[23.4375rem]:px-3 text-on-brand hover:bg-brand-hi lg:min-h-10 sm:px-[18px] ${FOCUS}`}
             >
               {/* Short where the row is tight: phones, and beside the search below 1280 px. */}
               <span className="sm:hidden lg:inline xl:hidden">{t.nav.quoteShort}</span>
@@ -413,12 +415,18 @@ export default function Layout({
             <p className={HEAD}>{t.footer.contact}</p>
             <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0">
               <li>
-                <a href={SELLER_TEL} className={`hover:text-ink ${FOCUS}`}>
+                <a
+                  href={SELLER_TEL}
+                  className={`hover:text-ink max-lg:inline-flex max-lg:min-h-11 max-lg:items-center ${FOCUS}`}
+                >
                   {SELLER.phone}
                 </a>
               </li>
               <li>
-                <a href={`tel:${ORG_PHONE_E164}`} className={`hover:text-ink ${FOCUS}`}>
+                <a
+                  href={`tel:${ORG_PHONE_E164}`}
+                  className={`hover:text-ink max-lg:inline-flex max-lg:min-h-11 max-lg:items-center ${FOCUS}`}
+                >
                   {ORG_PHONE}
                 </a>
               </li>

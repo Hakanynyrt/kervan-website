@@ -203,7 +203,7 @@ export function MissingModel({
       <p className="m-0 mt-2 max-w-3xl text-sm text-ink-mid">{t.missing.body}</p>
       <a
         href={whatsappHref(query ? t.missing.textFor(query, filters) : t.missing.text)}
-        className={`mt-4 inline-block rounded-sm bg-whatsapp px-5 py-3 text-sm font-medium text-white ${FOCUS}`}
+        className={`mt-4 inline-flex min-h-11 items-center rounded-sm bg-whatsapp px-5 py-3 text-sm font-medium text-white ${FOCUS}`}
       >
         {t.missing.button}
       </a>

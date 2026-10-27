@@ -524,7 +524,7 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
             <p className="m-0 min-w-0 text-[13.5px] text-ink">{t.missing.title}</p>
             <a
               href={whatsappHref(sel ? t.missing.textFor(sel.name) : t.missing.text)}
-              className={`inline-flex min-h-[38px] shrink-0 items-center rounded-sm bg-whatsapp px-4 text-sm font-medium text-white ${FOCUS}`}
+              className={`inline-flex min-h-11 shrink-0 items-center rounded-sm bg-whatsapp lg:min-h-[38px] px-4 text-sm font-medium text-white ${FOCUS}`}
             >
               {t.missing.button}
             </a>
@@ -553,13 +553,13 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
             <div className="grid grid-cols-2 gap-2 md:flex">
               <a
                 href={whatsappHref(t.nav.quoteText)}
-                className={`inline-flex min-h-[42px] items-center justify-center whitespace-nowrap rounded-sm bg-whatsapp px-2 text-sm font-medium text-white md:px-[18px] ${FOCUS}`}
+                className={`inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-sm bg-whatsapp lg:min-h-[42px] px-2 text-sm font-medium text-white md:px-[18px] ${FOCUS}`}
               >
                 {h.order.whatsapp}
               </a>
               <a
                 href={`mailto:${ORDER_EMAIL}`}
-                className={`inline-flex min-h-[42px] items-center justify-center whitespace-nowrap rounded-sm border border-ink-soft bg-bg px-2 text-sm text-ink hover:bg-bg-warm md:px-[18px] ${FOCUS}`}
+                className={`inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-sm border lg:min-h-[42px] border-ink-soft bg-bg px-2 text-sm text-ink hover:bg-bg-warm md:px-[18px] ${FOCUS}`}
               >
                 {h.order.mail}
               </a>
