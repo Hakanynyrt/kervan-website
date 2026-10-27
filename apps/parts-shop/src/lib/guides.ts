@@ -1,0 +1,233 @@
+/**
+ * "Rehber": short how-to articles for questions buyers search for (owner, 2026-10-27, SEO plan
+ * item 4). General workshop facts only: no figures, references or claims we cannot stand behind;
+ * limits always point to the breaker's own manual. Each article links the part groups it is about.
+ * The owner approves every text before it is published.
+ */
+import type { PartKey } from './routes';
+import type { Lang } from '../types';
+
+export const GUIDE_KEYS = [
+  'kirici-ucu-ne-zaman-degisir',
+  'kirici-burcu-ne-zaman-degisir',
+  'kirici-kamasi-neden-kirilir',
+] as const;
+export type GuideKey = (typeof GUIDE_KEYS)[number];
+
+export const GUIDES_PATH = '/rehber';
+export const guidePath = (k: GuideKey): string => `${GUIDES_PATH}/${k}`;
+
+export interface Guide {
+  title: string;
+  /** Meta description and the lead under the title. */
+  lead: string;
+  sections: { h: string; p: readonly string[] }[];
+  /** Part groups the article is about ('tips' for the tip pages). */
+  links: readonly (PartKey | 'tips')[];
+}
+
+export const GUIDES: Record<
+  Lang,
+  { title: string; lead: string; more: string; items: Record<GuideKey, Guide> }
+> = {
+  tr: {
+    title: 'Rehber',
+    lead: 'Hidrolik kırıcı parçalarının bakımı ve değişimi üzerine kısa notlar.',
+    more: 'İlgili parçalar',
+    items: {
+      'kirici-ucu-ne-zaman-degisir': {
+        title: 'Kırıcı ucu ne zaman değiştirilir?',
+        lead: 'Uç aşınan bir parçadır; zamanında değiştirilmezse burçları, kamayı ve pistonu da yorar. Değişim zamanını gösteren işaretler.',
+        sections: [
+          {
+            h: 'Uç boyu kısaldıysa',
+            p: [
+              'Uç çalıştıkça kısalır. Kırıcı üreticisinin kullanım kılavuzunda ucun en kısa kullanım boyu verilir; uç bu boya indiyse değiştirilmelidir. Kısa uçla çalışmak hem verimi düşürür hem de alt gövdeye ve burçlara yük bindirir.',
+            ],
+          },
+          {
+            h: 'Ucun arka yüzü ezildiyse (mantarlaşma)',
+            p: [
+              'Pistonun vurduğu arka yüz zamanla ezilip kenarlarından taşabilir. Taşan kenar burç içinde sıkışır, ucun düzgün çalışmasını engeller ve pistona zarar verebilir. Arka yüzde taşma ya da çatlak görülürse uç değiştirilmelidir.',
+            ],
+          },
+          {
+            h: 'Uçta çatlak ya da kırık varsa',
+            p: [
+              'Çatlak uç her an kırılabilir. Kırılmanın nedeni çoğu zaman kullanımdır: boşta vuruş, ucu levye gibi kullanmak, yanal ya da eğik vuruş ve yağlamasız çalışma. Yeni uç takmadan önce burçları da kontrol edin.',
+            ],
+          },
+          {
+            h: 'Ucu değiştirirken',
+            p: [
+              'Uçla birlikte burçları ve kamayı da kontrol edin; aşınmış burç yeni ucu da erken kırar. Takarken ucun kama kanalına ve burç yüzeyine gres sürün. Kırıcınızın marka ve modeline uyan ucu kırıcı ucu sayfalarından seçebilirsiniz.',
+            ],
+          },
+        ],
+        links: ['tips', 'burc', 'kama'],
+      },
+      'kirici-burcu-ne-zaman-degisir': {
+        title: 'Kırıcı burcu ne zaman değiştirilir?',
+        lead: 'Burçlar ucu yönlendirir. Aşınmış burç ucu eğik çalıştırır; uç, piston ve alt gövde erken bozulur.',
+        sections: [
+          {
+            h: 'Uç ile burç arasındaki boşluk',
+            p: [
+              'Burç aşındıkça uç ile burç arasındaki boşluk büyür. İzin verilen en büyük boşluk kırıcının kullanım kılavuzunda yazar. Boşluğu ucun gövdesi ile burcun iç çapı arasından ölçün; sınır aşıldıysa burç değiştirilmelidir.',
+            ],
+          },
+          {
+            h: 'Aşınmanın belirtileri',
+            p: [
+              'Ucun yanlara fazla oynaması, burç iç yüzeyinde oval aşınma, çizik ya da yanık izleri ve ucun gövdesinde tek taraflı aşınma burcun yorulduğunu gösterir.',
+            ],
+          },
+          {
+            h: 'Burç değişirken',
+            p: [
+              'Kafa burcu ve dayama burcu (merkezleme) birlikte kontrol edilir; bazı kırıcılarda ikisi tek parçadır. Yeni burçla birlikte ucu da kontrol edin, aşınmış uç yeni burcu çabuk bozar. Burç yuvasının alt gövdede düzgün olduğundan emin olun.',
+            ],
+          },
+          {
+            h: 'Burcun ömrünü uzatmak için',
+            p: [
+              'Düzenli gres yağı verin, boşta vuruş yapmayın, ucu levye gibi kullanmayın ve kırıcıyı vurduğu yüzeye dik tutun.',
+            ],
+          },
+        ],
+        links: ['burc', 'tips', 'alt-govde'],
+      },
+      'kirici-kamasi-neden-kirilir': {
+        title: 'Kırıcı kaması neden kırılır?',
+        lead: 'Kama ucu alt gövdede tutar. Kırılan ya da eğilen kama çoğu zaman başka bir sorunun işaretidir.',
+        sections: [
+          {
+            h: 'Boşta vuruş',
+            p: [
+              'Uç bir yüzeye dayanmadan kırıcı çalıştırılırsa pistonun darbesi ucu ileri iter ve bu yükü kama karşılar. Boşta vuruş kamanın kırılmasının en sık nedenidir.',
+            ],
+          },
+          {
+            h: 'Aşınmış uç ya da burç',
+            p: [
+              'Ucun kama kanalı aşındıysa ya da burçlar boşluk yaptıysa uç eğik çalışır ve kamaya darbeli yük biner. Kamayı değiştirirken ucun kama kanalını ve burçları da kontrol edin.',
+            ],
+          },
+          {
+            h: 'Yağlamasız çalışma',
+            p: [
+              'Gres verilmeyen kırıcıda kama ve uç kanalı kuru sürtünür, aşınır ve çentiklenir. Çentikli kama darbe altında kırılır.',
+            ],
+          },
+          {
+            h: 'Kamayı değiştirirken',
+            p: [
+              'Kırıcınızın modeline uyan kamayı ve tutucu pimini birlikte kullanın. Eğilmiş ya da çatlamış kamayı düzeltip yeniden takmayın.',
+            ],
+          },
+        ],
+        links: ['kama', 'tips', 'burc'],
+      },
+    },
+  },
+  en: {
+    title: 'Guides',
+    lead: 'Short notes on maintaining and replacing hydraulic breaker parts.',
+    more: 'Related parts',
+    items: {
+      'kirici-ucu-ne-zaman-degisir': {
+        title: 'When should a breaker tool be replaced?',
+        lead: 'The tool is a wear part; left too long it also wears the bushings, the retainer key and the piston. Signs that it is time to change it.',
+        sections: [
+          {
+            h: 'The tool has got too short',
+            p: [
+              'A tool gets shorter as it works. The breaker manufacturer’s manual gives the shortest usable tool length; at that length the tool should be replaced. A short tool works less well and loads the front head and bushings.',
+            ],
+          },
+          {
+            h: 'The impact face has mushroomed',
+            p: [
+              'The rear face the piston strikes can deform and spread over its edges. The spread edge jams in the bushing, stops the tool working freely and can damage the piston. Replace a tool with a mushroomed or cracked impact face.',
+            ],
+          },
+          {
+            h: 'The tool is cracked or broken',
+            p: [
+              'A cracked tool can break at any time. Breakage is mostly caused by use: blank firing, prying with the tool, side or angled blows and running without grease. Check the bushings before fitting a new tool.',
+            ],
+          },
+          {
+            h: 'When you change the tool',
+            p: [
+              'Check the bushings and the retainer key as well; a worn bushing breaks a new tool early too. Grease the key slot and the bushing surface when fitting. Find the tool for your breaker’s make and model on the tool pages.',
+            ],
+          },
+        ],
+        links: ['tips', 'burc', 'kama'],
+      },
+      'kirici-burcu-ne-zaman-degisir': {
+        title: 'When should a breaker bushing be replaced?',
+        lead: 'Bushings guide the tool. A worn bushing lets the tool work at an angle, and the tool, piston and front head wear early.',
+        sections: [
+          {
+            h: 'Clearance between tool and bushing',
+            p: [
+              'As a bushing wears, the clearance between tool and bushing grows. The largest allowed clearance is in the breaker’s manual. Measure between the tool shank and the bushing bore; past the limit, replace the bushing.',
+            ],
+          },
+          {
+            h: 'Signs of wear',
+            p: [
+              'Too much side play of the tool, an oval or scored bore, burn marks, and wear on one side of the tool shank show a worn bushing.',
+            ],
+          },
+          {
+            h: 'When you change a bushing',
+            p: [
+              'Check the front and the thrust bushing together; on some breakers they are one part. Check the tool too, as a worn tool soon ruins a new bushing. Make sure the bushing seat in the front head is sound.',
+            ],
+          },
+          {
+            h: 'To make bushings last',
+            p: [
+              'Grease regularly, avoid blank firing, never pry with the tool and keep the breaker square to the surface it strikes.',
+            ],
+          },
+        ],
+        links: ['burc', 'tips', 'alt-govde'],
+      },
+      'kirici-kamasi-neden-kirilir': {
+        title: 'Why do breaker retainer keys break?',
+        lead: 'The retainer key holds the tool in the front head. A broken or bent key is usually the sign of another problem.',
+        sections: [
+          {
+            h: 'Blank firing',
+            p: [
+              'Run without the tool resting on a surface, the piston blow drives the tool forward and the key takes that load. Blank firing is the most common cause of broken keys.',
+            ],
+          },
+          {
+            h: 'Worn tool or bushings',
+            p: [
+              'A worn key slot on the tool or slack bushings let the tool work at an angle and put shock loads on the key. Check the tool’s key slot and the bushings when you change the key.',
+            ],
+          },
+          {
+            h: 'Running without grease',
+            p: [
+              'Without grease the key and the tool slot rub dry, wear and notch. A notched key breaks under impact.',
+            ],
+          },
+          {
+            h: 'When you change the key',
+            p: [
+              'Use the key and its retaining pin made for your breaker model together. Do not straighten and refit a bent or cracked key.',
+            ],
+          },
+        ],
+        links: ['kama', 'tips', 'burc'],
+      },
+    },
+  },
+};

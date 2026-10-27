@@ -8,6 +8,7 @@ import Brand from './pages/Brand';
 import Cart from './pages/Cart';
 import Breaker from './pages/Breaker';
 import Family from './pages/Family';
+import Guide from './pages/Guide';
 import Home from './pages/Home';
 import Legal from './pages/Legal';
 import NotFound from './pages/NotFound';
@@ -58,6 +59,7 @@ export default function App({ lang, path, model, fx }: PageProps) {
       {model.kind === 'family' && <Family model={model} path={path} fx={fx} lang={lang} t={t} />}
       {model.kind === 'cart' && <Cart fx={fx} lang={lang} t={t} />}
       {model.kind === 'legal' && <Legal doc={model.doc} lang={lang} t={t} />}
+      {model.kind === 'guide' && <Guide doc={model.doc} lang={lang} t={t} />}
       {model.kind === 'notFound' && <NotFound lang={lang} t={t} />}
     </Layout>
   );
