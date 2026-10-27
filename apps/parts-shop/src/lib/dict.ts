@@ -371,7 +371,14 @@ export interface Dict {
     /** Count line on a product-group card (computed from the renders or the catalogue). */
     groupsTitle: string;
     fitNote: string;
-    plant: { title: string; lead: string; note: string; items: { caption: string; alt: string }[] };
+    plant: {
+      title: string;
+      lead: string;
+      note: string;
+      items: { caption: string; alt: string }[];
+      /** PLANT_WIDE: the landscape row under the four (same order). */
+      wide: { caption: string; alt: string }[];
+    };
     photosAlt: (name: string) => string;
     /** "Rammer E68 alt gövde". */
     renderCaption: (model: string, name: string) => string;
@@ -1094,6 +1101,25 @@ export const DICT: Record<Lang, Dict> = {
             caption: 'Uç stoğumuz: stoktan aynı gün kargo',
             alt: 'Kervan tesisinde sehpalarda kırıcı uçları',
           },
+        ],
+        wide: [
+          {
+            caption: 'Torna holü: CNC tornalar ve burç rafları',
+            alt: 'Kervan tesisinde CNC tornalar, tavan vinci ve burç rafları',
+          },
+          {
+            caption: 'Büyük CNC tornamız ve işlenmiş alt gövdeler',
+            alt: 'Kervan tesisinde büyük CNC torna ve önünde işlenmiş alt gövde blokları',
+          },
+          {
+            caption: 'Alt gövde blokları ve uçlar',
+            alt: 'Kervan tesisinde işlenmiş alt gövde blokları, uçlar ve büyük CNC torna',
+          },
+          {
+            caption: 'CNC frezede gövde işleme',
+            alt: 'Kervan tesisinde CNC freze tezgâhında blok işleme',
+          },
+          { caption: 'Saplama stoğumuz', alt: 'Kervan tesisinde raflarda kırıcı saplamaları' },
         ],
       },
       photosAlt: (name) =>
@@ -2064,6 +2090,25 @@ export const DICT: Record<Lang, Dict> = {
             caption: 'Tip stock: same-day shipping from stock',
             alt: 'Breaker tips on racks at the Kervan plant',
           },
+        ],
+        wide: [
+          {
+            caption: 'Turning hall: CNC lathes and bushing shelves',
+            alt: 'CNC lathes, overhead crane and bushing shelves at the Kervan plant',
+          },
+          {
+            caption: 'Our large CNC lathe and machined front heads',
+            alt: 'Large CNC lathe with machined front-head blocks at the Kervan plant',
+          },
+          {
+            caption: 'Front-head blocks and tools',
+            alt: 'Machined front-head blocks, tools and a large CNC lathe at the Kervan plant',
+          },
+          {
+            caption: 'Milling a body on a CNC mill',
+            alt: 'Machining a block on a CNC milling machine at the Kervan plant',
+          },
+          { caption: 'Our tie-rod stock', alt: 'Breaker tie rods on shelves at the Kervan plant' },
         ],
       },
       photosAlt: (name) => `${name} in stock at the Kervan plant`,

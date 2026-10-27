@@ -2534,6 +2534,16 @@ export const PLANT_PHOTOS = [
   '/photos/tesis/uc-stok-01',
 ] as const;
 
+/** More plant photos, 4:3 landscape and uncropped (`-sm` 640 px, `-lg` 1280 px; people removed,
+ *  owner 2026-10-27): the row under the four on /yedek-parca. Captions: `parts.plant.wide`. */
+export const PLANT_WIDE = [
+  '/photos/tesis/torna-holu-01',
+  '/photos/tesis/puma-torna-01',
+  '/photos/tesis/puma-torna-yan-01',
+  '/photos/tesis/cnc-freze-01',
+  '/photos/tesis/saplama-rafi-01',
+] as const;
+
 /**
  * Special tools modelled from our drawings, shown on the breaker's tip page next to the catalogue
  * tips, before "Stoğumuzdan" (hero only, `<base>-vitrin-<v>`): tools with dust grooves ("toz
