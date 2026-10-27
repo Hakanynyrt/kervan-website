@@ -42,6 +42,10 @@
   Cache-Control: public, max-age=31536000, immutable
 /icon-maskable-512-02.png
   Cache-Control: public, max-age=31536000, immutable
+# Summary of the shop for AI assistants (llmstxt.org); no prices.
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=3600
 /manifest.webmanifest
   Content-Type: application/manifest+json
   Cache-Control: public, max-age=3600
