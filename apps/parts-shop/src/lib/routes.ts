@@ -1,5 +1,6 @@
 import {
   breakerGroupKey,
+  breakerKeys,
   byPopularity,
   displayBreakers,
   fold,
@@ -141,6 +142,8 @@ export type PageModel =
       priceFitted: number | null;
       /** Genuine OEM numbers of the part ours is compatible with ("Muadil OEM no."); never mpn/sku. */
       oem: readonly string[];
+      /** The breaker pages this part fits (the item's facts block), all data those pages show. */
+      fitsBreakers: ItemFit[];
       demo: boolean;
       hasPopular: boolean;
     }
@@ -178,6 +181,19 @@ export type PageModel =
   | { kind: 'cart'; demo: boolean; hasPopular: boolean }
   | { kind: 'legal'; doc: LegalKey; demo: boolean; hasPopular: boolean }
   | { kind: 'notFound' };
+
+/**
+ * A breaker a part item fits, for the item's facts block: only what the breaker's own page
+ * already shows (its name, other spellings and working diameter, never the length).
+ */
+export interface ItemFit {
+  name: string;
+  /** Neutral path of the breaker page; null when the shop has none for it. */
+  path: string | null;
+  /** Other spellings, make included ("Furukawa HB20G"). */
+  aliases: string[];
+  diameterMm: number | null;
+}
 
 export interface BrandLink {
   name: string;
@@ -520,6 +536,25 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       if (!specialSeen.has(b))
         console.warn(`buildPages: special tools of "${b}" match no breaker of the catalog`);
   const tipPaths = new Map(cards.map((x) => [fold(x.name), x.path]));
+  const breakerByKey = new Map([...breakers].map(([slug, e]) => [fold(e.name), { slug, e }]));
+  // The breaker pages a part fits ("Krupp HM 560 / 580" names two), else its caption's model.
+  const fitsOf = (r: PartRender): ItemFit[] => {
+    const hits = [
+      ...new Map(
+        breakerKeys(r.model).flatMap((k) => {
+          const b = breakerByKey.get(k);
+          return b ? [[b.slug, b] as const] : [];
+        }),
+      ).values(),
+    ];
+    if (!hits.length) return [{ name: r.model, path: null, aliases: [], diameterMm: null }];
+    return hits.map(({ slug, e }) => ({
+      name: e.name,
+      path: breakerPath(slug),
+      aliases: e.aliases.map((x) => `${e.brand} ${x}`),
+      diameterMm: e.families[0]?.attrs.diameterMm ?? e.extra?.diameterMm ?? null,
+    }));
+  };
   const popular = cards.filter((x) => x.popularTier !== null).sort(byPopularity);
   const hasPopular = popular.length > 0;
   const partPrices = resolvePartPrices(c.partPrices ?? []);
@@ -623,6 +658,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
             price: partPrices.get(`${part}/${anchor}`) ?? null,
             priceFitted: partPrices.get(`${part}/${anchor}#b`) ?? null,
             oem: OEM_NUMBERS[`${part}/${anchor}`] ?? [],
+            fitsBreakers: fitsOf(r),
             demo,
             hasPopular,
           },

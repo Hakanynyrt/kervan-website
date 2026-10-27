@@ -526,6 +526,7 @@ export function QuotePanel({
   text,
   t,
   part,
+  compact,
 }: {
   name: string;
   breaker: string;
@@ -536,6 +537,8 @@ export function QuotePanel({
   t: Dict;
   /** The part group, for its warranty period in the sale terms. */
   part?: PartKey;
+  /** The page language on an item page: the one-line sale terms (`Terms`). */
+  compact?: Lang;
 }) {
   return (
     <div className="lg:sticky lg:top-6">
@@ -576,7 +579,7 @@ export function QuotePanel({
         </div>
       </div>
       <div className="mt-6">
-        <Terms t={t} part={part} />
+        <Terms t={t} part={part} compact={compact} />
       </div>
     </div>
   );

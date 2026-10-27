@@ -83,13 +83,14 @@ else
   fail=1
 fi
 robotstxt=$("${CURL[@]}" https://kiriciparca.com/robots.txt | tr -d '\r')
-if grep -qx 'Sitemap: https://kiriciparca.com/sitemap.xml' <<<"$robotstxt"; then
+if grep -qx 'Sitemap: https://kiriciparca.com/sitemap-index.xml' <<<"$robotstxt"; then
   echo "ok    robots.txt names the sitemap  https://kiriciparca.com/robots.txt"
 else
-  echo "FAIL  robots.txt has no 'Sitemap: https://kiriciparca.com/sitemap.xml' line"
+  echo "FAIL  robots.txt has no 'Sitemap: https://kiriciparca.com/sitemap-index.xml' line"
   fail=1
 fi
 # Any XML content type (application/xml or text/xml).
+check https://kiriciparca.com/sitemap-index.xml 200 ''
 check https://kiriciparca.com/sitemap.xml 200 ''
 # The old shop hosts 301 to the new domain, path kept (zone Redirect Rules).
 for old in https://magaza.kervanbreaker.com https://shop.kervanbreaker.com https://www.kiriciparca.com; do

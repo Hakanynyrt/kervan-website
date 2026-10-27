@@ -39,8 +39,26 @@ export { SITE };
 const NOINDEX_KINDS = new Set<PageProps['model']['kind']>(['cart', 'notFound', 'family']);
 const NOINDEX = 'noindex, follow';
 
+/**
+ * The switch (owner, 2026-10-27, after the SEO audit): while on, the ENGLISH part item pages
+ * (/en/yedek-parca/<group>/<item>) are `noindex, follow` and out of the sitemaps, and no item
+ * page, Turkish or English, carries hreflang (a Turkish page must not point at a noindexed
+ * alternate). The English home, model, tip, group and legal pages stay indexable. Turn it off
+ * (false) to index the English item pages again; check-dist reads this line.
+ */
+export const HOLD_EN_PART_ITEMS = true;
+
+/** An English part item page held out of the index by HOLD_EN_PART_ITEMS. */
+const heldEn = (p: Pick<PageProps, 'lang' | 'model'>): boolean =>
+  HOLD_EN_PART_ITEMS && p.lang === 'en' && p.model.kind === 'partItem';
+
+/** Whether a page has tr / en hreflang alternates (head and sitemap): not the held item pages. */
+export const hasAlternates = (p: Pick<PageProps, 'model'>): boolean =>
+  !(HOLD_EN_PART_ITEMS && p.model.kind === 'partItem');
+
 /** Whether a page belongs in the sitemap (scripts/prerender.mjs). */
-export const isIndexable = (p: PageProps): boolean => !NOINDEX_KINDS.has(p.model.kind);
+export const isIndexable = (p: PageProps): boolean =>
+  !NOINDEX_KINDS.has(p.model.kind) && !heldEn(p);
 
 /** The seller on every Offer: the Organization on the home page. */
 const ORG_ID = `${SITE}/#organization`;
@@ -129,8 +147,8 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
   const page = {
     ...base,
     canonical: url,
-    alternates,
-    ...(NOINDEX_KINDS.has(model.kind) ? { robots: NOINDEX } : {}),
+    ...(hasAlternates({ model }) ? { alternates } : {}),
+    ...(NOINDEX_KINDS.has(model.kind) || heldEn({ lang, model }) ? { robots: NOINDEX } : {}),
   };
   const abs = (p: string): string => SITE + localePath(p, lang);
   // The visible breadcrumb (components/Bits.tsx Breadcrumb): home, the trail, this page.
@@ -257,6 +275,9 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
         description,
         ...(image ? { ogImage: image } : {}),
         jsonLd: [
+          // Product (with its Offer) only where the page shows a price AND has its own picture:
+          // Google needs an image for a product result. Without either, a WebPage, as before. No
+          // sku: an item has no permanent Kervan code (its URL slug is not one); never OEM numbers.
           productLd({
             url,
             name: seoName,
@@ -265,7 +286,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
             image,
             brand: ORG_TRADING_NAME,
             category: name,
-            ...(cents !== null ? { offer: offerOf(cents) } : {}),
+            ...(cents !== null && image ? { offer: offerOf(cents) } : {}),
           }),
           crumbs([partsCrumb, [name, partPath(model.part)]], r ? renderModel(r, t) : model.anchor),
         ],

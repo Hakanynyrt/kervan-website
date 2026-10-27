@@ -490,7 +490,7 @@ export default function TipProduct({
               </a>
             </div>
           </div>
-          <Terms t={t} />
+          <Terms t={t} compact={lang} />
         </aside>
       </div>
 

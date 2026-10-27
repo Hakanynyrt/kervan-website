@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment, useState, type ReactNode } from 'react';
 import type { FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import {
@@ -13,7 +13,16 @@ import { FOCUS } from '../components/Layout';
 import { PartOrder, PartPriceLine, partOrderText, priceNote } from '../components/PartOrder';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { renderFits, renderModel, renderSeoName, renderTitle } from '../lib/part-caption';
+import { fmtNum } from '../lib/format';
+import {
+  isRockDrill,
+  otherSpelling,
+  renderFits,
+  renderModel,
+  renderSeoName,
+  renderTitle,
+} from '../lib/part-caption';
+import type { PartRender } from '../lib/photos';
 import { findRender } from '../lib/part-links';
 import { PARTS_PATH, partItemPath, partPath, type PageModel } from '../lib/routes';
 import type { Lang } from '../types';
@@ -122,6 +131,7 @@ export default function PartItem({
               )}
             </ul>
           </nav>
+          <Facts model={model} name={partName} r={r} lang={lang} t={t} />
           {related.length > 0 && (
             <section
               aria-labelledby="related-parts"
@@ -169,6 +179,7 @@ export default function PartItem({
               text={text}
               t={t}
               part={model.part}
+              compact={lang}
             />
           )}
         </aside>
@@ -191,5 +202,77 @@ export default function PartItem({
         <StickyQuote text={text} t={t} />
       )}
     </Container>
+  );
+}
+
+/**
+ * The item's own facts, all already on the site: its group and part, the breakers it fits
+ * (linked to their pages) with their other spellings and working diameter (never a length or
+ * any other dimension of the part). This, not the shared sale terms, is what tells the item
+ * pages of one group apart.
+ */
+function Facts({
+  model,
+  name,
+  r,
+  lang,
+  t,
+}: {
+  model: Model;
+  name: string;
+  r: PartRender;
+  lang: Lang;
+  t: Dict;
+}) {
+  const f = t.parts.item.facts;
+  const group = t.parts.items[model.part].name;
+  const other = otherSpelling(r.model);
+  const aliases = [
+    ...new Set([...(other ? [other] : []), ...model.fitsBreakers.flatMap((x) => x.aliases)]),
+  ].filter((x) => !model.fitsBreakers.some((y) => y.name === x));
+  const sizes = model.fitsBreakers.flatMap((x) =>
+    x.diameterMm === null
+      ? []
+      : [`${model.fitsBreakers.length > 1 ? `${x.name}: ` : ''}Ø${fmtNum(x.diameterMm, lang)} mm`],
+  );
+  const rows: [string, ReactNode][] = [
+    [f.group, group],
+    ...(name !== group ? [[f.part, name] as [string, ReactNode]] : []),
+    [
+      f.fits(isRockDrill(r)),
+      model.fitsBreakers.map((x, i) => (
+        <Fragment key={x.name}>
+          {i > 0 && ', '}
+          {x.path ? (
+            <a href={localePath(x.path, lang)} className={`underline hover:text-ink-mid ${FOCUS}`}>
+              {x.name}
+            </a>
+          ) : (
+            x.name
+          )}
+        </Fragment>
+      )),
+    ],
+    ...(aliases.length ? [[f.aliases, aliases.join(', ')] as [string, ReactNode]] : []),
+    ...(r.variant ? [[f.variant, t.parts.renderVariant[r.variant]] as [string, ReactNode]] : []),
+    ...(sizes.length ? [[f.diameter, sizes.join('; ')] as [string, ReactNode]] : []),
+  ];
+  return (
+    <section aria-labelledby="item-facts" className="font-sans">
+      <h2 id="item-facts" className="m-0 text-base font-bold text-ink">
+        {f.title(renderSeoName(r, model.part, t))}
+      </h2>
+      <dl className="m-0 mt-2 text-sm">
+        {rows.map(([k, v]) => (
+          <div
+            key={k}
+            className="grid gap-1 border-t border-hair py-2.5 sm:grid-cols-[12rem_minmax(0,1fr)]"
+          >
+            <dt className="text-ink-mid">{k}</dt>
+            <dd className="m-0 text-ink">{v}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }

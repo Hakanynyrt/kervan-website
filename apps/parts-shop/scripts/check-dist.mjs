@@ -1,13 +1,16 @@
 // Last build step: fails the build if a page could leak, or is indexed (or hidden) by mistake.
 // - every HTML page has the embedded page props;
-// - only the cart (/palet), the /urun/<code> tip pages and 404 pages carry meta robots noindex,
-//   and they must; every other page is indexable, has a self canonical on SITE, is listed in the
+// - only the cart (/palet), the /urun/<code> tip pages, 404 pages and (HOLD_EN_PART_ITEMS in
+//   page-head.ts) the English part item pages carry meta robots noindex, and they must; no
+//   noindex page is in a sitemap or the target of an hreflang (indexable page or sitemap); every other page is indexable, has a self canonical on SITE, is listed in the
 //   sitemap, is reachable from the home page through plain <a href> links to its clean URL (no
 //   query) on indexable prerendered pages (so crawlers find it without the sitemap; part item
 //   pages only warn, see PART_ITEM), and its JSON-LD parses;
 // - no file in dist/ contains a forbidden string (third-party catalogue names, VEGA part
 //   numbers, private D1 columns); genuine OEM numbers are allowed, only through the
 //   "Muadil OEM no." field (src/lib/oem-numbers.ts, owner's decision);
+// - robots.txt names the sitemap index, which lists only shipped children; <lastmod> dates are
+//   valid, not in the future and not one date for every URL;
 // - every og:image in /og/ on this host is in dist;
 // - at most MAX_FILES files (Pages limit).
 import fs from 'node:fs';
@@ -55,14 +58,65 @@ const count = (d) => {
 count(DIST);
 
 const SITE = 'https://kiriciparca.com';
-// Pages kept out of search results (src/lib/page-head.ts NOINDEX_KINDS): cart, /urun/ and 404.
-const NOINDEX_PAGES = /^(en\/)?(404|palet|urun\/[^/]+)\.html$/;
-// Every <loc> of the sitemap (sitemap.xml, or its children when it is an index).
+// Pages kept out of search results (src/lib/page-head.ts NOINDEX_KINDS): cart, /urun/ and 404;
+// and, while page-head.ts's HOLD_EN_PART_ITEMS switch is on, the English part item pages.
+const HOLD_EN_PART_ITEMS = /export const HOLD_EN_PART_ITEMS = true;/.test(
+  fs.readFileSync(path.join(DIST, '..', 'src', 'lib', 'page-head.ts'), 'utf8'),
+);
+const NOINDEX_PAGES = new RegExp(
+  `^((en/)?(404|palet|urun/[^/]+)${HOLD_EN_PART_ITEMS ? '|en/yedek-parca/[^/]+/[^/]+' : ''})\\.html$`,
+);
+// The sitemaps (src/entry-server.tsx sitemapFiles): robots.txt names the index, sitemap.xml is
+// the same index, every child it lists ships, and every <url> of the children is collected. A
+// <lastmod> must be a YYYY-MM-DD date no later than today, and not one shared by every dated URL
+// (that is a build time, not a page date).
+const problems = [];
+const SITEMAP_INDEX = 'sitemap-index.xml';
 const sitemapLocs = new Set();
-for (const f of files)
-  if (/^sitemap(-\d+)?\.xml$/.test(path.basename(f)) && path.dirname(f) === DIST)
-    for (const m of fs.readFileSync(f, 'utf8').matchAll(/<url>\s*<loc>([^<]+)<\/loc>/g))
-      sitemapLocs.add(m[1]);
+const lastmods = [];
+// hreflang href → where it was seen (a page or a sitemap), and every noindex page URL: no
+// hreflang may point at a noindexed page, and none may be in a sitemap.
+const hreflangTargets = new Map();
+const noindexUrls = new Set();
+{
+  const read = (f) =>
+    fs.existsSync(path.join(DIST, f)) ? fs.readFileSync(path.join(DIST, f), 'utf8') : null;
+  const robots = read('robots.txt') ?? '';
+  if (!robots.includes(`Sitemap: ${SITE}/${SITEMAP_INDEX}`))
+    problems.push(`robots.txt: no Sitemap line for ${SITEMAP_INDEX}`);
+  const index = read(SITEMAP_INDEX);
+  if (!index || !index.includes('<sitemapindex')) problems.push(`${SITEMAP_INDEX}: missing`);
+  else if (read('sitemap.xml') !== index) problems.push('sitemap.xml: not the same index');
+  const today = new Date().toISOString().slice(0, 10);
+  const checkDate = (where, d) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || d > today) problems.push(`${where}: bad lastmod ${d}`);
+  };
+  for (const m of (index ?? '').matchAll(
+    /<sitemap>\s*<loc>([^<]+)<\/loc>(?:\s*<lastmod>([^<]+)<\/lastmod>)?/g,
+  )) {
+    const child = m[1].startsWith(`${SITE}/`) ? m[1].slice(SITE.length + 1) : null;
+    if (m[2]) checkDate(m[1], m[2]);
+    const xml = child && !child.includes('/') ? read(child) : null;
+    if (!xml) {
+      problems.push(`${SITEMAP_INDEX}: child ${m[1]} not in dist`);
+      continue;
+    }
+    for (const h of xml.matchAll(/<xhtml:link rel="alternate" hreflang="[^"]+" href="([^"]+)"/g))
+      hreflangTargets.set(h[1], `${child} hreflang`);
+    for (const u of xml.matchAll(
+      /<url>\s*<loc>([^<]+)<\/loc>(?:\s*<lastmod>([^<]+)<\/lastmod>)?/g,
+    )) {
+      if (sitemapLocs.has(u[1])) problems.push(`sitemap: ${u[1]} listed twice`);
+      sitemapLocs.add(u[1]);
+      if (u[2]) {
+        checkDate(u[1], u[2]);
+        lastmods.push(u[2]);
+      }
+    }
+  }
+  if (lastmods.length > 50 && new Set(lastmods).size === 1)
+    problems.push(`sitemap: all ${lastmods.length} lastmod dates are the same (a build date?)`);
+}
 const urlOf = (rel) => {
   const p = rel.replace(/\\/g, '/').replace(/\.html$/, '');
   return p === 'index' ? `${SITE}/` : p === 'en/index' ? `${SITE}/en/` : `${SITE}/${p}`;
@@ -84,7 +138,6 @@ const pageUrlOfHref = (href) => {
   return `${SITE}${h.replace(/\/$/, '')}`;
 };
 
-const problems = [];
 let pages = 0;
 let indexable = 0;
 const indexableUrls = [];
@@ -115,11 +168,15 @@ for (const f of files) {
       )
         problems.push(`${rel}: og:image ${m[1]} not in dist`);
     const noindex = /<meta name="robots" content="[^"]*noindex/.test(s);
+    if (noindex) noindexUrls.add(urlOf(rel));
     if (NOINDEX_PAGES.test(rel.replace(/\\/g, '/'))) {
       if (!noindex) problems.push(`${rel}: should be noindex`);
       continue;
     }
     indexable++;
+    // hreflang of indexable pages only (the cart and /urun/ pages pair with each other, noindex).
+    for (const h of s.matchAll(/<link rel="alternate" hreflang="[^"]+" href="([^"]+)"/g))
+      hreflangTargets.set(h[1], rel);
     if (noindex) problems.push(`${rel}: indexable page has noindex`);
     const url = urlOf(rel);
     indexableUrls.push(url);
@@ -155,6 +212,9 @@ if (itemOrphans.length)
   process.stdout.write(
     `check-dist: warning: ${itemOrphans.length} part item pages are reached only through search and the sitemap\n`,
   );
+for (const u of noindexUrls) if (sitemapLocs.has(u)) problems.push(`sitemap: noindex page ${u}`);
+for (const [u, where] of hreflangTargets)
+  if (noindexUrls.has(u)) problems.push(`${where}: hreflang to noindex page ${u}`);
 if (sitemapLocs.size !== indexable)
   problems.push(`sitemap: ${sitemapLocs.size} URLs for ${indexable} indexable pages`);
 // With the R2 base set (CI on main) the part photos must be out of dist except the opening
@@ -181,5 +241,5 @@ if (problems.length) {
   process.exit(1);
 }
 process.stdout.write(
-  `check-dist: ${pages} pages ok (${indexable} indexable, all in the sitemap; reachable by links except the part items warned about), ${total} files\n`,
+  `check-dist: ${pages} pages ok (${indexable} indexable, all in the sitemaps, ${lastmods.length} with lastmod; reachable by links except the part items warned about), ${total} files\n`,
 );

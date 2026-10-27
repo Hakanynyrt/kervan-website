@@ -81,13 +81,15 @@ function Facts({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
     ? `${variants.length > 1 ? `Ø${fmtNum(primary!, lang)} mm: ` : ''}${t.family.carrierValue(c.min, c.max)}`
     : null;
   const parts = [...new Set(model.parts.map((x) => t.parts.items[x.part].name))];
+  const aliases = (model.aliases ?? []).map((x) => `${model.brand} ${x}`);
   const rows: [string, string][] = [
+    [f.group, t.parts.tips.name],
+    ...(aliases.length ? [[f.aliases, aliases.join(', ')] as [string, string]] : []),
     ...(sizes.length ? [[f.size, sizes.join('; ')] as [string, string]] : []),
     ...(types.length ? [[f.types, types.join(', ')] as [string, string]] : []),
     ...(carrier ? [[f.carrier, carrier] as [string, string]] : []),
     ...(parts.length ? [[f.parts, parts.join(', ')] as [string, string]] : []),
   ];
-  if (!rows.length) return null;
   return (
     <section aria-labelledby="facts" className="mt-12 font-sans">
       <h2 id="facts" className="m-0 text-xl font-bold text-ink">
