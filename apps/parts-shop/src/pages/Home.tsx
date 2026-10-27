@@ -299,7 +299,7 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
           >
             {h.title}
           </h1>
-          <p className="m-0 mt-1.5 max-w-[860px] font-sans text-sm text-ink-mid md:text-[15px]">
+          <p className="m-0 mt-1.5 max-w-[60ch] font-sans text-sm text-ink-mid md:text-[15px]">
             {h.lead}
           </p>
 
@@ -430,7 +430,7 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                 >
                   {f.startTitle}
                 </h2>
-                <p className="m-0 mt-1 text-[13.5px] text-ink-mid">{f.startBody}</p>
+                <p className="m-0 mt-1 max-w-[60ch] text-[13.5px] text-ink-mid">{f.startBody}</p>
               </div>
             )}
             {/* Small screens: the header box is far above, so the panel has its own. It stays in

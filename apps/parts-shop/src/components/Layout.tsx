@@ -441,7 +441,7 @@ export default function Layout({
             </ul>
             <div className="mt-6">
               <p className={HEAD}>{t.footer.social}</p>
-              <ul className="m-0 mt-3 flex list-none flex-wrap gap-4 p-0">
+              <ul className="m-0 mt-2 -ml-3 flex list-none flex-wrap gap-0 p-0">
                 {ORG_SOCIALS.map((s) => (
                   <li key={s.key}>
                     <a
@@ -449,7 +449,7 @@ export default function Layout({
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={t.footer.socials[s.key]}
-                      className={`inline-flex hover:text-ink ${FOCUS}`}
+                      className={`inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink ${FOCUS}`}
                     >
                       <SocialIcon name={s.key} size={18} />
                     </a>

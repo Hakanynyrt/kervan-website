@@ -28,7 +28,7 @@ export function CartLink({ lang, t, current }: { lang: Lang; t: Dict; current: b
       href={localePath(CART_PATH, lang)}
       aria-current={current ? 'page' : undefined}
       aria-label={t.nav.cartLabel(n)}
-      className={`relative inline-flex min-h-11 flex-col items-center justify-center gap-px text-[11px] leading-none text-ink hover:text-brand-hi aria-[current=page]:text-brand-hi sm:flex-row sm:gap-2 sm:text-sm sm:leading-tight ${FOCUS}`}
+      className={`relative inline-flex min-h-11 flex-col items-center justify-center gap-px text-xs leading-none text-ink hover:text-brand-hi aria-[current=page]:text-brand-hi sm:flex-row sm:gap-2 sm:text-sm sm:leading-tight ${FOCUS}`}
     >
       <svg
         aria-hidden="true"

@@ -66,7 +66,7 @@ export function ConsentBanner({ lang, t }: { lang: Lang; t: Dict }) {
       aria-modal="false"
       aria-labelledby="kv-consent-title"
       aria-describedby="kv-consent-body"
-      className="fixed inset-x-3 bottom-3 z-50 rounded-sm border border-hair-strong border-t-2 border-t-ink bg-bg p-5 font-sans text-sm shadow-lg sm:inset-x-auto sm:bottom-6 sm:right-6 sm:max-w-md"
+      className="fixed inset-x-3 bottom-3 z-50 rounded-sm border border-hair-strong bg-bg p-5 font-sans text-sm shadow-lg sm:inset-x-auto sm:bottom-6 sm:right-6 sm:max-w-md"
     >
       <p id="kv-consent-title" className="m-0 text-base font-bold text-ink">
         {c.title}
