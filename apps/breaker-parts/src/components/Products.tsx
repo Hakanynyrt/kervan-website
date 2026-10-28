@@ -56,6 +56,12 @@ export default function Products({ t }: Props) {
                 <div className="relative overflow-hidden aspect-[5/4] md:aspect-[4/5] bg-bg-soft">
                   <motion.img
                     src={p.img}
+                    srcSet={
+                      p.img.endsWith('-w1280.webp')
+                        ? `${p.img.replace('-w1280.webp', '-w640.webp')} 640w, ${p.img} 1280w`
+                        : undefined
+                    }
+                    sizes="(max-width: 1023px) 50vw, 25vw"
                     alt=""
                     loading="lazy"
                     decoding="async"

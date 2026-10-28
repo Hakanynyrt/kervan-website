@@ -23,7 +23,30 @@ export default function StackedCarousel({ items }: Props) {
   const [active, setActive] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  // The cards fetch pictures only once the carousel is near the screen, so they do not
+  // compete with the hero photo while the page loads (Lighthouse 2026-10-28).
+  const [near, setNear] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
   const N = items.length;
+
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setNear(true);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setNear(true);
+          obs.disconnect();
+        }
+      },
+      { rootMargin: '600px 0px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   // Mobile portrait: drop the stack effect entirely. The rotateZ +
   // translate stack reads as "tilted shards" on a narrow viewport.
@@ -80,7 +103,7 @@ export default function StackedCarousel({ items }: Props) {
   }, [N, lightboxOpen]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-2 md:px-4">
+    <div ref={rootRef} className="w-full max-w-2xl mx-auto px-2 md:px-4">
       {/* Stack area */}
       <div
         className="relative h-[380px] md:h-[640px] touch-pan-y select-none"
@@ -101,6 +124,7 @@ export default function StackedCarousel({ items }: Props) {
             active={active}
             N={N}
             isMobile={isMobile}
+            near={near}
             onOpen={() => setLightboxOpen(true)}
           />
         ))}
@@ -154,11 +178,12 @@ interface CardProps {
   active: number;
   N: number;
   isMobile: boolean;
+  near: boolean;
   onOpen: () => void;
 }
 
 /** Single card; computes its 3D transform based on offset from active. */
-function Card({ item, index, active, N, isMobile, onOpen }: CardProps) {
+function Card({ item, index, active, N, isMobile, near, onOpen }: CardProps) {
   // Signed offset, wrapped to [-N/2, N/2] for symmetric stacking
   const raw = index - active;
   const wrapped = raw > N / 2 ? raw - N : raw < -N / 2 ? raw + N : raw;
@@ -192,13 +217,13 @@ function Card({ item, index, active, N, isMobile, onOpen }: CardProps) {
     >
       <div className="relative h-full w-full overflow-hidden bg-bg-soft border border-hair">
         {item.video ? (
-          <InViewVideo src={item.video} poster={(visible && item.img) || undefined} />
+          <InViewVideo src={item.video} poster={(near && visible && item.img) || undefined} />
         ) : item.img ? (
           <div
             className="w-full h-full bg-cover bg-center"
             // Only the cards in the visible rack fetch their picture (Lighthouse 2026-10-28:
             // every card's photo loaded with the page).
-            style={visible ? { backgroundImage: `url(${item.img})` } : undefined}
+            style={near && visible ? { backgroundImage: `url(${item.img})` } : undefined}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-bg">
