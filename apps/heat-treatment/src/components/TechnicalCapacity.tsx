@@ -39,7 +39,7 @@ export default function TechnicalCapacity({ t }: Props) {
               <dd className="font-serif text-4xl md:text-5xl text-ink leading-none m-0 mt-1">
                 {c.value}
               </dd>
-              {c.note && <p className="font-sans text-[15px] text-ink-mid mt-2">{c.note}</p>}
+              {c.note && <dd className="font-sans text-[15px] text-ink-mid m-0 mt-2">{c.note}</dd>}
             </motion.div>
           ))}
         </motion.dl>
