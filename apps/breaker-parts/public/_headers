@@ -11,6 +11,8 @@
   Cache-Control: public, max-age=31536000, immutable
 /sister/*
   Cache-Control: public, max-age=31536000, immutable
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
 
 # 3D model — immutable, large (~45 KB).
 /*.glb

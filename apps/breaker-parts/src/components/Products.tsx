@@ -54,9 +54,12 @@ export default function Products({ t }: Props) {
             >
               <Wrapper>
                 <div className="relative overflow-hidden aspect-[5/4] md:aspect-[4/5] bg-bg-soft">
-                  <motion.div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${p.img})` }}
+                  <motion.img
+                    src={p.img}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 w-full h-full object-cover"
                     whileHover={{ scale: 1.04 }}
                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   />
