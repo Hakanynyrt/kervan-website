@@ -4,6 +4,7 @@
   "include": ["/*"],
   "exclude": [
     "/assets/*",
+    "/fonts/*",
     "/photos/*",
     "/og/*",
     "/tips/*",

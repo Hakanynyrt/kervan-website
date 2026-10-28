@@ -444,7 +444,7 @@ export type Dict = Record<Lang, DictBlock>;
  *  and the /urunler page grid). */
 export interface Product {
   slug: string;
-  /** Main image relative to /public, e.g. `/photos/uclar/uclar-yard.jpeg`. */
+  /** Main image relative to /public, e.g. `/photos/uclar/uclar-yard-w1280.webp`. */
   image: string;
   /** Optional `srcset` of the main image (same picture at more widths), e.g.
    *  `/photos/parcalar/kama-1024-v2.webp 1024w, /photos/parcalar/kama-1536-v2.webp 1536w`. */
