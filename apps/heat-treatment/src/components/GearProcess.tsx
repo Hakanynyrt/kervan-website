@@ -151,7 +151,8 @@ function GearStatic({ t }: Props) {
   );
 }
 
-/** Pinned stage: sticky for 300 svh; scroll progress drives the scene and the stage bar. */
+/** Pinned stage: sticky for 200 svh on phones and tablets, 300 svh from `lg` (owner, 2026-10-28:
+ *  too long on the phone); scroll progress drives the scene and the stage bar. */
 function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
   const g = t.gear;
   const sectionRef = useRef<HTMLElement>(null);
@@ -324,7 +325,7 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
       id="surec"
       aria-labelledby="surec-title"
       // Tall enough for the four stages; the stage is `svh` so a phone's sliding toolbar does not resize it.
-      className="bg-bg border-t border-hair relative h-[300svh]"
+      className="bg-bg border-t border-hair relative h-[200svh] lg:h-[300svh]"
     >
       <div ref={stageRef} className="sticky top-0 h-svh overflow-hidden">
         <div role="img" aria-label={g.sceneLabel} className="absolute inset-0 pointer-events-none">
