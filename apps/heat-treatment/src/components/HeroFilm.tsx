@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
+import { WRAP } from '../lib/ui';
 
 /** Cut from public/videos/atolye/furnace-01.mp4. Immutable cache: a re-encode needs a new name (-02). */
 const DIR = '/videos/isil-islem/firin-hatti-loop-01';
@@ -191,12 +192,9 @@ export default function HeroFilm({ t, startAt = 1 }: Props) {
   };
 
   return (
-    <figure className="m-0 flex flex-col gap-3">
-      {/* No opacity/clip entrance on the card or poster: it paints with the first render (LCP). */}
-      <div
-        ref={frameRef}
-        className="relative overflow-hidden rounded-md border border-hair bg-bg-soft aspect-video"
-      >
+    <figure className="relative m-0 bg-photo-shade">
+      {/* Full-bleed band. No opacity/clip entrance on the poster: it paints with the first render. */}
+      <div ref={frameRef} className="kv-film-frame relative overflow-hidden">
         <picture>
           <img
             src={`${DIR}-wide-poster.webp`}
@@ -204,7 +202,7 @@ export default function HeroFilm({ t, startAt = 1 }: Props) {
             height={720}
             alt={t.hero.film.alt}
             decoding="async"
-            className="absolute inset-0 size-full object-cover"
+            className="absolute inset-0 size-full object-cover object-[50%_45%]"
           />
         </picture>
         {!off && src && (
@@ -221,29 +219,40 @@ export default function HeroFilm({ t, startAt = 1 }: Props) {
             disableRemotePlayback
             onPlaying={() => setLive(true)}
             onError={fail}
-            className={`absolute inset-0 size-full object-cover transition-opacity duration-600 ease-editorial ${live ? 'opacity-100' : 'opacity-0'}`}
+            className={`absolute inset-0 size-full object-cover object-[50%_45%] transition-opacity duration-600 ease-editorial ${live ? 'opacity-100' : 'opacity-0'}`}
           />
         )}
-        {!off && (src !== null || offer) && (
-          <button
-            type="button"
-            onClick={toggle}
-            aria-label={playing ? t.hero.film.pause : t.hero.film.play}
-            className="absolute bottom-3 left-3 grid size-11 place-items-center rounded-full border border-hair-strong bg-bg/75 text-ink backdrop-blur-sm transition-colors hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 focus-visible:shadow-[0_0_0_6px_var(--color-bg)]"
-          >
-            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-              {playing ? (
-                <path fill="currentColor" d="M4 3h3v10H4zm5 0h3v10H9z" />
-              ) : (
-                <path fill="currentColor" d="M5 3l8 5-8 5z" />
-              )}
-            </svg>
-          </button>
-        )}
       </div>
-      <figcaption className="font-sans text-xs tracking-[0.1em] uppercase text-ink-soft">
-        {t.hero.film.caption}
-      </figcaption>
+      <div className="absolute inset-x-0 bottom-0 pointer-events-none">
+        <div
+          className={`${WRAP} flex flex-col items-start gap-2 pb-4 min-[721px]:flex-row min-[721px]:items-end min-[721px]:justify-between min-[721px]:gap-4 min-[721px]:pb-8`}
+        >
+          {!off && (src !== null || offer) ? (
+            <button
+              type="button"
+              onClick={toggle}
+              className="pointer-events-auto order-2 min-[721px]:order-none inline-flex items-center gap-3.5 min-h-14 pr-[22px] rounded-[2px] bg-bg text-ink font-sans text-base font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+            >
+              <span
+                aria-hidden="true"
+                className="grid size-14 place-items-center rounded-l-[2px] bg-brand text-on-brand"
+              >
+                <svg viewBox="0 0 16 16" width="18" height="18">
+                  {playing ? (
+                    <path fill="currentColor" d="M4 3h3v10H4zm5 0h3v10H9z" />
+                  ) : (
+                    <path fill="currentColor" d="M4.5 2.5v11l9-5.5z" />
+                  )}
+                </svg>
+              </span>
+              {playing ? t.hero.film.pause : t.hero.film.play}
+            </button>
+          ) : (
+            <span aria-hidden="true" />
+          )}
+          <figcaption className="kv-chip">{t.hero.film.caption}</figcaption>
+        </div>
+      </div>
     </figure>
   );
 }

@@ -1,70 +1,67 @@
 import { motion } from 'framer-motion';
 import { fadeUp, inViewOnce, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
+import { H2, SECTION, WRAP } from '../lib/ui';
 
 interface Props {
   t: DictBlock;
 }
 
 /**
- * Craft — atelier manifesto, heat-treatment voice.
- * Centered editorial copy block, italic Fraunces, generous whitespace,
- * then a row of real photos of our furnaces.
+ * Tesisimiz (`#tesisimiz`): the heading and one paragraph side by side, then four real photos
+ * of our furnaces with captions (two columns on phones).
  */
 export default function Craft({ t }: Props) {
   // Static (prerendered) mode and reduced motion render the final state.
   const reduce = useReducedMotion();
   return (
-    <section
-      id="tesisimiz"
-      className="min-h-dvh flex flex-col justify-center py-20 md:py-32 border-y border-hair"
-    >
-      <motion.div
-        className="max-w-[820px] mx-auto px-6 md:px-8 flex flex-col gap-10 items-start"
-        variants={fadeUp}
-        initial={reduce ? false : 'hidden'}
-        whileInView="show"
-        viewport={inViewOnce}
-      >
-        <span className="font-sans text-[13px] tracking-[0.16em] uppercase text-brand font-medium">
-          {t.craft.eyebrow}
-        </span>
-        <h2 className="font-serif italic text-h2 text-ink leading-[1.1] tracking-[-0.015em]">
-          {t.craft.title}
-        </h2>
-        {/* Plain text (was a word-by-word scroll reveal whose last lines stayed faded). */}
-        <p className="font-serif italic text-xl md:text-2xl text-ink leading-relaxed max-w-[44ch] m-0">
-          {t.craft.body}
-        </p>
-      </motion.div>
+    <section id="tesisimiz" aria-labelledby="tesisimiz-title" className={`${SECTION} bg-bg`}>
+      <div className={WRAP}>
+        <motion.div
+          className="grid grid-cols-1 gap-3.5 mb-7 min-[721px]:grid-cols-[5fr_7fr] min-[721px]:gap-14 min-[721px]:mb-12 items-start"
+          variants={fadeUp}
+          initial={reduce ? false : 'hidden'}
+          whileInView="show"
+          viewport={inViewOnce}
+        >
+          <h2 id="tesisimiz-title" className={H2}>
+            {t.craft.title}
+          </h2>
+          <p className="m-0 font-sans text-base min-[721px]:text-[17px] text-ink-mid max-w-[620px]">
+            {t.craft.body}
+          </p>
+        </motion.div>
 
-      <motion.ul
-        aria-label={t.craft.photosLabel}
-        className="mt-14 md:mt-20 w-full max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 list-none"
-        variants={fadeUp}
-        initial={reduce ? false : 'hidden'}
-        whileInView="show"
-        viewport={inViewOnce}
-      >
-        {t.craft.photos.map((p) => (
-          <li key={p.base}>
-            <figure className="m-0 flex flex-col gap-3">
-              <img
-                src={`/photos/isil-islem/${p.base}-1080.webp`}
-                srcSet={`/photos/isil-islem/${p.base}-640.webp 640w, /photos/isil-islem/${p.base}-1080.webp 1080w`}
-                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                width={1080}
-                height={1350}
-                alt={p.alt}
-                loading="lazy"
-                decoding="async"
-                className="w-full aspect-[4/3] lg:aspect-[4/5] object-cover object-[50%_35%] rounded-md border border-hair bg-bg-soft"
-              />
-              <figcaption className="font-sans text-sm text-ink-mid">{p.caption}</figcaption>
-            </figure>
-          </li>
-        ))}
-      </motion.ul>
+        <motion.ul
+          aria-label={t.craft.photosLabel}
+          className="list-none m-0 p-0 grid grid-cols-2 gap-3 min-[721px]:grid-cols-4"
+          variants={fadeUp}
+          initial={reduce ? false : 'hidden'}
+          whileInView="show"
+          viewport={inViewOnce}
+        >
+          {t.craft.photos.map((p) => (
+            <li key={p.base}>
+              <figure className="m-0">
+                <img
+                  src={`/photos/isil-islem/${p.base}-1080.webp`}
+                  srcSet={`/photos/isil-islem/${p.base}-640.webp 640w, /photos/isil-islem/${p.base}-1080.webp 1080w`}
+                  sizes="(min-width: 721px) 25vw, 50vw"
+                  width={1080}
+                  height={1350}
+                  alt={p.alt}
+                  loading="lazy"
+                  decoding="async"
+                  className="block w-full aspect-[3/4] object-cover object-[50%_35%] rounded-[4px] bg-photo-shade"
+                />
+                <figcaption className="mt-2.5 font-sans text-[13px] min-[721px]:text-sm text-ink-mid">
+                  {p.caption}
+                </figcaption>
+              </figure>
+            </li>
+          ))}
+        </motion.ul>
+      </div>
     </section>
   );
 }

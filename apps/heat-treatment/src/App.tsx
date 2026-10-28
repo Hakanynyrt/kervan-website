@@ -5,6 +5,7 @@ import { useTechAuth } from './lib/use-tech-auth';
 import type { Lang } from './types';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
+import HeroFilm from './components/HeroFilm';
 import GearProcess from './components/GearProcess';
 import Services from './components/Services';
 import TechnicalCapacity from './components/TechnicalCapacity';
@@ -34,10 +35,12 @@ export default function App({ lang }: Props) {
     <>
       <Nav lang={lang} t={t} techAuthed={tech.state === 'authed'} />
       <main>
+        {/* Order (2026-10-28 redesign): hero, capacity table, furnace film, gear, services, … */}
         <Hero t={t} />
+        <TechnicalCapacity t={t} />
+        <HeroFilm t={t} />
         <GearProcess t={t} />
         <Services t={t} lang={lang} />
-        <TechnicalCapacity t={t} />
         <TechInfo t={t} lang={lang} tech={tech} />
         <Craft t={t} />
         <About t={t} />

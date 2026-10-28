@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { fadeUp, inViewOnce, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
+import { SECTION, WRAP } from '../lib/ui';
 
 interface Props {
   t: DictBlock;
@@ -10,25 +11,24 @@ export default function About({ t }: Props) {
   // Static (prerendered) mode and reduced motion render the final state.
   const reduce = useReducedMotion();
   return (
-    <section id="hakkimizda" className="min-h-[60dvh] flex flex-col justify-center py-20 md:py-32">
+    <section id="hakkimizda" aria-labelledby="hakkimizda-title" className={`${SECTION} bg-bg-soft`}>
       <motion.div
-        className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-16 items-start"
+        className={`${WRAP} grid grid-cols-1 gap-5 min-[721px]:grid-cols-[5fr_7fr] min-[721px]:gap-14 items-start`}
         variants={fadeUp}
         initial={reduce ? false : 'hidden'}
         whileInView="show"
         viewport={inViewOnce}
       >
-        <div className="col-span-12 lg:col-span-4 flex flex-col gap-3">
-          <span className="font-sans text-[13px] font-medium tracking-[0.16em] uppercase text-brand">
-            {t.about.eyebrow}
-          </span>
-          <h2 className="font-serif italic text-3xl md:text-4xl text-ink leading-tight">
+        <div>
+          <h2
+            id="hakkimizda-title"
+            className="m-0 font-sans font-bold text-ink text-2xl min-[721px]:text-[30px] leading-[1.2] tracking-[-0.02em]"
+          >
             {t.about.title}
           </h2>
-          <span className="font-sans text-[15px] text-ink-mid mt-2">{t.about.location}</span>
+          <p className="m-0 mt-3 font-sans text-[15px] text-ink-mid">{t.about.location}</p>
         </div>
-
-        <p className="col-span-12 lg:col-span-8 font-serif text-xl md:text-2xl text-ink leading-relaxed italic max-w-[60ch]">
+        <p className="m-0 font-sans text-[17px] min-[721px]:text-xl leading-[1.55] text-ink max-w-[640px]">
           {t.about.body}
         </p>
       </motion.div>

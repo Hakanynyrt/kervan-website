@@ -1,16 +1,8 @@
-import type { SisterSiteCopy } from '@kervan/ui';
 /* ═══════════════════════════════════════════════════════════════════════
    Dictionary types — heat-treatment app surface.
 ═══════════════════════════════════════════════════════════════════════ */
 
 export type Lang = 'tr' | 'en';
-
-export interface Stat {
-  /** Big number/string (e.g. "1+2", "Ø1200", "42CrMo"). */
-  n: string;
-  /** Small label below (e.g. "potası", "max çap"). */
-  l: string;
-}
 
 /** A bullet that names a sister site: "<label>: <site>", the site linked. */
 export interface ServiceLink {
@@ -27,12 +19,15 @@ export interface ServiceItem {
   bullets: (string | ServiceLink)[];
 }
 
+/** One cell of the capacity spec table (the owner's figures; never invent one). */
 export interface CapacityItem {
-  /** Big value (e.g. "Ø1200mm × 2.5t"). */
-  value: string;
-  /** Eyebrow / small label. */
+  /** Row label (e.g. "Max parça çapı"). */
   label: string;
-  /** Optional one-line note. */
+  /** Big value (e.g. "Ø1200", "42CrMo · 42CrMoA"). */
+  value: string;
+  /** Unit after the value, smaller (e.g. "mm", "ton"). */
+  unit?: string;
+  /** One-line note under the value. */
   note?: string;
 }
 
@@ -72,16 +67,22 @@ export interface DictBlock {
     language: string;
     /** Header theme select: auto (by the sun) / light / dark. */
     theme: { label: string; auto: string; light: string; dark: string };
+    /** Short names in the language switch ("TR" / "EN"). */
+    langShort: Record<Lang, string>;
   };
-  /** Top strip of the fixed header linking to the breaker-parts sister site. */
-  sister: SisterSiteCopy;
+  /** Small marks used in the UI text. */
+  marks: {
+    /** After a link that leaves the site ("↗"). */
+    external: string;
+    /** After a required form field's label ("*"). */
+    required: string;
+  };
   hero: {
     title1: string;
     title2: string;
     sub: string;
     cta: string;
-    stats: Stat[];
-    /** The one hero photo: alt text and the visible caption. */
+    /** The one hero photo (the furnace pots): alt text and the caption on the photo. */
     photo: { alt: string; caption: string };
     /** Hero film card (client-only video over a poster). */
     film: { alt: string; caption: string; pause: string; play: string };
@@ -97,7 +98,7 @@ export interface DictBlock {
     /** aria-label of the stage list */
     stagesLabel: string;
     /** Exactly four: heating, quenching, tempering, report (the scene's stages, in order). */
-    stages: { name: string; desc: string }[];
+    stages: { no: string; name: string; desc: string }[];
     /** Card shown in the report stage. */
     report: { title: string; note: string };
   };
