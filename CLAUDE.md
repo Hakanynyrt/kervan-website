@@ -50,6 +50,7 @@ deploy's `verify` job runs the same four and blocks every deploy.
 - Push to `main` → production deploy of all apps, then `.github/scripts/smoke.sh`.
 - A PR gets Pages previews (`https://<branch>.<project>.pages.dev`) of the changed apps;
   `packages/**`, the lockfile or root configs rebuild every app.
+- `.github/workflows/quality.yml` reports Lighthouse and pa11y scores after each Deploy run (never blocks).
 - `.github/workflows/uptime.yml` runs the smoke probe every 15 minutes; `shop-daily.yml` rebuilds
   the shop each morning.
 

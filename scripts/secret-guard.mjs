@@ -130,6 +130,8 @@ function collect(range) {
   if (!range) {
     // New files not added yet: what a following `git add . && git commit` would take in.
     for (const p of git(['ls-files', '--others', '--exclude-standard']).split('\n').filter(Boolean)) {
+      // A new symlink to a directory (a skill linked into .claude/skills) has no text to scan.
+      if (!fs.statSync(p).isFile()) continue;
       const f = add(p);
       f.bytes = fs.statSync(p).size;
       if (f.bytes <= MAX_BYTES) {
