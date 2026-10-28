@@ -1,6 +1,7 @@
 import { DICT } from '../lib/dict';
 import { pathForLang } from '../lib/use-lang';
 import type { Lang } from '../types';
+import { BTN_PRIMARY } from '../lib/ui';
 
 const focusRing =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2';
@@ -18,15 +19,15 @@ export default function NotFound({ lang = 'tr' }: { lang?: Lang }) {
       <div className="max-w-[820px] w-full mx-auto px-6 md:px-8 flex flex-col gap-16">
         <a
           href={pathForLang(lang)}
-          className={`self-start flex items-center ${focusRing}`}
+          className={`self-start flex items-center min-h-11 ${focusRing}`}
           aria-label={DICT[lang].nav.home}
         >
           <img
             src="/logo-krv-v2.svg"
-            alt="Kervan Heat"
+            alt=""
             width={124}
             height={40}
-            className="h-9 w-auto md:h-10 select-none"
+            className="h-[26px] w-auto select-none"
             draggable={false}
           />
         </a>
@@ -38,23 +39,20 @@ export default function NotFound({ lang = 'tr' }: { lang?: Lang }) {
               lang={l === lang ? undefined : l}
               className="flex flex-col gap-6 items-start"
             >
-              <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand font-medium">
+              <span className="font-sans text-sm font-semibold text-ink-mid tabular-nums">
                 {t.eyebrow}
               </span>
               {l === lang ? (
-                <h1 className="font-serif italic text-h2 text-ink leading-[1.1] tracking-[-0.015em] m-0">
+                <h1 className="m-0 font-sans font-bold text-ink text-[30px] min-[721px]:text-[40px] leading-[1.1] tracking-[-0.03em]">
                   {t.title}
                 </h1>
               ) : (
-                <h2 className="font-serif italic text-h2 text-ink leading-[1.1] tracking-[-0.015em] m-0">
+                <h2 className="m-0 font-sans font-bold text-ink text-[30px] min-[721px]:text-[40px] leading-[1.1] tracking-[-0.03em]">
                   {t.title}
                 </h2>
               )}
-              <p className="font-serif italic text-xl text-ink-mid leading-relaxed m-0">{t.body}</p>
-              <a
-                href={pathForLang(l)}
-                className={`bg-brand text-bg px-7 py-3 font-sans text-sm tracking-wide hover:bg-brand-hi transition-colors ${focusRing}`}
-              >
+              <p className="m-0 font-sans text-[17px] text-ink-mid">{t.body}</p>
+              <a href={pathForLang(l)} className={`${BTN_PRIMARY} ${focusRing}`}>
                 {t.home}
               </a>
             </section>

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { useClientIdle, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
 import type { GearLayout } from '../lib/gear-scene';
+import { BTN_PRIMARY, H2, WRAP } from '../lib/ui';
+import { ReportIcon } from './TechnicalCapacity';
 
 /** Posters = the same gear at its hot frame, 1000×1000 with a transparent background
  *  (a changed picture gets a new file name). The CSS picks day or night with the page theme. */
@@ -82,19 +84,10 @@ function Poster({ alt }: { alt: string }) {
   );
 }
 
-function ReportMark() {
-  return (
-    <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <circle cx="13" cy="13" r="9" />
-      <circle cx="13" cy="13" r="2.4" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
 function Report({ g, className = '' }: { g: DictBlock['gear']; className?: string }) {
   return (
     <div className={`kv-gear-card ${className}`}>
-      <ReportMark />
+      <ReportIcon />
       <div>
         <strong>{g.report.title}</strong>
         <span>{g.report.note}</span>
@@ -103,48 +96,52 @@ function Report({ g, className = '' }: { g: DictBlock['gear']; className?: strin
   );
 }
 
-const H2_CLASS =
-  'm-0 font-sans font-bold text-ink text-[clamp(30px,3.9vw,56px)] leading-[1.08] tracking-[-0.025em] text-balance';
-const CTA_CLASS =
-  'bg-brand text-bg inline-flex items-center justify-center min-h-[52px] px-8 font-sans text-[17px] font-semibold hover:bg-brand-hi transition-colors self-start';
+const H2_CLASS = H2;
+const CTA_CLASS = `${BTN_PRIMARY} self-start`;
+const LEAD_CLASS = 'm-0 font-sans text-base min-[721px]:text-[17px] text-ink-mid max-w-[520px]';
 
-/** Static block: copy, the four stages as a list, the poster. No script, no WebGL. */
+/** Static block: the poster in a frame, then the copy, the four stages as a numbered list, the
+ *  report card and the button. No script, no WebGL. */
 function GearStatic({ t }: Props) {
   const g = t.gear;
   return (
-    <section
-      id="surec"
-      aria-labelledby="surec-title"
-      className="bg-bg border-t border-hair py-16 lg:py-24"
-    >
-      <div className="w-full max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-10 lg:gap-12 items-center">
-        <div className="flex flex-col gap-5 lg:gap-6">
+    <section id="surec" aria-labelledby="surec-title" className="bg-bg py-16 min-[721px]:py-24">
+      <div
+        className={`${WRAP} grid grid-cols-1 gap-7 min-[721px]:grid-cols-2 min-[721px]:gap-10 min-[1081px]:grid-cols-[460px_1fr] min-[1081px]:gap-[72px] items-center`}
+      >
+        <div className="relative mx-auto w-full max-w-[280px] min-[721px]:max-w-none aspect-square bg-bg-soft border border-hair rounded-[4px] overflow-hidden">
+          <Poster alt={g.posterAlt} />
+        </div>
+        <div className="flex flex-col items-start">
           <h2 id="surec-title" className={H2_CLASS}>
             {g.title}
           </h2>
-          <p className="m-0 font-sans text-[17px] lg:text-xl text-ink-mid leading-[1.5] max-w-[27em]">
-            {g.sub}
-          </p>
-          <a href="#contact" className={CTA_CLASS}>
-            {t.hero.cta}
-          </a>
+          <p className={`${LEAD_CLASS} mt-3.5`}>{g.sub}</p>
           <ol
             aria-label={g.stagesLabel}
-            className="list-none m-0 p-0 flex flex-col gap-3 border-l border-hair"
+            className="list-none m-0 p-0 mt-9 w-full border-t border-hair"
           >
             {g.stages.map((s) => (
-              <li key={s.name} className="pl-4 -ml-px border-l border-transparent">
-                <strong className="block font-sans text-lg font-semibold text-ink">{s.name}</strong>
-                <span className="block font-sans text-base text-ink-mid leading-snug">
-                  {s.desc}
+              <li
+                key={s.name}
+                className="grid grid-cols-[36px_1fr] gap-x-3 gap-y-1 py-3.5 min-[1081px]:grid-cols-[56px_160px_1fr] min-[1081px]:gap-4 min-[1081px]:py-[18px] items-baseline border-b border-hair"
+              >
+                <span className="font-sans text-sm font-semibold text-ink-mid tabular-nums">
+                  {s.no}
                 </span>
+                <h3 className="m-0 font-sans text-[19px] font-bold tracking-[-0.01em] text-ink">
+                  {s.name}
+                </h3>
+                <p className="m-0 col-start-2 min-[1081px]:col-start-auto font-sans text-base text-ink-mid">
+                  {s.desc}
+                </p>
               </li>
             ))}
           </ol>
-          <Report g={g} className="self-start" />
-        </div>
-        <div className="relative mx-auto w-full max-w-[560px] aspect-square">
-          <Poster alt={g.posterAlt} />
+          <Report g={g} className="mt-6" />
+          <a href="#contact" className={`${CTA_CLASS} mt-6`}>
+            {t.hero.cta}
+          </a>
         </div>
       </div>
     </section>
@@ -325,7 +322,7 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
       id="surec"
       aria-labelledby="surec-title"
       // Tall enough for the four stages; the stage is `svh` so a phone's sliding toolbar does not resize it.
-      className="bg-bg border-t border-hair relative h-[200svh] lg:h-[300svh]"
+      className="bg-bg relative h-[200svh] lg:h-[300svh]"
     >
       <div ref={stageRef} className="sticky top-0 h-svh overflow-hidden">
         <div role="img" aria-label={g.sceneLabel} className="absolute inset-0 pointer-events-none">
@@ -341,14 +338,12 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
         </div>
 
         <div className="kv-gear-copy relative z-[2] h-full flex flex-col justify-center pt-[5.5rem] pb-28 pointer-events-none">
-          <div className="w-full max-w-[1280px] mx-auto px-6 md:px-8">
+          <div className={WRAP}>
             <div className="flex flex-col gap-4 lg:gap-6 max-w-[min(40rem,50vw)] max-[999px]:max-w-none pointer-events-auto">
               <h2 id="surec-title" className={H2_CLASS}>
                 {g.title}
               </h2>
-              <p className="m-0 font-sans text-[17px] lg:text-xl text-ink-mid leading-[1.5] max-w-[27em]">
-                {g.sub}
-              </p>
+              <p className={LEAD_CLASS}>{g.sub}</p>
               <a ref={ctaRef} href="#contact" className={CTA_CLASS}>
                 {t.hero.cta}
               </a>
@@ -365,7 +360,7 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
         </div>
 
         <div ref={railRef} className="absolute z-[2] inset-x-0 bottom-3 md:bottom-5 text-ink-mid">
-          <div className="w-full max-w-[1280px] mx-auto px-6 md:px-8">
+          <div className={WRAP}>
             <div className="kv-gear-scale" aria-hidden="true">
               {SCALE.map(([a, b, c]) => (
                 <i key={a} style={{ flex: b - a, ['--c' as string]: c }} />

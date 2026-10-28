@@ -70,7 +70,7 @@ export default function ConsentBanner({ t }: Props) {
       aria-modal="false"
       aria-labelledby="kv-consent-title"
       aria-describedby="kv-consent-body"
-      className="fixed z-50 bottom-4 inset-x-4 md:inset-x-auto md:right-6 md:bottom-6 md:max-w-md bg-bg-soft border border-hair rounded-md p-5 shadow-[0_12px_32px_rgba(0,0,0,0.5)] font-sans"
+      className="fixed z-50 bottom-4 inset-x-4 md:inset-x-auto md:right-6 md:bottom-6 md:max-w-md bg-panel border border-hair-strong rounded-[4px] p-5 shadow-lg font-sans"
       initial={reduced ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: durations.md, ease: editorialEase }}
@@ -80,26 +80,26 @@ export default function ConsentBanner({ t }: Props) {
       </p>
       <p id="kv-consent-body" className="mt-2 mb-0 text-sm text-ink-mid leading-relaxed">
         {t.body}{' '}
-        {/* Colour/underline on the span: the global `a { color: inherit; text-decoration: none }` wins over utilities on the <a>. */}
+        {/* A 44 px tall hit area (padding, negative margin) that does not change the line box. */}
         <a
           href="/kvkk#cerezler"
-          className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+          className="inline-block -my-3 py-3 min-w-11 font-semibold text-brand underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
         >
-          <span className="text-brand-hi underline underline-offset-2">{t.policy}</span>
+          {t.policy}
         </a>
       </p>
       <div className="mt-4 grid grid-cols-2 gap-3">
         <button
           type="button"
           onClick={() => choose('denied')}
-          className="min-h-11 border border-ink-soft text-ink px-4 text-sm hover:bg-bg-warm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+          className="min-h-11 rounded-[2px] border border-field-line text-ink px-4 text-sm font-semibold hover:border-ink transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
         >
           {t.reject}
         </button>
         <button
           type="button"
           onClick={() => choose('granted')}
-          className="min-h-11 bg-brand text-bg px-4 text-sm hover:bg-brand-hi transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+          className="min-h-11 rounded-[2px] bg-brand text-on-brand px-4 text-sm font-semibold hover:bg-brand-hi transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
         >
           {t.accept}
         </button>

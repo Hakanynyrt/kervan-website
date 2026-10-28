@@ -49,7 +49,7 @@ export default function WhatsAppFAB() {
       aria-hidden={!visible}
       tabIndex={visible ? 0 : -1}
       // Phones: 48 px in the 12 px corner, so it stays clear of the 24 px page gutter's buttons.
-      className="fixed bottom-3 right-3 md:bottom-8 md:right-8 z-40 inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-whatsapp text-white shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
+      className="fixed bottom-3 right-3 md:bottom-8 md:right-8 z-40 inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-[4px] bg-whatsapp text-white shadow-md"
       style={{
         pointerEvents: visible ? 'auto' : 'none',
       }}

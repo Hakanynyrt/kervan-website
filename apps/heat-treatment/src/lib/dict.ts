@@ -61,27 +61,17 @@ export const DICT: Dict = {
       menu: 'Menü',
       language: 'Dil',
       theme: { label: 'Tema', auto: 'Otomatik', light: 'Açık', dark: 'Koyu' },
+      langShort: { tr: 'TR', en: 'EN' },
     },
-    sister: {
-      lead: 'Hidrolik kırıcı yedek parçalarımız ayrı sitemizde:',
-      leadShort: 'Kırıcı yedek parçaları:',
-      site: 'kervanbreaker.com',
-      href: 'https://kervanbreaker.com/',
-    },
+    marks: { external: '↗', required: '*' },
     hero: {
       title1: 'Kontrollü atmosfer pit-tip',
       title2: 'fırınlarda fason ısıl işlem.',
       sub: 'Sertleştirme ve temperleme. 42CrMo, 42CrMoA ve diğer alaşımlar — kendi ölçüm ve kontrol disiplinimizle.',
       cta: 'Teklif Al',
-      stats: [
-        { n: '2', l: 'temper potası' },
-        { n: 'Ø1200', l: 'mm max çap' },
-        { n: '2,5 t', l: 'tek sefer max yük' },
-        { n: '42CrMo', l: 'standart alaşım' },
-      ],
       photo: {
-        alt: 'Atölyemizde ısıl işlem sonrası sıralanmış kırıcı uçları ve istiflenmiş çelik çubuklar',
-        caption: 'Isıl işlem sonrası parçalar',
+        alt: 'Kartepe tesisimizde kuyu tipi fırın hattı: önde kapağı açık bir fırın, arkada üstünde alev yanan bir fırın',
+        caption: 'Fırın ağzı',
       },
       film: {
         alt: 'Kartepe tesisimizde kuyu tipi fırın hattı: önde kapağı açık bir fırın, arkada üstünde alev yanan bir fırın',
@@ -97,10 +87,10 @@ export const DICT: Dict = {
       posterAlt: 'Isıtılmış dişli çark',
       stagesLabel: 'Isıl işlem aşamaları',
       stages: [
-        { name: 'Isıtma', desc: 'Pit-tip fırında sertleşme sıcaklığına ısıtılır.' },
-        { name: 'Su verme', desc: 'Kontrollü soğutulur.' },
-        { name: 'Temperleme', desc: 'Su verme sonrası gerilimi alır, tokluk kazandırır.' },
-        { name: 'Rapor', desc: 'Her partide sertlik ölçüm raporu.' },
+        { no: '1', name: 'Isıtma', desc: 'Pit-tip fırında sertleşme sıcaklığına ısıtılır.' },
+        { no: '2', name: 'Su verme', desc: 'Kontrollü soğutulur.' },
+        { no: '3', name: 'Temperleme', desc: 'Su verme sonrası gerilimi alır, tokluk kazandırır.' },
+        { no: '4', name: 'Rapor', desc: 'Her partide sertlik ölçüm raporu.' },
       ],
       report: { title: 'Sertlik ölçüm raporu', note: 'Her partide' },
     },
@@ -163,13 +153,15 @@ export const DICT: Dict = {
       eyebrow: 'Teknik Kapasite',
       title: 'Sayılarla atölye.',
       aside: 'Bir bakışta fırın kapasitesi, malzeme yelpazesi ve ölçüm disiplini.',
+      // Spec table order. "Max parça boyu 2,6 m": owner, 2026-10-28 (the pot's inner depth).
       items: [
-        { value: '2', label: 'Temper potası', note: 'Paralel iki sıcaklık eğrisi' },
-        { value: 'Ø1200 mm', label: 'Max parça çapı', note: 'Pit-tip fırın iç ölçüsü' },
-        { value: '2,5 ton', label: 'Tek sefer max yük', note: 'Brüt parti ağırlığı' },
+        { label: 'Max parça çapı', value: 'Ø1200', unit: 'mm', note: 'Pit-tip fırın iç ölçüsü' },
+        { label: 'Max parça boyu', value: '2,6', unit: 'm', note: 'Pota iç derinliği' },
+        { label: 'Tek sefer max yük', value: '2,5', unit: 'ton', note: 'Brüt parti ağırlığı' },
+        { label: 'Temper potası', value: '2', note: 'Paralel iki sıcaklık eğrisi' },
         {
-          value: '42CrMo · 42CrMoA',
           label: 'Standart alaşımlar',
+          value: '42CrMo · 42CrMoA',
           note: 'Diğerleri — talep üzerine',
         },
       ],
@@ -190,7 +182,7 @@ export const DICT: Dict = {
     craft: {
       eyebrow: 'Tesisimiz',
       title: 'Sıcaklık sabırla yükselir.',
-      body: 'Fırın bir tezgâh değil; bir saat. Termokupldan gelen her okuma, atmosferdeki her oksijen seviyesi, eğrideki her dakika — hepsi parçanın iç yapısına yazılır. Burada acele etmek yok; doğru sıcaklık, doğru süre, doğru soğutma. Ve bunun arkasında, on yıllardır aynı tezgâhın başında olan eller.',
+      body: 'Fırın bir tezgâh değil; bir saat. Termokupldan gelen her okuma, atmosferdeki her oksijen seviyesi, eğrideki her dakika — hepsi parçanın iç yapısına yazılır. Burada acele etmek yok; doğru sıcaklık, doğru süre, doğru soğutma.',
       photosLabel: 'Isıl işlem tesisimizden fotoğraflar',
       photos: [
         {
@@ -332,27 +324,17 @@ export const DICT: Dict = {
       menu: 'Menu',
       language: 'Language',
       theme: { label: 'Theme', auto: 'Auto', light: 'Light', dark: 'Dark' },
+      langShort: { tr: 'TR', en: 'EN' },
     },
-    sister: {
-      lead: 'Our hydraulic breaker spare parts have their own site:',
-      leadShort: 'Breaker spare parts:',
-      site: 'kervanbreaker.com',
-      href: 'https://kervanbreaker.com/en/',
-    },
+    marks: { external: '↗', required: '*' },
     hero: {
       title1: 'Contract heat treatment in',
       title2: 'controlled-atmosphere pit furnaces.',
       sub: 'Hardening and tempering. 42CrMo, 42CrMoA and other alloys — under our own measurement and control discipline.',
       cta: 'Get a Quote',
-      stats: [
-        { n: '2', l: 'tempering pots' },
-        { n: 'Ø1200', l: 'mm max diameter' },
-        { n: '2.5 t', l: 'max load per batch' },
-        { n: '42CrMo', l: 'standard alloy' },
-      ],
       photo: {
-        alt: 'Breaker tools lined up after heat treatment and stacked steel bars in our workshop',
-        caption: 'Parts after heat treatment',
+        alt: 'Pit furnace line at our Kartepe plant: an open furnace in front, and behind it a furnace with a flame burning on top',
+        caption: 'Furnace mouth',
       },
       film: {
         alt: 'Pit furnace line at our Kartepe plant: an open furnace in front, and behind it a furnace with a flame burning on top',
@@ -368,10 +350,14 @@ export const DICT: Dict = {
       posterAlt: 'A heated gear',
       stagesLabel: 'Heat treatment stages',
       stages: [
-        { name: 'Heating', desc: 'Heated to hardening temperature in a pit furnace.' },
-        { name: 'Quenching', desc: 'Cooled under control.' },
-        { name: 'Tempering', desc: 'Relieves the stress of quenching and adds toughness.' },
-        { name: 'Report', desc: 'A hardness test report for every batch.' },
+        { no: '1', name: 'Heating', desc: 'Heated to hardening temperature in a pit furnace.' },
+        { no: '2', name: 'Quenching', desc: 'Cooled under control.' },
+        {
+          no: '3',
+          name: 'Tempering',
+          desc: 'Relieves the stress of quenching and adds toughness.',
+        },
+        { no: '4', name: 'Report', desc: 'A hardness test report for every batch.' },
       ],
       report: { title: 'Hardness test report', note: 'Every batch' },
     },
@@ -439,10 +425,16 @@ export const DICT: Dict = {
       title: 'Our plant in numbers.',
       aside: 'Furnace capacity, material range and measurement discipline at a glance.',
       items: [
-        { value: '2', label: 'Tempering pots', note: 'Two parallel temperature curves' },
-        { value: 'Ø1200 mm', label: 'Max part diameter', note: 'Pit furnace inner dimension' },
-        { value: '2.5 ton', label: 'Max load per batch', note: 'Gross batch weight' },
-        { value: '42CrMo · 42CrMoA', label: 'Standard alloys', note: 'Others on request' },
+        {
+          label: 'Max part diameter',
+          value: 'Ø1200',
+          unit: 'mm',
+          note: 'Pit furnace inner dimension',
+        },
+        { label: 'Max part length', value: '2.6', unit: 'm', note: 'Pot inner depth' },
+        { label: 'Max load per batch', value: '2.5', unit: 'ton', note: 'Gross batch weight' },
+        { label: 'Tempering pots', value: '2', note: 'Two parallel temperature curves' },
+        { label: 'Standard alloys', value: '42CrMo · 42CrMoA', note: 'Others on request' },
       ],
     },
     techUi: {
@@ -461,7 +453,7 @@ export const DICT: Dict = {
     craft: {
       eyebrow: 'Our Plant',
       title: 'Temperature rises with patience.',
-      body: 'A furnace is not a bench; it is a clock. Every reading from the thermocouple, every oxygen level in the atmosphere, every minute on the curve — all of it is written into the part. There is no rushing here; the right temperature, the right time, the right cooling. Behind it, the same hands that have stood at the same furnace for decades.',
+      body: 'A furnace is not a bench; it is a clock. Every reading from the thermocouple, every oxygen level in the atmosphere, every minute on the curve — all of it is written into the part. There is no rushing here; the right temperature, the right time, the right cooling.',
       photosLabel: 'Photos from our heat treatment plant',
       photos: [
         {

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
-import { SectionHeading } from '@kervan/ui';
 import { fadeUp, inViewOnce, staggerContainer, useReducedMotion } from '@kervan/motion';
 import type { DictBlock, Lang } from '../types';
+import { H2, SECTION, SEC_HEAD, SEC_LEAD, WRAP } from '../lib/ui';
 
 interface Props {
   t: DictBlock;
@@ -18,18 +18,18 @@ export default function Services({ t, lang }: Props) {
   const reduce = useReducedMotion();
   const s = t.services;
   return (
-    <section id="hizmetler" className="min-h-dvh flex flex-col justify-center py-20 md:py-32">
-      <SectionHeading
-        eyebrow={s.eyebrow}
-        title={s.title}
-        aside={s.aside}
-        className="w-full kv-heading"
-      />
+    <section id="hizmetler" aria-labelledby="hizmetler-title" className={`${SECTION} bg-bg-soft`}>
+      <div className={WRAP}>
+        <div className={SEC_HEAD}>
+          <h2 id="hizmetler-title" className={H2}>
+            {s.title}
+          </h2>
+          <p className={SEC_LEAD}>{s.aside}</p>
+        </div>
 
-      <div className="max-w-[1280px] w-full mx-auto px-6 md:px-8 flex flex-col gap-12 md:gap-16">
         <motion.ul
           aria-label={s.processesLabel}
-          className="list-none m-0 p-0 border-t border-hair"
+          className="list-none m-0 p-0 border-t border-hair-strong"
           variants={staggerContainer(0, 0.06)}
           initial={reduce ? false : 'hidden'}
           whileInView="show"
@@ -39,32 +39,39 @@ export default function Services({ t, lang }: Props) {
             <motion.li
               key={p.name}
               variants={fadeUp}
-              className="grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-2 py-5 md:py-6 border-b border-hair"
+              className="grid grid-cols-1 gap-1.5 py-[18px] min-[721px]:grid-cols-[340px_1fr] min-[721px]:gap-8 min-[721px]:py-[22px] border-b border-hair"
             >
-              <h3 className="md:col-span-5 font-serif italic text-2xl md:text-3xl text-ink leading-tight">
+              <h3 className="m-0 font-sans text-[19px] min-[721px]:text-[21px] font-bold leading-[1.2] tracking-[-0.015em] text-ink">
                 {p.name}
               </h3>
-              <p className="md:col-span-7 font-sans text-base text-ink-mid leading-relaxed md:pt-1 max-w-[60ch]">
-                {p.body}
-              </p>
+              <p className="m-0 font-sans text-base text-ink-mid max-w-[640px]">{p.body}</p>
             </motion.li>
           ))}
           <motion.li
             variants={fadeUp}
-            className="grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-2 py-5 md:py-6 border-b border-hair"
+            className="grid grid-cols-1 gap-1.5 py-[18px] min-[721px]:grid-cols-[340px_1fr] min-[721px]:gap-8 min-[721px]:py-[22px] border-b border-hair"
           >
-            <p className="md:col-span-5 m-0 flex items-start gap-3 font-sans text-base font-medium text-ink">
-              <span aria-hidden="true" className="mt-2.5 w-1.5 h-1.5 bg-brand flex-shrink-0" />
+            <h3 className="m-0 flex items-center gap-2.5 font-sans text-[17px] font-bold leading-[1.2] text-ink">
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+                className="flex-none"
+              >
+                <path d="M5 12.5l4.5 4.5L19 7.5" />
+              </svg>
               {s.quality.name}
-            </p>
-            <p className="md:col-span-7 font-sans text-base text-ink-mid leading-relaxed m-0 max-w-[60ch]">
-              {s.quality.body}
-            </p>
+            </h3>
+            <p className="m-0 font-sans text-base text-ink-mid max-w-[640px]">{s.quality.body}</p>
           </motion.li>
         </motion.ul>
 
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-px bg-hair border border-hair"
+          className="mt-10 min-[721px]:mt-14 grid grid-cols-1 gap-4 min-[721px]:grid-cols-2 min-[721px]:gap-6"
           variants={staggerContainer(0, 0.1)}
           initial={reduce ? false : 'hidden'}
           whileInView="show"
@@ -74,46 +81,41 @@ export default function Services({ t, lang }: Props) {
             <motion.article
               key={item.index}
               variants={fadeUp}
-              className="bg-bg p-6 md:p-10 flex flex-col gap-6"
+              className="bg-panel border border-hair rounded-[4px] px-5 py-6 min-[721px]:p-9"
             >
-              <div className="flex items-baseline gap-4">
-                <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand">
-                  {item.index}
-                </span>
-                <h3 className="font-serif italic text-3xl md:text-4xl text-ink leading-tight">
-                  {item.name}
-                </h3>
-              </div>
+              <span className="font-sans text-sm font-semibold text-ink-mid tabular-nums">
+                {item.index}
+              </span>
+              <h3 className="m-0 mt-2 font-sans text-[22px] min-[721px]:text-[26px] font-bold leading-[1.15] tracking-[-0.02em] text-ink">
+                {item.name}
+              </h3>
+              <p className="m-0 mt-3.5 font-sans text-base text-ink-mid">{item.body}</p>
 
-              <p className="font-sans text-base text-ink-mid leading-relaxed">{item.body}</p>
-
-              <ul className="flex flex-col gap-2 mt-auto pt-6 border-t border-hair">
-                {item.bullets.map((b, i) => (
-                  <li key={i} className="font-sans text-sm text-ink-mid flex items-start gap-3">
-                    <span
-                      aria-hidden="true"
-                      className="mt-2 w-1 h-1 bg-brand rounded-full flex-shrink-0"
-                    />
-                    {typeof b === 'string' ? (
-                      <span>{b}</span>
-                    ) : (
-                      // Sister site: same tab, no rel, underlined so it is not told apart by colour only.
-                      <span>
-                        {b.label}:{' '}
-                        <a
-                          href={b.href}
-                          hrefLang={lang}
-                          className="group focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
-                        >
-                          {/* Styled on the span: the global `a` rule is unlayered and outranks utilities. */}
-                          <span className="text-ink underline underline-offset-2 group-hover:text-brand-hi transition-colors">
-                            {b.site}
-                          </span>
-                        </a>
-                      </span>
-                    )}
-                  </li>
-                ))}
+              <ul className="list-none m-0 p-0 mt-[22px] border-t border-hair">
+                {item.bullets.map((b, i) =>
+                  typeof b === 'string' ? (
+                    <li
+                      key={i}
+                      className="py-2.5 border-b border-hair font-sans text-[15px] text-ink"
+                    >
+                      {b}
+                    </li>
+                  ) : (
+                    <li key={i} className="border-b border-hair">
+                      {/* Sister site: same tab, no rel. */}
+                      <a
+                        href={b.href}
+                        hrefLang={lang}
+                        className="flex items-center justify-between gap-3 min-h-12 font-sans text-[15px] font-semibold text-brand hover:underline underline-offset-2"
+                      >
+                        <span className="font-normal text-ink">{b.label}</span>
+                        <span>
+                          {b.site} <span aria-hidden="true">{t.marks.external}</span>
+                        </span>
+                      </a>
+                    </li>
+                  ),
+                )}
               </ul>
             </motion.article>
           ))}

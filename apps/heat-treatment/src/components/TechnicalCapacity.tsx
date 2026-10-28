@@ -1,48 +1,73 @@
-import { motion } from 'framer-motion';
-import { SectionHeading } from '@kervan/ui';
-import { fadeUp, inViewOnce, staggerContainer, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
+import { WRAP } from '../lib/ui';
 
 interface Props {
   t: DictBlock;
 }
 
+/** Report sheet with a tick (the hardness report). */
+export function ReportIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      aria-hidden="true"
+      className={className}
+    >
+      <path d="M7 3h7l5 5v13H7z" />
+      <path d="M14 3v5h5M10 13l2 2 4-4" />
+    </svg>
+  );
+}
+
+/**
+ * Capacity (`#teknik-kapasite`) right under the hero: a framed spec table with a head bar, the
+ * owner's five figures (label, value + unit, note) and a footer row "every batch gets a hardness
+ * report". Desktop 5 in a row, tablet 3 + 2, phones 2 × 2 plus the alloy cell at full width (so the
+ * first 390×844 screen holds the H1, both actions, the table and the report row). Layout in
+ * globals.css (`.kv-spec*`). No entrance animation: it is part of the first screen.
+ */
 export default function TechnicalCapacity({ t }: Props) {
-  // Static (prerendered) mode and reduced motion render the final state.
-  const reduce = useReducedMotion();
+  const c = t.capacity;
+  const q = t.services.quality;
   return (
     <section
       id="teknik-kapasite"
-      className="min-h-dvh flex flex-col justify-center py-20 md:py-32 bg-bg-soft/40"
+      aria-labelledby="kapasite-title"
+      className="bg-bg pt-3.5 pb-7 min-[721px]:pt-7 min-[721px]:pb-12"
     >
-      <SectionHeading
-        eyebrow={t.capacity.eyebrow}
-        title={t.capacity.title}
-        aside={t.capacity.aside}
-        className="w-full kv-heading"
-      />
-
-      {/* Padding on the wrapper, the hairline grid inside: no bg-hair slabs beside the cards. */}
-      <div className="max-w-[1280px] w-full mx-auto px-6 md:px-8">
-        <motion.dl
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-hair border border-hair m-0"
-          variants={staggerContainer(0, 0.08)}
-          initial={reduce ? false : 'hidden'}
-          whileInView="show"
-          viewport={inViewOnce}
-        >
-          {t.capacity.items.map((c, i) => (
-            <motion.div key={i} variants={fadeUp} className="bg-bg p-8 md:p-10 flex flex-col gap-3">
-              <dt className="font-sans text-[13px] font-medium tracking-[0.14em] uppercase text-ink-mid">
-                {c.label}
-              </dt>
-              <dd className="font-serif text-4xl md:text-5xl text-ink leading-none m-0 mt-1">
-                {c.value}
-              </dd>
-              {c.note && <dd className="font-sans text-[15px] text-ink-mid m-0 mt-2">{c.note}</dd>}
-            </motion.div>
-          ))}
-        </motion.dl>
+      <div className={WRAP}>
+        <div className="kv-spec">
+          <div className="kv-spec-head">
+            <h2 id="kapasite-title">{c.eyebrow}</h2>
+            <p>{c.title}</p>
+          </div>
+          <table>
+            <caption className="sr-only">{c.aside}</caption>
+            <tbody>
+              {c.items.map((it) => (
+                <tr key={it.label}>
+                  <th scope="row">{it.label}</th>
+                  <td>
+                    <span className="kv-spec-v">
+                      {it.value}
+                      {/* The space sits in the smaller unit type, so the gap stays narrow. */}
+                      {it.unit && <span className="kv-spec-u"> {it.unit}</span>}
+                    </span>
+                    {it.note && <span className="kv-spec-n">{it.note}</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="kv-spec-foot">
+            <ReportIcon />
+            <strong>{q.name}</strong>
+            <span>{q.body}</span>
+          </p>
+        </div>
       </div>
     </section>
   );

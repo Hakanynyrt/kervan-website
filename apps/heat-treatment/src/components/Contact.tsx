@@ -2,7 +2,8 @@ import { useId, useRef, useState, type ChangeEvent, type FormEvent } from 'react
 import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
 import { fadeUp, inViewOnce, useReducedMotion } from '../lib/motion';
-import { SectionHeading } from '@kervan/ui';
+import { ORG_EMAIL, ORG_PHONE, ORG_PHONE_E164 } from '@kervan/seo';
+import { BTN_LINE, BTN_PRIMARY, H2, SECTION, SEC_HEAD, SEC_LEAD, WRAP } from '../lib/ui';
 import { trackConversion } from '../lib/ads';
 import { MAPS_URL, WHATSAPP_URL } from '../lib/contact';
 import {
@@ -98,206 +99,229 @@ export default function Contact({ t }: Props) {
     }
   }
 
+  const req = t.marks.required;
+  const label = 'font-sans text-sm font-semibold text-ink';
+  const field =
+    'w-full min-h-12 px-3.5 py-3 rounded-[2px] border border-field-line bg-field font-sans text-base text-ink placeholder:text-ink-soft hover:border-ink transition-colors';
+  const infoLink =
+    'inline-flex items-center min-h-11 font-sans font-semibold text-brand hover:underline underline-offset-2';
+  const direct = `${BTN_LINE} w-full justify-start min-h-[60px] px-4 min-[721px]:px-[22px] text-base min-[721px]:text-[17px]`;
+
   return (
-    <section
-      id="contact"
-      className="min-h-dvh flex flex-col justify-center py-16 md:py-24 bg-bg-soft/40"
-    >
-      <SectionHeading
-        eyebrow={t.contact.eyebrow}
-        title={t.contact.title}
-        aside={t.contact.sub}
-        className="w-full kv-heading"
-      />
+    <section id="contact" aria-labelledby="contact-title" className={`${SECTION} bg-bg`}>
+      <div className={WRAP}>
+        <div className={SEC_HEAD}>
+          <h2 id="contact-title" className={H2}>
+            {t.contact.title}
+          </h2>
+          <p className={SEC_LEAD}>{t.contact.sub}</p>
+        </div>
 
-      <div className="max-w-[1280px] w-full mx-auto px-6 md:px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-16">
-        {/* Info — 4 col */}
-        <motion.dl
-          className="col-span-12 lg:col-span-4 flex flex-col gap-7 m-0"
-          variants={fadeUp}
-          initial={reduce ? false : 'hidden'}
-          whileInView="show"
-          viewport={inViewOnce}
-        >
-          {[
-            {
-              label: t.contact.phoneLabel,
-              value: (
-                <a href="tel:+905316693734" className="hover:text-brand transition-colors">
-                  +90 531 669 37 34
-                </a>
-              ),
-            },
-            {
-              label: t.contact.whatsappLabel,
-              value: (
-                <a
-                  href={WHATSAPP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-brand transition-colors"
+        <div className="grid grid-cols-1 gap-8 min-[721px]:grid-cols-[4fr_7fr] min-[721px]:gap-14 items-start">
+          {/* Direct lines and the address */}
+          <motion.div
+            variants={fadeUp}
+            initial={reduce ? false : 'hidden'}
+            whileInView="show"
+            viewport={inViewOnce}
+          >
+            <div className="grid gap-3">
+              <a href={`tel:${ORG_PHONE_E164}`} className={direct}>
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  aria-hidden="true"
+                  className="flex-none"
                 >
-                  +90 531 669 37 34
-                </a>
-              ),
-            },
-            {
-              label: t.contact.emailLabel,
-              value: (
-                <a href="mailto:info@kervanheat.com" className="hover:text-brand transition-colors">
-                  info@kervanheat.com
-                </a>
-              ),
-            },
-            {
-              label: t.contact.addressLabel,
-              value: (
-                <>
-                  <span className="block whitespace-pre-line">{t.contact.address}</span>
-                  <a
-                    href={MAPS_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block mt-2 font-sans not-italic text-sm text-ink-mid underline underline-offset-2 hover:text-brand transition-colors"
-                  >
-                    {t.contact.mapLabel} ↗
-                  </a>
-                </>
-              ),
-            },
-            { label: t.contact.hoursLabel, value: t.contact.hours },
-          ].map((row, i) => (
-            <div key={i} className="flex flex-col gap-1.5">
-              <dt className="font-sans text-[13px] font-medium tracking-[0.12em] uppercase text-ink-mid">
-                {row.label}
-              </dt>
-              <dd className="font-serif italic text-lg text-ink m-0">{row.value}</dd>
+                  <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z" />
+                </svg>
+                {t.contact.phoneLabel}
+                <small className="ml-auto text-[15px] font-normal text-ink-mid">{ORG_PHONE}</small>
+              </a>
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className={direct}>
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  aria-hidden="true"
+                  className="flex-none"
+                >
+                  <path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z" />
+                </svg>
+                {t.contact.whatsappLabel}
+                <small className="ml-auto text-[15px] font-normal text-ink-mid">{ORG_PHONE}</small>
+              </a>
             </div>
-          ))}
-        </motion.dl>
+            <dl className="m-0 mt-7 border-t border-hair font-sans">
+              <div className="py-2.5 border-b border-hair">
+                <dt className="text-sm text-ink-mid">{t.contact.emailLabel}</dt>
+                <dd className="m-0 mt-0.5">
+                  <a href={`mailto:${ORG_EMAIL}`} className={infoLink}>
+                    {ORG_EMAIL}
+                  </a>
+                </dd>
+              </div>
+              <div className="py-2.5 border-b border-hair">
+                <dt className="text-sm text-ink-mid">{t.contact.addressLabel}</dt>
+                <dd className="m-0 mt-0.5 whitespace-pre-line text-ink">{t.contact.address}</dd>
+                <dd className="m-0">
+                  <a href={MAPS_URL} target="_blank" rel="noopener noreferrer" className={infoLink}>
+                    {t.contact.mapLabel} <span aria-hidden="true">&nbsp;{t.marks.external}</span>
+                  </a>
+                </dd>
+              </div>
+              <div className="py-2.5 border-b border-hair">
+                <dt className="text-sm text-ink-mid">{t.contact.hoursLabel}</dt>
+                <dd className="m-0 mt-0.5 text-ink">{t.contact.hours}</dd>
+              </div>
+            </dl>
+          </motion.div>
 
-        {/* Form — 8 col */}
-        <motion.form
-          ref={formRef}
-          onSubmit={onSubmit}
-          className="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-5"
-          variants={fadeUp}
-          initial={reduce ? false : 'hidden'}
-          whileInView="show"
-          viewport={inViewOnce}
-        >
-          {/* Honeypot: hidden (not just off-screen) so browser autofill skips it; see rfq.ts */}
-          <div hidden aria-hidden="true">
-            <input
-              type="text"
-              name="hp_ref"
-              tabIndex={-1}
-              autoComplete="off"
-              data-1p-ignore
-              data-lpignore="true"
-              data-bwignore="true"
-              data-form-type="other"
+          {/* Form */}
+          <motion.form
+            ref={formRef}
+            onSubmit={onSubmit}
+            aria-labelledby="contact-title"
+            className="bg-bg-soft border border-hair rounded-[4px] px-4 py-5 min-[721px]:p-8 grid grid-cols-1 gap-x-4 gap-y-4 min-[721px]:grid-cols-2"
+            variants={fadeUp}
+            initial={reduce ? false : 'hidden'}
+            whileInView="show"
+            viewport={inViewOnce}
+          >
+            {/* Honeypot: hidden (not just off-screen) so browser autofill skips it; see rfq.ts */}
+            <div hidden aria-hidden="true">
+              <input
+                type="text"
+                name="hp_ref"
+                tabIndex={-1}
+                autoComplete="off"
+                data-1p-ignore
+                data-lpignore="true"
+                data-bwignore="true"
+                data-form-type="other"
+              />
+            </div>
+
+            <Field label={t.contact.fields.name} name="name" required mark={req} maxLength={100} />
+            <Field label={t.contact.fields.company} name="company" mark={req} maxLength={150} />
+            <Field
+              label={t.contact.fields.email}
+              name="email"
+              type="email"
+              required
+              mark={req}
+              maxLength={200}
             />
-          </div>
-
-          <Field label={t.contact.fields.name} name="name" required maxLength={100} />
-          <Field label={t.contact.fields.company} name="company" maxLength={150} />
-          <Field
-            label={t.contact.fields.email}
-            name="email"
-            type="email"
-            required
-            maxLength={200}
-          />
-          <Field label={t.contact.fields.phone} name="phone" type="tel" maxLength={30} />
-
-          <label className="md:col-span-2 flex flex-col gap-2">
-            <span className="font-sans text-[13px] font-medium tracking-[0.12em] uppercase text-ink-mid">
-              {t.contact.fields.message}
-            </span>
-            <textarea
-              name="message"
-              rows={4}
-              maxLength={3000}
-              className="w-full bg-bg border border-ink-soft rounded-sm px-3.5 py-3 font-sans text-base text-ink placeholder:text-ink-soft hover:border-ink-mid focus:border-ink transition-colors resize-y min-h-[7.5rem]"
+            <Field
+              label={t.contact.fields.phone}
+              name="phone"
+              type="tel"
+              mark={req}
+              maxLength={30}
             />
-          </label>
 
-          {/* Drawing / photo: optional, checked here and again on the server. */}
-          <div className="md:col-span-2 flex flex-col gap-2">
-            <label
-              htmlFor={`${ids}-files`}
-              className="font-sans text-[13px] font-medium tracking-[0.12em] uppercase text-ink-mid"
-            >
-              {t.contact.files.label}
+            <label className="min-[721px]:col-span-2 grid gap-1.5">
+              <span className={label}>{t.contact.fields.message}</span>
+              <textarea
+                name="message"
+                rows={4}
+                maxLength={3000}
+                className={`${field} min-h-[120px] resize-y`}
+              />
             </label>
-            <input
-              ref={fileRef}
-              id={`${ids}-files`}
-              type="file"
-              name="attachment"
-              multiple
-              accept={ACCEPT}
-              onChange={onFiles}
-              aria-describedby={
-                fileProblem || state === 'rejected' ? `${fileHintId} ${fileErrId}` : fileHintId
-              }
-              aria-invalid={fileProblem || state === 'rejected' ? true : undefined}
-              className="w-full font-sans text-sm text-ink-mid file:mr-4 file:border file:border-solid file:border-ink-soft file:bg-transparent file:px-4 file:py-2 file:font-sans file:text-sm file:text-ink file:cursor-pointer hover:file:border-ink file:transition-colors"
-            />
-            <span id={fileHintId} className="font-sans text-sm text-ink-mid">
-              {t.contact.files.hint}
-            </span>
-            {files.length > 0 && !fileProblem && (
-              <ul className="list-none m-0 p-0 flex flex-col gap-1 font-sans text-sm text-ink-mid">
-                {files.map((f, i) => (
-                  <li key={i} className="break-all">
-                    {f.name} <span className="text-ink-soft">· {formatSize(f.size)}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {(fileProblem || state === 'rejected') && (
-              <p id={fileErrId} role="alert" className="m-0 font-sans text-sm text-err">
-                {fileProblem ? t.contact.files[fileProblem] : t.contact.files.rejected}
+
+            {/* Drawing / photo: optional, checked here and again on the server. The input is visually
+                hidden; its label is the button (the focus ring follows the input). */}
+            <div className="min-[721px]:col-span-2 flex flex-wrap items-center gap-x-3.5 gap-y-2">
+              <input
+                ref={fileRef}
+                id={`${ids}-files`}
+                type="file"
+                name="attachment"
+                multiple
+                accept={ACCEPT}
+                onChange={onFiles}
+                aria-describedby={
+                  fileProblem || state === 'rejected' ? `${fileHintId} ${fileErrId}` : fileHintId
+                }
+                aria-invalid={fileProblem || state === 'rejected' ? true : undefined}
+                className="peer sr-only"
+              />
+              <label
+                htmlFor={`${ids}-files`}
+                className={`${BTN_LINE} min-h-11 text-[15px] bg-field cursor-pointer peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-brand peer-focus-visible:outline-offset-2`}
+              >
+                {t.contact.files.label}
+              </label>
+              <span id={fileHintId} className="font-sans text-[13px] text-ink-mid">
+                {t.contact.files.hint}
+              </span>
+              {files.length > 0 && !fileProblem && (
+                <ul className="basis-full list-none m-0 p-0 flex flex-col gap-1 font-sans text-sm text-ink">
+                  {files.map((f, i) => (
+                    <li key={i} className="break-all">
+                      {f.name} <span className="text-ink-mid">· {formatSize(f.size)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {(fileProblem || state === 'rejected') && (
+                <p
+                  id={fileErrId}
+                  role="alert"
+                  className="basis-full m-0 font-sans text-sm text-err"
+                >
+                  {fileProblem ? t.contact.files[fileProblem] : t.contact.files.rejected}
+                </p>
+              )}
+            </div>
+
+            <div className="min-[721px]:col-span-2 mt-1 flex flex-wrap items-center justify-between gap-5">
+              <p className="m-0 max-w-[440px] font-sans text-[13px] leading-5 text-ink-mid">
+                {t.contact.requiredNote} {t.contact.kvkk.before}
+                {/* A 44 px tall hit area that does not change the line box. */}
+                <a
+                  href="/kvkk"
+                  className="inline-block -my-3 py-3 min-w-11 font-semibold text-brand underline underline-offset-2"
+                >
+                  {t.contact.kvkk.link}
+                </a>
+                {t.contact.kvkk.after}
+              </p>
+              <button
+                type="submit"
+                disabled={state === 'sending'}
+                className={`${BTN_PRIMARY} w-full min-[721px]:w-auto min-[721px]:min-w-[180px]`}
+              >
+                {state === 'sending' ? t.contact.sending : t.contact.submit}
+              </button>
+            </div>
+
+            {state === 'success' && (
+              <p
+                role="status"
+                className="min-[721px]:col-span-2 m-0 font-sans text-base font-semibold text-ok"
+              >
+                {t.contact.success}
               </p>
             )}
-          </div>
-
-          <p className="md:col-span-2 m-0 font-sans text-sm text-ink-mid">
-            {t.contact.requiredNote}
-          </p>
-
-          <button
-            type="submit"
-            disabled={state === 'sending'}
-            className="md:col-span-2 mt-2 bg-brand text-bg py-4 font-sans text-sm tracking-widest uppercase hover:bg-brand-hi disabled:bg-bg-soft disabled:text-ink-soft disabled:cursor-not-allowed transition-colors"
-          >
-            {state === 'sending' ? t.contact.sending : t.contact.submit}
-          </button>
-
-          <p className="md:col-span-2 m-0 font-sans text-sm text-ink-mid leading-relaxed">
-            {t.contact.kvkk.before}
-            <a
-              href="/kvkk"
-              className="underline underline-offset-2 hover:text-ink transition-colors"
-            >
-              {t.contact.kvkk.link}
-            </a>
-            {t.contact.kvkk.after}
-          </p>
-
-          {state === 'success' && (
-            <p role="status" className="md:col-span-2 font-serif italic text-base text-brand">
-              {t.contact.success}
-            </p>
-          )}
-          {state === 'error' && (
-            <p role="alert" className="md:col-span-2 font-serif italic text-base text-ink">
-              {t.contact.error}
-            </p>
-          )}
-        </motion.form>
+            {state === 'error' && (
+              <p
+                role="alert"
+                className="min-[721px]:col-span-2 m-0 font-sans text-base font-semibold text-ink"
+              >
+                {t.contact.error}
+              </p>
+            )}
+          </motion.form>
+        </div>
       </div>
     </section>
   );
@@ -316,21 +340,18 @@ interface FieldProps {
   name: string;
   type?: string;
   required?: boolean;
+  /** The required mark ("*", from the dict). */
+  mark: string;
   maxLength?: number;
 }
 
-function Field({ label, name, type = 'text', required, maxLength }: FieldProps) {
+function Field({ label, name, type = 'text', required, mark, maxLength }: FieldProps) {
   return (
-    <label className="flex flex-col gap-2">
-      <span className="font-sans text-[13px] font-medium tracking-[0.12em] uppercase text-ink-mid">
+    <label className="grid gap-1.5">
+      <span className="font-sans text-sm font-semibold text-ink">
         {label}
         {/* Visual mark; `required` + `aria-required` tell assistive technology. */}
-        {required && (
-          <span aria-hidden="true" className="text-brand">
-            {' '}
-            *
-          </span>
-        )}
+        {required && <span aria-hidden="true"> {mark}</span>}
       </span>
       <input
         type={type}
@@ -339,7 +360,7 @@ function Field({ label, name, type = 'text', required, maxLength }: FieldProps) 
         required={required}
         aria-required={required || undefined}
         maxLength={maxLength}
-        className="w-full bg-bg border border-ink-soft rounded-sm px-3.5 py-3 font-sans text-base text-ink placeholder:text-ink-soft hover:border-ink-mid focus:border-ink transition-colors"
+        className="w-full min-h-12 px-3.5 py-3 rounded-[2px] border border-field-line bg-field font-sans text-base text-ink placeholder:text-ink-soft hover:border-ink transition-colors"
       />
     </label>
   );

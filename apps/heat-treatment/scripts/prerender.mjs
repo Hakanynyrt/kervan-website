@@ -37,7 +37,7 @@ const CURTAIN_CSS = [
   '@keyframes kv-cur-l{to{transform:translateX(-100%)}}@keyframes kv-cur-r{to{transform:translateX(100%)}}',
   `.kv-curtain-slit{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--color-brand);opacity:0;transform:translateX(-50%) scaleY(0);animation:kv-cur-slit 1.6s ${EASE} forwards}`,
   '@keyframes kv-cur-slit{18%{transform:translateX(-50%) scaleY(1);opacity:1}50%{transform:translateX(-50%) scaleY(1);opacity:.8}to{transform:translateX(-50%) scaleY(.4);opacity:0}}',
-  '.kv-curtain-name{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;margin:0;font-family:var(--font-serif);font-style:italic;font-size:clamp(40px,8vw,96px);line-height:1;letter-spacing:-.025em;color:var(--color-ink);opacity:0;animation:kv-cur-name 2.4s linear forwards}',
+  '.kv-curtain-name{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;margin:0;font-family:var(--font-sans);font-weight:700;font-size:clamp(36px,7vw,80px);line-height:1;letter-spacing:-.03em;color:var(--color-ink);opacity:0;animation:kv-cur-name 2.4s linear forwards}',
   '@keyframes kv-cur-name{45%{opacity:0}60%{opacity:1}85%{opacity:1}to{opacity:0}}',
 ].join('');
 const CURTAIN_HTML =
