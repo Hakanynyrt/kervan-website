@@ -3,7 +3,6 @@ import { useLangSync } from './lib/use-lang';
 import { DICT } from './lib/dict';
 import { useTechAuth } from './lib/use-tech-auth';
 import type { Lang } from './types';
-import IntroOverlay from './components/IntroOverlay';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
 import GearProcess from './components/GearProcess';
@@ -33,8 +32,6 @@ export default function App({ lang }: Props) {
 
   return (
     <>
-      {!isStatic && <IntroOverlay />}
-
       <Nav lang={lang} t={t} techAuthed={tech.state === 'authed'} />
       <main>
         <Hero t={t} />

@@ -18,17 +18,31 @@ process.on('exit', () => fs.rmSync(ssrDir, { recursive: true, force: true }));
 const ssr = await import(pathToFileURL(path.join(ssrDir, 'entry-server.js')).href);
 const template = fs.readFileSync(path.join(distDir, 'index.html'), 'utf8');
 
-// The static page is hidden for animated visitors only while the intro curtain is still to come
-// (first page of a visit, IntroOverlay's sessionStorage key unset): the curtain covers it anyway.
-// Later pages in the same visit show the static markup at once instead of a blank screen until the
-// script has loaded and rendered (2026-10-28, Lighthouse: up to 3 s on phones).
-const INTRO_SCRIPT = `(function(){try{var h=document.documentElement;if(h.classList.contains('${ssr.JS_ANIM_CLASS}')&&sessionStorage.getItem('${ssr.INTRO_SESSION_KEY}')!=='1')h.classList.add('kv-intro')}catch(e){}})();`;
-const ROOT_CSS = ssr.JS_ANIM_ROOT_CSS.replace(
-  `html.${ssr.JS_ANIM_CLASS} `,
-  `html.${ssr.JS_ANIM_CLASS}.kv-intro `,
-);
-if (ROOT_CSS === ssr.JS_ANIM_ROOT_CSS) throw new Error('prerender: JS_ANIM_ROOT_CSS changed shape');
-const headPrepend = `<script>${ssr.JS_ANIM_INLINE_SCRIPT}${INTRO_SCRIPT}</script><style>${ROOT_CSS}</style>`;
+// Intro curtain (first page of a visit, animated visitors only): pure CSS in the static HTML, so it
+// starts with the first paint instead of waiting for the script, and the page under it is already
+// painted (2026-10-28, Lighthouse: the page used to stay hidden until the script had loaded and
+// rendered, up to 3 s on phones). The head script adds `kv-intro` and marks the visit, so later
+// pages show at once. The look and timing are the former IntroOverlay's: two halves part after
+// 0.4 s, a brand hairline in the middle, the name fades in and out, gone after 2.8 s.
+const INTRO_SCRIPT = `(function(){try{var h=document.documentElement;if(h.classList.contains('${ssr.JS_ANIM_CLASS}')&&sessionStorage.getItem('${ssr.INTRO_SESSION_KEY}')!=='1'){h.classList.add('kv-intro');sessionStorage.setItem('${ssr.INTRO_SESSION_KEY}','1')}}catch(e){}})();`;
+const EASE = 'cubic-bezier(.7,0,.3,1)';
+const CURTAIN_CSS = [
+  '.kv-curtain{display:none}',
+  'html.kv-intro{overflow:hidden;animation:kv-unlock 0s 2.4s forwards}',
+  '@keyframes kv-unlock{to{overflow:visible}}',
+  'html.kv-intro .kv-curtain{display:block;position:fixed;inset:0;z-index:100;pointer-events:none;animation:kv-cur-out .4s linear 2.4s forwards}',
+  '@keyframes kv-cur-out{to{opacity:0;visibility:hidden}}',
+  `.kv-curtain-l,.kv-curtain-r{position:absolute;top:0;height:100%;width:50%;background:var(--color-bg);animation:kv-cur-l 1.2s ${EASE} .4s forwards}`,
+  '.kv-curtain-l{left:0}.kv-curtain-r{right:0;animation-name:kv-cur-r}',
+  '@keyframes kv-cur-l{to{transform:translateX(-100%)}}@keyframes kv-cur-r{to{transform:translateX(100%)}}',
+  `.kv-curtain-slit{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--color-brand);opacity:0;transform:translateX(-50%) scaleY(0);animation:kv-cur-slit 1.6s ${EASE} forwards}`,
+  '@keyframes kv-cur-slit{18%{transform:translateX(-50%) scaleY(1);opacity:1}50%{transform:translateX(-50%) scaleY(1);opacity:.8}to{transform:translateX(-50%) scaleY(.4);opacity:0}}',
+  '.kv-curtain-name{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;margin:0;font-family:var(--font-serif);font-style:italic;font-size:clamp(40px,8vw,96px);line-height:1;letter-spacing:-.025em;color:var(--color-ink);opacity:0;animation:kv-cur-name 2.4s linear forwards}',
+  '@keyframes kv-cur-name{45%{opacity:0}60%{opacity:1}85%{opacity:1}to{opacity:0}}',
+].join('');
+const CURTAIN_HTML =
+  '<div class="kv-curtain" aria-hidden="true"><div class="kv-curtain-l"></div><div class="kv-curtain-r"></div><div class="kv-curtain-slit"></div><div class="kv-curtain-name">Kervan Heat</div></div>';
+const headPrepend = `<script>${ssr.JS_ANIM_INLINE_SCRIPT}${INTRO_SCRIPT}</script><style>${CURTAIN_CSS}</style>`;
 
 function write(rel, html) {
   const file = path.join(distDir, rel);
@@ -61,7 +75,12 @@ for (const lang of ['tr', 'en']) {
     headPrepend,
     rootAttrs: `${ssr.PRERENDERED_ATTR}=""`,
   });
-  write(lang === 'en' ? 'en/index.html' : 'index.html', html);
+  if (!html.includes('<div id="root"'))
+    throw new Error('prerender: no root to put the curtain before');
+  write(
+    lang === 'en' ? 'en/index.html' : 'index.html',
+    html.replace('<div id="root"', `${CURTAIN_HTML}<div id="root"`),
+  );
 }
 
 // 2. 404 pages: static, noindex, no client script (nothing to hydrate). Pages serves the
