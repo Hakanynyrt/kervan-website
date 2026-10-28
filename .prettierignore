@@ -13,3 +13,4 @@ apps/*/dist
 package-lock.json
 pnpm-lock.yaml
 .impeccable
+.anthropic-skills

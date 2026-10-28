@@ -1,0 +1,124 @@
+name: Quality
+
+# Lighthouse (speed, SEO, accessibility, best practices) and pa11y (WCAG 2 AA) on a few
+# key pages, after every Deploy run: PR runs check that branch's Pages previews, main runs
+# check production. Report only: it never blocks a deploy or a merge. Scores go to the run
+# summary, full reports to the run's artifacts. "Run workflow" checks production on demand.
+# GET requests only; never POST anywhere (CLAUDE.md: never POST /api/tech/login).
+# "Run workflow" also runs a whole-site Unlighthouse sweep of a kiriciparca.com sample.
+on:
+  workflow_run:
+    workflows: [Deploy]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.event.workflow_run.head_branch || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Lighthouse + pa11y
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Pick the URLs
+        id: urls
+        env:
+          EVENT: ${{ github.event.workflow_run.event || 'workflow_dispatch' }}
+          BRANCH: ${{ github.event.workflow_run.head_branch || 'main' }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            # Cloudflare Pages branch alias: lower case, other characters to '-', 28 chars.
+            slug=$(printf '%s' "$BRANCH" | tr 'A-Z' 'a-z' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//' | cut -c1-28 | sed -E 's/-+$//')
+            shop="https://$slug.kervan-parts-shop.pages.dev"
+            breaker="https://$slug.kervan-breaker-parts.pages.dev"
+            heat="https://$slug.kervan-heat-treatment.pages.dev"
+          else
+            shop="https://kiriciparca.com"
+            breaker="https://kervanbreaker.com"
+            heat="https://kervanheat.com"
+          fi
+          list=""
+          for u in "$shop/" "$shop/kirici-ucu" "$shop/yedek-parca/kama" "$shop/rehber/kirici-ucu-ne-zaman-degisir" \
+                   "$breaker/" "$heat/"; do
+            # A PR only gets previews of the apps it changed: skip the ones that do not answer.
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$u" || true)
+            if [ "$code" = "200" ]; then list="$list $u"; else echo "skip $u ($code)"; fi
+          done
+          echo "list=${list# }" >> "$GITHUB_OUTPUT"
+          echo "Checking:${list:- nothing}"
+
+      - name: Lighthouse
+        if: steps.urls.outputs.list != ''
+        continue-on-error: true
+        env:
+          LIST: ${{ steps.urls.outputs.list }}
+        run: |
+          args=""
+          for u in $LIST; do args="$args --url=$u"; done
+          npx -y @lhci/cli@0.14.0 collect $args --numberOfRuns=1 \
+            --settings.chromeFlags="--headless=new --no-sandbox"
+          npx -y @lhci/cli@0.14.0 upload --target=filesystem --outputDir=lhci-report
+          node -e '
+            const m = require("./lhci-report/manifest.json");
+            const p = (x) => (x == null ? "–" : Math.round(x * 100));
+            const rows = m.map((r) => `| ${r.url} | ${p(r.summary.performance)} | ${p(r.summary.accessibility)} | ${p(r.summary["best-practices"])} | ${p(r.summary.seo)} |`);
+            const out = ["### Lighthouse (phone)", "", "| Page | Speed | Accessibility | Best practices | SEO |", "|---|---|---|---|---|", ...rows, ""].join("\n");
+            require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY, out + "\n");
+          '
+
+      - name: pa11y (WCAG 2 AA)
+        if: steps.urls.outputs.list != ''
+        continue-on-error: true
+        env:
+          LIST: ${{ steps.urls.outputs.list }}
+        run: |
+          printf '{"defaults":{"standard":"WCAG2AA","timeout":60000,"chromeLaunchConfig":{"args":["--no-sandbox"]}}}' > pa11y.json
+          set +e
+          npx -y pa11y-ci@3.1.0 --config pa11y.json --reporter json $LIST > pa11y-report.json
+          set -e
+          node -e '
+            const r = require("./pa11y-report.json");
+            const rows = Object.entries(r.results || {}).map(([u, issues]) => `| ${u} | ${Array.isArray(issues) ? issues.length : "error"} |`);
+            const out = ["### pa11y (WCAG 2 AA)", "", "| Page | Issues |", "|---|---|", ...rows, ""].join("\n");
+            require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY, out + "\n");
+          '
+
+      - name: Keep the reports
+        if: always() && steps.urls.outputs.list != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports
+          path: |
+            lhci-report/
+            pa11y-report.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  site-scan:
+    # Whole-site sweep, on demand only ("Run workflow"): Unlighthouse on a sample of
+    # kiriciparca.com pages from the sitemap; the sortable HTML report is the run's artifact.
+    name: Unlighthouse (kiriciparca.com sample)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Scan
+        continue-on-error: true
+        run: |
+          npx -y -p unlighthouse@0.19.1 unlighthouse-ci --site https://kiriciparca.com \
+            --output-path unlighthouse --build-static --reporter jsonExpanded \
+            --samples 1 --throttle --mobile 2>&1 | tail -40
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unlighthouse-report
+          path: unlighthouse/
+          if-no-files-found: ignore
+          retention-days: 14

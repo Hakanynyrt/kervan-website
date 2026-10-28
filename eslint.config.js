@@ -11,6 +11,7 @@ export default tseslint.config(
       '**/dist-ssr/**',
       '**/node_modules/**',
       '.impeccable/**',
+      '.anthropic-skills/**',
       '**/.turbo/**',
       '**/.wrangler/**',
       // parts-shop build artefacts (gitignored)
