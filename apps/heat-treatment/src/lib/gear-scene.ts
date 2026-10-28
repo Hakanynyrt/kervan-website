@@ -61,10 +61,14 @@ function bez(
 function toothedOutline(flankSteps: number, filSteps: number) {
   const pts = [];
   const pitch = (2 * Math.PI) / N;
-  const FIL = 0.058; // kök yuvarlatması (rad)
   const r0 = RB * 1.003;
   const rF = RA - 0.17 * MOD; // pah başlangıcı
   const hb = halfAngle(r0);
+  // Kök yuvarlatması (rad): iki diş arasındaki dip boşluğunun %45'i. Sabit 0.058 boşluktan
+  // genişti, iki yuvarlatma üst üste biniyor ve pah her dipte sivri bir çıkıntı bırakıyordu
+  // (sahibi, 2026-10-28: "dişlinin şekli bozuk").
+  const FIL = 0.45 * (pitch - 2 * hb);
+  const ROOT_STEPS = 2;
   const hF = halfAngle(rF);
   const hTip = hF * 0.4; // baş pahı: yan yüzden diş üstüne ~45 derece
   for (let k = 0; k < N; k++) {
@@ -90,10 +94,10 @@ function toothedOutline(flankSteps: number, filSteps: number) {
     }
     // sağ kök yuvarlatması
     bez(polar(r0, c + hb), polar(RR, c + hb), polar(RR, c + hb + FIL), filSteps, pts, true);
-    // diş dibi yayı
+    // diş dibi yayı: birkaç nokta, tek nokta pah (bevel) sırasında dipte sivri çıkıntı bırakıyordu
     const a0 = c + hb + FIL;
     const a1 = c + pitch - hb - FIL;
-    pts.push(polar(RR, a0 + (a1 - a0) * 0.5));
+    for (let i = 1; i < ROOT_STEPS; i++) pts.push(polar(RR, a0 + ((a1 - a0) * i) / ROOT_STEPS));
   }
   return pts;
 }
@@ -551,7 +555,9 @@ export async function mount({
   try {
     renderer = new THREE.WebGLRenderer({
       alpha: true,
-      antialias: !coarse,
+      // Antialiasing and the full-detail outline on phones too (owner, 2026-10-28: the gear's
+      // shape looked broken on the phone: jagged tooth flanks): one mesh, the 30 fps cap holds.
+      antialias: true,
       powerPreference: 'low-power',
       preserveDrawingBuffer: !!debug,
     });
@@ -600,7 +606,7 @@ export async function mount({
     uNM: { value: new THREE.Matrix3() },
   };
   const mat = makeMaterial(U);
-  const geo = buildGearGeometry(coarse);
+  const geo = buildGearGeometry(false);
   const mesh = new THREE.Mesh(geo, mat);
   const spin = new THREE.Group();
   spin.add(mesh);
