@@ -21,14 +21,20 @@ function RevealRoot() {
 if (isAnimatedClient() || !el.hasChildNodes()) {
   // Animated visitors (and the dev server, which has no prerendered markup):
   // a fresh render replaces the static HTML, exactly like before prerendering.
-  createRoot(el).render(
-    <StrictMode>
-      <MotionConfig reducedMotion="user">
-        <App lang={lang} />
-        <RevealRoot />
-      </MotionConfig>
-    </StrictMode>,
-  );
+  const start = () =>
+    createRoot(el).render(
+      <StrictMode>
+        <MotionConfig reducedMotion="user">
+          <App lang={lang} />
+          <RevealRoot />
+        </MotionConfig>
+      </StrictMode>,
+    );
+  // The prerendered page is never hidden here (the intro curtain is CSS, see prerender.mjs), so
+  // let the browser paint it before the full render runs (2026-10-28, Lighthouse: the render held
+  // back the first paint on phones).
+  if (el.hasChildNodes()) requestAnimationFrame(() => setTimeout(start, 0));
+  else start();
 } else {
   // Bots, headless browsers and reduced-motion visitors: keep the
   // prerendered static page and hydrate it (same tree as entry-server.tsx).
