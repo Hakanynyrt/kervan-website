@@ -10,7 +10,13 @@ import NotFound from './components/NotFound';
 import type { Lang } from './types';
 
 export { buildHeadTags, injectHead, buildSitemapXml } from '@kervan/seo';
-export { JS_ANIM_INLINE_SCRIPT, JS_ANIM_ROOT_CSS, PRERENDERED_ATTR } from '@kervan/motion';
+export {
+  JS_ANIM_CLASS,
+  JS_ANIM_INLINE_SCRIPT,
+  JS_ANIM_ROOT_CSS,
+  PRERENDERED_ATTR,
+} from '@kervan/motion';
+export { INTRO_SESSION_KEY } from './lib/intro';
 export { homeHead, notFoundHead, pageUrl, ALTERNATES } from './lib/seo';
 export { pathForLang } from './lib/use-lang';
 

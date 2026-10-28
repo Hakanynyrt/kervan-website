@@ -61,14 +61,14 @@ jobs:
         run: |
           args=""
           for u in $LIST; do args="$args --url=$u"; done
-          npx -y @lhci/cli@0.14.0 collect $args --numberOfRuns=1 \
+          npx -y @lhci/cli@0.14.0 collect $args --numberOfRuns=3 \
             --settings.chromeFlags="--headless=new --no-sandbox"
           npx -y @lhci/cli@0.14.0 upload --target=filesystem --outputDir=lhci-report
           node -e '
             const m = require("./lhci-report/manifest.json");
             const p = (x) => (x == null ? "–" : Math.round(x * 100));
-            const rows = m.map((r) => `| ${r.url} | ${p(r.summary.performance)} | ${p(r.summary.accessibility)} | ${p(r.summary["best-practices"])} | ${p(r.summary.seo)} |`);
-            const out = ["### Lighthouse (phone)", "", "| Page | Speed | Accessibility | Best practices | SEO |", "|---|---|---|---|---|", ...rows, ""].join("\n");
+            const rows = m.filter((r) => r.isRepresentativeRun).map((r) => `| ${r.url} | ${p(r.summary.performance)} | ${p(r.summary.accessibility)} | ${p(r.summary["best-practices"])} | ${p(r.summary.seo)} |`);
+            const out = ["### Lighthouse (phone, median of 3 runs)", "", "| Page | Speed | Accessibility | Best practices | SEO |", "|---|---|---|---|---|", ...rows, ""].join("\n");
             require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY, out + "\n");
           '
 

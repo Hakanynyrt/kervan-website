@@ -18,7 +18,17 @@ process.on('exit', () => fs.rmSync(ssrDir, { recursive: true, force: true }));
 const ssr = await import(pathToFileURL(path.join(ssrDir, 'entry-server.js')).href);
 const template = fs.readFileSync(path.join(distDir, 'index.html'), 'utf8');
 
-const headPrepend = `<script>${ssr.JS_ANIM_INLINE_SCRIPT}</script><style>${ssr.JS_ANIM_ROOT_CSS}</style>`;
+// The static page is hidden for animated visitors only while the intro curtain is still to come
+// (first page of a visit, IntroOverlay's sessionStorage key unset): the curtain covers it anyway.
+// Later pages in the same visit show the static markup at once instead of a blank screen until the
+// script has loaded and rendered (2026-10-28, Lighthouse: up to 3 s on phones).
+const INTRO_SCRIPT = `(function(){try{var h=document.documentElement;if(h.classList.contains('${ssr.JS_ANIM_CLASS}')&&sessionStorage.getItem('${ssr.INTRO_SESSION_KEY}')!=='1')h.classList.add('kv-intro')}catch(e){}})();`;
+const ROOT_CSS = ssr.JS_ANIM_ROOT_CSS.replace(
+  `html.${ssr.JS_ANIM_CLASS} `,
+  `html.${ssr.JS_ANIM_CLASS}.kv-intro `,
+);
+if (ROOT_CSS === ssr.JS_ANIM_ROOT_CSS) throw new Error('prerender: JS_ANIM_ROOT_CSS changed shape');
+const headPrepend = `<script>${ssr.JS_ANIM_INLINE_SCRIPT}${INTRO_SCRIPT}</script><style>${ROOT_CSS}</style>`;
 
 function write(rel, html) {
   const file = path.join(distDir, rel);
