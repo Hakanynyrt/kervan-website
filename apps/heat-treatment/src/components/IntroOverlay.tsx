@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useReducedMotion, useStaticMotion } from '@kervan/motion';
-
-const SESSION_KEY = 'kv_v2_intro_seen';
+import { INTRO_SESSION_KEY as SESSION_KEY } from '../lib/intro';
 const TOTAL_MS = 2400;
 
 /**
