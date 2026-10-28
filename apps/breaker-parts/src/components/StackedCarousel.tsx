@@ -192,11 +192,13 @@ function Card({ item, index, active, N, isMobile, onOpen }: CardProps) {
     >
       <div className="relative h-full w-full overflow-hidden bg-bg-soft border border-hair">
         {item.video ? (
-          <InViewVideo src={item.video} poster={item.img || undefined} />
+          <InViewVideo src={item.video} poster={(visible && item.img) || undefined} />
         ) : item.img ? (
           <div
             className="w-full h-full bg-cover bg-center"
-            style={{ backgroundImage: `url(${item.img})` }}
+            // Only the cards in the visible rack fetch their picture (Lighthouse 2026-10-28:
+            // every card's photo loaded with the page).
+            style={visible ? { backgroundImage: `url(${item.img})` } : undefined}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-bg">

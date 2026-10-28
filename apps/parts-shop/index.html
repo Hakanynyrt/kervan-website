@@ -62,13 +62,16 @@
         }
       })();
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Tip and part images come from R2 on main (docs/agent/platform.md). -->
     <link rel="preconnect" href="https://img.kiriciparca.com" />
+    <!-- Inter is served from our own origin (public/fonts, @font-face in globals.css): no
+         render-blocking third-party stylesheet (Lighthouse 2026-10-28). Latin first: most text. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="/fonts/inter-latin-v20.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32-02.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16-02.png" />
