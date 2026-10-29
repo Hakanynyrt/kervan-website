@@ -145,7 +145,7 @@ body {
 }
 html {
   overflow-x: clip;
-  /* The intro curtain locks scrolling; a stable gutter keeps the page from shifting when it unlocks (CLS). */
+  /* A stable gutter keeps the page from shifting when a scrollbar appears (CLS). */
   scrollbar-gutter: stable;
   scroll-behavior: smooth;
   scroll-padding-top: 80px;

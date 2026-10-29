@@ -16,7 +16,6 @@ export {
   JS_ANIM_ROOT_CSS,
   PRERENDERED_ATTR,
 } from '@kervan/motion';
-export { INTRO_SESSION_KEY } from './lib/intro';
 export { homeHead, notFoundHead, pageUrl, ALTERNATES } from './lib/seo';
 export { pathForLang } from './lib/use-lang';
 
