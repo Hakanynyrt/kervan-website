@@ -1,72 +1,71 @@
 import type { DictBlock } from '../types';
+import { BTN_LINE, BTN_PRIMARY, WRAP } from '../lib/ui';
+import { WHATSAPP_URL } from '../lib/contact';
+import { HERO_PHOTO } from '../lib/home-photos';
+import { ChatIcon } from './icons';
 
 interface Props {
   t: DictBlock;
 }
 
-const PHOTO = '/photos/uclar/uclar-pile-hero';
-
 /**
- * First screen: headline, one sentence, two buttons and three facts on the left, one real
- * workshop photo on the right. Below 1024 px the copy and the primary button come first and
- * the photo follows. Plain markup and CSS (`.kv-hero` in globals.css): the same on the
- * prerendered page and after hydration. The photo is cropped from the original
- * (uclar-pile.jpeg) into a phone and a desktop picture, each with a 1x and a 2x file.
+ * First screen: the lathe photo full-bleed with a solid, page-coloured text panel at its bottom
+ * left: H1, one sentence, "Teklif Al" + WhatsApp. Phones: a 112 px band of the photo, then the
+ * text. The fact table follows right below (Facts). No entrance animation: the heading is the
+ * LCP text and the page is prerendered. The photo drifts a few percent larger over a long,
+ * one-way CSS animation (`kv-hero-drift`, off for reduced motion).
  */
 export default function Hero({ t }: Props) {
+  const h = t.hero;
+  const photo = t.atolye.items.find((i) => i.img === HERO_PHOTO);
+  const alt = photo ? `${photo.name}: ${photo.desc}` : '';
   return (
-    <section className="kv-hero" aria-label={t.hero.sectionLabel}>
-      <div className="kv-hero-copy">
-        <h1>
-          {t.hero.title1} {t.hero.title2}
-        </h1>
-        <p className="kv-hero-sub">{t.hero.sub}</p>
-        <div className="kv-hero-btns">
-          <a href="#contact" className="kv-hero-btn kv-hero-btn--primary">
-            {t.hero.cta}
-          </a>
-          <a href="#products" className="kv-hero-btn">
-            {t.hero.ctaSecondary}
-          </a>
+    <section id="top" aria-labelledby="hero-title" className="kv-hero">
+      <div className="kv-hero-photo">
+        <img
+          src={HERO_PHOTO}
+          width={1280}
+          height={960}
+          alt={alt}
+          loading="eager"
+          // React 18 only knows the lowercase attribute (fetchPriority warns in SSR and on the client).
+          {...{ fetchpriority: 'high' }}
+          decoding="async"
+          className="kv-hero-drift"
+        />
+        {photo && (
+          <p className="kv-chip kv-hero-caption">
+            {photo.name} · {photo.desc}
+          </p>
+        )}
+      </div>
+      <div className={`${WRAP} kv-hero-wrap`}>
+        <div className="kv-hero-panel">
+          <h1
+            id="hero-title"
+            className="m-0 font-sans font-bold text-ink text-[30px] leading-[1.08] tracking-[-0.025em] min-[721px]:text-[50px] min-[721px]:leading-[1.04] min-[721px]:tracking-[-0.035em] text-balance"
+          >
+            {h.title1} {h.title2}
+          </h1>
+          <p className="m-0 mt-2 min-[721px]:mt-4 font-sans text-[15px] leading-[1.45] min-[721px]:text-lg min-[721px]:leading-[1.55] text-ink-mid max-w-[500px]">
+            {h.sub}
+          </p>
+          <div className="mt-3.5 min-[721px]:mt-[26px] grid grid-cols-2 gap-2.5 min-[721px]:flex min-[721px]:flex-wrap min-[721px]:items-center min-[721px]:gap-3">
+            <a href="#contact" className={`${BTN_PRIMARY} max-[720px]:px-3`}>
+              {h.cta}
+            </a>
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${BTN_LINE} max-[720px]:px-3`}
+            >
+              <ChatIcon />
+              {t.contact.whatsappLabel}
+            </a>
+          </div>
         </div>
       </div>
-
-      <figure className="kv-hero-photo">
-        <div className="kv-hero-frame">
-          <picture>
-            <source
-              media="(max-width: 1023px)"
-              type="image/webp"
-              srcSet={`${PHOTO}-mobil-768-v1.webp 768w, ${PHOTO}-mobil-1536-v1.webp 1536w`}
-              sizes="calc(100vw - 32px)"
-            />
-            <img
-              src={`${PHOTO}-1536-v1.webp`}
-              srcSet={`${PHOTO}-1024-v1.webp 1024w, ${PHOTO}-1536-v1.webp 1536w`}
-              sizes="53vw"
-              width={1536}
-              height={1536}
-              alt={t.hero.photoAlt}
-              fetchPriority="high"
-              decoding="async"
-            />
-          </picture>
-        </div>
-        <figcaption>{t.hero.photoCaption}</figcaption>
-      </figure>
-
-      <dl className="kv-hero-stats">
-        {t.hero.stats.map((s) => (
-          <div key={s.n} className="kv-hero-stat">
-            <dt>
-              <b>{s.n}</b>
-            </dt>
-            <dd style={{ margin: 0 }}>
-              <span>{s.l}</span>
-            </dd>
-          </div>
-        ))}
-      </dl>
     </section>
   );
 }

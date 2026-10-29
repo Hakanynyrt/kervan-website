@@ -6,6 +6,7 @@ import { fadeUp, inViewOnce, useReducedMotion, useStaticMotion } from '@kervan/m
 import { PRODUCT_BY_SLUG } from '../data/products';
 import type { DictBlock, Lang } from '../types';
 import { shopUrl } from '../lib/shop';
+import { BTN_PRIMARY, FIELD, LABEL } from '../lib/ui';
 
 interface Props {
   t: DictBlock;
@@ -65,7 +66,7 @@ export default function Contact({ t, lang }: Props) {
 
   return (
     <>
-      <section className="pt-32 pb-16 md:pt-40 md:pb-24">
+      <section className="pt-10 pb-16 md:pt-16 md:pb-24">
         <motion.div
           className="max-w-[1280px] mx-auto px-6 md:px-8 mb-12 md:mb-16 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end"
           variants={fadeUp}
@@ -73,14 +74,11 @@ export default function Contact({ t, lang }: Props) {
           animate="show"
         >
           <div className="col-span-12 lg:col-span-7 flex flex-col gap-5">
-            <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand font-medium">
-              {t.contact.eyebrow}
-            </span>
-            <h1 className="font-serif italic text-h1 text-ink leading-[1.05] tracking-[-0.02em]">
+            <h1 className="font-sans font-bold text-[34px] md:text-[48px] text-ink leading-[1.08] tracking-[-0.03em] text-balance">
               {t.contact.title}
             </h1>
           </div>
-          <p className="col-span-12 lg:col-span-5 font-serif italic text-lg text-ink-mid leading-relaxed max-w-[40ch]">
+          <p className="col-span-12 lg:col-span-5 font-sans text-lg text-ink-mid leading-relaxed max-w-[40ch]">
             {t.contact.sub}
           </p>
         </motion.div>
@@ -133,10 +131,8 @@ export default function Contact({ t, lang }: Props) {
               },
             ].map((row, i) => (
               <div key={i} className="flex flex-col gap-1.5">
-                <dt className="font-sans text-xs tracking-widest uppercase text-ink-soft">
-                  {row.label}
-                </dt>
-                <dd className="font-serif italic text-lg text-ink m-0">{row.value}</dd>
+                <dt className="font-sans text-sm font-medium text-ink-mid">{row.label}</dt>
+                <dd className="font-sans font-semibold text-lg text-ink m-0">{row.value}</dd>
               </div>
             ))}
           </motion.dl>
@@ -145,7 +141,7 @@ export default function Contact({ t, lang }: Props) {
           <motion.form
             ref={formRef}
             onSubmit={onSubmit}
-            className="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-5"
+            className="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4 bg-panel border border-hair-strong rounded-[4px] px-4 py-5 md:p-8"
             variants={fadeUp}
             initial={reduce ? false : 'hidden'}
             whileInView="show"
@@ -175,35 +171,33 @@ export default function Contact({ t, lang }: Props) {
             />
             <Field label={t.contact.fields.phone} name="phone" type="tel" maxLength={30} />
 
-            <label className="md:col-span-2 flex flex-col gap-2">
-              <span className="font-sans text-xs tracking-widest uppercase text-ink-soft">
-                {t.contact.fields.message}
-              </span>
+            <label className="md:col-span-2 grid gap-1.5">
+              <span className={LABEL}>{t.contact.fields.message}</span>
               <textarea
                 name="message"
                 rows={5}
                 maxLength={3000}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="bg-transparent border-b border-ink-soft pb-2 font-serif text-lg text-ink resize-none focus:border-ink transition-colors"
+                className={`${FIELD} min-h-[130px] resize-y`}
               />
             </label>
 
             <button
               type="submit"
               disabled={state === 'sending'}
-              className="md:col-span-2 mt-4 bg-brand text-bg py-4 font-sans text-sm tracking-widest uppercase hover:bg-brand-hi disabled:bg-bg-soft disabled:text-ink-soft disabled:cursor-not-allowed transition-colors"
+              className={`${BTN_PRIMARY} md:col-span-2 mt-4`}
             >
               {state === 'sending' ? t.contact.sending : t.contact.submit}
             </button>
 
             {state === 'success' && (
-              <p role="status" className="md:col-span-2 font-serif italic text-base text-brand">
+              <p role="status" className="md:col-span-2 font-sans font-semibold text-base text-ok">
                 {t.contact.success}
               </p>
             )}
             {state === 'error' && (
-              <p role="alert" className="md:col-span-2 font-serif italic text-base text-ink">
+              <p role="alert" className="md:col-span-2 font-sans font-semibold text-base text-ink">
                 {t.contact.error}
               </p>
             )}
@@ -232,15 +226,15 @@ interface FieldProps {
 
 function Field({ label, name, type = 'text', required, maxLength }: FieldProps) {
   return (
-    <label className="flex flex-col gap-2">
-      <span className="font-sans text-xs tracking-widest uppercase text-ink-soft">{label}</span>
+    <label className="grid gap-1.5">
+      <span className={LABEL}>{label}</span>
       <input
         type={type}
         name={name}
         autoComplete={AUTOCOMPLETE[name]}
         required={required}
         maxLength={maxLength}
-        className="bg-transparent border-b border-ink-soft pb-2 font-serif text-lg text-ink focus:border-ink transition-colors"
+        className={FIELD}
       />
     </label>
   );

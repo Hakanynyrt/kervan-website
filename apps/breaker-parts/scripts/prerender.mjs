@@ -22,7 +22,8 @@ process.env.NODE_ENV ??= 'production';
 try {
   const ssr = await import(pathToFileURL(path.join(SSR, 'entry-server.js')).href);
   const template = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
-  const headPrepend = `<script>${ssr.JS_ANIM_INLINE_SCRIPT}</script>\n    <style>${ssr.JS_ANIM_ROOT_CSS}</style>`;
+  // The prerendered page is never hidden (2026-10-29, like kervanheat.com): no JS_ANIM_ROOT_CSS.
+  const headPrepend = `<script>${ssr.JS_ANIM_INLINE_SCRIPT}</script>`;
 
   let count = 0;
   for (const page of ssr.pages()) {

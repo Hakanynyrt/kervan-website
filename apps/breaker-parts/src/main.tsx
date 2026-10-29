@@ -9,7 +9,7 @@ import App from './App';
 const rootEl = document.getElementById('root')!;
 
 /** Removes `data-prerendered` right after the first animated render has
- *  replaced the static markup (CSS hides it under html.js-anim until then). */
+ *  replaced the static markup. */
 function RevealRoot() {
   useLayoutEffect(() => {
     rootEl.removeAttribute(PRERENDERED_ATTR);
@@ -31,11 +31,14 @@ const tree = (staticMode: boolean) => (
 );
 
 // Animated visitors (the inline <head> script set html.js-anim) and the dev
-// server (empty root) get a fresh render: intro, opening hold, 3D scene and
-// entrance animations exactly as before. Everyone else (bots, no-animation
-// preference) hydrates the prerendered static page as it is.
+// server (empty root) get a fresh render with the entrance animations. The
+// prerendered page is never hidden (2026-10-29, like kervanheat.com), so the
+// browser paints it first and the fresh render runs right after. Everyone else
+// (bots, no-animation preference) hydrates the prerendered static page as it is.
 if (isAnimatedClient() || !rootEl.hasAttribute(PRERENDERED_ATTR)) {
-  createRoot(rootEl).render(tree(false));
+  const start = () => createRoot(rootEl).render(tree(false));
+  if (rootEl.hasAttribute(PRERENDERED_ATTR)) requestAnimationFrame(() => setTimeout(start, 0));
+  else start();
 } else {
   hydrateRoot(rootEl, tree(true));
 }

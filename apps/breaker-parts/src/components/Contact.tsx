@@ -1,12 +1,14 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { motion } from 'framer-motion';
-import type { DictBlock } from '../types';
-import { fadeUp, inViewOnce, useReducedMotion } from '../lib/motion';
-import { SectionHeading } from '@kervan/ui';
-import { ORG_PUBLIC_EMAIL } from '@kervan/seo';
+import type { DictBlock, Lang } from '../types';
+import { ORG_PHONE, ORG_PHONE_E164, ORG_PUBLIC_EMAIL } from '@kervan/seo';
+import { BTN_PRIMARY, FIELD, H2, LABEL, SECTION, WRAP } from '../lib/ui';
+import { WHATSAPP_URL } from '../lib/contact';
+import { shopUrl } from '../lib/shop';
+import { ArrowOut, ArrowRight } from './icons';
 
 interface Props {
   t: DictBlock;
+  lang: Lang;
 }
 
 type State = 'idle' | 'sending' | 'success' | 'error';
@@ -16,8 +18,9 @@ type State = 'idle' | 'sending' | 'success' | 'error';
  *  there is no such endpoint, so a submit ends in the error state, as expected. */
 const RFQ_ENDPOINT = import.meta.env.PROD ? 'https://kervanheat.com/api/rfq' : '/api/rfq';
 
-export default function Contact({ t }: Props) {
-  const reduce = useReducedMotion();
+/** İletişim (`#contact`): the framed quote panel (direct lines, address, hours) beside the
+ *  quote form, which posts to the shared /api/rfq. */
+export default function Contact({ t, lang }: Props) {
   const [state, setState] = useState<State>('idle');
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -43,67 +46,61 @@ export default function Contact({ t }: Props) {
     }
   }
 
-  return (
-    <section
-      id="contact"
-      data-scene-pose="contact"
-      className="min-h-dvh flex flex-col justify-center py-16 md:py-24 bg-bg-soft/40"
+  const row = (label: string, value: string, href: string, external?: boolean) => (
+    <a
+      href={href}
+      className="kv-qpanel-row"
+      {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
     >
-      <SectionHeading eyebrow={t.contact.eyebrow} title={t.contact.title} aside={t.contact.sub} />
+      <span>
+        <b>{label}</b>
+        <span className="kv-qpanel-v">{value}</span>
+      </span>
+      <span className="kv-qpanel-go">
+        {href.startsWith('tel:') ? <ArrowRight /> : <ArrowOut />}
+      </span>
+    </a>
+  );
 
-      <div className="max-w-[1280px] mx-auto px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-16">
-        {/* Info — 4 col */}
-        <motion.dl
-          className="col-span-12 lg:col-span-4 flex flex-col gap-7 m-0"
-          variants={fadeUp}
-          initial={reduce ? false : 'hidden'}
-          whileInView="show"
-          viewport={inViewOnce}
-        >
-          {[
-            {
-              label: t.contact.phoneLabel,
-              value: (
-                <a href="tel:+905316693734" className="hover:text-brand transition-colors">
-                  +90 531 669 37 34
-                </a>
-              ),
-            },
-            {
-              label: t.contact.emailLabel,
-              value: (
-                <a
-                  href={`mailto:${ORG_PUBLIC_EMAIL}`}
-                  className="hover:text-brand transition-colors"
-                >
-                  {ORG_PUBLIC_EMAIL}
-                </a>
-              ),
-            },
-            {
-              label: t.contact.addressLabel,
-              value: <span className="whitespace-pre-line">{t.contact.address}</span>,
-            },
-            { label: t.contact.hoursLabel, value: t.contact.hours },
-          ].map((row, i) => (
-            <div key={i} className="flex flex-col gap-1.5">
-              <dt className="font-sans text-xs tracking-widest uppercase text-ink-soft">
-                {row.label}
-              </dt>
-              <dd className="font-serif italic text-lg text-ink m-0">{row.value}</dd>
+  return (
+    <section id="contact" aria-labelledby="contact-title" className={SECTION}>
+      <div
+        className={`${WRAP} grid grid-cols-1 gap-9 min-[1081px]:grid-cols-[4fr_7fr] min-[1081px]:gap-14 items-start`}
+      >
+        <div>
+          <h2 id="contact-title" className={H2}>
+            {t.contact.title}
+          </h2>
+          <p className="m-0 mt-3 mb-7 text-base min-[721px]:text-[17px] text-ink-mid">
+            {t.contact.sub}
+          </p>
+          <div className="kv-qpanel">
+            <p className="kv-qpanel-bar">{t.nav.cta}</p>
+            {row(t.contact.phoneLabel, ORG_PHONE, `tel:${ORG_PHONE_E164}`)}
+            {row(t.contact.whatsappLabel, ORG_PHONE, WHATSAPP_URL, true)}
+            {row(t.contact.emailLabel, ORG_PUBLIC_EMAIL, `mailto:${ORG_PUBLIC_EMAIL}`)}
+            {/* The sister shop: same tab, no rel. */}
+            {row(t.shop.contactLabel, 'kiriciparca.com', shopUrl('/', lang))}
+            <div className="kv-qpanel-row">
+              <span>
+                <b>{t.contact.addressLabel}</b>
+                <span className="kv-qpanel-txt">{t.contact.address}</span>
+              </span>
             </div>
-          ))}
-        </motion.dl>
+            <div className="kv-qpanel-row">
+              <span>
+                <b>{t.contact.hoursLabel}</b>
+                <span className="kv-qpanel-txt">{t.contact.hours}</span>
+              </span>
+            </div>
+          </div>
+        </div>
 
-        {/* Form — 8 col */}
-        <motion.form
+        <form
           ref={formRef}
           onSubmit={onSubmit}
-          className="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-5"
-          variants={fadeUp}
-          initial={reduce ? false : 'hidden'}
-          whileInView="show"
-          viewport={inViewOnce}
+          aria-labelledby="contact-title"
+          className="bg-panel border border-hair-strong rounded-[4px] px-4 py-5 min-[721px]:p-8 grid grid-cols-1 gap-x-4 gap-y-4 min-[721px]:grid-cols-2"
         >
           {/* Honeypot: hidden (not just off-screen) so browser autofill skips it; see rfq.ts */}
           <div hidden aria-hidden="true">
@@ -130,37 +127,43 @@ export default function Contact({ t }: Props) {
           />
           <Field label={t.contact.fields.phone} name="phone" type="tel" maxLength={30} />
 
-          <label className="md:col-span-2 flex flex-col gap-2">
-            <span className="font-sans text-xs tracking-widest uppercase text-ink-soft">
-              {t.contact.fields.message}
-            </span>
+          <label className="min-[721px]:col-span-2 grid gap-1.5">
+            <span className={LABEL}>{t.contact.fields.message}</span>
             <textarea
               name="message"
               rows={4}
               maxLength={3000}
-              className="bg-transparent border-b border-ink-soft pb-2 font-serif text-lg text-ink resize-none focus:border-ink transition-colors"
+              className={`${FIELD} min-h-[130px] resize-y`}
             />
           </label>
 
-          <button
-            type="submit"
-            disabled={state === 'sending'}
-            className="md:col-span-2 mt-4 bg-brand text-bg py-4 font-sans text-sm tracking-widest uppercase hover:bg-brand-hi disabled:bg-bg-soft disabled:text-ink-soft disabled:cursor-not-allowed transition-colors"
-          >
-            {state === 'sending' ? t.contact.sending : t.contact.submit}
-          </button>
+          <div className="min-[721px]:col-span-2 mt-1 flex justify-end">
+            <button
+              type="submit"
+              disabled={state === 'sending'}
+              className={`${BTN_PRIMARY} w-full min-[721px]:w-auto min-[721px]:min-w-[180px]`}
+            >
+              {state === 'sending' ? t.contact.sending : t.contact.submit}
+            </button>
+          </div>
 
           {state === 'success' && (
-            <p role="status" className="md:col-span-2 font-serif italic text-base text-brand">
+            <p
+              role="status"
+              className="min-[721px]:col-span-2 m-0 font-sans text-base font-semibold text-ok"
+            >
               {t.contact.success}
             </p>
           )}
           {state === 'error' && (
-            <p role="alert" className="md:col-span-2 font-serif italic text-base text-ink">
+            <p
+              role="alert"
+              className="min-[721px]:col-span-2 m-0 font-sans text-base font-semibold text-ink"
+            >
               {t.contact.error}
             </p>
           )}
-        </motion.form>
+        </form>
       </div>
     </section>
   );
@@ -184,15 +187,15 @@ interface FieldProps {
 
 function Field({ label, name, type = 'text', required, maxLength }: FieldProps) {
   return (
-    <label className="flex flex-col gap-2">
-      <span className="font-sans text-xs tracking-widest uppercase text-ink-soft">{label}</span>
+    <label className="grid gap-1.5">
+      <span className={LABEL}>{label}</span>
       <input
         type={type}
         name={name}
         autoComplete={AUTOCOMPLETE[name]}
         required={required}
         maxLength={maxLength}
-        className="bg-transparent border-b border-ink-soft pb-2 font-serif text-lg text-ink focus:border-ink transition-colors"
+        className={FIELD}
       />
     </label>
   );

@@ -42,7 +42,7 @@ const MAKE_CAP = 18;
 const focusRing =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2';
 const inputCls = `w-full min-h-11 bg-bg-soft border border-ink-soft rounded-md px-3 font-sans text-ink placeholder:text-ink-mid ${focusRing}`;
-const labelCls = 'font-sans text-xs tracking-[0.12em] uppercase text-ink-mid';
+const labelCls = 'font-sans text-sm font-medium text-ink-mid';
 const chipCls = `min-h-10 px-3 rounded-md border font-sans text-sm transition-colors ${focusRing}`;
 
 const fill = (tpl: string, vars: Record<string, string | number>): string =>
@@ -156,7 +156,7 @@ function Ready({ t, fits }: { t: DictBlock; fits: FitsIndex }) {
             }
             className={`${chipCls} ${
               view.mode === m
-                ? 'bg-brand text-bg border-brand'
+                ? 'bg-brand text-on-brand rounded-[2px] font-semibold border-brand'
                 : 'border-hair-strong text-ink hover:border-ink-mid'
             }`}
           >
@@ -418,7 +418,7 @@ function TipView({
                   onClick={() => onDiameter(s.d)}
                   className={`${chipCls} ${
                     d === s.d
-                      ? 'bg-brand text-bg border-brand'
+                      ? 'bg-brand text-on-brand rounded-[2px] font-semibold border-brand'
                       : 'border-hair-strong text-ink hover:border-ink-mid'
                   }`}
                 >
@@ -511,7 +511,7 @@ function FamilyCard({
             const shown = all ? g.ids : g.ids.slice(0, MAKE_CAP);
             return (
               <div key={g.brand} className="flex flex-col gap-2">
-                <h4 className="font-sans text-xs tracking-[0.12em] uppercase text-ink-mid m-0">
+                <h4 className="font-sans text-sm font-medium text-ink-mid m-0">
                   {g.brand} <span className="text-ink-soft">({g.ids.length})</span>
                 </h4>
                 <ul className="list-none m-0 p-0 flex flex-wrap gap-2">

@@ -10,7 +10,7 @@ export default function Production({ t }: Props) {
   const reduce = useReducedMotion();
   return (
     <>
-      <section className="pt-32 pb-16 md:pt-40 md:pb-24">
+      <section className="pt-10 pb-16 md:pt-16 md:pb-24">
         <motion.div
           className="max-w-[1280px] mx-auto px-6 md:px-8 mb-16 md:mb-20 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end"
           variants={fadeUp}
@@ -18,14 +18,11 @@ export default function Production({ t }: Props) {
           animate="show"
         >
           <div className="col-span-12 lg:col-span-7 flex flex-col gap-5">
-            <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand font-medium">
-              {t.productionPage.eyebrow}
-            </span>
-            <h1 className="font-serif italic text-h1 text-ink leading-[1.05] tracking-[-0.02em]">
+            <h1 className="font-sans font-bold text-[34px] md:text-[48px] text-ink leading-[1.08] tracking-[-0.03em] text-balance">
               {t.productionPage.title}
             </h1>
           </div>
-          <p className="col-span-12 lg:col-span-5 font-serif italic text-lg text-ink-mid leading-relaxed max-w-[44ch]">
+          <p className="col-span-12 lg:col-span-5 font-sans text-lg text-ink-mid leading-relaxed max-w-[44ch]">
             {t.productionPage.body}
           </p>
         </motion.div>
@@ -38,7 +35,7 @@ export default function Production({ t }: Props) {
           viewport={inViewOnce}
         >
           <article className="bg-bg p-8 md:p-12 flex flex-col gap-5">
-            <h2 className="font-serif italic text-3xl md:text-4xl text-ink leading-tight">
+            <h2 className="font-sans font-bold text-2xl md:text-[32px] text-ink leading-tight tracking-[-0.02em]">
               {t.productionPage.metallurgyHeading}
             </h2>
             <p className="font-sans text-base md:text-lg text-ink-mid leading-relaxed">
@@ -47,7 +44,7 @@ export default function Production({ t }: Props) {
           </article>
 
           <article className="bg-bg p-8 md:p-12 flex flex-col gap-5">
-            <h2 className="font-serif italic text-3xl md:text-4xl text-ink leading-tight">
+            <h2 className="font-sans font-bold text-2xl md:text-[32px] text-ink leading-tight tracking-[-0.02em]">
               {t.productionPage.heatHeading}
             </h2>
             <p className="font-sans text-base md:text-lg text-ink-mid leading-relaxed">
@@ -57,7 +54,7 @@ export default function Production({ t }: Props) {
               href="https://kervanheat.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-sans text-sm tracking-[0.16em] uppercase text-brand hover:text-brand-hi transition-colors mt-2 inline-block"
+              className="font-sans text-[15px] font-semibold text-brand hover:text-brand-hi transition-colors mt-2 inline-block"
             >
               {t.productionPage.heatLink}
             </a>
@@ -71,10 +68,10 @@ export default function Production({ t }: Props) {
           whileInView="show"
           viewport={inViewOnce}
         >
-          <span className="font-sans text-xs tracking-[0.2em] uppercase text-ink-soft font-medium">
+          <span className="font-sans text-sm font-medium text-ink-soft font-medium">
             {t.productionPage.materialsHeading}
           </span>
-          <div className="flex flex-wrap gap-x-8 gap-y-2 font-serif italic text-2xl md:text-3xl text-ink">
+          <div className="flex flex-wrap gap-x-8 gap-y-2 font-sans font-semibold text-2xl md:text-3xl text-ink">
             {t.productionPage.materials.map((m, i) => (
               <span key={i} className="inline-flex items-center gap-3">
                 {i > 0 && (

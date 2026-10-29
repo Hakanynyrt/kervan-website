@@ -44,8 +44,7 @@ export default function App() {
       <RouteHead />
 
       <Nav lang={lang} t={t} techAuthed={tech.state === 'authed'} />
-      {/* Offsets every page by the sister strip at the top of the fixed header (it slides away on scroll). */}
-      <main className="pt-(--kv-strip-h)">
+      <main>
         <Routes>
           {LANGS.flatMap((l) =>
             pages.map(([path, element]) => (

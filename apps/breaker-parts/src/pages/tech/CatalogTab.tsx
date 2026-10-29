@@ -64,8 +64,8 @@ const MAX_COMPARE = 3;
 const focusRing =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2';
 const inputCls = `w-full min-h-11 bg-bg-soft border border-ink-soft rounded-md px-3 font-sans text-ink placeholder:text-ink-mid ${focusRing}`;
-const labelCls = 'font-sans text-xs tracking-[0.12em] uppercase text-ink-mid';
-const btnCls = `min-h-11 px-4 rounded-full border border-hair-strong font-sans text-sm text-ink hover:border-ink-mid transition-colors ${focusRing}`;
+const labelCls = 'font-sans text-sm font-medium text-ink-mid';
+const btnCls = `min-h-11 px-4 rounded-[2px] border border-hair-strong font-sans text-sm text-ink hover:border-ink-mid transition-colors ${focusRing}`;
 
 /** Order follows how much each size narrows the candidates (key count and
  *  back-end→slot are the independent ones; key thickness tracks diameter).
@@ -265,7 +265,7 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="font-serif italic text-3xl text-ink m-0">{c.title}</h1>
+        <h1 className="font-sans font-bold text-3xl text-ink tracking-[-0.02em] m-0">{c.title}</h1>
         <p className="font-sans text-ink-mid mt-2 mb-0 max-w-[60ch]">{c.sub}</p>
       </div>
 
@@ -314,7 +314,7 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
                 type="button"
                 aria-pressed={tip === k}
                 onClick={() => setTip(tip === k ? '' : k)}
-                className={`${btnCls} px-3 ${tip === k ? 'bg-brand text-bg border-brand hover:border-brand' : ''}`}
+                className={`${btnCls} px-3 ${tip === k ? 'bg-brand text-on-brand rounded-[2px] font-semibold border-brand hover:border-brand' : ''}`}
               >
                 {c.tipLabels[k]}
               </button>
@@ -348,7 +348,7 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
 
       {/* Measure form */}
       <fieldset className="border border-hair rounded-[14px] p-5 md:p-6 m-0 min-w-0">
-        <legend className="px-2 font-serif text-xl text-ink">{c.measureTitle}</legend>
+        <legend className="px-2 font-sans font-semibold text-xl text-ink">{c.measureTitle}</legend>
         <p className="font-sans text-sm text-ink-mid mt-0 mb-5 max-w-[70ch]">{c.measureHint}</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {MEASURE_FIELDS.map(({ key, label, optional }) => {
@@ -452,7 +452,7 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
 
       {/* Drawing-derived features + carrier weight */}
       <fieldset className="border border-hair rounded-[14px] p-5 md:p-6 m-0 min-w-0">
-        <legend className="px-2 font-serif text-xl text-ink">{c.featTitle}</legend>
+        <legend className="px-2 font-sans font-semibold text-xl text-ink">{c.featTitle}</legend>
         <p className="font-sans text-sm text-ink-mid mt-0 mb-5 max-w-[70ch]">{c.featHint}</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="flex flex-col gap-2">
@@ -520,7 +520,7 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
 
       <details className="border border-hair rounded-[14px] px-5 md:px-6 py-3 group">
         <summary
-          className={`cursor-pointer min-h-11 flex items-center font-serif text-xl text-ink ${focusRing} rounded-md`}
+          className={`cursor-pointer min-h-11 flex items-center font-sans font-semibold text-xl text-ink ${focusRing} rounded-md`}
         >
           {c.useTitle}
         </summary>
@@ -528,7 +528,7 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
         <ul className="list-none p-0 m-0 grid grid-cols-1 md:grid-cols-2 gap-4 pb-3">
           {TIP_TYPES.map((k) => (
             <li key={k} className="rounded-[14px] border border-hair p-4 flex flex-col gap-2">
-              <span className="font-serif text-lg text-ink">{c.tipLabels[k]}</span>
+              <span className="font-sans font-semibold text-lg text-ink">{c.tipLabels[k]}</span>
               <dl className="m-0 flex flex-col gap-2 font-sans text-sm">
                 {(
                   [
@@ -619,7 +619,7 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
             return (
               <section key={g} aria-label={title} className="flex flex-col gap-4">
                 <div>
-                  <h2 className="font-sans text-sm tracking-[0.12em] uppercase text-brand-hi m-0">
+                  <h2 className="font-sans text-[15px] font-semibold text-brand m-0">
                     {title} ({hits.length})
                   </h2>
                   {hint && <p className="font-sans text-sm text-ink-mid mt-1 mb-0">{hint}</p>}
@@ -689,7 +689,7 @@ function Collapse({ open, id, children }: { open: boolean; id: string; children:
 
 function WarnBadge({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/60 px-2.5 py-1 font-sans text-xs text-brand-hi">
+    <span className="inline-flex items-center gap-1.5 rounded-[2px] border border-brand/60 px-2.5 py-1 font-sans text-xs text-brand-hi">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path
           d="M12 3 2 21h20L12 3Z"
@@ -772,10 +772,8 @@ function ItemCard({
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="font-serif text-xl text-ink m-0 break-words">{it.model}</h3>
-          <p className="font-sans text-xs tracking-[0.12em] uppercase text-ink-mid m-0 mt-1">
-            {it.brand}
-          </p>
+          <h3 className="font-sans font-semibold text-xl text-ink m-0 break-words">{it.model}</h3>
+          <p className="font-sans text-sm font-medium text-ink-mid m-0 mt-1">{it.brand}</p>
         </div>
         <div className="flex flex-wrap gap-1.5">
           <PopularBadge it={it} pop={pop} t={t} />
@@ -826,7 +824,7 @@ function ItemCard({
           onClick={onSelect}
           aria-pressed={selected}
           disabled={!selected && !canSelect}
-          className={`${btnCls} disabled:opacity-50 disabled:cursor-not-allowed ${selected ? 'bg-brand text-bg border-brand hover:border-brand' : ''}`}
+          className={`${btnCls} disabled:opacity-50 disabled:cursor-not-allowed ${selected ? 'bg-brand text-on-brand rounded-[2px] font-semibold border-brand hover:border-brand' : ''}`}
         >
           {c.compare}
         </button>
@@ -855,7 +853,7 @@ function CopyButton({ value, t }: { value: string; t: DictBlock }) {
           .catch(() => undefined);
       }}
       aria-label={t.catalogUi.copyLabel}
-      className={`ml-2 min-h-8 px-3 rounded-full border border-hair-strong font-sans text-xs text-ink-mid hover:text-ink ${focusRing}`}
+      className={`ml-2 min-h-8 px-3 rounded-[2px] border border-hair-strong font-sans text-xs text-ink-mid hover:text-ink ${focusRing}`}
     >
       {done ? t.catalogUi.copied : t.catalogUi.copy}
       <span role="status" aria-live="polite" className="sr-only">
@@ -880,7 +878,7 @@ function BreakageGuide({
   return (
     <details className="border border-hair rounded-[14px] px-5 md:px-6 py-3">
       <summary
-        className={`cursor-pointer min-h-11 flex items-center font-serif text-xl text-ink ${focusRing} rounded-md`}
+        className={`cursor-pointer min-h-11 flex items-center font-sans font-semibold text-xl text-ink ${focusRing} rounded-md`}
       >
         {c.guideTitle}
       </summary>
@@ -889,7 +887,9 @@ function BreakageGuide({
         <ul className="list-none p-0 m-0 grid grid-cols-1 gap-4">
           {g.zones.map((z) => (
             <li key={z.key} className="rounded-[14px] border border-hair p-4 flex flex-col gap-3">
-              <span className="font-serif text-lg text-ink">{tr ? z.nameTr : z.nameEn}</span>
+              <span className="font-sans font-semibold text-lg text-ink">
+                {tr ? z.nameTr : z.nameEn}
+              </span>
               <div>
                 <span className={labelCls}>{c.guideCauses}</span>
                 <p className="font-sans text-sm text-ink m-0 mt-1 max-w-[75ch]">
@@ -917,7 +917,7 @@ function BreakageGuide({
           ] as const
         ).map(([title, list]) => (
           <section key={title}>
-            <h3 className="font-serif text-lg text-ink m-0 mb-2">{title}</h3>
+            <h3 className="font-sans font-semibold text-lg text-ink m-0 mb-2">{title}</h3>
             <ul className="m-0 pl-5 flex flex-col gap-2 font-sans text-sm text-ink max-w-[75ch]">
               {list.map((x) => (
                 <li key={x}>{x}</li>
@@ -1135,7 +1135,7 @@ function PopularBadge({ it, pop, t }: { it: VegaItem; pop: Popularity; t: DictBl
   const label = tier === 1 ? c.popularBadge : tier === 2 ? c.popularBadge2 : c.popularTwin;
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-sans text-xs ${
+      className={`inline-flex items-center gap-1.5 rounded-[2px] border px-2.5 py-1 font-sans text-xs ${
         tier === 1 ? 'border-ok/70 text-ok' : 'border-hair-strong text-ink-mid'
       }`}
     >
@@ -1154,7 +1154,7 @@ function Chips({ fields, t, lang }: { fields: FieldScore[]; t: DictBlock; lang: 
       {fields.map((f) => (
         <li
           key={f.key}
-          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-sans text-xs transition-colors duration-[250ms] ${CHIP_CLS[f.state]}`}
+          className={`inline-flex items-center gap-1 rounded-[2px] border px-2 py-0.5 font-sans text-xs transition-colors duration-[250ms] ${CHIP_CLS[f.state]}`}
         >
           <span>{f.key === 'keyCount' ? c.fKey : c.diffLabels[f.key]}</span>
           <span className="font-medium">
@@ -1213,14 +1213,14 @@ function LikelyCard({
       className="border border-brand rounded-[14px] p-5 md:p-6 flex flex-col gap-3 bg-brand-soft"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-sans text-xs tracking-[0.2em] uppercase text-brand-hi m-0">
-          {c.likelyTitle}
-        </h2>
-        <span className="font-serif text-2xl text-ink">{fill(c.likelyPct, { p: pct })}</span>
+        <h2 className="font-sans text-sm font-medium text-brand-hi m-0">{c.likelyTitle}</h2>
+        <span className="font-sans font-semibold text-2xl text-ink">
+          {fill(c.likelyPct, { p: pct })}
+        </span>
       </div>
-      <div aria-hidden="true" className="h-1.5 rounded-full bg-hair overflow-hidden">
+      <div aria-hidden="true" className="h-1.5 rounded-[2px] bg-hair overflow-hidden">
         <motion.div
-          className="h-full w-full origin-left rounded-full bg-brand"
+          className="h-full w-full origin-left rounded-[2px] bg-brand"
           initial={reduce ? false : { scaleX: 0 }}
           animate={{ scaleX: pct / 100 }}
           transition={{ duration: reduce ? 0 : durations.md, ease: editorialEase }}
@@ -1228,10 +1228,8 @@ function LikelyCard({
       </div>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="font-serif text-2xl text-ink m-0 break-words">{it.model}</h3>
-          <p className="font-sans text-xs tracking-[0.12em] uppercase text-ink-mid m-0 mt-1">
-            {it.brand}
-          </p>
+          <h3 className="font-sans font-semibold text-2xl text-ink m-0 break-words">{it.model}</h3>
+          <p className="font-sans text-sm font-medium text-ink-mid m-0 mt-1">{it.brand}</p>
         </div>
         <div className="flex flex-wrap gap-1.5">
           <PopularBadge it={likely.items.find((x) => pop.tier.has(x)) ?? it} pop={pop} t={t} />
@@ -1313,7 +1311,7 @@ function CompareTable({
       className="border border-hair-strong rounded-[14px] p-5"
     >
       <div className="flex items-center justify-between gap-3 mb-4">
-        <h2 className="font-serif text-xl text-ink m-0">{c.compareTitle}</h2>
+        <h2 className="font-sans font-semibold text-xl text-ink m-0">{c.compareTitle}</h2>
         <button type="button" onClick={onClose} className={btnCls}>
           {c.compareClose}
         </button>
@@ -1325,7 +1323,9 @@ function CompareTable({
               <th scope="col" className="text-left p-2" />
               {items.map((it) => (
                 <th key={it.id} scope="col" className="text-left p-2 align-top">
-                  <span className="block font-serif text-base text-ink">{it.model}</span>
+                  <span className="block font-sans font-semibold text-base text-ink">
+                    {it.model}
+                  </span>
                   <span className="block text-xs text-ink-mid font-normal">{it.brand}</span>
                   {needsVerification(it) && (
                     <span className="block mt-1">
@@ -1336,7 +1336,7 @@ function CompareTable({
                     type="button"
                     onClick={() => onRemove(it.id)}
                     aria-label={`${c.compareRemove}: ${it.model}`}
-                    className={`mt-2 min-h-8 px-3 rounded-full border border-hair-strong text-xs text-ink-mid hover:text-ink ${focusRing}`}
+                    className={`mt-2 min-h-8 px-3 rounded-[2px] border border-hair-strong text-xs text-ink-mid hover:text-ink ${focusRing}`}
                   >
                     <span aria-hidden="true">✕ </span>
                     {c.compareRemove}

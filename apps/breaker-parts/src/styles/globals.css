@@ -14,8 +14,9 @@
    the package are emitted in the bundle. */
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
 
-/* Self-hosted fonts (Google Fonts v20 / v38 variable files, latin + latin-ext only): no
-   render-blocking third-party stylesheet. A changed font file gets a new name. */
+/* Self-hosted Inter (Google Fonts v20 variable file, latin + latin-ext only): no
+   render-blocking third-party stylesheet. A changed font file gets a new name. Inter is the only
+   face on this site (2026-10-29 redesign, like kervanheat.com: no serif display type). */
 @font-face {
   font-family: 'Inter';
   font-style: normal;
@@ -34,112 +35,108 @@
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
     U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-@font-face {
-  font-family: 'Fraunces';
-  font-style: normal;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url('/fonts/fraunces-latin-ext-a-v38.woff2') format('woff2');
-  unicode-range: U+0100-017F, U+0218-021B, U+20A0-20C0, U+2113;
-}
-@font-face {
-  font-family: 'Fraunces';
-  font-style: normal;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url('/fonts/fraunces-latin-v38.woff2') format('woff2');
-  unicode-range:
-    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
-    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-@font-face {
-  font-family: 'Fraunces';
-  font-style: italic;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url('/fonts/fraunces-italic-latin-ext-a-v38.woff2') format('woff2');
-  unicode-range: U+0100-017F, U+0218-021B, U+20A0-20C0, U+2113;
-}
-@font-face {
-  font-family: 'Fraunces';
-  font-style: italic;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url('/fonts/fraunces-italic-latin-v38.woff2') format('woff2');
-  unicode-range:
-    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
-    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
 
-/* Height of the sister-site strip at the top of the fixed header (SisterSiteStrip in Nav).
-   <main> is padded by it; the header slides up by it once the page is scrolled. */
-:root {
-  --kv-strip-h: 2.75rem; /* 44px: full-width touch target */
+/* This app's extra colour tokens (Tailwind utilities: bg-panel, border-field-line, text-on-brand, …).
+   Values are set per theme below; these are the night defaults. Same as kervanheat.com. */
+@theme {
+  --color-panel: #24282c;
+  --color-field: #15181a;
+  --color-field-line: #727a83;
+  --color-on-brand: #16110e;
+  --color-spec-head: #2e3338;
+  --color-spec-head-ink: #eceae6;
+  --color-spec-rule: #6b7279;
+  --color-photo-shade: #0e1012;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   Day theme ("kâğıt"): light by day, today's dark Mood C at night.
-   The edge middleware (functions/_middleware.ts) marks the page
-   `<html data-sun="day|night">` by the sun where the visitor is; the theme
-   select (localStorage `kv_theme`, applied by the inline script in
-   index.html before paint) overrides it with `data-theme`. Without either
-   mark the page keeps the dark Mood C of @kervan/ui (the night look).
-   Contrast (WCAG): ink-soft 4.92:1, brand 4.76:1 on bg-warm; bg-coloured
-   text on brand buttons 5.64:1. Unlayered so it wins over @theme.
+   Palette (2026-10-29 redesign "D: Karışım", identical to kervanheat.com): a cool white day,
+   a graphite night. No mark ⇒ night (dark-first, like before). The edge middleware
+   (functions/_middleware.ts) marks the page `<html data-sun="day|night">` by the
+   visitor's sun; the theme select (localStorage `kv_theme`, applied by the inline
+   script in index.html before paint) overrides it with `data-theme`.
+   Unlayered, so these win over @theme; the day block has the more specific selector.
+
+   Contrast (WCAG 2.x):
+   night  ink 14.09 on bg, 12.35 on panel; ink-mid 7.16 on bg, 6.27 on panel;
+          brand #f26a45 5.58 on bg, 4.89 on panel; on-brand label 6.18 on brand;
+          field-line 3.41 on panel, 3.59 on bg-soft; spec frame 3.47; spec head ink 10.61.
+   day    ink 17.96 on bg, 16.60 on bg-soft; ink-mid 5.39 on bg, 4.98 on bg-soft;
+          brand #c23a16 5.37 on bg, 4.96 on bg-soft (white label 5.37, 6.71 on hover);
+          field-line 3.35; spec head ink 17.96.
 ═══════════════════════════════════════════════════════════════════════ */
+:root {
+  --color-bg: #1a1d20;
+  --color-bg-soft: #202427; /* bands */
+  --color-bg-warm: #24282c; /* = panel */
+  --color-panel: #24282c; /* cards, the fact table, the form */
+  --color-ink: #eceae6;
+  --color-ink-mid: #a5a9ad;
+  --color-ink-soft: #a5a9ad;
+  --color-brand: #f26a45; /* a lighter ember for the dark ground */
+  --color-brand-hi: #ff8259;
+  --color-brand-lo: #ff8259;
+  --color-brand-soft: rgba(242, 106, 69, 0.12);
+  --color-on-brand: #16110e; /* label on ember buttons */
+  --color-hair: #383d42;
+  --color-hair-strong: #4a5056;
+  --color-field: #15181a;
+  --color-field-line: #727a83;
+  --color-spec-head: #2e3338;
+  --color-spec-head-ink: #eceae6;
+  --color-spec-rule: #6b7279;
+  --color-photo-shade: #0e1012;
+  --kv-chip-bg: rgba(14, 16, 18, 0.82); /* caption chip over a photo: same in both themes */
+  --kv-chip-ink: #e8e6e1;
+  color-scheme: dark;
+}
 :root[data-theme='light'],
 :root[data-sun='day']:not([data-theme='dark']) {
-  --color-bg: #f6f3ee;
-  --color-bg-soft: #eeeae3;
-  --color-bg-warm: #e6e0d6;
-  --color-ink: #1a1714;
-  --color-ink-mid: #4a433a;
-  --color-ink-soft: #665d52;
-  --color-brand: #b0350e;
-  --color-brand-hi: #962d0b;
-  --color-brand-lo: #82270a;
-  --color-brand-soft: rgba(176, 53, 14, 0.08);
-  --color-hair: #ddd6cb;
-  --color-hair-strong: #bdb3a4;
+  --color-bg: #ffffff;
+  --color-bg-soft: #f5f6f7;
+  --color-bg-warm: #ffffff;
+  --color-panel: #ffffff;
+  --color-ink: #15171a;
+  --color-ink-mid: #646b74;
+  --color-ink-soft: #646b74;
+  --color-brand: #c23a16;
+  --color-brand-hi: #a8320f;
+  --color-brand-lo: #a8320f;
+  --color-brand-soft: rgba(194, 58, 22, 0.08);
+  --color-on-brand: #ffffff;
+  --color-hair: #e2e5e8;
+  --color-hair-strong: #c9ced4;
+  --color-field: #ffffff;
+  --color-field-line: #868d96;
+  --color-spec-head: #15171a;
+  --color-spec-head-ink: #ffffff;
+  --color-spec-rule: #15171a;
+  --color-photo-shade: #2a2d30;
   --color-ok: #1e7046;
   --color-err: #b42318;
-  --shadow-xs: 0 1px 2px rgba(40, 30, 20, 0.08);
-  --shadow-sm: 0 2px 8px rgba(40, 30, 20, 0.08);
-  --shadow-md: 0 6px 24px rgba(40, 30, 20, 0.1);
-  --shadow-lg: 0 16px 48px rgba(40, 30, 20, 0.12);
+  --shadow-xs: 0 1px 2px rgba(20, 24, 28, 0.08);
+  --shadow-sm: 0 2px 8px rgba(20, 24, 28, 0.08);
+  --shadow-md: 0 6px 24px rgba(20, 24, 28, 0.1);
+  --shadow-lg: 0 16px 48px rgba(20, 24, 28, 0.12);
   color-scheme: light;
 }
 
-/* Links ignore Tailwind's text colour (the unlayered `a { color: inherit }`
-   below), so brand buttons would inherit the ink: give them the page colour
-   in both themes (day 5.64:1 on brand; night the dark page on the ember,
-   where the inherited light ink read 3.1:1, audit 2026-10-27). */
-a.text-bg,
-a.hover\:text-bg:hover {
-  color: var(--color-bg);
+/* Base resets in the base layer, so Tailwind utilities on links and buttons win. */
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  button {
+    font: inherit;
+    cursor: pointer;
+  }
 }
 
 /* No paragraph ends on a single word. */
 p {
   text-wrap: pretty;
 }
-
-/* Brand logo tiles (BrandMarquee): the wordmark SVGs are drawn in the night
-   ink (#E8E2D6); by day they are darkened to ink and the tile shadow lightened. */
-:root[data-theme='light'],
-:root[data-sun='day']:not([data-theme='dark']) {
-  --kv-tile-shadow: 0 4px 14px rgba(40, 30, 20, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  /* Product placeholders (ProductGrid, ProductDetail): no ember glow on paper. */
-  --kv-ph-glow: transparent;
-}
-:root[data-theme='light'] .kv-brand-tile img,
-:root[data-sun='day']:not([data-theme='dark']) .kv-brand-tile img {
-  filter: brightness(0.2);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   Breaker-parts app — Mood C tokens are sourced from @kervan/ui.
-═══════════════════════════════════════════════════════════════════════ */
 
 *,
 *::before,
@@ -153,6 +150,8 @@ body {
 }
 html {
   overflow-x: clip;
+  /* A stable gutter keeps the page from shifting when a scrollbar appears (CLS). */
+  scrollbar-gutter: stable;
   scroll-behavior: smooth;
   scroll-padding-top: 80px;
 }
@@ -165,20 +164,12 @@ body {
   background-color: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  font-size: 17px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
-}
-a {
-  color: inherit;
-  text-decoration: none;
-}
-button {
-  font: inherit;
-  cursor: pointer;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -188,73 +179,6 @@ button {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   Typography utilities — Mood C atelier editorial.
-═══════════════════════════════════════════════════════════════════════ */
-.font-display {
-  font-family: var(--font-serif);
-  font-size: var(--text-display);
-  font-style: italic;
-  font-weight: 400;
-  line-height: 0.95;
-  letter-spacing: -0.025em;
-  font-variation-settings: 'opsz' 144;
-}
-
-.font-h1 {
-  font-family: var(--font-serif);
-  font-size: var(--text-h1);
-  font-weight: 500;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  font-variation-settings: 'opsz' 144;
-}
-
-.font-h2 {
-  font-family: var(--font-serif);
-  font-size: var(--text-h2);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.015em;
-  font-variation-settings: 'opsz' 72;
-}
-
-.font-h3 {
-  font-family: var(--font-serif);
-  font-size: var(--text-h3);
-  font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-}
-
-.font-eyebrow {
-  font-family: var(--font-sans);
-  font-size: var(--text-eyebrow);
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-ink-soft);
-}
-
-.font-italic-quote {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-weight: 400;
-  font-variation-settings: 'opsz' 72;
-}
-
-/* Selected-city panel fade-in keyframe (used by ExportsGlobe). */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -280,12 +204,6 @@ button {
   display: none;
 }
 
-/* Content sits on top of the scene */
-.app-root {
-  position: relative;
-  z-index: 1;
-}
-
 /* Static mode (no js-anim: crawlers, no-JS, reduced motion). Google renders with a viewport as
    tall as the page, so full-viewport sections would grow thousands of pixels and push their
    centred text out of the screenshot. Cap them; only screens taller than 1000px notice. */
@@ -299,218 +217,771 @@ html:not(.js-anim) .min-h-\[70dvh\] {
   min-height: min(70dvh, 700px);
 }
 
+/* Caption chip over a photo (hero, rail video badge). */
+.kv-chip {
+  margin: 0;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--kv-chip-ink);
+  background: var(--kv-chip-bg);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
-   Hero (first screen): copy left, one workshop photo right; on phones the
-   copy and the primary button come first, the photo below. Colours are the
-   theme tokens, so day and night follow the theme select / data-sun.
+   Hero: our own big CNC lathe full-bleed (capped at its 1280 px source, so it is
+   never upscaled), a solid page-coloured text panel at its bottom left (no overlay,
+   no gradient). Phones (≤ 720 px): a 112 px band of the photo, then the text.
 ═══════════════════════════════════════════════════════════════════════ */
 .kv-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: 'copy' 'photo' 'stats';
-  row-gap: 24px;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 88px 16px 40px;
-}
-.kv-hero-copy {
-  grid-area: copy;
-}
-.kv-hero-stats {
-  grid-area: stats;
+  position: relative;
+  background: var(--color-bg);
 }
 .kv-hero-photo {
-  grid-area: photo;
-  margin: 0;
-}
-.kv-hero h1 {
-  font-family: var(--font-sans);
-  font-weight: 700;
-  font-size: 36px;
-  line-height: 1.05;
-  letter-spacing: -0.025em;
-  color: var(--color-ink);
-  margin: 0 0 12px;
-}
-.kv-hero-sub {
-  font-size: 17px;
-  line-height: 1.5;
-  color: var(--color-ink-mid);
-  max-width: 40ch;
-  margin: 0 0 20px;
-}
-.kv-hero-btns {
-  display: flex;
-  gap: 10px;
-}
-.kv-hero-btn {
-  flex: 1;
-  min-width: 0;
-  min-height: 56px;
-  padding: 0 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--color-ink);
-  border-radius: 4px;
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: 17px;
-  color: var(--color-ink);
-  background: transparent;
-  transition:
-    background-color 150ms,
-    color 150ms;
-}
-.kv-hero-btn:hover {
-  background: var(--color-ink);
-  color: var(--color-bg);
-}
-.kv-hero-btn--primary {
-  background: var(--color-brand);
-  border-color: var(--color-brand);
-  color: var(--color-bg);
-}
-.kv-hero-btn--primary:hover {
-  background: var(--color-brand-hi);
-  border-color: var(--color-brand-hi);
-  color: var(--color-bg);
-}
-.kv-hero-frame {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: min(100%, 1280px);
+  transform: translateX(-50%);
   overflow: hidden;
-  border: 1px solid var(--color-hair-strong);
-  background: var(--color-bg-soft);
-  aspect-ratio: 4 / 3;
+  background: var(--color-photo-shade);
 }
-.kv-hero-frame img {
+.kv-hero-photo img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 60%;
-  transform-origin: 70% 85%;
-  /* One slow, one-way push-in; never loops. */
-  animation: kvHeroPush 24s linear 0.1s forwards;
+  object-position: 50% 40%;
 }
-.kv-hero-photo figcaption {
-  margin-top: 8px;
-  font-size: 14px;
-  line-height: 1.4;
-  font-weight: 500;
-  color: var(--color-ink-mid);
+.kv-hero-caption {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
 }
-.kv-hero-stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid var(--color-hair-strong);
-  padding-top: 16px;
+.kv-hero-wrap {
+  position: relative;
+  height: 500px;
+  display: flex;
+  align-items: flex-end;
 }
-.kv-hero-stat {
-  padding-right: 10px;
-  margin-right: 10px;
-  border-right: 1px solid var(--color-hair-strong);
+.kv-hero-panel {
+  position: relative;
+  width: 620px;
+  max-width: 100%;
+  padding: 40px 48px 36px 0;
+  background: var(--color-bg);
 }
-.kv-hero-stat:last-child {
-  border: 0;
-  margin: 0;
-  padding: 0;
+.kv-hero-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 100%;
+  width: 100vw;
+  background: var(--color-bg);
 }
-.kv-hero-stat b {
-  display: block;
-  font-size: 24px;
-  line-height: 1.05;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--color-ink);
+/* Hero photo: one-way, very slow scale 1 → 1.04 that holds at the end (no loop). Off for reduced motion. */
+.kv-hero-drift {
+  transform-origin: 50% 50%;
+  animation: kv-hero-drift 40s linear both;
 }
-.kv-hero-stat span {
-  display: block;
-  margin-top: 6px;
-  font-size: 14px;
-  line-height: 1.35;
-  color: var(--color-ink-mid);
-}
-@keyframes kvHeroPush {
+@keyframes kv-hero-drift {
+  from {
+    transform: scale(1);
+  }
   to {
     transform: scale(1.04);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .kv-hero-frame img {
+  .kv-hero-drift {
     animation: none;
-    transform: none;
   }
 }
-@media (min-width: 1024px) {
-  .kv-hero {
-    grid-template-columns: minmax(0, 47fr) minmax(0, 53fr);
-    grid-template-rows: minmax(0, 1fr) auto;
-    grid-template-areas: 'copy photo' 'stats photo';
-    column-gap: clamp(32px, 4vw, 72px);
-    row-gap: 0;
-    height: min(calc(100svh - var(--kv-strip-h)), 960px);
-    min-height: 640px;
-    padding: 96px clamp(24px, 4vw, 64px) 32px;
-  }
-  .kv-hero-copy {
-    align-self: center;
-    padding-bottom: 24px;
-  }
-  .kv-hero-stats {
-    align-self: end;
-    padding-top: 22px;
+@media (max-width: 720px) {
+  .kv-hero-wrap {
+    height: auto;
+    display: block;
+    padding: 0;
   }
   .kv-hero-photo {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+    position: relative;
+    left: auto;
+    width: auto;
+    height: 112px;
+    transform: none;
   }
-  .kv-hero-frame {
-    flex: 1;
-    min-height: 0;
-    aspect-ratio: auto;
+  .kv-hero-photo img {
+    object-position: 50% 45%;
   }
-  .kv-hero h1 {
-    font-size: clamp(44px, 5.2vw, 80px);
-    line-height: 1.02;
-    margin-bottom: 24px;
-    max-width: 12ch;
+  .kv-hero-caption {
+    display: none;
   }
-  .kv-hero-sub {
-    font-size: clamp(18px, 1.5vw, 22px);
-    margin-bottom: 34px;
+  .kv-hero-panel {
+    width: auto;
+    padding: 16px 16px 0;
   }
-  .kv-hero-btns {
-    gap: 14px;
-  }
-  .kv-hero-btn {
-    flex: 0 0 auto;
-    min-height: 58px;
-    min-width: 190px;
-    padding: 0 32px;
-    font-size: 18px;
-  }
-  .kv-hero-stat {
-    padding-right: 28px;
-    margin-right: 28px;
-  }
-  .kv-hero-stat b {
-    font-size: clamp(28px, 2.6vw, 38px);
-  }
-  .kv-hero-stat span {
-    font-size: 16px;
-  }
-  .kv-hero-stats {
-    grid-template-columns: repeat(3, auto);
-    justify-content: start;
+  .kv-hero-panel::before {
+    display: none;
   }
 }
-@media (min-width: 640px) and (max-width: 1023px) {
-  .kv-hero {
-    padding-inline: 32px;
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Fact table (right under the hero): heat's framed spec table.
+   Desktop 4 in a row, phone 2 × 2; a foot row with the quote note and the shop link.
+═══════════════════════════════════════════════════════════════════════ */
+.kv-spec {
+  border: 1px solid var(--color-spec-rule);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--color-panel);
+}
+.kv-spec-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 14px 24px;
+  background: var(--color-spec-head);
+  color: var(--color-spec-head-ink);
+}
+.kv-spec-head h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.kv-spec-head p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.85;
+}
+.kv-spec dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.kv-spec dl > div {
+  padding: 20px 24px 22px;
+  border-left: 1px solid var(--color-hair);
+}
+.kv-spec dl > div:first-child {
+  border-left: 0;
+}
+.kv-spec dt {
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-ink-mid);
+}
+.kv-spec dd {
+  margin: 0;
+}
+.kv-spec-v {
+  display: block;
+  margin-top: 8px;
+  font-size: 38px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--color-ink);
+}
+.kv-spec-n {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--color-ink-mid);
+}
+.kv-spec-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  padding: 6px 24px;
+  border-top: 1px solid var(--color-spec-rule);
+  background: var(--color-bg-soft);
+  font-size: 15px;
+}
+.kv-spec-foot-note {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  font-weight: 600;
+}
+.kv-spec-foot svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+.kv-spec-foot a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--color-brand);
+  font-weight: 600;
+}
+.kv-spec-foot a:hover {
+  text-decoration: underline;
+}
+.kv-spec-foot a small {
+  font-size: 15px;
+  color: var(--color-ink-mid);
+  font-weight: 400;
+}
+@media (max-width: 720px) {
+  .kv-spec-head {
+    padding: 9px 14px;
   }
-  .kv-hero-btn {
-    flex: 0 0 auto;
-    min-width: 200px;
+  .kv-spec-head h2 {
+    font-size: 15px;
+  }
+  .kv-spec-head p {
+    display: none;
+  }
+  .kv-spec dl {
+    grid-template-columns: 1fr 1fr;
+  }
+  .kv-spec dl > div {
+    padding: 10px 14px 11px;
+    border-left: 1px solid var(--color-hair);
+  }
+  .kv-spec dl > div:nth-child(odd) {
+    border-left: 0;
+  }
+  .kv-spec dl > div:nth-child(n + 3) {
+    border-top: 1px solid var(--color-hair);
+  }
+  .kv-spec dt {
+    font-size: 13px;
+  }
+  .kv-spec-v {
+    font-size: 26px;
+    margin-top: 3px;
+  }
+  .kv-spec-n {
+    font-size: 12.5px;
+    margin-top: 3px;
+    line-height: 1.3;
+  }
+  .kv-spec-foot {
+    padding: 2px 14px;
+    font-size: 14px;
+    gap: 0;
+  }
+  .kv-spec-foot-note {
+    display: none;
+  }
+  .kv-spec-foot a {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .kv-spec-foot a small {
+    display: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Product cards: four large cards (2 × 2), then the dark shop bar.
+═══════════════════════════════════════════════════════════════════════ */
+.kv-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.kv-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-hair-strong);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--color-panel);
+  color: var(--color-ink);
+}
+.kv-card:hover {
+  border-color: var(--color-spec-rule);
+}
+.kv-card-ph {
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--color-photo-shade);
+}
+.kv-card-ph img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.kv-card-bd {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 20px;
+  align-items: center;
+  padding: 18px 22px 20px;
+  border-top: 1px solid var(--color-hair);
+}
+.kv-card h3 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.kv-card p {
+  grid-column: 1;
+  margin: 0;
+  color: var(--color-ink-mid);
+  font-size: 15px;
+}
+.kv-card-go {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--color-brand);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.kv-card-go svg {
+  width: 18px;
+  height: 18px;
+}
+.kv-card:hover h3 {
+  text-decoration: underline;
+}
+.kv-shopbar {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 20px;
+  flex-wrap: wrap;
+  padding: 16px 22px;
+  border: 1px solid var(--color-spec-rule);
+  border-radius: 4px;
+  background: var(--color-spec-head);
+  color: var(--color-spec-head-ink);
+}
+.kv-shopbar b {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+}
+.kv-shopbar span {
+  display: block;
+  font-size: 15px;
+  opacity: 0.85;
+}
+/* The light ember with a dark label in both themes (6.18:1), on the dark bar. */
+.kv-shopbar a {
+  background: #f26a45;
+  color: #16110e;
+  border-color: transparent;
+}
+.kv-shopbar a:hover {
+  background: #ff8259;
+}
+@media (max-width: 720px) {
+  .kv-cards {
+    gap: 10px;
+  }
+  .kv-card-ph {
+    aspect-ratio: 4 / 3;
+  }
+  .kv-card-bd {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 10px 12px 4px;
+  }
+  .kv-card h3 {
+    font-size: 19px;
+  }
+  .kv-card p {
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+  .kv-card-go {
+    font-size: 14.5px;
+    justify-content: space-between;
+  }
+  .kv-shopbar {
+    padding: 14px 16px;
+  }
+  .kv-shopbar a {
+    width: 100%;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Compatible makes: a ruled grid of names.
+═══════════════════════════════════════════════════════════════════════ */
+.kv-makes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-top: 1px solid var(--color-hair-strong);
+  border-left: 1px solid var(--color-hair);
+}
+.kv-makes li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 76px;
+  padding: 8px;
+  border-right: 1px solid var(--color-hair);
+  border-bottom: 1px solid var(--color-hair);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-ink);
+  text-align: center;
+}
+@media (max-width: 1080px) {
+  .kv-makes {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .kv-makes {
+    grid-template-columns: 1fr 1fr;
+  }
+  .kv-makes li {
+    min-height: 56px;
+    font-size: 15px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Workshop rail: a horizontal scroll-snap row of photos and video posters.
+═══════════════════════════════════════════════════════════════════════ */
+.kv-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 36px) / 4);
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 12px;
+  scrollbar-width: thin;
+}
+.kv-rail > figure {
+  margin: 0;
+  scroll-snap-align: start;
+}
+.kv-rail-ph {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--color-photo-shade);
+  padding: 0;
+  border: 0;
+}
+.kv-rail-ph img,
+.kv-rail-ph video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.kv-rail-vid {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 2px;
+  padding: 5px 8px;
+}
+.kv-rail-vid svg {
+  width: 12px;
+  height: 12px;
+}
+.kv-rail figcaption {
+  margin-top: 10px;
+}
+.kv-rail figcaption b {
+  display: block;
+  font-size: 15.5px;
+  font-weight: 600;
+}
+.kv-rail figcaption span {
+  font-size: 14px;
+  color: var(--color-ink-mid);
+}
+@media (max-width: 1080px) {
+  .kv-rail {
+    grid-auto-columns: calc((100% - 24px) / 3);
+  }
+}
+@media (max-width: 720px) {
+  .kv-rail {
+    grid-auto-columns: 72%;
+    margin-right: -16px;
+    padding-right: 16px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Craft (İmalathanemiz): two photos, the body and the material table.
+═══════════════════════════════════════════════════════════════════════ */
+.kv-craft {
+  display: grid;
+  grid-template-columns: 6fr 5fr;
+  gap: 64px;
+  align-items: center;
+}
+.kv-craft-ph {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 12px;
+}
+.kv-craft-ph img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--color-photo-shade);
+}
+.kv-mat {
+  margin: 28px 0 0;
+  border: 1px solid var(--color-hair-strong);
+  border-radius: 4px;
+  background: var(--color-panel);
+}
+.kv-mat > div {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 16px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--color-hair);
+}
+.kv-mat > div:first-child {
+  border-top: 0;
+}
+.kv-mat dt {
+  font-size: 14px;
+  color: var(--color-ink-mid);
+  font-weight: 500;
+}
+.kv-mat dd {
+  margin: 0;
+  font-size: 15px;
+}
+@media (max-width: 1080px) {
+  .kv-craft {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+@media (max-width: 720px) {
+  .kv-craft-ph {
+    grid-template-columns: 1fr 1fr;
+  }
+  .kv-mat > div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Industries: four ruled cells.
+═══════════════════════════════════════════════════════════════════════ */
+.kv-ind {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--color-hair-strong);
+}
+.kv-ind li {
+  padding: 22px 24px 24px 0;
+  border-bottom: 1px solid var(--color-hair);
+}
+.kv-ind li + li {
+  padding-left: 24px;
+  border-left: 1px solid var(--color-hair);
+}
+.kv-ind-no {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink-mid);
+  font-variant-numeric: tabular-nums;
+}
+.kv-ind h3 {
+  margin: 6px 0 0;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+.kv-ind p {
+  margin: 6px 0 0;
+  color: var(--color-ink-mid);
+  font-size: 15px;
+}
+@media (max-width: 1080px) {
+  .kv-ind {
+    grid-template-columns: 1fr 1fr;
+  }
+  .kv-ind li:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+@media (max-width: 720px) {
+  .kv-ind {
+    grid-template-columns: 1fr;
+  }
+  .kv-ind li,
+  .kv-ind li + li {
+    padding: 16px 0;
+    border-left: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Exports: the title and lead on the left, the region list on the right.
+═══════════════════════════════════════════════════════════════════════ */
+.kv-exp {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: 56px;
+  align-items: start;
+}
+.kv-regions {
+  margin: 0;
+  border: 1px solid var(--color-hair-strong);
+  border-radius: 4px;
+  background: var(--color-panel);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.kv-regions > div {
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-hair);
+  font-size: 15.5px;
+  line-height: 1.5;
+}
+.kv-regions > div:nth-child(-n + 2) {
+  border-top: 0;
+}
+.kv-regions > div:nth-child(even) {
+  border-left: 1px solid var(--color-hair);
+}
+.kv-regions h3 {
+  margin: 0 0 4px;
+  line-height: 1.4;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink-mid);
+}
+.kv-regions p {
+  margin: 0;
+}
+.kv-regions > .kv-regions-home {
+  grid-column: 1 / -1;
+  border-left: 0;
+  background: var(--color-bg-soft);
+  font-weight: 600;
+}
+@media (max-width: 1080px) {
+  .kv-exp {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+@media (max-width: 720px) {
+  .kv-regions {
+    grid-template-columns: 1fr;
+  }
+  .kv-regions > div:nth-child(2) {
+    border-top: 1px solid var(--color-hair);
+  }
+  .kv-regions > div:nth-child(even) {
+    border-left: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Contact: the framed quote panel beside the form.
+═══════════════════════════════════════════════════════════════════════ */
+.kv-qpanel {
+  border: 1px solid var(--color-spec-rule);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--color-panel);
+}
+.kv-qpanel-bar {
+  margin: 0;
+  background: var(--color-spec-head);
+  color: var(--color-spec-head-ink);
+  padding: 14px 20px;
+  font-size: 17px;
+  font-weight: 600;
+}
+.kv-qpanel-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--color-hair);
+  min-height: 60px;
+  color: var(--color-ink);
+}
+.kv-qpanel-bar + .kv-qpanel-row {
+  border-top: 0;
+}
+.kv-qpanel-row b {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-ink-mid);
+}
+.kv-qpanel-v {
+  display: block;
+  font-size: 16.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+a.kv-qpanel-row:hover .kv-qpanel-v {
+  text-decoration: underline;
+}
+.kv-qpanel-go {
+  display: flex;
+  align-items: center;
+  color: var(--color-brand);
+}
+.kv-qpanel-go svg {
+  width: 18px;
+  height: 18px;
+}
+.kv-qpanel-txt {
+  display: block;
+  font-size: 15.5px;
+  white-space: pre-line;
+}
+@media (max-width: 720px) {
+  .kv-qpanel-row {
+    padding: 10px 16px;
   }
 }

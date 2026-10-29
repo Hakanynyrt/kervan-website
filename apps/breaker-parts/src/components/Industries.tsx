@@ -1,57 +1,31 @@
-import { motion } from 'framer-motion';
 import type { DictBlock } from '../types';
-import { staggerContainer, fadeUp, inViewOnce, useReducedMotion } from '../lib/motion';
-import { SectionHeading, Marquee } from '@kervan/ui';
+import { H2, SECTION, SEC_HEAD, SEC_LEAD, WRAP } from '../lib/ui';
 
 interface Props {
   t: DictBlock;
 }
 
+/** Sektörler (`#industries`): four ruled cells. */
 export default function Industries({ t }: Props) {
-  const reduce = useReducedMotion();
+  const ind = t.industries;
   return (
-    <section
-      id="industries"
-      data-scene-pose="industries"
-      className="min-h-dvh flex flex-col justify-center py-8 md:py-16"
-    >
-      <SectionHeading
-        eyebrow={t.industries.eyebrow}
-        title={t.industries.title}
-        aside={t.industries.aside}
-      />
-
-      <motion.ul
-        className="max-w-[1280px] mx-auto px-8 border-t border-hair list-none m-0 p-0"
-        variants={staggerContainer(0, 0.08)}
-        initial={reduce ? false : 'hidden'}
-        whileInView="show"
-        viewport={inViewOnce}
-      >
-        {t.industries.items.map((it, i) => (
-          <motion.li
-            key={i}
-            variants={fadeUp}
-            className="group grid grid-cols-12 gap-4 md:gap-8 items-baseline border-b border-hair py-5 md:py-10 cursor-default"
-          >
-            <span className="col-span-2 md:col-span-1 font-sans text-sm tracking-widest text-ink-soft">
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <span className="col-span-10 md:col-span-4 font-serif italic text-2xl md:text-4xl text-ink relative">
-              {it.name}
-              <span className="absolute -bottom-1 left-0 right-full h-px bg-brand transition-all duration-500 ease-out group-hover:right-0" />
-            </span>
-            <span className="col-span-12 md:col-span-7 font-sans text-sm md:text-base text-ink-mid leading-snug md:leading-relaxed">
-              {it.desc}
-            </span>
-          </motion.li>
-        ))}
-      </motion.ul>
-
-      {/* Manifesto marquee — atelier signal strip. Hidden on mobile so
-          the section fits one viewport; resurfaces md+. */}
-      <div className="hidden md:block mt-24 md:mt-32 border-t border-b border-hair">
-        <Marquee items={t.industries.marquee} duration={70} />
+    <section id="industries" aria-labelledby="industries-title" className={SECTION}>
+      <div className={WRAP}>
+        <div className={SEC_HEAD}>
+          <h2 id="industries-title" className={H2}>
+            {ind.title}
+          </h2>
+          <p className={SEC_LEAD}>{ind.aside}</p>
+        </div>
+        <ul className="kv-ind">
+          {ind.items.map((it, i) => (
+            <li key={it.name}>
+              <span className="kv-ind-no">{String(i + 1).padStart(2, '0')}</span>
+              <h3>{it.name}</h3>
+              <p>{it.desc}</p>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
