@@ -5,9 +5,10 @@ import type { OrgSocialKey } from '@kervan/seo';
    About, NotFound).
 ═══════════════════════════════════════════════════════════════════════ */
 
-import type { SisterSiteCopy } from '@kervan/ui';
-
 export type Lang = 'tr' | 'en';
+
+/** Export destination regions (lib/exports.ts). */
+export type ExportRegion = 'europe' | 'mena' | 'asia' | 'americas';
 
 export interface Stat {
   n: string;
@@ -47,11 +48,11 @@ export interface DictBlock {
     home: string;
     menu: string;
     language: string;
+    /** Cells of the header language switch. */
+    langShort: Record<Lang, string>;
     /** Header theme select: auto (by the sun) / light / dark. */
     theme: { label: string; auto: string; light: string; dark: string };
   };
-  /** Top strip of the fixed header linking to the heat-treatment sister site. */
-  sister: SisterSiteCopy;
   /** Links to the sister shop kiriciparca.com. */
   shop: {
     /** Header menu entry. */
@@ -78,13 +79,20 @@ export interface DictBlock {
     title2: string;
     sub: string;
     cta: string;
-    ctaSecondary: string;
-    photoAlt: string;
-    photoCaption: string;
+    /** 2004 / Kartepe / 40+: the first three cells of the fact table. */
     stats: Stat[];
   };
+  /** Fact table under the hero (its head is meta.siteName; the export count comes from EXPORTS). */
+  facts: {
+    sub: string;
+    /** Cell labels: production, workshop, compatibility, exports. */
+    labels: [string, string, string, string];
+    /** Note under the export count. */
+    exportsNote: string;
+    /** Foot row note. */
+    quoteNote: string;
+  };
   products: {
-    eyebrow: string;
     title: string;
     aside: string;
     items: ProductItem[];
@@ -109,32 +117,38 @@ export interface DictBlock {
     items: GalleryItem[];
   };
   atolye: {
-    eyebrow: string;
     title: string;
+    /** Badge on a video card. */
+    video: string;
+    /** Rail buttons (aria-labels). */
+    prev: string;
+    next: string;
     aside: string;
     items: GalleryItem[];
   };
   craft: {
-    eyebrow: string;
     title: string;
     body: string;
+    /** Material table rows (headings from productionPage). */
+    heat: string;
+    metallurgy: string;
   };
   industries: {
-    eyebrow: string;
     title: string;
     aside: string;
     items: IndustryItem[];
-    marquee: string[];
   };
   exports: {
-    eyebrow: string;
     /** `{count}` placeholder is replaced with destination count. */
     title: string;
     aside: string;
+    /** Region headings of the destination list (lib/exports.ts `region`). */
+    regions: Record<ExportRegion, string>;
   };
   brands: {
-    eyebrow: string;
     title: string;
+    /** Line under the make grid on the home page. */
+    sub: string;
     items: string[];
     /** Headline shown on the dedicated /uyumluluk page. */
     pageTitle: string;
@@ -370,7 +384,6 @@ export interface DictBlock {
     illustrativeNote: string;
   };
   contact: {
-    eyebrow: string;
     title: string;
     sub: string;
     fields: {
@@ -430,6 +443,8 @@ export interface DictBlock {
     crumbContact: string;
   };
   footer: {
+    /** Small label over the kervanheat.com link. */
+    heatLabel: string;
     brand: string;
     tag: string;
     rights: string;

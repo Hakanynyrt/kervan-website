@@ -44,7 +44,7 @@ export default function WhatsAppFAB() {
       aria-label="WhatsApp +90 531 669 37 34"
       aria-hidden={!visible}
       tabIndex={visible ? 0 : -1}
-      className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-40 inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full bg-whatsapp text-white shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
+      className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-40 inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-[2px] bg-whatsapp text-white shadow-md"
       style={{
         pointerEvents: visible ? 'auto' : 'none',
       }}

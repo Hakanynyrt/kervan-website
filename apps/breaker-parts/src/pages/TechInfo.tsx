@@ -80,7 +80,7 @@ export default function TechInfo({ t, lang, tech }: Props) {
   }
 
   return (
-    <section className="pt-32 pb-16 md:pt-40 md:pb-24">
+    <section className="pt-10 pb-16 md:pt-16 md:pb-24">
       {tech.state === 'unknown' ? (
         <p className="max-w-[1280px] mx-auto px-6 md:px-8 font-sans text-ink-mid">
           {t.techUi.loading}
@@ -125,9 +125,9 @@ function Tabs({ t, tab, onSelect }: { t: DictBlock; tab: Tab; onSelect: (x: Tab)
           aria-controls={tab === x ? `tech-panel-${x}` : undefined}
           tabIndex={tab === x ? 0 : -1}
           onClick={() => onSelect(x)}
-          className={`min-h-11 px-5 rounded-full border font-sans text-sm transition-colors ${focusRing} ${
+          className={`min-h-11 px-5 rounded-[2px] border font-sans text-sm transition-colors ${focusRing} ${
             tab === x
-              ? 'bg-brand text-bg border-brand'
+              ? 'bg-brand text-on-brand rounded-[2px] font-semibold border-brand'
               : 'border-hair-strong text-ink hover:border-ink-mid'
           }`}
         >
@@ -162,7 +162,7 @@ function Content({
   const drawings = useVegaDrawings(tech.logout);
   const reduce = useReducedMotion();
   return (
-    <section className="pt-32 pb-16 md:pt-40 md:pb-24">
+    <section className="pt-10 pb-16 md:pt-16 md:pb-24">
       <div className="max-w-[1280px] mx-auto px-6 md:px-8 mb-10">
         <Tabs t={t} tab={tab} onSelect={selectTab} />
       </div>
@@ -217,14 +217,11 @@ function Content({
             animate="show"
           >
             <div className="col-span-12 lg:col-span-7 flex flex-col gap-5">
-              <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand font-medium">
-                {c.eyebrow}
-              </span>
-              <h1 className="font-serif italic text-h1 text-ink leading-[1.05] tracking-[-0.02em]">
+              <h1 className="font-sans font-bold text-[34px] md:text-[48px] text-ink leading-[1.08] tracking-[-0.03em] text-balance">
                 {c.title}
               </h1>
             </div>
-            <p className="col-span-12 lg:col-span-5 font-serif italic text-lg text-ink-mid leading-relaxed max-w-[44ch]">
+            <p className="col-span-12 lg:col-span-5 font-sans text-lg text-ink-mid leading-relaxed max-w-[44ch]">
               {c.aside}
             </p>
           </motion.div>
@@ -238,16 +235,14 @@ function Content({
           >
             {c.groups.map((g) => (
               <motion.div key={g.title} variants={fadeUp} className="bg-bg p-8 md:p-10">
-                <h2 className="font-sans text-xs tracking-[0.2em] uppercase text-brand font-medium m-0 mb-6">
+                <h2 className="font-sans text-sm font-medium text-brand font-medium m-0 mb-6">
                   {g.title}
                 </h2>
                 <dl className="m-0 flex flex-col gap-5">
                   {g.rows.map((r) => (
                     <div key={r.k} className="flex flex-col gap-1">
-                      <dt className="font-sans text-xs tracking-[0.16em] uppercase text-ink-soft">
-                        {r.k}
-                      </dt>
-                      <dd className="font-serif text-2xl text-ink m-0">{r.v}</dd>
+                      <dt className="font-sans text-sm font-medium text-ink-soft">{r.k}</dt>
+                      <dd className="font-sans font-semibold text-2xl text-ink m-0">{r.v}</dd>
                     </div>
                   ))}
                 </dl>
@@ -290,14 +285,10 @@ function LoginForm({ t, tech }: { t: DictBlock; tech: TechAuth }) {
 
   return (
     <form onSubmit={onSubmit} className="max-w-[420px] mx-auto px-6 md:px-8 flex flex-col gap-4">
-      <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand font-medium">
-        {t.techUi.eyebrow}
-      </span>
-      <h1 className="font-serif italic text-4xl text-ink m-0">{t.techUi.loginTitle}</h1>
-      <label
-        htmlFor="tech-pw"
-        className="font-sans text-xs tracking-[0.16em] uppercase text-ink-soft"
-      >
+      <h1 className="font-sans font-bold text-[34px] text-ink tracking-[-0.03em] m-0">
+        {t.techUi.loginTitle}
+      </h1>
+      <label htmlFor="tech-pw" className="font-sans text-sm font-medium text-ink-soft">
         {t.techUi.passwordLabel}
       </label>
       <input
@@ -311,7 +302,7 @@ function LoginForm({ t, tech }: { t: DictBlock; tech: TechAuth }) {
       <button
         type="submit"
         disabled={busy || !password}
-        className={`bg-brand text-bg px-5 py-3 font-sans text-sm hover:bg-brand-hi transition-colors disabled:opacity-60 ${focusRing}`}
+        className={`bg-brand text-on-brand rounded-[2px] font-semibold px-5 py-3 font-sans text-sm hover:bg-brand-hi transition-colors disabled:opacity-60 ${focusRing}`}
       >
         {busy ? t.techUi.sending : t.techUi.submit}
       </button>

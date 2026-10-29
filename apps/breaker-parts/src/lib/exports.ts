@@ -1,12 +1,12 @@
-/** İhracat noktaları — Kocaeli'den çıkıp ulaşılan şehirler.
- *  Lat/lon WGS84 ondalık derece. Şehir/ülke isimleri TR ve EN ayrı,
- *  globe tooltip'i o anki dile göre seçer. `y2025` 2025 takvim yılında
- *  o destinasyona giden ton miktarı, `y2026` 2026 YTD (Mayıs itibariyle).
- *  Sayılar pazara göre orantılı: Almanya/Rusya/Suudi gibi büyük
- *  hidrolik kırıcı pazarları yüksek, Bakü/Cezayir gibi küçük pazarlar
- *  düşük. Listeyi büyütmek için diziye yeni satır ekle — Globe
- *  component otomatik yeni dot + arc çiziyor. */
+import type { ExportRegion } from '../types';
+
+/** İhracat noktaları — Kocaeli'den çıkıp ulaşılan şehirler. Ana sayfa (Exports) ülke sayısını
+ *  (`EXPORTS.length`) ve bölge listesini (`region`) buradan alır. Şehir/ülke isimleri TR ve EN ayrı.
+ *  Lat/lon WGS84 ondalık derece; `y2025` / `y2026` ton miktarları (2026: Mayıs itibariyle) sitede
+ *  gösterilmiyor (eski 3D küre kullanıyordu). Listeyi büyütmek için diziye yeni satır ekle. */
 export interface ExportPoint {
+  /** Region heading on the home page's destination list. */
+  region: ExportRegion;
   city: string;
   cityTr: string;
   country: string;
@@ -20,6 +20,7 @@ export interface ExportPoint {
 }
 
 export const ORIGIN: ExportPoint = {
+  region: 'europe',
   city: 'Kocaeli',
   cityTr: 'Kocaeli',
   country: 'Türkiye',
@@ -33,6 +34,7 @@ export const ORIGIN: ExportPoint = {
 export const EXPORTS: ExportPoint[] = [
   // ──── Avrupa ─────────────────────────────────────────────────────
   {
+    region: 'europe',
     city: 'Frankfurt',
     cityTr: 'Frankfurt',
     country: 'Germany',
@@ -43,6 +45,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 96,
   },
   {
+    region: 'europe',
     city: 'Milan',
     cityTr: 'Milano',
     country: 'Italy',
@@ -53,6 +56,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 71,
   },
   {
+    region: 'europe',
     city: 'Lyon',
     cityTr: 'Lyon',
     country: 'France',
@@ -63,6 +67,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 58,
   },
   {
+    region: 'europe',
     city: 'Madrid',
     cityTr: 'Madrid',
     country: 'Spain',
@@ -73,6 +78,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 41,
   },
   {
+    region: 'europe',
     city: 'London',
     cityTr: 'Londra',
     country: 'UK',
@@ -83,6 +89,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 52,
   },
   {
+    region: 'europe',
     city: 'Rotterdam',
     cityTr: 'Rotterdam',
     country: 'Netherlands',
@@ -93,6 +100,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 28,
   },
   {
+    region: 'europe',
     city: 'Warsaw',
     cityTr: 'Varşova',
     country: 'Poland',
@@ -103,6 +111,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 44,
   },
   {
+    region: 'europe',
     city: 'Bucharest',
     cityTr: 'Bükreş',
     country: 'Romania',
@@ -115,6 +124,7 @@ export const EXPORTS: ExportPoint[] = [
 
   // ──── MENA ───────────────────────────────────────────────────────
   {
+    region: 'mena',
     city: 'Cairo',
     cityTr: 'Kahire',
     country: 'Egypt',
@@ -125,6 +135,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 33,
   },
   {
+    region: 'mena',
     city: 'Algiers',
     cityTr: 'Cezayir',
     country: 'Algeria',
@@ -135,6 +146,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 18,
   },
   {
+    region: 'mena',
     city: 'Riyadh',
     cityTr: 'Riyad',
     country: 'Saudi Arabia',
@@ -145,6 +157,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 68,
   },
   {
+    region: 'mena',
     city: 'Dubai',
     cityTr: 'Dubai',
     country: 'UAE',
@@ -155,6 +168,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 82,
   },
   {
+    region: 'mena',
     city: 'Baghdad',
     cityTr: 'Bağdat',
     country: 'Iraq',
@@ -167,6 +181,7 @@ export const EXPORTS: ExportPoint[] = [
 
   // ──── CIS / Orta Asya ─────────────────────────────────────────────
   {
+    region: 'asia',
     city: 'Moscow',
     cityTr: 'Moskova',
     country: 'Russia',
@@ -177,6 +192,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 104,
   },
   {
+    region: 'asia',
     city: 'Baku',
     cityTr: 'Bakü',
     country: 'Azerbaijan',
@@ -187,6 +203,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 15,
   },
   {
+    region: 'asia',
     city: 'Almaty',
     cityTr: 'Almatı',
     country: 'Kazakhstan',
@@ -199,6 +216,7 @@ export const EXPORTS: ExportPoint[] = [
 
   // ──── Asya / Amerika ─────────────────────────────────────────────
   {
+    region: 'asia',
     city: 'Mumbai',
     cityTr: 'Mumbai',
     country: 'India',
@@ -209,6 +227,7 @@ export const EXPORTS: ExportPoint[] = [
     y2026: 62,
   },
   {
+    region: 'americas',
     city: 'Houston',
     cityTr: 'Houston',
     country: 'USA',

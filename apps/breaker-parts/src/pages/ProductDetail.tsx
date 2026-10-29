@@ -21,11 +21,13 @@ export default function ProductDetail({ t, lang }: Props) {
   if (!product) {
     return (
       <>
-        <section className="min-h-[60dvh] flex flex-col justify-center items-center pt-32 pb-16 text-center px-6">
-          <h1 className="font-serif italic text-h2 text-ink mb-6">{t.productDetail.notFound}</h1>
+        <section className="min-h-[60dvh] flex flex-col justify-center items-center pt-10 pb-16 text-center px-6">
+          <h1 className="font-sans font-bold text-[30px] md:text-[40px] text-ink leading-[1.1] tracking-[-0.03em] text-balance mb-6">
+            {t.productDetail.notFound}
+          </h1>
           <Link
             to={localePath('/urunler', lang)}
-            className="font-sans text-sm tracking-[0.16em] uppercase text-brand hover:text-brand-hi transition-colors"
+            className="font-sans text-[15px] font-semibold text-brand hover:text-brand-hi transition-colors"
           >
             {t.productDetail.notFoundCta} →
           </Link>
@@ -40,11 +42,11 @@ export default function ProductDetail({ t, lang }: Props) {
 
   return (
     <>
-      <section className="pt-32 pb-16 md:pt-40 md:pb-24">
+      <section className="pt-10 pb-16 md:pt-16 md:pb-24">
         <div className="max-w-[1280px] mx-auto px-6 md:px-8">
           <Link
             to={localePath('/urunler', lang)}
-            className="inline-block font-sans text-xs tracking-[0.2em] uppercase text-ink-soft hover:text-ink transition-colors mb-8"
+            className="inline-flex items-center min-h-11 font-sans text-sm font-medium text-ink-mid hover:text-ink transition-colors mb-6"
           >
             {t.productDetail.backLink}
           </Link>
@@ -57,7 +59,7 @@ export default function ProductDetail({ t, lang }: Props) {
               animate="show"
               variants={kenBurns}
             >
-              <div className="relative aspect-[3/4] overflow-hidden rounded-md border border-hair bg-bg-soft">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-[4px] border border-hair bg-bg-soft">
                 {product.image ? (
                   <img
                     src={product.image}
@@ -73,14 +75,8 @@ export default function ProductDetail({ t, lang }: Props) {
                     fetchPriority="high"
                   />
                 ) : (
-                  <div
-                    className="absolute inset-0 flex items-center justify-center"
-                    style={{
-                      background:
-                        'radial-gradient(ellipse at 30% 30%, var(--kv-ph-glow, rgba(232,67,27,0.18)), transparent 60%), linear-gradient(135deg, var(--color-bg-warm), var(--color-bg-soft))',
-                    }}
-                  >
-                    <span className="font-serif italic text-4xl md:text-5xl text-ink-mid opacity-60 px-6 text-center">
+                  <div className="absolute inset-0 flex items-center justify-center bg-bg-soft">
+                    <span className="font-sans font-bold text-3xl md:text-4xl text-ink-mid px-6 text-center">
                       {loc.name}
                     </span>
                   </div>
@@ -101,10 +97,10 @@ export default function ProductDetail({ t, lang }: Props) {
               animate="show"
             >
               <header className="flex flex-col gap-4">
-                <h1 className="font-serif italic text-h1 text-ink leading-[1.0] tracking-[-0.02em]">
+                <h1 className="font-sans font-bold text-[34px] md:text-[48px] text-ink leading-[1.08] tracking-[-0.03em] text-balance">
                   {loc.name}
                 </h1>
-                <p className="font-serif italic text-xl md:text-2xl text-ink-mid leading-snug max-w-[44ch]">
+                <p className="font-sans text-lg md:text-xl text-ink-mid leading-snug max-w-[44ch]">
                   {loc.tagline}
                 </p>
               </header>
@@ -126,7 +122,9 @@ export default function ProductDetail({ t, lang }: Props) {
                     const stLoc = st[lang];
                     return (
                       <li key={st.slug} className="py-4 flex flex-col gap-1">
-                        <span className="font-serif italic text-xl text-ink">{stLoc.name}</span>
+                        <span className="font-sans font-semibold text-xl text-ink">
+                          {stLoc.name}
+                        </span>
                         <span className="font-sans text-sm text-ink-mid">{stLoc.desc}</span>
                       </li>
                     );
@@ -137,13 +135,13 @@ export default function ProductDetail({ t, lang }: Props) {
               {/* Specs grid */}
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 m-0">
                 <div className="flex flex-col gap-2 border-t border-hair pt-4">
-                  <dt className="font-sans text-xs tracking-[0.2em] uppercase text-ink-soft">
+                  <dt className="font-sans text-sm font-medium text-ink-soft">
                     {t.productDetail.materialsLabel}
                   </dt>
-                  <dd className="font-serif italic text-lg text-ink m-0">42CrMo · 42CrMoA</dd>
+                  <dd className="font-sans font-semibold text-lg text-ink m-0">42CrMo · 42CrMoA</dd>
                 </div>
                 <div className="flex flex-col gap-2 border-t border-hair pt-4">
-                  <dt className="font-sans text-xs tracking-[0.2em] uppercase text-ink-soft">
+                  <dt className="font-sans text-sm font-medium text-ink-soft">
                     {t.productDetail.sizesLabel}
                   </dt>
                   <dd className="font-sans text-sm text-ink-mid leading-relaxed m-0">
@@ -151,7 +149,7 @@ export default function ProductDetail({ t, lang }: Props) {
                   </dd>
                 </div>
                 <div className="sm:col-span-2 flex flex-col gap-2 border-t border-hair pt-4">
-                  <dt className="font-sans text-xs tracking-[0.2em] uppercase text-ink-soft">
+                  <dt className="font-sans text-sm font-medium text-ink-soft">
                     {t.productDetail.brandFitsLabel}
                   </dt>
                   <dd className="font-sans text-sm text-ink-mid m-0 flex flex-wrap gap-x-3 gap-y-1.5">
@@ -164,7 +162,7 @@ export default function ProductDetail({ t, lang }: Props) {
 
               <Link
                 to={quoteHref}
-                className="self-start mt-2 bg-brand text-bg px-7 py-3 font-sans text-sm tracking-wide hover:bg-brand-hi transition-colors"
+                className="self-start mt-2 bg-brand text-on-brand rounded-[2px] font-semibold px-7 py-3 font-sans text-sm tracking-wide hover:bg-brand-hi transition-colors"
               >
                 {t.productDetail.quoteCta}
               </Link>

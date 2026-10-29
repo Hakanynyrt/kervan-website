@@ -8,7 +8,7 @@
       name="description"
       content="Keski, piston, burç, sızdırmazlık. 2004'ten beri Kocaeli'de üretiliyor. 40+ kırıcı markası uyumlu."
     />
-    <meta name="theme-color" content="#0A0A0B" />
+    <meta name="theme-color" content="#1A1D20" />
     <script>
       // Light by day, dark at night: the edge middleware (functions/_middleware.ts) sets
       // data-sun = day | night on the html element; a theme picked by hand (header "Tema", localStorage
@@ -26,17 +26,10 @@
           h.getAttribute('data-theme') === 'light' ||
           (h.getAttribute('data-theme') !== 'dark' && h.getAttribute('data-sun') === 'day');
         var m = document.querySelector('meta[name="theme-color"]');
-        if (m) m.setAttribute('content', light ? '#F6F3EE' : '#0A0A0B');
+        if (m) m.setAttribute('content', light ? '#FFFFFF' : '#1A1D20');
       })();
     </script>
 
-    <link
-      rel="preload"
-      href="/fonts/fraunces-latin-v38.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
     <link
       rel="preload"
       href="/fonts/inter-latin-v20.woff2"

@@ -1,30 +1,75 @@
 import { Link } from 'react-router-dom';
-import { ORG_PUBLIC_EMAIL, ORG_SOCIALS } from '@kervan/seo';
+import {
+  KERVAN_HEAT_URL,
+  ORG_PHONE,
+  ORG_PHONE_E164,
+  ORG_PUBLIC_EMAIL,
+  ORG_SOCIALS,
+} from '@kervan/seo';
 import { SocialIcon } from '@kervan/ui';
 import type { DictBlock } from '../types';
 import { useLocale, useLocalePath } from '../lib/locale-path';
 import { shopUrl } from '../lib/shop';
+import { WRAP } from '../lib/ui';
 
 interface Props {
   t: DictBlock;
 }
 
+const linkBox =
+  'inline-flex flex-col justify-center min-h-12 min-w-11 px-2.5 py-1 font-sans text-[15px] leading-[1.3] text-ink hover:underline underline-offset-2';
+const legal =
+  'inline-flex items-center justify-center min-h-11 min-w-11 px-2.5 text-ink-mid hover:text-ink hover:underline underline-offset-2';
+
+/** Footer (kervanheat.com's layout): the mark, the sister sites, e-mail and phone, the social
+ *  profiles, and a legal row with KVKK and a quiet link to the owner's technical page. */
 export default function Footer({ t }: Props) {
   const to = useLocalePath();
   const lang = useLocale();
+  const links = [
+    {
+      href: lang === 'en' ? `${KERVAN_HEAT_URL}/en/` : `${KERVAN_HEAT_URL}/`,
+      small: t.footer.heatLabel,
+      text: 'kervanheat.com',
+      lang,
+    },
+    { href: shopUrl('/', lang), small: t.shop.contactLabel, text: 'kiriciparca.com', lang },
+    { href: `mailto:${ORG_PUBLIC_EMAIL}`, small: t.contact.emailLabel, text: ORG_PUBLIC_EMAIL },
+    { href: `tel:${ORG_PHONE_E164}`, small: t.contact.phoneLabel, text: ORG_PHONE },
+  ];
   return (
-    // relative + z-[1]: always above the fixed 3D scene layer (z-0).
-    <footer className="relative z-[1] border-t border-hair">
-      <div className="max-w-[1280px] mx-auto px-6 md:px-8 py-12 flex flex-col md:flex-row gap-6 md:gap-12 items-start md:items-center justify-between">
-        <Link to={to('/')} className="flex items-baseline gap-3">
-          <span className="font-serif italic text-3xl text-ink leading-none">K</span>
-          <div className="flex flex-col">
-            <span className="font-sans text-sm font-medium text-ink">{t.footer.brand}</span>
-            <span className="font-serif italic text-sm text-ink-soft">{t.footer.tag}</span>
-          </div>
-        </Link>
+    <footer className="bg-bg-soft border-t border-hair">
+      <div className={`${WRAP} pt-10 pb-8`}>
+        <div className="flex flex-col gap-3 min-[721px]:flex-row min-[721px]:flex-wrap min-[721px]:justify-between min-[721px]:gap-8 items-start">
+          <Link to={to('/')} className="flex items-center gap-3.5 min-h-11">
+            {/* The KRV mark (same file as the header); the brand name follows, so no alt text. */}
+            <img
+              src="/logo-krv-v2.svg"
+              alt=""
+              width={124}
+              height={40}
+              className="h-[22px] w-auto select-none"
+              draggable={false}
+              loading="lazy"
+            />
+            <span className="flex flex-col whitespace-nowrap font-sans">
+              <span className="text-[15px] font-bold text-ink">{t.footer.brand}</span>
+              <span className="text-sm text-ink-mid">{t.footer.tag}</span>
+            </span>
+          </Link>
 
-        <nav className="flex flex-wrap gap-x-6 gap-y-2 font-sans text-sm text-ink-mid items-center">
+          <nav className="flex flex-col -ml-2.5 min-[721px]:ml-0 min-[721px]:flex-row min-[721px]:flex-wrap min-[721px]:gap-x-2 min-[721px]:gap-y-1">
+            {/* Sister sites: same tab, no rel. */}
+            {links.map((l) => (
+              <a key={l.href} href={l.href} hrefLang={l.lang} className={linkBox}>
+                <small className="text-[13px] text-ink-mid">{l.small}</small>
+                <b className="font-semibold">{l.text}</b>
+              </a>
+            ))}
+          </nav>
+        </div>
+
+        <div className="mt-4 flex flex-wrap -ml-3 gap-1">
           {ORG_SOCIALS.map(({ key, url }) => (
             <a
               key={key}
@@ -32,39 +77,24 @@ export default function Footer({ t }: Props) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={t.footer.social[key]}
-              className="inline-flex items-center justify-center w-8 h-8 hover:text-ink transition-colors"
+              className="inline-flex items-center justify-center min-w-11 min-h-11 text-ink-mid hover:text-ink transition-colors"
             >
               <SocialIcon name={key} />
             </a>
           ))}
-          {/* Sister sites: same tab, no rel, like the sister-site strip. */}
-          <a
-            href={lang === 'en' ? 'https://kervanheat.com/en/' : 'https://kervanheat.com/'}
-            hrefLang={lang}
-            className="hover:text-ink transition-colors"
-          >
-            kervanheat.com
-          </a>
-          <a href={shopUrl('/', lang)} hrefLang={lang} className="hover:text-ink transition-colors">
-            kiriciparca.com
-          </a>
-          <a href="/kvkk" className="hover:text-ink transition-colors">
-            {t.footer.kvkk}
-          </a>
-          <a href={`mailto:${ORG_PUBLIC_EMAIL}`} className="hover:text-ink transition-colors">
-            {ORG_PUBLIC_EMAIL}
-          </a>
-          <a href="tel:+905316693734" className="hover:text-ink transition-colors">
-            +90 531 669 37 34
-          </a>
-        </nav>
+        </div>
 
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 font-sans text-xs text-ink-soft tracking-wide">
+        <div className="mt-4 pt-3 border-t border-hair flex flex-col-reverse items-start gap-2 min-[721px]:flex-row min-[721px]:flex-wrap min-[721px]:items-center min-[721px]:justify-between min-[721px]:gap-x-4 font-sans text-[13px] text-ink-mid">
           <span>{t.footer.rights}</span>
-          {/* Quiet text link to the technical-info page (label reuses nav.tech). */}
-          <Link to={to('/teknik-bilgiler')} className="hover:text-ink transition-colors">
-            {t.nav.tech}
-          </Link>
+          <span className="flex gap-1 -ml-2.5 min-[721px]:ml-0">
+            <a href="/kvkk" className={legal}>
+              {t.footer.kvkk}
+            </a>
+            {/* Quiet text link to the technical-info page (label reuses nav.tech). */}
+            <Link to={to('/teknik-bilgiler')} className={legal}>
+              {t.nav.tech}
+            </Link>
+          </span>
         </div>
       </div>
     </footer>

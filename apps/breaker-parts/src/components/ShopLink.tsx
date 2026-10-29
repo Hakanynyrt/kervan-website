@@ -21,15 +21,13 @@ export default function ShopLink({ lang, path, text, className = '' }: Props) {
       href={shopUrl(path, lang)}
       hrefLang={lang}
       className={
-        'group font-sans text-sm tracking-[0.16em] uppercase ' +
+        'group inline-flex items-center min-h-11 font-sans text-[15px] font-semibold ' +
         'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 ' +
         className
       }
     >
-      {/* Colour on the inner span: the global `a { color: inherit }` rule is unlayered and
-          outranks Tailwind's colour utilities on the link itself. */}
-      <span className="text-brand group-hover:text-brand-hi transition-colors">
-        {text}: <span className="normal-case tracking-normal">{SHOP_HOST}</span>{' '}
+      <span className="text-brand group-hover:underline underline-offset-2">
+        {text}: <span className="font-normal text-ink-mid">{SHOP_HOST}</span>{' '}
         <span aria-hidden="true">→</span>
       </span>
     </a>

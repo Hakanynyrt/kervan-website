@@ -18,13 +18,8 @@ export const DICT: Dict = {
       home: 'Kervan Breaker — anasayfa',
       menu: 'Menü',
       language: 'Dil',
+      langShort: { tr: 'TR', en: 'EN' },
       theme: { label: 'Tema', auto: 'Otomatik', light: 'Açık', dark: 'Koyu' },
-    },
-    sister: {
-      lead: 'Kontrollü atmosfer fırınlarda fason ısıl işlem hizmetimiz:',
-      leadShort: 'Fason ısıl işlem:',
-      site: 'kervanheat.com',
-      href: 'https://kervanheat.com/',
     },
     shop: {
       nav: 'Mağaza',
@@ -42,19 +37,21 @@ export const DICT: Dict = {
       title2: 'tutan parçalar.',
       sub: 'Keski, piston, burç, sızdırmazlık. Her biri kendi atölyemizde, kendi ellerimizle.',
       cta: 'Teklif Al',
-      ctaSecondary: 'Ürünlere bak',
-      photoAlt: 'Atölyemizde sıralı duran kırıcı keski uçları',
-      photoCaption: 'Atölyemizden: kırıcı parçaları',
       stats: [
         { n: '2004', l: 'yılından beri' },
         { n: 'Kartepe', l: 'Kocaeli atölyesi' },
         { n: '40+', l: 'kırıcı markasıyla uyumlu' },
       ],
     },
+    facts: {
+      sub: 'Kendi atölyemizde, kendi ellerimizle',
+      labels: ['Üretim', 'Atölye', 'Uyumluluk', 'İhracat'],
+      exportsNote: 'ülkeye yol aldık',
+      quoteNote: 'Yirmi dört saat içinde teklif',
+    },
     products: {
-      eyebrow: 'Ürün Aileleri',
-      title: 'Basit dört kalem.\nHer kırıcının ihtiyacı.',
-      aside: 'Her parça kendi tezgâhında, kendi malzemesiyle. Değiştirilemeyen tek şey: özen.',
+      title: 'Ürünler',
+      aside: 'Her parça kendi tezgâhında, kendi malzemesiyle.',
       items: [
         {
           slug: 'keski',
@@ -71,7 +68,7 @@ export const DICT: Dict = {
         {
           slug: 'burc',
           name: 'Burç',
-          desc: 'Sessiz kahraman. Piston ile keski arasında dengeyi kurar.',
+          desc: 'Piston ile keski arasında dengeyi kurar.',
           img: '/photos/burclar/burclar-raf-w1280.webp',
         },
         {
@@ -117,8 +114,10 @@ export const DICT: Dict = {
       ],
     },
     atolye: {
-      eyebrow: 'Atölyeden',
-      title: 'Üretimin nefes aldığı yer.',
+      title: 'Atölye',
+      video: 'Video',
+      prev: 'Önceki',
+      next: 'Sonraki',
       aside: 'Bir tezgâhtan diğerine, bir elden diğerine. Her parça buradan geçer.',
       items: [
         {
@@ -190,13 +189,14 @@ export const DICT: Dict = {
       ],
     },
     craft: {
-      eyebrow: 'İmalathanemiz',
-      title: 'Zanaat ellerde yaşar.',
-      body: "Kartepe'de küçük bir tezgâhla başladık. Bugün hâlâ aynı çatı altındayız — aynı eller, aynı özen, aynı titizlik. Burası bir üretim hattı değil; bu bir imalathane.",
+      title: 'İmalathanemiz',
+      body: "Kartepe'de küçük bir tezgâhla başladık. Bugün hâlâ aynı çatı altındayız — aynı eller, aynı özen, aynı titizlik.",
+      heat: 'Kontrollü atmosfer pit-tip fırınlarda sertleştirme ve temperleme. Aynı çatı, aynı disiplin.',
+      metallurgy: 'Sertlik ve dayanım, her parti için lot başı ölçülür.',
     },
     brands: {
-      eyebrow: 'Uyumlu Markalar',
       title: 'Kırk üzeri kırıcı markası — kendi parçamızı eşleriz.',
+      sub: 'Aradığınız model listemizde değilse, parça çizimi paylaşın — eşleşme bulalım.',
       items: [
         'Atlas Copco',
         'Furukawa',
@@ -218,8 +218,7 @@ export const DICT: Dict = {
         'Atlas Copco · Furukawa · Soosan · Indeco · NPK · Rammer · Montabert · Epiroc · Sandvik · Toku · Kobelco · Hanwoo · Krupp · D&A. Aradığınız model listemizde değilse, parça çizimi paylaşın — eşleşme bulalım.',
     },
     industries: {
-      eyebrow: 'Kimler İçin',
-      title: 'İşini yapanın yanında.',
+      title: 'Sektörler',
       aside:
         'Bina yıkımından maden ocağına, taş kesiminden yol bakımına — sahada kırıcı çalıştıran herkes için.',
       items: [
@@ -228,21 +227,11 @@ export const DICT: Dict = {
         { name: 'Taş Ocağı', desc: 'Granit, mermer, agrega' },
         { name: 'Altyapı', desc: 'Yol bakımı, kanalizasyon, demiryolu' },
       ],
-      marquee: [
-        "2004'ten beri Kocaeli'de",
-        'Yirmi iki yıllık zanaat',
-        'Kendi atölyemizde, kendi ellerimizle',
-        'Kırk üzeri kırıcı markası',
-        'Bin üzeri parça çeşidi',
-        'Yirmi dört saat içinde teklif',
-        'Sahanın yanında',
-      ],
     },
     exports: {
-      eyebrow: 'İhracat Ağı',
       title: '{count}+ ülkeye yol aldık.',
-      aside:
-        "Kocaeli'den çıkıp Avrupa, MENA, Orta Asya ve Amerika'ya yol alan parçalar. Sürükle, döndür — noktaya dokun, hangi şehir olduğunu gör.",
+      aside: "Kocaeli'den çıkıp Avrupa, MENA, Orta Asya ve Amerika'ya yol alan parçalar.",
+      regions: { europe: 'Avrupa', mena: 'MENA', asia: 'Orta Asya', americas: 'Amerika' },
     },
     techUi: {
       eyebrow: 'Teknik Bilgiler',
@@ -546,8 +535,7 @@ export const DICT: Dict = {
       illustrativeNote: 'Görseller temsilidir',
     },
     contact: {
-      eyebrow: 'İletişim',
-      title: 'Bir mesaj, bir cevap.',
+      title: 'İletişim',
       sub: 'Formunu doldur, yirmi dört saat içinde dönelim.',
       fields: {
         name: 'Ad Soyad',
@@ -609,6 +597,7 @@ export const DICT: Dict = {
       crumbContact: 'İletişim',
     },
     footer: {
+      heatLabel: 'Fason ısıl işlem',
       brand: 'Kervan Breaker',
       tag: 'Kocaeli · 2004',
       rights: '© 2026 Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti. Tüm hakları saklıdır.',
@@ -636,13 +625,8 @@ export const DICT: Dict = {
       home: 'Kervan Breaker — home',
       menu: 'Menu',
       language: 'Language',
+      langShort: { tr: 'TR', en: 'EN' },
       theme: { label: 'Theme', auto: 'Auto', light: 'Light', dark: 'Dark' },
-    },
-    sister: {
-      lead: 'Our contract heat treatment in controlled-atmosphere furnaces:',
-      leadShort: 'Contract heat treatment:',
-      site: 'kervanheat.com',
-      href: 'https://kervanheat.com/en/',
     },
     shop: {
       nav: 'Shop',
@@ -660,20 +644,21 @@ export const DICT: Dict = {
       title2: 'the hammer running.',
       sub: 'Chisels, pistons, bushings, seals. Each one made in our workshop, by hand.',
       cta: 'Get a Quote',
-      ctaSecondary: 'See products',
-      photoAlt: 'Rows of breaker chisel tips laid out in our workshop',
-      photoCaption: 'From our workshop: breaker parts',
       stats: [
         { n: '2004', l: 'since' },
         { n: 'Kartepe', l: 'Kocaeli workshop' },
         { n: '40+', l: 'breaker brands supported' },
       ],
     },
+    facts: {
+      sub: 'In our own workshop, by our own hands',
+      labels: ['Production', 'Workshop', 'Compatibility', 'Exports'],
+      exportsNote: 'countries shipped to',
+      quoteNote: 'Quotes within twenty-four hours',
+    },
     products: {
-      eyebrow: 'Product Families',
-      title: 'Four simple things.\nWhat every hammer needs.',
-      aside:
-        'Every part on its own bench, with its own steel. The one thing that never changes: care.',
+      title: 'Products',
+      aside: 'Every part on its own bench, with its own steel.',
       items: [
         {
           slug: 'keski',
@@ -690,7 +675,7 @@ export const DICT: Dict = {
         {
           slug: 'burc',
           name: 'Bushing',
-          desc: 'The quiet hero. Holds the balance between piston and chisel.',
+          desc: 'Holds the balance between piston and chisel.',
           img: '/photos/burclar/burclar-raf-w1280.webp',
         },
         {
@@ -740,8 +725,10 @@ export const DICT: Dict = {
       ],
     },
     atolye: {
-      eyebrow: 'From the workshop',
-      title: 'Where production breathes.',
+      title: 'Workshop',
+      video: 'Video',
+      prev: 'Previous',
+      next: 'Next',
       aside: 'From one bench to the next, one hand to the next. Every part passes through here.',
       items: [
         {
@@ -813,13 +800,14 @@ export const DICT: Dict = {
       ],
     },
     craft: {
-      eyebrow: 'Our Workshop',
-      title: 'Craft lives in hands.',
-      body: 'We started in Kartepe with a single bench. Today we are still under the same roof — same hands, same care, same attention. This is not a production line; this is a workshop.',
+      title: 'Our Workshop',
+      body: 'We started in Kartepe with a single bench. Today we are still under the same roof — same hands, same care, same attention.',
+      heat: 'Hardened and tempered in our own controlled-atmosphere pit furnaces. Same roof, same discipline.',
+      metallurgy: 'Hardness and yield are measured per lot, every batch.',
     },
     brands: {
-      eyebrow: 'Compatible Brands',
       title: 'Forty-plus hammer brands — we match the part.',
+      sub: "If your model isn't listed, send the drawing — we will find a match.",
       items: [
         'Atlas Copco',
         'Furukawa',
@@ -841,8 +829,7 @@ export const DICT: Dict = {
         "Atlas Copco · Furukawa · Soosan · Indeco · NPK · Rammer · Montabert · Epiroc · Sandvik · Toku · Kobelco · Hanwoo · Krupp · D&A. If your model isn't listed, send the drawing — we will find a match.",
     },
     industries: {
-      eyebrow: 'Who We Serve',
-      title: 'Beside the people doing the work.',
+      title: 'Industries',
       aside:
         'From building demolition to mine pit, stone quarry to roadworks — for every crew running a breaker on site.',
       items: [
@@ -851,21 +838,11 @@ export const DICT: Dict = {
         { name: 'Quarry', desc: 'Granite, marble, aggregate' },
         { name: 'Infrastructure', desc: 'Road repair, sewer, rail' },
       ],
-      marquee: [
-        'In Kocaeli since 2004',
-        'Twenty-two years of craft',
-        'In our own workshop, by our own hands',
-        'Forty-plus hammer brands',
-        'A thousand-plus part variants',
-        'Quotes within twenty-four hours',
-        'Beside the field',
-      ],
     },
     exports: {
-      eyebrow: 'Export Reach',
       title: 'Shipped to {count}+ countries.',
-      aside:
-        'Parts shipped from Kocaeli to Europe, MENA, Central Asia and the Americas. Drag to spin — tap a marker for the city.',
+      aside: 'Parts shipped from Kocaeli to Europe, MENA, Central Asia and the Americas.',
+      regions: { europe: 'Europe', mena: 'MENA', asia: 'Central Asia', americas: 'Americas' },
     },
     techUi: {
       eyebrow: 'Technical Info',
@@ -1167,8 +1144,7 @@ export const DICT: Dict = {
       illustrativeNote: 'Images are illustrative',
     },
     contact: {
-      eyebrow: 'Contact',
-      title: 'One message, one answer.',
+      title: 'Contact',
       sub: 'Fill the form. We will come back within twenty-four hours.',
       fields: {
         name: 'Name',
@@ -1230,6 +1206,7 @@ export const DICT: Dict = {
       crumbContact: 'Contact',
     },
     footer: {
+      heatLabel: 'Contract heat treatment',
       brand: 'Kervan Breaker',
       tag: 'Kocaeli · Since 2004',
       rights: '© 2026 Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti. All rights reserved.',

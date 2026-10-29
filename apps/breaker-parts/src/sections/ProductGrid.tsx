@@ -56,13 +56,13 @@ export default function ProductGrid({ lang, limit }: Props) {
                 )}
               </div>
               <div className="p-6 md:p-8 flex flex-col gap-3 flex-1">
-                <h3 className="font-serif italic text-2xl md:text-3xl text-ink leading-tight">
+                <h3 className="font-sans font-bold text-2xl md:text-[28px] text-ink leading-tight tracking-[-0.02em]">
                   {loc.name}
                 </h3>
                 <p className="font-sans text-sm text-ink-mid leading-relaxed flex-1">
                   {loc.tagline}
                 </p>
-                <span className="font-sans text-xs tracking-[0.2em] uppercase text-brand mt-2 inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                <span className="font-sans text-sm font-medium text-brand mt-2 inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
                   {DICT[lang].productsPage.detail} <span aria-hidden="true">→</span>
                 </span>
               </div>
@@ -79,18 +79,12 @@ interface PlaceholderProps {
 }
 
 /** Stylized fallback for products without a real photo yet. Renders a
- *  soft gradient with the part name in italic — keeps the grid rhythm
+ *  flat panel with the part name — keeps the grid rhythm
  *  intact until we shoot studio images in Faz 6. */
 function Placeholder({ label }: PlaceholderProps) {
   return (
-    <div
-      className="absolute inset-0 flex items-center justify-center"
-      style={{
-        background:
-          'radial-gradient(ellipse at 30% 30%, var(--kv-ph-glow, rgba(232,67,27,0.18)), transparent 60%), linear-gradient(135deg, var(--color-bg-warm), var(--color-bg-soft))',
-      }}
-    >
-      <span className="font-serif italic text-2xl md:text-3xl text-ink-mid opacity-60 px-6 text-center">
+    <div className="absolute inset-0 flex items-center justify-center bg-bg-soft">
+      <span className="font-sans font-bold text-2xl md:text-3xl text-ink-mid px-6 text-center">
         {label}
       </span>
     </div>
