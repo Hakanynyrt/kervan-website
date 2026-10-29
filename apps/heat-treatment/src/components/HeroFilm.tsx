@@ -81,7 +81,7 @@ export default function HeroFilm({ t, startAt = 1 }: Props) {
     return () => mq.removeEventListener('change', onChange);
   }, [reduced]);
 
-  // 1. Arm after the hero sequence (+ intro curtain), then idle, then when the card is ≥25 % on screen.
+  // 1. Arm after the hero sequence, then idle, then when the card is ≥25 % on screen.
   useEffect(() => {
     if (off) return;
     const w = window as IdleWindow;

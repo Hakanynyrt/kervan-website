@@ -30,7 +30,7 @@ if (isAnimatedClient() || !el.hasChildNodes()) {
         </MotionConfig>
       </StrictMode>,
     );
-  // The prerendered page is never hidden here (the intro curtain is CSS, see prerender.mjs), so
+  // The prerendered page is never hidden here (no intro curtain), so
   // let the browser paint it before the full render runs (2026-10-28, Lighthouse: the render held
   // back the first paint on phones).
   if (el.hasChildNodes()) requestAnimationFrame(() => setTimeout(start, 0));
