@@ -33,3 +33,9 @@
 /about.html             /                                               301
 /tr                     /                                               301
 /tr/                    /                                               301
+
+# Eski diyagram ve galeri sayfaları → ana sayfa (Search Console 404'leri, 2026-10-29)
+/diagram                /                                               301
+/diagram.html           /                                               301
+/gallery                /                                               301
+/gallery.html           /                                               301
