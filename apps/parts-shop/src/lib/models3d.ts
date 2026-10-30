@@ -1052,6 +1052,7 @@ export const MODELS_3D: Record<string, string> = {
   'pim-mtb-210-key-pin-holder': '/models/pim-mtb-210-key-pin-holder-02.glb',
   'pim-mtb-210-retainer-lock-pin': '/models/pim-mtb-210-retainer-lock-pin-02.glb',
   'pim-mtb-210-tool-bushing-pin': '/models/pim-mtb-210-tool-bushing-pin-02.glb',
+  'pim-npk-e-213a-key-pin-rubber': '/models/pim-npk-e-213a-key-pin-rubber-01.glb',
   'pim-rammer-e64-tool-bushing-pin': '/models/pim-rammer-e64-tool-bushing-pin-02.glb',
   'pim-rammer-e66-tool-bushing-pin': '/models/pim-rammer-e66-tool-bushing-pin-02.glb',
   'pim-rammer-g80-key-pin-retainer': '/models/pim-rammer-g80-key-pin-retainer-02.glb',
