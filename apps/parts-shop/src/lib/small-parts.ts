@@ -326,6 +326,7 @@ export const SMALL_PARTS: Record<
       file: 'pim-krupp-hm-720-key-pin-rubber',
       kind: 'keyPinRubber',
     },
+    { make: 'NPK', model: 'E-213A', file: 'pim-npk-e-213a-key-pin-rubber', kind: 'keyPinRubber' },
     {
       make: 'Krupp',
       model: 'HM 720',

@@ -1481,6 +1481,7 @@ export const REDRAWN: Record<string, string> = {
   'pim-mtb-210-key-pin-holder': '02',
   'pim-mtb-210-retainer-lock-pin': '02',
   'pim-mtb-210-tool-bushing-pin': '02',
+  'pim-npk-e-213a-key-pin-rubber': '01',
   'pim-rammer-e64-tool-bushing-pin': '02',
   'pim-rammer-e66-tool-bushing-pin': '02',
   'pim-rammer-g80-key-pin-retainer': '02',
