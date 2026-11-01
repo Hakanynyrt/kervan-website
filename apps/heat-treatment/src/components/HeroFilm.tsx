@@ -4,11 +4,11 @@ import { useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
 import { WRAP } from '../lib/ui';
 
-/** Cut from public/videos/atolye/furnace-01.mp4. Immutable cache: a re-encode needs a new name (-02). */
-const DIR = '/videos/isil-islem/firin-hatti-loop-01';
-/** Both posters are frame 189 (6.30–6.33 s, the furnace with the flame); playback starts on that frame
- *  so the poster comes alive without a jump. `loop` then wraps 9.2 s → 0 (the loop is seamless). */
-const START_AT = 6.32;
+/** Cut from public/videos/atolye/furnace-01.mp4; -02 drops the spans with clutter (2026-11-01). Immutable cache: a re-encode needs a new name (-03). */
+const DIR = '/videos/isil-islem/firin-hatti-loop-02';
+/** Both posters are frame 90 (3.00–3.03 s, the furnace with the flame); playback starts on that frame
+ *  so the poster comes alive without a jump. `loop` then wraps 6.5 s → 0 (the loop is seamless). */
+const START_AT = 3.02;
 /** Per-session choice: 'paused' = this visitor paused the film (no bytes until Play). */
 const PREF = 'kv_hero_film';
 
