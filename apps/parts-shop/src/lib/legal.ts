@@ -1,4 +1,4 @@
-import { ORG_PHONE, ORG_REGISTERED_NAME } from '@kervan/seo';
+import { ORG_MERSIS, ORG_PHONE, ORG_REGISTERED_NAME } from '@kervan/seo';
 import { SHOP_EMAIL } from './site';
 import type { Lang } from '../types';
 
@@ -18,6 +18,7 @@ const SELLER_STREET = 'Uzunçiftlik Mh. Sadun Atığ Cd. No:112';
 
 export const SELLER = {
   name: ORG_REGISTERED_NAME,
+  mersis: ORG_MERSIS,
   street: SELLER_STREET,
   address: `${SELLER_STREET}, Kartepe / Kocaeli`,
   tax: 'Alemdar V.D. 5451088184',
@@ -46,6 +47,7 @@ const sellerTr: LegalSection = {
   h: 'Satıcı bilgileri',
   p: [
     `Unvan: ${SELLER.name}`,
+    `MERSİS No: ${SELLER.mersis}`,
     `Adres: ${SELLER.address}`,
     `Vergi dairesi ve numarası: ${SELLER.tax}`,
     `Telefon: ${SELLER.phone} · Mobil / WhatsApp: ${SELLER.mobile} · Faks: ${SELLER.fax}`,
@@ -56,6 +58,7 @@ const sellerEn: LegalSection = {
   h: 'Seller',
   p: [
     `Company: ${SELLER.name}`,
+    `MERSIS No: ${SELLER.mersis}`,
     `Address: ${SELLER.address}, Türkiye`,
     `Tax office and number: ${SELLER.tax}`,
     `Phone: ${SELLER.phone} · Mobile / WhatsApp: ${SELLER.mobile} · Fax: ${SELLER.fax}`,
@@ -123,7 +126,7 @@ const TR: Record<LegalKey, LegalDoc> = {
       {
         h: 'Taraflar',
         p: [
-          `Satıcı: ${SELLER.name}, ${SELLER.address}, ${SELLER.tax}, telefon ${SELLER.phone}, e-posta ${SELLER.email}.`,
+          `Satıcı: ${SELLER.name}, MERSİS No: ${SELLER.mersis}, ${SELLER.address}, ${SELLER.tax}, telefon ${SELLER.phone}, e-posta ${SELLER.email}.`,
           'Alıcı: Sipariş talebini gönderen ve sipariş onayında adı, adresi ve iletişim bilgileri yazan gerçek veya tüzel kişi.',
         ],
       },
@@ -217,7 +220,7 @@ const TR: Record<LegalKey, LegalDoc> = {
       {
         h: 'Veri sorumlusu',
         p: [
-          `${SELLER.name}, ${SELLER.address}. 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) uyarınca veri sorumlusudur.`,
+          `${SELLER.name} (MERSİS No: ${SELLER.mersis}), ${SELLER.address}. 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) uyarınca veri sorumlusudur.`,
         ],
       },
       {
@@ -322,7 +325,7 @@ const EN: Record<LegalKey, LegalDoc> = {
       {
         h: 'Parties and subject',
         p: [
-          `Seller: ${SELLER.name}, ${SELLER.address}, ${SELLER.tax}. Buyer: the person or company named in the order confirmation. The contract covers the sale and delivery of the items, quantities and prices in the order confirmation under Turkish Consumer Protection Law No. 6502 and the Distance Contracts Regulation.`,
+          `Seller: ${SELLER.name}, MERSIS No: ${SELLER.mersis}, ${SELLER.address}, ${SELLER.tax}. Buyer: the person or company named in the order confirmation. The contract covers the sale and delivery of the items, quantities and prices in the order confirmation under Turkish Consumer Protection Law No. 6502 and the Distance Contracts Regulation.`,
         ],
       },
       {
@@ -379,7 +382,7 @@ const EN: Record<LegalKey, LegalDoc> = {
       {
         h: 'Controller and data',
         p: [
-          `${SELLER.name}, ${SELLER.address}, is the data controller under Turkish Law No. 6698. The site has no accounts or forms and stores no personal data; your cart stays in your own browser. Cookies are set only if you accept them in the cookie banner (see “Cookies and ad measurement”). When you send an order request by WhatsApp or e-mail we receive what the message contains and your number or address; the confirmation also asks for delivery and invoice details. Cloudflare, which hosts the site, keeps technical logs such as IP addresses for security.`,
+          `${SELLER.name} (MERSIS No: ${SELLER.mersis}), ${SELLER.address}, is the data controller under Turkish Law No. 6698. The site has no accounts or forms and stores no personal data; your cart stays in your own browser. Cookies are set only if you accept them in the cookie banner (see “Cookies and ad measurement”). When you send an order request by WhatsApp or e-mail we receive what the message contains and your number or address; the confirmation also asks for delivery and invoice details. Cloudflare, which hosts the site, keeps technical logs such as IP addresses for security.`,
         ],
       },
       {

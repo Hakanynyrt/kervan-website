@@ -1,3 +1,4 @@
+import { ORG_MERSIS } from '@kervan/seo';
 import type { Dict } from '../types';
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -601,6 +602,7 @@ export const DICT: Dict = {
       brand: 'Kervan Breaker',
       tag: 'Kocaeli · 2004',
       rights: '© 2026 Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti. Tüm hakları saklıdır.',
+      mersis: `MERSİS No: ${ORG_MERSIS}`,
       kvkk: 'KVKK',
       social: {
         facebook: 'Facebook — Kervan Breaker',
@@ -1210,6 +1212,7 @@ export const DICT: Dict = {
       brand: 'Kervan Breaker',
       tag: 'Kocaeli · Since 2004',
       rights: '© 2026 Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti. All rights reserved.',
+      mersis: `MERSIS No: ${ORG_MERSIS}`,
       kvkk: 'Privacy',
       social: {
         facebook: 'Facebook — Kervan Breaker',

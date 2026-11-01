@@ -85,7 +85,10 @@ export default function Footer({ t }: Props) {
         </div>
 
         <div className="mt-4 pt-3 border-t border-hair flex flex-col-reverse items-start gap-2 min-[721px]:flex-row min-[721px]:flex-wrap min-[721px]:items-center min-[721px]:justify-between min-[721px]:gap-x-4 font-sans text-[13px] text-ink-mid">
-          <span>{t.footer.rights}</span>
+          <span className="flex flex-col gap-0.5">
+            <span>{t.footer.rights}</span>
+            <span>{t.footer.mersis}</span>
+          </span>
           <span className="flex gap-1 -ml-2.5 min-[721px]:ml-0">
             <a href="/kvkk" className={legal}>
               {t.footer.kvkk}

@@ -448,6 +448,8 @@ export interface DictBlock {
     brand: string;
     tag: string;
     rights: string;
+    /** "MERSİS No: …" under the rights line (TTK md. 1524). */
+    mersis: string;
     kvkk: string;
     social: Record<OrgSocialKey, string>;
   };
