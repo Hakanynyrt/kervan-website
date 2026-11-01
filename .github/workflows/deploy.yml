@@ -273,7 +273,7 @@ jobs:
       # Renders are content-addressed (file name = hash of the geometry and RENDER_VERSION),
       # so every cached file stays valid; only new or changed tips are rendered.
       - name: Restore tip renders
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: apps/parts-shop/.renders
           key: shop-renders-${{ github.run_id }}-${{ github.run_attempt }}
@@ -292,7 +292,7 @@ jobs:
       # Saved even when a later step fails, so finished renders are never lost.
       - name: Save tip renders
         if: always()
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: apps/parts-shop/.renders
           key: shop-renders-${{ github.run_id }}-${{ github.run_attempt }}
