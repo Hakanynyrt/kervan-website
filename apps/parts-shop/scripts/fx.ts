@@ -1,8 +1,10 @@
 // The USD/TRY rate of the Turkish prices (owner, G2, 2026-11-01): ONE CBRT (TCMB) ForexSelling
 // rate per week, the one of the first business day of the ISO week, read from TCMB's archive
 // (https://www.tcmb.gov.tr/kurlar/YYYYMM/DDMMYYYY.xml), stepping back day by day while a file is
-// missing (a holiday Monday, or a Monday morning before the day's bulletin). Pure helpers here;
-// the network is used only by build-catalog.ts.
+// missing (a holiday Monday). TCMB publishes a day's file only at about 15:30 Istanbul, so on the
+// Monday itself, before that, the build keeps the previous week's rate: the price changes once a
+// week, on the first build after Monday's bulletin. Pure helpers here; the network is used only by
+// build-catalog.ts.
 import type { FxRate } from '../../../packages/tips/src/index.ts';
 
 /** Türkiye keeps UTC+3 all year (no DST since 2016). */
@@ -12,7 +14,9 @@ const iso = (d: Date): string => d.toISOString().slice(0, 10);
 
 /**
  * The archive dates to try, in order: the Monday of `now`'s ISO week (Istanbul calendar), then
- * one day earlier at a time, `max` dates in all. Never a date after today.
+ * one day earlier at a time, `max` dates in all. Never a date after today. On the Monday itself
+ * its file may not exist yet (the bulletin comes out at about 15:30), so the dates after it are
+ * the previous week's (its Monday first): the rate the week before used, not the Friday's.
  */
 export function fxCandidateDates(now: Date, max = 10): string[] {
   const local = new Date(now.getTime() + ISTANBUL_OFFSET_MS);
@@ -20,7 +24,12 @@ export function fxCandidateDates(now: Date, max = 10): string[] {
   // ISO weekday: Monday 1 … Sunday 7.
   const weekday = day.getUTCDay() === 0 ? 7 : day.getUTCDay();
   const monday = day.getTime() - (weekday - 1) * 86_400_000;
-  return Array.from({ length: max }, (_, i) => iso(new Date(monday - i * 86_400_000)));
+  const back = (from: number, n: number) =>
+    Array.from({ length: n }, (_, i) => iso(new Date(from - i * 86_400_000)));
+  if (weekday === 1 && max > 1) {
+    return [iso(new Date(monday)), ...back(monday - 7 * 86_400_000, max - 1)];
+  }
+  return back(monday, max);
 }
 
 /** "https://www.tcmb.gov.tr/kurlar/202611/02112026.xml" for "2026-11-02". */

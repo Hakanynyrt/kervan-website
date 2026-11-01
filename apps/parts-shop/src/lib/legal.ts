@@ -82,7 +82,7 @@ const TR: Record<LegalKey, LegalDoc> = {
       {
         h: 'Fiyat, vergiler ve kargo',
         p: [
-          'Türkçe ürün sayfalarında fiyat vergiler dahil Türk lirası olarak gösterilir, altında vergiler hariç ABD doları fiyatı yer alır. Türk lirası fiyatı, ABD doları fiyatına vergiler eklenip Türkiye Cumhuriyet Merkez Bankası’nın sayfada tarihi yazan döviz satış kuruyla çevrilerek hesaplanır ve tam liraya yuvarlanır. İngilizce sayfalarda vergiler hariç ihracat fiyatı gösterilir.',
+          'Türkçe ürün sayfalarında fiyat vergiler dahil Türk lirası olarak gösterilir, altında vergiler hariç ABD doları fiyatı yer alır. Türk lirası fiyatı, ABD doları fiyatına vergiler eklenip Türkiye Cumhuriyet Merkez Bankası’nın ürün sayfasında ve sepette tarihi yazan döviz satış kuruyla çevrilerek hesaplanır ve tam liraya yuvarlanır. İngilizce sayfalarda vergiler hariç ihracat fiyatı gösterilir.',
           'Vergiler dahil toplam satış bedeli, kargo ücreti ve ödeme bilgileri, sipariş talebiniz üzerine Satıcı’nın göndereceği sipariş onayında ayrıca gösterilir. Kargo ücreti Alıcı’ya aittir.',
           'Sipariş onayında bildirilen fiyat, onayda yazan süre boyunca geçerlidir.',
         ],
@@ -293,7 +293,7 @@ const EN: Record<LegalKey, LegalDoc> = {
       {
         h: 'Price, taxes and shipping',
         p: [
-          'On the Turkish pages prices are shown in Turkish lira including taxes, with the US dollar price excluding taxes under them; the lira price is the US dollar price plus taxes, converted at the Central Bank of the Republic of Türkiye selling rate dated on the page and rounded to the whole lira. The English pages show the export price in US dollars, excluding Turkish taxes, with its lira amount at the same rate. The total price including taxes, the shipping cost and the payment details are given in the order confirmation the Seller sends. Shipping is paid by the buyer.',
+          'On the Turkish pages prices are shown in Turkish lira including taxes, with the US dollar price excluding taxes under them; the lira price is the US dollar price plus taxes, converted at the Central Bank of the Republic of Türkiye selling rate dated on the product page and in the cart, and rounded to the whole lira. The English pages show the export price in US dollars, excluding Turkish taxes, with its lira amount at the same rate. The total price including taxes, the shipping cost and the payment details are given in the order confirmation the Seller sends. Shipping is paid by the buyer.',
         ],
       },
       {

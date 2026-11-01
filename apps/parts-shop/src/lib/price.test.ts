@@ -4,10 +4,12 @@ import {
   fmtGrossTry,
   fmtTryCents,
   grossTryCents,
+  offerPrice,
   tryDecimal,
   VAT_PERCENT,
   vatOf,
 } from './price.ts';
+import { shopProduct } from '../../../../packages/seo/src/jsonld.ts';
 
 // Invented values only: never a catalogue price.
 const fx = (usdTry: number) => ({ usdTry, date: '2026-01-05' });
@@ -53,4 +55,33 @@ test('fmtTryCents / fmtGrossTry / tryDecimal', () => {
   assert.equal(fmtGrossTry(10_000, fx(10), 'tr'), '1.200 TL');
   assert.equal(fmtGrossTry(10_000, null, 'tr'), null);
   assert.equal(tryDecimal(120_000), '1200.00');
+});
+
+test('offerPrice → JSON-LD: TR with a rate in TRY incl. VAT; EN and TR without a rate net USD', () => {
+  // An invented net price and rate (never a catalogue price).
+  const net = 12_345;
+  const rate = fx(10);
+  const ld = (lang: 'tr' | 'en', r: ReturnType<typeof fx> | null) =>
+    shopProduct({
+      url: 'https://example.test/x',
+      name: 'x',
+      brand: 'b',
+      offer: offerPrice(net, lang, r),
+    }).offers;
+  const tr = ld('tr', rate);
+  const gross = tryDecimal(grossTryCents(net, rate) as number);
+  assert.equal(tr?.price, gross);
+  assert.equal(tr?.priceCurrency, 'TRY');
+  assert.deepEqual(tr?.priceSpecification, {
+    '@type': 'UnitPriceSpecification',
+    price: gross,
+    priceCurrency: 'TRY',
+    valueAddedTaxIncluded: true,
+  });
+  for (const o of [ld('en', rate), ld('tr', null), ld('en', null)]) {
+    assert.equal(o?.price, '123.45');
+    assert.equal(o?.priceCurrency, 'USD');
+    assert.equal(o?.priceSpecification?.priceCurrency, 'USD');
+    assert.equal(o?.priceSpecification?.valueAddedTaxIncluded, false);
+  }
 });

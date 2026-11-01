@@ -21,6 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { checkOffer, offersIn } from './offer-check.mjs';
 
 const DIST = path.join(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), 'dist');
 const FORBIDDEN = [
@@ -152,21 +153,6 @@ const pageUrlOfHref = (href) => {
 // The build's CBRT rate (build-catalog.ts): with it the Turkish offers are in TRY.
 const CATALOG = path.join(DIST, '..', '.catalog', 'catalog.json');
 const hasFx = fs.existsSync(CATALOG) && !!JSON.parse(fs.readFileSync(CATALOG, 'utf8')).fx;
-const offersIn = (v, out = []) => {
-  if (Array.isArray(v)) for (const x of v) offersIn(x, out);
-  else if (v && typeof v === 'object') {
-    if (v['@type'] === 'Offer') out.push(v);
-    for (const x of Object.values(v)) offersIn(x, out);
-  }
-  return out;
-};
-// "15.816 TL" / "1.850 USD" (tr-TR) or "1,850 USD" (en-GB) → number and currency.
-const shownPrice = (text, en) => {
-  const m = /^\s*([\d.,]+)\s*(TL|USD)\b/.exec(text);
-  if (!m) return null;
-  const n = Number(en ? m[1].replace(/,/g, '') : m[1].replace(/\./g, '').replace(',', '.'));
-  return { n, cur: m[2] === 'TL' ? 'TRY' : 'USD' };
-};
 const offerCounts = { TRY: 0, USD: 0 };
 
 let pages = 0;
@@ -195,26 +181,9 @@ for (const f of files) {
     if (offers.length) {
       const en = rel.replace(/\\/g, '/').startsWith('en/');
       const shown = [...s.matchAll(/data-offer=""[^>]*>([^<]*)</g)].map((m) => m[1]);
-      const want = !en && hasFx ? 'TRY' : 'USD';
-      if (offers.length > 1 || shown.length !== 1)
-        problems.push(`${rel}: ${offers.length} offers, ${shown.length} shown offer prices`);
-      else {
-        const o = offers[0];
-        const v = shownPrice(shown[0], en);
-        const vat = o.priceSpecification?.valueAddedTaxIncluded;
-        if (o.priceCurrency !== want || o.priceSpecification?.priceCurrency !== want)
-          problems.push(`${rel}: offer not in ${want}`);
-        else if (vat !== (want === 'TRY'))
-          problems.push(`${rel}: offer valueAddedTaxIncluded should be ${want === 'TRY'}`);
-        else if (
-          !v ||
-          v.cur !== want ||
-          Math.abs(v.n - Number(o.price)) > 0.001 ||
-          o.price !== o.priceSpecification?.price
-        )
-          problems.push(`${rel}: JSON-LD offer differs from the price the page shows`);
-        else offerCounts[want]++;
-      }
+      const r = checkOffer(offers, shown, en, hasFx);
+      if (r.problem) problems.push(`${rel}: ${r.problem}`);
+      else offerCounts[r.currency]++;
     }
     // A link-preview picture of our own /og/ folder must ship (public/og/, named in page-head.ts).
     for (const m of s.matchAll(/<meta property="og:image" content="([^"]+)"/g))

@@ -51,6 +51,21 @@ export const tryDecimal = (tryCents: number): string => (tryCents / 100).toFixed
  *  without a rate) show the net USD price first. */
 export const leadsGross = (lang: Lang, fx: FxRate | null): fx is FxRate => lang === 'tr' && !!fx;
 
+/**
+ * The JSON-LD offer price of a priced page: the price it leads with. Turkish pages with a rate:
+ * the tax-inclusive TL price (`grossTryCents`), TRY, VAT included; otherwise the net USD price.
+ */
+export function offerPrice(
+  cents: number,
+  lang: Lang,
+  fx: FxRate | null,
+): { price: string; priceCurrency: 'TRY' | 'USD'; valueAddedTaxIncluded: boolean } {
+  const gross = leadsGross(lang, fx) ? grossTryCents(cents, fx) : null;
+  return gross === null
+    ? { price: (cents / 100).toFixed(2), priceCurrency: 'USD', valueAddedTaxIncluded: false }
+    : { price: tryDecimal(gross), priceCurrency: 'TRY', valueAddedTaxIncluded: true };
+}
+
 /** The unit price in an order message ("15.816 TL vergiler dahil; 268 USD + vergiler"). */
 export const unitText = (cents: number, fx: FxRate | null, lang: Lang, t: Dict): string =>
   t.price.unit(leadsGross(lang, fx) ? fmtGrossTry(cents, fx, lang) : null, fmtUsd(cents, lang));

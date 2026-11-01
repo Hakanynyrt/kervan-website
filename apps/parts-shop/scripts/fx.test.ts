@@ -16,6 +16,25 @@ test('fxCandidateDates: the Monday of the ISO week first, then one day back at a
   assert.equal(fxCandidateDates(new Date('2026-11-08T12:00:00Z')).length, 10);
 });
 
+test('fxCandidateDates: on the Monday, a missing file means the previous week rate', () => {
+  // Monday 2026-11-02, 06:47 Istanbul (before the 15:30 bulletin): Monday, then the previous
+  // week's Monday 26 Oct and the days before it, never Friday 30 Oct.
+  assert.deepEqual(fxCandidateDates(new Date('2026-11-02T03:47:00Z'), 4), [
+    '2026-11-02',
+    '2026-10-26',
+    '2026-10-25',
+    '2026-10-24',
+  ]);
+  assert.equal(fxCandidateDates(new Date('2026-11-02T03:47:00Z')).length, 10);
+  // From Tuesday on, a missing Monday (a holiday) steps back day by day: Friday 30 Oct.
+  assert.deepEqual(fxCandidateDates(new Date('2026-11-03T03:47:00Z'), 4), [
+    '2026-11-02',
+    '2026-11-01',
+    '2026-10-31',
+    '2026-10-30',
+  ]);
+});
+
 test('fxCandidateDates: the Istanbul calendar (UTC+3), across months and years', () => {
   // 22:30 UTC on Sunday 8 Nov is already Monday 9 Nov in Istanbul.
   assert.equal(fxCandidateDates(new Date('2026-11-08T22:30:00Z'))[0], '2026-11-09');

@@ -30,7 +30,7 @@ import { shownTip } from './tip-options';
 import type { PageProps } from './page-props';
 import { SITE } from './site';
 import { photoImgAbs } from './photo-url';
-import { grossTryCents, leadsGross, tryDecimal } from './price';
+import { offerPrice } from './price';
 
 export { SITE };
 
@@ -129,29 +129,19 @@ const ogOf = (lang: PageProps['lang'], file: string | undefined): Partial<HeadIn
 /** Meta descriptions longer than this lose the alias (Google cuts snippets around 155–160). */
 const DESC_MAX = 155;
 
-/** Offer price as schema.org wants it: the net USD price the page shows, "125.00". */
-const usd = (cents: number): string => (cents / 100).toFixed(2);
-
 /**
- * Offer of a priced page: the price it leads with, the seller and the return policy. Turkish
- * pages with a rate: the tax-inclusive TL price (`grossTryCents`, the visible figure; owner, G2),
- * `valueAddedTaxIncluded: true`. English pages (and a build without a rate): the net USD price,
- * `valueAddedTaxIncluded: false`.
+ * Offer of a priced page: the price it leads with (`offerPrice`: Turkish pages with a rate the
+ * tax-inclusive TL price, owner G2; otherwise net USD), the seller and the return policy.
  */
 const offerOf = (
   cents: number,
   lang: PageProps['lang'],
   fx: PageProps['fx'],
-): NonNullable<BuildShopProductOpts['offer']> => {
-  const gross = leadsGross(lang, fx) ? grossTryCents(cents, fx) : null;
-  return {
-    ...(gross === null
-      ? { price: usd(cents), priceCurrency: 'USD' as const, valueAddedTaxIncluded: false }
-      : { price: tryDecimal(gross), priceCurrency: 'TRY' as const, valueAddedTaxIncluded: true }),
-    seller: SELLER_REF,
-    returnPolicy: RETURN_POLICY,
-  };
-};
+): NonNullable<BuildShopProductOpts['offer']> => ({
+  ...offerPrice(cents, lang, fx),
+  seller: SELLER_REF,
+  returnPolicy: RETURN_POLICY,
+});
 
 /**
  * Head for one page: title and description (make + model + part first), a self canonical,

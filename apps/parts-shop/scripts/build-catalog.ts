@@ -180,8 +180,14 @@ if (
 if (fs.existsSync(OUT)) {
   const c = JSON.parse(fs.readFileSync(OUT, 'utf8')) as PublicCatalog;
   // The deploy runs this twice (snapshot step, then the app build): a snapshot that already
-  // holds this week's Monday rate keeps it, so both runs agree.
-  if (c.fx?.date !== fxCandidateDates(new Date())[0]) c.fx = await fetchFx();
+  // holds this week's Monday rate keeps it, so both runs agree. Otherwise read again; if that
+  // fails (a short TCMB outage between the runs), a rate the first run read for this week stays.
+  const candidates = fxCandidateDates(new Date());
+  if (c.fx?.date !== candidates[0]) {
+    const fresh = await fetchFx();
+    if (fresh) c.fx = fresh;
+    else if (!candidates.includes(c.fx?.date ?? '')) c.fx = null;
+  }
   if (!c.fx && process.env.SHOP_REQUIRE_FX === '1') {
     log('FAILED (no CBRT USD/TRY rate could be read)');
     process.exit(1);

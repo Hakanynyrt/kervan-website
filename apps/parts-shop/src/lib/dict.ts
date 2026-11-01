@@ -700,7 +700,7 @@ export const DICT: Record<Lang, Dict> = {
       },
       made: {
         title: 'Ürettiklerimizden',
-        lead: 'Ürettiğimiz uç ve parçalardan bir seçki. Fiyatlar nettir; TL karşılığı altında.',
+        lead: 'Ürettiğimiz uç ve parçalardan bir seçki.',
       },
       order: {
         title: 'Sipariş talebi',
