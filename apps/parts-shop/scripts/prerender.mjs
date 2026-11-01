@@ -56,6 +56,9 @@ function gitDates() {
       encoding: 'utf8',
       maxBuffer: 256 * 1024 * 1024,
       stdio: ['ignore', 'pipe', 'ignore'],
+      // Dates in UTC: check-dist rejects a lastmod after today's UTC date, and a commit made
+      // after midnight Istanbul time but before midnight UTC would otherwise read as tomorrow.
+      env: { ...process.env, TZ: 'UTC' },
     });
   try {
     if (git(['rev-parse', '--is-shallow-repository']).trim() !== 'false') {
@@ -66,7 +69,8 @@ function gitDates() {
     let date = '';
     const log = git([
       'log',
-      '--format=%x01%cs',
+      '--format=%x01%cd',
+      '--date=format-local:%Y-%m-%d',
       '--name-only',
       '--no-renames',
       '--relative',

@@ -15,7 +15,12 @@ const PARCA = '/photos/parcalar';
 export const PRODUCTS: Product[] = [
   {
     slug: 'keski',
-    image: '/photos/uclar/uclar-yard-v3-w1280.webp',
+    image: '/photos/uclar/keski-palet-01-w1280.webp',
+    imageSrcSet:
+      '/photos/uclar/keski-palet-01-w640.webp 640w, /photos/uclar/keski-palet-01-w1280.webp 1280w',
+    detailImage: '/photos/uclar/keski-detay-01-w1000.webp',
+    detailImageSrcSet:
+      '/photos/uclar/keski-detay-01-w640.webp 640w, /photos/uclar/keski-detay-01-w1000.webp 1000w',
     tr: {
       name: 'Keski',
       tagline: 'Kırıcının ucu — taşla, betonla, asfaltla ilk temas.',
@@ -91,7 +96,12 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'tamir-kiti',
-    image: '/photos/kit/seal-kit-v3-w1280.webp',
+    image: '/photos/kit/conta-setleri-01-w1280.webp',
+    imageSrcSet:
+      '/photos/kit/conta-setleri-01-w640.webp 640w, /photos/kit/conta-setleri-01-w1280.webp 1280w',
+    detailImage: '/photos/kit/conta-setleri-detay-01-w1000.webp',
+    detailImageSrcSet:
+      '/photos/kit/conta-setleri-detay-01-w640.webp 640w, /photos/kit/conta-setleri-detay-01-w1000.webp 1000w',
     tr: {
       name: 'Tamir Kiti',
       tagline: 'Sızdırmazlık ve bağlantı parçaları. Ayrıntıların tümü.',
@@ -122,10 +132,15 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'alt-govde',
-    image: `${PARCA}/alt-govde-1536-v2.webp`,
-    imageSrcSet: `${PARCA}/alt-govde-1024-v2.webp 1024w, ${PARCA}/alt-govde-1536-v2.webp 1536w`,
-    ogImage: `${PARCA}/og-alt-govde-v3.jpg`,
-    illustrative: true,
+    // Real workshop photo (2026-11); the earlier render and its "temsili" preview are no longer linked.
+    image: '/photos/govdeler/alt-govde-01-w1280.webp',
+    imageSrcSet:
+      '/photos/govdeler/alt-govde-01-w640.webp 640w, /photos/govdeler/alt-govde-01-w1280.webp 1280w',
+    detailImage: '/photos/govdeler/alt-govde-detay-01-w1000.webp',
+    detailImageSrcSet:
+      '/photos/govdeler/alt-govde-detay-01-w640.webp 640w, /photos/govdeler/alt-govde-detay-01-w1000.webp 1000w',
+    // 1200×630 link preview: the grid photo downscaled (no crop) and centred on the panel colour.
+    ogImage: '/photos/govdeler/og-alt-govde-foto-01.jpg',
     tr: {
       name: 'Alt Gövde (Lower Housing)',
       tagline: 'Burçların ve keskinin yaşadığı yer.',

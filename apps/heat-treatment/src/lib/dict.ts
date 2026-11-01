@@ -70,7 +70,7 @@ export const DICT: Dict = {
       sub: 'Sertleştirme ve temperleme. 42CrMo, 42CrMoA ve diğer alaşımlar — kendi ölçüm ve kontrol disiplinimizle.',
       cta: 'Teklif Al',
       photo: {
-        alt: 'Kartepe tesisimizde kuyu tipi fırın hattı: önde kapağı açık bir fırın, arkada üstünde alev yanan bir fırın',
+        alt: 'Kartepe tesisimizde kuyu tipi fırın hattı ve fırın kapakları',
         caption: 'Fırın ağzı',
       },
       film: {
@@ -191,8 +191,8 @@ export const DICT: Dict = {
           caption: 'Tesisimiz: şarja hazır parçalar ve fikstürler',
         },
         {
-          base: 'firin-agzi-02',
-          alt: 'Kapağı açık kuyu tipi fırının ağzına yukarıdan bakış; içeride dikey çubuklar',
+          base: 'firin-agzi-03',
+          alt: 'Kapağı açık, boş kuyu tipi fırına yukarıdan bakış: yalıtım halkası, tuğla örgülü iç duvar ve duvar boyunca dizili ısıtıcı rezistanslar',
           caption: 'Fırın ağzı',
         },
         {
@@ -201,8 +201,8 @@ export const DICT: Dict = {
           caption: 'Gösterge ve vana dolabı',
         },
         {
-          base: 'kapali-firin-02',
-          alt: 'Kapağı kapalı kuyu tipi fırın: kapak mekanizması ve üstünde fan motoru; arkada ikinci bir fırın',
+          base: 'kapali-firin-03',
+          alt: 'Kapağı kapalı kuyu tipi fırın: kapak üstünde fan motoru ve kapak mekanizması, yanında yanan alev çıkışı',
           caption: 'Kapalı fırın',
         },
       ],
@@ -334,7 +334,7 @@ export const DICT: Dict = {
       sub: 'Hardening and tempering. 42CrMo, 42CrMoA and other alloys — under our own measurement and control discipline.',
       cta: 'Get a Quote',
       photo: {
-        alt: 'Pit furnace line at our Kartepe plant: an open furnace in front, and behind it a furnace with a flame burning on top',
+        alt: 'The pit furnace line and furnace lids at our Kartepe plant',
         caption: 'Furnace mouth',
       },
       film: {
@@ -463,8 +463,8 @@ export const DICT: Dict = {
           caption: 'Our plant: parts and fixtures ready to load',
         },
         {
-          base: 'firin-agzi-02',
-          alt: 'Looking down into an open pit furnace: the mouth with vertical bars inside',
+          base: 'firin-agzi-03',
+          alt: 'Looking down into an open, empty pit furnace: the insulation ring, the brick-lined wall and the heating elements running around it',
           caption: 'Furnace mouth',
         },
         {
@@ -473,8 +473,8 @@ export const DICT: Dict = {
           caption: 'Gauge and valve cabinet',
         },
         {
-          base: 'kapali-firin-02',
-          alt: 'Closed pit furnace: the lid mechanism with the fan motor on top; a second furnace behind',
+          base: 'kapali-firin-03',
+          alt: 'Closed pit furnace: the fan motor and lid mechanism on top, with a burning flame outlet beside it',
           caption: 'Closed furnace',
         },
       ],

@@ -62,14 +62,14 @@ export default function ProductDetail({ t, lang }: Props) {
               <div className="relative aspect-[3/4] overflow-hidden rounded-[4px] border border-hair bg-bg-soft">
                 {product.image ? (
                   <img
-                    src={product.image}
-                    srcSet={product.imageSrcSet}
+                    src={product.detailImage ?? product.image}
+                    srcSet={product.detailImage ? product.detailImageSrcSet : product.imageSrcSet}
                     sizes={
-                      product.imageSrcSet
+                      (product.detailImage ? product.detailImageSrcSet : product.imageSrcSet)
                         ? '(min-width: 1280px) 616px, (min-width: 1024px) 50vw, 100vw'
                         : undefined
                     }
-                    alt={loc.name}
+                    alt={t.productPhotoAlt[product.slug]?.detail ?? loc.name}
                     className="absolute inset-0 w-full h-full object-cover"
                     loading="eager"
                     fetchPriority="high"

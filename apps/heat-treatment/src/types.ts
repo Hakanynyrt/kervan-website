@@ -82,7 +82,7 @@ export interface DictBlock {
     title2: string;
     sub: string;
     cta: string;
-    /** The one hero photo (the furnace pots): alt text and the caption on the photo. */
+    /** The furnace hero photo: alt text and the caption on the photo. */
     photo: { alt: string; caption: string };
     /** Hero film card (client-only video over a poster). */
     film: { alt: string; caption: string; pause: string; play: string };

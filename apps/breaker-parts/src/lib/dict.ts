@@ -521,6 +521,20 @@ export const DICT: Dict = {
       company: 'Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti.',
       location: 'Kartepe · Kocaeli',
     },
+    productPhotoAlt: {
+      keski: {
+        grid: 'Atölyemizde palet üzerinde iki kırıcı keskisi: yassı ve sivri uç',
+        detail: 'Yan yana iki kırıcı keskisi, yassı ve sivri iş uçları',
+      },
+      'tamir-kiti': {
+        grid: 'Poşetlerinde renkli conta ve O-ring setleri',
+        detail: 'Poşetlerinde krem, turuncu, siyah ve sarı conta setleri',
+      },
+      'alt-govde': {
+        grid: 'Üst üste iki işlenmiş kırıcı alt gövdesi, delikli ön yüzler',
+        detail: 'İşlenmiş kırıcı alt gövdesi: ön yüz, bağlantı delikleri ve iç yuva',
+      },
+    },
     productDetail: {
       materialsLabel: 'Malzeme',
       sizesLabel: 'Ölçüler',
@@ -1127,6 +1141,20 @@ export const DICT: Dict = {
       body: 'Kervan Makina is a family business in Kartepe / Kocaeli running both contract heat treatment (kervanheat.com) and hydraulic breaker spare-part production. Same bench, same hands. This site is the breaker-parts catalogue — for heat treatment service, see kervanheat.com.',
       company: 'Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti.',
       location: 'Kartepe · Kocaeli · Türkiye',
+    },
+    productPhotoAlt: {
+      keski: {
+        grid: 'Two breaker chisels on a pallet in our workshop: a flat and a pointed tip',
+        detail: 'Two breaker chisels side by side, flat and pointed working ends',
+      },
+      'tamir-kiti': {
+        grid: 'Coloured seal and O-ring sets in their bags',
+        detail: 'Cream, orange, black and yellow seal sets in their bags',
+      },
+      'alt-govde': {
+        grid: 'Two machined breaker lower housings stacked, drilled front faces',
+        detail: 'Machined breaker lower housing: front face, bolt holes and inner bore',
+      },
     },
     productDetail: {
       materialsLabel: 'Material',

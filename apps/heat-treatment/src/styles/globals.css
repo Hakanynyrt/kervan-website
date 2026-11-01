@@ -195,9 +195,9 @@ html:not(.js-anim) .min-h-dvh {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   Hero (#top): our own pot photo full-bleed (capped at its 1280 px source, so
-   it is never upscaled), a solid page-coloured text panel at its bottom left
-   (no overlay, no gradient). Phones (≤ 720 px): a 132 px band of the open pot,
+   Hero (#top): the furnace hero photo full-bleed (capped at its 1280 px source,
+   so it is never upscaled), a solid page-coloured text panel at its bottom left
+   (no overlay, no gradient). Phones (≤ 720 px): a 132 px band of the hot charge,
    then the text.
 ═══════════════════════════════════════════════════════════════════════ */
 .kv-hero {
@@ -285,7 +285,7 @@ html:not(.js-anim) .min-h-dvh {
     transform: none;
   }
   .kv-hero-photo img {
-    object-position: 50% 63%;
+    object-position: 50% 88%;
   }
   .kv-hero-caption {
     display: none;

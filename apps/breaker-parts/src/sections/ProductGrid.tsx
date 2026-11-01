@@ -42,7 +42,7 @@ export default function ProductGrid({ lang, limit }: Props) {
                         ? '(min-width: 1024px) 416px, (min-width: 640px) 50vw, 100vw'
                         : undefined
                     }
-                    alt={loc.name}
+                    alt={DICT[lang].productPhotoAlt[p.slug]?.grid ?? loc.name}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.04]"
                     loading="lazy"
                   />
