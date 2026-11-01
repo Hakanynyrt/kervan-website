@@ -5,7 +5,7 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"],
-      "env": ["VITE_TIP_IMG_BASE", "SHOP_PREVIEW_LEAN"]
+      "env": ["VITE_TIP_IMG_BASE", "SHOP_PREVIEW_LEAN", "SHOP_REQUIRE_FX"]
     },
     "dev": {
       "cache": false,

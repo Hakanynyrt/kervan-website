@@ -3,6 +3,8 @@
 //   published rows from D1 and keeps only public fields (toPublicCatalog).
 // - Otherwise keeps an existing snapshot, or writes the DEMO catalog.
 // - SHOP_REQUIRE_CATALOG=1 turns any D1 failure into a build failure (production).
+// - SHOP_REQUIRE_FX=1 (main) fails the build when no CBRT rate can be read, so production keeps
+//   the previous deploy; elsewhere the pages fall back to USD only (never an invented rate).
 // Prints counts only: this public repo's CI logs must never show catalog data.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -31,6 +33,7 @@ import {
   FITS_SQL,
   SKUS_SQL,
 } from '../../../packages/tips/src/catalog-sql.ts';
+import { fxCandidateDates, parseTcmbUsd, tcmbArchiveUrl } from './fx.ts';
 
 const APP = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(APP, '.catalog', 'catalog.json');
@@ -73,22 +76,32 @@ function query<T>(db: string, sql: string): T[] {
   return parsed.flatMap((b) => b.results ?? []);
 }
 
-/** CBRT (TCMB) USD selling rate of the last business day; null when it cannot be read. */
-async function fetchFx(): Promise<FxRate | null> {
-  try {
-    const res = await fetch('https://www.tcmb.gov.tr/kurlar/today.xml', {
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!res.ok) return null;
-    const xml = await res.text();
-    const usd = /<Currency[^>]*CurrencyCode="USD"[^>]*>([\s\S]*?)<\/Currency>/.exec(xml)?.[1] ?? '';
-    const rate = Number(/<ForexSelling>([\d.]+)<\/ForexSelling>/.exec(usd)?.[1]);
-    const d = /Date="(\d{2})\/(\d{2})\/(\d{4})"/.exec(xml);
-    if (!(rate > 1 && rate < 1000) || !d) return null;
-    return { usdTry: rate, date: `${d[3]}-${d[1]}-${d[2]}` };
-  } catch {
-    return null;
+/** One archive file: the rate, 'missing' (404: no bulletin that day) or null (could not read). */
+async function fetchBulletin(date: string): Promise<FxRate | 'missing' | null> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetch(tcmbArchiveUrl(date), { signal: AbortSignal.timeout(10_000) });
+      if (res.status === 404) return 'missing';
+      if (res.ok) return parseTcmbUsd(await res.text(), date);
+    } catch {
+      // network error or timeout: try again
+    }
   }
+  return null;
+}
+
+/**
+ * The week's CBRT USD selling rate (owner, G2): the bulletin of the ISO week's Monday, stepping
+ * back a day while a file is missing; null when none can be read (a read error never steps back
+ * to another week's rate).
+ */
+async function fetchFx(): Promise<FxRate | null> {
+  for (const date of fxCandidateDates(new Date())) {
+    const r = await fetchBulletin(date);
+    if (r === 'missing') continue;
+    return r;
+  }
+  return null;
 }
 
 function write(c: PublicCatalog, what: string) {
@@ -162,10 +175,23 @@ if (
   log(`DEMO part prices: ${DEMO_PART_PRICES.length} rows (local only)`);
 }
 
-// The TRY prices follow the rate of the build day (the shop rebuilds every morning).
+// The TRY prices follow the week's CBRT rate (scripts/fx.ts). Turkish pages lead with the
+// tax-inclusive TL price, so production never ships without a rate.
 if (fs.existsSync(OUT)) {
   const c = JSON.parse(fs.readFileSync(OUT, 'utf8')) as PublicCatalog;
-  c.fx = await fetchFx();
+  // The deploy runs this twice (snapshot step, then the app build): a snapshot that already
+  // holds this week's Monday rate keeps it, so both runs agree. Otherwise read again; if that
+  // fails (a short TCMB outage between the runs), a rate the first run read for this week stays.
+  const candidates = fxCandidateDates(new Date());
+  if (c.fx?.date !== candidates[0]) {
+    const fresh = await fetchFx();
+    if (fresh) c.fx = fresh;
+    else if (!candidates.includes(c.fx?.date ?? '')) c.fx = null;
+  }
+  if (!c.fx && process.env.SHOP_REQUIRE_FX === '1') {
+    log('FAILED (no CBRT USD/TRY rate could be read)');
+    process.exit(1);
+  }
   fs.writeFileSync(OUT, JSON.stringify(c));
   log(c.fx ? `USD/TRY rate of ${c.fx.date}` : 'USD/TRY rate unavailable (USD prices only)');
 }

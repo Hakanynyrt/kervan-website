@@ -268,6 +268,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_SHOP_DATA_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           SHOP_REQUIRE_CATALOG: ${{ github.ref == 'refs/heads/main' && vars.SHOP_REQUIRE_CATALOG || '0' }}
+          # No CBRT rate on main → fail, production keeps the previous deploy (owner, G2).
+          SHOP_REQUIRE_FX: ${{ github.ref == 'refs/heads/main' && '1' || '0' }}
         run: node --experimental-strip-types --no-warnings apps/parts-shop/scripts/build-catalog.ts
 
       # Renders are content-addressed (file name = hash of the geometry and RENDER_VERSION),
@@ -319,6 +321,7 @@ jobs:
         env:
           VITE_TIP_IMG_BASE: ${{ steps.r2.outputs.base }}
           SHOP_PREVIEW_LEAN: ${{ github.ref != 'refs/heads/main' && '1' || '' }}
+          SHOP_REQUIRE_FX: ${{ github.ref == 'refs/heads/main' && '1' || '0' }}
         run: pnpm turbo build --filter=@kervan/parts-shop
 
       # Additive only (never --delete): published names are content-addressed, so a name never

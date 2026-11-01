@@ -30,6 +30,7 @@ import { shownTip } from './tip-options';
 import type { PageProps } from './page-props';
 import { SITE } from './site';
 import { photoImgAbs } from './photo-url';
+import { offerPrice } from './price';
 
 export { SITE };
 
@@ -128,14 +129,16 @@ const ogOf = (lang: PageProps['lang'], file: string | undefined): Partial<HeadIn
 /** Meta descriptions longer than this lose the alias (Google cuts snippets around 155–160). */
 const DESC_MAX = 155;
 
-/** Offer price as schema.org wants it: the net USD price the page shows, "125.00". */
-const usd = (cents: number): string => (cents / 100).toFixed(2);
-
-/** Offer of a priced page: the net USD price it shows, the seller and the return policy. */
-const offerOf = (cents: number): NonNullable<BuildShopProductOpts['offer']> => ({
-  price: usd(cents),
-  priceCurrency: 'USD',
-  valueAddedTaxIncluded: false,
+/**
+ * Offer of a priced page: the price it leads with (`offerPrice`: Turkish pages with a rate the
+ * tax-inclusive TL price, owner G2; otherwise net USD), the seller and the return policy.
+ */
+const offerOf = (
+  cents: number,
+  lang: PageProps['lang'],
+  fx: PageProps['fx'],
+): NonNullable<BuildShopProductOpts['offer']> => ({
+  ...offerPrice(cents, lang, fx),
   seller: SELLER_REF,
   returnPolicy: RETURN_POLICY,
 });
@@ -146,7 +149,7 @@ const offerOf = (cents: number): NonNullable<BuildShopProductOpts['offer']> => (
  * page has a breadcrumb, Product on tip and part item pages; an Offer only where the page
  * shows a price). The cart, 404 and the /urun/ code pages are noindex.
  */
-export function pageHead({ lang, path, model }: PageProps): HeadInput {
+export function pageHead({ lang, path, model, fx }: PageProps): HeadInput {
   const t = DICT[lang];
   const m = t.meta;
   const base = { lang, siteName: m.siteName } as const;
@@ -346,7 +349,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
             image,
             brand: ORG_TRADING_NAME,
             category: name,
-            ...(cents !== null && image ? { offer: offerOf(cents) } : {}),
+            ...(cents !== null && image ? { offer: offerOf(cents, lang, fx) } : {}),
           }),
           crumbs([partsCrumb, [name, partPath(model.part)]], r ? renderModel(r, t) : model.anchor),
         ],
@@ -399,7 +402,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
             image,
             brand: ORG_TRADING_NAME,
             category: t.parts.tips.name,
-            ...(opt && opt.cents !== null ? { offer: offerOf(opt.cents) } : {}),
+            ...(opt && opt.cents !== null ? { offer: offerOf(opt.cents, lang, fx) } : {}),
           }),
           crumbs([partsCrumb, tipsCrumb, [model.brand, brandPath(model.brand)]], model.model),
         ],
@@ -427,7 +430,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
             category: t.parts.tips.name,
             // The family code is this page's public name (URL, breadcrumb).
             sku: f.code,
-            ...(opt && opt.cents !== null ? { offer: offerOf(opt.cents) } : {}),
+            ...(opt && opt.cents !== null ? { offer: offerOf(opt.cents, lang, fx) } : {}),
           }),
           crumbs([partsCrumb, tipsCrumb], f.code),
         ],

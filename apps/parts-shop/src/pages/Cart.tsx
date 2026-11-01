@@ -8,7 +8,17 @@ import { ORDER_CONVERSION } from '../lib/ads';
 import { CART_EVENT, readCart, writeCart, type CartItem } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { fmtDate, fmtTry, fmtUsd, VAT_PERCENT, vatOf } from '../lib/price';
+import {
+  fmtDate,
+  fmtTry,
+  fmtTryCents,
+  fmtUsd,
+  grossTryCents,
+  leadsGross,
+  unitText,
+  VAT_PERCENT,
+  vatOf,
+} from '../lib/price';
 import { LEGAL, legalPath } from '../lib/legal';
 import { PARTS_PATH } from '../lib/routes';
 import type { Lang } from '../types';
@@ -82,17 +92,38 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   const vatCents = lang === 'tr' ? vatOf(totalCents) : 0;
   const grossCents = totalCents + vatCents;
   const anyAsk = list.some((x) => x.cents === null);
+  // Turkish with a rate (owner, G2): each line is its unit's tax-inclusive TL price (the product
+  // pages' figure) × quantity, and the total is the sum of those lines, so the cart never
+  // differs from the pages. The subtotal and tax rows stay in net USD.
+  const gross = leadsGross(lang, fx);
+  const lineTry = (x: CartItem) =>
+    x.cents === null ? null : (grossTryCents(x.cents, gross ? fx : null) ?? 0) * x.qty;
+  const totalTry = gross ? list.reduce((n, x) => n + (lineTry(x) ?? 0), 0) : null;
   const money = (cents: number) =>
-    [fmtUsd(cents, lang), fmtTry(cents, fx, lang)].filter(Boolean).join(' / ');
+    gross
+      ? fmtUsd(cents, lang)
+      : [fmtUsd(cents, lang), fmtTry(cents, fx, lang)].filter(Boolean).join(' / ');
+  const lineTotal = (x: CartItem) => {
+    const l = lineTry(x);
+    return x.cents === null
+      ? null
+      : gross && l !== null
+        ? fmtTryCents(l, lang)
+        : fmtUsd(x.cents * x.qty, lang);
+  };
   const lines = list.map((x) =>
     c.line(
       `${x.name}, ${lineLabel(x)}${x.code ? ` (${x.code})` : ''}`,
       x.qty,
-      x.cents === null ? c.ask : fmtUsd(x.cents, lang),
-      x.cents === null ? null : fmtUsd(x.cents * x.qty, lang),
+      x.cents === null ? c.ask : unitText(x.cents, fx, lang, t),
+      lineTotal(x),
       SITE + localePath(x.path, lang),
     ),
   );
+  const totalText =
+    totalTry !== null
+      ? `${fmtTryCents(totalTry, lang)} / ${fmtUsd(grossCents, lang)}`
+      : money(grossCents);
   const subject = list.length ? c.subject(list[0].name, list.length - 1) : c.title;
   const message = c.message(
     lines,
@@ -100,7 +131,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
       ...(vatCents
         ? [`${c.subtotal}: ${money(totalCents)}`, `${c.vat(VAT_PERCENT)}: ${money(vatCents)}`]
         : []),
-      `${c.total}: ${money(grossCents)}${anyAsk ? ` (${c.totalNote})` : ''}`,
+      `${c.total}: ${totalText}${anyAsk ? ` (${c.totalNote})` : ''}`,
     ].join('\n'),
     fields.filter((k) => contact[k].trim()).map((k) => `${c[k]}: ${contact[k].trim()}`),
   );
@@ -159,9 +190,20 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                       {x.name}
                     </a>
                     <p className="m-0 text-ink-mid">{lineLabel(x)}</p>
-                    <p className="m-0 text-ink-mid tabular-nums">
-                      {c.unit}: {x.cents === null ? c.ask : fmtUsd(x.cents, lang)}
-                    </p>
+                    {gross && x.cents !== null ? (
+                      <>
+                        <p className="m-0 text-ink-mid tabular-nums">
+                          {c.unitGross}: {fmtTryCents(grossTryCents(x.cents, fx) ?? 0, lang)}
+                        </p>
+                        <p className="m-0 text-xs text-ink-soft tabular-nums">
+                          {fmtUsd(x.cents, lang)} {t.price.plus}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="m-0 text-ink-mid tabular-nums">
+                        {c.unit}: {x.cents === null ? c.ask : fmtUsd(x.cents, lang)}
+                      </p>
+                    )}
                   </div>
                   <QtyStepper
                     id={`q-${i}`}
@@ -171,7 +213,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                     t={t}
                   />
                   <p className="m-0 ml-auto min-w-24 text-right font-semibold text-ink tabular-nums">
-                    {x.cents === null ? '—' : fmtUsd(x.cents * x.qty, lang)}
+                    {lineTotal(x) ?? '—'}
                   </p>
                   <button
                     type="button"
@@ -206,12 +248,20 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
               </dl>
               <p className="m-0 mt-2 flex justify-between gap-4 border-t border-hair pt-3 text-lg font-bold text-ink tabular-nums">
                 <span>{c.total}</span>
-                <span className="whitespace-nowrap">{fmtUsd(grossCents, lang)}</span>
+                <span className="whitespace-nowrap">
+                  {totalTry !== null ? fmtTryCents(totalTry, lang) : fmtUsd(grossCents, lang)}
+                </span>
               </p>
-              {fmtTry(grossCents, fx, lang) && (
-                <p className="m-0 mt-1 text-right text-lg font-semibold text-ink tabular-nums">
-                  {fmtTry(grossCents, fx, lang)}
+              {totalTry !== null ? (
+                <p className="m-0 mt-1 text-right text-sm text-ink-mid tabular-nums">
+                  {fmtUsd(grossCents, lang)}
                 </p>
+              ) : (
+                fmtTry(grossCents, fx, lang) && (
+                  <p className="m-0 mt-1 text-right text-lg font-semibold text-ink tabular-nums">
+                    {fmtTry(grossCents, fx, lang)}
+                  </p>
+                )
               )}
               {fx && (
                 <p className="m-0 mt-1 text-right text-xs text-ink-soft">

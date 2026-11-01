@@ -4,20 +4,24 @@ import { ORDER_CONVERSION } from '../lib/ads';
 import { addToCart } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
-import { fmtDate, fmtTry, fmtUsd } from '../lib/price';
+import { fmtDate, fmtGrossTry, fmtTry, fmtUsd, leadsGross, unitText } from '../lib/price';
 import { CART_PATH, type PartKey } from '../lib/routes';
 import type { Lang } from '../types';
 import { QtyStepper, Terms } from './Bits';
 import { FOCUS, whatsappHref } from './Layout';
 import { ORDER_EMAIL, SITE } from '../lib/site';
 
-/** "1.850 USD · 81.000 TL": one line under a priced part (group page, phones). */
+/**
+ * One line under a priced part (group page, phones): "97.200 TL (vergiler dahil) · 1.850 USD +
+ * vergiler" on Turkish pages with a rate (owner, G2), "1,850 USD · 81,000 TL" in English.
+ */
 export function PartPriceLine({
   cents,
   fx,
   lang,
   note,
   plus = '',
+  incl = '',
   className = '',
 }: {
   cents: number;
@@ -25,10 +29,23 @@ export function PartPriceLine({
   lang: Lang;
   /** After the USD price: "+ vergiler" on Turkish pages (`t.price.plus`). */
   plus?: string;
+  /** After the tax-inclusive TL price: "(vergiler dahil)" (`t.price.incl`). */
+  incl?: string;
   /** What the price covers, when it is more than the part (tie rods: nuts and washers). */
   note?: string | null;
   className?: string;
 }) {
+  const gross = leadsGross(lang, fx) ? fmtGrossTry(cents, fx, lang) : null;
+  if (gross)
+    return (
+      <p className={`m-0 font-sans tabular-nums ${className}`}>
+        <span className="font-semibold text-ink">{gross}</span>
+        {incl && <span className="text-sm text-ink-soft"> {incl}</span>}
+        <span className="text-sm text-ink-mid"> · {fmtUsd(cents, lang)}</span>
+        {plus && <span className="text-sm text-ink-soft"> {plus}</span>}
+        {note && <span className="block text-sm font-normal text-ink-mid">{note}</span>}
+      </p>
+    );
   const tl = fmtTry(cents, fx, lang);
   return (
     <p className={`m-0 font-sans tabular-nums ${className}`}>
@@ -53,11 +70,20 @@ export const partOrderText = (
   qty: number,
   cents: number,
   path: string,
-) => t.parts.order.text(label, breaker, qty, fmtUsd(cents, lang), SITE + localePath(path, lang));
+  fx: FxRate | null,
+) =>
+  t.parts.order.text(
+    label,
+    breaker,
+    qty,
+    unitText(cents, fx, lang, t),
+    SITE + localePath(path, lang),
+  );
 
 /**
- * A priced spare part's order panel (item page): the price like the tip pages (USD, TL at the
- * CBRT rate; "+ vergiler" on Turkish pages, the export note in English), same-day delivery, quantity, "Palete yükle", and the WhatsApp / e-mail
+ * A priced spare part's order panel (item page): the price like the tip pages (Turkish: the
+ * tax-inclusive TL price, then the net USD price "+ vergiler"; English: the net export price and
+ * its TL amount, with the export note), same-day delivery, quantity, "Palete yükle", and the WhatsApp / e-mail
  * order. The cart line keeps the price it was added at.
  */
 export function PartOrder({
@@ -94,19 +120,36 @@ export function PartOrder({
 }) {
   const [added, setAdded] = useState(false);
   const o = t.parts.order;
-  const tl = fmtTry(cents, fx, lang);
-  const text = partOrderText(t, lang, label, breaker, qty, cents, path);
+  const gross = leadsGross(lang, fx) ? fmtGrossTry(cents, fx, lang) : null;
+  const tl = gross ?? fmtTry(cents, fx, lang);
+  const text = partOrderText(t, lang, label, breaker, qty, cents, path, fx);
   return (
     <div className="lg:sticky lg:top-6">
       <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
         <p className="m-0 text-sm text-ink-mid">{t.price.label}</p>
-        <p className="m-0 mt-1 text-3xl font-bold text-ink tabular-nums">
-          {fmtUsd(cents, lang)}
-          {t.price.plus && (
-            <span className="text-base font-semibold text-ink-mid"> {t.price.plus}</span>
-          )}
-        </p>
-        {tl && <p className="m-0 mt-1 text-lg font-semibold text-ink-mid tabular-nums">{tl}</p>}
+        {gross ? (
+          <>
+            {/* data-offer: check-dist compares it with the JSON-LD offer. */}
+            <p data-offer="" className="m-0 mt-1 text-3xl font-bold text-ink tabular-nums">
+              {gross}
+              <span className="text-base font-semibold text-ink-mid"> {t.price.incl}</span>
+            </p>
+            <p className="m-0 mt-1 text-base text-ink-mid tabular-nums">
+              {fmtUsd(cents, lang)}
+              {t.price.plus && <span className="text-ink-soft"> {t.price.plus}</span>}
+            </p>
+          </>
+        ) : (
+          <>
+            <p data-offer="" className="m-0 mt-1 text-3xl font-bold text-ink tabular-nums">
+              {fmtUsd(cents, lang)}
+              {t.price.plus && (
+                <span className="text-base font-semibold text-ink-mid"> {t.price.plus}</span>
+              )}
+            </p>
+            {tl && <p className="m-0 mt-1 text-lg font-semibold text-ink-mid tabular-nums">{tl}</p>}
+          </>
+        )}
         {note && <p className="m-0 mt-1 text-sm text-ink">{note}</p>}
         {t.price.note && <p className="m-0 mt-1 text-sm text-ink-soft">{t.price.note}</p>}
         {tl && fx && (
