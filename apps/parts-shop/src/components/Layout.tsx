@@ -353,6 +353,7 @@ export default function Layout({
             <p className="m-0 mt-3">{SELLER.name}</p>
             <p className="m-0">{SELLER.address}</p>
             <p className="m-0">{SELLER.tax}</p>
+            <p className="m-0">{t.footer.mersis}</p>
           </div>
           <div>
             <p className={HEAD}>{t.footer.shop}</p>

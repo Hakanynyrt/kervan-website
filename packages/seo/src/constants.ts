@@ -12,6 +12,9 @@ export const ORG_LEGAL_NAME = 'Kervan Isıl İşlem San. Tic. Ltd. Şti.';
 /** Registered company name (tax register; owner, Oct 2026). Used on kervanbreaker.com and
  *  kiriciparca.com: footers, KVKK / legal pages and their Organization JSON-LD. */
 export const ORG_REGISTERED_NAME = 'Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti.';
+/** MERSİS number of the registered company (owner, Nov 2026; TTK md. 1524): footers of all three
+ *  sites, the shop's legal pages, the KVKK pages and the Organization JSON-LD `identifier`. */
+export const ORG_MERSIS = '0545108818400001';
 export const ORG_TRADING_NAME = 'Kervan Makina';
 
 export const ORG_PHONE = '+90 531 669 37 34';

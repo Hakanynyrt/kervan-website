@@ -1,4 +1,6 @@
 import type { OrgSocialKey } from '@kervan/seo';
+// Subpath: the dict is loaded by node's test runner, which cannot resolve the package index.
+import { ORG_MERSIS } from '@kervan/seo/constants';
 import type { TipType } from '@kervan/tips';
 import type { PartKey } from './routes';
 import type { Lang } from '../types';
@@ -554,6 +556,8 @@ export interface Dict {
     about: string;
     fit: string;
     fax: string;
+    /** "MERSİS No: …" in the seller block (TTK md. 1524). */
+    mersis: string;
     /** Reopens the cookie banner (ConsentBanner). */
     cookies: string;
     /** Heading over the social profile links. */
@@ -1529,6 +1533,7 @@ export const DICT: Record<Lang, Dict> = {
         'Kartepe / Kocaeli’de hidrolik kırıcı yedek parça üretimi; ısıl işlem kendi tesisimizde.',
       fit: 'Kırıcı marka ve model adları yalnızca uyumu belirtir; ürünlerimiz kırıcı üreticisinin orijinal parçası değildir.',
       fax: 'Faks',
+      mersis: `MERSİS No: ${ORG_MERSIS}`,
       images:
         '© Kervan Makina. Ürün görselleri Kervan Makina’ya aittir, temsilidir; izinsiz kullanılamaz.',
       cookies: 'Çerez tercihleri',
@@ -2519,6 +2524,7 @@ export const DICT: Record<Lang, Dict> = {
         'Hydraulic breaker spare parts made in Kartepe / Kocaeli, heat-treated in our own plant.',
       fit: 'Breaker make and model names only show the fit; our products are not the breaker maker’s original parts.',
       fax: 'Fax',
+      mersis: `MERSIS No: ${ORG_MERSIS}`,
       images:
         '© Kervan Makina. Product images belong to Kervan Makina and are illustrations; do not use without permission.',
       cookies: 'Cookie preferences',

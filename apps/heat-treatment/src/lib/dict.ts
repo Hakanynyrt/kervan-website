@@ -1,4 +1,4 @@
-import { ORG_LOCALITY, ORG_REGION, ORG_REGISTERED_NAME, ORG_STREET } from '@kervan/seo';
+import { ORG_LOCALITY, ORG_MERSIS, ORG_REGION, ORG_REGISTERED_NAME, ORG_STREET } from '@kervan/seo';
 import type { Dict } from '../types';
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -258,6 +258,7 @@ export const DICT: Dict = {
       brand: 'Kervan Heat',
       tag: 'Kartepe · Kocaeli',
       rights: `© 2026 ${ORG_REGISTERED_NAME} Tüm hakları saklıdır.`,
+      mersis: `MERSİS No: ${ORG_MERSIS}`,
       kvkk: 'KVKK',
       cookies: 'Çerez tercihleri',
     },
@@ -529,6 +530,7 @@ export const DICT: Dict = {
       brand: 'Kervan Heat',
       tag: 'Kartepe · Kocaeli',
       rights: `© 2026 ${ORG_REGISTERED_NAME} All rights reserved.`,
+      mersis: `MERSIS No: ${ORG_MERSIS}`,
       kvkk: 'Privacy',
       cookies: 'Cookie settings',
     },
