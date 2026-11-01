@@ -14,6 +14,8 @@ export const GUIDE_KEYS = [
   'keski-mi-sivri-uc-mu',
   'kirici-yaglamasi-nasil-yapilir',
   'kirici-alt-govdesi-ne-zaman-degisir',
+  'kirici-pistonu-neden-cizilir',
+  'kirici-saplamasi-neden-kopar',
 ] as const;
 export type GuideKey = (typeof GUIDE_KEYS)[number];
 
@@ -242,6 +244,98 @@ export const GUIDES: Record<
         ],
         links: ['alt-govde', 'burc', 'kama', 'saplama'],
       },
+      'kirici-pistonu-neden-cizilir': {
+        title: 'Kırıcı pistonu neden çizilir?',
+        lead: 'Piston silindirin içinde çok dar bir boşlukla çalışır. Yağa karışan kir, eğik vuruş ya da aşırı ısınma piston ve silindir yüzeyini çizer.',
+        sections: [
+          {
+            h: 'Kirli ya da yanlış hidrolik yağ',
+            p: [
+              'Piston ile silindiri hidrolik yağ yağlar. Yağa karışan toz, metal parçacığı ya da su yüzeyleri zımpara gibi çizer. Kir çoğu zaman kırıcı takılıp sökülürken kirli hortum uçlarından ve rakorlardan, yıkanmamış yeni hatlardan ya da onarım sırasında girer: kırıcı makineden ayrıyken hortum uçlarını temizleyip kapatın, yeni hatları ilk çalışmadan önce yıkayın. Üreticinin önerdiği yağı kullanın. Kırıcı çalışması yağı kazıdan çok daha hızlı ısıtıp kirlettiği için yağ ve filtreyi normal kazı aralıklarına göre değil, kılavuzların kırıcı çalışması için verdiği aralıklarda değiştirin; kılavuz istiyorsa kırıcı devresine dönüş filtresi takın.',
+            ],
+          },
+          {
+            h: 'Aşınmış burç, kötü uç ve yanlış gres',
+            p: [
+              'Aşınmış ya da uymayan burç ucu eğik tutar; piston ucun arka yüzüne eğik vurur, silindir içinde yana itilir ve tek taraftan çizilir. Darbe yüzü ezilmiş, çentiklenmiş ya da çatlamış veya kırıcıya uymayan uç pistonun vuruş yüzünü bozar; kopan parçalar keçelere ve piston ile silindir arasına girer. Gres de doğru yere gitmelidir: uç sonuna kadar itilmeden ya da fazla gres verilirse gres darbe bölgesine dolar, piston onu her vuruşta alt keçelere ve silindire basar; keçeler bozulur ve gres hidrolik yağa karışır. Uç, burç ve yağlama rehberleri ayrıntıyı anlatıyor.',
+            ],
+          },
+          {
+            h: 'Boşta vuruş ve ucu levye gibi kullanmak',
+            p: [
+              'Uç bir yüzeye dayanmadan vurulduğunda piston normal vuruş boyunu aşıp silindirin ön tarafına kadar gider; darbeyi alt gövde, kama, keçeler ve pistonun vuruş yüzü alır. Bozulan keçeler kirin girmesine ve yağ filminin kaybolmasına yol açar, piston çizilir. Ucu levye gibi kullanmak ise yanal yük bindirir; piston tek tarafa sürtünür ve çizilir.',
+            ],
+          },
+          {
+            h: 'Aşırı ısınma, gaz basıncı ve aşınmış keçeler',
+            p: [
+              'Ara vermeden uzun çalışmak, yetersiz soğutma ya da yanlış ayarlanmış hidrolik sistem yağı ısıtır; incelen yağ piston ile silindir arasındaki yağ filmini tutamaz ve metal metale sürtünür. Çalışma basıncı, yağ akışı ve sıcaklık sınırları kırıcının kılavuzunda yazar. Yanlış gaz basıncı pistonun hareketini bozar, yırtılan akümülatör diyaframı yağa parça karıştırır; gaz basıncını kılavuzda yazan aralıklarla kontrol ettirin. Aşınmış toz keçesi içeri toz ve çamur alır; keçeleri kılavuzdaki bakımlarda ve kaçak görüldüğünde değiştirin.',
+            ],
+          },
+          {
+            h: 'Belirtiler ve kontrol',
+            p: [
+              'Darbe gücünün düşmesi, vuruşun düzensizleşmesi, yağ kaçağı, keçelerin sık bozulması ve hidrolik yağda ya da filtrede metal parçacıkları piston ya da silindirin çizildiğini gösterebilir. Yağın temizliğini, filtreyi, uç ile burç arasındaki boşluğu, yağlamayı ve keçeleri kontrol edin; bu belirtilerle çalışmaya devam etmek hasarı büyütür. Pistonu söküp yüzeyini incelemek atölye işidir.',
+            ],
+          },
+          {
+            h: 'Piston ve silindir birlikte değerlendirilir',
+            p: [
+              'Çizik piston çoğu zaman silindirde de iz bırakır; çizik silindire takılan yeni piston da kısa sürede çizilir. Pistonun ve silindirin yeniden kullanılıp kullanılamayacağına, ikisini birlikte ölçüp inceleyen bir atölye karar verir. Çizilmeye yol açan neden giderilmeden yeni piston takmayın. Kırıcınızın marka ve modeline uyan pistonu piston sayfasında arayabilirsiniz.',
+            ],
+          },
+        ],
+        links: ['piston', 'burc', 'tips'],
+      },
+      'kirici-saplamasi-neden-kopar': {
+        title: 'Kırıcı saplaması neden kopar?',
+        lead: 'Saplamalar kırıcının gövde parçalarını bir arada tutar ve her darbede yük taşır. Kopan saplama çoğu zaman sıkma, bakım ya da kullanım hatasının işaretidir.',
+        sections: [
+          {
+            h: 'Yanlış ya da eşit olmayan sıkma',
+            p: [
+              'Saplama somunları kırıcı üreticisinin kılavuzunda yazan yöntemle sıkılır. Az sıkılan saplamada gövde parçaları arasında boşluk açılır ve saplama her darbede vuruntulu yük alır; fazla sıkılan saplama baştan zorlanır. Somunlar birbirinden farklı sıkılırsa yükü saplamaların yalnızca bir kısmı taşır ve en çok yüklenen önce kopar. Sıkmadan önce dişleri temizleyin; dişleri ve somunların oturma yüzlerini kılavuzda yazan yağlayıcıyla yağlayın, çünkü kuru, kirli ya da paslı dişte aynı sıkma değeri çok daha az sıkılık verir. Somunları kılavuzdaki sırayla, çapraz ve kademeli olarak sıkın.',
+            ],
+          },
+          {
+            h: 'Gevşeyen somunlar, bozuk diş ve pul',
+            p: [
+              'Darbe ve titreşim somunları zamanla gevşetebilir; gevşek saplama kısa sürede yorulur ve onun yükünü diğerleri taşır. Yeni ya da revizyondan çıkmış kırıcıda birleşimler ilk çalışma saatlerinde oturur; somunların sıkılığını kılavuzda yazan ilk kontrol zamanında ve sonra kılavuzdaki aralıklarla kontrol edin. Eksik pul, aşınmış oturma yüzeyi ya da ezilmiş, paslı, çapaklı diş somunun tam oturmasını ve saplamanın doğru gerilmesini engeller. Dişi hasarlı saplama ve somunu yeniden kullanmayın.',
+            ],
+          },
+          {
+            h: 'Yanal yük: boşta vuruş, levye, aşınmış burç ve tampon',
+            p: [
+              'Boşta vuruşta darbenin enerjisi kırıcının gövdesine ve saplamalara biner. Ucu levye gibi kullanmak, taşı uçla yana itmek ya da aşınmış uç ve burçla eğik çalışmak gövdeye yanal yük bindirir; saplamalar çekmenin yanında eğilme yükü de taşır. Muhafazadaki aşınmış tamponlar ve aşınma plakaları gövdenin muhafaza içinde vurup sarsılmasına yol açar; bunları bakımlarda kontrol edin.',
+            ],
+          },
+          {
+            h: 'Yanlış gaz basıncı, fazla yağ basıncı ve bastırma',
+            p: [
+              'Arka kafa ya da akümülatör gaz basıncı düşük ya da yüksekse veya akümülatör diyaframı yırtılmışsa basınç darbeleri ve titreşim gövdeye geçer. Kırıcının değerlerini aşan çalışma basıncı ya da yağ akışı, yüksek dönüş hattı basıncı ve iş makinesini kırıcının üstüne kaldıracak kadar bastırmak da saplamalara her darbede fazladan yük bindirir. Gaz basıncını kılavuzda yazan aralıklarla kontrol ettirin; basınç ve yağ akışını kılavuzdaki değerlerde tutun.',
+            ],
+          },
+          {
+            h: 'Yorulma ve kırıcıya uymayan saplama',
+            p: [
+              'Saplama her darbede biraz gerilir ve geri bırakılır. Bu tekrar eden yük zamanla küçük çatlaklar açar; kopma çoğu zaman diş dibinde ya da kesitin değiştiği yerde başlar ve uyarı vermeden olur. Boyu, çapı, dişi ve malzemesi o kırıcıya göre yapılmamış bir saplama, ölçüsü benzese de doğru sıkılamaz ya da darbeye dayanmaz.',
+            ],
+          },
+          {
+            h: 'Belirtiler ve kontrol',
+            p: [
+              'Gövde parçaları arasında boşluk ya da oynama, birleşim yerlerinden yağ sızması, alışılmadık vuruntu ya da tıkırtı ve gevşemiş somunlar saplamalarda sorun olduğunu gösterir. Uç ve burç aşınmasına da bakın; saplamalara binen yanal yükün nedeni çoğu zaman oradadır. Bir saplama koptuysa kırıcıyı çalıştırmayın; yük diğer saplamalara biner ve onlar da kopabilir.',
+            ],
+          },
+          {
+            h: 'Saplama değişimi atölye işidir',
+            p: [
+              'Çoğu kırıcıda arka kafa, bazılarında akümülatör de basınçlı azot gazı tutar. Gaz kılavuzda yazan dolum takımıyla boşaltılmadan ve kırıcı yatırılıp desteklenmeden saplamalar gevşetilmez, sökülmez ve gövde açılmaz; aksi halde arka kafa fırlayıp ağır yaralanmaya yol açabilir. Saplamaları değiştirip tam değerine sıkmak atölye işidir; makine üzerinde operatöre düşen yalnızca somun sıkılığını kılavuzda yazan şekilde kontrol etmektir. Bir saplama koptuğunda diğerleri onun yükünü de taşımıştır; uzamış ya da gözle görülmeyen ince çatlaklar almış olabilirler. Bu yüzden saplamalar genellikle takım olarak, somun ve pullarıyla birlikte değiştirilir; kılavuzda yazanı esas alın. Kırıcınızın marka ve modeline uyan saplamaları saplama sayfasında arayabilirsiniz.',
+            ],
+          },
+        ],
+        links: ['saplama', 'alt-govde', 'burc'],
+      },
     },
   },
   en: {
@@ -452,6 +546,98 @@ export const GUIDES: Record<
           },
         ],
         links: ['alt-govde', 'burc', 'kama', 'saplama'],
+      },
+      'kirici-pistonu-neden-cizilir': {
+        title: 'Why does a breaker piston get scored?',
+        lead: 'The piston runs inside the cylinder with a very small clearance. Dirt in the oil, off-axis blows or overheating score the piston and the cylinder.',
+        sections: [
+          {
+            h: 'Contaminated or wrong hydraulic oil',
+            p: [
+              'Hydraulic oil lubricates the piston and the cylinder. Dust, metal particles or water in the oil score the surfaces like sandpaper. Dirt most often gets in through dirty hose ends and couplers when the breaker is fitted or removed, through new lines that were not flushed, or during a repair: clean and cap the hose ends while the breaker is off the machine, and flush new lines before the first run. Use the oil the manufacturer recommends. Breaker work heats and contaminates the oil much faster than digging, so change oil and filters at the intervals the manuals give for breaker work, not the normal digging intervals; fit a return filter to the breaker circuit if the manual asks for one.',
+            ],
+          },
+          {
+            h: 'Worn bushings, a bad tool and wrong greasing',
+            p: [
+              'A worn or wrong-fit bushing holds the tool at an angle; the piston strikes the tool’s impact end off-axis, is pushed sideways in the cylinder and scores on one side. A tool whose impact face is mushroomed, chipped or cracked, or that does not fit the breaker, damages the piston’s striking face, and the chips get into the seals and between piston and cylinder. Grease must go to the right place too: greased without the tool pressed fully in, or with too much grease, it fills the impact area and the piston presses it into the lower seals and the cylinder at every blow; the seals fail and the grease gets into the hydraulic oil. The tool, bushing and greasing guides give the details.',
+            ],
+          },
+          {
+            h: 'Blank firing and prying with the tool',
+            p: [
+              'When the tool strikes without resting on a surface, the piston runs past its normal stroke towards the front of the cylinder; the front head, the retainer key, the seals and the piston’s striking face take the blow. Damaged seals let dirt in and the oil film break down, and the piston scores. Prying with the tool puts a side load on it; the piston rubs on one side and scores.',
+            ],
+          },
+          {
+            h: 'Overheating, gas pressure and worn seals',
+            p: [
+              'Long work without breaks, poor cooling or a wrongly set hydraulic system heat the oil; thinned oil cannot keep the oil film between piston and cylinder, and metal rubs on metal. The limits for working pressure, oil flow and temperature are in the breaker’s manual. Wrong gas pressure upsets the piston’s movement, and a torn accumulator diaphragm puts debris into the oil; have the gas pressure checked at the intervals the manual gives. A worn dust seal lets dust and mud in; change the seals at the services the manual gives and whenever you see a leak.',
+            ],
+          },
+          {
+            h: 'Signs and checks',
+            p: [
+              'Loss of impact power, irregular blows, oil leaks, seals that keep failing and metal particles in the hydraulic oil or the filter can show a scored piston or cylinder. Check how clean the oil is, the filter, the clearance between tool and bushing, the greasing and the seals; working on with these signs makes the damage worse. Taking the piston out and inspecting its surface is workshop work.',
+            ],
+          },
+          {
+            h: 'Piston and cylinder are judged together',
+            p: [
+              'A scored piston usually marks the cylinder as well, and a new piston in a scored cylinder soon scores too. Whether piston and cylinder can be used again is decided by a workshop that measures and inspects the two together. Do not fit a new piston before the cause of the scoring has been removed. Search your breaker’s make and model on the piston page to find the piston that fits it.',
+            ],
+          },
+        ],
+        links: ['piston', 'burc', 'tips'],
+      },
+      'kirici-saplamasi-neden-kopar': {
+        title: 'Why do breaker tie rods break?',
+        lead: 'Tie rods hold the breaker body sections together and carry load at every blow. A broken rod usually points to a tightening, maintenance or operating fault.',
+        sections: [
+          {
+            h: 'Wrong or uneven tightening',
+            p: [
+              'Tie-rod nuts are tightened by the method the breaker manufacturer’s manual gives. An under-tightened rod lets gaps open between the body sections and takes a shock load at every blow; an over-tightened rod is strained from the start. If the nuts are tightened unevenly, only some of the rods carry the load and the most loaded one breaks first. Before tightening, clean the threads and lubricate them and the nut seating faces with the lubricant the manual names, because dry, dirty or rusty threads give much less clamping at the same tightening value. Tighten the nuts in the order the manual gives, crosswise and in stages.',
+            ],
+          },
+          {
+            h: 'Loose nuts, damaged threads and washers',
+            p: [
+              'Impact and vibration can loosen the nuts over time; a loose rod soon fatigues and the others carry its load. On a new or rebuilt breaker the joints settle in the first working hours; check the tightness of the nuts at the first check the manual gives and then at the manual’s intervals. A missing washer, a worn seating face or crushed, rusty or burred threads keep the nut from seating fully and the rod from being tensioned correctly. Do not reuse a rod or nut with damaged threads.',
+            ],
+          },
+          {
+            h: 'Side loads: blank firing, prying, worn bushings and buffers',
+            p: [
+              'In blank firing the energy of the blow goes into the breaker body and the tie rods. Prying with the tool, pushing rock sideways with it, or working at an angle with a worn tool and bushings puts side loads on the body; the rods then carry bending as well as tension. Worn damping buffers and wear plates in the housing let the body hammer and rattle inside it; check them at service.',
+            ],
+          },
+          {
+            h: 'Wrong gas pressure, excess oil pressure and down force',
+            p: [
+              'If the back-head or accumulator gas pressure is too low or too high, or the accumulator diaphragm is torn, pressure peaks and vibration pass into the body. Working pressure or oil flow above the breaker’s rating, high return-line back pressure and pressing down so hard that the machine lifts on the breaker also add load to the rods at every blow. Have the gas pressure checked at the intervals the manual gives, and keep pressure and oil flow to the manual’s values.',
+            ],
+          },
+          {
+            h: 'Fatigue and a rod that does not match the breaker',
+            p: [
+              'A tie rod is stretched a little and released at every blow. This repeated load opens small cracks over time; a break usually starts at the root of a thread or where the rod’s section changes, and comes without warning. A rod whose length, diameter, thread and material were not made for that breaker, even one of similar size, cannot be tightened correctly or does not stand up to impact.',
+            ],
+          },
+          {
+            h: 'Signs and checks',
+            p: [
+              'Gaps or play between the body sections, oil seeping at the joints, unusual knocking or rattling and loose nuts show a problem with the tie rods. Look at tool and bushing wear too; the side load on the rods often comes from there. If a rod has broken, do not run the breaker; the load moves to the other rods and they can break too.',
+            ],
+          },
+          {
+            h: 'Replacing tie rods is workshop work',
+            p: [
+              'On most breakers the back head, and on some the accumulator too, holds nitrogen gas under pressure. Tie rods are not loosened or removed, and the body is not taken apart, until the gas has been let out with the charging kit the manual names and the breaker has been laid flat and supported; otherwise the back head can be thrown off and cause serious injury. Replacing tie rods and tightening them to full value is workshop work; on the machine, the operator only checks nut tightness as the manual says. When one rod breaks, the others have carried its load too; they may be stretched or have fine cracks you cannot see. So tie rods are usually replaced as a set, with their nuts and washers; follow what the manual says. Search your breaker’s make and model on the tie rod page to find the rods that fit it.',
+            ],
+          },
+        ],
+        links: ['saplama', 'alt-govde', 'burc'],
       },
     },
   },
