@@ -165,18 +165,18 @@ Sonra Claude'a "yükledim, bakar mısın?" de → içerikleri inceler, doğru is
 
 ### Manuel yol — Slot referansı
 
-| App            | Dizin                                              | Slotlar                                                                                                                                                       |
-| -------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| breaker-parts  | `apps/breaker-parts/public/photos/uclar/`          | sivri-uc, yassi, konik, piramit, asfalt                                                                                                                       |
-| breaker-parts  | `apps/breaker-parts/public/photos/pistonlar/`      | piston-stack, piston-detay                                                                                                                                    |
-| breaker-parts  | `apps/breaker-parts/public/photos/burclar/`        | burclar-raf, burc-detay                                                                                                                                       |
-| breaker-parts  | `apps/breaker-parts/public/photos/kit/`            | seal-kit                                                                                                                                                      |
-| heat-treatment | `public/photos/isil-islem/` (repo root, symlinked) | `<ad>-640.webp` + `<ad>-1080.webp` (4:5), listed in dict `craft.photos`                                                                                       |
-| heat-treatment | `public/videos/isil-islem/` (repo root, symlinked) | `firin-hatti-loop-01.mp4` (720×1280) + `-wide.mp4` (1280×720) + `-poster.webp` / `-wide-poster.webp` = frame 189 (6.3 s), hero film (`HeroFilm.tsx` START_AT) |
-| parts-shop     | `apps/parts-shop/public/photos/`                   | stok fotoğrafları: her görsel `-sm` + `-lg` webp (4:3), adı yeni sürümde değişir                                                                              |
-| parts-shop     | `apps/parts-shop/public/photos/parca/`             | yedek parça render'ları (alt gövde, burç, kama, saplama, piston, kit); 3B modellerden üretilir, elle eklenmez                                                 |
-| parts-shop     | `apps/parts-shop/public/photos/tesis/`             | tesis/atölye fotoğrafları                                                                                                                                     |
-| parts-shop     | `apps/parts-shop/public/models/`                   | 3B modeller (GLB, sayfadaki "3B incele" ile açılır)                                                                                                           |
+| App            | Dizin                                              | Slotlar                                                                                                                                                      |
+| -------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| breaker-parts  | `apps/breaker-parts/public/photos/uclar/`          | sivri-uc, yassi, konik, piramit, asfalt                                                                                                                      |
+| breaker-parts  | `apps/breaker-parts/public/photos/pistonlar/`      | piston-stack, piston-detay                                                                                                                                   |
+| breaker-parts  | `apps/breaker-parts/public/photos/burclar/`        | burclar-raf, burc-detay                                                                                                                                      |
+| breaker-parts  | `apps/breaker-parts/public/photos/kit/`            | seal-kit                                                                                                                                                     |
+| heat-treatment | `public/photos/isil-islem/` (repo root, symlinked) | `<ad>-640.webp` + `<ad>-1080.webp` (4:5), listed in dict `craft.photos`                                                                                      |
+| heat-treatment | `public/videos/isil-islem/` (repo root, symlinked) | `firin-hatti-loop-02.mp4` (720×1280) + `-wide.mp4` (1280×720) + `-poster.webp` / `-wide-poster.webp` = frame 90 (3.0 s), hero film (`HeroFilm.tsx` START_AT) |
+| parts-shop     | `apps/parts-shop/public/photos/`                   | stok fotoğrafları: her görsel `-sm` + `-lg` webp (4:3), adı yeni sürümde değişir                                                                             |
+| parts-shop     | `apps/parts-shop/public/photos/parca/`             | yedek parça render'ları (alt gövde, burç, kama, saplama, piston, kit); 3B modellerden üretilir, elle eklenmez                                                |
+| parts-shop     | `apps/parts-shop/public/photos/tesis/`             | tesis/atölye fotoğrafları                                                                                                                                    |
+| parts-shop     | `apps/parts-shop/public/models/`                   | 3B modeller (GLB, sayfadaki "3B incele" ile açılır)                                                                                                          |
 
 `apps/breaker-parts/public/videos` → repo kökünde `public/videos/` symlink (paylaşılan).
 
