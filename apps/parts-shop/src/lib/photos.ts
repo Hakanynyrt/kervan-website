@@ -11,7 +11,7 @@ import type { PartKey } from './routes';
  * owner's rule): frames cut from the stock videos are not used; a group without one shows none.
  */
 export const STOCK_TIP_PHOTOS = [
-  '/photos/stok/uc-stok-01',
+  '/photos/stok/uc-sehpa-stok-01',
   '/photos/stok/uc-stok-03-v2',
   '/photos/stok/uc-stok-02-v2',
 ] as const;
@@ -23,11 +23,11 @@ export const STOCK_TIP_PHOTOS = [
  * JSON-LD. Data only: add a model by adding a line.
  */
 export const BREAKER_PHOTOS: Readonly<Record<string, readonly string[]>> = {
-  'furukawa/hb-20g': ['/photos/stok/hb-20g-uc-01', '/photos/stok/hb-20g-uc-03'],
+  'furukawa/hb-20g': ['/photos/stok/uc-palet-keski-sivri-01', '/photos/stok/hb-20g-uc-03'],
 };
 
 export const PART_PHOTOS: Record<PartKey, readonly string[]> = {
-  'alt-govde': [],
+  'alt-govde': ['/photos/parca/govde-stok-01'],
   burc: ['/photos/parca/burc-02'],
   kama: [],
   saplama: [],
@@ -2529,7 +2529,7 @@ function kitPartRender(k: RepairKit): PartRender {
 /** Our own plant photos (/yedek-parca "Tesisimiz"), 4:5, `-sm` 480 px and `-lg` 960 px. */
 export const PLANT_PHOTOS = [
   '/photos/tesis/cnc-isleme-01',
-  '/photos/tesis/isil-islem-holu-01',
+  '/photos/tesis/kizgin-sarj-firin-01',
   '/photos/tesis/burc-stok-02',
   '/photos/tesis/uc-stok-02',
 ] as const;

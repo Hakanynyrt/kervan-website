@@ -101,8 +101,9 @@ const SELLER_REF_LD = {
 /**
  * Link-preview pictures (1200×630, `public/og/`) of the part group pages: a studio render of the
  * shop's own 3D models (tamir-takimi: the shop's own kit render) with the group name and
- * "Görseller temsilidir" in Turkish, so the Turkish pages only (no EN variant yet). A group
- * missing here keeps no og:image. A changed picture gets a new file name.
+ * "Görseller temsilidir" in Turkish, so the Turkish group pages only (no EN variant yet). English
+ * group pages, and a Turkish group missing here, fall back to GENERAL_OG through ogOf. A changed
+ * picture gets a new file name.
  */
 const PART_OG: Partial<Record<PartKey, string>> = {
   'alt-govde': '/og/og-alt-govde-v2.jpg',
@@ -114,16 +115,23 @@ const PART_OG: Partial<Record<PartKey, string>> = {
   kama: '/og/og-kama-v1.jpg',
   'tamir-takimi': '/og/og-tamir-takimi-v1.jpg',
 };
-/** The same kind of picture for the home page, /kirici-ucu and /cok-satanlar (Turkish only). */
+/** The home page, /kirici-ucu and /cok-satanlar (Turkish): the owner's real photo of our tip stock
+ *  (2026-11, no text on it). */
 const PAGE_OG = {
-  home: '/og/og-anasayfa-v2.jpg',
-  list: '/og/og-kirici-ucu-v2.jpg',
-  popular: '/og/og-cok-satanlar-v2.jpg',
+  home: '/og/og-uc-stogu-v1.jpg',
+  list: '/og/og-uc-stogu-v1.jpg',
+  popular: '/og/og-uc-stogu-v1.jpg',
 } as const;
+/** Pages without a picture of their own (/yedek-parca, /marka/<make>, /palet, /yasal/*) and every
+ *  English page that would otherwise have none: the owner's real photo of tips on a stand, no text. */
+const GENERAL_OG = '/og/og-uc-sehpa-v1.jpg';
 const OG_SIZE = { width: 1200, height: 630 } as const;
-/** og:image head fields of one of our /og/ pictures on a Turkish page; nothing on English. */
-const ogOf = (lang: PageProps['lang'], file: string | undefined): Partial<HeadInput> =>
-  lang === 'tr' && file ? { ogImage: SITE + file, ogImageSize: OG_SIZE } : {};
+/** og:image head fields of one of our /og/ pictures: `file` on a Turkish page (the group pictures
+ *  carry Turkish text), the general photo on English pages and where `file` is missing. */
+const ogOf = (lang: PageProps['lang'], file: string | undefined): Partial<HeadInput> => ({
+  ogImage: SITE + (lang === 'tr' && file ? file : GENERAL_OG),
+  ogImageSize: OG_SIZE,
+});
 
 /** Meta descriptions longer than this lose the alias (Google cuts snippets around 155–160). */
 const DESC_MAX = 155;
@@ -219,16 +227,18 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
         ...page,
         title: m.brandTitle(model.brand),
         description: m.brandDesc(model.brand, model.rows.length),
+        ...ogOf(lang, GENERAL_OG),
         jsonLd: crumbs([partsCrumb, tipsCrumb], model.brand),
       };
     case 'cart':
-      return { ...page, title: m.cartTitle };
+      return { ...page, title: m.cartTitle, ...ogOf(lang, GENERAL_OG) };
     case 'legal': {
       const d = LEGAL[lang][model.doc];
       return {
         ...page,
         title: `${d.title} | ${m.brand}`,
         description: d.desc,
+        ...ogOf(lang, GENERAL_OG),
         jsonLd: crumbs([], t.legal.nav),
       };
     }
@@ -276,6 +286,7 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
         ...page,
         title: m.partsTitle,
         description: m.partsDesc,
+        ...ogOf(lang, GENERAL_OG),
         jsonLd: crumbs([], t.parts.title),
       };
     case 'part': {

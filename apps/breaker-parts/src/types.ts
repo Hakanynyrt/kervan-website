@@ -371,6 +371,9 @@ export interface DictBlock {
     company: string;
     location: string;
   };
+  /** TR/EN alt text of a product's real photos, by product slug (`grid`: the 4:3 card picture,
+   *  `detail`: the product page picture). Products not listed use their name. */
+  productPhotoAlt: Record<string, { grid: string; detail: string }>;
   productDetail: {
     materialsLabel: string;
     sizesLabel: string;
@@ -466,6 +469,10 @@ export interface Product {
   /** Optional `srcset` of the main image (same picture at more widths), e.g.
    *  `/photos/parcalar/kama-1024-v2.webp 1024w, /photos/parcalar/kama-1536-v2.webp 1536w`. */
   imageSrcSet?: string;
+  /** Optional portrait (3:4) picture for the product page, relative to /public; else `image`. */
+  detailImage?: string;
+  /** Optional `srcset` of `detailImage`. */
+  detailImageSrcSet?: string;
   /** Optional 1200×630 link-preview picture (og:image) relative to /public; else `image`. */
   ogImage?: string;
   /** True when `image` is a studio render of a 3D model (not a photo): pages then caption it

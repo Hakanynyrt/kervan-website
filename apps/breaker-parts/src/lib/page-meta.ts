@@ -25,7 +25,8 @@ import type { Lang } from '../types';
 ═══════════════════════════════════════════════════════════════════════ */
 
 const SITE = KERVAN_BREAKER_URL;
-const OG_IMAGE = `${SITE}/og.png`;
+/** Site-wide link preview (1200×630): our own chisels on a pallet. A changed picture gets a new file name. */
+const OG_IMAGE = `${SITE}/og-keski-palet-01.jpg`;
 
 /** Absolute URL of a neutral path in a language. */
 export const absUrl = (path: string, lang: Lang) => `${SITE}${localePath(path, lang)}`;

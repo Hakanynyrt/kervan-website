@@ -463,7 +463,7 @@ export function PlantPhotos({
             alt={pl.items[HALL].alt}
             loading="lazy"
             decoding="async"
-            className="block aspect-[3/2] h-auto w-full rounded-sm bg-bg-warm object-cover object-[50%_66%] lg:aspect-[2/1]"
+            className="block aspect-[3/2] h-auto w-full rounded-sm bg-bg-warm object-cover object-[50%_58%] lg:aspect-[2/1]"
           />
           <figcaption className="mt-2 text-[13px] text-ink-mid">
             {pl.items[HALL].caption}

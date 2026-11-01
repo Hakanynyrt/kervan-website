@@ -1105,8 +1105,8 @@ export const DICT: Record<Lang, Dict> = {
             alt: 'Kervan tesisinde CNC tezgâhında kırıcı ucunun kama kanalının işlenmesi',
           },
           {
-            caption: 'Isıl işlem holü ve fırınlarımız',
-            alt: 'Kervan ısıl işlem holünde kuyu tipi fırınlar ve işlenmiş parçalar',
+            caption: 'Isıl işlem: fırından çıkan kızgın şarj',
+            alt: 'Kervan ısıl işlem holünde kuyu tipi fırından vinçle çıkarılan kızgın parçalar',
           },
           { caption: 'Raflardaki burç stoğumuz', alt: 'Kervan tesisinde raflarda kırıcı burçları' },
           {
@@ -2094,8 +2094,8 @@ export const DICT: Record<Lang, Dict> = {
             alt: 'Machining the retainer-key slot of a breaker tool on a CNC machine at the Kervan plant',
           },
           {
-            caption: 'Heat-treatment hall and furnaces',
-            alt: 'Pit furnaces and machined parts in the Kervan heat-treatment hall',
+            caption: 'Heat treatment: a glowing charge out of the furnace',
+            alt: 'Glowing parts lifted by crane out of a pit furnace in the Kervan heat-treatment hall',
           },
           {
             caption: 'Bushing stock on the shelves',
