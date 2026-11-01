@@ -47,7 +47,7 @@ const KIT_V = '03';
 /** `/photos/parca/<stem>-<view>-<NN>`: the stem and view of a published render picture. */
 const VERSIONED = /^\/photos\/parca\/(.+)-(vitrin|on|arka|yan|kesit|pencere)-\d\d$/;
 /** A re-rendered picture keeps its name with the new file version from `REDRAWN` (images are cached immutable). */
-const redrawn = (base: string): string => {
+export const redrawn = (base: string): string => {
   const m = VERSIONED.exec(base);
   const v = m && REDRAWN[m[1]];
   return v ? `/photos/parca/${m[1]}-${m[2]}-${v}` : base;

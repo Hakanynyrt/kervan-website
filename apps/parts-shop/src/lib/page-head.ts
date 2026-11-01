@@ -10,7 +10,7 @@ import {
   type HeadInput,
 } from '@kervan/seo';
 import { DICT } from './dict';
-import { GUIDES, GUIDES_PATH } from './guides';
+import { GUIDE_PICS, GUIDES, GUIDES_PATH, guidePicAbs, shownFigures } from './guides';
 import { LEGAL, legalPath, SELLER } from './legal';
 import { localePath } from './locale-path';
 import { joinedSpelling } from './model-aliases';
@@ -253,6 +253,14 @@ export function pageHead({ lang, path, model }: PageProps): HeadInput {
             '@type': 'Article',
             headline: d.title,
             description: d.lead,
+            // The article's own pictures (guides.ts), in page order.
+            image: [
+              ...new Set(
+                shownFigures(d, model.tips).map((f) =>
+                  guidePicAbs(GUIDE_PICS[f.pic], SITE, model.tips[f.pic]),
+                ),
+              ),
+            ],
             inLanguage: lang,
             url,
             mainEntityOfPage: url,

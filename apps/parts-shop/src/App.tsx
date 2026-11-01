@@ -59,7 +59,7 @@ export default function App({ lang, path, model, fx }: PageProps) {
       {model.kind === 'family' && <Family model={model} path={path} fx={fx} lang={lang} t={t} />}
       {model.kind === 'cart' && <Cart fx={fx} lang={lang} t={t} />}
       {model.kind === 'legal' && <Legal doc={model.doc} lang={lang} t={t} />}
-      {model.kind === 'guide' && <Guide doc={model.doc} lang={lang} t={t} />}
+      {model.kind === 'guide' && <Guide doc={model.doc} tips={model.tips} lang={lang} t={t} />}
       {model.kind === 'notFound' && <NotFound lang={lang} t={t} />}
     </Layout>
   );
