@@ -1,10 +1,14 @@
 name: Shop daily rebuild
 
-# The shop shows TRY prices at the CBRT USD selling rate of its build day: rebuild it every
-# morning (Istanbul 06:47) so the rate stays current. Manual runs work too.
+# Rebuild the shop every morning (Istanbul 06:47) so the catalogue stays current. The TRY prices
+# use the week's CBRT USD selling rate (the ISO week's Monday bulletin, scripts/fx.ts). TCMB
+# publishes it at about 15:30 Istanbul, so until then Monday keeps the previous week's rate; the
+# extra Monday 16:07 run switches to the new week's rate the same afternoon, the one change of the
+# week. Manual runs work too.
 on:
   schedule:
     - cron: '47 3 * * *'
+    - cron: '7 13 * * 1'
   workflow_dispatch:
 
 jobs:

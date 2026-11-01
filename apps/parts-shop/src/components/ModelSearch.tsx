@@ -21,7 +21,7 @@ import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
 import { LIST_PATH, type BrandLink, type BreakerCard } from '../lib/routes';
 import type { Lang } from '../types';
-import { fmtTry, fmtUsd } from '../lib/price';
+import { fmtTry, fmtTryCents, fmtUsd, grossTryCents, leadsGross } from '../lib/price';
 import { cardHref, cardKey, cardName, cardPic } from '../lib/card';
 import { replaceSearch } from '../lib/url-state';
 import { chipClass, MissingModel } from './Bits';
@@ -482,9 +482,10 @@ function Cards({
 }
 
 /**
- * A card's price (brand pages, the home's "Ürettiklerimizden"): the net USD list price or its span,
- * "+ vergiler" / "export price" next to it, the TL amount at the CBRT rate under it; "Fiyat için
- * sorun" without a price.
+ * A card's price (brand pages, the home's "Ürettiklerimizden"), or its span. Turkish pages with a
+ * rate: the tax-inclusive TL price "(vergiler dahil)" first, the net USD price "+ vergiler" under
+ * it (owner, G2, 2026-11-01). English: the net USD price "export price", the TL amount under it.
+ * "Fiyat için sorun" without a price.
  */
 export function CardPrice({
   price,
@@ -497,15 +498,31 @@ export function CardPrice({
   lang: Lang;
   t: Dict;
 }) {
+  const usd = price
+    ? price[0] === price[1]
+      ? fmtUsd(price[0], lang)
+      : `${fmtNum(price[0] / 100, lang)}–${fmtUsd(price[1], lang)}`
+    : '';
+  if (price && leadsGross(lang, fx)) {
+    const lo = grossTryCents(price[0], fx) ?? 0;
+    const hi = grossTryCents(price[1], fx) ?? 0;
+    return (
+      <span className="mt-auto pt-1 text-sm text-ink tabular-nums">
+        <span className="font-semibold">
+          {lo === hi ? fmtTryCents(lo, lang) : `${fmtNum(lo / 100, lang)}–${fmtTryCents(hi, lang)}`}
+        </span>{' '}
+        <span className="text-xs text-ink-soft">{t.price.incl}</span>
+        <span className="block text-ink-mid">
+          {usd} <span className="text-xs text-ink-soft">{t.list.priceNote}</span>
+        </span>
+      </span>
+    );
+  }
   return (
     <span className="mt-auto pt-1 text-sm text-ink tabular-nums">
       {price ? (
         <>
-          <span className="font-semibold">
-            {price[0] === price[1]
-              ? fmtUsd(price[0], lang)
-              : `${fmtNum(price[0] / 100, lang)}–${fmtUsd(price[1], lang)}`}
-          </span>{' '}
+          <span className="font-semibold">{usd}</span>{' '}
           <span className="text-xs text-ink-soft">{t.list.priceNote}</span>
           {fx && (
             <span className="block text-ink-mid">

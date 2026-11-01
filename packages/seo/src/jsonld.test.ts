@@ -75,6 +75,35 @@ test('shopProduct: seller and return policy on the offer, never ratings', () => 
   assert.equal('shippingDetails' in offer, false);
 });
 
+test('shopProduct: the currency and VAT flag of the shown price (TRY gross, USD net)', () => {
+  const offerOf = (priceCurrency: 'TRY' | 'USD', valueAddedTaxIncluded: boolean) =>
+    (
+      shopProduct({
+        url: `${URL}/p`,
+        name: 'Tip',
+        brand: 'Maker',
+        offer: { price: '12.00', priceCurrency, valueAddedTaxIncluded },
+      }) as { offers: Record<string, unknown> }
+    ).offers;
+  const tr = offerOf('TRY', true);
+  assert.equal(tr.priceCurrency, 'TRY');
+  assert.equal(tr.price, '12.00');
+  assert.deepEqual(tr.priceSpecification, {
+    '@type': 'UnitPriceSpecification',
+    price: '12.00',
+    priceCurrency: 'TRY',
+    valueAddedTaxIncluded: true,
+  });
+  assert.equal('shippingDetails' in tr, false);
+  const en = offerOf('USD', false);
+  assert.equal(en.priceCurrency, 'USD');
+  assert.equal(
+    (en.priceSpecification as { valueAddedTaxIncluded: boolean }).valueAddedTaxIncluded,
+    false,
+  );
+  assert.equal('shippingDetails' in en, false);
+});
+
 test('shopProduct / productWebPage: no alternateName when none is given', () => {
   assert.equal('alternateName' in shopProduct({ url: URL, name: 'n', brand: 'b' }), false);
   const w = productWebPage({ url: URL, name: 'n', brand: 'b', alternateName: ['m'] });

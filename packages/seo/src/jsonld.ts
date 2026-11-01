@@ -237,8 +237,10 @@ interface BuildShopProductOpts {
   offer?: {
     /** Decimal string, e.g. "125.00". */
     price: string;
-    priceCurrency: string;
-    /** The shown price excludes VAT. */
+    /** The currency of the shown price: TRY on the shop's Turkish pages (tax-inclusive), USD on
+     *  the English ones (net export price). */
+    priceCurrency: 'TRY' | 'USD';
+    /** Whether the shown price includes VAT (written as a UnitPriceSpecification). */
     valueAddedTaxIncluded?: boolean;
     /** The seller, written out (its full Organization node sits on the home page only, and
      *  Google does not follow an `@id` to another page). */

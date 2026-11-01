@@ -167,7 +167,8 @@ export interface Dict {
     /** Badge on a result row whose breaker has tools with dust grooves; link to the section. */
     groovedBadge: string;
     /** Brand page cards: net list price (or span) and the note under it; no price yet. */
-    /** Next to a card's price: "+ vergiler" in Turkish (net prices), "export price" in English. */
+    /** Next to a card's net USD price: "+ vergiler" in Turkish (under the tax-inclusive TL price,
+     *  `price.incl`), "export price" in English. */
     priceNote: string;
     priceAsk: string;
     /** On a card whose picture is another breaker's tip. */
@@ -294,9 +295,14 @@ export interface Dict {
     add: string;
     added: string;
     goCart: string;
-    /** Second, smaller figure next to the net price. */
-    /** After the price on item pages ("+ vergiler"; empty in English). */
+    /** After the net USD price ("+ vergiler"; empty in English). */
     plus: string;
+    /** After the tax-inclusive TL price that leads Turkish pages ("(vergiler dahil)"; owner, G2,
+     *  2026-11-01); empty in English, whose pages keep the net export price. */
+    incl: string;
+    /** The unit price in an order message: the gross TL price (Turkish pages with a rate) and
+     *  the net USD price. */
+    unit: (gross: string | null, usd: string) => string;
     /** Under the price on item pages and the cart: empty in Turkish, the export / shipping note in English. */
     note: string;
   };
@@ -310,6 +316,8 @@ export interface Dict {
     product: string;
     qty: string;
     unit: string;
+    /** The unit price label when the lines show the tax-inclusive TL price (Turkish, with a rate). */
+    unitGross: string;
     lineTotal: string;
     ask: string;
     total: string;
@@ -692,7 +700,7 @@ export const DICT: Record<Lang, Dict> = {
       },
       made: {
         title: 'Ürettiklerimizden',
-        lead: 'Ürettiğimiz uç ve parçalardan bir seçki. Fiyatlar nettir; TL karşılığı altında.',
+        lead: 'Ürettiğimiz uç ve parçalardan bir seçki.',
       },
       order: {
         title: 'Sipariş talebi',
@@ -812,7 +820,7 @@ export const DICT: Record<Lang, Dict> = {
       quoteText: (name, type, code, qty, url) =>
         `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet için fiyat teklifi almak istiyorum.\n${url}`,
       orderText: (name, type, code, qty, price, url) =>
-        `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet sipariş vermek istiyorum (birim ${price} + vergiler).\n${url}`,
+        `Merhaba, ${name} için ${type} kırıcı ucu${code ? ` (${code})` : ''}, ${qty} adet sipariş vermek istiyorum (birim ${price}).\n${url}`,
       partsTitle: 'Bu kırıcı için ürettiğimiz parçalar',
       renderAlt: (name, type) => `${name} ${type} kırıcı ucu`,
       sample: (name) => `Temsili görsel: ${name} ucu`,
@@ -880,6 +888,9 @@ export const DICT: Record<Lang, Dict> = {
       added: 'Palete yüklendi',
       goCart: 'Palete git',
       plus: '+ vergiler',
+      incl: '(vergiler dahil)',
+      unit: (gross, usd) =>
+        gross ? `${gross} vergiler dahil; ${usd} + vergiler` : `${usd} + vergiler`,
       note: '',
     },
     cart: {
@@ -908,10 +919,11 @@ export const DICT: Record<Lang, Dict> = {
       product: 'Ürün',
       qty: 'Adet',
       unit: 'Birim fiyat (+ vergiler)',
+      unitGross: 'Birim fiyat (vergiler dahil)',
       lineTotal: 'Tutar',
       ask: 'Fiyat sorulacak',
       total: 'Toplam (vergiler dahil, kargo hariç)',
-      subtotal: 'Ara toplam',
+      subtotal: 'Ara toplam (vergiler hariç)',
       vat: (pct) => `Vergiler (%${pct})`,
       totalNote: 'Fiyatı sorulacak ürünler toplama dahil değildir.',
       remove: (name) => `${name} ürününü paletten indir`,
@@ -1488,7 +1500,7 @@ export const DICT: Record<Lang, Dict> = {
         mail: 'E-posta ile sipariş ver',
         delivery: 'Stoktan aynı gün kargo',
         text: (part, breaker, qty, price, url) =>
-          `Merhaba, ${breaker} ${part}, ${qty} adet sipariş vermek istiyorum (birim ${price} + vergiler).\n${url}`,
+          `Merhaba, ${breaker} ${part}, ${qty} adet sipariş vermek istiyorum (birim ${price}).\n${url}`,
         other: 'Başka bir kırıcı için teklif isteyin',
         withNuts: 'Somunlarıyla birlikte, takım olarak',
       },
@@ -1870,6 +1882,8 @@ export const DICT: Record<Lang, Dict> = {
       added: 'Added to cart',
       goCart: 'Go to cart',
       plus: '',
+      incl: '',
+      unit: (_gross, usd) => usd,
       note: 'Export price: product price only, shipping is not included. Orders delivered within Türkiye are invoiced with Turkish taxes.',
     },
     cart: {
@@ -1898,6 +1912,7 @@ export const DICT: Record<Lang, Dict> = {
       product: 'Product',
       qty: 'Qty',
       unit: 'Unit price (export)',
+      unitGross: 'Unit price (export)',
       lineTotal: 'Amount',
       ask: 'Price on request',
       total: 'Total (export price, excl. shipping)',

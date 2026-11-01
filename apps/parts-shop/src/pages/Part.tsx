@@ -333,6 +333,7 @@ export default function Part({
                               fx={ctx.fx}
                               lang={lang}
                               plus={t.price.plus}
+                              incl={t.price.incl}
                               note={priceNote(r.kind, t)}
                               className="px-2.5 pt-1 text-sm"
                             />
@@ -474,6 +475,7 @@ function ListedCard({ l, ctx }: { l: ListedPart; ctx: Ctx }) {
           fx={ctx.fx}
           lang={lang}
           plus={t.price.plus}
+          incl={t.price.incl}
           note={l.type === 'BOY_SAPLAMA' ? t.parts.order.withNuts : null}
           className="mt-1 text-base"
         />
@@ -499,7 +501,7 @@ function ListedCard({ l, ctx }: { l: ListedPart; ctx: Ctx }) {
             {t.price.add}
           </button>
           <a
-            href={whatsappHref(partOrderText(t, lang, label, l.breaker, 1, l.cents, path))}
+            href={whatsappHref(partOrderText(t, lang, label, l.breaker, 1, l.cents, path, ctx.fx))}
             {...ORDER_CONVERSION}
             className={link}
           >
@@ -729,6 +731,7 @@ export function RenderFigure({
               fx={ctx.fx}
               lang={ctx.lang}
               plus={ctx.t.price.plus}
+              incl={ctx.t.price.incl}
               note={priceNote(r.kind, t)}
               className="mt-1 text-base"
             />

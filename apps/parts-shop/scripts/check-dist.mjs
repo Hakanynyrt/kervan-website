@@ -12,11 +12,16 @@
 // - robots.txt names the sitemap index, which lists only shipped children; <lastmod> dates are
 //   valid, not in the future and not one date for every URL;
 // - every og:image in /og/ on this host is in dist;
+// - every JSON-LD Offer matches the price the page leads with (`data-offer`): on Turkish pages
+//   the tax-inclusive TL price, TRY, valueAddedTaxIncluded true (with the build's CBRT rate; USD
+//   net without one); on English pages the net USD price, valueAddedTaxIncluded false. Counts only,
+//   never a price, in the output;
 // - at most MAX_FILES files (Pages limit).
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { checkOffer, offersIn } from './offer-check.mjs';
 
 const DIST = path.join(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), 'dist');
 const FORBIDDEN = [
@@ -145,6 +150,11 @@ const pageUrlOfHref = (href) => {
   return `${SITE}${h.replace(/\/$/, '')}`;
 };
 
+// The build's CBRT rate (build-catalog.ts): with it the Turkish offers are in TRY.
+const CATALOG = path.join(DIST, '..', '.catalog', 'catalog.json');
+const hasFx = fs.existsSync(CATALOG) && !!JSON.parse(fs.readFileSync(CATALOG, 'utf8')).fx;
+const offerCounts = { TRY: 0, USD: 0 };
+
 let pages = 0;
 let indexable = 0;
 const indexableUrls = [];
@@ -160,12 +170,20 @@ for (const f of files) {
       if (u) out.add(u);
     }
     if (!s.includes('id="kv-page"')) problems.push(`${rel}: no page props`);
+    const offers = [];
     for (const m of s.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
       try {
-        JSON.parse(m[1]);
+        offersIn(JSON.parse(m[1]), offers);
       } catch {
         problems.push(`${rel}: JSON-LD does not parse`);
       }
+    }
+    if (offers.length) {
+      const en = rel.replace(/\\/g, '/').startsWith('en/');
+      const shown = [...s.matchAll(/data-offer=""[^>]*>([^<]*)</g)].map((m) => m[1]);
+      const r = checkOffer(offers, shown, en, hasFx);
+      if (r.problem) problems.push(`${rel}: ${r.problem}`);
+      else offerCounts[r.currency]++;
     }
     // A link-preview picture of our own /og/ folder must ship (public/og/, named in page-head.ts).
     for (const m of s.matchAll(/<meta property="og:image" content="([^"]+)"/g))
@@ -247,6 +265,9 @@ if (problems.length) {
   );
   process.exit(1);
 }
+process.stdout.write(
+  `check-dist: offers match the shown price: ${offerCounts.TRY} in TRY (Turkish, taxes included), ${offerCounts.USD} in USD (net)\n`,
+);
 process.stdout.write(
   `check-dist: ${pages} pages ok (${indexable} indexable, all in the sitemaps, ${lastmods.length} with lastmod; reachable by links except the part items warned about), ${total} files\n`,
 );
