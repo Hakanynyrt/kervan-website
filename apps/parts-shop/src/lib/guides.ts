@@ -1,10 +1,14 @@
 /**
  * "Rehber": short how-to articles for questions buyers search for (owner, 2026-10-27, SEO plan
- * item 4). General workshop facts only: no figures, references or claims we cannot stand behind;
+ * item 4). General workshop facts only: no numbers, references or claims we cannot stand behind;
  * limits always point to the breaker's own manual. Each article links the part groups it is about.
  * The owner approves every text before it is published.
  */
+import { photoImg, photoImgAbs, cardSet, photoSet, type PhotoSize } from './photo-url';
+import { redrawn, STOCK_TIP_PHOTOS } from './photos';
+import type { PublicCatalog } from '@kervan/tips';
 import type { PartKey } from './routes';
+import { tipImg, tipImgAbs } from './tip-img';
 import type { Lang } from '../types';
 
 export const GUIDE_KEYS = [
@@ -22,11 +26,125 @@ export type GuideKey = (typeof GUIDE_KEYS)[number];
 export const GUIDES_PATH = '/rehber';
 export const guidePath = (k: GuideKey): string => `${GUIDES_PATH}/${k}`;
 
+/**
+ * A picture in an article: our own stock photo, a part render (`/photos/parca`, R2 on main via
+ * photo-url.ts) or a tip render (`tip`, tip-img.ts). Own pictures only, with no
+ * legible model codes, shelf labels, chalk numbers or brand text in frame (owner, 2026-11-01).
+ */
+export interface GuidePic {
+  /** Published base (`<base>-<size>.webp`), or `tip`: a tip render named by its catalog code. */
+  base?: string;
+  tip?: TipRef;
+  /** Intrinsic size of the largest file (layout without shift). */
+  w: number;
+  h: number;
+  /** srcset: 'card' = a render hero (`-xs`/`-md`/`-lg`, cardSet), else the published sizes. */
+  set?: 'card' | readonly [PhotoSize, number][];
+  /** Transparent render: stands on the light studio sweep (`bg-pstage`). */
+  render?: true;
+}
+
+const hero = (base: string): GuidePic => ({
+  base: redrawn(base),
+  w: 1600,
+  h: 900,
+  set: 'card',
+  render: true,
+});
+/**
+ * A tip render by catalog code, never by render key: keys change with every re-render
+ * (geometry, RENDER_VERSION, renderFixes), so the key is looked up from the built catalog
+ * (`s.image` / `f.imageRear`, set by scripts/prerender.mjs) into the page model (`guideTipKeys`).
+ * A picture the catalog has no render for is left out of the page and its JSON-LD.
+ */
+export type TipRef = { sku: string } | { familyRear: string };
+const tipPic = (tip: TipRef): GuidePic => ({ tip, w: 800, h: 533, render: true });
+
+/** The pictures the articles use (owner-approved plan, 2026-11-01). */
+export const GUIDE_PICS = {
+  stock: {
+    base: STOCK_TIP_PHOTOS[1],
+    w: 960,
+    h: 720,
+    set: [
+      ['sm', 480],
+      ['lg', 960],
+    ],
+  },
+  tipSlot: tipPic({ familyRear: 'KU135-05' }),
+  tipChisel: tipPic({ sku: 'KU135-05-C' }),
+  tipMoil: tipPic({ sku: 'KU135-05-M' }),
+  key: hero('/photos/parca/kama-mtb-150-vitrin-01'),
+  retainerPin: hero('/photos/parca/pim-mtb-210-ii-retainer-pin-vitrin-01'),
+  headSection: {
+    base: redrawn('/photos/parca/alt-govde-furukawa-f-22-burclu-montaj-kesit-01'),
+    w: 960,
+    h: 720,
+    render: true,
+  },
+  headPlain: hero('/photos/parca/alt-govde-mtb-700-vitrin-01'),
+  toolBushing: hero('/photos/parca/burc-furukawa-f-22-kafa-vitrin-01'),
+  bushingSet: hero('/photos/parca/burc-takim-rammer-e64-vitrin-01'),
+  piston: hero('/photos/parca/piston-mtb-210-ii-vitrin-01'),
+  rodSet: hero('/photos/parca/saplama-takim-mtb-150-vitrin-01'),
+  /** The home page's exploded view (1600 x 346): shown across the full text width. */
+  exploded: {
+    base: '/photos/parca/acilis-acik-05',
+    w: 1600,
+    h: 346,
+    set: [
+      ['sm', 1000],
+      ['lg', 1600],
+    ],
+    render: true,
+  },
+} satisfies Record<string, GuidePic>;
+export type GuidePicKey = keyof typeof GUIDE_PICS;
+
+/** Current render key of each tip picture (`GuidePic.tip`) in this catalog; absent = no render. */
+export type GuideTipKeys = Partial<Record<GuidePicKey, string>>;
+export function guideTipKeys(c: PublicCatalog): GuideTipKeys {
+  const out: GuideTipKeys = {};
+  for (const [k, p] of Object.entries(GUIDE_PICS) as [GuidePicKey, GuidePic][]) {
+    const t = p.tip;
+    if (!t) continue;
+    const key =
+      'sku' in t
+        ? c.families.flatMap((f) => f.skus).find((s) => s.code === t.sku)?.image
+        : c.families.find((f) => f.code === t.familyRear)?.imageRear;
+    if (key) out[k] = key;
+  }
+  return out;
+}
+/** The figures that can be shown: tip pictures only when the catalog has their render. */
+export const shownFigures = (d: Guide, tips: GuideTipKeys): GuideFigure[] =>
+  d.figures.filter((f) => !(GUIDE_PICS[f.pic] as GuidePic).tip || tips[f.pic]);
+
+/** The picture's `src` (largest file); `tip` = its render key from `guideTipKeys`. */
+export const guidePicSrc = (p: GuidePic, tip?: string): string =>
+  tip ? tipImg(tip) : photoImg(p.base, 'lg');
+/** Its srcset, or undefined when one file is published. */
+export const guidePicSet = (p: GuidePic): string | undefined =>
+  p.set === 'card' ? cardSet(p.base) : p.set ? photoSet(p.base, ...p.set) : undefined;
+/** Absolute URL for the Article JSON-LD `image`. */
+export const guidePicAbs = (p: GuidePic, site: string, tip?: string): string =>
+  tip ? tipImgAbs(tip, site) : photoImgAbs(p.base, 'lg', site);
+
+export interface GuideFigure {
+  pic: GuidePicKey;
+  /** Where it stands: after the lead, or after the section with this index. */
+  after: 'lead' | number;
+  caption: string;
+  alt: string;
+}
+
 export interface Guide {
   title: string;
   /** Meta description and the lead under the title. */
   lead: string;
   sections: { h: string; p: readonly string[] }[];
+  /** Pictures, in page order; TR and EN list the same pictures in the same places. */
+  figures: readonly GuideFigure[];
   /** Part groups the article is about ('tips' for the tip pages). */
   links: readonly (PartKey | 'tips')[];
 }
@@ -69,6 +187,26 @@ export const GUIDES: Record<
             ],
           },
         ],
+        figures: [
+          {
+            pic: 'stock',
+            after: 0,
+            caption: 'Atölyemizde stoktaki yeni kırıcı uçları',
+            alt: 'Kervan atölyesinde sehpalara dizilmiş, tam boydaki yeni keski ve sivri kırıcı uçları',
+          },
+          {
+            pic: 'tipSlot',
+            after: 1,
+            caption: 'Ucun arka ucu ve kama kanalı: piston bu yüze vurur',
+            alt: 'Kırıcı ucunun arka ucunu ve kama kanalını yakından gösteren 3D görsel',
+          },
+          {
+            pic: 'key',
+            after: 3,
+            caption: 'Kırıcı kaması: uç değişiminde kama da kontrol edilir',
+            alt: 'Hidrolik kırıcı kaması, açık zemin üzerinde 3D görünüş',
+          },
+        ],
         links: ['tips', 'burc', 'kama'],
       },
       'kirici-burcu-ne-zaman-degisir': {
@@ -100,6 +238,29 @@ export const GUIDES: Record<
             ],
           },
         ],
+        figures: [
+          {
+            pic: 'headSection',
+            after: 0,
+            caption:
+              'Alt gövde kesiti: burçlar gövdedeki yuvalarına oturur, uç bu burçların içinde çalışır.',
+            alt: 'Burçları takılı kırıcı alt gövdesinin kesit görünüşü; turuncu gövde içinde sarı renkli burçlar ve uç boşluğu',
+          },
+          {
+            pic: 'toolBushing',
+            after: 1,
+            caption:
+              'Kafa burcu. Aşınma burcun iç yüzeyinde görülür: ovalleşme, çizik ya da yanık izi.',
+            alt: 'Kırıcı kafa burcunun 3D görseli; iç çapı görünen, basamaklı flanşlı silindirik burç',
+          },
+          {
+            pic: 'bushingSet',
+            after: 2,
+            caption:
+              'Burç takımı: burçlar ve pimi birlikte. Biri değişirken diğerleri de kontrol edilir.',
+            alt: 'Kırıcı burç takımı: iki büyük burç, bir pim ve bir küçük burç yan yana, 3D görsel',
+          },
+        ],
         links: ['burc', 'tips', 'alt-govde'],
       },
       'kirici-kamasi-neden-kirilir': {
@@ -129,6 +290,26 @@ export const GUIDES: Record<
             p: [
               'Kırıcınızın modeline uyan kamayı ve tutucu pimini birlikte kullanın. Eğilmiş ya da çatlamış kamayı düzeltip yeniden takmayın.',
             ],
+          },
+        ],
+        figures: [
+          {
+            pic: 'key',
+            after: 'lead',
+            caption: 'Kırıcı kaması: ucu alt gövdede tutan parça.',
+            alt: 'Hidrolik kırıcı kaması, açık zemin üzerinde 3D görünüş',
+          },
+          {
+            pic: 'tipSlot',
+            after: 1,
+            caption: 'Kırıcı ucunun kama kanalı. Kama değişiminde bu kanalı da kontrol edin.',
+            alt: 'Kırıcı ucunun kama kanalı ve arka ucu, yakından görünüş',
+          },
+          {
+            pic: 'retainerPin',
+            after: 3,
+            caption: 'Kama tutucu pimi. Kamayla birlikte değiştirilir.',
+            alt: 'Kırıcı kamasını yerinde tutan silindirik pim, 3D görünüş',
           },
         ],
         links: ['kama', 'tips', 'burc'],
@@ -168,6 +349,26 @@ export const GUIDES: Record<
             ],
           },
         ],
+        figures: [
+          {
+            pic: 'tipChisel',
+            after: 0,
+            caption: 'Keski uç: yassı ağız darbeyi bir çizgi boyunca verir.',
+            alt: 'Yassı ağızlı keski kırıcı ucu, 3D görsel',
+          },
+          {
+            pic: 'tipMoil',
+            after: 1,
+            caption: 'Sivri uç: darbeyi tek noktaya toplar.',
+            alt: 'Sivri uçlu kırıcı ucu, 3D görsel',
+          },
+          {
+            pic: 'stock',
+            after: 3,
+            caption: 'Stoğumuzdaki keski ve sivri uçlar',
+            alt: 'Kervan atölyesinde sehpalara dizilmiş çok sayıda keski ve sivri kırıcı ucu',
+          },
+        ],
         links: ['tips', 'burc'],
       },
       'kirici-yaglamasi-nasil-yapilir': {
@@ -205,6 +406,27 @@ export const GUIDES: Record<
             ],
           },
         ],
+        figures: [
+          {
+            pic: 'tipSlot',
+            after: 0,
+            caption: 'Kırıcı ucunun gövdesi ve kama kanalı: uç değişiminde gres sürülen yüzeyler.',
+            alt: 'Kırıcı ucunun kama kanalı ve arka ucunun yakın görünüşü, 3D render',
+          },
+          {
+            pic: 'headSection',
+            after: 1,
+            caption:
+              'Burçları takılı alt gövdenin kesiti: gres uç ile burçların arasına gitmelidir.',
+            alt: 'Burçları takılı hidrolik kırıcı alt gövdesinin montaj kesiti, 3D render',
+          },
+          {
+            pic: 'bushingSet',
+            after: 4,
+            caption: 'Kuru çalışmada hızla aşınan parçalar: burçlar.',
+            alt: 'Kırıcı burç takımı: iki büyük burç, bir pim ve bir küçük burç yan yana, 3D render',
+          },
+        ],
         links: ['tips', 'burc', 'kama'],
       },
       'kirici-alt-govdesi-ne-zaman-degisir': {
@@ -240,6 +462,20 @@ export const GUIDES: Record<
             p: [
               'Alt gövde kırıcının modeline göre üretilir; burç yuvaları, kama delikleri ve saplama delikleri o modele uymalıdır. Kırıcınızın marka ve modelini alt gövde sayfasında arayın; bazı modellerde gövde burçları takılı olarak da sunulur.',
             ],
+          },
+        ],
+        figures: [
+          {
+            pic: 'headPlain',
+            after: 'lead',
+            caption: 'Burçsuz alt gövde: burç yuvası ve kama delikleri',
+            alt: 'Burçları takılı olmayan işlenmiş kırıcı alt gövdesi, 3D görsel',
+          },
+          {
+            pic: 'headSection',
+            after: 0,
+            caption: 'Kesit: burçlar alt gövdedeki yuvalarına sıkı oturur',
+            alt: 'Burçları takılı kırıcı alt gövdesinin montaj kesiti, 3D görsel',
           },
         ],
         links: ['alt-govde', 'burc', 'kama', 'saplama'],
@@ -283,6 +519,28 @@ export const GUIDES: Record<
             p: [
               'Çizik piston çoğu zaman silindirde de iz bırakır; çizik silindire takılan yeni piston da kısa sürede çizilir. Pistonun ve silindirin yeniden kullanılıp kullanılamayacağına, ikisini birlikte ölçüp inceleyen bir atölye karar verir. Çizilmeye yol açan neden giderilmeden yeni piston takmayın. Kırıcınızın marka ve modeline uyan pistonu piston sayfasında arayabilirsiniz.',
             ],
+          },
+        ],
+        figures: [
+          {
+            pic: 'exploded',
+            after: 'lead',
+            caption:
+              'Hidrolik kırıcının parçaları: piston, arka kapak ile alt gövde arasında çalışır ve ucun arka yüzüne vurur.',
+            alt: 'Hidrolik kırıcının patlatılmış yandan görünüşü; arka kapak, piston, boy saplamalar, alt gövde, burçlar, kama ve uç sırayla dizili',
+          },
+          {
+            pic: 'toolBushing',
+            after: 1,
+            caption:
+              'Kafa burcu: ucu eksende tutar. İç yüzü aşınınca uç eğik çalışır ve piston uca düz vurmaz.',
+            alt: 'Kırıcı kafa burcunun 3D görseli; iç çapı görünen, basamaklı flanşlı silindirik burç',
+          },
+          {
+            pic: 'piston',
+            after: 5,
+            caption: 'Kırıcı pistonu: çizikler silindirle çalışan parlak yüzeylerde görülür.',
+            alt: 'Kırıcı pistonu, yandan 3D render; silindir içinde çalışan parlak yüzeyleri ve vuruş ucu görünüyor',
           },
         ],
         links: ['piston', 'burc', 'tips'],
@@ -334,6 +592,21 @@ export const GUIDES: Record<
             ],
           },
         ],
+        figures: [
+          {
+            pic: 'exploded',
+            after: 'lead',
+            caption:
+              'Kırıcının patlatılmış görünüşü: boy saplamalar arka kapaktan alt gövdeye uzanır ve gövde parçalarını bir arada tutar.',
+            alt: 'Hidrolik kırıcının patlatılmış yandan görünüşü; arka kapak, piston, boy saplamalar, alt gövde, burçlar, kama ve uç sırayla dizili',
+          },
+          {
+            pic: 'rodSet',
+            after: 6,
+            caption: 'Boy saplama takımı: saplama, somunları ve pulu birlikte değiştirilir.',
+            alt: 'Uçlarında somun ve pul bulunan boy saplama takımının 3D görünüşü',
+          },
+        ],
         links: ['saplama', 'alt-govde', 'burc'],
       },
     },
@@ -372,6 +645,26 @@ export const GUIDES: Record<
             ],
           },
         ],
+        figures: [
+          {
+            pic: 'stock',
+            after: 0,
+            caption: 'New breaker tools in stock in our workshop',
+            alt: 'New full-length chisel and moil breaker tools on racks in the Kervan workshop',
+          },
+          {
+            pic: 'tipSlot',
+            after: 1,
+            caption: 'Shank end and retainer slot: the piston strikes this face',
+            alt: "3D close-up of a breaker tool's shank end and retainer slot",
+          },
+          {
+            pic: 'key',
+            after: 3,
+            caption: 'Breaker retainer key: check it too whenever you change the tool',
+            alt: 'Hydraulic breaker retainer key, 3D view on a light background',
+          },
+        ],
         links: ['tips', 'burc', 'kama'],
       },
       'kirici-burcu-ne-zaman-degisir': {
@@ -403,6 +696,29 @@ export const GUIDES: Record<
             ],
           },
         ],
+        figures: [
+          {
+            pic: 'headSection',
+            after: 0,
+            caption:
+              'Front head in section: the bushings sit in their seats in the body, and the tool runs inside them.',
+            alt: 'Section view of a breaker front head with its bushings fitted: yellow bushings inside the orange body and the bore for the tool',
+          },
+          {
+            pic: 'toolBushing',
+            after: 1,
+            caption:
+              'Front (tool) bushing. Wear shows on the bore: an oval shape, scoring or burn marks.',
+            alt: '3D image of a breaker front bushing: a cylindrical bushing with a stepped flange, its bore visible',
+          },
+          {
+            pic: 'bushingSet',
+            after: 2,
+            caption:
+              'Bushing set: the bushings and their pin together. When one is changed, check the others too.',
+            alt: 'Breaker bushing set: two large bushings, a pin and a small bushing side by side, 3D image',
+          },
+        ],
         links: ['burc', 'tips', 'alt-govde'],
       },
       'kirici-kamasi-neden-kirilir': {
@@ -432,6 +748,26 @@ export const GUIDES: Record<
             p: [
               'Use the key and its retaining pin made for your breaker model together. Do not straighten and refit a bent or cracked key.',
             ],
+          },
+        ],
+        figures: [
+          {
+            pic: 'key',
+            after: 'lead',
+            caption: 'Breaker retainer key: the part that holds the tool in the front head.',
+            alt: 'Hydraulic breaker retainer key, 3D view on a light background',
+          },
+          {
+            pic: 'tipSlot',
+            after: 1,
+            caption: 'The key slot on a breaker tool. Check this slot when you change the key.',
+            alt: 'The key slot and shank end of a breaker tool, close-up',
+          },
+          {
+            pic: 'retainerPin',
+            after: 3,
+            caption: 'Retaining pin for the key. Change it together with the key.',
+            alt: 'Cylindrical pin that holds the breaker retainer key in place, 3D view',
           },
         ],
         links: ['kama', 'tips', 'burc'],
@@ -471,6 +807,26 @@ export const GUIDES: Record<
             ],
           },
         ],
+        figures: [
+          {
+            pic: 'tipChisel',
+            after: 0,
+            caption: 'Chisel tool: the flat edge strikes along a line.',
+            alt: 'Breaker chisel tool with a flat edge, 3D image',
+          },
+          {
+            pic: 'tipMoil',
+            after: 1,
+            caption: 'Moil point: focuses the blow on a single point.',
+            alt: 'Pointed breaker moil tool, 3D image',
+          },
+          {
+            pic: 'stock',
+            after: 3,
+            caption: 'Chisel and moil tools in our stock',
+            alt: 'Many chisel and moil breaker tools on racks in the Kervan workshop',
+          },
+        ],
         links: ['tips', 'burc'],
       },
       'kirici-yaglamasi-nasil-yapilir': {
@@ -508,6 +864,27 @@ export const GUIDES: Record<
             ],
           },
         ],
+        figures: [
+          {
+            pic: 'tipSlot',
+            after: 0,
+            caption: 'Breaker tool shank and key slot: the surfaces greased at every tool change.',
+            alt: "Close-up 3D render of a breaker tool's key slot and shank end",
+          },
+          {
+            pic: 'headSection',
+            after: 1,
+            caption:
+              'Section of a front head with bushings fitted: grease must reach the gap between tool and bushings.',
+            alt: 'Assembly section of a hydraulic breaker front head with its bushings fitted, 3D render',
+          },
+          {
+            pic: 'bushingSet',
+            after: 4,
+            caption: 'The parts that wear fast when a breaker runs dry: the bushings.',
+            alt: 'Breaker bushing set: two large bushings, a pin and a small bushing side by side, 3D render',
+          },
+        ],
         links: ['tips', 'burc', 'kama'],
       },
       'kirici-alt-govdesi-ne-zaman-degisir': {
@@ -543,6 +920,20 @@ export const GUIDES: Record<
             p: [
               'A front head is made for one breaker model; its bushing seats, key holes and tie-rod holes must fit that model. Search your breaker’s make and model on the front head page; for some models the head is also offered with the bushings fitted.',
             ],
+          },
+        ],
+        figures: [
+          {
+            pic: 'headPlain',
+            after: 'lead',
+            caption: 'Front head without bushings: bushing bore and key holes',
+            alt: 'Machined breaker front head without its bushings, 3D image',
+          },
+          {
+            pic: 'headSection',
+            after: 0,
+            caption: 'Section: the bushings sit tight in their bores in the front head',
+            alt: 'Assembly section of a breaker front head with its bushings fitted, 3D image',
           },
         ],
         links: ['alt-govde', 'burc', 'kama', 'saplama'],
@@ -586,6 +977,29 @@ export const GUIDES: Record<
             p: [
               'A scored piston usually marks the cylinder as well, and a new piston in a scored cylinder soon scores too. Whether piston and cylinder can be used again is decided by a workshop that measures and inspects the two together. Do not fit a new piston before the cause of the scoring has been removed. Search your breaker’s make and model on the piston page to find the piston that fits it.',
             ],
+          },
+        ],
+        figures: [
+          {
+            pic: 'exploded',
+            after: 'lead',
+            caption:
+              'Parts of a hydraulic breaker: the piston runs between the back head and the front head and strikes the end of the tool.',
+            alt: 'Exploded side view of a hydraulic breaker: back head, piston, tie rods, front head, bushings, retainer key and tool in order',
+          },
+          {
+            pic: 'toolBushing',
+            after: 1,
+            caption:
+              'Front bushing: it keeps the tool on its axis. When its bore wears, the tool tilts and the piston no longer strikes it square.',
+            alt: '3D image of a breaker front bushing: a cylindrical bushing with a stepped flange, its bore visible',
+          },
+          {
+            pic: 'piston',
+            after: 5,
+            caption:
+              'Breaker piston: scoring shows on the bright surfaces that run in the cylinder.',
+            alt: 'Breaker piston, 3D side render showing the bright surfaces that run in the cylinder and the striking end',
           },
         ],
         links: ['piston', 'burc', 'tips'],
@@ -635,6 +1049,21 @@ export const GUIDES: Record<
             p: [
               'On most breakers the back head, and on some the accumulator too, holds nitrogen gas under pressure. Tie rods are not loosened or removed, and the body is not taken apart, until the gas has been let out with the charging kit the manual names and the breaker has been laid flat and supported; otherwise the back head can be thrown off and cause serious injury. Replacing tie rods and tightening them to full value is workshop work; on the machine, the operator only checks nut tightness as the manual says. When one rod breaks, the others have carried its load too; they may be stretched or have fine cracks you cannot see. So tie rods are usually replaced as a set, with their nuts and washers; follow what the manual says. Search your breaker’s make and model on the tie rod page to find the rods that fit it.',
             ],
+          },
+        ],
+        figures: [
+          {
+            pic: 'exploded',
+            after: 'lead',
+            caption:
+              'Exploded view of a breaker: the tie rods run from the back head to the front head and hold the body parts together.',
+            alt: 'Exploded side view of a hydraulic breaker: back head, piston, tie rods, front head, bushings, retainer key and tool in order',
+          },
+          {
+            pic: 'rodSet',
+            after: 6,
+            caption: 'Tie-rod set: the rod is replaced together with its nuts and washer.',
+            alt: '3D view of a tie-rod set with nuts and a washer on its ends',
           },
         ],
         links: ['saplama', 'alt-govde', 'burc'],

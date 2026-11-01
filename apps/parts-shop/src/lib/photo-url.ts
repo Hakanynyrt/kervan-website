@@ -7,7 +7,8 @@
  * (versions, page props); the host is added only where an <img> URL is written.
  */
 /** `md` (800 px) exists only for render heroes, the pictures with an `-xs` thumbnail (cards). */
-type Size = 'xs' | 'sm' | 'md' | 'lg';
+export type PhotoSize = 'xs' | 'sm' | 'md' | 'lg';
+type Size = PhotoSize;
 
 const BASE = ((import.meta.env?.VITE_TIP_IMG_BASE as string | undefined) ?? '').replace(/\/$/, '');
 

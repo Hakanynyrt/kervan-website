@@ -12,7 +12,14 @@ import {
   type TipType,
 } from '@kervan/tips';
 import { LEGAL_KEYS, legalPath, type LegalKey } from './legal';
-import { GUIDE_KEYS, GUIDES_PATH, guidePath, type GuideKey } from './guides';
+import {
+  GUIDE_KEYS,
+  GUIDES_PATH,
+  guidePath,
+  guideTipKeys,
+  type GuideKey,
+  type GuideTipKeys,
+} from './guides';
 import {
   partItemsForBreaker,
   partsForBreaker,
@@ -182,7 +189,14 @@ export type PageModel =
   | { kind: 'cart'; demo: boolean; hasPopular: boolean }
   | { kind: 'legal'; doc: LegalKey; demo: boolean; hasPopular: boolean }
   /** "Rehber" (guides.ts): the index (`doc` null) and one article per guide. */
-  | { kind: 'guide'; doc: GuideKey | null; demo: boolean; hasPopular: boolean }
+  | {
+      kind: 'guide';
+      doc: GuideKey | null;
+      /** Render keys of the article's tip pictures (guides.ts `guideTipKeys`); {} on the index. */
+      tips: GuideTipKeys;
+      demo: boolean;
+      hasPopular: boolean;
+    }
   | { kind: 'notFound' };
 
 /**
@@ -596,6 +610,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
     }
     return { brand: b.name, models: [...models.values()] };
   });
+  const guideTips = guideTipKeys(c);
   const pages: BuiltPage[] = [
     {
       path: '/',
@@ -633,10 +648,10 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       path: legalPath(doc),
       model: { kind: 'legal' as const, doc, demo, hasPopular },
     })),
-    { path: GUIDES_PATH, model: { kind: 'guide' as const, doc: null, demo, hasPopular } },
+    { path: GUIDES_PATH, model: { kind: 'guide' as const, doc: null, tips: {}, demo, hasPopular } },
     ...GUIDE_KEYS.map((doc) => ({
       path: guidePath(doc),
-      model: { kind: 'guide' as const, doc, demo, hasPopular },
+      model: { kind: 'guide' as const, doc, tips: guideTips, demo, hasPopular },
     })),
     ...PART_KEYS.map((part) => ({
       path: partPath(part),
