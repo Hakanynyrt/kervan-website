@@ -15,7 +15,7 @@ const PARCA = '/photos/parcalar';
 export const PRODUCTS: Product[] = [
   {
     slug: 'keski',
-    image: '/photos/uclar/uclar-yard-v2-w1280.webp',
+    image: '/photos/uclar/uclar-yard-v3-w1280.webp',
     tr: {
       name: 'Keski',
       tagline: 'Kırıcının ucu — taşla, betonla, asfaltla ilk temas.',
@@ -46,7 +46,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'piston',
-    image: '/photos/pistonlar/pistons-stack-w1280.webp',
+    image: '/photos/pistonlar/pistons-stack-v2-w1280.webp',
     tr: {
       name: 'Piston',
       tagline: 'Darbenin kaynağı. Yüksek frekansla çalışır, yılmaz durur.',
@@ -91,7 +91,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: 'tamir-kiti',
-    image: '/photos/kit/seal-kit-v2-w1280.webp',
+    image: '/photos/kit/seal-kit-v3-w1280.webp',
     tr: {
       name: 'Tamir Kiti',
       tagline: 'Sızdırmazlık ve bağlantı parçaları. Ayrıntıların tümü.',

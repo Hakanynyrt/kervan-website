@@ -12,8 +12,8 @@ import type { PartKey } from './routes';
  */
 export const STOCK_TIP_PHOTOS = [
   '/photos/stok/uc-stok-01',
-  '/photos/stok/uc-stok-03',
-  '/photos/stok/uc-stok-02',
+  '/photos/stok/uc-stok-03-v2',
+  '/photos/stok/uc-stok-02-v2',
 ] as const;
 
 /**
@@ -23,12 +23,12 @@ export const STOCK_TIP_PHOTOS = [
  * JSON-LD. Data only: add a model by adding a line.
  */
 export const BREAKER_PHOTOS: Readonly<Record<string, readonly string[]>> = {
-  'furukawa/hb-20g': ['/photos/stok/hb-20g-uc-01', '/photos/stok/hb-20g-uc-02'],
+  'furukawa/hb-20g': ['/photos/stok/hb-20g-uc-01', '/photos/stok/hb-20g-uc-03'],
 };
 
 export const PART_PHOTOS: Record<PartKey, readonly string[]> = {
   'alt-govde': [],
-  burc: ['/photos/parca/burc-01'],
+  burc: ['/photos/parca/burc-02'],
   kama: [],
   saplama: [],
   piston: ['/photos/parca/piston-01'],
@@ -2530,18 +2530,18 @@ function kitPartRender(k: RepairKit): PartRender {
 export const PLANT_PHOTOS = [
   '/photos/tesis/cnc-isleme-01',
   '/photos/tesis/isil-islem-holu-01',
-  '/photos/tesis/burc-stok-01',
-  '/photos/tesis/uc-stok-01',
+  '/photos/tesis/burc-stok-02',
+  '/photos/tesis/uc-stok-02',
 ] as const;
 
 /** More plant photos, 4:3 landscape and uncropped (`-sm` 640 px, `-lg` 1280 px; people removed,
  *  owner 2026-10-27): the row under the four on /yedek-parca. Captions: `parts.plant.wide`. */
 export const PLANT_WIDE = [
-  '/photos/tesis/torna-holu-01',
-  '/photos/tesis/puma-torna-01',
-  '/photos/tesis/puma-torna-yan-01',
+  '/photos/tesis/torna-holu-02',
+  '/photos/tesis/puma-torna-02',
+  '/photos/tesis/puma-torna-yan-02',
   '/photos/tesis/cnc-freze-01',
-  '/photos/tesis/saplama-rafi-01',
+  '/photos/tesis/saplama-rafi-02',
 ] as const;
 
 /**
