@@ -6,7 +6,7 @@ import { BTN_LINE, BTN_PRIMARY, WRAP } from '../lib/ui';
  *  file name. Desktop 1280×720, shown in a box capped at 1280 px so it is never upscaled; phones get a
  *  1080×1920 frame cropped to a 132 px band of the open pot. */
 const PHOTO = '/photos/isil-islem/hero-pota-01-1280.webp';
-const PHOTO_PHONE = '/photos/isil-islem/hero-pota-telefon-01-1080.webp';
+const PHOTO_PHONE = '/photos/isil-islem/hero-pota-telefon-02-1080.webp';
 
 interface Props {
   t: DictBlock;

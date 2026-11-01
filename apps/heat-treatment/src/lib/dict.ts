@@ -191,17 +191,17 @@ export const DICT: Dict = {
           caption: 'Tesisimiz: şarja hazır parçalar ve fikstürler',
         },
         {
-          base: 'firin-agzi-01',
+          base: 'firin-agzi-02',
           alt: 'Kapağı açık kuyu tipi fırının ağzına yukarıdan bakış; içeride dikey çubuklar',
           caption: 'Fırın ağzı',
         },
         {
-          base: 'kontrol-panosu-02',
+          base: 'kontrol-panosu-03',
           alt: 'Duvar boyunca gelen boruların bağlandığı cam kapaklı beyaz dolap; içinde dikey cam tüpler, göstergeler, vanalar ve hortumlar',
           caption: 'Gösterge ve vana dolabı',
         },
         {
-          base: 'kapali-firin-01',
+          base: 'kapali-firin-02',
           alt: 'Kapağı kapalı kuyu tipi fırın: kapak mekanizması ve üstünde fan motoru; arkada ikinci bir fırın',
           caption: 'Kapalı fırın',
         },
@@ -463,17 +463,17 @@ export const DICT: Dict = {
           caption: 'Our plant: parts and fixtures ready to load',
         },
         {
-          base: 'firin-agzi-01',
+          base: 'firin-agzi-02',
           alt: 'Looking down into an open pit furnace: the mouth with vertical bars inside',
           caption: 'Furnace mouth',
         },
         {
-          base: 'kontrol-panosu-02',
+          base: 'kontrol-panosu-03',
           alt: 'White glass-door cabinet fed by pipes running along the wall, with vertical glass tubes, gauges, valves and hoses inside',
           caption: 'Gauge and valve cabinet',
         },
         {
-          base: 'kapali-firin-01',
+          base: 'kapali-firin-02',
           alt: 'Closed pit furnace: the lid mechanism with the fan motor on top; a second furnace behind',
           caption: 'Closed furnace',
         },

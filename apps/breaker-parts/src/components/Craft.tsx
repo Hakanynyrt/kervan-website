@@ -8,7 +8,7 @@ interface Props {
 }
 
 const PHOTOS = [
-  '/photos/atolye/torna-holu-01-w1280.webp',
+  '/photos/atolye/torna-holu-02-w1280.webp',
   '/photos/atolye/cnc-machining-w1280.webp',
 ];
 
