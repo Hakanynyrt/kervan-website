@@ -1,7 +1,8 @@
 name: Shop daily rebuild
 
-# The shop shows TRY prices at the CBRT USD selling rate of its build day: rebuild it every
-# morning (Istanbul 06:47) so the rate stays current. Manual runs work too.
+# Rebuild the shop every morning (Istanbul 06:47) so the catalogue stays current. The TRY prices
+# use the week's CBRT USD selling rate (the ISO week's Monday bulletin, scripts/fx.ts), so the
+# rate itself changes once a week. Manual runs work too.
 on:
   schedule:
     - cron: '47 3 * * *'

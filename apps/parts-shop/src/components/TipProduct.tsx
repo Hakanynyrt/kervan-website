@@ -15,7 +15,7 @@ import { fmtMm, fmtNum } from '../lib/format';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
 import type { SpecialTool } from '../lib/grooved';
 import { addToCart } from '../lib/cart';
-import { fmtDate, fmtTry, fmtUsd } from '../lib/price';
+import { fmtDate, fmtGrossTry, fmtTry, fmtUsd, leadsGross, unitText } from '../lib/price';
 import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
 import type { PartItemLink } from '../lib/part-links';
@@ -156,8 +156,19 @@ export default function TipProduct({
   const text =
     opt.cents === null
       ? tf.quoteText(name, t.tip[opt.tipType], opt.code ?? '', qty, url)
-      : tf.orderText(name, t.tip[opt.tipType], opt.code ?? '', qty, fmtUsd(opt.cents, lang), url);
-  const tl = opt.cents === null ? null : fmtTry(opt.cents, fx, lang);
+      : tf.orderText(
+          name,
+          t.tip[opt.tipType],
+          opt.code ?? '',
+          qty,
+          unitText(opt.cents, fx, lang, t),
+          url,
+        );
+  // Turkish pages lead with the tax-inclusive TL price (owner, G2), the net USD price under it;
+  // English pages keep the net export price with its TL amount.
+  const gross =
+    opt.cents !== null && leadsGross(lang, fx) ? fmtGrossTry(opt.cents, fx, lang) : null;
+  const tl = opt.cents === null ? null : (gross ?? fmtTry(opt.cents, fx, lang));
   const add = () => {
     addToCart(
       {
@@ -187,9 +198,20 @@ export default function TipProduct({
       <OemLine t={t} />
       {opt.cents !== null && (
         <p className="m-0 mt-2 font-sans text-base text-ink-mid tabular-nums lg:hidden">
-          <span className="font-semibold text-ink">{fmtUsd(opt.cents, lang)}</span>
-          {tl && ` · ${tl}`}
-          {t.price.plus && <span className="text-sm text-ink-soft"> {t.price.plus}</span>}
+          {gross ? (
+            <>
+              <span className="font-semibold text-ink">{gross}</span>
+              <span className="text-sm text-ink-soft"> {t.price.incl}</span>
+              <span className="text-sm"> · {fmtUsd(opt.cents, lang)}</span>
+              {t.price.plus && <span className="text-sm text-ink-soft"> {t.price.plus}</span>}
+            </>
+          ) : (
+            <>
+              <span className="font-semibold text-ink">{fmtUsd(opt.cents, lang)}</span>
+              {tl && ` · ${tl}`}
+              {t.price.plus && <span className="text-sm text-ink-soft"> {t.price.plus}</span>}
+            </>
+          )}
         </p>
       )}
 
@@ -397,14 +419,35 @@ export default function TipProduct({
               <p className="m-0 mt-1 text-lg font-semibold text-ink">{tf.ask}</p>
             ) : (
               <>
-                <p className="m-0 mt-1 text-3xl font-bold text-ink tabular-nums">
-                  {fmtUsd(opt.cents, lang)}
-                  {t.price.plus && (
-                    <span className="text-base font-semibold text-ink-mid"> {t.price.plus}</span>
-                  )}
-                </p>
-                {tl && (
-                  <p className="m-0 mt-1 text-lg font-semibold text-ink-mid tabular-nums">{tl}</p>
+                {gross ? (
+                  <>
+                    {/* data-offer: check-dist compares it with the JSON-LD offer. */}
+                    <p data-offer="" className="m-0 mt-1 text-3xl font-bold text-ink tabular-nums">
+                      {gross}
+                      <span className="text-base font-semibold text-ink-mid"> {t.price.incl}</span>
+                    </p>
+                    <p className="m-0 mt-1 text-base text-ink-mid tabular-nums">
+                      {fmtUsd(opt.cents, lang)}
+                      {t.price.plus && <span className="text-ink-soft"> {t.price.plus}</span>}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p data-offer="" className="m-0 mt-1 text-3xl font-bold text-ink tabular-nums">
+                      {fmtUsd(opt.cents, lang)}
+                      {t.price.plus && (
+                        <span className="text-base font-semibold text-ink-mid">
+                          {' '}
+                          {t.price.plus}
+                        </span>
+                      )}
+                    </p>
+                    {tl && (
+                      <p className="m-0 mt-1 text-lg font-semibold text-ink-mid tabular-nums">
+                        {tl}
+                      </p>
+                    )}
+                  </>
                 )}
                 {t.price.note && <p className="m-0 mt-1 text-sm text-ink-soft">{t.price.note}</p>}
                 {tl && fx && (
