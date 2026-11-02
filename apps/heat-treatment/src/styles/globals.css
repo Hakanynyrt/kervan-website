@@ -184,7 +184,7 @@ html:not(.js-anim) .min-h-dvh {
   min-height: min(100dvh, 1000px);
 }
 
-/* Caption chip over a photo (hero, film). */
+/* Caption chip over a photo (hero, plant photo). */
 .kv-chip {
   margin: 0;
   padding: 6px 10px;
@@ -520,12 +520,14 @@ html:not(.js-anim) .min-h-dvh {
   }
 }
 
-/* Furnace film: full-bleed, the play / pause control and the caption chip on its bottom edge. */
-.kv-film-frame {
-  height: min(56vw, 600px);
+/* Plant photo band (PlantPhoto): full-bleed (capped at the 2560 px source), caption chip bottom right.
+   Above ~1935 px a fixed 600 px would show less than the bottom half of the 16:9 frame and cut the
+   furnace motors, so the band grows with 31vw there (794 px at the 2560 px cap). */
+.kv-plant-frame {
+  height: min(56vw, max(600px, min(31vw, 794px)));
 }
 @media (max-width: 720px) {
-  .kv-film-frame {
+  .kv-plant-frame {
     height: 240px;
   }
 }

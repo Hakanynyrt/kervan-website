@@ -22,7 +22,7 @@ All apps are Vite 5 + React 18 + TypeScript + Tailwind v4 + Framer Motion, shari
 | ------------------------------------------------------------------------------------------- | ------------------------------ |
 | kiriciparca.com shop: pages, parts and renders, prices, cart, search, SEO, D1 data, opening | `docs/agent/parts-shop.md`     |
 | kervanbreaker.com: pages, 3D scene, shop links, private VEGA catalog                        | `docs/agent/breaker-parts.md`  |
-| kervanheat.com: sections, hero film, service links                                          | `docs/agent/heat-treatment.md` |
+| kervanheat.com: sections, hero and plant photos, service links                              | `docs/agent/heat-treatment.md` |
 | Packages, deploying, RFQ form, Google Ads, owner login, i18n, prerender/sitemap, media      | `docs/agent/platform.md`       |
 | Tokens, palette, type, motion, accessibility                                                | `docs/agent/design.md`         |
 | Owner's ready-made prompts (Turkish)                                                        | `docs/komut-kaliplari.md`      |

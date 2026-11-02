@@ -73,11 +73,9 @@ export const DICT: Dict = {
         alt: 'Kartepe tesisimizde kuyu tipi fırının ağzında, fikstürüyle vince asılı kızgın şarj',
         caption: 'Pit fırın ağzında kızgın şarj',
       },
-      film: {
-        alt: 'Kartepe tesisimizde kuyu tipi fırın hattı: önde kapağı açık bir fırın, arkada üstünde alev yanan bir fırın',
-        caption: 'Fırın hattımız · Kartepe',
-        pause: 'Videoyu duraklat',
-        play: 'Videoyu oynat',
+      plant: {
+        alt: 'Tesisimizdeki fırın salonu: zemine gömülü kuyu tipi fırınlar; önde kapak mekanizmalı fırınlar, arkada üstünde küçük bir alev yanan bir fırın ve ağzı açık bir fırın',
+        caption: 'Kuyu tipi fırın salonumuz',
       },
     },
     gear: {
@@ -337,11 +335,9 @@ export const DICT: Dict = {
         alt: 'A glowing charge on its fixture, hanging from the crane at the mouth of a pit furnace in our Kartepe plant',
         caption: 'Glowing charge at the pit furnace mouth',
       },
-      film: {
-        alt: 'Pit furnace line at our Kartepe plant: an open furnace in front, and behind it a furnace with a flame burning on top',
-        caption: 'Our furnace line · Kartepe',
-        pause: 'Pause video',
-        play: 'Play video',
+      plant: {
+        alt: 'The furnace hall in our plant: pit furnaces set into the floor; lidded furnaces with their lid drives in front, and behind them a furnace with a small flame on top and one with its mouth open',
+        caption: 'Our pit furnace hall',
       },
     },
     gear: {
