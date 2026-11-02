@@ -674,15 +674,25 @@ html:not(.js-anim) .min-h-dvh {
   opacity: 1;
   transform: none;
 }
-/* Narrow or tall screens ([data-stacked] is set by GearProcess from the stage size): text on top, gear below it. */
+/* Side by side: the copy column on the left, the gear in the space to its right. */
+.kv-gear-copy-col {
+  max-width: min(40rem, 50vw);
+}
+/* Stacked ([data-stacked] is set by GearProcess when that layout holds the bigger gear, e.g. portrait
+   screens): text on top, gear below it. */
+[data-stacked] .kv-gear-copy-col {
+  max-width: none;
+}
 [data-stacked] .kv-gear-copy {
   justify-content: flex-start;
   padding-bottom: 0;
 }
+/* Tabs at their own width from the left (not spread edge to edge), so "Rapor" stays clear of the
+   floating WhatsApp button in the bottom-right corner. */
 [data-stacked] .kv-gear-tabs {
   display: flex;
-  justify-content: space-between;
-  gap: 0 8px;
+  justify-content: flex-start;
+  gap: 0 clamp(14px, 4.5vw, 48px);
 }
 [data-stacked] .kv-gear-tab {
   white-space: nowrap;

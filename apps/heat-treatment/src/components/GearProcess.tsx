@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { useClientIdle, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
 import type { GearLayout } from '../lib/gear-scene';
+import { fromP, toP } from '../lib/gear-progress';
 import { BTN_PRIMARY, H2, WRAP } from '../lib/ui';
 import { ReportIcon } from './TechnicalCapacity';
 
@@ -9,8 +10,6 @@ import { ReportIcon } from './TechnicalCapacity';
  *  (a changed picture gets a new file name). The CSS picks day or night with the page theme. */
 const POSTER_DAY = '/photos/isil-islem/gear-poster-day-01.webp';
 const POSTER_NIGHT = '/photos/isil-islem/gear-poster-night-01.webp';
-/** The hot frame's progress: the scene warms up to it by itself, then scrolling takes over. */
-const P_HOLD = 0.36;
 /** Where each stage tab scrolls to (scene progress P). */
 const TAB_P = [0, 0.47, 0.76, 1];
 
@@ -31,6 +30,16 @@ const SCALE: [number, number, string][] = [
 ];
 
 const stageOf = (P: number) => (P < 0.37 ? 0 : P < 0.6 ? 1 : P < 0.94 ? 2 : 3);
+
+/** What the gear needs around its own circle, in gear diameters from its centre: the rising steam
+ *  above (it also fades out below the free area's top edge), the ground shadow below and to the sides. */
+const FOOT_UP = 0.6;
+const FOOT_DOWN = 0.66;
+const FOOT_SIDE = 0.56;
+/** Gap between the free area and the copy / stage bar (px). */
+const GAP = 16;
+/** Stages this short (a phone in landscape) get the poster block instead of the pinned stage. */
+const SHORT_MQ = '(orientation: landscape) and (max-height: 440px)';
 
 interface Props {
   t: DictBlock;
@@ -54,8 +63,19 @@ export default function GearProcess({ t }: Props) {
       ?.saveData;
   });
   const onFail = useCallback(() => setFailed(true), []);
+  // A phone held sideways (a stage under ~440 px tall) has no room for the copy, the gear and the
+  // stage bar at once: the copy ran onto the bar. It gets the poster block; turning the phone back
+  // brings the pinned stage again.
+  const [short, setShort] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(SHORT_MQ);
+    const on = () => setShort(mq.matches);
+    on();
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
 
-  if (reduced || saveData || failed) return <GearStatic t={t} />;
+  if (reduced || saveData || failed || short) return <GearStatic t={t} />;
   return <GearPinned t={t} onFail={onFail} />;
 }
 
@@ -148,8 +168,8 @@ function GearStatic({ t }: Props) {
   );
 }
 
-/** Pinned stage: sticky for 200 svh on phones and tablets, 300 svh from `lg` (owner, 2026-10-28:
- *  too long on the phone); scroll progress drives the scene and the stage bar. */
+/** Pinned stage: sticky for 200 svh on phones, 300 svh from 721 px (owner, 2026-10-28: too long
+ *  on the phone); scroll progress drives the scene and the stage bar. */
 function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
   const g = t.gear;
   const sectionRef = useRef<HTMLElement>(null);
@@ -157,6 +177,7 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLAnchorElement>(null);
+  const copyRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const layoutRef = useRef<GearLayout>({ cx: 0.7, cy: 0.5, D: 600 });
   const sceneLive = useRef(false);
@@ -189,34 +210,73 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
     return span > 0 ? Math.max(0, Math.min(1, -r.top / span)) : 0;
   }, []);
 
-  // Layout: the gear sits right of the copy (wide) or in the gap between copy and stage bar (stacked);
-  // the poster and the canvas use the same numbers (CSS variables + getLayout).
+  // Layout: the gear sits right of the copy (side by side) or in the gap between the copy and the
+  // stage bar (stacked). Both are measured and the one that gives the bigger gear wins, so a short
+  // landscape screen (an iPad with Safari's sidebar or Split View) is not squeezed into the portrait
+  // layout. The free area holds the gear's whole footprint (FOOT_*), not only its circle. The poster
+  // and the canvas use the same numbers (CSS variables + getLayout).
   useLayoutEffect(() => {
     const stage = stageRef.current;
     const rail = railRef.current;
+    const copy = copyRef.current;
     const cta = ctaRef.current;
     const card = cardRef.current;
-    if (!stage || !rail || !cta || !card) return;
+    if (!stage || !rail || !copy || !cta || !card) return;
+    const fit = (
+      left: number,
+      right: number,
+      top: number,
+      bottom: number,
+      H: number,
+      W: number,
+    ) => {
+      const D = Math.max(
+        0,
+        Math.min((right - left) / (2 * FOOT_SIDE), (bottom - top) / (FOOT_UP + FOOT_DOWN)),
+      );
+      const cy = top + (bottom - top - D * (FOOT_UP + FOOT_DOWN)) / 2 + D * FOOT_UP;
+      return { cx: (left + right) / 2 / W, cy: cy / H, D, top };
+    };
+    const measure = (stacked: boolean): GearLayout => {
+      stage.toggleAttribute('data-stacked', stacked);
+      const W = stage.clientWidth;
+      const H = stage.clientHeight;
+      const sr = stage.getBoundingClientRect();
+      const bar = rail.getBoundingClientRect();
+      const bottom = bar.top - sr.top - GAP;
+      if (stacked) {
+        // under the button, above the stage bar, the full stage width
+        const top = cta.getBoundingClientRect().bottom - sr.top + GAP / 2;
+        return fit(0, W, top, bottom, H, W);
+      }
+      // side by side only when the narrower copy column still clears the stage bar (a phone held
+      // sideways wraps the heading and pushes the button onto the bar): D = -1 makes stacked win
+      if (copy.getBoundingClientRect().bottom > bar.top - GAP / 2)
+        return { cx: 0.7, cy: 0.5, D: -1 };
+      // right of the copy's longest line, up to the stage bar's right end, under the header
+      // (the line boxes of its text, not the column's box: the lines end well before it)
+      const range = document.createRange();
+      const walk = document.createTreeWalker(copy, NodeFilter.SHOW_TEXT);
+      let textRight = 0;
+      for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+        range.selectNodeContents(n);
+        for (const r of range.getClientRects()) textRight = Math.max(textRight, r.right);
+      }
+      const left = (textRight || copy.getBoundingClientRect().right) - sr.left + GAP * 1.5;
+      return fit(left, bar.right - sr.left, 88, bottom, H, W);
+    };
     const layout = () => {
       const W = stage.clientWidth;
       const H = stage.clientHeight;
       if (!W || !H) return;
-      const stacked = W < 1000 || W / H < 1.15;
-      stage.toggleAttribute('data-stacked', stacked);
-      const sr = stage.getBoundingClientRect();
-      const railTop = rail.getBoundingClientRect().top - sr.top;
-      let L: GearLayout;
-      if (stacked) {
-        const top = cta.getBoundingClientRect().bottom - sr.top + 4;
-        const avail = Math.max(120, railTop - 6 - top);
-        L = { cx: 0.5, cy: (top + avail * 0.5) / H, D: Math.min(W * 0.86, avail * 0.9) };
-      } else {
-        const top = 88;
-        const avail = Math.max(240, railTop - 16 - top);
-        L = { cx: 0.7, cy: (top + avail / 2) / H, D: Math.min(W * 0.42, avail * 0.86) };
-      }
+      // portrait screens always stack; otherwise the layout that holds the bigger gear
+      const side = W > H ? measure(false) : null;
+      const stack = measure(true);
+      const stacked = !side || stack.D > side.D;
+      const L = stacked ? stack : measure(false);
       layoutRef.current = L;
       // report card: on the button's row, to its right (never over the gear)
+      const sr = stage.getBoundingClientRect();
       const cr = cta.getBoundingClientRect();
       const cardH = card.offsetHeight || 56;
       stage.style.setProperty(
@@ -242,7 +302,7 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
       if (sceneLive.current || raf) return;
       raf = requestAnimationFrame(() => {
         raf = 0;
-        setRail(P_HOLD + (1 - P_HOLD) * sectionProgress());
+        setRail(toP(sectionProgress()));
       });
     };
     setRail(0);
@@ -309,8 +369,7 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
     const section = sectionRef.current;
     const stage = stageRef.current;
     if (!section || !stage) return;
-    const P = TAB_P[k];
-    const p = P <= P_HOLD ? 0 : (P - P_HOLD) / (1 - P_HOLD);
+    const p = fromP(TAB_P[k]);
     const span = section.offsetHeight - stage.offsetHeight;
     const top = section.getBoundingClientRect().top + window.scrollY;
     window.scrollTo({ top: top + p * span, behavior: 'smooth' });
@@ -321,8 +380,9 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
       ref={sectionRef}
       id="surec"
       aria-labelledby="surec-title"
-      // Tall enough for the four stages; the stage is `svh` so a phone's sliding toolbar does not resize it.
-      className="bg-bg relative h-[200svh] lg:h-[300svh]"
+      // Tall enough for the four stages: two screens on phones (owner, 2026-10-28: longer felt too long
+      // there), three from tablets up. The stage is `svh` so a sliding toolbar does not resize it.
+      className="bg-bg relative h-[200svh] min-[721px]:h-[300svh]"
     >
       <div ref={stageRef} className="sticky top-0 h-svh overflow-hidden">
         <div role="img" aria-label={g.sceneLabel} className="absolute inset-0 pointer-events-none">
@@ -339,7 +399,10 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
 
         <div className="kv-gear-copy relative z-[2] h-full flex flex-col justify-center pt-[5.5rem] pb-28 pointer-events-none">
           <div className={WRAP}>
-            <div className="flex flex-col gap-4 lg:gap-6 max-w-[min(40rem,50vw)] max-[999px]:max-w-none pointer-events-auto">
+            <div
+              ref={copyRef}
+              className="kv-gear-copy-col flex flex-col gap-4 lg:gap-6 pointer-events-auto"
+            >
               <h2 id="surec-title" className={H2_CLASS}>
                 {g.title}
               </h2>
