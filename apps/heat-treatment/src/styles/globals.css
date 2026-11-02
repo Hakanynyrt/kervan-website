@@ -520,9 +520,11 @@ html:not(.js-anim) .min-h-dvh {
   }
 }
 
-/* Plant photo band (PlantPhoto): full-bleed (capped at the 2560 px source), caption chip bottom right. */
+/* Plant photo band (PlantPhoto): full-bleed (capped at the 2560 px source), caption chip bottom right.
+   Above ~1935 px a fixed 600 px would show less than the bottom half of the 16:9 frame and cut the
+   furnace motors, so the band grows with 31vw there (794 px at the 2560 px cap). */
 .kv-plant-frame {
-  height: min(56vw, 600px);
+  height: min(56vw, max(600px, min(31vw, 794px)));
 }
 @media (max-width: 720px) {
   .kv-plant-frame {
