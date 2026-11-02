@@ -198,9 +198,9 @@ html:not(.js-anim) .min-h-dvh {
    Hero (#top): the hot-charge photo full-bleed (capped at its 1280 px source,
    so it is never upscaled), a solid page-coloured text panel at its bottom right
    (no overlay, no gradient), so the charge on the left stays clear of it; the
-   caption chip sits bottom left. 721–1199 px: the panel narrows to 45vw so it
-   still ends right of the charge. Phones (≤ 720 px): a 132 px band of the hot
-   charge, then the text.
+   caption chip sits bottom left. 960–1199 px: the panel narrows to 45vw so it
+   still ends right of the charge; 721–959 px: a 360 px photo band, then the
+   text. Phones (≤ 720 px): a 132 px band of the hot charge, then the text.
 ═══════════════════════════════════════════════════════════════════════ */
 .kv-hero {
   position: relative;
@@ -258,10 +258,32 @@ html:not(.js-anim) .min-h-dvh {
   width: 100vw;
   background: var(--color-bg);
 }
-@media (min-width: 721px) and (max-width: 1199px) {
+@media (min-width: 960px) and (max-width: 1199px) {
   .kv-hero-panel {
     width: 45vw;
     padding: 32px 0 32px 32px;
+  }
+}
+/* 721–959 px (tablets): a panel beside the photo would cover the charge, so the photo is a
+   360 px band (its full width shows the whole charge) and the text follows below it. */
+@media (min-width: 721px) and (max-width: 959px) {
+  .kv-hero-photo {
+    position: relative;
+    left: auto;
+    width: auto;
+    height: 360px;
+    transform: none;
+  }
+  .kv-hero-wrap {
+    min-height: 0;
+    display: block;
+  }
+  .kv-hero-panel {
+    width: auto;
+    padding: 32px 0 8px;
+  }
+  .kv-hero-panel::before {
+    display: none;
   }
 }
 /* Hero photo: one-way, very slow scale 1 → 1.04 that holds at the end (no loop). Off for reduced motion. */

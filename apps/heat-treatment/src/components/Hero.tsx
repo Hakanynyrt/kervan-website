@@ -36,7 +36,8 @@ function PhoneIcon() {
  * The page opening (`#top`): the hot-charge photo full-bleed (capped at 1280 px) with a solid,
  * page-coloured text panel at its bottom right (the charge stays visible on the left, the caption
  * chip bottom left): H1, one paragraph, "Teklif Al" + the phone.
- * Phones: a 132 px band of the hot charge, then the text. The capacity spec table follows right
+ * Tablets (721–959 px): a 360 px photo band, then the text. Phones: a 132 px band of the hot
+ * charge, then the text. The capacity spec table follows right
  * below (TechnicalCapacity). No entrance animation: the heading is the LCP text and the page is
  * prerendered. The photo drifts a few percent larger over a long, one-way CSS animation
  * (`kv-hero-drift`, off for reduced motion).
