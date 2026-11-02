@@ -38,6 +38,8 @@ const FOOT_DOWN = 0.66;
 const FOOT_SIDE = 0.56;
 /** Gap between the free area and the copy / stage bar (px). */
 const GAP = 16;
+/** Stages this short (a phone in landscape) get the poster block instead of the pinned stage. */
+const SHORT_MQ = '(orientation: landscape) and (max-height: 440px)';
 
 interface Props {
   t: DictBlock;
@@ -61,8 +63,19 @@ export default function GearProcess({ t }: Props) {
       ?.saveData;
   });
   const onFail = useCallback(() => setFailed(true), []);
+  // A phone held sideways (a stage under ~440 px tall) has no room for the copy, the gear and the
+  // stage bar at once: the copy ran onto the bar. It gets the poster block; turning the phone back
+  // brings the pinned stage again.
+  const [short, setShort] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(SHORT_MQ);
+    const on = () => setShort(mq.matches);
+    on();
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
 
-  if (reduced || saveData || failed) return <GearStatic t={t} />;
+  if (reduced || saveData || failed || short) return <GearStatic t={t} />;
   return <GearPinned t={t} onFail={onFail} />;
 }
 
@@ -236,6 +249,10 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
         const top = cta.getBoundingClientRect().bottom - sr.top + GAP / 2;
         return fit(0, W, top, bottom, H, W);
       }
+      // side by side only when the narrower copy column still clears the stage bar (a phone held
+      // sideways wraps the heading and pushes the button onto the bar): D = -1 makes stacked win
+      if (copy.getBoundingClientRect().bottom > bar.top - GAP / 2)
+        return { cx: 0.7, cy: 0.5, D: -1 };
       // right of the copy's longest line, up to the stage bar's right end, under the header
       // (the line boxes of its text, not the column's box: the lines end well before it)
       const range = document.createRange();
