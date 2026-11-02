@@ -2,12 +2,12 @@ import { ORG_PHONE, ORG_PHONE_E164 } from '@kervan/seo';
 import type { DictBlock } from '../types';
 import { BTN_LINE, BTN_PRIMARY, WRAP } from '../lib/ui';
 
-/** The hero photos. A changed picture gets a new file name. Desktop: our own pot frame (owner,
- *  2026-10-28), 1280×720 in a box capped at 1280 px so it is never upscaled. Phones: a glowing
- *  charge lifted out of our pit furnace (owner-approved photo package, 2026-11; 780 / 1170 px, the
- *  same frame) as a 132 px band. On desktop the text panel would cover that charge, so the pot
- *  frame stays there until the owner picks a layout. */
-const PHOTO = '/photos/isil-islem/hero-pota-01-1280.webp';
+/** The hero photos. A changed picture gets a new file name. Both come from the same owner-approved
+ *  frame (photo package, 2026-11): a glowing charge on its fixture at the mouth of our pit furnace.
+ *  Desktop: a 1280×720 cut of it, anchored to the bottom with the charge in the left half (the text
+ *  panel sits on the right), in a box capped at 1280 px so it is never upscaled. Phones: the whole
+ *  frame (780 / 1170 px) as a 132 px band. */
+const PHOTO = '/photos/isil-islem/hero-kizgin-sarj-02-1280.webp';
 const PHOTO_PHONE =
   '/photos/isil-islem/hero-kizgin-sarj-01-780.webp 780w, /photos/isil-islem/hero-kizgin-sarj-01-1170.webp 1170w';
 
@@ -33,9 +33,11 @@ function PhoneIcon() {
 }
 
 /**
- * The page opening (`#top`): the furnace photo full-bleed (capped at 1280 px) with a solid,
- * page-coloured text panel at its bottom left: H1, one paragraph, "Teklif Al" + the phone.
- * Phones: a 132 px band of the hot charge, then the text. The capacity spec table follows right
+ * The page opening (`#top`): the hot-charge photo full-bleed (capped at 1280 px) with a solid,
+ * page-coloured text panel at its bottom right (the charge stays visible on the left, the caption
+ * chip bottom left): H1, one paragraph, "Teklif Al" + the phone.
+ * Tablets (721–959 px): a 360 px photo band, then the text. Phones: a 132 px band of the hot
+ * charge, then the text. The capacity spec table follows right
  * below (TechnicalCapacity). No entrance animation: the heading is the LCP text and the page is
  * prerendered. The photo drifts a few percent larger over a long, one-way CSS animation
  * (`kv-hero-drift`, off for reduced motion).

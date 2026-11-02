@@ -70,8 +70,8 @@ export const DICT: Dict = {
       sub: 'Sertleştirme ve temperleme. 42CrMo, 42CrMoA ve diğer alaşımlar — kendi ölçüm ve kontrol disiplinimizle.',
       cta: 'Teklif Al',
       photo: {
-        alt: 'Kartepe tesisimizde kuyu tipi fırın hattı ve fırın kapakları',
-        caption: 'Fırın ağzı',
+        alt: 'Kartepe tesisimizde kuyu tipi fırının ağzında, fikstürüyle vince asılı kızgın şarj',
+        caption: 'Pit fırın ağzında kızgın şarj',
       },
       film: {
         alt: 'Kartepe tesisimizde kuyu tipi fırın hattı: önde kapağı açık bir fırın, arkada üstünde alev yanan bir fırın',
@@ -334,8 +334,8 @@ export const DICT: Dict = {
       sub: 'Hardening and tempering. 42CrMo, 42CrMoA and other alloys — under our own measurement and control discipline.',
       cta: 'Get a Quote',
       photo: {
-        alt: 'The pit furnace line and furnace lids at our Kartepe plant',
-        caption: 'Furnace mouth',
+        alt: 'A glowing charge on its fixture, hanging from the crane at the mouth of a pit furnace in our Kartepe plant',
+        caption: 'Glowing charge at the pit furnace mouth',
       },
       film: {
         alt: 'Pit furnace line at our Kartepe plant: an open furnace in front, and behind it a furnace with a flame burning on top',
