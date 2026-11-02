@@ -9,6 +9,7 @@
  *                straw -> bronze -> purple -> blue -> dark blue-grey.
  *
  * Brightness only falls while cooling. The warm light sits on the gear's surface only (no glow, no halo). */
+import { P_HOLD, toP } from './gear-progress';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { mergeGeometries, toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -431,13 +432,17 @@ function makeSteam(count: number) {
     uCol: { value: new THREE.Color(0.45, 0.43, 0.41) },
     uAlpha: { value: 0.3 },
     uRise: { value: 1.0 },
+    // the free area's top edge (NDC y) and the fade band below it, so the steam never drifts over the copy
+    uCeil: { value: 0.9 },
+    uFadeA: { value: 0.4 },
+    uFadeB: { value: 0.15 },
   };
   const mat = new THREE.ShaderMaterial({
     uniforms: U,
     transparent: true,
     depthWrite: false,
     vertexShader: /* glsl */ `
-      attribute vec4 aSeed; uniform float uTime, uAmt, uS, uPx, uAlpha, uRise; uniform mat4 uPose;
+      attribute vec4 aSeed; uniform float uTime, uAmt, uS, uPx, uAlpha, uRise, uCeil, uFadeA, uFadeB; uniform mat4 uPose;
       varying float vA; varying float vLife; varying float vSd;
       void main(){
         float sp = 0.55 + 0.6 * aSeed.w;
@@ -453,7 +458,7 @@ function makeSteam(count: number) {
         gl_Position = projectionMatrix * mv;
         gl_PointSize = min(560.0, (0.30 + 1.0 * life) * uS * uPx / -mv.z);
         vec2 nd = gl_Position.xy / gl_Position.w;
-        float edgeFade = 1.0 - smoothstep(0.74, 0.99, nd.y);
+        float edgeFade = 1.0 - smoothstep(uCeil - uFadeA, uCeil - uFadeB, nd.y);
         vA = uAmt * uAlpha * smoothstep(0.0, 0.16, life) * pow(1.0 - life, 1.15) * edgeFade;
         vLife = life; vSd = aSeed.z * 13.0 + aSeed.w * 7.0;
       }`,
@@ -520,6 +525,8 @@ export interface GearLayout {
   cy: number;
   /** gear diameter in CSS px */
   D: number;
+  /** top of the free area around the gear (CSS px from the canvas top): the steam fades out below it */
+  top?: number;
 }
 export interface GearMountOptions {
   container: HTMLElement;
@@ -649,6 +656,11 @@ export async function mount({
     const W2 = H2 * (vw / vh);
     pose.position.set((L.cx * 2 - 1) * W2, -(L.cy * 2 - 1) * H2, 0);
     steam.U.uS.value = s;
+    // steam: gone by the free area's top edge (sprite centres fade 0.4 → 0.15 gear diameters below it)
+    const ceil = L.top ?? 0;
+    steam.U.uCeil.value = 1 - (2 * ceil) / vh;
+    steam.U.uFadeA.value = (2 * 0.4 * L.D) / vh;
+    steam.U.uFadeB.value = (2 * 0.15 * L.D) / vh;
   }
 
   const progress = () => {
@@ -657,8 +669,6 @@ export async function mount({
     const span = r.height - (stage?.offsetHeight || window.innerHeight);
     return span > 0 ? clamp01(-r.top / span) : 0;
   };
-  const P_HOLD = 0.36;
-  const toP = (p: number) => P_HOLD + (1 - P_HOLD) * p;
 
   let onScreen = false;
   const io = new IntersectionObserver(
@@ -804,8 +814,9 @@ export async function mount({
       steam.U.uCol.value.setRGB(0.8, 0.82, 0.86);
       steam.U.uAlpha.value = 0.36;
     } else {
-      steam.U.uCol.value.setRGB(0.38, 0.45, 0.54);
-      steam.U.uAlpha.value = 0.46;
+      // day: a pale cool veil (a dark slate tone read as grey smoke on the white page)
+      steam.U.uCol.value.setRGB(0.66, 0.71, 0.77);
+      steam.U.uAlpha.value = 0.4;
     }
     U.uT.value = st;
     ground.U.uHeat.value = smoothstep(0.2, 0.34, P) * (1 - smoothstep(0.42, 0.62, P));
