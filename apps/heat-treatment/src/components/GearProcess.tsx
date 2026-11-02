@@ -38,7 +38,7 @@ interface Props {
 
 /**
  * "Parçanın ısıl işlem yolu" (`#surec`): a 3D gear that heats, is quenched, is tempered and gets its
- * report as the visitor scrolls through a tall pinned section. It follows the hero and its film.
+ * report as the visitor scrolls through a tall pinned section. It follows the hero, the capacity table and the plant photo.
  *
  * Static mode (prerender + hydrate), reduced motion, Save-Data and any 3D failure: a normal block with
  * the poster and the four stages listed. Animated visitors get the pinned stage with the poster painted

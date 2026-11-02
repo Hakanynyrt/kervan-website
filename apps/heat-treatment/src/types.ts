@@ -84,8 +84,8 @@ export interface DictBlock {
     cta: string;
     /** The furnace hero photo: alt text and the caption on the photo. */
     photo: { alt: string; caption: string };
-    /** Hero film card (client-only video over a poster). */
-    film: { alt: string; caption: string; pause: string; play: string };
+    /** The furnace hall photo band after the capacity table (PlantPhoto). */
+    plant: { alt: string; caption: string };
   };
   /** The pinned "gear" section after the hero (GearProcess): four heat-treatment stages. */
   gear: {
