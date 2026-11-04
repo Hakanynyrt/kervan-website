@@ -1907,7 +1907,7 @@ export const DICT: Record<Lang, Dict> = {
       plus: '',
       incl: '',
       unit: (_gross, usd) => usd,
-      note: 'Export price: product price only, shipping is not included. Orders delivered within Türkiye are invoiced with Turkish taxes.',
+      note: 'Export price: product price only, shipping is not included. Orders delivered within Türkiye are invoiced with Turkish taxes. EU orders ship with an A.TR certificate (EU–Turkey Customs Union): no customs duty; import VAT is paid on arrival.',
     },
     cart: {
       title: 'Cart',
