@@ -576,6 +576,19 @@ export interface Dict {
   /** Cookie banner for Google Ads measurement (ConsentBanner). */
   consent: { title: string; body: string; accept: string; reject: string; policy: string };
   notFound: { title: string; body: string; home: string; ask: string };
+  /** Guide narrated videos (GuideVideo). */
+  guideMedia: {
+    videoTitle: string;
+    /** Under every video: the voice-over is synthetic (owner, 2026-11-02). */
+    videoVoice: string;
+    videoTranscript: string;
+    videoFallback: string;
+    youtube: string;
+    /** Screen-reader text after a link that opens in a new tab. */
+    newTab: string;
+    captionsTr: string;
+    captionsEn: string;
+  };
 }
 
 export const DICT: Record<Lang, Dict> = {
@@ -1572,6 +1585,16 @@ export const DICT: Record<Lang, Dict> = {
       home: 'Ana sayfaya dön',
       ask: 'WhatsApp’tan sorun',
     },
+    guideMedia: {
+      videoTitle: 'Videolu anlatım',
+      videoVoice: 'Seslendirme yapay sesle üretilmiştir.',
+      videoTranscript: 'Anlatım metni',
+      videoFallback: 'Videoyu indirin',
+      youtube: 'YouTube’da izleyin',
+      newTab: '(yeni sekmede açılır)',
+      captionsTr: 'Türkçe',
+      captionsEn: 'English',
+    },
   },
   en: {
     meta: {
@@ -2565,6 +2588,16 @@ export const DICT: Record<Lang, Dict> = {
       body: 'The page does not exist or has moved. Search your breaker model or browse our product groups.',
       home: 'Back to the home page',
       ask: 'Ask on WhatsApp',
+    },
+    guideMedia: {
+      videoTitle: 'Video walkthrough',
+      videoVoice: 'The voice-over is synthetic.',
+      videoTranscript: 'Transcript',
+      videoFallback: 'Download the video',
+      youtube: 'Watch on YouTube',
+      newTab: '(opens in a new tab)',
+      captionsTr: 'Türkçe',
+      captionsEn: 'English',
     },
   },
 };
