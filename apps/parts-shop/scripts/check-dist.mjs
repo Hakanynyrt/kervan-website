@@ -16,6 +16,8 @@
 //   the tax-inclusive TL price, TRY, valueAddedTaxIncluded true (with the build's CBRT rate; USD
 //   net without one); on English pages the net USD price, valueAddedTaxIncluded false. Counts only,
 //   never a price, in the output;
+// - every guide video is a visitor-started player with its files, captions and VideoObject
+//   (design.md "Motion"); caption files are served as text/vtt;
 // - at most MAX_FILES files (Pages limit).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -44,7 +46,7 @@ const walk = (d) => {
   for (const e of fs.readdirSync(d, { withFileTypes: true })) {
     const p = path.join(d, e.name);
     if (e.isDirectory()) walk(p);
-    else if (/\.(html|js|css|json|txt|xml)$/.test(e.name)) files.push(p);
+    else if (/\.(html|js|css|json|txt|xml|vtt)$/.test(e.name)) files.push(p);
   }
 };
 walk(DIST);
@@ -185,6 +187,37 @@ for (const f of files) {
       if (r.problem) problems.push(`${rel}: ${r.problem}`);
       else offerCounts[r.currency]++;
     }
+    // A guide video (GuideVideo): started by the visitor only, with its files and captions.
+    for (const v of s.matchAll(/<video\b([^>]*)>([\s\S]*?)<\/video>/g)) {
+      const [, attrs, inner] = v;
+      if (!/preload="none"/.test(attrs) || !/\bcontrols\b/.test(attrs) || !/poster="/.test(attrs))
+        problems.push(`${rel}: video without preload="none", controls or poster`);
+      if (/\b(autoplay|loop|muted)\b/.test(attrs)) problems.push(`${rel}: video starts by itself`);
+      if ((inner.match(/<track kind="captions"/g) ?? []).length !== 2)
+        problems.push(`${rel}: video without TR and EN captions`);
+      const refs = [
+        ...attrs.matchAll(/poster="([^"]+)"/g),
+        ...inner.matchAll(/src="([^"]+)"/g),
+      ].map((m) => m[1]);
+      for (const r of refs)
+        if (!r.startsWith('/') || !fs.existsSync(path.join(DIST, r)))
+          problems.push(`${rel}: video file ${r} not in dist`);
+    }
+    if (s.includes('<video')) {
+      const ld = [...s.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
+        .map((m) => {
+          try {
+            return JSON.parse(m[1]);
+          } catch {
+            return null;
+          }
+        })
+        .find((j) => j?.['@type'] === 'VideoObject');
+      if (!ld?.contentUrl?.startsWith(`${SITE}/`))
+        problems.push(`${rel}: video without VideoObject JSON-LD`);
+      else if (!fs.existsSync(path.join(DIST, ld.contentUrl.slice(SITE.length))))
+        problems.push(`${rel}: VideoObject contentUrl not in dist`);
+    }
     // A link-preview picture of our own /og/ folder must ship (public/og/, named in page-head.ts).
     for (const m of s.matchAll(/<meta property="og:image" content="([^"]+)"/g))
       if (
@@ -256,6 +289,31 @@ if (process.env.VITE_TIP_IMG_BASE) {
   const bad = files.filter((f) => f.endsWith('.html') && local.test(fs.readFileSync(f, 'utf8')));
   if (bad.length)
     problems.push(`${bad.length} pages still reference /photos/parca on this host (R2 build)`);
+}
+// Guide videos (public/videos/rehber): each caption file served as text/vtt by its own
+// _headers block, no mp4 over 20 MiB (Pages' file limit is 25 MiB); the Functions skip /videos.
+{
+  const headers = fs.existsSync(path.join(DIST, '_headers'))
+    ? fs.readFileSync(path.join(DIST, '_headers'), 'utf8')
+    : '';
+  const vdir = path.join(DIST, 'videos', 'rehber');
+  for (const f of fs.existsSync(vdir) ? fs.readdirSync(vdir) : []) {
+    const site = `/videos/rehber/${f}`;
+    if (
+      f.endsWith('.vtt') &&
+      !new RegExp(`^${site.replace(/\./g, '\\.')}\\r?\\n\\s+Content-Type: text/vtt`, 'm').test(
+        headers,
+      )
+    )
+      problems.push(`_headers: ${site} not served as text/vtt`);
+    if (f.endsWith('.mp4') && fs.statSync(path.join(vdir, f)).size > 20 * 1024 * 1024)
+      problems.push(`${site}: larger than 20 MiB`);
+  }
+  const routes = fs.existsSync(path.join(DIST, '_routes.json'))
+    ? JSON.parse(fs.readFileSync(path.join(DIST, '_routes.json'), 'utf8'))
+    : null;
+  if (!routes?.exclude?.includes('/videos/*'))
+    problems.push('_routes.json: /videos/* not excluded');
 }
 if (total > MAX_FILES)
   problems.push(`dist: ${total} files, more than ${MAX_FILES} (Pages limit 20,000)`);

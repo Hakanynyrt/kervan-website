@@ -140,7 +140,10 @@ export function pageInputs(p: PrerenderPage): string[] {
     case 'legal':
       return ['src/lib/legal.ts'];
     case 'guide':
-      return ['src/lib/guides.ts'];
+      // The article, its narrated steps and its video entry (the index page: the articles only).
+      return m.doc
+        ? ['src/lib/guides.ts', `src/lib/guide-steps/${m.doc}.ts`, 'src/lib/guide-videos.ts']
+        : ['src/lib/guides.ts'];
     default:
       return [];
   }

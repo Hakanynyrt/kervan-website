@@ -11,6 +11,7 @@ import {
 } from '@kervan/seo';
 import { DICT } from './dict';
 import { GUIDE_PICS, GUIDES, GUIDES_PATH, guidePicAbs, shownFigures } from './guides';
+import { GUIDE_VIDEOS, videoFiles } from './guide-videos';
 import { LEGAL, legalPath, SELLER } from './legal';
 import { localePath } from './locale-path';
 import { joinedSpelling } from './model-aliases';
@@ -255,6 +256,7 @@ export function pageHead({ lang, path, model, fx }: PageProps): HeadInput {
           jsonLd: crumbs([], g.title),
         };
       const d = g.items[model.doc];
+      const video = GUIDE_VIDEOS[model.doc];
       return {
         ...page,
         title: `${d.title} | ${m.brand}`,
@@ -281,6 +283,26 @@ export function pageHead({ lang, path, model, fx }: PageProps): HeadInput {
             publisher: SELLER_REF_LD,
           },
           crumbs([[g.title, GUIDES_PATH]], d.title),
+          // The narrated video (guide-videos.ts), when the guide has one. Its spoken language is
+          // Turkish on both pages (the English page has the English caption track); a video
+          // without a voice counts as Turkish too.
+          ...(video
+            ? [
+                {
+                  '@context': 'https://schema.org',
+                  '@type': 'VideoObject',
+                  name: d.title,
+                  description: d.lead,
+                  thumbnailUrl: [`${SITE}${videoFiles(video).jpg}`],
+                  contentUrl: `${SITE}${videoFiles(video).mp4}`,
+                  // With a time zone (Türkiye, UTC+3), as Google asks for.
+                  uploadDate: `${video.uploadDate}T00:00:00+03:00`,
+                  duration: video.durationIso,
+                  inLanguage: 'tr',
+                  publisher: SELLER_REF_LD,
+                },
+              ]
+            : []),
         ],
       };
     }

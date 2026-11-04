@@ -1,5 +1,6 @@
 import { Container } from '@kervan/ui';
 import { Breadcrumb, PageTitle } from '../components/Bits';
+import { GuideVideo } from '../components/GuideVideo';
 import { FOCUS } from '../components/Layout';
 import type { Dict } from '../lib/dict';
 import {
@@ -133,6 +134,7 @@ export default function Guide({
             </section>
           ))}
         </div>
+        <GuideVideo k={doc} lang={lang} t={t} />
       </article>
       <nav aria-labelledby="guide-parts" className="mt-12 border-t border-hair pt-8 font-sans">
         <h2 id="guide-parts" className="m-0 mb-4 text-sm font-bold text-ink">
