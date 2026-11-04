@@ -16,6 +16,7 @@ import {
   Terms,
   chipClass,
 } from '../components/Bits';
+import { PartVideos } from '../components/GuideVideo';
 import { FOCUS, whatsappHref } from '../components/Layout';
 import { PartPriceLine, partOrderText, priceNote } from '../components/PartOrder';
 import RenderGallery from '../components/RenderGallery';
@@ -408,6 +409,7 @@ export default function Part({
           />
         </aside>
       </div>
+      <PartVideos part={model.part} lang={lang} t={t} />
       <Guide
         id="part-guide"
         title={t.parts.guide[model.part].title}

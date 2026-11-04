@@ -588,6 +588,8 @@ export interface Dict {
     newTab: string;
     captionsTr: string;
     captionsEn: string;
+    /** Under a video on a parts page: the link to the whole guide. */
+    readGuide: string;
   };
 }
 
@@ -1594,6 +1596,7 @@ export const DICT: Record<Lang, Dict> = {
       newTab: '(yeni sekmede açılır)',
       captionsTr: 'Türkçe',
       captionsEn: 'English',
+      readGuide: 'Rehberin tamamını okuyun',
     },
   },
   en: {
@@ -2598,6 +2601,7 @@ export const DICT: Record<Lang, Dict> = {
       newTab: '(opens in a new tab)',
       captionsTr: 'Türkçe',
       captionsEn: 'English',
+      readGuide: 'Read the whole guide',
     },
   },
 };

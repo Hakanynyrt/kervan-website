@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BREAKER_BRANDS } from '@kervan/tips';
 import { GUIDE_STEPS } from './guide-steps/index.ts';
-import { GUIDE_VIDEOS, videoFiles } from './guide-videos.ts';
+import { GUIDE_VIDEOS, PART_VIDEOS, videoFiles } from './guide-videos.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.resolve(HERE, '..', '..');
@@ -145,4 +145,26 @@ test('every video entry ships its four files and stays honest', () => {
   }
   if (fs.existsSync(dir))
     for (const f of fs.readdirSync(dir)) assert.ok(named.has(f), `videos/rehber/${f}: no entry`);
+});
+
+test('parts pages show only guide videos that exist', () => {
+  const parts = [
+    'alt-govde',
+    'burc',
+    'kama',
+    'saplama',
+    'piston',
+    'akumulator',
+    'asinma-plakasi',
+    'tamir-takimi',
+    'tips',
+  ];
+  for (const [part, keys] of Object.entries(PART_VIDEOS)) {
+    assert.ok(parts.includes(part), `PART_VIDEOS: unknown page ${part}`);
+    assert.ok(keys && keys.length > 0 && keys.length <= 2, `${part}: one or two videos`);
+    for (const k of keys ?? []) {
+      assert.ok(KEYS.includes(k), `${part}: ${k} is not a guide`);
+      assert.ok(GUIDE_VIDEOS[k], `${part}: ${k} has no video`);
+    }
+  }
 });
