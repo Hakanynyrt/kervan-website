@@ -108,3 +108,13 @@ export const videoFiles = (v: GuideVideo) => ({
   tr: `${VIDEO_DIR}/${v.base}.tr.vtt`,
   en: `${VIDEO_DIR}/${v.base}.en.vtt`,
 });
+
+/** Which guide videos a parts page shows (owner, 2026-11-04): the page's own guide first. */
+export const PART_VIDEOS: Partial<Record<string, readonly GuideKey[]>> = {
+  'alt-govde': ['kirici-alt-govdesi-ne-zaman-degisir'],
+  burc: ['kirici-burcu-ne-zaman-degisir', 'kirici-yaglamasi-nasil-yapilir'],
+  kama: ['kirici-kamasi-neden-kirilir'],
+  saplama: ['kirici-saplamasi-neden-kopar'],
+  piston: ['kirici-pistonu-neden-cizilir'],
+  tips: ['keski-mi-sivri-uc-mu'],
+};

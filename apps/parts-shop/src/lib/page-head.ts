@@ -10,8 +10,15 @@ import {
   type HeadInput,
 } from '@kervan/seo';
 import { DICT } from './dict';
-import { GUIDE_PICS, GUIDES, GUIDES_PATH, guidePicAbs, shownFigures } from './guides';
-import { GUIDE_VIDEOS, videoFiles } from './guide-videos';
+import {
+  GUIDE_PICS,
+  GUIDES,
+  GUIDES_PATH,
+  guidePicAbs,
+  shownFigures,
+  type GuideKey,
+} from './guides';
+import { GUIDE_VIDEOS, PART_VIDEOS, videoFiles } from './guide-videos';
 import { LEGAL, legalPath, SELLER } from './legal';
 import { localePath } from './locale-path';
 import { joinedSpelling } from './model-aliases';
@@ -30,6 +37,7 @@ import { tipImgAbs } from './tip-img';
 import { shownTip } from './tip-options';
 import type { PageProps } from './page-props';
 import { SITE } from './site';
+import type { Lang } from '../types';
 import { photoImgAbs } from './photo-url';
 import { offerPrice } from './price';
 
@@ -107,6 +115,35 @@ const SELLER_REF_LD = {
  * group pages, and a Turkish group missing here, fall back to GENERAL_OG through ogOf. A changed
  * picture gets a new file name.
  */
+/**
+ * The narrated video's VideoObject (guide-videos.ts), when the guide has one. Its spoken language
+ * is Turkish on both pages (the English page has the English caption track); a video without a
+ * voice counts as Turkish too. The parts pages that show it carry the same object.
+ */
+function videoLd(k: GuideKey, lang: Lang) {
+  const video = GUIDE_VIDEOS[k];
+  if (!video) return [];
+  const d = GUIDES[lang].items[k];
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'VideoObject',
+      name: d.title,
+      description: d.lead,
+      thumbnailUrl: [`${SITE}${videoFiles(video).jpg}`],
+      contentUrl: `${SITE}${videoFiles(video).mp4}`,
+      // With a time zone (Türkiye, UTC+3), as Google asks for.
+      uploadDate: `${video.uploadDate}T00:00:00+03:00`,
+      duration: video.durationIso,
+      inLanguage: 'tr',
+      publisher: SELLER_REF_LD,
+    },
+  ];
+}
+
+const partVideosLd = (part: string, lang: Lang) =>
+  (PART_VIDEOS[part] ?? []).flatMap((k) => videoLd(k, lang));
+
 const PART_OG: Partial<Record<PartKey, string>> = {
   'alt-govde': '/og/og-alt-govde-v2.jpg',
   burc: '/og/og-burc-v2.jpg',
@@ -217,7 +254,7 @@ export function pageHead({ lang, path, model, fx }: PageProps): HeadInput {
         title: m.listTitle,
         description: m.listDesc,
         ...ogOf(lang, PAGE_OG.list),
-        jsonLd: crumbs([partsCrumb], t.parts.tips.name),
+        jsonLd: [crumbs([partsCrumb], t.parts.tips.name), ...partVideosLd('tips', lang)],
       };
     case 'popular':
       return {
@@ -256,7 +293,6 @@ export function pageHead({ lang, path, model, fx }: PageProps): HeadInput {
           jsonLd: crumbs([], g.title),
         };
       const d = g.items[model.doc];
-      const video = GUIDE_VIDEOS[model.doc];
       return {
         ...page,
         title: `${d.title} | ${m.brand}`,
@@ -286,23 +322,7 @@ export function pageHead({ lang, path, model, fx }: PageProps): HeadInput {
           // The narrated video (guide-videos.ts), when the guide has one. Its spoken language is
           // Turkish on both pages (the English page has the English caption track); a video
           // without a voice counts as Turkish too.
-          ...(video
-            ? [
-                {
-                  '@context': 'https://schema.org',
-                  '@type': 'VideoObject',
-                  name: d.title,
-                  description: d.lead,
-                  thumbnailUrl: [`${SITE}${videoFiles(video).jpg}`],
-                  contentUrl: `${SITE}${videoFiles(video).mp4}`,
-                  // With a time zone (Türkiye, UTC+3), as Google asks for.
-                  uploadDate: `${video.uploadDate}T00:00:00+03:00`,
-                  duration: video.durationIso,
-                  inLanguage: 'tr',
-                  publisher: SELLER_REF_LD,
-                },
-              ]
-            : []),
+          ...videoLd(model.doc, lang),
         ],
       };
     }
@@ -321,7 +341,7 @@ export function pageHead({ lang, path, model, fx }: PageProps): HeadInput {
         title: m.partTitle(name),
         description: m.partDesc(name, model.part === 'tamir-takimi'),
         ...ogOf(lang, PART_OG[model.part]),
-        jsonLd: crumbs([partsCrumb], name),
+        jsonLd: [crumbs([partsCrumb], name), ...partVideosLd(model.part, lang)],
       };
     }
     case 'partItem': {
