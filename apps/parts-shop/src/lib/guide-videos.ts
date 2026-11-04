@@ -34,6 +34,7 @@ export const GUIDE_VIDEOS: Partial<Record<GuideKey, GuideVideo>> = {
     durationIso: 'PT31S',
     uploadDate: '2026-11-04',
     voice: 'synthetic',
+    youtubeUrl: 'https://www.youtube.com/watch?v=pgNCjud12tg',
   },
   'kirici-ucu-ne-zaman-degisir': {
     base: 'kirici-ucu-ne-zaman-degisir-01',
@@ -42,6 +43,7 @@ export const GUIDE_VIDEOS: Partial<Record<GuideKey, GuideVideo>> = {
     durationIso: 'PT31S',
     uploadDate: '2026-11-04',
     voice: 'synthetic',
+    youtubeUrl: 'https://www.youtube.com/watch?v=QigIJREC7XE',
   },
   'kirici-burcu-ne-zaman-degisir': {
     base: 'kirici-burcu-ne-zaman-degisir-01',
@@ -50,6 +52,7 @@ export const GUIDE_VIDEOS: Partial<Record<GuideKey, GuideVideo>> = {
     durationIso: 'PT32S',
     uploadDate: '2026-11-04',
     voice: 'synthetic',
+    youtubeUrl: 'https://www.youtube.com/watch?v=DRcIEWR65ow',
   },
   'kirici-kamasi-neden-kirilir': {
     base: 'kirici-kamasi-neden-kirilir-01',
@@ -58,6 +61,7 @@ export const GUIDE_VIDEOS: Partial<Record<GuideKey, GuideVideo>> = {
     durationIso: 'PT37S',
     uploadDate: '2026-11-04',
     voice: 'synthetic',
+    youtubeUrl: 'https://www.youtube.com/watch?v=8XwZi2ilSb8',
   },
   'keski-mi-sivri-uc-mu': {
     base: 'keski-mi-sivri-uc-mu-01',
@@ -66,6 +70,7 @@ export const GUIDE_VIDEOS: Partial<Record<GuideKey, GuideVideo>> = {
     durationIso: 'PT31S',
     uploadDate: '2026-11-04',
     voice: 'synthetic',
+    youtubeUrl: 'https://www.youtube.com/watch?v=o0FE6QyUylo',
   },
   'kirici-alt-govdesi-ne-zaman-degisir': {
     base: 'kirici-alt-govdesi-ne-zaman-degisir-01',
@@ -74,6 +79,7 @@ export const GUIDE_VIDEOS: Partial<Record<GuideKey, GuideVideo>> = {
     durationIso: 'PT31S',
     uploadDate: '2026-11-04',
     voice: 'synthetic',
+    youtubeUrl: 'https://www.youtube.com/watch?v=CWCQRZu9IDM',
   },
   'kirici-pistonu-neden-cizilir': {
     base: 'kirici-pistonu-neden-cizilir-01',
@@ -82,6 +88,7 @@ export const GUIDE_VIDEOS: Partial<Record<GuideKey, GuideVideo>> = {
     durationIso: 'PT38S',
     uploadDate: '2026-11-04',
     voice: 'synthetic',
+    youtubeUrl: 'https://www.youtube.com/watch?v=c7vLDBucWqw',
   },
   'kirici-saplamasi-neden-kopar': {
     base: 'kirici-saplamasi-neden-kopar-01',
@@ -90,6 +97,7 @@ export const GUIDE_VIDEOS: Partial<Record<GuideKey, GuideVideo>> = {
     durationIso: 'PT41S',
     uploadDate: '2026-11-04',
     voice: 'synthetic',
+    youtubeUrl: 'https://www.youtube.com/watch?v=0zt9wKxRvQY',
   },
 };
 
