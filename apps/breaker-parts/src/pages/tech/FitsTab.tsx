@@ -8,7 +8,16 @@ import {
   rewriteQuery,
 } from '@kervan/tips';
 import type { DictBlock, Lang } from '../../types';
-import { type Part, type SamePartsGroup, nameKeys, samePartsFor } from '../../lib/same-parts';
+import { type SamePartsGroup, nameKeys, samePartsFor, searchParts } from '../../lib/same-parts';
+import {
+  RECENT_KEY,
+  STAR_KEY,
+  pushRecent,
+  readList,
+  toggleStar,
+  writeList,
+} from '../../lib/tech-recent';
+import type { Part } from '../../lib/same-parts';
 import type { CatalogStatus } from '../../lib/use-vega-catalog';
 import { FITS_HASH } from './fits-hash';
 import { buildAnswer, whatsappLink } from '../../lib/share-answer';
@@ -27,19 +36,31 @@ interface Props {
   retry: () => void;
 }
 
-type View = { mode: 'breaker'; slug: string | null } | { mode: 'tip'; d: number | null };
+type View =
+  | { mode: 'breaker'; slug: string | null }
+  | { mode: 'tip'; d: number | null }
+  | { mode: 'part'; q: string };
 
 function parseHash(h: string): View {
   const rest = h.startsWith(FITS_HASH) ? h.slice(FITS_HASH.length) : '';
-  const m = /^\/(k|d)\/(.+)$/.exec(rest);
+  if (rest === '/p') return { mode: 'part', q: '' };
+  const m = /^\/(k|d|p)\/(.+)$/.exec(rest);
   if (!m) return rest === '/d' ? { mode: 'tip', d: null } : { mode: 'breaker', slug: null };
-  const v = decodeURIComponent(m[2]);
+  let v = m[2];
+  try {
+    v = decodeURIComponent(v);
+  } catch {
+    /* a hand-typed hash: keep it as it is */
+  }
+  if (m[1] === 'p') return { mode: 'part', q: v };
   if (m[1] === 'k') return { mode: 'breaker', slug: v };
   const n = Number(v);
   return { mode: 'tip', d: Number.isFinite(n) && n > 0 ? n : null };
 }
 
 function toHash(v: View): string {
+  if (v.mode === 'part')
+    return v.q ? `${FITS_HASH}/p/${encodeURIComponent(v.q)}` : `${FITS_HASH}/p`;
   if (v.mode === 'breaker')
     return v.slug ? `${FITS_HASH}/k/${encodeURIComponent(v.slug)}` : FITS_HASH;
   return v.d === null ? `${FITS_HASH}/d` : `${FITS_HASH}/d/${v.d}`;
@@ -157,31 +178,33 @@ function Ready({
   };
   const bySlug = useMemo(() => new Map(fits.breakers.map((b, i) => [b.slug, i])), [fits]);
   const pickBreaker = (i: number) => go({ mode: 'breaker', slug: fits.breakers[i].slug });
+  const modes =
+    parts.length > 0 ? (['breaker', 'tip', 'part'] as const) : (['breaker', 'tip'] as const);
+  const startOf = (m: View['mode']): View =>
+    m === 'breaker'
+      ? { mode: 'breaker', slug: null }
+      : m === 'tip'
+        ? { mode: 'tip', d: null }
+        : { mode: 'part', q: '' };
 
   return (
     <div className="flex flex-col gap-6">
       <Head t={t} fits={fits} />
       <div role="radiogroup" aria-label={c.modesLabel} className="flex flex-wrap gap-2">
-        {(['breaker', 'tip'] as const).map((m) => (
+        {modes.map((m) => (
           <button
             key={m}
             type="button"
             role="radio"
             aria-checked={view.mode === m}
-            onClick={() =>
-              view.mode !== m &&
-              go(
-                m === 'breaker' ? { mode: 'breaker', slug: null } : { mode: 'tip', d: null },
-                false,
-              )
-            }
+            onClick={() => view.mode !== m && go(startOf(m), false)}
             className={`${chipCls} ${
               view.mode === m
                 ? 'bg-brand text-on-brand rounded-[2px] font-semibold border-brand'
                 : 'border-hair-strong text-ink hover:border-ink-mid'
             }`}
           >
-            {m === 'breaker' ? c.modeBreaker : c.modeTip}
+            {m === 'breaker' ? c.modeBreaker : m === 'tip' ? c.modeTip : c.modePart}
           </button>
         ))}
       </div>
@@ -196,6 +219,20 @@ function Ready({
           onPick={pickBreaker}
           onClear={() => go({ mode: 'breaker', slug: null }, false)}
           resultRef={resultRef}
+        />
+      ) : view.mode === 'part' ? (
+        <PartView
+          t={t}
+          fits={fits}
+          parts={parts}
+          lang={lang}
+          q={view.q}
+          // Typing replaces the entry (no history step per letter); picks still push one.
+          onQuery={(q) => {
+            setView({ mode: 'part', q });
+            window.history.replaceState(null, '', toHash({ mode: 'part', q }));
+          }}
+          onPick={pickBreaker}
         />
       ) : (
         <TipView
@@ -263,6 +300,47 @@ function BreakerView({
   }, [dq, fits, names, makes]);
 
   const b = selected !== null ? fits.breakers[selected] : null;
+  // This phone's recent and starred breakers (slugs only, cleared on sign-out).
+  const [recent, setRecent] = useState<string[]>(() => readList(RECENT_KEY));
+  const [stars, setStars] = useState<string[]>(() => readList(STAR_KEY));
+  useEffect(() => {
+    if (!b) return;
+    setRecent((r) => {
+      const next = pushRecent(r, b.slug);
+      writeList(RECENT_KEY, next);
+      return next;
+    });
+  }, [b]);
+  const starred = b ? stars.includes(b.slug) : false;
+  const flipStar = () => {
+    if (!b) return;
+    const next = toggleStar(stars, b.slug);
+    setStars(next);
+    writeList(STAR_KEY, next);
+  };
+  const bySlug = useMemo(() => new Map(fits.breakers.map((x, i) => [x.slug, i])), [fits]);
+  const shortList = (slugs: string[], label: string) => {
+    const ids = slugs.map((s) => bySlug.get(s)).filter((i): i is number => i !== undefined);
+    if (!ids.length) return null;
+    return (
+      <div className="flex flex-col gap-2">
+        <h2 className={`${labelCls} m-0`}>{label}</h2>
+        <ul className="list-none m-0 p-0 flex flex-wrap gap-2">
+          {ids.map((i) => (
+            <li key={fits.breakers[i].slug}>
+              <button
+                type="button"
+                onClick={() => onPick(i)}
+                className={`${chipCls} border-hair-strong text-ink hover:border-brand`}
+              >
+                {fits.breakers[i].name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2 max-w-[640px]">
@@ -351,6 +429,14 @@ function BreakerView({
             </h2>
             <button
               type="button"
+              onClick={flipStar}
+              aria-pressed={starred}
+              className={`${chipCls} min-h-10 ${starred ? 'border-brand text-ink' : 'border-hair-strong text-ink-mid'}`}
+            >
+              <span aria-hidden="true">{starred ? '★' : '☆'}</span> {starred ? c.starred : c.star}
+            </button>
+            <button
+              type="button"
               onClick={onClear}
               className={`font-sans text-sm text-ink-mid hover:text-ink underline underline-offset-4 ${focusRing}`}
             >
@@ -372,7 +458,13 @@ function BreakerView({
           ))}
         </section>
       ) : (
-        !found && <p className="font-sans text-ink-mid m-0">{c.pickHint}</p>
+        !found && (
+          <>
+            {shortList(stars, c.starredList)}
+            {shortList(recent, c.recentList)}
+            <p className="font-sans text-ink-mid m-0">{c.pickHint}</p>
+          </>
+        )
       )}
     </div>
   );
@@ -651,9 +743,9 @@ function SameParts({
                     </button>
                   ) : (
                     <span
-                      className={`${chipCls} inline-flex items-center border-hair text-ink bg-bg`}
+                      className={`${chipCls} inline-flex items-center gap-1 border-hair text-ink bg-bg`}
                     >
-                      {o}
+                      {o} <span className="text-xs text-ink-soft">({c.notInShop})</span>
                     </span>
                   )}
                 </li>
@@ -876,6 +968,110 @@ function QuoteLines({
           </span>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Part search over the owner's same-parts list: "piston", "burç 70", "MTB 30 kama". */
+function PartView({
+  t,
+  fits,
+  parts,
+  lang,
+  q,
+  onQuery,
+  onPick,
+}: {
+  t: DictBlock;
+  fits: FitsIndex;
+  parts: SamePartsGroup[];
+  lang: Lang;
+  q: string;
+  onQuery: (q: string) => void;
+  onPick: (i: number) => void;
+}) {
+  const c = t.fitsUi;
+  const dq = useDeferredValue(q);
+  const hits = useMemo(() => searchParts(dq, parts, lang), [dq, parts, lang]);
+  const byKey = useMemo(() => {
+    const m = new Map<string, number>();
+    fits.breakers.forEach((x, i) => {
+      for (const k of nameKeys(x.name)) if (!m.has(k)) m.set(k, i);
+    });
+    return m;
+  }, [fits]);
+  const find = (name: string) =>
+    nameKeys(name)
+      .map((k) => byKey.get(k))
+      .find((x) => x !== undefined);
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2 max-w-[640px]">
+        <label htmlFor="fits-part" className={labelCls}>
+          {c.partLabel}
+        </label>
+        <input
+          id="fits-part"
+          type="search"
+          autoFocus
+          autoComplete="off"
+          spellCheck={false}
+          value={q}
+          onChange={(e) => onQuery(e.target.value)}
+          placeholder={c.partPlaceholder}
+          className={inputCls}
+        />
+      </div>
+      {!dq.trim() ? (
+        <p className="font-sans text-ink-mid m-0">{fill(c.partHint, { n: parts.length })}</p>
+      ) : hits.length === 0 ? (
+        <p role="status" className="font-sans text-ink-mid m-0">
+          {c.partNone}
+        </p>
+      ) : (
+        <ul aria-label={c.partResults} className="list-none m-0 p-0 flex flex-col gap-3">
+          {hits.map((h) => (
+            <li
+              key={`${h.models.join('|')}|${h.name}|${h.differs}`}
+              className={`border rounded-md bg-bg-soft p-4 flex flex-col gap-2 ${h.differs ? 'border-hair-strong' : 'border-brand'}`}
+            >
+              <p className="font-sans m-0">
+                <span className="font-semibold text-ink">{h.name}</span>
+                {h.size && <span className="text-ink-mid"> · {h.size}</span>}
+              </p>
+              <p className="font-sans text-sm m-0 text-ink-mid">
+                {h.differs ? c.partDiffers : c.partSame}
+              </p>
+              <ul className="list-none m-0 p-0 flex flex-wrap gap-2">
+                {h.models.map((m) => {
+                  const i = find(m);
+                  return (
+                    <li key={m}>
+                      {i !== undefined ? (
+                        <button
+                          type="button"
+                          onClick={() => onPick(i)}
+                          aria-label={fill(c.openBreaker, { name: fits.breakers[i].name })}
+                          className={`${chipCls} border-hair text-ink hover:border-brand bg-bg`}
+                        >
+                          {m}
+                        </button>
+                      ) : (
+                        <span
+                          className={`${chipCls} inline-flex items-center gap-1 border-hair text-ink bg-bg`}
+                        >
+                          {m} <span className="text-xs text-ink-soft">({c.notInShop})</span>
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+              {h.note && <p className="font-sans text-xs text-ink-soft m-0">{h.note}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { nameKeys, parseSameParts, samePartsFor } from './same-parts.ts';
+import { nameKeys, parseSameParts, samePartsFor, searchParts } from './same-parts.ts';
 
 // Invented rows only: the real list lives in the private KV key, never in the repo.
 const RAW = {
@@ -58,4 +58,32 @@ test('samePartsFor matches spacing and case, and lists the other breakers', () =
 
 test('nameKeys falls back to the folded name for unknown makes', () => {
   assert.deepEqual(nameKeys('Zzz Q-1'), ['zzzq1']);
+});
+
+test('searchParts finds parts by name, size and breaker, same before different', () => {
+  const g = parseSameParts({
+    groups: [
+      {
+        models: ['Zzz A 1', 'Qqq B 2'],
+        same: {
+          tr: [
+            { name: 'Piston', size: 'boy 500' },
+            { name: 'Kafa burcu', size: 'iç Ø70' },
+          ],
+        },
+        different: { tr: [{ name: 'Yan saplama', size: 'Ø32' }] },
+      },
+    ],
+  });
+  assert.deepEqual(
+    searchParts('piston', g, 'tr').map((h) => h.name),
+    ['Piston'],
+  );
+  assert.deepEqual(
+    searchParts('burç 70', g, 'tr').map((h) => h.name),
+    ['Kafa burcu'],
+  );
+  assert.equal(searchParts('qqq b2 saplama', g, 'tr')[0].differs, true);
+  assert.deepEqual(searchParts('', g, 'tr'), []);
+  assert.deepEqual(searchParts('valf', g, 'tr'), []);
 });

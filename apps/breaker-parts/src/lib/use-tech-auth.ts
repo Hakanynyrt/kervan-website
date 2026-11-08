@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { TechContent } from '../types';
+import { clearTechLocal } from './tech-recent';
 
 /** 'expired': the session ran out mid-use; the page keeps its data and asks for the password inline. */
 export type TechState = 'unknown' | 'anon' | 'authed' | 'expired';
@@ -47,13 +48,14 @@ export function useTechAuth() {
     };
   }, []);
 
-  const login = useCallback(async (password: string): Promise<LoginResult> => {
+  /** `remember`: keep this phone signed in for 30 days (opt-in). */
+  const login = useCallback(async (password: string, remember = false): Promise<LoginResult> => {
     try {
       const r = await fetch('/api/tech/login', {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'kv' },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password, remember }),
       });
       if (r.status === 503) return 'not_configured';
       if (r.status === 401) return 'wrong';
@@ -77,6 +79,8 @@ export function useTechAuth() {
         body: '{}',
       });
     } finally {
+      // This phone's recent and starred lists go with the session.
+      clearTechLocal();
       setContent(null);
       setState('anon');
     }
