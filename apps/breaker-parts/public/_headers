@@ -38,6 +38,10 @@
 /manifest.webmanifest
   Content-Type: application/manifest+json
   Cache-Control: public, max-age=3600
+/teknik.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: public, max-age=3600
+  X-Robots-Tag: noindex
 /logo-krv-v2.svg
   Cache-Control: public, max-age=31536000, immutable
 /logo-krv-v2-256.png

@@ -27,13 +27,13 @@ try {
 
   let count = 0;
   for (const page of ssr.pages()) {
-    const html = ssr.injectHead(template, {
+    const html = ssr.withAppIdentity(ssr.injectHead(template, {
       lang: page.lang,
       headTags: ssr.headTags(page.url),
       appHtml: ssr.render(page.url),
       headPrepend,
       rootAttrs: `${ssr.PRERENDERED_ATTR}=""`,
-    });
+    }), page.url);
     const out = path.join(DIST, page.file);
     fs.mkdirSync(path.dirname(out), { recursive: true });
     fs.writeFileSync(out, html);

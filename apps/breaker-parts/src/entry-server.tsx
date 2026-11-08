@@ -122,3 +122,5 @@ export function sitemapPages(): SitemapPage[] {
 
 /** For the build log / sanity checks. */
 export const PRODUCT_SLUGS = PRODUCTS.map((p) => p.slug);
+
+export { withAppIdentity } from './lib/app-identity';
