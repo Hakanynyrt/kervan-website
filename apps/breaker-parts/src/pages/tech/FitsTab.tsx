@@ -11,6 +11,8 @@ import type { DictBlock, Lang } from '../../types';
 import { type Part, type SamePartsGroup, nameKeys, samePartsFor } from '../../lib/same-parts';
 import type { CatalogStatus } from '../../lib/use-vega-catalog';
 import { FITS_HASH } from './fits-hash';
+import { buildAnswer, whatsappLink } from '../../lib/share-answer';
+import { shopUrl } from '../../lib/shop';
 
 interface Props {
   t: DictBlock;
@@ -94,9 +96,9 @@ function Head({ t, fits }: { t: DictBlock; fits?: FitsIndex }) {
   return (
     <header className="flex flex-col gap-2 mb-2">
       <h1 className="font-sans text-2xl md:text-3xl font-semibold text-ink m-0">{c.title}</h1>
-      <p className="font-sans text-ink-mid m-0 max-w-[70ch]">{c.sub}</p>
+      <p className="hidden md:block font-sans text-ink-mid m-0 max-w-[70ch]">{c.sub}</p>
       {fits && (
-        <p className="font-sans text-sm text-ink-soft m-0">
+        <p className="hidden md:block font-sans text-sm text-ink-soft m-0">
           {fill(c.stats, {
             breakers: fits.breakers.length,
             families: fits.families.length,
@@ -104,7 +106,7 @@ function Head({ t, fits }: { t: DictBlock; fits?: FitsIndex }) {
           })}
         </p>
       )}
-      <p className="font-sans text-xs text-ink-soft m-0">{c.privacy}</p>
+      <p className="hidden md:block font-sans text-xs text-ink-soft m-0">{c.privacy}</p>
     </header>
   );
 }
@@ -262,6 +264,8 @@ function BreakerView({
         <div className="flex gap-2">
           <input
             id="fits-q"
+            // Opening the tab is opening the search: one tap less on the phone.
+            autoFocus={selected === null}
             type="search"
             inputMode="search"
             autoComplete="off"
@@ -354,6 +358,7 @@ function BreakerView({
               fam={fits.families[fi]}
               current={selected}
               onPick={onPick}
+              lang={lang}
             />
           ))}
         </section>
@@ -482,6 +487,7 @@ function FamilyCard({
   fam,
   current,
   onPick,
+  lang,
 }: {
   t: DictBlock;
   fits: FitsIndex;
@@ -489,6 +495,8 @@ function FamilyCard({
   /** The breaker this card is shown for (left out of the list), or null for all. */
   current: number | null;
   onPick: (i: number) => void;
+  /** Set when shown for a picked breaker: offers the customer-ready answer. */
+  lang?: Lang;
 }) {
   const c = t.fitsUi;
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -518,6 +526,9 @@ function FamilyCard({
           {fam.types.map((x) => c.tipTypes[x]).join(', ')}
         </p>
       </div>
+      {current !== null && lang && (
+        <ShareAnswer t={t} lang={lang} fits={fits} fam={fam} current={current} />
+      )}
       <p className="font-sans text-sm font-medium text-ink m-0">
         {others.length === 0
           ? c.noOthers
@@ -672,6 +683,114 @@ function PartRows({ label, rows, sizeLabel }: { label: string; rows: Part[]; siz
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+/** "Müşteriye gönder": an editable, customer-ready answer for the picked breaker and this tip,
+ *  shared (phone), copied or opened in WhatsApp. Public fields only (see buildAnswer). */
+function ShareAnswer({
+  t,
+  lang,
+  fits,
+  fam,
+  current,
+}: {
+  t: DictBlock;
+  lang: Lang;
+  fits: FitsIndex;
+  fam: FitsFamily;
+  current: number;
+}) {
+  const c = t.fitsUi;
+  const b = fits.breakers[current];
+  const initial = useMemo(
+    () => buildAnswer(b, fam, (x) => c.tipTypes[x], shopUrl(`/kirici/${b.slug}`, lang), c.answer),
+    [b, fam, c, lang],
+  );
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState(initial);
+  const [note, setNote] = useState<string | null>(null);
+  useEffect(() => setText(initial), [initial]);
+  const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setNote(c.answerCopied);
+    } catch {
+      setNote(c.answerCopyFailed);
+    }
+  };
+  const share = async () => {
+    try {
+      await navigator.share({ text });
+    } catch {
+      /* closed by the user */
+    }
+  };
+  const id = `answer-${fam.code}`;
+  if (!open)
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={`self-start ${chipCls} border-brand text-ink hover:bg-bg`}
+      >
+        {c.answerOpen}
+      </button>
+    );
+  return (
+    <div className="flex flex-col gap-2 border-t border-hair pt-3">
+      <label htmlFor={id} className={labelCls}>
+        {c.answerLabel}
+      </label>
+      <textarea
+        id={id}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={5}
+        className={`${inputCls} py-2 min-h-24 text-sm`}
+      />
+      <div className="flex flex-wrap gap-2">
+        {canShare && (
+          <button
+            type="button"
+            onClick={() => void share()}
+            className={`${chipCls} bg-brand text-on-brand border-brand font-semibold`}
+          >
+            {c.answerShare}
+          </button>
+        )}
+        <a
+          href={whatsappLink(text)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${chipCls} inline-flex items-center border-hair-strong text-ink hover:border-brand`}
+        >
+          {c.answerWhatsapp}
+        </a>
+        <button
+          type="button"
+          onClick={() => void copy()}
+          className={`${chipCls} border-hair-strong text-ink hover:border-brand`}
+        >
+          {c.answerCopy}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(false);
+            setNote(null);
+          }}
+          className={`${chipCls} border-transparent text-ink-mid hover:text-ink`}
+        >
+          {c.answerClose}
+        </button>
+      </div>
+      <p role="status" className="font-sans text-sm text-ink-mid m-0 min-h-5">
+        {note}
+      </p>
+      <p className="font-sans text-xs text-ink-soft m-0">{c.answerHint}</p>
     </div>
   );
 }

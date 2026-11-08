@@ -178,6 +178,11 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
     [scored, dMeasure],
   );
   const [likelyOpen, setLikelyOpen] = useState(false);
+  const [measureOpen, setMeasureOpen] = useState(false);
+  const measureCount = Object.keys(measure).length;
+  const featCount = Object.keys(feat).length;
+  // Open whenever a measure or feature is set, so a filter is never hidden in a closed panel.
+  const measureShown = measureOpen || measureCount > 0 || featCount > 0;
 
   useEffect(() => setLimit(PAGE), [text, brand, tip, hideLow, popularOnly, measure, tol, feat]);
 
@@ -233,6 +238,33 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
     setTonsRaw('');
   };
 
+  const clearAll = () => {
+    setText('');
+    setBrand('');
+    setTip('');
+    setHideLow(false);
+    setPopularOnly(false);
+    setTol(DEFAULT_TOL);
+    clearMeasure();
+    document.getElementById('vc-q')?.focus();
+  };
+  const active: { key: string; label: string; clear: () => void }[] = [
+    text.trim() ? { key: 'q', label: `“${text.trim()}”`, clear: () => setText('') } : null,
+    brand ? { key: 'b', label: brand, clear: () => setBrand('') } : null,
+    tip ? { key: 't', label: c.tipLabels[tip], clear: () => setTip('') } : null,
+    popularOnly ? { key: 'p', label: c.popularOnly, clear: () => setPopularOnly(false) } : null,
+    hideLow ? { key: 'h', label: c.hideLow, clear: () => setHideLow(false) } : null,
+    measureCount > 0
+      ? { key: 'm', label: fill(c.chipMeasure, { n: measureCount }), clear: clearMeasure }
+      : null,
+    featCount > 0
+      ? { key: 'f', label: fill(c.chipFeat, { n: featCount }), clear: clearMeasure }
+      : null,
+    tol !== DEFAULT_TOL
+      ? { key: 'tol', label: `±${tol} mm`, clear: () => setTol(DEFAULT_TOL) }
+      : null,
+  ].filter((x): x is { key: string; label: string; clear: () => void } => x !== null);
+
   const renderHits = (hits: Hit[], max: number) =>
     hits.slice(0, max).map((h, i) => (
       <ItemCard
@@ -251,7 +283,8 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
         pop={pop}
         onMeasure={() => {
           setText('');
-          document.getElementById('vc-m-dia')?.focus();
+          setMeasureOpen(true);
+          requestAnimationFrame(() => document.getElementById('vc-m-dia')?.focus());
         }}
       />
     ));
@@ -263,10 +296,12 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
   let budget = limit;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-sans font-bold text-3xl text-ink tracking-[-0.02em] m-0">{c.title}</h1>
-        <p className="font-sans text-ink-mid mt-2 mb-0 max-w-[60ch]">{c.sub}</p>
+        <h1 className="font-sans font-semibold text-2xl md:text-3xl text-ink tracking-[-0.02em] m-0">
+          {c.title}
+        </h1>
+        <p className="hidden md:block font-sans text-ink-mid mt-2 mb-0 max-w-[60ch]">{c.sub}</p>
       </div>
 
       {/* Text search + filters */}
@@ -277,6 +312,8 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
           </label>
           <input
             id="vc-q"
+            // The tab is opened to look something up: focus the box (saves a tap on the phone).
+            autoFocus
             type="search"
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -321,17 +358,8 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
             ))}
           </div>
         </div>
-        <label className="md:col-span-12 flex items-center gap-3 min-h-11 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={hideLow}
-            onChange={(e) => setHideLow(e.target.checked)}
-            className="w-5 h-5 accent-brand"
-          />
-          <span className="font-sans text-sm text-ink-mid">{c.hideLow}</span>
-        </label>
         {pop.tier.size > 0 && (
-          <label className="md:col-span-12 flex items-center gap-3 min-h-11 cursor-pointer -mt-2">
+          <label className="md:col-span-12 flex items-center gap-3 min-h-11 cursor-pointer">
             <input
               type="checkbox"
               checked={popularOnly}
@@ -346,209 +374,242 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
         )}
       </div>
 
-      {/* Measure form */}
-      <fieldset className="border border-hair rounded-[14px] p-5 md:p-6 m-0 min-w-0">
-        <legend className="px-2 font-sans font-semibold text-xl text-ink">{c.measureTitle}</legend>
-        <p className="font-sans text-sm text-ink-mid mt-0 mb-5 max-w-[70ch]">{c.measureHint}</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {MEASURE_FIELDS.map(({ key, label, optional }) => {
-            const invalid = raw[key].trim() !== '' && parseNum(raw[key]) === undefined;
-            const hot = next?.key === key;
-            const field = (
-              <div key={key} className="flex flex-col gap-2">
-                <label htmlFor={`vc-m-${key}`} className={labelCls}>
-                  {c[label] as string}
-                  {optional && (
-                    <span className="normal-case tracking-normal"> {c.measureOptional}</span>
-                  )}
-                </label>
-                <input
-                  id={`vc-m-${key}`}
-                  type="text"
-                  inputMode="decimal"
-                  autoComplete="off"
-                  value={raw[key]}
-                  onChange={(e) => setRaw({ ...raw, [key]: e.target.value })}
-                  aria-invalid={invalid}
-                  aria-describedby={invalid ? `vc-m-${key}-e` : hot ? 'vc-next' : undefined}
-                  className={`${inputCls} ${hot ? 'vc-pulse border-brand ring-2 ring-brand/40' : ''}`}
-                />
-                {invalid && (
-                  <span id={`vc-m-${key}-e`} className="font-sans text-xs text-err">
-                    {c.invalidNumber}
-                  </span>
-                )}
-              </div>
-            );
-            if (key !== 'dia') return field;
-            const kcHot = next?.key === 'keyCount';
-            return [
-              field,
-              <div key="kc" className="flex flex-col gap-2">
-                <label htmlFor="vc-m-kc" className={labelCls}>
-                  {c.measureKeyCount}
-                </label>
-                <select
-                  id="vc-m-kc"
-                  value={keyCount}
-                  onChange={(e) => setKeyCount(e.target.value as '' | '1' | '2')}
-                  aria-describedby={kcHot ? 'vc-next' : undefined}
-                  className={`${inputCls} ${kcHot ? 'vc-pulse border-brand ring-2 ring-brand/40' : ''}`}
-                >
-                  <option value="">{c.keyAny}</option>
-                  <option value="1">{c.keySingle}</option>
-                  <option value="2">{c.keyDouble}</option>
-                </select>
-              </div>,
-            ];
-          })}
-          <div className="flex flex-col gap-2">
-            <label htmlFor="vc-m-tol" className={labelCls}>
-              {c.tolLabel}
-            </label>
-            <select
-              id="vc-m-tol"
-              value={tol}
-              onChange={(e) => setTol(Number(e.target.value))}
-              className={inputCls}
+      {/* Active filters: one place to see and reset everything that narrows the list */}
+      {active.length > 0 && (
+        <div
+          className="flex flex-wrap items-center gap-2"
+          aria-label={c.activeFilters}
+          role="group"
+        >
+          <span className={labelCls}>{c.activeFilters}:</span>
+          {active.map((x) => (
+            <button
+              key={x.key}
+              type="button"
+              onClick={x.clear}
+              aria-label={fill(c.removeFilter, { f: x.label })}
+              className={`${btnCls} px-3 min-h-10`}
             >
-              {TOLERANCES.map((n) => (
-                <option key={n} value={n}>
-                  ±{n} mm
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="mt-5 min-h-11">
-          {next && (
-            <motion.p
-              key={next.key}
-              id="vc-next"
-              role="status"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: durations.md, ease: editorialEase }}
-              className="font-sans text-sm text-ink m-0"
-            >
-              <span className="text-brand-hi font-medium">
-                {fill(c.nextMeasure, { field: c.fieldNames[next.key] })}
-              </span>{' '}
-              <span className="text-ink-mid">
-                {fill(c.nextMeasureHint, {
-                  a: Math.round(next.before),
-                  b: Math.max(1, Math.round(next.after)),
-                })}
-              </span>
-            </motion.p>
-          )}
-        </div>
-        <div className="mt-5">
-          <button type="button" onClick={clearMeasure} className={btnCls}>
-            {c.clear}
+              {x.label} <span aria-hidden="true">×</span>
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={clearAll}
+            className={`${btnCls} px-3 min-h-10 border-brand`}
+          >
+            {c.clearAll}
           </button>
         </div>
-      </fieldset>
+      )}
 
-      {/* Drawing-derived features + carrier weight */}
-      <fieldset className="border border-hair rounded-[14px] p-5 md:p-6 m-0 min-w-0">
-        <legend className="px-2 font-sans font-semibold text-xl text-ink">{c.featTitle}</legend>
-        <p className="font-sans text-sm text-ink-mid mt-0 mb-5 max-w-[70ch]">{c.featHint}</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="flex flex-col gap-2">
-            <label htmlFor="vc-f-rear" className={labelCls}>
-              {c.featRear}
-            </label>
-            <select
-              id="vc-f-rear"
-              value={rear}
-              onChange={(e) => setRear(e.target.value as '' | 'yes' | 'no')}
-              className={inputCls}
-            >
-              <option value="">{c.featAny}</option>
-              <option value="yes">{c.featYes}</option>
-              <option value="no">{c.featNo}</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="vc-f-slot" className={labelCls}>
-              {c.featSlot}
-            </label>
-            <select
-              id="vc-f-slot"
-              value={slot}
-              onChange={(e) => setSlot(e.target.value as '' | 'tapered' | 'rounded')}
-              className={inputCls}
-            >
-              <option value="">{c.featAny}</option>
-              <option value="tapered">{c.featSlotTapered}</option>
-              <option value="rounded">{c.featSlotRounded}</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="vc-f-angle" className={labelCls}>
-              {c.featAngle}
-            </label>
-            <select
-              id="vc-f-angle"
-              value={angle}
-              onChange={(e) => setAngle(e.target.value as '' | 'yes' | 'no')}
-              className={inputCls}
-            >
-              <option value="">{c.featAny}</option>
-              <option value="yes">{c.featAngled}</option>
-              <option value="no">{c.featNotAngled}</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="vc-f-tons" className={labelCls}>
-              {c.featTons}
-            </label>
-            <input
-              id="vc-f-tons"
-              type="text"
-              inputMode="decimal"
-              autoComplete="off"
-              value={tonsRaw}
-              onChange={(e) => setTonsRaw(e.target.value)}
-              aria-invalid={tonsRaw.trim() !== '' && parseNum(tonsRaw) === undefined}
-              className={inputCls}
-            />
-          </div>
-        </div>
-      </fieldset>
-
-      <details className="border border-hair rounded-[14px] px-5 md:px-6 py-3 group">
-        <summary
-          className={`cursor-pointer min-h-11 flex items-center font-sans font-semibold text-xl text-ink ${focusRing} rounded-md`}
+      {/* Measure and feature search, folded: a name lookup does not scroll past it */}
+      <div className="border border-hair rounded-[14px]">
+        <button
+          type="button"
+          aria-expanded={measureShown}
+          aria-controls="vc-measure"
+          onClick={() => setMeasureOpen((o) => !o)}
+          className={`w-full min-h-12 px-5 md:px-6 flex items-center justify-between gap-3 font-sans font-semibold text-lg text-ink text-left ${focusRing} rounded-[14px]`}
         >
-          {c.useTitle}
-        </summary>
-        <p className="font-sans text-sm text-ink-mid mt-2 mb-4 max-w-[70ch]">{c.useNote}</p>
-        <ul className="list-none p-0 m-0 grid grid-cols-1 md:grid-cols-2 gap-4 pb-3">
-          {TIP_TYPES.map((k) => (
-            <li key={k} className="rounded-[14px] border border-hair p-4 flex flex-col gap-2">
-              <span className="font-sans font-semibold text-lg text-ink">{c.tipLabels[k]}</span>
-              <dl className="m-0 flex flex-col gap-2 font-sans text-sm">
-                {(
-                  [
-                    [c.useRock, c.useTips[k].rock],
-                    [c.useWhere, c.useTips[k].where],
-                    [c.useWatch, c.useTips[k].watch],
-                  ] as const
-                ).map(([dt, dd]) => (
-                  <div key={dt}>
-                    <dt className={labelCls}>{dt}</dt>
-                    <dd className="m-0 text-ink">{dd}</dd>
-                  </div>
-                ))}
-              </dl>
-            </li>
-          ))}
-        </ul>
-      </details>
+          <span>
+            {c.measureOpen}
+            <span className="block font-normal text-sm text-ink-mid">{c.measureOpenHint}</span>
+          </span>
+          <span aria-hidden="true">{measureShown ? '−' : '+'}</span>
+        </button>
+        {measureShown && (
+          <div id="vc-measure" className="px-3 md:px-4 pb-4 flex flex-col gap-4">
+            {/* Measure form */}
+            <fieldset className="border border-hair rounded-[14px] p-5 md:p-6 m-0 min-w-0">
+              <legend className="px-2 font-sans font-semibold text-xl text-ink">
+                {c.measureTitle}
+              </legend>
+              <p className="font-sans text-sm text-ink-mid mt-0 mb-5 max-w-[70ch]">
+                {c.measureHint}
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {MEASURE_FIELDS.map(({ key, label, optional }) => {
+                  const invalid = raw[key].trim() !== '' && parseNum(raw[key]) === undefined;
+                  const hot = next?.key === key;
+                  const field = (
+                    <div key={key} className="flex flex-col gap-2">
+                      <label htmlFor={`vc-m-${key}`} className={labelCls}>
+                        {c[label] as string}
+                        {optional && (
+                          <span className="normal-case tracking-normal"> {c.measureOptional}</span>
+                        )}
+                      </label>
+                      <input
+                        id={`vc-m-${key}`}
+                        type="text"
+                        inputMode="decimal"
+                        autoComplete="off"
+                        value={raw[key]}
+                        onChange={(e) => setRaw({ ...raw, [key]: e.target.value })}
+                        aria-invalid={invalid}
+                        aria-describedby={invalid ? `vc-m-${key}-e` : hot ? 'vc-next' : undefined}
+                        className={`${inputCls} ${hot ? 'vc-pulse border-brand ring-2 ring-brand/40' : ''}`}
+                      />
+                      {invalid && (
+                        <span id={`vc-m-${key}-e`} className="font-sans text-xs text-err">
+                          {c.invalidNumber}
+                        </span>
+                      )}
+                    </div>
+                  );
+                  if (key !== 'dia') return field;
+                  const kcHot = next?.key === 'keyCount';
+                  return [
+                    field,
+                    <div key="kc" className="flex flex-col gap-2">
+                      <label htmlFor="vc-m-kc" className={labelCls}>
+                        {c.measureKeyCount}
+                      </label>
+                      <select
+                        id="vc-m-kc"
+                        value={keyCount}
+                        onChange={(e) => setKeyCount(e.target.value as '' | '1' | '2')}
+                        aria-describedby={kcHot ? 'vc-next' : undefined}
+                        className={`${inputCls} ${kcHot ? 'vc-pulse border-brand ring-2 ring-brand/40' : ''}`}
+                      >
+                        <option value="">{c.keyAny}</option>
+                        <option value="1">{c.keySingle}</option>
+                        <option value="2">{c.keyDouble}</option>
+                      </select>
+                    </div>,
+                  ];
+                })}
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="vc-m-tol" className={labelCls}>
+                    {c.tolLabel}
+                  </label>
+                  <select
+                    id="vc-m-tol"
+                    value={tol}
+                    onChange={(e) => setTol(Number(e.target.value))}
+                    className={inputCls}
+                  >
+                    {TOLERANCES.map((n) => (
+                      <option key={n} value={n}>
+                        ±{n} mm
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="mt-5 min-h-11">
+                {next && (
+                  <motion.p
+                    key={next.key}
+                    id="vc-next"
+                    role="status"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: durations.md, ease: editorialEase }}
+                    className="font-sans text-sm text-ink m-0"
+                  >
+                    <span className="text-brand-hi font-medium">
+                      {fill(c.nextMeasure, { field: c.fieldNames[next.key] })}
+                    </span>{' '}
+                    <span className="text-ink-mid">
+                      {fill(c.nextMeasureHint, {
+                        a: Math.round(next.before),
+                        b: Math.max(1, Math.round(next.after)),
+                      })}
+                    </span>
+                  </motion.p>
+                )}
+              </div>
+              <div className="mt-5">
+                <button type="button" onClick={clearMeasure} className={btnCls}>
+                  {c.clear}
+                </button>
+              </div>
+            </fieldset>
 
-      {guide?.breakage && <BreakageGuide g={guide.breakage} t={t} lang={lang} />}
+            {/* Drawing-derived features + carrier weight */}
+            <fieldset className="border border-hair rounded-[14px] p-5 md:p-6 m-0 min-w-0">
+              <legend className="px-2 font-sans font-semibold text-xl text-ink">
+                {c.featTitle}
+              </legend>
+              <p className="font-sans text-sm text-ink-mid mt-0 mb-5 max-w-[70ch]">{c.featHint}</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="vc-f-rear" className={labelCls}>
+                    {c.featRear}
+                  </label>
+                  <select
+                    id="vc-f-rear"
+                    value={rear}
+                    onChange={(e) => setRear(e.target.value as '' | 'yes' | 'no')}
+                    className={inputCls}
+                  >
+                    <option value="">{c.featAny}</option>
+                    <option value="yes">{c.featYes}</option>
+                    <option value="no">{c.featNo}</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="vc-f-slot" className={labelCls}>
+                    {c.featSlot}
+                  </label>
+                  <select
+                    id="vc-f-slot"
+                    value={slot}
+                    onChange={(e) => setSlot(e.target.value as '' | 'tapered' | 'rounded')}
+                    className={inputCls}
+                  >
+                    <option value="">{c.featAny}</option>
+                    <option value="tapered">{c.featSlotTapered}</option>
+                    <option value="rounded">{c.featSlotRounded}</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="vc-f-angle" className={labelCls}>
+                    {c.featAngle}
+                  </label>
+                  <select
+                    id="vc-f-angle"
+                    value={angle}
+                    onChange={(e) => setAngle(e.target.value as '' | 'yes' | 'no')}
+                    className={inputCls}
+                  >
+                    <option value="">{c.featAny}</option>
+                    <option value="yes">{c.featAngled}</option>
+                    <option value="no">{c.featNotAngled}</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="vc-f-tons" className={labelCls}>
+                    {c.featTons}
+                  </label>
+                  <input
+                    id="vc-f-tons"
+                    type="text"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    value={tonsRaw}
+                    onChange={(e) => setTonsRaw(e.target.value)}
+                    aria-invalid={tonsRaw.trim() !== '' && parseNum(tonsRaw) === undefined}
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+            </fieldset>
+
+            <label className="flex items-center gap-3 min-h-11 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hideLow}
+                onChange={(e) => setHideLow(e.target.checked)}
+                className="w-5 h-5 accent-brand"
+              />
+              <span className="font-sans text-sm text-ink-mid">{c.hideLow}</span>
+            </label>
+          </div>
+        )}
+      </div>
 
       {results.measuring && likely && (
         <LikelyCard
@@ -567,22 +628,6 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
           pop={pop}
           open={likelyOpen}
           onOpen={() => setLikelyOpen((o) => !o)}
-        />
-      )}
-
-      {compared.length > 0 && (
-        <CompareTable
-          items={compared}
-          t={t}
-          lang={lang}
-          onRemove={(id) => {
-            setSel((s) => s.filter((x) => x !== id));
-            if (sel.length <= 1) statusRef.current?.focus();
-          }}
-          onClose={() => {
-            setSel([]);
-            statusRef.current?.focus();
-          }}
         />
       )}
 
@@ -645,6 +690,53 @@ export default function CatalogTab({ t, lang, status, catalog, popular, guide, r
           <button type="button" onClick={() => setLimit((n) => n + PAGE)} className={btnCls}>
             {c.more}
           </button>
+          {compared.length > 0 && (
+            <CompareTable
+              items={compared}
+              t={t}
+              lang={lang}
+              onRemove={(id) => {
+                setSel((s) => s.filter((x) => x !== id));
+                if (sel.length <= 1) statusRef.current?.focus();
+              }}
+              onClose={() => {
+                setSel([]);
+                statusRef.current?.focus();
+              }}
+            />
+          )}
+
+          <details className="border border-hair rounded-[14px] px-5 md:px-6 py-3 group">
+            <summary
+              className={`cursor-pointer min-h-11 flex items-center font-sans font-semibold text-xl text-ink ${focusRing} rounded-md`}
+            >
+              {c.useTitle}
+            </summary>
+            <p className="font-sans text-sm text-ink-mid mt-2 mb-4 max-w-[70ch]">{c.useNote}</p>
+            <ul className="list-none p-0 m-0 grid grid-cols-1 md:grid-cols-2 gap-4 pb-3">
+              {TIP_TYPES.map((k) => (
+                <li key={k} className="rounded-[14px] border border-hair p-4 flex flex-col gap-2">
+                  <span className="font-sans font-semibold text-lg text-ink">{c.tipLabels[k]}</span>
+                  <dl className="m-0 flex flex-col gap-2 font-sans text-sm">
+                    {(
+                      [
+                        [c.useRock, c.useTips[k].rock],
+                        [c.useWhere, c.useTips[k].where],
+                        [c.useWatch, c.useTips[k].watch],
+                      ] as const
+                    ).map(([dt, dd]) => (
+                      <div key={dt}>
+                        <dt className={labelCls}>{dt}</dt>
+                        <dd className="m-0 text-ink">{dd}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </li>
+              ))}
+            </ul>
+          </details>
+
+          {guide?.breakage && <BreakageGuide g={guide.breakage} t={t} lang={lang} />}
         </div>
       )}
     </div>

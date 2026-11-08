@@ -1,24 +1,28 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { TechContent } from '../types';
 
-export type TechState = 'unknown' | 'anon' | 'authed';
+/** 'expired': the session ran out mid-use; the page keeps its data and asks for the password inline. */
+export type TechState = 'unknown' | 'anon' | 'authed' | 'expired';
 export type LoginResult = 'ok' | 'wrong' | 'not_configured' | 'error';
 export type TechBundle = { tr?: TechContent; en?: TechContent };
 
 const hasHint = (): boolean =>
   document.cookie.split(';').some((c) => c.trim() === 'kv_tech_hint=1');
 
-/** Strict check: only a real 200 JSON answer with authed === true counts. */
-async function fetchContent(): Promise<TechBundle | null> {
+/** Strict check: only a JSON answer with authed === true counts as signed in. A broken text
+ *  secret (500 with authed: true) still signs in, so the catalog and shared-tips tabs work; only
+ *  the Genel tab then shows its own error. */
+async function fetchContent(): Promise<{ authed: boolean; content: TechBundle | null }> {
+  const no = { authed: false, content: null };
   try {
     const r = await fetch('/api/tech/content', { credentials: 'same-origin' });
-    if (r.status !== 200 || !(r.headers.get('content-type') ?? '').includes('application/json')) {
-      return null;
-    }
+    if (!(r.headers.get('content-type') ?? '').includes('application/json')) return no;
+    if (r.status !== 200 && r.status !== 500) return no;
     const b = (await r.json()) as { ok?: boolean; authed?: boolean; content?: TechBundle };
-    return b.ok === true && b.authed === true && b.content ? b.content : null;
+    if (b.authed !== true) return no;
+    return { authed: true, content: b.ok === true && b.content ? b.content : null };
   } catch {
-    return null;
+    return no;
   }
 }
 
@@ -35,8 +39,8 @@ export function useTechAuth() {
     }
     fetchContent().then((c) => {
       if (!alive) return;
-      setContent(c);
-      setState(c ? 'authed' : 'anon');
+      setContent(c.content);
+      setState(c.authed ? 'authed' : 'anon');
     });
     return () => {
       alive = false;
@@ -55,8 +59,8 @@ export function useTechAuth() {
       if (r.status === 401) return 'wrong';
       if (r.status !== 200) return 'error';
       const c = await fetchContent();
-      if (!c) return 'error';
-      setContent(c);
+      if (!c.authed) return 'error';
+      setContent(c.content);
       setState('authed');
       return 'ok';
     } catch {
@@ -78,7 +82,10 @@ export function useTechAuth() {
     }
   }, []);
 
-  return { state, content, login, logout };
+  /** A data request answered 401: keep the page and its data, ask for the password inline. */
+  const expire = useCallback(() => setState((s) => (s === 'authed' ? 'expired' : s)), []);
+
+  return { state, content, login, logout, expire };
 }
 
 export type TechAuth = ReturnType<typeof useTechAuth>;

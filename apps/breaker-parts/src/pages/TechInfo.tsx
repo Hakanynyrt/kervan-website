@@ -1,13 +1,6 @@
-import { Suspense, lazy, useEffect, useState, type FormEvent } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
-import {
-  durations,
-  editorialEase,
-  fadeUp,
-  inViewOnce,
-  staggerContainer,
-  useReducedMotion,
-} from '@kervan/motion';
+import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
 import type { DictBlock, Lang, TechContent } from '../types';
 import type { TechAuth } from '../lib/use-tech-auth';
 import { useVegaCatalog } from '../lib/use-vega-catalog';
@@ -20,12 +13,16 @@ import { FITS_HASH } from './tech/fits-hash';
 const FitsTab = lazy(() => import('./tech/FitsTab'));
 
 type Tab = 'general' | 'catalog' | 'fits';
+/** Tab order: the lookups first, the static text last. */
+const ORDER: Tab[] = ['fits', 'catalog', 'general'];
+const GENERAL_HASH = '#genel';
+/** No hash opens the shared-tips search: that is what the owner looks up on a call. */
 const tabFromHash = (): Tab => {
-  if (typeof window === 'undefined') return 'general';
+  if (typeof window === 'undefined') return 'fits';
   const h = window.location.hash;
   if (h === '#katalog') return 'catalog';
-  if (h === FITS_HASH || h.startsWith(`${FITS_HASH}/`)) return 'fits';
-  return 'general';
+  if (h === GENERAL_HASH) return 'general';
+  return 'fits';
 };
 
 interface Props {
@@ -54,29 +51,33 @@ export default function TechInfo({ t, lang, tech }: Props) {
     window.history.replaceState(
       null,
       '',
-      next === 'catalog' ? '#katalog' : next === 'fits' ? FITS_HASH : window.location.pathname,
+      next === 'catalog' ? '#katalog' : next === 'fits' ? FITS_HASH : GENERAL_HASH,
     );
   };
-  // The catalog is fetched only after sign-in and only when its tab is opened.
-  const catalog = useVegaCatalog(tech.state === 'authed' && tab === 'catalog', tech.logout);
-  // Shared tips: fetched when its tab is first opened, kept until sign-out.
-  const fits = useTechFits(tech.state === 'authed', tab === 'fits', tech.logout);
+  // An expired session keeps the page and its data; the password is asked for inline.
+  const signedIn = tech.state === 'authed' || tech.state === 'expired';
+  // Both lists are fetched when their tab is first opened and kept until sign-out.
+  const catalog = useVegaCatalog(
+    signedIn,
+    tech.state === 'authed' && tab === 'catalog',
+    tech.expire,
+  );
+  const fits = useTechFits(signedIn, tech.state === 'authed' && tab === 'fits', tech.expire);
 
-  if (tech.state === 'authed' && tech.content) {
-    const c = tech.content[lang] ?? tech.content.tr;
-    if (c)
-      return (
-        <Content
-          c={c}
-          t={t}
-          lang={lang}
-          tech={tech}
-          tab={tab}
-          selectTab={selectTab}
-          catalog={catalog}
-          fits={fits}
-        />
-      );
+  if (signedIn) {
+    const c = tech.content ? (tech.content[lang] ?? tech.content.tr ?? null) : null;
+    return (
+      <Content
+        c={c}
+        t={t}
+        lang={lang}
+        tech={tech}
+        tab={tab}
+        selectTab={selectTab}
+        catalog={catalog}
+        fits={fits}
+      />
+    );
   }
 
   return (
@@ -93,7 +94,7 @@ export default function TechInfo({ t, lang, tech }: Props) {
 }
 
 function Tabs({ t, tab, onSelect }: { t: DictBlock; tab: Tab; onSelect: (x: Tab) => void }) {
-  const order: Tab[] = ['general', 'catalog', 'fits'];
+  const order = ORDER;
   const label = (x: Tab) =>
     x === 'general'
       ? t.catalogUi.tabGeneral
@@ -112,7 +113,7 @@ function Tabs({ t, tab, onSelect }: { t: DictBlock; tab: Tab; onSelect: (x: Tab)
     <div
       role="tablist"
       aria-label={t.catalogUi.tabsLabel}
-      className="flex flex-wrap gap-2"
+      className="flex gap-2 overflow-x-auto min-w-0"
       onKeyDown={onKey}
     >
       {order.map((x) => (
@@ -125,7 +126,7 @@ function Tabs({ t, tab, onSelect }: { t: DictBlock; tab: Tab; onSelect: (x: Tab)
           aria-controls={tab === x ? `tech-panel-${x}` : undefined}
           tabIndex={tab === x ? 0 : -1}
           onClick={() => onSelect(x)}
-          className={`min-h-11 px-5 rounded-[2px] border font-sans text-sm transition-colors ${focusRing} ${
+          className={`min-h-10 px-3 md:px-5 whitespace-nowrap rounded-[2px] border font-sans text-sm transition-colors ${focusRing} ${
             tab === x
               ? 'bg-brand text-on-brand rounded-[2px] font-semibold border-brand'
               : 'border-hair-strong text-ink hover:border-ink-mid'
@@ -148,7 +149,7 @@ function Content({
   catalog,
   fits,
 }: {
-  c: TechContent;
+  c: TechContent | null;
   t: DictBlock;
   lang: Lang;
   tech: TechAuth;
@@ -159,13 +160,43 @@ function Content({
 }) {
   // Drawings are fetched when the first detail panel opens; the state lives here so it
   // survives tab switches and is dropped with this component on sign-out.
-  const drawings = useVegaDrawings(tech.logout);
+  const drawings = useVegaDrawings(tech.expire);
   const reduce = useReducedMotion();
+  // Signed in again after an expiry: reload what the expired session could not.
+  const wasExpired = useRef(false);
+  useEffect(() => {
+    if (tech.state === 'expired') wasExpired.current = true;
+    else if (tech.state === 'authed' && wasExpired.current) {
+      wasExpired.current = false;
+      if (catalog.status === 'unauthorized') catalog.retry();
+      if (fits.status === 'unauthorized') fits.retry();
+    }
+  }, [tech.state, catalog, fits]);
   return (
-    <section className="pt-10 pb-16 md:pt-16 md:pb-24">
-      <div className="max-w-[1280px] mx-auto px-6 md:px-8 mb-10">
-        <Tabs t={t} tab={tab} onSelect={selectTab} />
+    <section className="pt-4 pb-16 md:pt-6 md:pb-24">
+      {/* Sticky under the site header: the tabs and sign-out stay in reach on a long list. */}
+      <div className="sticky top-[60px] md:top-[68px] z-30 bg-bg border-b border-hair mb-6 md:mb-8">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-2 flex items-center justify-between gap-2">
+          <Tabs t={t} tab={tab} onSelect={selectTab} />
+          <button
+            type="button"
+            onClick={() => void tech.logout()}
+            className={`shrink-0 min-h-10 px-1 font-sans text-xs md:text-sm text-ink-mid hover:text-ink underline underline-offset-4 whitespace-nowrap ${focusRing}`}
+          >
+            {t.techUi.logout}
+          </button>
+        </div>
       </div>
+      {tech.state === 'expired' && (
+        <div className="max-w-[1280px] mx-auto px-4 md:px-8 mb-6">
+          <div className="border border-brand rounded-md bg-bg-soft p-4 md:p-6 flex flex-col gap-3 max-w-[520px]">
+            <p role="alert" className="font-sans text-ink m-0">
+              {t.techUi.expired}
+            </p>
+            <LoginForm t={t} tech={tech} compact />
+          </div>
+        </div>
+      )}
       {tab === 'catalog' && (
         <motion.div
           id="tech-panel-catalog"
@@ -216,64 +247,70 @@ function Content({
           role="tabpanel"
           tabIndex={0}
           aria-labelledby="tech-tab-general"
+          className="max-w-[1280px] mx-auto px-4 md:px-8"
         >
-          <motion.div
-            className="max-w-[1280px] mx-auto px-6 md:px-8 mb-16 md:mb-20 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end"
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-          >
-            <div className="col-span-12 lg:col-span-7 flex flex-col gap-5">
-              <h1 className="font-sans font-bold text-[34px] md:text-[48px] text-ink leading-[1.08] tracking-[-0.03em] text-balance">
-                {c.title}
-              </h1>
-            </div>
-            <p className="col-span-12 lg:col-span-5 font-sans text-lg text-ink-mid leading-relaxed max-w-[44ch]">
-              {c.aside}
+          {c ? (
+            <motion.div
+              className="flex flex-col gap-6"
+              initial={reduce ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: durations.sm, ease: editorialEase }}
+            >
+              <header className="flex flex-col gap-2">
+                <h1 className="font-sans text-2xl md:text-3xl font-semibold text-ink m-0">
+                  {c.title}
+                </h1>
+                {c.aside && <p className="font-sans text-ink-mid m-0 max-w-[70ch]">{c.aside}</p>}
+              </header>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {c.groups.map((g) => (
+                  <section
+                    key={g.title}
+                    className="border border-hair-strong rounded-md bg-bg-soft p-4 md:p-6"
+                  >
+                    <h2 className="font-sans text-sm font-semibold text-brand m-0 mb-3">
+                      {g.title}
+                    </h2>
+                    <dl className="m-0 flex flex-col">
+                      {g.rows.map((r) => (
+                        <div
+                          key={r.k}
+                          className="flex justify-between gap-4 py-2 border-t border-hair first:border-t-0"
+                        >
+                          <dt className="font-sans text-sm text-ink-mid">{r.k}</dt>
+                          <dd className="font-sans text-sm font-semibold text-ink m-0 text-right">
+                            {r.v}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </section>
+                ))}
+              </div>
+            </motion.div>
+          ) : (
+            <p role="status" className="font-sans text-ink-mid m-0">
+              {t.techUi.contentError}
             </p>
-          </motion.div>
-
-          <motion.div
-            className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-px bg-hair"
-            variants={staggerContainer(0, 0.08)}
-            initial="hidden"
-            whileInView="show"
-            viewport={inViewOnce}
-          >
-            {c.groups.map((g) => (
-              <motion.div key={g.title} variants={fadeUp} className="bg-bg p-8 md:p-10">
-                <h2 className="font-sans text-sm font-medium text-brand font-medium m-0 mb-6">
-                  {g.title}
-                </h2>
-                <dl className="m-0 flex flex-col gap-5">
-                  {g.rows.map((r) => (
-                    <div key={r.k} className="flex flex-col gap-1">
-                      <dt className="font-sans text-sm font-medium text-ink-soft">{r.k}</dt>
-                      <dd className="font-sans font-semibold text-2xl text-ink m-0">{r.v}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </motion.div>
-            ))}
-          </motion.div>
+          )}
         </div>
       )}
-
-      <div className="max-w-[1280px] mx-auto px-6 md:px-8 mt-8">
-        <button
-          type="button"
-          onClick={() => void tech.logout()}
-          className={`font-sans text-sm text-ink-mid hover:text-ink underline underline-offset-4 ${focusRing}`}
-        >
-          {t.techUi.logout}
-        </button>
-      </div>
     </section>
   );
 }
 
-function LoginForm({ t, tech }: { t: DictBlock; tech: TechAuth }) {
+function LoginForm({
+  t,
+  tech,
+  compact = false,
+}: {
+  t: DictBlock;
+  tech: TechAuth;
+  /** Inline re-login after an expiry: no page heading. */
+  compact?: boolean;
+}) {
   const [password, setPassword] = useState('');
+  const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -284,28 +321,49 @@ function LoginForm({ t, tech }: { t: DictBlock; tech: TechAuth }) {
     setError(null);
     const r = await tech.login(password);
     setBusy(false);
-    setPassword('');
-    if (r === 'wrong') setError(t.techUi.wrong);
+    // Kept after a wrong attempt so a one-letter typo can be fixed; cleared once signed in.
+    if (r === 'ok') setPassword('');
+    else if (r === 'wrong') setError(t.techUi.wrong);
     else if (r === 'not_configured') setError(t.techUi.notConfigured);
-    else if (r === 'error') setError(t.techUi.error);
+    else setError(t.techUi.error);
   };
 
+  const id = compact ? 'tech-pw-again' : 'tech-pw';
   return (
-    <form onSubmit={onSubmit} className="max-w-[420px] mx-auto px-6 md:px-8 flex flex-col gap-4">
-      <h1 className="font-sans font-bold text-[34px] text-ink tracking-[-0.03em] m-0">
-        {t.techUi.loginTitle}
-      </h1>
-      <label htmlFor="tech-pw" className="font-sans text-sm font-medium text-ink-soft">
+    <form
+      onSubmit={onSubmit}
+      className={
+        compact ? 'flex flex-col gap-3' : 'max-w-[420px] mx-auto px-6 md:px-8 flex flex-col gap-4'
+      }
+    >
+      {!compact && (
+        <h1 className="font-sans font-bold text-[34px] text-ink tracking-[-0.03em] m-0">
+          {t.techUi.loginTitle}
+        </h1>
+      )}
+      <label htmlFor={id} className="font-sans text-sm font-medium text-ink-soft">
         {t.techUi.passwordLabel}
       </label>
-      <input
-        id="tech-pw"
-        type="password"
-        autoComplete="current-password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className={`bg-bg-soft border border-hair-2 px-4 py-3 font-sans text-ink ${focusRing}`}
-      />
+      <div className="flex gap-2">
+        <input
+          id={id}
+          type={show ? 'text' : 'password'}
+          autoComplete="current-password"
+          // The page exists only to sign in here; focus saves a tap on the phone.
+          autoFocus
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className={`flex-1 min-w-0 bg-bg-soft border border-hair-2 px-4 py-3 font-sans text-ink ${focusRing}`}
+        />
+        <button
+          type="button"
+          onClick={() => setShow((v) => !v)}
+          aria-pressed={show}
+          className={`min-h-11 px-3 border border-hair-strong font-sans text-sm text-ink-mid hover:text-ink ${focusRing}`}
+        >
+          {show ? t.techUi.hidePassword : t.techUi.showPassword}
+        </button>
+      </div>
       <button
         type="submit"
         disabled={busy || !password}
