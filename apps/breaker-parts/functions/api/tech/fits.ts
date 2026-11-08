@@ -22,11 +22,30 @@ import {
 interface D1Like {
   prepare(sql: string): { all<T>(): Promise<{ results?: T[] }> };
 }
-type FitsCtx = { request: Ctx['request']; env: TechEnv & { SHOP_DB?: D1Like } };
+/** Minimal slice of a Workers KV binding (avoids a workers-types dependency). */
+interface KvLike {
+  get(key: string, type: 'json'): Promise<unknown>;
+}
+type FitsCtx = {
+  request: Ctx['request'];
+  env: TechEnv & { SHOP_DB?: D1Like; VEGA_CATALOG?: KvLike };
+};
 type Fn = (ctx: FitsCtx) => Response | Promise<Response>;
 
 /** One isolate serves many requests: keep the built index a few minutes. */
 const TTL_MS = 5 * 60 * 1000;
+/** Owner-only list of breakers with the same parts ("Ortak parçalar"), optional. */
+const PARTS_KEY = 'parts:v1';
+
+/** The same-parts list; a missing binding, key or bad JSON gives null and never breaks the tab. */
+async function sameParts(kv: KvLike | undefined): Promise<unknown> {
+  if (!kv) return null;
+  try {
+    return (await kv.get(PARTS_KEY, 'json')) ?? null;
+  } catch {
+    return null;
+  }
+}
 let cached: { at: number; fits: FitsIndex } | null = null;
 
 async function rows<T>(db: D1Like, sql: string): Promise<T[]> {
@@ -37,7 +56,8 @@ async function rows<T>(db: D1Like, sql: string): Promise<T[]> {
  *  database (bound read-only in use as SHOP_DB, Production only) the same way the shop's
  *  build reads it: published rows, Kervan's drawings applied, WRONG_FITS and hidden makes
  *  left out (toPublicCatalog). Prices and stock are never selected.
- *  Fails closed: no session -> 401 before D1 is touched; no binding -> 503; no rows -> 404. */
+ *  Also returns the optional same-parts list (KV `parts:v1`, see src/lib/same-parts.ts).
+ *  Fails closed: no session -> 401 before D1 or KV is touched; no binding -> 503; no rows -> 404. */
 const handle: Fn = async ({ request, env }) => {
   const url = new URL(request.url);
   if (!allowedHost(url) || !(await isAuthed(request, env, url))) {
@@ -46,7 +66,12 @@ const handle: Fn = async ({ request, env }) => {
   const db = env.SHOP_DB;
   if (!db) return json({ ok: false, authed: true, error: 'not_configured' }, 503);
   if (cached && Date.now() - cached.at < TTL_MS)
-    return json({ ok: true, authed: true, fits: cached.fits });
+    return json({
+      ok: true,
+      authed: true,
+      fits: cached.fits,
+      parts: await sameParts(env.VEGA_CATALOG),
+    });
   let fits: FitsIndex;
   try {
     // The drawings table comes with migration 0004; before it exists there are none.
@@ -68,7 +93,7 @@ const handle: Fn = async ({ request, env }) => {
   }
   if (fits.families.length === 0) return json({ ok: false, authed: true, error: 'empty' }, 404);
   cached = { at: Date.now(), fits };
-  return json({ ok: true, authed: true, fits });
+  return json({ ok: true, authed: true, fits, parts: await sameParts(env.VEGA_CATALOG) });
 };
 
 export const onRequestGet: Fn = handle;

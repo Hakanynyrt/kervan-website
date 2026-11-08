@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { FitsIndex } from '@kervan/tips';
 import type { CatalogStatus } from './use-vega-catalog';
+import { type SamePartsGroup, parseSameParts } from './same-parts';
 
 /** Loads the private "which breakers share one tip" index once its tab is opened. Kept in
  *  memory only (never localStorage/sessionStorage) and dropped on sign-out. */
 export function useTechFits(authed: boolean, active: boolean, onUnauthorized: () => void) {
   const [status, setStatus] = useState<CatalogStatus>('idle');
   const [fits, setFits] = useState<FitsIndex | null>(null);
+  const [parts, setParts] = useState<SamePartsGroup[]>([]);
   const [attempt, setAttempt] = useState(0);
 
   // Signed out: drop the data at once.
   useEffect(() => {
     if (authed) return;
     setFits(null);
+    setParts([]);
     setStatus('idle');
   }, [authed]);
 
@@ -33,7 +36,12 @@ export function useTechFits(authed: boolean, active: boolean, onUnauthorized: ()
         if (r.status === 404) return setStatus('empty');
         const ct = r.headers.get('content-type') ?? '';
         if (r.status !== 200 || !ct.includes('application/json')) return setStatus('error');
-        const b = (await r.json()) as { ok?: boolean; authed?: boolean; fits?: FitsIndex };
+        const b = (await r.json()) as {
+          ok?: boolean;
+          authed?: boolean;
+          fits?: FitsIndex;
+          parts?: unknown;
+        };
         if (!alive) return;
         if (
           b.ok === true &&
@@ -42,6 +50,7 @@ export function useTechFits(authed: boolean, active: boolean, onUnauthorized: ()
           Array.isArray(b.fits?.breakers)
         ) {
           setFits(b.fits as FitsIndex);
+          setParts(parseSameParts(b.parts));
           setStatus('ready');
         } else setStatus('error');
       } catch {
@@ -55,5 +64,5 @@ export function useTechFits(authed: boolean, active: boolean, onUnauthorized: ()
   }, [authed, active, attempt]);
 
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
-  return { status, fits, retry };
+  return { status, fits, parts, retry };
 }
