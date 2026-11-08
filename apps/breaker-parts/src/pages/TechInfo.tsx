@@ -199,7 +199,14 @@ function Content({
           className="max-w-[1280px] mx-auto px-4 md:px-8"
         >
           <Suspense fallback={<p className="font-sans text-ink-mid m-0">{t.fitsUi.loading}</p>}>
-            <FitsTab t={t} status={fits.status} fits={fits.fits} retry={fits.retry} />
+            <FitsTab
+              t={t}
+              status={fits.status}
+              fits={fits.fits}
+              parts={fits.parts}
+              lang={lang}
+              retry={fits.retry}
+            />
           </Suspense>
         </div>
       )}

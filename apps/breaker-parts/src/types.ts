@@ -351,6 +351,11 @@ export interface DictBlock {
     familyCount: string;
     noFamilies: string;
     showAll: string;
+    /** Same-parts card (owner's private list, KV `parts:v1`). */
+    samePartsTitle: string;
+    samePartsWith: string;
+    samePartsSame: string;
+    samePartsDifferent: string;
   };
   productionPage: {
     eyebrow: string;

@@ -7,7 +7,8 @@ import {
   matches,
   rewriteQuery,
 } from '@kervan/tips';
-import type { DictBlock } from '../../types';
+import type { DictBlock, Lang } from '../../types';
+import { type SamePartsGroup, nameKeys, samePartsFor } from '../../lib/same-parts';
 import type { CatalogStatus } from '../../lib/use-vega-catalog';
 import { FITS_HASH } from './fits-hash';
 
@@ -15,6 +16,9 @@ interface Props {
   t: DictBlock;
   status: CatalogStatus;
   fits: FitsIndex | null;
+  /** Owner-only same-parts list (KV `parts:v1`); empty when none. */
+  parts: SamePartsGroup[];
+  lang: Lang;
   retry: () => void;
 }
 
@@ -49,7 +53,7 @@ const fill = (tpl: string, vars: Record<string, string | number>): string =>
   Object.entries(vars).reduce((s, [k, v]) => s.replace(`{${k}}`, String(v)), tpl);
 const mm = (v: number): string => String(Math.round(v * 10) / 10);
 
-export default function FitsTab({ t, status, fits, retry }: Props) {
+export default function FitsTab({ t, status, fits, parts, lang, retry }: Props) {
   const c = t.fitsUi;
   if (status !== 'ready' || !fits) {
     const msg =
@@ -81,7 +85,7 @@ export default function FitsTab({ t, status, fits, retry }: Props) {
       </div>
     );
   }
-  return <Ready t={t} fits={fits} />;
+  return <Ready t={t} fits={fits} parts={parts} lang={lang} />;
 }
 
 function Head({ t, fits }: { t: DictBlock; fits?: FitsIndex }) {
@@ -105,7 +109,17 @@ function Head({ t, fits }: { t: DictBlock; fits?: FitsIndex }) {
   );
 }
 
-function Ready({ t, fits }: { t: DictBlock; fits: FitsIndex }) {
+function Ready({
+  t,
+  fits,
+  parts,
+  lang,
+}: {
+  t: DictBlock;
+  fits: FitsIndex;
+  parts: SamePartsGroup[];
+  lang: Lang;
+}) {
   const c = t.fitsUi;
   const [view, setView] = useState<View>(() =>
     typeof window === 'undefined'
@@ -168,6 +182,8 @@ function Ready({ t, fits }: { t: DictBlock; fits: FitsIndex }) {
         <BreakerView
           t={t}
           fits={fits}
+          parts={parts}
+          lang={lang}
           selected={view.slug !== null ? (bySlug.get(view.slug) ?? null) : null}
           onPick={pickBreaker}
           onClear={() => go({ mode: 'breaker', slug: null }, false)}
@@ -190,6 +206,8 @@ function Ready({ t, fits }: { t: DictBlock; fits: FitsIndex }) {
 function BreakerView({
   t,
   fits,
+  parts,
+  lang,
   selected,
   onPick,
   onClear,
@@ -197,6 +215,8 @@ function BreakerView({
 }: {
   t: DictBlock;
   fits: FitsIndex;
+  parts: SamePartsGroup[];
+  lang: Lang;
   selected: number | null;
   onPick: (i: number) => void;
   onClear: () => void;
@@ -325,6 +345,7 @@ function BreakerView({
               {c.clear}
             </button>
           </div>
+          <SameParts t={t} fits={fits} parts={parts} lang={lang} name={b.name} onPick={onPick} />
           {b.families.map((fi) => (
             <FamilyCard
               key={fits.families[fi].code}
@@ -548,5 +569,87 @@ function FamilyCard({
         </div>
       )}
     </article>
+  );
+}
+
+/** Breakers with the same parts as the selected one (owner's private list, KV `parts:v1`). */
+function SameParts({
+  t,
+  fits,
+  parts,
+  lang,
+  name,
+  onPick,
+}: {
+  t: DictBlock;
+  fits: FitsIndex;
+  parts: SamePartsGroup[];
+  lang: Lang;
+  name: string;
+  onPick: (i: number) => void;
+}) {
+  const c = t.fitsUi;
+  const byKey = useMemo(() => {
+    const m = new Map<string, number>();
+    fits.breakers.forEach((x, i) => {
+      for (const k of nameKeys(x.name)) if (!m.has(k)) m.set(k, i);
+    });
+    return m;
+  }, [fits]);
+  const hits = useMemo(() => samePartsFor(name, parts, lang), [name, parts, lang]);
+  if (!hits.length) return null;
+  return (
+    <>
+      {hits.map((h) => (
+        <article
+          key={h.others.join('|')}
+          className="border border-brand rounded-md bg-bg-soft p-4 md:p-6 flex flex-col gap-3"
+        >
+          <h3 className="font-sans text-lg font-semibold text-ink m-0">
+            {fill(c.samePartsTitle, { name })}
+          </h3>
+          <ul aria-label={c.samePartsWith} className="list-none m-0 p-0 flex flex-wrap gap-2">
+            {h.others.map((o) => {
+              const i = nameKeys(o)
+                .map((k) => byKey.get(k))
+                .find((x) => x !== undefined);
+              return (
+                <li key={o}>
+                  {i !== undefined ? (
+                    <button
+                      type="button"
+                      onClick={() => onPick(i)}
+                      aria-label={fill(c.openBreaker, { name: fits.breakers[i].name })}
+                      className={`${chipCls} border-hair text-ink hover:border-brand bg-bg`}
+                    >
+                      {o}
+                    </button>
+                  ) : (
+                    <span
+                      className={`${chipCls} inline-flex items-center border-hair text-ink bg-bg`}
+                    >
+                      {o}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          <dl className="m-0 flex flex-col gap-2 font-sans text-sm">
+            <div className="flex flex-col gap-1">
+              <dt className={labelCls}>{c.samePartsSame}</dt>
+              <dd className="m-0 text-ink">{h.same.join(', ')}</dd>
+            </div>
+            {h.different.length > 0 && (
+              <div className="flex flex-col gap-1">
+                <dt className={labelCls}>{c.samePartsDifferent}</dt>
+                <dd className="m-0 text-ink">{h.different.join(', ')}</dd>
+              </div>
+            )}
+          </dl>
+          {h.note && <p className="font-sans text-sm text-ink-mid m-0">{h.note}</p>}
+        </article>
+      ))}
+    </>
   );
 }

@@ -499,6 +499,10 @@ export const DICT: Dict = {
       familyCount: '{n} kırıcı · {m} marka',
       noFamilies: 'Bu aramaya uyan uç yok.',
       showAll: 'Tümünü göster ({n})',
+      samePartsTitle: '{name} ile aynı parçalar',
+      samePartsWith: 'Aynı parçaları kullanan kırıcılar',
+      samePartsSame: 'Aynı parçalar',
+      samePartsDifferent: 'Farklı parçalar',
     },
     productionPage: {
       eyebrow: 'Üretim & Kalite',
@@ -1120,6 +1124,10 @@ export const DICT: Dict = {
       familyCount: '{n} breakers · {m} makes',
       noFamilies: 'No tip matches this search.',
       showAll: 'Show all ({n})',
+      samePartsTitle: 'Same parts as {name}',
+      samePartsWith: 'Breakers with the same parts',
+      samePartsSame: 'Same parts',
+      samePartsDifferent: 'Different parts',
     },
     productionPage: {
       eyebrow: 'Production & Quality',
