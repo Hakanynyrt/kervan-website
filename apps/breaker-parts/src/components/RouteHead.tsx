@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ogLocale } from '@kervan/seo';
 import { pageHead } from '../lib/page-meta';
+import { appIdentity } from '../lib/app-identity';
 
 /** Keeps <head> in step with the route after client-side navigation.
  *  The prerendered HTML already carries the same tags for the first URL
@@ -16,6 +17,10 @@ export default function RouteHead() {
     document.title = h.title;
     setMeta('name', 'description', h.description);
     setMeta('name', 'robots', h.robots);
+    // The owner page installs as its own home-screen app ("Kervan Teknik").
+    const app = appIdentity(pathname);
+    setLink('manifest', undefined, app.manifest);
+    setMeta('name', 'apple-mobile-web-app-title', app.title);
     setLink('canonical', undefined, h.canonical);
     setLink('alternate', 'tr', h.alternates?.tr);
     setLink('alternate', 'en', h.alternates?.en);
