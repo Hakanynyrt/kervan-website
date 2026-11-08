@@ -12,18 +12,21 @@ import { FITS_HASH } from './tech/fits-hash';
 
 // Its own chunk (search code, make spellings): downloaded only when the tab is opened.
 const FitsTab = lazy(() => import('./tech/FitsTab'));
+const QuickTab = lazy(() => import('./tech/QuickTab'));
+const QUICK_HASH = '#ara';
 
-type Tab = 'general' | 'catalog' | 'fits';
-/** Tab order: the lookups first, the static text last. */
-const ORDER: Tab[] = ['fits', 'catalog', 'general'];
+type Tab = 'quick' | 'general' | 'catalog' | 'fits';
+/** Tab order: the one-box answer first, then the lookups, the static text last. */
+const ORDER: Tab[] = ['quick', 'fits', 'catalog', 'general'];
 const GENERAL_HASH = '#genel';
-/** No hash opens the shared-tips search: that is what the owner looks up on a call. */
+/** No hash opens "Hızlı Cevap": one box for whatever the caller names. */
 const tabFromHash = (): Tab => {
-  if (typeof window === 'undefined') return 'fits';
+  if (typeof window === 'undefined') return 'quick';
   const h = window.location.hash;
   if (h === '#katalog') return 'catalog';
   if (h === GENERAL_HASH) return 'general';
-  return 'fits';
+  if (h === FITS_HASH || h.startsWith(`${FITS_HASH}/`)) return 'fits';
+  return 'quick';
 };
 
 interface Props {
@@ -52,7 +55,13 @@ export default function TechInfo({ t, lang, tech }: Props) {
     window.history.replaceState(
       null,
       '',
-      next === 'catalog' ? '#katalog' : next === 'fits' ? FITS_HASH : GENERAL_HASH,
+      next === 'catalog'
+        ? '#katalog'
+        : next === 'fits'
+          ? FITS_HASH
+          : next === 'quick'
+            ? QUICK_HASH
+            : GENERAL_HASH,
     );
   };
   // An expired session keeps the page and its data; the password is asked for inline.
@@ -63,9 +72,11 @@ export default function TechInfo({ t, lang, tech }: Props) {
     tech.state === 'authed' && tab === 'catalog',
     tech.expire,
   );
-  const fits = useTechFits(signedIn, tech.state === 'authed' && tab === 'fits', tech.expire);
+  // The quick answer reads the same lists as the shared-tips tab.
+  const lookup = tab === 'fits' || tab === 'quick';
+  const fits = useTechFits(signedIn, tech.state === 'authed' && lookup, tech.expire);
   // Shop prices, stock and lead time for the quote lines (owner only, memory only).
-  const quote = useTechQuote(signedIn, tech.state === 'authed' && tab === 'fits', tech.expire);
+  const quote = useTechQuote(signedIn, tech.state === 'authed' && lookup, tech.expire);
 
   if (signedIn) {
     const c = tech.content ? (tech.content[lang] ?? tech.content.tr ?? null) : null;
@@ -104,7 +115,9 @@ function Tabs({ t, tab, onSelect }: { t: DictBlock; tab: Tab; onSelect: (x: Tab)
       ? t.catalogUi.tabGeneral
       : x === 'catalog'
         ? t.catalogUi.tabCatalog
-        : t.fitsUi.tab;
+        : x === 'quick'
+          ? t.quickUi.tab
+          : t.fitsUi.tab;
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
     e.preventDefault();
@@ -168,6 +181,7 @@ function Content({
   // survives tab switches and is dropped with this component on sign-out.
   const drawings = useVegaDrawings(tech.expire);
   const reduce = useReducedMotion();
+  const [catalogText, setCatalogText] = useState('');
   // Signed in again after an expiry: reload what the expired session could not.
   const wasExpired = useRef(false);
   useEffect(() => {
@@ -217,6 +231,9 @@ function Content({
         >
           <DrawingsContext.Provider value={drawings}>
             <CatalogTab
+              // A jump from "Hızlı Cevap" starts the catalogue on that search.
+              key={catalogText}
+              initialText={catalogText}
               t={t}
               lang={lang}
               status={catalog.status}
@@ -227,6 +244,32 @@ function Content({
             />
           </DrawingsContext.Provider>
         </motion.div>
+      )}
+      {tab === 'quick' && (
+        <div
+          id="tech-panel-quick"
+          role="tabpanel"
+          tabIndex={-1}
+          aria-labelledby="tech-tab-quick"
+          className="max-w-[1280px] mx-auto px-4 md:px-8"
+        >
+          <Suspense fallback={<p className="font-sans text-ink-mid m-0">{t.fitsUi.loading}</p>}>
+            <QuickTab
+              t={t}
+              lang={lang}
+              status={fits.status}
+              fits={fits.fits}
+              parts={fits.parts}
+              quote={quote.quote}
+              retry={fits.retry}
+              onCatalog={(text) => {
+                setCatalogText(text);
+                selectTab('catalog');
+                window.scrollTo({ top: 0 });
+              }}
+            />
+          </Suspense>
+        </div>
       )}
       {tab === 'fits' && (
         <div

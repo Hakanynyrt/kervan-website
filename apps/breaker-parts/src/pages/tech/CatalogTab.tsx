@@ -57,6 +57,8 @@ interface Props {
   popular?: VegaPopular | null;
   guide?: VegaGuide | null;
   retry: () => void;
+  /** Search text to start with (a jump from "Hızlı Cevap"). */
+  initialText?: string;
 }
 
 const PAGE = 40;
@@ -91,9 +93,18 @@ const CHIP_CLS: Record<ChipState, string> = {
 const fill = (tpl: string, vars: Record<string, string | number>): string =>
   Object.entries(vars).reduce((s, [k, v]) => s.replace(`{${k}}`, String(v)), tpl);
 
-export default function CatalogTab({ t, lang, status, catalog, popular, guide, retry }: Props) {
+export default function CatalogTab({
+  t,
+  lang,
+  status,
+  catalog,
+  popular,
+  guide,
+  retry,
+  initialText = '',
+}: Props) {
   const c = t.catalogUi;
-  const [text, setText] = useState('');
+  const [text, setText] = useState(initialText);
   const [brand, setBrand] = useState('');
   const [tip, setTip] = useState<VegaTip | ''>('');
   const [hideLow, setHideLow] = useState(false);
