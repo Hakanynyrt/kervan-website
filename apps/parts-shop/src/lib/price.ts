@@ -1,4 +1,4 @@
-import type { FxRate } from '@kervan/tips';
+import { type FxRate, grossTryCents } from '@kervan/tips';
 import type { Lang } from '../types';
 import type { Dict } from './dict';
 
@@ -21,18 +21,8 @@ export const fmtDate = (iso: string, lang: Lang): string => {
   return lang === 'tr' ? `${d}.${m}.${y}` : `${d}/${m}/${y}`;
 };
 
-/** VAT rate on our products (percent); catalogue prices are net. */
-export const VAT_PERCENT = 20;
-export const vatOf = (netCents: number): number => Math.round((netCents * VAT_PERCENT) / 100);
-
-/**
- * The Turkish pages' price (owner, G2, 2026-11-01): the net USD price plus its taxes (`vatOf`),
- * times the stated CBRT rate, rounded once to whole lira. Nothing else enters it. Returned in
- * kuruş (always a whole number of lira); null without a rate. The page, the cart and the JSON-LD
- * all use it, so they cannot disagree.
- */
-export const grossTryCents = (netCents: number, fx: FxRate | null): number | null =>
-  fx ? Math.round(((netCents + vatOf(netCents)) / 100) * fx.usdTry) * 100 : null;
+// VAT and the gross TL price live in @kervan/tips (shared with kervanbreaker.com's owner quote).
+export { VAT_PERCENT, vatOf, grossTryCents } from '@kervan/tips';
 
 /** "15.816 TL": an amount in kuruş of whole lira (grossTryCents, or a sum of them). */
 export const fmtTryCents = (tryCents: number, lang: Lang): string =>

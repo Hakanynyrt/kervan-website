@@ -382,6 +382,23 @@ export interface DictBlock {
     answerClose: string;
     answerHint: string;
     answer: { line: string; keys: string; types: string; order: string };
+    /** Owner-only quote lines (shop price, stock, lead time). */
+    quoteTitle: string;
+    quoteType: string;
+    quotePrice: string;
+    quoteAvail: string;
+    quoteNone: string;
+    quoteLoading: string;
+    quoteShop: string;
+    quoteFx: string;
+    quote: {
+      gross: string;
+      net: string;
+      ask: string;
+      inStock: string;
+      lead: string;
+      noStock: string;
+    };
   };
   productionPage: {
     eyebrow: string;
