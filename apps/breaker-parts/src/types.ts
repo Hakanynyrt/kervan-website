@@ -166,8 +166,22 @@ export interface DictBlock {
     error: string;
     logout: string;
     loading: string;
+    /** Shown inline when the session ran out mid-use; the page and its data stay. */
+    expired: string;
+    showPassword: string;
+    hidePassword: string;
+    /** The Genel text could not be read (the other tabs still work). */
+    contentError: string;
   };
   catalogUi: {
+    /** Folded measure/feature search, active-filter chips and the one reset. */
+    measureOpen: string;
+    measureOpenHint: string;
+    activeFilters: string;
+    removeFilter: string;
+    clearAll: string;
+    chipMeasure: string;
+    chipFeat: string;
     tabsLabel: string;
     tabGeneral: string;
     tabCatalog: string;
@@ -357,6 +371,17 @@ export interface DictBlock {
     samePartsSame: string;
     samePartsDifferent: string;
     samePartsSize: string;
+    /** "Müşteriye gönder": customer-ready answer (public fields only). */
+    answerOpen: string;
+    answerLabel: string;
+    answerShare: string;
+    answerWhatsapp: string;
+    answerCopy: string;
+    answerCopied: string;
+    answerCopyFailed: string;
+    answerClose: string;
+    answerHint: string;
+    answer: { line: string; keys: string; types: string; order: string };
   };
   productionPage: {
     eyebrow: string;

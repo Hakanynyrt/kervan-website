@@ -12,7 +12,8 @@ export type CatalogStatus =
 
 /** Loads the private tip catalog once the catalog tab is opened. The data is kept
  *  in memory only (never localStorage/sessionStorage) and dropped on sign-out. */
-export function useVegaCatalog(enabled: boolean, onUnauthorized: () => void) {
+/** `authed`: signed in (data kept until sign-out); `active`: the catalog tab is open (fetch once). */
+export function useVegaCatalog(authed: boolean, active: boolean, onUnauthorized: () => void) {
   const [status, setStatus] = useState<CatalogStatus>('idle');
   const [catalog, setCatalog] = useState<VegaCatalog | null>(null);
   const [popular, setPopular] = useState<VegaPopular | null>(null);
@@ -20,14 +21,14 @@ export function useVegaCatalog(enabled: boolean, onUnauthorized: () => void) {
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!authed) {
       setCatalog(null);
       setPopular(null);
       setGuide(null);
       setStatus('idle');
       return;
     }
-    if (catalog) return;
+    if (!active || catalog) return;
     let alive = true;
     setStatus('loading');
     (async () => {
@@ -67,7 +68,7 @@ export function useVegaCatalog(enabled: boolean, onUnauthorized: () => void) {
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, attempt]);
+  }, [authed, active, attempt]);
 
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
   return { status, catalog, popular, guide, retry };

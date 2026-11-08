@@ -27,6 +27,8 @@ export default function App() {
   const lang = useLang();
   const t = DICT[lang];
   const tech = useTechAuth();
+  // The owner's lookup page has no visitor chrome: the WhatsApp button covered result rows.
+  const ownerPage = stripLang(useLocation().pathname).replace(/\/$/, '') === '/teknik-bilgiler';
 
   const pages: [string, ReactElement][] = [
     ['/', <Home key="home" t={t} lang={lang} />],
@@ -43,7 +45,7 @@ export default function App() {
     <>
       <RouteHead />
 
-      <Nav lang={lang} t={t} techAuthed={tech.state === 'authed'} />
+      <Nav lang={lang} t={t} techAuthed={tech.state === 'authed' || tech.state === 'expired'} />
       <main>
         <Routes>
           {LANGS.flatMap((l) =>
@@ -54,8 +56,8 @@ export default function App() {
           <Route path="*" element={<NotFound t={t} />} />
         </Routes>
       </main>
-      <Footer t={t} />
-      <WhatsAppFAB />
+      {!ownerPage && <Footer t={t} />}
+      {!ownerPage && <WhatsAppFAB />}
 
       <ScrollToTop />
     </>
