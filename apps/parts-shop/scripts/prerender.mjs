@@ -79,6 +79,8 @@ function gitDates() {
       'public/models',
       'src/lib/legal.ts',
       'src/lib/guides.ts',
+      'src/lib/guide-steps',
+      'src/lib/guide-videos.ts',
     ]);
     for (const line of log.split('\n')) {
       if (line.startsWith('\x01')) date = line.slice(1);
