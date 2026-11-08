@@ -503,6 +503,7 @@ export const DICT: Dict = {
       samePartsWith: 'Aynı parçaları kullanan kırıcılar',
       samePartsSame: 'Aynı parçalar',
       samePartsDifferent: 'Farklı parçalar',
+      samePartsSize: 'Ana ölçü (mm)',
     },
     productionPage: {
       eyebrow: 'Üretim & Kalite',
@@ -1128,6 +1129,7 @@ export const DICT: Dict = {
       samePartsWith: 'Breakers with the same parts',
       samePartsSame: 'Same parts',
       samePartsDifferent: 'Different parts',
+      samePartsSize: 'Main size (mm)',
     },
     productionPage: {
       eyebrow: 'Production & Quality',

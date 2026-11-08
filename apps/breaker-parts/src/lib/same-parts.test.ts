@@ -8,7 +8,10 @@ const RAW = {
   groups: [
     {
       models: ['Rammer E 68', 'Krupp HM 960'],
-      same: { tr: ['Piston', 'Silindir'], en: ['Piston'] },
+      same: {
+        tr: [{ name: 'Piston', size: 'boy 500' }, 'Silindir', { size: 'x' }],
+        en: ['Piston'],
+      },
       different: { tr: ['Yan saplama'] },
       note: { tr: 'Not' },
     },
@@ -21,8 +24,15 @@ const RAW = {
 test('parseSameParts keeps valid groups and fills English from Turkish', () => {
   const g = parseSameParts(RAW);
   assert.equal(g.length, 1);
-  assert.deepEqual(g[0].same, { tr: ['Piston', 'Silindir'], en: ['Piston'] });
-  assert.deepEqual(g[0].different, { tr: ['Yan saplama'], en: ['Yan saplama'] });
+  assert.deepEqual(g[0].same, {
+    tr: [
+      { name: 'Piston', size: 'boy 500' },
+      { name: 'Silindir', size: null },
+    ],
+    en: [{ name: 'Piston', size: null }],
+  });
+  const y = { name: 'Yan saplama', size: null };
+  assert.deepEqual(g[0].different, { tr: [y], en: [y] });
   assert.deepEqual(g[0].note, { tr: 'Not', en: 'Not' });
 });
 
@@ -36,8 +46,11 @@ test('samePartsFor matches spacing and case, and lists the other breakers', () =
   const m = samePartsFor('Rammer E68', g, 'tr');
   assert.equal(m.length, 1);
   assert.deepEqual(m[0].others, ['Krupp HM 960']);
-  assert.deepEqual(m[0].same, ['Piston', 'Silindir']);
-  assert.deepEqual(m[0].different, ['Yan saplama']);
+  assert.deepEqual(
+    m[0].same.map((x) => x.name),
+    ['Piston', 'Silindir'],
+  );
+  assert.deepEqual(m[0].different, [{ name: 'Yan saplama', size: null }]);
   assert.equal(m[0].note, 'Not');
   assert.deepEqual(samePartsFor('krupp hm 960', g, 'en')[0].others, ['Rammer E 68']);
   assert.deepEqual(samePartsFor('Rammer E 64', g, 'tr'), []);

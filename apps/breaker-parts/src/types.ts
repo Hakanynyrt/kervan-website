@@ -356,6 +356,7 @@ export interface DictBlock {
     samePartsWith: string;
     samePartsSame: string;
     samePartsDifferent: string;
+    samePartsSize: string;
   };
   productionPage: {
     eyebrow: string;

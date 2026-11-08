@@ -8,7 +8,7 @@ import {
   rewriteQuery,
 } from '@kervan/tips';
 import type { DictBlock, Lang } from '../../types';
-import { type SamePartsGroup, nameKeys, samePartsFor } from '../../lib/same-parts';
+import { type Part, type SamePartsGroup, nameKeys, samePartsFor } from '../../lib/same-parts';
 import type { CatalogStatus } from '../../lib/use-vega-catalog';
 import { FITS_HASH } from './fits-hash';
 
@@ -635,21 +635,43 @@ function SameParts({
               );
             })}
           </ul>
-          <dl className="m-0 flex flex-col gap-2 font-sans text-sm">
-            <div className="flex flex-col gap-1">
-              <dt className={labelCls}>{c.samePartsSame}</dt>
-              <dd className="m-0 text-ink">{h.same.join(', ')}</dd>
-            </div>
-            {h.different.length > 0 && (
-              <div className="flex flex-col gap-1">
-                <dt className={labelCls}>{c.samePartsDifferent}</dt>
-                <dd className="m-0 text-ink">{h.different.join(', ')}</dd>
-              </div>
-            )}
-          </dl>
+          <PartRows label={c.samePartsSame} rows={h.same} sizeLabel={c.samePartsSize} />
+          {h.different.length > 0 && (
+            <PartRows label={c.samePartsDifferent} rows={h.different} sizeLabel={c.samePartsSize} />
+          )}
           {h.note && <p className="font-sans text-sm text-ink-mid m-0">{h.note}</p>}
         </article>
       ))}
     </>
+  );
+}
+
+/** One part per row with its main size (owner asked for each part on its own line). */
+function PartRows({ label, rows, sizeLabel }: { label: string; rows: Part[]; sizeLabel: string }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <h4 className={`${labelCls} m-0`}>{label}</h4>
+      <table className="w-full border-collapse font-sans text-sm">
+        <thead className="sr-only">
+          <tr>
+            <th scope="col">{label}</th>
+            <th scope="col">{sizeLabel}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.name} className="border-t border-hair">
+              <th
+                scope="row"
+                className="py-2 pr-4 text-left font-medium text-ink align-top w-[40%]"
+              >
+                {r.name}
+              </th>
+              <td className="py-2 text-ink-mid align-top">{r.size ?? '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

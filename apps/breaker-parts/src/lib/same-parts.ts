@@ -7,14 +7,19 @@ import { breakerKeys, fold } from '@kervan/tips';
  *
  * KV shape (schema 1):
  *   { "schema": 1, "groups": [ { "models": ["Daemo DMB S 500 V", "MTB 30"],
- *       "same": { "tr": ["Piston"], "en": ["Piston"] },
+ *       "same": { "tr": [{ "name": "Piston", "size": "boy 500, Ø77" }], "en": [...] },
  *       "different": { "tr": ["Yan saplama"], "en": ["Side bolt"] },
  *       "note": { "tr": "…", "en": "…" } } ] }
- * `different` and `note` are optional; `en` falls back to `tr`.
+ * A part is `{ name, size? }` or a plain name. `different` and `note` are optional; `en` falls
+ * back to `tr`.
  */
+export interface Part {
+  name: string;
+  size: string | null;
+}
 export interface Texts {
-  tr: string[];
-  en: string[];
+  tr: Part[];
+  en: Part[];
 }
 export interface SamePartsGroup {
   models: string[];
@@ -25,18 +30,35 @@ export interface SamePartsGroup {
 export interface SamePartsMatch {
   /** The other breakers of the group, as written in the list. */
   others: string[];
-  same: string[];
-  different: string[];
+  same: Part[];
+  different: Part[];
   note: string | null;
 }
 
 const strings = (v: unknown): string[] =>
   Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string' && x.trim() !== '') : [];
 
+const str = (v: unknown): string => (typeof v === 'string' ? v.trim() : '');
+
+const parts = (v: unknown): Part[] => {
+  if (!Array.isArray(v)) return [];
+  const out: Part[] = [];
+  for (const x of v) {
+    if (typeof x === 'string') {
+      if (x.trim()) out.push({ name: x.trim(), size: null });
+    } else if (x && typeof x === 'object') {
+      const o = x as { name?: unknown; size?: unknown };
+      const name = str(o.name);
+      if (name) out.push({ name, size: str(o.size) || null });
+    }
+  }
+  return out;
+};
+
 const texts = (v: unknown): Texts => {
   const o = (v && typeof v === 'object' ? v : {}) as { tr?: unknown; en?: unknown };
-  const tr = strings(o.tr);
-  const en = strings(o.en);
+  const tr = parts(o.tr);
+  const en = parts(o.en);
   return { tr, en: en.length ? en : tr };
 };
 
