@@ -13,6 +13,7 @@ import type { CatalogStatus } from '../../lib/use-vega-catalog';
 import { FITS_HASH } from './fits-hash';
 import { buildAnswer, whatsappLink } from '../../lib/share-answer';
 import { shopUrl } from '../../lib/shop';
+import { type Quote, quoteText } from '../../lib/quote';
 
 interface Props {
   t: DictBlock;
@@ -20,6 +21,8 @@ interface Props {
   fits: FitsIndex | null;
   /** Owner-only same-parts list (KV `parts:v1`); empty when none. */
   parts: SamePartsGroup[];
+  /** Owner-only shop prices, stock and lead time; null while loading or unavailable. */
+  quote: Quote | null;
   lang: Lang;
   retry: () => void;
 }
@@ -55,7 +58,7 @@ const fill = (tpl: string, vars: Record<string, string | number>): string =>
   Object.entries(vars).reduce((s, [k, v]) => s.replace(`{${k}}`, String(v)), tpl);
 const mm = (v: number): string => String(Math.round(v * 10) / 10);
 
-export default function FitsTab({ t, status, fits, parts, lang, retry }: Props) {
+export default function FitsTab({ t, status, fits, parts, quote, lang, retry }: Props) {
   const c = t.fitsUi;
   if (status !== 'ready' || !fits) {
     const msg =
@@ -87,7 +90,7 @@ export default function FitsTab({ t, status, fits, parts, lang, retry }: Props) 
       </div>
     );
   }
-  return <Ready t={t} fits={fits} parts={parts} lang={lang} />;
+  return <Ready t={t} fits={fits} parts={parts} quote={quote} lang={lang} />;
 }
 
 function Head({ t, fits }: { t: DictBlock; fits?: FitsIndex }) {
@@ -115,11 +118,13 @@ function Ready({
   t,
   fits,
   parts,
+  quote,
   lang,
 }: {
   t: DictBlock;
   fits: FitsIndex;
   parts: SamePartsGroup[];
+  quote: Quote | null;
   lang: Lang;
 }) {
   const c = t.fitsUi;
@@ -185,6 +190,7 @@ function Ready({
           t={t}
           fits={fits}
           parts={parts}
+          quote={quote}
           lang={lang}
           selected={view.slug !== null ? (bySlug.get(view.slug) ?? null) : null}
           onPick={pickBreaker}
@@ -209,6 +215,7 @@ function BreakerView({
   t,
   fits,
   parts,
+  quote,
   lang,
   selected,
   onPick,
@@ -218,6 +225,7 @@ function BreakerView({
   t: DictBlock;
   fits: FitsIndex;
   parts: SamePartsGroup[];
+  quote: Quote | null;
   lang: Lang;
   selected: number | null;
   onPick: (i: number) => void;
@@ -359,6 +367,7 @@ function BreakerView({
               current={selected}
               onPick={onPick}
               lang={lang}
+              quote={quote}
             />
           ))}
         </section>
@@ -488,6 +497,7 @@ function FamilyCard({
   current,
   onPick,
   lang,
+  quote = null,
 }: {
   t: DictBlock;
   fits: FitsIndex;
@@ -497,6 +507,7 @@ function FamilyCard({
   onPick: (i: number) => void;
   /** Set when shown for a picked breaker: offers the customer-ready answer. */
   lang?: Lang;
+  quote?: Quote | null;
 }) {
   const c = t.fitsUi;
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -526,6 +537,9 @@ function FamilyCard({
           {fam.types.map((x) => c.tipTypes[x]).join(', ')}
         </p>
       </div>
+      {current !== null && lang && (
+        <QuoteLines t={t} lang={lang} fits={fits} fam={fam} current={current} quote={quote} />
+      )}
       {current !== null && lang && (
         <ShareAnswer t={t} lang={lang} fits={fits} fam={fam} current={current} />
       )}
@@ -791,6 +805,77 @@ function ShareAnswer({
         {note}
       </p>
       <p className="font-sans text-xs text-ink-soft m-0">{c.answerHint}</p>
+    </div>
+  );
+}
+
+/** Owner-only quote lines for the picked breaker's tip: per tip type the shop's price (as the shop
+ *  shows it), stock or lead time, and a link to the shop page. Never in the customer message. */
+function QuoteLines({
+  t,
+  lang,
+  fits,
+  fam,
+  current,
+  quote,
+}: {
+  t: DictBlock;
+  lang: Lang;
+  fits: FitsIndex;
+  fam: FitsFamily;
+  current: number;
+  quote: Quote | null;
+}) {
+  const c = t.fitsUi;
+  const rows = quote?.byFamily.get(fam.code) ?? [];
+  const order = ['chisel', 'moil', 'blunt', 'pyramid', 'conical', 'asphalt'];
+  const sorted = [...rows].sort((a, b) => order.indexOf(a.tipType) - order.indexOf(b.tipType));
+  const href = shopUrl(`/kirici/${fits.breakers[current].slug}`, lang);
+  return (
+    <div className="flex flex-col gap-2 border-t border-hair pt-3">
+      <h4 className={`${labelCls} m-0`}>{c.quoteTitle}</h4>
+      {sorted.length > 0 ? (
+        <table className="w-full border-collapse font-sans text-sm">
+          <thead className="sr-only">
+            <tr>
+              <th scope="col">{c.quoteType}</th>
+              <th scope="col">{c.quotePrice}</th>
+              <th scope="col">{c.quoteAvail}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((s) => {
+              const q = quoteText(s, quote?.fx ?? null, lang, c.quote);
+              return (
+                <tr key={s.code} className="border-t border-hair first:border-t-0">
+                  <th scope="row" className="py-2 pr-3 text-left font-medium text-ink align-top">
+                    {c.tipTypes[s.tipType as keyof typeof c.tipTypes] ?? s.tipType}
+                  </th>
+                  <td className="py-2 pr-3 text-ink align-top">{q.price}</td>
+                  <td className="py-2 text-ink-mid align-top whitespace-nowrap">{q.avail}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      ) : (
+        <p className="font-sans text-sm text-ink-mid m-0">{quote ? c.quoteNone : c.quoteLoading}</p>
+      )}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`font-sans text-sm text-ink underline underline-offset-4 hover:text-brand ${focusRing}`}
+        >
+          {c.quoteShop} ↗
+        </a>
+        {quote?.fx && (
+          <span className="font-sans text-xs text-ink-soft">
+            {fill(c.quoteFx, { v: quote.fx.usdTry, d: quote.fx.date })}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

@@ -66,6 +66,7 @@ check https://kervanbreaker.com/api/tech/content 401 application/json
 check https://kervanbreaker.com/api/tech/catalog 401 application/json
 check https://kervanbreaker.com/api/tech/drawings 401 application/json
 check https://kervanbreaker.com/api/tech/fits 401 application/json
+check https://kervanbreaker.com/api/tech/quote 401 application/json
 
 # The breaker contact form posts cross-origin to the heat-treatment function.
 preflight "$RFQ" https://kervanbreaker.com yes

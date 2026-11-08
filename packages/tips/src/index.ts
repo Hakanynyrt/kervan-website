@@ -15,3 +15,4 @@ export * from './search.ts';
 export * from './tip-filter.ts';
 export * from './oem.ts';
 export * from './fits-index.ts';
+export * from './price-math.ts';

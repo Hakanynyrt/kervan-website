@@ -6,6 +6,7 @@ import type { TechAuth } from '../lib/use-tech-auth';
 import { useVegaCatalog } from '../lib/use-vega-catalog';
 import { DrawingsContext, useVegaDrawings } from '../lib/use-vega-drawings';
 import { useTechFits } from '../lib/use-tech-fits';
+import { useTechQuote } from '../lib/use-tech-quote';
 import CatalogTab from './tech/CatalogTab';
 import { FITS_HASH } from './tech/fits-hash';
 
@@ -63,6 +64,8 @@ export default function TechInfo({ t, lang, tech }: Props) {
     tech.expire,
   );
   const fits = useTechFits(signedIn, tech.state === 'authed' && tab === 'fits', tech.expire);
+  // Shop prices, stock and lead time for the quote lines (owner only, memory only).
+  const quote = useTechQuote(signedIn, tech.state === 'authed' && tab === 'fits', tech.expire);
 
   if (signedIn) {
     const c = tech.content ? (tech.content[lang] ?? tech.content.tr ?? null) : null;
@@ -76,6 +79,7 @@ export default function TechInfo({ t, lang, tech }: Props) {
         selectTab={selectTab}
         catalog={catalog}
         fits={fits}
+        quote={quote}
       />
     );
   }
@@ -148,6 +152,7 @@ function Content({
   selectTab,
   catalog,
   fits,
+  quote,
 }: {
   c: TechContent | null;
   t: DictBlock;
@@ -157,6 +162,7 @@ function Content({
   selectTab: (x: Tab) => void;
   catalog: ReturnType<typeof useVegaCatalog>;
   fits: ReturnType<typeof useTechFits>;
+  quote: ReturnType<typeof useTechQuote>;
 }) {
   // Drawings are fetched when the first detail panel opens; the state lives here so it
   // survives tab switches and is dropped with this component on sign-out.
@@ -170,8 +176,9 @@ function Content({
       wasExpired.current = false;
       if (catalog.status === 'unauthorized') catalog.retry();
       if (fits.status === 'unauthorized') fits.retry();
+      if (quote.status === 'unauthorized') quote.retry();
     }
-  }, [tech.state, catalog, fits]);
+  }, [tech.state, catalog, fits, quote]);
   return (
     <section className="pt-4 pb-16 md:pt-6 md:pb-24">
       {/* Sticky under the site header: the tabs and sign-out stay in reach on a long list. */}
@@ -235,6 +242,7 @@ function Content({
               status={fits.status}
               fits={fits.fits}
               parts={fits.parts}
+              quote={quote.quote}
               lang={lang}
               retry={fits.retry}
             />
