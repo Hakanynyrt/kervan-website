@@ -120,3 +120,50 @@ export function samePartsFor(
   }
   return out;
 }
+
+/** One row of a part search: a part shared by a group's breakers (or listed as different). */
+export interface PartHit {
+  models: string[];
+  name: string;
+  size: string | null;
+  /** True when the part is listed under "different" for this group. */
+  differs: boolean;
+  note: string | null;
+}
+
+/**
+ * Part search over the whole same-parts list ("piston", "burç 70", "MTB 30 kama"): every word of
+ * the query must appear (folded) in the part's name, its size or the group's breaker names. Groups
+ * whose breakers are not in the shop are found too. Same parts first, then the different ones.
+ */
+export function searchParts(
+  q: string,
+  groups: readonly SamePartsGroup[],
+  lang: 'tr' | 'en',
+): PartHit[] {
+  const words = q
+    .split(/[\s,;/]+/)
+    .map(fold)
+    .filter(Boolean);
+  if (!words.length) return [];
+  const out: PartHit[] = [];
+  for (const g of groups) {
+    const models = fold(g.models.join(' '));
+    const rows: [Part, boolean][] = [
+      ...g.same[lang].map((p): [Part, boolean] => [p, false]),
+      ...g.different[lang].map((p): [Part, boolean] => [p, true]),
+    ];
+    for (const [p, differs] of rows) {
+      const text = `${fold(p.name)} ${fold(p.size ?? '')} ${models}`;
+      if (words.every((w) => text.includes(w)))
+        out.push({
+          models: g.models,
+          name: p.name,
+          size: p.size,
+          differs,
+          note: g.note ? g.note[lang] : null,
+        });
+    }
+  }
+  return out.sort((a, b) => Number(a.differs) - Number(b.differs));
+}

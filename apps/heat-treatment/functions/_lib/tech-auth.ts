@@ -25,6 +25,9 @@ export interface TechEnv {
 export type Ctx = { request: Request; env: TechEnv };
 
 export const SESSION_MAX_AGE = 4 * 60 * 60; // 4 h, absolute (no sliding renewal)
+/** "Keep me signed in on this phone" (opt-in at login): 30 days, absolute. Rotating the
+ *  password, SESSION_SECRET or SESSION_VERSION still ends it, like every session. */
+export const TRUSTED_MAX_AGE = 30 * 24 * 60 * 60;
 export const MIN_PASSWORD = 16;
 export const MIN_SECRET = 32;
 const HINT_COOKIE = 'kv_tech_hint';
@@ -143,15 +146,19 @@ function attrs(url: URL, maxAge: number): string {
   return `Path=/; Max-Age=${maxAge}; SameSite=Strict${secureHost(url) ? '; Secure' : ''}`;
 }
 
-export async function sessionCookies(env: TechEnv, url: URL): Promise<string[]> {
-  const exp = Math.floor(Date.now() / 1000) + SESSION_MAX_AGE;
+export async function sessionCookies(
+  env: TechEnv,
+  url: URL,
+  maxAge: number = SESSION_MAX_AGE,
+): Promise<string[]> {
+  const exp = Math.floor(Date.now() / 1000) + maxAge;
   const nonce = b64url(crypto.getRandomValues(new Uint8Array(16)));
   const payload = `v1.${exp}.${nonce}`;
   const sig = b64url(await hmac(await sessionKey(env), payload));
   return [
-    `${cookieName(url)}=${payload}.${sig}; HttpOnly; ${attrs(url, SESSION_MAX_AGE)}`,
+    `${cookieName(url)}=${payload}.${sig}; HttpOnly; ${attrs(url, maxAge)}`,
     // Non-sensitive hint so the SPA only calls the API when a session may exist.
-    `${HINT_COOKIE}=1; ${attrs(url, SESSION_MAX_AGE)}`,
+    `${HINT_COOKIE}=1; ${attrs(url, maxAge)}`,
   ];
 }
 

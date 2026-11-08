@@ -172,6 +172,8 @@ export interface DictBlock {
     hidePassword: string;
     /** The Genel text could not be read (the other tabs still work). */
     contentError: string;
+    /** Opt-in 30-day session on this device. */
+    remember: string;
   };
   catalogUi: {
     /** Folded measure/feature search, active-filter chips and the one reset. */
@@ -371,6 +373,20 @@ export interface DictBlock {
     samePartsSame: string;
     samePartsDifferent: string;
     samePartsSize: string;
+    /** Part search mode and this phone's lists. */
+    modePart: string;
+    partLabel: string;
+    partPlaceholder: string;
+    partHint: string;
+    partNone: string;
+    partResults: string;
+    partSame: string;
+    partDiffers: string;
+    notInShop: string;
+    star: string;
+    starred: string;
+    starredList: string;
+    recentList: string;
     /** "Müşteriye gönder": customer-ready answer (public fields only). */
     answerOpen: string;
     answerLabel: string;

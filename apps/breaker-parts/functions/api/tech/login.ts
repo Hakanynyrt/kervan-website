@@ -7,6 +7,8 @@ import {
   passwordOk,
   sameOriginJson,
   sessionCookies,
+  SESSION_MAX_AGE,
+  TRUSTED_MAX_AGE,
   withCookies,
 } from '../../_lib/tech-auth';
 
@@ -23,8 +25,12 @@ export const onRequestPost: Fn = async ({ request, env }) => {
   const raw = await request.text();
   if (raw.length > 1024) return json({ ok: false, error: 'size' }, 413);
   let password: unknown;
+  let remember = false;
   try {
-    password = (JSON.parse(raw) as { password?: unknown }).password;
+    const b = JSON.parse(raw) as { password?: unknown; remember?: unknown };
+    password = b.password;
+    // Opt-in "keep me signed in on this phone": only the literal true counts.
+    remember = b.remember === true;
   } catch {
     return json({ ok: false, error: 'parse' }, 400);
   }
@@ -36,7 +42,10 @@ export const onRequestPost: Fn = async ({ request, env }) => {
     await sleep(800); // slows online guessing; the real defence is a long random password
     return json({ ok: false, error: 'invalid' }, 401);
   }
-  return withCookies(json({ ok: true }), await sessionCookies(env, url));
+  return withCookies(
+    json({ ok: true }),
+    await sessionCookies(env, url, remember ? TRUSTED_MAX_AGE : SESSION_MAX_AGE),
+  );
 };
 
 export const onRequest: Fn = () => methodNotAllowed();

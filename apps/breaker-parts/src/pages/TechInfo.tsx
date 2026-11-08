@@ -319,6 +319,7 @@ function LoginForm({
 }) {
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
+  const [remember, setRemember] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -327,7 +328,7 @@ function LoginForm({
     if (busy || !password) return;
     setBusy(true);
     setError(null);
-    const r = await tech.login(password);
+    const r = await tech.login(password, remember);
     setBusy(false);
     // Kept after a wrong attempt so a one-letter typo can be fixed; cleared once signed in.
     if (r === 'ok') setPassword('');
@@ -372,6 +373,15 @@ function LoginForm({
           {show ? t.techUi.hidePassword : t.techUi.showPassword}
         </button>
       </div>
+      <label className="flex items-center gap-3 min-h-11 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={remember}
+          onChange={(e) => setRemember(e.target.checked)}
+          className="w-5 h-5 accent-brand"
+        />
+        <span className="font-sans text-sm text-ink-mid">{t.techUi.remember}</span>
+      </label>
       <button
         type="submit"
         disabled={busy || !password}
