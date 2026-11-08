@@ -34,7 +34,7 @@
       "name": "Teknik ara",
       "short_name": "Teknik",
       "description": "Kırıcı, uç veya parça ara (giriş gerekir)",
-      "url": "/teknik-bilgiler#ortak-uclar",
+      "url": "/teknik-bilgiler#ara",
       "icons": [
         {
           "src": "/icon-192-02.png",

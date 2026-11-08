@@ -8,7 +8,13 @@ import {
   rewriteQuery,
 } from '@kervan/tips';
 import type { DictBlock, Lang } from '../../types';
-import { type SamePartsGroup, nameKeys, samePartsFor, searchParts } from '../../lib/same-parts';
+import {
+  type PartHit,
+  type SamePartsGroup,
+  nameKeys,
+  samePartsFor,
+  searchParts,
+} from '../../lib/same-parts';
 import {
   RECENT_KEY,
   STAR_KEY,
@@ -582,7 +588,7 @@ function TipView({
   );
 }
 
-function FamilyCard({
+export function FamilyCard({
   t,
   fits,
   fam,
@@ -690,7 +696,7 @@ function FamilyCard({
 }
 
 /** Breakers with the same parts as the selected one (owner's private list, KV `parts:v1`). */
-function SameParts({
+export function SameParts({
   t,
   fits,
   parts,
@@ -993,17 +999,6 @@ function PartView({
   const c = t.fitsUi;
   const dq = useDeferredValue(q);
   const hits = useMemo(() => searchParts(dq, parts, lang), [dq, parts, lang]);
-  const byKey = useMemo(() => {
-    const m = new Map<string, number>();
-    fits.breakers.forEach((x, i) => {
-      for (const k of nameKeys(x.name)) if (!m.has(k)) m.set(k, i);
-    });
-    return m;
-  }, [fits]);
-  const find = (name: string) =>
-    nameKeys(name)
-      .map((k) => byKey.get(k))
-      .find((x) => x !== undefined);
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2 max-w-[640px]">
@@ -1029,49 +1024,78 @@ function PartView({
           {c.partNone}
         </p>
       ) : (
-        <ul aria-label={c.partResults} className="list-none m-0 p-0 flex flex-col gap-3">
-          {hits.map((h) => (
-            <li
-              key={`${h.models.join('|')}|${h.name}|${h.differs}`}
-              className={`border rounded-md bg-bg-soft p-4 flex flex-col gap-2 ${h.differs ? 'border-hair-strong' : 'border-brand'}`}
-            >
-              <p className="font-sans m-0">
-                <span className="font-semibold text-ink">{h.name}</span>
-                {h.size && <span className="text-ink-mid"> · {h.size}</span>}
-              </p>
-              <p className="font-sans text-sm m-0 text-ink-mid">
-                {h.differs ? c.partDiffers : c.partSame}
-              </p>
-              <ul className="list-none m-0 p-0 flex flex-wrap gap-2">
-                {h.models.map((m) => {
-                  const i = find(m);
-                  return (
-                    <li key={m}>
-                      {i !== undefined ? (
-                        <button
-                          type="button"
-                          onClick={() => onPick(i)}
-                          aria-label={fill(c.openBreaker, { name: fits.breakers[i].name })}
-                          className={`${chipCls} border-hair text-ink hover:border-brand bg-bg`}
-                        >
-                          {m}
-                        </button>
-                      ) : (
-                        <span
-                          className={`${chipCls} inline-flex items-center gap-1 border-hair text-ink bg-bg`}
-                        >
-                          {m} <span className="text-xs text-ink-soft">({c.notInShop})</span>
-                        </span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-              {h.note && <p className="font-sans text-xs text-ink-soft m-0">{h.note}</p>}
-            </li>
-          ))}
-        </ul>
+        <PartHitList t={t} fits={fits} hits={hits} onPick={onPick} />
       )}
     </div>
+  );
+}
+
+/** Part search results: each shared (or different) part with its size and the breakers that use it. */
+export function PartHitList({
+  t,
+  fits,
+  hits,
+  onPick,
+}: {
+  t: DictBlock;
+  fits: FitsIndex;
+  hits: PartHit[];
+  onPick: (i: number) => void;
+}) {
+  const c = t.fitsUi;
+  const byKey = useMemo(() => {
+    const m = new Map<string, number>();
+    fits.breakers.forEach((x, i) => {
+      for (const k of nameKeys(x.name)) if (!m.has(k)) m.set(k, i);
+    });
+    return m;
+  }, [fits]);
+  const find = (name: string) =>
+    nameKeys(name)
+      .map((k) => byKey.get(k))
+      .find((x) => x !== undefined);
+  return (
+    <ul aria-label={c.partResults} className="list-none m-0 p-0 flex flex-col gap-3">
+      {hits.map((h) => (
+        <li
+          key={`${h.models.join('|')}|${h.name}|${h.differs}`}
+          className={`border rounded-md bg-bg-soft p-4 flex flex-col gap-2 ${h.differs ? 'border-hair-strong' : 'border-brand'}`}
+        >
+          <p className="font-sans m-0">
+            <span className="font-semibold text-ink">{h.name}</span>
+            {h.size && <span className="text-ink-mid"> · {h.size}</span>}
+          </p>
+          <p className="font-sans text-sm m-0 text-ink-mid">
+            {h.differs ? c.partDiffers : c.partSame}
+          </p>
+          <ul className="list-none m-0 p-0 flex flex-wrap gap-2">
+            {h.models.map((m) => {
+              const i = find(m);
+              return (
+                <li key={m}>
+                  {i !== undefined ? (
+                    <button
+                      type="button"
+                      onClick={() => onPick(i)}
+                      aria-label={fill(c.openBreaker, { name: fits.breakers[i].name })}
+                      className={`${chipCls} border-hair text-ink hover:border-brand bg-bg`}
+                    >
+                      {m}
+                    </button>
+                  ) : (
+                    <span
+                      className={`${chipCls} inline-flex items-center gap-1 border-hair text-ink bg-bg`}
+                    >
+                      {m} <span className="text-xs text-ink-soft">({c.notInShop})</span>
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          {h.note && <p className="font-sans text-xs text-ink-soft m-0">{h.note}</p>}
+        </li>
+      ))}
+    </ul>
   );
 }

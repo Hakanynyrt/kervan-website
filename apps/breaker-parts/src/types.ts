@@ -322,6 +322,22 @@ export interface DictBlock {
     qualityLabels: Record<string, string>;
     flagLabels: Record<string, string>;
   };
+  /** Owner-only "Hızlı Cevap" tab: one box for a breaker, tip code, size or part. */
+  quickUi: {
+    tab: string;
+    title: string;
+    sub: string;
+    placeholder: string;
+    clear: string;
+    hint: string;
+    breakersFound: string;
+    inCatalog: string;
+    codeTitle: string;
+    sizeTitle: string;
+    partsTitle: string;
+    noResults: string;
+    searchCatalog: string;
+  };
   /** Owner-only "Ortak uçlar" tab: which breakers share one tip (data from /api/tech/fits). */
   fitsUi: {
     tab: string;
