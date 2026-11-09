@@ -36,7 +36,7 @@ export {
 } from './head.js';
 
 // React components
-export { JsonLd } from './JsonLd.js';
+export { JsonLd } from './JsonLdScript.js';
 export { PageMeta } from './PageMeta.js';
 
 // Constants
