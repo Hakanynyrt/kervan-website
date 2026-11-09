@@ -1,5 +1,15 @@
+/* Astryx's order line must stay above the Tailwind import, or the cascade inverts. */
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
 @import 'tailwindcss';
 @import '@kervan/ui/tokens.css';
+@import '@astryxdesign/core/astryx.css';
+@import '@kervan/ui/astryx-bridge.css';
+
+:root {
+  --radius-inner: 2px;
+  --radius-element: 2px;
+  --radius-container: 4px;
+}
 
 /* One visible focus ring for every keyboard-focusable element (WCAG 2.4.7).
    In the base layer so a component can still restyle it with a utility class. */

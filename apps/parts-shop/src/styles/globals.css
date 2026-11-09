@@ -1,5 +1,15 @@
+/* Astryx's order line must stay above the Tailwind import, or the cascade inverts. */
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
 @import 'tailwindcss';
 @import '@kervan/ui/tokens.css';
+@import '@astryxdesign/core/astryx.css';
+@import '@kervan/ui/astryx-bridge.css';
+
+:root {
+  --radius-inner: 4px;
+  --radius-element: var(--radius-sm);
+  --radius-container: var(--radius-md);
+}
 
 /* Scan @kervan/ui sources so utilities used inside the package are emitted. */
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
@@ -33,6 +43,7 @@
   --color-stage-deep: #0e0e0f;
   /* Text on bg-brand buttons: white on the light theme's dark ember, ink on the night theme's light one. */
   --color-on-brand: #ffffff;
+  --color-err: #b42318; /* 6.57:1 on white */
 }
 
 /*
@@ -92,6 +103,7 @@
   --color-hair: #343940;
   --color-hair-strong: #767d86;
   --color-on-brand: #1c1f23;
+  --color-err: #ff7b6e;
   --kv-stage: var(--kv-stage-night);
   --kv-stage-up: var(--kv-stage-night-up);
   --pstage: var(--kv-stage-night);
@@ -113,6 +125,7 @@
     --color-hair: #343940;
     --color-hair-strong: #767d86;
     --color-on-brand: #1c1f23;
+    --color-err: #ff7b6e;
     --kv-stage: var(--kv-stage-night);
     --kv-stage-up: var(--kv-stage-night-up);
     --pstage: var(--kv-stage-night);

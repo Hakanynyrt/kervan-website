@@ -18,12 +18,13 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
 import type { Lang } from './types';
+import { AstryxProvider } from '@kervan/ui';
 
 /** Route path of a neutral page in a language ('/' → '/en' for English). */
 const routePath = (path: string, lang: Lang) =>
   lang === 'tr' ? path : path === '/' ? '/en' : `/en${path}`;
 
-export default function App() {
+function AppBody() {
   const lang = useLang();
   const t = DICT[lang];
   const tech = useTechAuth();
@@ -78,4 +79,12 @@ function ScrollToTop() {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
   }, [pathname, hash]);
   return null;
+}
+
+export default function App() {
+  return (
+    <AstryxProvider lang={useLang()}>
+      <AppBody />
+    </AstryxProvider>
+  );
 }

@@ -16,13 +16,14 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import WhatsAppFAB from './components/WhatsAppFAB';
 import ConsentBanner from './components/ConsentBanner';
+import { AstryxProvider } from '@kervan/ui';
 
 interface Props {
   /** Page language, decided by the URL ("/" = tr, "/en/" = en). */
   lang: Lang;
 }
 
-export default function App({ lang }: Props) {
+function AppBody({ lang }: Props) {
   useLangSync(lang);
   const t = DICT[lang];
   const tech = useTechAuth();
@@ -51,5 +52,13 @@ export default function App({ lang }: Props) {
       {(!isStatic || clientReady) && <WhatsAppFAB />}
       <ConsentBanner t={t.consent} />
     </>
+  );
+}
+
+export default function App(props: Parameters<typeof AppBody>[0]) {
+  return (
+    <AstryxProvider lang={props.lang}>
+      <AppBody {...props} />
+    </AstryxProvider>
   );
 }
