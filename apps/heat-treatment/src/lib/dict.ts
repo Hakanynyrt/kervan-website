@@ -203,6 +203,61 @@ export const DICT: Dict = {
           alt: 'Kapağı kapalı kuyu tipi fırın: kapak üstünde fan motoru ve kapak mekanizması, yanında yanan alev çıkışı',
           caption: 'Kapalı fırın',
         },
+        {
+          base: 'firin-alev-01',
+          alt: 'Kuyu tipi fırının kapağındaki çıkıştan yükselen alev',
+          caption: 'Fırın kapağında alev',
+        },
+        {
+          base: 'firin-kapak-01',
+          alt: 'Kapağı üzerinde fan motoru ve bağlantıları olan kuyu tipi fırın',
+          caption: 'Fırın kapağı ve fan motoru',
+        },
+        {
+          base: 'sarj-burc-01',
+          alt: 'Taşıyıcı üzerine dizilmiş işlenmiş burçlar',
+          caption: 'Şarja dizilmiş burçlar',
+        },
+        {
+          base: 'sarj-govde-01',
+          alt: 'Fikstür tablası üzerinde işlenmiş gövde blokları',
+          caption: 'Fikstürde gövde blokları',
+        },
+        {
+          base: 'sarj-mil-01',
+          alt: 'Fikstür tablasında dik duran uzun işlenmiş parçalar',
+          caption: 'Fikstürde uzun parçalar',
+        },
+        {
+          base: 'sarj-silindirik-01',
+          alt: 'Fikstürde demet hâlinde bağlanmış silindirik parçalar',
+          caption: 'Demet hâlinde silindirik parçalar',
+        },
+        {
+          base: 'sarj-halka-01',
+          alt: 'Kuyu tipi fırının ağzında tabakaya dizilmiş halkalar',
+          caption: 'Fırın ağzında halka şarjı',
+        },
+        {
+          base: 'sarj-raf-01',
+          alt: 'Katlı fikstürde dizilmiş küçük parçalar',
+          caption: 'Katlı fikstürde küçük parçalar',
+        },
+        {
+          base: 'sertlik-olcum-01',
+          alt: 'Isıl işlem görmüş parçalar üzerinde el tipi cihazla sertlik ölçümü',
+          caption: 'Sertlik ölçümü',
+        },
+        {
+          base: 'sertlik-olcum-02',
+          alt: 'Isıl işlem görmüş uzun parça üzerinde el tipi cihazla sertlik ölçümü',
+          caption: 'Parça üzerinde sertlik ölçümü',
+        },
+        {
+          base: 'surec-ekran-01',
+          alt: 'Fırın kontrol panelinde süreç şeması',
+          caption: 'Süreç ekranı',
+        },
       ],
     },
     about: {
@@ -472,6 +527,61 @@ export const DICT: Dict = {
           base: 'kapali-firin-03',
           alt: 'Closed pit furnace: the fan motor and lid mechanism on top, with a burning flame outlet beside it',
           caption: 'Closed furnace',
+        },
+        {
+          base: 'firin-alev-01',
+          alt: 'Flame rising from the outlet on a pit furnace lid',
+          caption: 'Flame at the furnace lid',
+        },
+        {
+          base: 'firin-kapak-01',
+          alt: 'Pit furnace with the fan motor and connections on its lid',
+          caption: 'Furnace lid and fan motor',
+        },
+        {
+          base: 'sarj-burc-01',
+          alt: 'Machined bushings arranged on a carrier',
+          caption: 'Bushings loaded for the charge',
+        },
+        {
+          base: 'sarj-govde-01',
+          alt: 'Machined body blocks on a fixture tray',
+          caption: 'Body blocks on the fixture',
+        },
+        {
+          base: 'sarj-mil-01',
+          alt: 'Long machined parts standing on a fixture tray',
+          caption: 'Long parts on the fixture',
+        },
+        {
+          base: 'sarj-silindirik-01',
+          alt: 'Cylindrical parts bundled on a fixture',
+          caption: 'Bundled cylindrical parts',
+        },
+        {
+          base: 'sarj-halka-01',
+          alt: 'Rings laid out in layers at the mouth of a pit furnace',
+          caption: 'A charge of rings at the furnace mouth',
+        },
+        {
+          base: 'sarj-raf-01',
+          alt: 'Small parts arranged on a tiered fixture',
+          caption: 'Small parts on a tiered fixture',
+        },
+        {
+          base: 'sertlik-olcum-01',
+          alt: 'Hardness check with a handheld tester on heat-treated parts',
+          caption: 'Hardness check',
+        },
+        {
+          base: 'sertlik-olcum-02',
+          alt: 'Hardness check with a handheld tester on a long heat-treated part',
+          caption: 'Hardness check on a part',
+        },
+        {
+          base: 'surec-ekran-01',
+          alt: 'Process diagram on the furnace control panel',
+          caption: 'Process screen',
         },
       ],
     },
