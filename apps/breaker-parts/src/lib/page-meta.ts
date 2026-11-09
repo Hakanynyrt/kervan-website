@@ -100,7 +100,7 @@ export function pageHead(pathname: string): PageHead {
     PRODUCTS.map((p) => ({
       name: p[lang].name,
       url: absUrl(`/urunler/${p.slug}`, lang),
-      description: p[lang].tagline,
+      description: p[lang].metaDescription,
       image: p.image ? `${SITE}${p.image}` : undefined,
     }));
 
@@ -195,15 +195,15 @@ export function pageHead(pathname: string): PageHead {
     const loc = prod[lang];
     const image = prod.image ? `${SITE}${prod.image}` : undefined;
     const preview = prod.ogImage ? `${SITE}${prod.ogImage}` : image;
-    const title = `${loc.name} — ${m.siteName}`;
+    const title = `${loc.seoName ?? loc.name} — ${m.siteName}`;
     return {
       ...common,
       title,
-      description: loc.tagline,
+      description: loc.metaDescription,
       ogImage: preview ?? OG_IMAGE,
       ogType: 'product',
       jsonLd: [
-        webPage(url, title, loc.tagline, lang),
+        webPage(url, title, loc.metaDescription, lang),
         productSchema({
           url,
           name: loc.name,
