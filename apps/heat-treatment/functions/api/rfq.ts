@@ -14,6 +14,7 @@
  *   MAILCHANNELS_DKIM_PRIVATE_KEY     — DKIM private key for MailChannels
  *   MAIL_TO                           — RFQ inbox (default: info@kervanheat.com)
  *   MAIL_FROM                         — sender (default: noreply@kervanheat.com)
+ *   PANEL_INGEST_URL, PANEL_INGEST_KEY — optional copy of each request for the private sales panel
  *
  * Attachments: optional files in the multipart field `attachment` (kervanheat.com's form; the
  * breaker form sends none): at most 3, 8 MB in all, PDF / DWG / DXF / STEP / JPG / PNG / WebP,
@@ -43,6 +44,8 @@ interface Env {
   MAILCHANNELS_DKIM_PRIVATE_KEY?: string;
   MAIL_TO?: string;
   MAIL_FROM?: string;
+  PANEL_INGEST_URL?: string;
+  PANEL_INGEST_KEY?: string;
 }
 
 // Which transport was tried last and how it ended. Diagnostic only: a status code or a
@@ -106,7 +109,11 @@ const clean = (v: FormDataEntryValue | null, max = 500): string =>
     .trim()
     .slice(0, max);
 
-async function handleRfq(request: Request, env: Env): Promise<Response> {
+async function handleRfq(
+  request: Request,
+  env: Env,
+  waitUntil: (promise: Promise<unknown>) => void,
+): Promise<Response> {
   const origin = allowedOrigin(request);
   if (!origin) return Response.json({ ok: false, error: 'origin' }, { status: 403 });
 
@@ -323,6 +330,35 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
     }
   }
 
+  // Copy for the private sales panel. Runs after the response; it can never affect the form.
+  if (env.PANEL_INGEST_URL && env.PANEL_INGEST_KEY) {
+    waitUntil(
+      fetch(env.PANEL_INGEST_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-panel-key': env.PANEL_INGEST_KEY },
+        body: JSON.stringify({
+          site: sourceSite,
+          name,
+          company,
+          email,
+          phone,
+          country,
+          service,
+          qty,
+          deadline,
+          specs,
+          message,
+          files: attachments.map((a) => a.name),
+        }),
+        signal: AbortSignal.timeout(5000),
+      })
+        .then((r) => {
+          if (!r.ok) console.error('Panel copy failed:', r.status);
+        })
+        .catch(() => console.error('Panel copy failed')),
+    );
+  }
+
   // `delivered` is what the forms trust: the request reached the owner by email.
   // (`emailSent` stays for older clients.)
   return Response.json({ ok: true, emailSent, delivered: emailSent, emailStatus });
@@ -333,8 +369,8 @@ UA: ${request.headers.get('User-Agent') ?? 'unknown'}`;
    request method.
 ═══════════════════════════════════════════════════════════════════════ */
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  return withCors(withSecurityHeaders(await handleRfq(request, env)), request);
+export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUntil }) => {
+  return withCors(withSecurityHeaders(await handleRfq(request, env, waitUntil)), request);
 };
 
 export const onRequestOptions: PagesFunction<Env> = async ({ request }) => {
