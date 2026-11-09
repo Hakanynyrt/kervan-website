@@ -14,6 +14,9 @@ export const STOCK_TIP_PHOTOS = [
   '/photos/stok/uc-sehpa-stok-01',
   '/photos/stok/uc-stok-03-v2',
   '/photos/stok/uc-stok-02-v2',
+  '/photos/stok/uc-stok-04',
+  '/photos/stok/uc-stok-05',
+  '/photos/stok/uc-stok-06',
 ] as const;
 
 /**
@@ -2535,13 +2538,23 @@ export const PLANT_PHOTOS = [
 ] as const;
 
 /** More plant photos, 4:3 landscape and uncropped (`-sm` 640 px, `-lg` 1280 px; people removed,
- *  owner 2026-10-27): the row under the four on /yedek-parca. Captions: `parts.plant.wide`. */
+ *  owner 2026-10-27): the grid under the four on /yedek-parca. Captions: `parts.plant.wide`. */
 export const PLANT_WIDE = [
   '/photos/tesis/torna-holu-02',
   '/photos/tesis/puma-torna-02',
   '/photos/tesis/puma-torna-yan-02',
   '/photos/tesis/cnc-freze-01',
   '/photos/tesis/saplama-rafi-02',
+  '/photos/tesis/parca-stok-01',
+  '/photos/tesis/govde-stok-01',
+  '/photos/tesis/halka-stok-01',
+  '/photos/tesis/halka-stok-02',
+  '/photos/tesis/depo-01',
+  '/photos/tesis/azot-dolum-01',
+  '/photos/tesis/azot-dolum-02',
+  '/photos/tesis/hammadde-01',
+  '/photos/tesis/hammadde-02',
+  '/photos/tesis/isleme-halka-01',
 ] as const;
 
 /**
