@@ -10,7 +10,7 @@ Kervan Makina'nın üç web sitesi tek monorepo'da:
 ## Stack
 
 - pnpm 10+ workspace · Turborepo 2
-- Vite 5 + TypeScript 5 + React 18 (üç app)
+- Vite 5 + TypeScript 5 + React 19 (üç app)
 - Tailwind v4 + Framer Motion
 - Isıl işlem + kırıcı: Mood C dark palette + Forge Ember accent (`#E8431B`)
 - Mağaza: açık, kurumsal palet (aynı token adları, açık değerler)

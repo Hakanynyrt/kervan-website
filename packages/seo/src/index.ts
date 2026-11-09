@@ -33,10 +33,11 @@ export {
   type HeadInput,
   type InjectHeadOptions,
   type SitemapEntry,
+  stripImagePreloads,
 } from './head.js';
 
 // React components
-export { JsonLd } from './JsonLd.js';
+export { JsonLd } from './JsonLd.tsx';
 export { PageMeta } from './PageMeta.js';
 
 // Constants

@@ -29,7 +29,7 @@ export default function Hero({ t }: Props) {
           alt={alt}
           loading="eager"
           // React 18 only knows the lowercase attribute (fetchPriority warns in SSR and on the client).
-          {...{ fetchpriority: 'high' }}
+          fetchPriority="high"
           decoding="async"
           className="kv-hero-drift"
         />

@@ -1,5 +1,7 @@
 import { StrictMode } from 'react';
-import { renderToString } from 'react-dom/server';
+import type { ReactNode } from 'react';
+import { renderToString as reactRenderToString } from 'react-dom/server';
+import { stripImagePreloads } from '@kervan/seo/head';
 import { MotionConfig } from 'framer-motion';
 import { StaticRouter } from 'react-router-dom/server';
 import { StaticMotionProvider } from '@kervan/motion';
@@ -8,6 +10,9 @@ import App from './App';
 import { pageHead, prerenderPaths, alternatesFor, INDEXABLE_PATHS } from './lib/page-meta';
 import { LANGS, localePath } from './lib/locale-path';
 import { PRODUCTS } from './data/products';
+
+/* React 19 adds image preload lines to the markup; each site sets its own in the head. */
+const renderToString = (node: ReactNode) => stripImagePreloads(reactRenderToString(node));
 
 /* ═══════════════════════════════════════════════════════════════════════
    Build-time server entry, used only by scripts/prerender.mjs (bundled to
