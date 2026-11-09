@@ -48,10 +48,11 @@
             l.rel = 'preload';
             l.as = 'image';
             l.setAttribute('fetchpriority', 'high');
-            l.href =
-              '/photos/parca/acilis-kabin-06-00-' +
-              (window.matchMedia('(max-width: 900px)').matches ? 'md' : 'lg') +
-              '.webp';
+            // Whole file names, not a base + suffix: Googlebot reads path-like strings in
+            // inline scripts as links, and a bare base is a 404 in Search Console.
+            l.href = window.matchMedia('(max-width: 900px)').matches
+              ? '/photos/parca/acilis-kabin-06-00-md.webp'
+              : '/photos/parca/acilis-kabin-06-00-lg.webp';
             document.head.appendChild(l);
             setTimeout(function () {
               if (!window.__kvOpen) h.removeAttribute('data-kv-open');

@@ -170,7 +170,11 @@ try {
   let count = 0;
   const pages = ssr.prerender(catalog);
   for (const p of pages) {
-    const props = `<script type="application/json" id="${ssr.PROPS_ID}">${ssr.jsonForScript(p.props)}</script>`;
+    // Slashes escaped (`\/`, still valid JSON): the props hold photo bases without an
+    // extension ("/photos/stok/uc-01"), which Googlebot otherwise reads as links and
+    // reports as 404s in Search Console.
+    const propsJson = ssr.jsonForScript(p.props).replace(/\//g, '\\/');
+    const props = `<script type="application/json" id="${ssr.PROPS_ID}">${propsJson}</script>`;
     // email_off: Cloudflare's Email Address Obfuscation (zone setting) would rewrite the
     // mailto links (and their prefilled subject/body) into its own script; skip it here.
     const html = ssr
