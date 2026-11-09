@@ -388,7 +388,7 @@ export interface Dict {
       lead: string;
       note: string;
       items: { caption: string; alt: string }[];
-      /** PLANT_WIDE: the landscape row under the four (same order). */
+      /** PLANT_WIDE: the landscape grid under the four (same order). */
       wide: { caption: string; alt: string }[];
     };
     photosAlt: (name: string) => string;
@@ -1159,6 +1159,46 @@ export const DICT: Record<Lang, Dict> = {
             alt: 'Kervan tesisinde CNC freze tezgâhında kırıcı kaması işleme',
           },
           { caption: 'Saplama stoğumuz', alt: 'Kervan tesisinde raflarda kırıcı saplamaları' },
+          {
+            caption: 'Tornadan çıkan parçalar',
+            alt: 'Kervan tesisinde kademeli işlenmiş iri parçalar',
+          },
+          {
+            caption: 'Gövde blokları',
+            alt: 'Kervan tesisinde palet üzerinde siyah gövde blokları',
+          },
+          {
+            caption: 'Paletlerde halkalar',
+            alt: 'Kervan tesisinde paletler üzerinde delikli halkalar',
+          },
+          {
+            caption: 'Fikstürde halkalar',
+            alt: 'Kervan tesisinde fikstür tablası üzerinde siyah halkalar',
+          },
+          {
+            caption: 'Depo rafları',
+            alt: 'Kervan tesisinde parça ve bağlantı elemanı rafları',
+          },
+          {
+            caption: 'Azot dolum aparatı',
+            alt: 'Manometreli azot dolum aparatı',
+          },
+          {
+            caption: 'Azot basıncı kontrolü',
+            alt: 'Manometreli aparatla azot basıncı kontrolü',
+          },
+          {
+            caption: 'Hammadde: çelik çubuklar',
+            alt: 'Kervan tesisinde kaldırma kemeriyle bağlanmış çelik çubuklar',
+          },
+          {
+            caption: 'Kesilmiş hammadde',
+            alt: 'Kervan tesisinde kesilmiş ve işaretlenmiş çelik parçalar',
+          },
+          {
+            caption: 'İşlenmiş halka',
+            alt: 'Taşlanmış çelik halka',
+          },
         ],
       },
       photosAlt: (name) =>
@@ -2165,6 +2205,46 @@ export const DICT: Record<Lang, Dict> = {
             alt: 'Machining a breaker retainer key on a CNC milling machine at the Kervan plant',
           },
           { caption: 'Our tie-rod stock', alt: 'Breaker tie rods on shelves at the Kervan plant' },
+          {
+            caption: 'Parts off the lathe',
+            alt: 'Large stepped machined parts at the Kervan plant',
+          },
+          {
+            caption: 'Body blocks',
+            alt: 'Black body blocks on a pallet at the Kervan plant',
+          },
+          {
+            caption: 'Rings on pallets',
+            alt: 'Drilled rings on pallets at the Kervan plant',
+          },
+          {
+            caption: 'Rings on the fixture',
+            alt: 'Black rings on a fixture tray at the Kervan plant',
+          },
+          {
+            caption: 'Storage shelves',
+            alt: 'Shelves of parts and fasteners at the Kervan plant',
+          },
+          {
+            caption: 'Nitrogen charging tool',
+            alt: 'Nitrogen charging tool with a pressure gauge',
+          },
+          {
+            caption: 'Nitrogen pressure check',
+            alt: 'Checking nitrogen pressure with a gauge',
+          },
+          {
+            caption: 'Raw material: steel bars',
+            alt: 'Steel bars tied with a lifting strap at the Kervan plant',
+          },
+          {
+            caption: 'Cut raw material',
+            alt: 'Cut and marked steel pieces at the Kervan plant',
+          },
+          {
+            caption: 'Machined ring',
+            alt: 'A ground steel ring',
+          },
         ],
       },
       photosAlt: (name) => `${name} in stock at the Kervan plant`,
