@@ -164,7 +164,7 @@ export function PartGroups({
                     height={900}
                     sizes={
                       g.xs
-                        ? '(min-width: 1280px) 290px, (min-width: 1024px) 23vw, (min-width: 640px) 50vw, 38vw'
+                        ? '(min-width: 1280px) 316px, (min-width: 1024px) 23vw, (min-width: 640px) 50vw, 38vw'
                         : undefined
                     }
                     alt={g.alt}
@@ -186,7 +186,7 @@ export function PartGroups({
                   <img
                     src={photoImg(stock, 'lg')}
                     srcSet={photoSet(stock, ['sm', 480], ['lg', 960])}
-                    sizes="(min-width: 1280px) 600px, (min-width: 1024px) 48vw, (min-width: 640px) 100vw, 38vw"
+                    sizes="(min-width: 1280px) 655px, (min-width: 1024px) 48vw, (min-width: 640px) 100vw, 38vw"
                     width={960}
                     height={720}
                     alt={g.alt}

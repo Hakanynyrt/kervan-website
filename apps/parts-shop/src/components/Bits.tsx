@@ -292,7 +292,7 @@ export function Photo({
       src={photoImg(base, single ? 'lg' : 'sm')}
       srcSet={single ? undefined : photoSet(base, ['sm', 480], ['lg', 960])}
       sizes={
-        single ? undefined : (sizes ?? '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw')
+        single ? undefined : (sizes ?? '(min-width: 1024px) 436px, (min-width: 640px) 50vw, 100vw')
       }
       width={480}
       height={360}
@@ -561,7 +561,7 @@ export function PlantPhotos({
               <img
                 src={photoImg(p, 'sm')}
                 srcSet={photoSet(p, ['sm', 480], ['lg', 960])}
-                sizes="(min-width: 1024px) 290px, 50vw"
+                sizes="(min-width: 1024px) 316px, 50vw"
                 width={480}
                 height={600}
                 alt={pl.items[i].alt}
@@ -583,7 +583,7 @@ export function PlantPhotos({
               <img
                 src={photoImg(p, 'sm')}
                 srcSet={photoSet(p, ['sm', 640], ['lg', 1280])}
-                sizes="(min-width: 1024px) 390px, (min-width: 640px) 50vw, 100vw"
+                sizes="(min-width: 1024px) 426px, (min-width: 640px) 50vw, 100vw"
                 width={640}
                 height={480}
                 alt={pl.wide[i].alt}

@@ -8,6 +8,17 @@ export function joinedSpelling(model: string): string | null {
   return j === model ? null : j;
 }
 
+/**
+ * Every letter–number boundary spaced: "HB 20G" → "HB 20 G", "S26N" → "S 26 N"; null when the
+ * model already reads so. People search "20 g boy saplama", and Google matches words, so the
+ * fully spaced form is kept as its own spelling (owner, 2026-11-10).
+ */
+export function separatedSpelling(model: string): string | null {
+  const norm = (x: string) => x.replace(/\s+/g, ' ').trim();
+  const s = norm(model.replace(/(\d)(?=[A-Za-z])/g, '$1 ').replace(/([A-Za-z])(?=\d)/g, '$1 '));
+  return s === norm(model) ? null : s;
+}
+
 /** Case, spaces, dashes and slashes ignored: "S 26N", "S26 N" and "s-26n" are one spelling. */
 const key = (x: string): string => x.toLocaleLowerCase('tr').replace(/[\s\-/]+/g, '');
 
@@ -28,7 +39,7 @@ export function brandNumberSpelling(brand: string, model: string): string | null
 
 /**
  * The model's other spellings, each once, never the model itself: the no-space form first (the
- * one people type), then the make-plus-number form ("MSB 200") when the series letters repeat
+ * one people type), the fully spaced form ("HB 20 G"), then the make-plus-number form ("MSB 200") when the series letters repeat
  * the make, then merged catalogue spellings that differ from the model by more than case,
  * spacing, dashes or slashes. Spellings with stray punctuation are left out.
  */
@@ -37,6 +48,10 @@ export function modelAliases(model: string, spellings: string[], brand?: string)
   const out: string[] = [];
   const joined = joinedSpelling(model);
   if (joined && !STRAY.test(joined)) out.push(joined);
+  // The fully spaced form differs from the model only by spacing, but it is the one searches
+  // split into words ("HB 20 G"), so it is kept, unlike other spacing variants.
+  const sep = separatedSpelling(model);
+  if (sep && !STRAY.test(sep)) out.push(sep);
   const bare = brand ? brandNumberSpelling(brand, model) : null;
   if (bare && !STRAY.test(bare) && !seen.has(key(bare))) {
     seen.add(key(bare));

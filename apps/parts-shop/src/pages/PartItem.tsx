@@ -1,7 +1,6 @@
 import { Fragment, useState, type ReactNode } from 'react';
 import { Button } from '@astryxdesign/core/Button';
 import type { FxRate } from '@kervan/tips';
-import { Container } from '@kervan/ui';
 import {
   Breadcrumb,
   ImgNote,
@@ -10,7 +9,7 @@ import {
   PageTitle,
   StickyQuote,
 } from '../components/Bits';
-import { FOCUS, OUTLINE_BUTTON } from '../components/Layout';
+import { FOCUS, OUTLINE_BUTTON, WRAP } from '../components/Layout';
 import { PartOrder, PartPriceLine, partOrderText, priceNote } from '../components/PartOrder';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
@@ -85,8 +84,12 @@ export default function PartItem({
     const x = findRender(l.part, l.anchor);
     return x ? [{ l, x }] : [];
   });
+  const nearby = model.nearby.flatMap((l) => {
+    const x = findRender(l.part, l.anchor);
+    return x ? [{ l, x }] : [];
+  });
   return (
-    <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">
+    <div className={`${WRAP} pb-28 pt-8 lg:pb-12 lg:pt-12`}>
       <Breadcrumb
         trail={[
           [t.parts.title, PARTS_PATH],
@@ -105,21 +108,21 @@ export default function PartItem({
       </p>
       <OemLine t={t} kit={model.part === 'tamir-takimi'} />
       <OemNumbers numbers={model.oem} t={t} note className="mt-3" />
-      {cents !== null && (
-        <PartPriceLine
-          cents={cents}
-          fx={fx}
-          lang={lang}
-          plus={t.price.plus}
-          incl={t.price.incl}
-          note={priceNote(r.kind, t)}
-          className="mt-2 text-lg lg:hidden"
-        />
-      )}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
         <div className="flex min-w-0 flex-col gap-6">
           <RenderFigure r={r} ctx={ctx} item onWithB={setWithB} />
+          {cents !== null && (
+            <PartPriceLine
+              cents={cents}
+              fx={fx}
+              lang={lang}
+              plus={t.price.plus}
+              incl={t.price.incl}
+              note={priceNote(r.kind, t)}
+              className="text-lg lg:hidden"
+            />
+          )}
           <ImgNote t={t} kind={model.part === 'tamir-takimi' ? 'kit' : 'render'} />
           <nav aria-label={t.parts.item.linksLabel} className="font-sans text-sm">
             <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
@@ -162,6 +165,23 @@ export default function PartItem({
                       endContent={<span aria-hidden="true">→</span>}
                       className={`w-full justify-between ${LINK}`}
                     />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {nearby.length > 0 && (
+            <section aria-labelledby="nearby-parts" className="font-sans">
+              <h2 id="nearby-parts" className="m-0 text-base font-bold text-ink">
+                {t.parts.item.nearby(p.name)}
+              </h2>
+              <ul className="m-0 mt-3 flex list-none flex-wrap gap-2 p-0 text-sm">
+                {nearby.map(({ l, x }) => (
+                  <li key={`${l.part}/${l.anchor}`}>
+                    <a href={localePath(partItemPath(l.part, l.anchor), lang)} className={LINK}>
+                      {renderTitle(x, p.name, t)}
+                      {'\u00a0'}→
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -217,7 +237,7 @@ export default function PartItem({
       ) : (
         <StickyQuote text={text} t={t} />
       )}
-    </Container>
+    </div>
   );
 }
 

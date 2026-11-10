@@ -3,7 +3,6 @@ import type { FxRate } from '@kervan/tips';
 import { Button } from '@astryxdesign/core/Button';
 import { TextArea } from '@astryxdesign/core/TextArea';
 import { TextInput } from '@astryxdesign/core/TextInput';
-import { Container } from '@kervan/ui';
 import { OrderSteps, PageTitle, QtyStepper } from '../components/Bits';
 import {
   FIELD_RING,
@@ -12,6 +11,7 @@ import {
   OUTLINE_BUTTON,
   WHATSAPP_BUTTON,
   whatsappHref,
+  WRAP,
 } from '../components/Layout';
 import { PartGroups } from '../components/PartGroups';
 import { ORDER_CONVERSION } from '../lib/ads';
@@ -170,7 +170,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   );
 
   return (
-    <Container className="py-12">
+    <div className={`${WRAP} py-12`}>
       <PageTitle>{c.title}</PageTitle>
       {/* Always in the page, so a removal is announced; empty it adds no space. */}
       <div role="status">
@@ -427,6 +427,6 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
         </h2>
         <OrderSteps lang={lang} t={t} className="mt-6 sm:grid-cols-3" />
       </section>
-    </Container>
+    </div>
   );
 }
