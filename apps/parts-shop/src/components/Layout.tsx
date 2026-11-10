@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { Button } from '@astryxdesign/core/Button';
 import { Container, SocialIcon } from '@kervan/ui';
 import { ORG_PHONE, ORG_PHONE_E164, ORG_SOCIALS, ORG_TRADING_NAME } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
@@ -33,6 +34,18 @@ export const WRAP = 'mx-auto w-full max-w-[1376px] px-4 md:px-6';
 /** The same ring drawn inside the element, for links inside a clipping box (overflow, scroller). */
 export const FOCUS_INSET =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:-outline-offset-2';
+
+/** Astryx Button looks the token bridge has no variant for (Astryx's layers sit under Tailwind's
+ *  utilities, so these win): the WhatsApp green and the white button with a dark hairline. */
+export const WHATSAPP_BUTTON = 'bg-whatsapp text-white';
+export const OUTLINE_BUTTON = 'border border-ink-soft bg-bg text-ink';
+
+/** Astryx field control: the site's focus ring (Astryx only tints a 1 px border and an 8 % inset). */
+export const FIELD_RING =
+  'has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand has-[:focus-visible]:outline-offset-2';
+
+/** Astryx TextInput control: the shop's 16 px type (no zoom on phones), placeholder colour, ring. */
+export const FIELD_TEXT = `[&_input]:text-base [&_input]:placeholder:text-ink-soft ${FIELD_RING}`;
 
 /** WhatsApp link with a prefilled message (also used by the pages' quote buttons). */
 export const whatsappHref = (text: string): string =>
@@ -208,14 +221,16 @@ export default function Layout({
             </a>
             <ThemeSelect t={t} />
             <CartLink lang={lang} t={t} current={path === CART_PATH} />
-            <a
+            <Button
               href={whatsappHref(quoteText ?? t.nav.quoteText)}
-              className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-sm bg-brand px-2.5 font-semibold min-[23.4375rem]:px-3 text-on-brand hover:bg-brand-hi lg:min-h-10 sm:px-[18px] ${FOCUS}`}
+              label={t.nav.quote}
+              variant="primary"
+              className="shrink-0 px-2.5 font-semibold min-[23.4375rem]:px-3 sm:px-[18px]"
             >
               {/* Short where the row is tight: phones, and beside the search below 1280 px. */}
               <span className="sm:hidden lg:inline xl:hidden">{t.nav.quoteShort}</span>
               <span className="hidden sm:inline lg:hidden xl:inline">{t.nav.quote}</span>
-            </a>
+            </Button>
           </div>
           <OrderLine
             t={t}
@@ -324,26 +339,26 @@ export default function Layout({
         {children}
       </main>
       <footer className="mt-24 border-t-2 border-ink bg-bg-soft">
-        <div
-          className={`${WRAP} flex flex-col gap-4 border-b border-hair py-8 sm:flex-row sm:items-center sm:justify-between`}
-        >
-          <a href={localePath('/', lang)} className={`flex items-center gap-3 ${FOCUS}`}>
-            <img
-              src="/logo-krv-v2.svg"
-              alt=""
-              width={124}
-              height={40}
-              loading="lazy"
-              className="h-10 w-auto"
-            />
-            <span className="flex flex-col">
-              <span className="font-sans text-base font-bold text-ink">{ORG_TRADING_NAME}</span>
-              <span className="font-sans text-sm text-ink-mid">{t.footer.about}</span>
-            </span>
-          </a>
-          <p className="m-0 max-w-md font-sans text-xs text-ink-soft sm:text-right">
-            {t.footer.fit}
-          </p>
+        <div className={WRAP}>
+          <div className="flex flex-col gap-4 border-b border-hair py-8 sm:flex-row sm:items-center sm:justify-between">
+            <a href={localePath('/', lang)} className={`flex items-center gap-3 ${FOCUS}`}>
+              <img
+                src="/logo-krv-v2.svg"
+                alt=""
+                width={124}
+                height={40}
+                loading="lazy"
+                className="h-10 w-auto"
+              />
+              <span className="flex flex-col">
+                <span className="font-sans text-base font-bold text-ink">{ORG_TRADING_NAME}</span>
+                <span className="font-sans text-sm text-ink-mid">{t.footer.about}</span>
+              </span>
+            </a>
+            <p className="m-0 max-w-md font-sans text-xs text-ink-soft sm:text-right">
+              {t.footer.fit}
+            </p>
+          </div>
         </div>
         <div
           className={`${WRAP} grid gap-8 py-10 font-sans text-sm text-ink-mid sm:grid-cols-2 lg:grid-cols-5`}
@@ -408,13 +423,12 @@ export default function Layout({
                 </li>
               ))}
               <li>
-                <button
-                  type="button"
+                <Button
+                  label={t.footer.cookies}
+                  variant="ghost"
                   onClick={() => window.dispatchEvent(new Event(CONSENT_OPEN_EVENT))}
-                  className={`cursor-pointer p-0 text-left hover:text-ink ${FOCUS}`}
-                >
-                  {t.footer.cookies}
-                </button>
+                  className="h-auto justify-start p-0 text-left font-normal text-ink-mid hover:bg-none hover:text-ink max-lg:min-h-11"
+                />
               </li>
             </ul>
           </div>
@@ -437,11 +451,14 @@ export default function Layout({
                   {ORG_PHONE}
                 </a>
               </li>
-              <li>
+              <li className="max-lg:flex max-lg:min-h-11 max-lg:items-center">
                 {t.footer.fax}: {SELLER.fax}
               </li>
               <li>
-                <a href={`mailto:${SHOP_EMAIL}`} className={`hover:text-ink ${FOCUS}`}>
+                <a
+                  href={`mailto:${SHOP_EMAIL}`}
+                  className={`hover:text-ink max-lg:inline-flex max-lg:min-h-11 max-lg:items-center ${FOCUS}`}
+                >
                   {SHOP_EMAIL}
                 </a>
               </li>

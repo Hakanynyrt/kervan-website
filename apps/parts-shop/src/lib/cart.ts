@@ -61,4 +61,8 @@ export function addToCart(item: Omit<CartItem, 'qty'>, qty: number): void {
   writeCart(items);
 }
 
+/** How many of this line the cart holds; null when it is not there (private mode, nothing stored). */
+export const cartQty = (id: string): number | null =>
+  readCart().find((x) => x.id === id)?.qty ?? null;
+
 export const cartCount = (items: CartItem[]): number => items.reduce((n, x) => n + x.qty, 0);

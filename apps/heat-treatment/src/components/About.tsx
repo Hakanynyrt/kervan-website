@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { fadeUp, inViewOnce, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
-import { SECTION, WRAP } from '../lib/ui';
+import { SECTION, SPLIT, WRAP } from '../lib/ui';
 
 interface Props {
   t: DictBlock;
@@ -13,7 +13,7 @@ export default function About({ t }: Props) {
   return (
     <section id="hakkimizda" aria-labelledby="hakkimizda-title" className={`${SECTION} bg-bg-soft`}>
       <motion.div
-        className={`${WRAP} grid grid-cols-1 gap-5 min-[721px]:grid-cols-[5fr_7fr] min-[721px]:gap-14 items-start`}
+        className={`${WRAP} grid grid-cols-1 gap-5 ${SPLIT} items-start`}
         variants={fadeUp}
         initial={reduce ? false : 'hidden'}
         whileInView="show"

@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { fadeUp, inViewOnce, staggerContainer, useReducedMotion } from '@kervan/motion';
+import { fadeUp, inViewOnce, useReducedMotion } from '@kervan/motion';
 import { localePath } from '../lib/locale-path';
 import { PRODUCTS } from '../data/products';
 import { DICT } from '../lib/dict';
+import { WRAP } from '../lib/ui';
 import type { Lang } from '../types';
 
 interface Props {
@@ -17,60 +18,64 @@ export default function ProductGrid({ lang, limit }: Props) {
   const reduce = useReducedMotion();
 
   return (
-    <motion.div
-      className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-hair"
-      variants={staggerContainer(0, 0.06)}
-      initial={reduce ? false : 'hidden'}
-      whileInView="show"
-      viewport={inViewOnce}
-    >
-      {items.map((p) => {
-        const loc = p[lang];
-        return (
-          <motion.article key={p.slug} variants={fadeUp} className="bg-bg group">
-            <Link
-              to={localePath(`/urunler/${p.slug}`, lang)}
-              className="flex flex-col h-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
+    <div className={WRAP}>
+      {/* One reveal per card: a reveal on the whole grid (about 3,800 px on a phone) never fires. */}
+      <div className="kv-ruled grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((p) => {
+          const loc = p[lang];
+          return (
+            <motion.article
+              key={p.slug}
+              className="group"
+              variants={fadeUp}
+              initial={reduce ? false : 'hidden'}
+              whileInView="show"
+              viewport={inViewOnce}
             >
-              <div className="relative aspect-[4/3] overflow-hidden bg-bg-soft">
-                {p.image ? (
-                  <img
-                    src={p.image}
-                    srcSet={p.imageSrcSet}
-                    sizes={
-                      p.imageSrcSet
-                        ? '(min-width: 1024px) 416px, (min-width: 640px) 50vw, 100vw'
-                        : undefined
-                    }
-                    alt={DICT[lang].productPhotoAlt[p.slug]?.grid ?? loc.name}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.04]"
-                    loading="lazy"
-                  />
-                ) : (
-                  <Placeholder label={loc.name} />
-                )}
-                {p.image && p.illustrative && (
-                  <span className="absolute right-2 bottom-2 rounded-sm bg-black/45 px-1.5 py-0.5 font-sans text-[10px] leading-tight tracking-[0.04em] text-white/80 pointer-events-none">
-                    {DICT[lang].productDetail.illustrativeNote}
+              <Link
+                to={localePath(`/urunler/${p.slug}`, lang)}
+                className="flex flex-col h-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-bg-soft">
+                  {p.image ? (
+                    <img
+                      src={p.image}
+                      srcSet={p.imageSrcSet}
+                      sizes={
+                        p.imageSrcSet
+                          ? '(min-width: 1024px) 416px, (min-width: 640px) 50vw, 100vw'
+                          : undefined
+                      }
+                      alt={DICT[lang].productPhotoAlt[p.slug]?.grid ?? loc.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.04]"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <Placeholder label={loc.name} />
+                  )}
+                  {p.image && p.illustrative && (
+                    <span className="kv-chip absolute right-2 bottom-2 font-sans pointer-events-none">
+                      {DICT[lang].productDetail.illustrativeNote}
+                    </span>
+                  )}
+                </div>
+                <div className="p-6 md:p-8 flex flex-col gap-3 flex-1">
+                  <h3 className="font-sans font-bold text-2xl text-ink leading-tight tracking-[-0.02em]">
+                    {loc.name}
+                  </h3>
+                  <p className="font-sans text-sm text-ink-mid leading-relaxed flex-1">
+                    {loc.tagline}
+                  </p>
+                  <span className="font-sans text-sm font-medium text-brand mt-2 inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                    {DICT[lang].productsPage.detail} <span aria-hidden="true">→</span>
                   </span>
-                )}
-              </div>
-              <div className="p-6 md:p-8 flex flex-col gap-3 flex-1">
-                <h3 className="font-sans font-bold text-2xl md:text-[28px] text-ink leading-tight tracking-[-0.02em]">
-                  {loc.name}
-                </h3>
-                <p className="font-sans text-sm text-ink-mid leading-relaxed flex-1">
-                  {loc.tagline}
-                </p>
-                <span className="font-sans text-sm font-medium text-brand mt-2 inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-                  {DICT[lang].productsPage.detail} <span aria-hidden="true">→</span>
-                </span>
-              </div>
-            </Link>
-          </motion.article>
-        );
-      })}
-    </motion.div>
+                </div>
+              </Link>
+            </motion.article>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

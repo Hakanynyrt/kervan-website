@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Selector } from '@astryxdesign/core/Selector';
 import type { Dict } from '../lib/dict';
-import { FOCUS } from './Layout';
+import { FIELD_RING } from './Layout';
 
 /** localStorage key; the inline script in index.html reads the same one before paint. */
 const KEY = 'kv_theme';
@@ -49,7 +50,7 @@ export function ThemeSelect({ t }: { t: Dict }) {
       ?.setAttribute('content', THEME_COLOR[isDark() ? 'dark' : 'light']);
   };
   return (
-    <label className="hidden items-center gap-1.5 text-ink-mid md:flex">
+    <div className="hidden items-center gap-1.5 text-ink-mid md:flex">
       <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 shrink-0">
         <circle cx="8" cy="8" r="3.25" fill="none" stroke="currentColor" strokeWidth="1.5" />
         <path
@@ -59,16 +60,21 @@ export function ThemeSelect({ t }: { t: Dict }) {
           strokeLinecap="round"
         />
       </svg>
-      <span className="sr-only">{t.nav.theme.label}</span>
-      <select
+      <Selector
+        label={t.nav.theme.label}
+        isLabelHidden
+        presentation="adaptive"
         value={choice}
-        onChange={(e) => pick(e.target.value as Choice)}
-        className={`cursor-pointer rounded-sm border border-hair bg-bg py-1 pl-1.5 pr-1 font-sans text-sm text-ink-mid hover:text-ink ${FOCUS}`}
-      >
-        <option value="auto">{t.nav.theme.auto}</option>
-        <option value="light">{t.nav.theme.light}</option>
-        <option value="dark">{t.nav.theme.dark}</option>
-      </select>
-    </label>
+        onChange={(v) => {
+          if (isChoice(v)) pick(v);
+        }}
+        options={[
+          { value: 'auto', label: t.nav.theme.auto },
+          { value: 'light', label: t.nav.theme.light },
+          { value: 'dark', label: t.nav.theme.dark },
+        ]}
+        controlClassName={`border-hair px-2 ${FIELD_RING}`}
+      />
+    </div>
   );
 }

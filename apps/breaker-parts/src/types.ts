@@ -47,6 +47,8 @@ export interface DictBlock {
     cta: string;
     home: string;
     menu: string;
+    /** Skip link, the first element of every page. */
+    skip: string;
     language: string;
     /** Cells of the header language switch. */
     langShort: Record<Lang, string>;
@@ -93,6 +95,8 @@ export interface DictBlock {
     quoteNote: string;
   };
   products: {
+    /** Home button to /urunler under the four cards. */
+    allCta: string;
     title: string;
     aside: string;
     items: ProductItem[];
@@ -153,6 +157,8 @@ export interface DictBlock {
     /** Headline shown on the dedicated /uyumluluk page. */
     pageTitle: string;
     pageAside: string;
+    /** Country of each make on /uyumluluk, by `BrandSpec.slug`. */
+    countries: Record<string, string>;
   };
   techUi: {
     eyebrow: string;
@@ -479,7 +485,11 @@ export interface DictBlock {
     submit: string;
     sending: string;
     success: string;
-    error: string;
+    /** Failure sentence around the phone number (a tel: link, ORG_PHONE). */
+    errorLead: string;
+    errorTail: string;
+    /** One line above the quote form: what the * on a label means. */
+    requiredLegend: string;
     address: string;
     phoneLabel: string;
     addressLabel: string;
@@ -534,6 +544,15 @@ export interface DictBlock {
     /** "MERSİS No: …" under the rights line (TTK md. 1524). */
     mersis: string;
     kvkk: string;
+    /** The row of page links; `label` names the nav for screen readers. */
+    pages: {
+      label: string;
+      products: string;
+      brands: string;
+      production: string;
+      about: string;
+      contact: string;
+    };
     social: Record<OrgSocialKey, string>;
   };
 }
@@ -584,8 +603,6 @@ export interface ProductSubType {
 export interface BrandSpec {
   slug: string;
   name: string;
-  logo?: string;
-  country: string;
 }
 
 /** Shape of the protected content served by /api/tech/content (never bundled). */

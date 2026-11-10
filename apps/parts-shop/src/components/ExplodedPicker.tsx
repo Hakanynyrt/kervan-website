@@ -52,7 +52,7 @@ const SMALL_MQ = '(max-width: 900px)';
  *  of the home (`openingPreload`, entry-server.tsx): it is the home's LCP image on phones. */
 const FINAL_SRCSET = `${FINAL}-sm.webp 1000w, ${FINAL}-lg.webp 1600w, ${BASE}-kare-06-47-lg.webp 2864w`;
 /** React 18 does not know `fetchPriority`; the lowercase attribute goes through as it is. */
-const HIGH = { fetchpriority: 'high' } as Record<string, string>;
+const HIGH = { fetchPriority: 'high' } as const;
 const FINAL_SIZES = `(max-width: 767px) ${PHONE_L}px, 100vw`;
 export const openingPreload = (): string =>
   `<link rel="preload" as="image" href="${FINAL}-lg.webp" imagesrcset="${FINAL_SRCSET}" imagesizes="${FINAL_SIZES}" fetchpriority="high" />`;
@@ -82,7 +82,7 @@ const groupPath = (g: Group) => (g === 'tips' ? LIST_PATH : partPath(g));
 const ROWS = nameRows();
 
 /** Plays the frames on the canvas, then clears the opening mark. Safe to call when unmarked. */
-function useOpening(canvas: React.RefObject<HTMLCanvasElement>) {
+function useOpening(canvas: React.RefObject<HTMLCanvasElement | null>) {
   useEffect(() => {
     const root = document.documentElement;
     if (!root.hasAttribute('data-kv-open')) return;

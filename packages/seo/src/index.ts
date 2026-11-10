@@ -33,6 +33,7 @@ export {
   type HeadInput,
   type InjectHeadOptions,
   type SitemapEntry,
+  stripImagePreloads,
 } from './head.js';
 
 // React components

@@ -7,6 +7,7 @@ import {
   useState,
   type MouseEvent,
 } from 'react';
+import { Button } from '@astryxdesign/core/Button';
 import type { FxRate } from '@kervan/tips';
 import { ORG_PHONE, ORG_PHONE_E164 } from '@kervan/seo';
 import { useReducedMotion } from '@kervan/motion';
@@ -14,7 +15,14 @@ import { OrderSteps, PlantPhotos } from '../components/Bits';
 import { BreakerSearch, FinderPick } from '../components/BreakerSearch';
 import ExplodedPicker from '../components/ExplodedPicker';
 import { PartGroups } from '../components/PartGroups';
-import { FOCUS, SELLER_TEL, whatsappHref, WRAP } from '../components/Layout';
+import {
+  FOCUS,
+  OUTLINE_BUTTON,
+  SELLER_TEL,
+  WHATSAPP_BUTTON,
+  whatsappHref,
+  WRAP,
+} from '../components/Layout';
 import { CardPrice } from '../components/ModelSearch';
 import { priceNote } from '../components/PartOrder';
 import { cardHref, cardKey, cardName, cardPic } from '../lib/card';
@@ -25,7 +33,7 @@ import { fmtNum } from '../lib/format';
 import { LEGAL, legalPath, SELLER } from '../lib/legal';
 import { localePath } from '../lib/locale-path';
 import { NUMBERED } from '../lib/opening';
-import { renderModel, renderTitle } from '../lib/part-caption';
+import { renderModel, renderTitle, upFirst } from '../lib/part-caption';
 import { findRender, partsForBreaker } from '../lib/part-links';
 import { GROUP_COVERS } from '../lib/photos';
 import { photoImg } from '../lib/photo-url';
@@ -134,7 +142,7 @@ function PanelRow({
         className={`group flex min-h-[50px] items-center gap-3 px-4 py-[5px] font-sans hover:bg-bg-soft ${FOCUS}`}
       >
         <span
-          className={`relative block aspect-[4/3] w-[52px] shrink-0 overflow-hidden rounded-sm border border-hair ${stage === 'tip' ? 'bg-stage' : 'bg-pstage'}`}
+          className={`relative block aspect-[4/3] w-[52px] shrink-0 overflow-hidden rounded-sm border border-hair ${!img ? 'bg-bg-soft' : stage === 'tip' ? 'bg-stage' : 'bg-pstage'}`}
         >
           {img && (
             <img
@@ -522,12 +530,11 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
           )}
           <div className="flex items-center justify-between gap-3 rounded-b-md border-t border-hair bg-bg-soft px-4 py-3 max-sm:flex-wrap">
             <p className="m-0 min-w-0 text-[13.5px] text-ink">{t.missing.title}</p>
-            <a
+            <Button
               href={whatsappHref(sel ? t.missing.textFor(sel.name) : t.missing.text)}
-              className={`inline-flex min-h-11 shrink-0 items-center rounded-sm bg-whatsapp lg:min-h-[38px] px-4 text-sm font-medium text-white ${FOCUS}`}
-            >
-              {t.missing.button}
-            </a>
+              label={t.missing.button}
+              className={`shrink-0 px-4 ${WHATSAPP_BUTTON}`}
+            />
           </div>
         </aside>
 
@@ -551,18 +558,17 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2 md:flex">
-              <a
+              <Button
                 href={whatsappHref(t.nav.quoteText)}
-                className={`inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-sm bg-whatsapp lg:min-h-[42px] px-2 text-sm font-medium text-white md:px-[18px] ${FOCUS}`}
-              >
-                {h.order.whatsapp}
-              </a>
-              <a
+                label={h.order.whatsapp}
+                className={`px-0.5 min-[23.4375rem]:px-2 md:px-[18px] ${WHATSAPP_BUTTON}`}
+              />
+              <Button
                 href={`mailto:${ORDER_EMAIL}`}
-                className={`inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-sm border lg:min-h-[42px] border-ink-soft bg-bg px-2 text-sm text-ink hover:bg-bg-warm md:px-[18px] ${FOCUS}`}
-              >
-                {h.order.mail}
-              </a>
+                label={h.order.mail}
+                variant="secondary"
+                className={`px-0.5 min-[23.4375rem]:px-2 md:px-[18px] ${OUTLINE_BUTTON}`}
+              />
             </div>
           </aside>
 
@@ -591,9 +597,6 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
     </section>
   );
 }
-
-const upFirst = (s: string, lang: Lang) =>
-  s.charAt(0).toLocaleUpperCase(lang === 'tr' ? 'tr' : 'en') + s.slice(1);
 
 /** A priced tip or part of "Ürettiklerimizden": picture, what and for which breaker, price. */
 function MadeCard({ x, fx, lang, t }: { x: MadeItem; fx: FxRate | null; lang: Lang; t: Dict }) {
@@ -772,18 +775,17 @@ export default function Home({
             ))}
           </dl>
           <div className="mt-4 flex flex-col gap-2.5 font-sans text-sm md:flex-row md:flex-wrap md:items-center md:gap-x-3 md:gap-y-2.5">
-            <a
+            <Button
               href={whatsappHref(t.nav.quoteText)}
-              className={`inline-flex min-h-11 items-center justify-center rounded-sm bg-whatsapp px-5 font-medium text-white ${FOCUS}`}
-            >
-              {h.order.whatsapp}
-            </a>
-            <a
+              label={h.order.whatsapp}
+              className={`px-5 ${WHATSAPP_BUTTON}`}
+            />
+            <Button
               href={`mailto:${ORDER_EMAIL}`}
-              className={`inline-flex min-h-11 items-center justify-center rounded-sm border border-ink-soft bg-bg px-5 text-ink hover:bg-bg-warm ${FOCUS}`}
-            >
-              {h.order.mail} · {ORDER_EMAIL}
-            </a>
+              label={`${h.order.mail} · ${ORDER_EMAIL}`}
+              variant="secondary"
+              className={`h-auto min-h-11 whitespace-normal px-5 py-2 ${OUTLINE_BUTTON}`}
+            />
             <p className="m-0 text-[13px] text-ink-mid md:ml-2">
               {t.cart.phone}:{' '}
               <a href={`tel:${ORG_PHONE_E164}`} className={`${line} whitespace-nowrap`}>

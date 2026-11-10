@@ -3,7 +3,8 @@ import { useClientIdle, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
 import type { GearLayout } from '../lib/gear-scene';
 import { fromP, toP } from '../lib/gear-progress';
-import { BTN_PRIMARY, H2, WRAP } from '../lib/ui';
+import { Button } from '@astryxdesign/core/Button';
+import { ACTION, H2, WRAP } from '../lib/ui';
 import { ReportIcon } from './TechnicalCapacity';
 
 /** Posters = the same gear at its hot frame, 1000×1000 with a transparent background
@@ -117,7 +118,7 @@ function Report({ g, className = '' }: { g: DictBlock['gear']; className?: strin
 }
 
 const H2_CLASS = H2;
-const CTA_CLASS = `${BTN_PRIMARY} self-start`;
+const CTA_CLASS = `${ACTION} self-start`;
 const LEAD_CLASS = 'm-0 font-sans text-base min-[721px]:text-[17px] text-ink-mid max-w-[520px]';
 
 /** Static block: the poster in a frame, then the copy, the four stages as a numbered list, the
@@ -159,9 +160,13 @@ function GearStatic({ t }: Props) {
             ))}
           </ol>
           <Report g={g} className="mt-6" />
-          <a href="#contact" className={`${CTA_CLASS} mt-6`}>
-            {t.hero.cta}
-          </a>
+          <Button
+            href="#contact"
+            label={t.hero.cta}
+            variant="primary"
+            size="lg"
+            className={`${CTA_CLASS} mt-6`}
+          />
         </div>
       </div>
     </section>
@@ -176,7 +181,7 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
-  const ctaRef = useRef<HTMLAnchorElement>(null);
+  const ctaRef = useRef<HTMLButtonElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const layoutRef = useRef<GearLayout>({ cx: 0.7, cy: 0.5, D: 600 });
@@ -392,7 +397,7 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
           </div>
           <div
             ref={hostRef}
-            className="absolute inset-0 transition-opacity duration-[700ms]"
+            className="absolute inset-0 transition-opacity duration-[600ms]"
             style={{ opacity: ready ? 1 : 0 }}
           />
         </div>
@@ -407,9 +412,14 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
                 {g.title}
               </h2>
               <p className={LEAD_CLASS}>{g.sub}</p>
-              <a ref={ctaRef} href="#contact" className={CTA_CLASS}>
-                {t.hero.cta}
-              </a>
+              <Button
+                ref={ctaRef}
+                href="#contact"
+                label={t.hero.cta}
+                variant="primary"
+                size="lg"
+                className={CTA_CLASS}
+              />
             </div>
           </div>
         </div>
@@ -422,7 +432,10 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
           <Report g={g} />
         </div>
 
-        <div ref={railRef} className="absolute z-[2] inset-x-0 bottom-3 md:bottom-5 text-ink-mid">
+        <div
+          ref={railRef}
+          className="absolute z-[2] inset-x-0 bottom-3 min-[721px]:bottom-5 text-ink-mid"
+        >
           <div className={WRAP}>
             <div className="kv-gear-scale" aria-hidden="true">
               {SCALE.map(([a, b, c]) => (
@@ -432,8 +445,13 @@ function GearPinned({ t, onFail }: Props & { onFail: () => void }) {
             </div>
             <ol aria-label={g.stagesLabel} className="kv-gear-tabs">
               {g.stages.map((s, k) => (
-                <li key={s.name} aria-current={k === step ? 'step' : undefined}>
-                  <button type="button" className="kv-gear-tab" onClick={() => goTo(k)}>
+                <li key={s.name}>
+                  <button
+                    type="button"
+                    className="kv-gear-tab"
+                    aria-current={k === step ? 'step' : undefined}
+                    onClick={() => goTo(k)}
+                  >
                     {s.name}
                   </button>
                 </li>

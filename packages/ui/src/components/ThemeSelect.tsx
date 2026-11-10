@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Selector } from '@astryxdesign/core/Selector';
 import { cn } from '../lib/cn.js';
 
 /** localStorage key; each app's inline script in index.html reads the same one before paint. */
@@ -65,26 +66,35 @@ export function ThemeSelect({ t, themeColor, className }: Props) {
       ?.setAttribute('content', isLight() ? themeColor.light : themeColor.dark);
   };
   return (
-    <label className={cn('items-center gap-1.5 text-ink-mid hover:text-ink', className)}>
-      <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 shrink-0">
-        <circle cx="8" cy="8" r="3.25" fill="none" stroke="currentColor" strokeWidth="1.25" />
-        <path
-          d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"
-          stroke="currentColor"
-          strokeWidth="1.25"
-          strokeLinecap="round"
-        />
-      </svg>
-      <span className="sr-only">{t.label}</span>
-      <select
+    <div className={cn('items-center gap-1.5 text-ink-mid hover:text-ink', className)}>
+      <Selector
+        label={t.label}
+        isLabelHidden
+        variant="ghost"
+        presentation="adaptive"
+        options={[
+          { value: 'auto', label: t.auto },
+          { value: 'light', label: t.light },
+          { value: 'dark', label: t.dark },
+        ]}
         value={choice}
-        onChange={(e) => pick(e.target.value as Choice)}
-        className="min-h-11 cursor-pointer bg-transparent font-sans text-xs uppercase tracking-widest text-inherit focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand [&>option]:bg-bg [&>option]:text-ink [&>option]:normal-case [&>option]:tracking-normal"
-      >
-        <option value="auto">{t.auto}</option>
-        <option value="light">{t.light}</option>
-        <option value="dark">{t.dark}</option>
-      </select>
-    </label>
+        onChange={(v) => {
+          if (isChoice(v)) pick(v);
+        }}
+        startIcon={
+          <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 shrink-0">
+            <circle cx="8" cy="8" r="3.25" fill="none" stroke="currentColor" strokeWidth="1.25" />
+            <path
+              d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"
+              stroke="currentColor"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+            />
+          </svg>
+        }
+        // Inside the caller's 44 px bordered box: the box is the visible control.
+        controlClassName="min-h-[42px] p-0 gap-1.5 text-sm font-medium text-inherit hover:bg-none"
+      />
+    </div>
   );
 }

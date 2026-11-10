@@ -35,3 +35,13 @@
 - Never accept output verbatim: convert to this repo's conventions — map colors/spacing to `@kervan/ui` tokens, use `@kervan/ui` components where they exist, replace `lucide-react` with inline SVG or the `Icon` component, and apply the motion contract above.
 - Kervan logo (all three sites, owner 2026-10-13): the **KRV** mark, steel-grey letters `#747b83` with the V drawn as a chisel tip in ember `#d9481c`. The SAME colours on the light and dark themes (owner: no dark variant); both read about 4.3:1 on white and on `#141416`. Files in each app's `public/`: `logo-krv-v2.svg` (header, footer, 404; shown 32 to 40 px high, width auto), `logo-krv-v2-256.png` (JSON-LD `logo`), `favicon-16.png` / `favicon-32.png` (pixel-fitted KRV), `apple-touch-icon.png` (180 px, mark on `#141416`). No lone letter and no tile or box around the mark (owner).
 - Brand logo bars: `logo_search` against Atlas Copco, Furukawa, Soosan, Montabert, Indeco, Rammer, Epiroc, Sandvik, NPK, Toku, Kobelco, Hanwoo (existing logos: `apps/breaker-parts/public/brand-logos/`).
+
+## Astryx (owner's decision, 2026-11-10)
+
+All three sites use `@astryxdesign/core` (exact version in each `package.json`; it is beta, so upgrade on purpose) for action buttons, button-looking links, form fields and selects, and `useCombobox` for the shop's breaker search. Page layouts, cards, chips, galleries and `<details>` stay Tailwind and `@kervan/ui`.
+
+- `packages/ui/src/astryx-bridge.css` maps Astryx's token names to Kervan's, so components follow day and night through the same marks. Each app sets `--radius-inner`, `--radius-element`, `--radius-container` in its `globals.css`. Never hard-code a colour to fix an Astryx component: bridge the token.
+- Never mount Astryx's `<Theme>`: it removes `<html data-theme>` on hydration. No `theme-neutral`, `reset.css` or `tailwind-theme.css`.
+- The `@layer` line stays above `@import 'tailwindcss'` in each `globals.css`, or the cascade inverts silently.
+- `<AstryxProvider>` (`@kervan/ui`) wraps each `App` for Astryx's own strings; props such as `label` still come from `dict.ts`.
+- Astryx's stylesheet holds every component. `astryxPrune` (`packages/ui/vite-astryx-prune.mjs`, in each `vite.config.ts`) drops at build time the rules whose classes appear in no JS chunk, so dev and build CSS differ in size, not in look. Check a new Astryx component on a build, not only in dev.

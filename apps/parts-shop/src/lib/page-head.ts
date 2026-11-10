@@ -262,6 +262,7 @@ export function pageHead({ lang, path, model, fx }: PageProps): HeadInput {
         title: m.popularTitle,
         description: m.popularDesc,
         ...ogOf(lang, PAGE_OG.popular),
+        jsonLd: crumbs([], t.popular.title),
       };
     case 'brand':
       return {

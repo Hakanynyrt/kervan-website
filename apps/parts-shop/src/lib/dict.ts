@@ -271,6 +271,8 @@ export interface Dict {
       carrier: string;
       /** Diameter band `from` ≤ Ø < `below` mm (0 / Infinity at the ends), with tonnage when known. */
       band: (from: number, below: number, tons: { min: number; max: number } | null) => string;
+      /** Chip label: the "approximately" is left to the heading. */
+      bandChip: (from: number, below: number, tons: { min: number; max: number } | null) => string;
       /** Short form for the WhatsApp message. */
       bandShort: (from: number, below: number, tons: { min: number; max: number } | null) => string;
       grooved: string;
@@ -294,6 +296,8 @@ export interface Dict {
     fxNote: (date: string) => string;
     add: string;
     added: string;
+    /** After adding: how many of this line the cart now holds. */
+    addedQty: (n: number) => string;
     goCart: string;
     /** After the net USD price ("+ vergiler"; empty in English). */
     plus: string;
@@ -351,7 +355,12 @@ export interface Dict {
     /** One order line: name, type, code, qty × unit = line total, then the page link. */
     line: (name: string, qty: number, unit: string, total: string | null, url: string) => string;
   };
-  brand: { title: (brand: string) => string; lead: (n: number) => string };
+  brand: {
+    title: (brand: string) => string;
+    lead: (n: number) => string;
+    /** Example in the page's filter box, from the page's first model. */
+    filterHint: (model: string) => string;
+  };
   /** Sales terms shown on every product page: quality, shipping, payment, warranty. */
   terms: {
     title: string;
@@ -871,6 +880,12 @@ export const DICT: Record<Lang, Dict> = {
             : below === Infinity
               ? `Ø${from} mm ve üstü`
               : `Ø${from}–${below - 1} mm${tons ? ` · yaklaşık ${tons.min}–${tons.max} t` : ''}`,
+        bandChip: (from, below, tons) =>
+          from === 0
+            ? `Ø${below} mm altı`
+            : below === Infinity
+              ? `Ø${from} mm ve üstü`
+              : `Ø${from}–${below - 1} mm${tons ? ` · ${tons.min}–${tons.max} t` : ''}`,
         bandShort: (from, below, tons) =>
           from === 0
             ? `Ø${below} altı`
@@ -901,6 +916,7 @@ export const DICT: Record<Lang, Dict> = {
       fxNote: (date) => `TL fiyatı TCMB döviz satış kuruyla (${date}) hesaplanır.`,
       add: 'Palete yükle',
       added: 'Palete yüklendi',
+      addedQty: (n) => `Palete yüklendi, paletinizde ${n} adet`,
       goCart: 'Palete git',
       plus: '+ vergiler',
       incl: '(vergiler dahil)',
@@ -976,6 +992,7 @@ export const DICT: Record<Lang, Dict> = {
     brand: {
       title: (brand) => `${brand} kırıcı uçları`,
       lead: (n) => `${n} model. Kırıcınızın modelini seçin.`,
+      filterHint: (model) => `Bu markada arayın, ör. ${model}`,
     },
     terms: {
       title: 'Satış koşulları',
@@ -1916,6 +1933,12 @@ export const DICT: Record<Lang, Dict> = {
             : below === Infinity
               ? `Ø${from} mm and up`
               : `Ø${from}–${below - 1} mm${tons ? ` · approx. ${tons.min}–${tons.max} t` : ''}`,
+        bandChip: (from, below, tons) =>
+          from === 0
+            ? `Under Ø${below} mm`
+            : below === Infinity
+              ? `Ø${from} mm and up`
+              : `Ø${from}–${below - 1} mm${tons ? ` · ${tons.min}–${tons.max} t` : ''}`,
         bandShort: (from, below, tons) =>
           from === 0
             ? `under Ø${below}`
@@ -1946,6 +1969,7 @@ export const DICT: Record<Lang, Dict> = {
       fxNote: (date) => `TRY prices use the CBRT USD selling rate of ${date}.`,
       add: 'Add to cart',
       added: 'Added to cart',
+      addedQty: (n) => `Added to cart, ${n} in your cart`,
       goCart: 'Go to cart',
       plus: '',
       incl: '',
@@ -2020,6 +2044,7 @@ export const DICT: Record<Lang, Dict> = {
     brand: {
       title: (brand) => `${brand} breaker tips`,
       lead: (n) => `${n} models. Pick your breaker model.`,
+      filterHint: (model) => `Search this make, e.g. ${model}`,
     },
     terms: {
       title: 'Terms of sale',

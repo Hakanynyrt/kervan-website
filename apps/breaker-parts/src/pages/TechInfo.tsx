@@ -7,10 +7,10 @@ import { useVegaCatalog } from '../lib/use-vega-catalog';
 import { DrawingsContext, useVegaDrawings } from '../lib/use-vega-drawings';
 import { useTechFits } from '../lib/use-tech-fits';
 import { useTechQuote } from '../lib/use-tech-quote';
-import CatalogTab from './tech/CatalogTab';
 import { FITS_HASH } from './tech/fits-hash';
 
 // Its own chunk (search code, make spellings): downloaded only when the tab is opened.
+const CatalogTab = lazy(() => import('./tech/CatalogTab'));
 const FitsTab = lazy(() => import('./tech/FitsTab'));
 const QuickTab = lazy(() => import('./tech/QuickTab'));
 const QUICK_HASH = '#ara';
@@ -230,18 +230,20 @@ function Content({
           className="max-w-[1280px] mx-auto px-6 md:px-8"
         >
           <DrawingsContext.Provider value={drawings}>
-            <CatalogTab
-              // A jump from "Hızlı Cevap" starts the catalogue on that search.
-              key={catalogText}
-              initialText={catalogText}
-              t={t}
-              lang={lang}
-              status={catalog.status}
-              catalog={catalog.catalog}
-              popular={catalog.popular}
-              guide={catalog.guide}
-              retry={catalog.retry}
-            />
+            <Suspense fallback={<p className="font-sans text-ink-mid m-0">{t.fitsUi.loading}</p>}>
+              <CatalogTab
+                // A jump from "Hızlı Cevap" starts the catalogue on that search.
+                key={catalogText}
+                initialText={catalogText}
+                t={t}
+                lang={lang}
+                status={catalog.status}
+                catalog={catalog.catalog}
+                popular={catalog.popular}
+                guide={catalog.guide}
+                retry={catalog.retry}
+              />
+            </Suspense>
           </DrawingsContext.Provider>
         </motion.div>
       )}

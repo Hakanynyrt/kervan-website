@@ -13,7 +13,7 @@ pnpm + Turborepo monorepo for Kervan Makina's websites:
 | `apps/breaker-parts/`  | kervanbreaker.com + www (kırıcı parçaları)   | `kervan-breaker-parts`   |
 | `apps/parts-shop/`     | kiriciparca.com (www., magaza., shop. → 301) | `kervan-parts-shop`      |
 
-All apps are Vite 5 + React 18 + TypeScript + Tailwind v4 + Framer Motion, sharing code through
+All apps are Vite 5 + React 19 + TypeScript + Tailwind v4 + Framer Motion, sharing code through
 `packages/*` (`@kervan/ui`, `@kervan/motion`, `@kervan/seo`, `@kervan/tips`).
 
 ## Read before you work on an area

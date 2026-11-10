@@ -91,3 +91,7 @@ Any failure stops the job before the Pages deploy, so production keeps the previ
 
 - Photos are cached for 1 year as immutable (`_headers`). To replace an image, use a **new filename** (`-02`, `-v2`), not an overwrite.
 - Slot directories and size limits are documented in `README.md` ("Medya ekleme").
+
+## React 19 prerender note
+
+All apps and packages are on React 19. `renderToString` adds `<link rel="preload" as="image">` lines for the first images in front of the markup; each app's `src/entry-server.tsx` removes them with `stripImagePreloads` (`@kervan/seo/head`), so the only preloads are the ones each site sets in its head.
