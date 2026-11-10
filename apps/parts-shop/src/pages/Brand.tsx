@@ -1,5 +1,5 @@
+import { WRAP } from '../components/Layout';
 import type { FxRate } from '@kervan/tips';
-import { Container } from '@kervan/ui';
 import { Breadcrumb, PageTitle } from '../components/Bits';
 import { BrandChips, ModelTable } from '../components/ModelSearch';
 import type { Dict } from '../lib/dict';
@@ -21,7 +21,7 @@ export default function Brand({
   t: Dict;
 }) {
   return (
-    <Container className="pt-8 pb-12 lg:pt-12">
+    <div className={`${WRAP} pt-8 pb-12 lg:pt-12`}>
       <Breadcrumb
         trail={[
           [t.parts.title, PARTS_PATH],
@@ -52,6 +52,6 @@ export default function Brand({
       <div className="mt-8 sm:hidden">
         <BrandChips brands={model.brands} current={model.brand} only="phone" lang={lang} t={t} />
       </div>
-    </Container>
+    </div>
   );
 }

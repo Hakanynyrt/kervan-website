@@ -1,7 +1,6 @@
-import { Container } from '@kervan/ui';
 import { Breadcrumb, PageTitle } from '../components/Bits';
 import { GuideVideo } from '../components/GuideVideo';
-import { FOCUS } from '../components/Layout';
+import { FOCUS, WRAP } from '../components/Layout';
 import type { Dict } from '../lib/dict';
 import {
   GUIDE_KEYS,
@@ -98,14 +97,14 @@ export default function Guide({
   const g = GUIDES[lang];
   if (!doc)
     return (
-      <Container className="py-10">
+      <div className={`${WRAP} py-10`}>
         <Breadcrumb trail={[]} current={g.title} lang={lang} t={t} />
         <PageTitle>{g.title}</PageTitle>
         <p className="m-0 mt-3 max-w-[65ch] font-sans text-base text-ink-mid">{g.lead}</p>
         <div className="mt-8 font-sans">
           <GuideCards lang={lang} />
         </div>
-      </Container>
+      </div>
     );
   const d = g.items[doc];
   const figs = (at: GuideFigure['after']) =>
@@ -115,7 +114,7 @@ export default function Guide({
   const link = (k: PartKey | 'tips'): [string, string] =>
     k === 'tips' ? [t.parts.tips.name, LIST_PATH] : [t.parts.items[k].name, partPath(k)];
   return (
-    <Container className="py-10">
+    <div className={`${WRAP} py-10`}>
       <Breadcrumb trail={[[g.title, GUIDES_PATH]]} current={d.title} lang={lang} t={t} />
       <article className="max-w-[65ch] font-sans">
         <PageTitle>{d.title}</PageTitle>
@@ -161,6 +160,6 @@ export default function Guide({
         </h2>
         <GuideCards lang={lang} except={doc} />
       </nav>
-    </Container>
+    </div>
   );
 }

@@ -3,7 +3,6 @@ import { Button } from '@astryxdesign/core/Button';
 import { Selector } from '@astryxdesign/core/Selector';
 import { TextInput } from '@astryxdesign/core/TextInput';
 import { matches, matchesOem, rewriteQuery, slugify, type FxRate } from '@kervan/tips';
-import { Container } from '@kervan/ui';
 import { useReducedMotion } from '@kervan/motion';
 import {
   Breadcrumb,
@@ -27,6 +26,7 @@ import {
   OUTLINE_BUTTON,
   WHATSAPP_BUTTON,
   whatsappHref,
+  WRAP,
 } from '../components/Layout';
 import { searchExamples } from '../components/ModelSearch';
 import { PartPriceLine, partOrderText, priceNote } from '../components/PartOrder';
@@ -253,7 +253,7 @@ export default function Part({
     }
   };
   return (
-    <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">
+    <div className={`${WRAP} pb-28 pt-8 lg:pb-12 lg:pt-12`}>
       <Breadcrumb trail={[[t.parts.title, PARTS_PATH]]} current={p.name} lang={lang} t={t} />
       <PageTitle>{p.h1}</PageTitle>
       <OemLine t={t} kit={model.part === 'tamir-takimi'} />
@@ -373,7 +373,7 @@ export default function Part({
                           <img
                             src={photoImg(r.hero, 'xs')}
                             srcSet={cardSet(r.hero)}
-                            sizes="(min-width: 1280px) 210px, (min-width: 1024px) 17vw, (min-width: 640px) 31vw, 47vw"
+                            sizes="(min-width: 1280px) 230px, (min-width: 1024px) 17vw, (min-width: 640px) 31vw, 47vw"
                             width={320}
                             height={180}
                             alt={renderTitle(r, b ? t.parts.fitted.name(p.name, true) : p.name, t)}
@@ -483,7 +483,7 @@ export default function Part({
         body={t.parts.guide[model.part].body}
       />
       <StickyQuote text={text} t={t} />
-    </Container>
+    </div>
   );
 }
 

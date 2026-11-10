@@ -1,7 +1,6 @@
-import { Container } from '@kervan/ui';
 import { Breadcrumb, PageTitle } from '../components/Bits';
 import FamilyCardView from '../components/FamilyCardView';
-import { FOCUS } from '../components/Layout';
+import { FOCUS, WRAP } from '../components/Layout';
 import { SearchForm } from '../components/ModelSearch';
 import { cardKey } from '../lib/card';
 import type { Dict } from '../lib/dict';
@@ -15,7 +14,7 @@ type Model = Extract<PageModel, { kind: 'popular' }>;
 export default function Popular({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   const p = t.popular;
   return (
-    <Container className="pb-12 pt-8 lg:pt-12">
+    <div className={`${WRAP} pb-12 pt-8 lg:pt-12`}>
       <Breadcrumb trail={[]} current={p.title} lang={lang} t={t} />
       <PageTitle>{p.title}</PageTitle>
       <p className="m-0 mt-3 font-sans text-ink-mid">{p.lead}</p>
@@ -36,7 +35,7 @@ export default function Popular({ model, lang, t }: { model: Model; lang: Lang; 
         )}
       </ul>
       <p className="m-0 mt-6 max-w-3xl font-sans text-sm text-ink-mid">{p.partsLead}</p>
-    </Container>
+    </div>
   );
 }
 
