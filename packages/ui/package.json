@@ -13,6 +13,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "test": "node --test vite-astryx-prune.test.mjs",
     "lint": "eslint ."
   },
   "dependencies": {

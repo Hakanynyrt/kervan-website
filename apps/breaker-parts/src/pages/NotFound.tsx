@@ -1,3 +1,4 @@
+import { Button } from '@astryxdesign/core/Button';
 import { Link } from 'react-router-dom';
 import { useLocale, useLocalePath } from '../lib/locale-path';
 import ShopLink from '../components/ShopLink';
@@ -17,12 +18,15 @@ export default function NotFound({ t }: Props) {
           {t.notFound.title}
         </h1>
         <p className="font-sans text-lg text-ink-mid max-w-[44ch] mb-8">{t.notFound.body}</p>
-        <Link
-          to={to('/')}
-          className="bg-brand text-on-brand rounded-[2px] font-semibold px-7 py-3 font-sans text-sm tracking-wide hover:bg-brand-hi transition-colors"
-        >
-          {t.notFound.cta} →
-        </Link>
+        <Button
+          as={Link}
+          href={to('/')}
+          label={t.notFound.cta}
+          variant="primary"
+          size="lg"
+          endContent={<span aria-hidden="true">→</span>}
+          className="kv-btn kv-btn-main"
+        />
         <ShopLink lang={lang} path="/yedek-parca" text={t.shop.notFoundCta} className="mt-8" />
       </section>
     </>

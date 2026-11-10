@@ -1,5 +1,6 @@
+import { Button } from '@astryxdesign/core/Button';
 import type { DictBlock } from '../types';
-import { BTN_LINE, BTN_PRIMARY, WRAP } from '../lib/ui';
+import { WRAP } from '../lib/ui';
 import { WHATSAPP_URL } from '../lib/contact';
 import { HERO_PHOTO } from '../lib/home-photos';
 import { ChatIcon } from './icons';
@@ -51,18 +52,22 @@ export default function Hero({ t }: Props) {
             {h.sub}
           </p>
           <div className="mt-3.5 min-[721px]:mt-[26px] grid grid-cols-2 gap-2.5 min-[721px]:flex min-[721px]:flex-wrap min-[721px]:items-center min-[721px]:gap-3">
-            <a href="#contact" className={`${BTN_PRIMARY} max-[720px]:px-3`}>
-              {h.cta}
-            </a>
-            <a
+            <Button
+              href="#contact"
+              label={h.cta}
+              variant="primary"
+              size="lg"
+              className="kv-btn kv-btn-main max-[720px]:px-3"
+            />
+            <Button
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className={`${BTN_LINE} max-[720px]:px-3`}
-            >
-              <ChatIcon />
-              {t.contact.whatsappLabel}
-            </a>
+              label={t.contact.whatsappLabel}
+              icon={<ChatIcon />}
+              size="lg"
+              className="kv-btn kv-btn-line max-[720px]:px-3"
+            />
           </div>
         </div>
       </div>

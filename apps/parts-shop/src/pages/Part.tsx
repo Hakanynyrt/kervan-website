@@ -1,4 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { Button } from '@astryxdesign/core/Button';
+import { Selector } from '@astryxdesign/core/Selector';
+import { TextInput } from '@astryxdesign/core/TextInput';
 import { matches, matchesOem, rewriteQuery, slugify, type FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import { useReducedMotion } from '@kervan/motion';
@@ -17,7 +20,15 @@ import {
   chipClass,
 } from '../components/Bits';
 import { PartVideos } from '../components/GuideVideo';
-import { FOCUS, whatsappHref } from '../components/Layout';
+import {
+  FIELD_RING,
+  FIELD_TEXT,
+  FOCUS,
+  OUTLINE_BUTTON,
+  WHATSAPP_BUTTON,
+  whatsappHref,
+} from '../components/Layout';
+import { searchExamples } from '../components/ModelSearch';
 import { PartPriceLine, partOrderText, priceNote } from '../components/PartOrder';
 import RenderGallery from '../components/RenderGallery';
 import ShareLinks from '../components/ShareLinks';
@@ -26,12 +37,13 @@ import { addToCart } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import type { ListedPart } from '../lib/listed-parts';
 import { localePath } from '../lib/locale-path';
-import { renderModel, renderTitle } from '../lib/part-caption';
+import { renderModel, renderTitle, upFirst } from '../lib/part-caption';
 import { DEFAULT_FILTER, filtersFor, inFilter, type PartFilter } from '../lib/part-filters';
 import { renderAnchor } from '../lib/part-links';
 import { kindPartType } from '../lib/part-prices';
 import { PART_PHOTOS, PART_RENDERS, type PartRender } from '../lib/photos';
 import { replaceSearch } from '../lib/url-state';
+import { useFitPlaceholder, useKeepTyped } from '../lib/use-field';
 import {
   CART_PATH,
   PARTS_PATH,
@@ -71,6 +83,8 @@ const SHOWCASE = 8;
 const PAGE = 24;
 /** `?tur=` value for "every kind" (the "Tümü" chip). */
 const TUR_ALL = 'tumu';
+/** Most "Parça türü" choices shown as chips on phones. */
+const PHONE_CHIPS = 5;
 
 /** What the search box matches on: the make (series) and the model text of a render. */
 const renderName = (r: PartRender, t: Dict): string =>
@@ -108,6 +122,18 @@ export default function Part({
     : null;
   const [filter, setFilter] = useState<PartFilter | null>(defaultFilter);
   const [shown, setShown] = useState(PAGE);
+  const box = useRef<HTMLInputElement>(null);
+  const placeholder = useFitPlaceholder(box, searchExamples(t));
+  // "Daha fazla göster" goes away on the last page and the new cards land above it: the focus moves
+  // to the first new card (WCAG 2.4.3, as the home's "Tüm markalar").
+  const showcaseList = useRef<HTMLUListElement>(null);
+  const focusFrom = useRef<number | null>(null);
+  useEffect(() => {
+    const from = focusFrom.current;
+    if (from === null) return;
+    focusFrom.current = null;
+    showcaseList.current?.children[from]?.querySelector('a')?.focus({ preventScroll: false });
+  }, [shown]);
   const kinds = filters.find(([f]) => f === filter)?.[1];
   const all = kinds ? every.filter((r) => inFilter(r, kinds)) : every;
   // The chip picked is written to `?tur=` (shareable); `tumu` = every kind on a page whose
@@ -151,6 +177,12 @@ export default function Part({
     // Only on load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const search = (v: string) => {
+    setQ(v);
+    // Typing searches every kind ("Tümü"); clearing the box goes back to the default chip.
+    if (!chosen.current) setFilter(v.trim() ? null : defaultFilter);
+  };
+  useKeepTyped(box, search);
   const query = q.trim();
   const names = all.map((r) => renderName(r, t));
   const oem = model.oem ?? {};
@@ -228,22 +260,19 @@ export default function Part({
       <p className="m-0 mt-3 max-w-3xl font-sans text-ink-mid">{p.body}</p>
       {all.length > 0 && (
         <div className="mt-6 flex max-w-2xl flex-wrap items-center gap-3">
-          <label className="sr-only" htmlFor="filter">
-            {t.search.label}
-          </label>
-          <input
+          <TextInput
+            ref={box}
             id="filter"
             type="search"
+            label={t.search.label}
+            isLabelHidden
+            size="lg"
             value={q}
-            onChange={(e) => {
-              const v = e.target.value;
-              setQ(v);
-              // Typing searches every kind ("Tümü"); clearing the box goes back to the default chip.
-              if (!chosen.current) setFilter(v.trim() ? null : defaultFilter);
-            }}
-            placeholder={t.search.placeholder}
+            onChange={(v) => search(v)}
+            placeholder={placeholder}
             autoComplete="off"
-            className={`min-w-0 flex-[1_1_22rem] rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft ${FOCUS}`}
+            containerClassName="min-w-0 flex-[1_1_22rem] font-sans"
+            controlClassName={`px-4 ${FIELD_TEXT}`}
           />
           <p className="m-0 font-sans text-sm text-ink-mid" aria-live="polite">
             {!query
@@ -256,8 +285,32 @@ export default function Part({
           </p>
         </div>
       )}
+      {/* Phones, with more than five choices: one selector instead of rows of chips (`?tur=` as the
+          chips); both are in the prerender and CSS shows one. */}
+      {filters.length + 1 > PHONE_CHIPS && (
+        <div className="mt-4 font-sans sm:hidden">
+          <Selector
+            label={t.parts.filter.label}
+            presentation="adaptive"
+            size="lg"
+            width="100%"
+            containerClassName="[&_label]:font-semibold"
+            controlClassName={FIELD_RING}
+            value={shownFilter ?? TUR_ALL}
+            onChange={(v) => pickFilter(filters.find(([f]) => f === v)?.[0] ?? null)}
+            options={[
+              { value: TUR_ALL, label: t.parts.filter.all },
+              ...filters.map(([f]) => ({ value: f as string, label: t.parts.filter.items[f] })),
+            ]}
+          />
+        </div>
+      )}
       {filters.length > 1 && (
-        <div role="group" aria-label={t.parts.filter.label} className="mt-4 font-sans text-sm">
+        <div
+          role="group"
+          aria-label={t.parts.filter.label}
+          className={`mt-4 font-sans text-sm ${filters.length + 1 > PHONE_CHIPS ? 'hidden sm:block' : ''}`}
+        >
           <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
             {[null, ...filters.map(([f]) => f)].map((f) => (
               <li key={f ?? 'all'}>
@@ -303,7 +356,10 @@ export default function Part({
                   {t.parts.showcase.title}
                 </h2>
                 <p className="m-0 mt-1 font-sans text-sm text-ink-mid">{t.parts.showcase.lead}</p>
-                <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 lg:grid-cols-4">
+                <ul
+                  ref={showcaseList}
+                  className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 lg:grid-cols-4"
+                >
                   {showcase.slice(0, shown).map((r, i) => {
                     // Same price as the item page: a front head opens Burçlu there (its own price).
                     const b = !!r.fitted && ctx.prices[`${renderAnchor(r)}#b`] !== undefined;
@@ -323,10 +379,19 @@ export default function Part({
                             alt={renderTitle(r, b ? t.parts.fitted.name(p.name, true) : p.name, t)}
                             loading={i > 3 ? 'lazy' : undefined}
                             decoding="async"
-                            className="block h-auto w-full bg-pstage"
+                            className="block h-auto w-full border-b border-hair bg-pstage"
                           />
-                          <span className="block px-2.5 pt-2 font-sans text-sm leading-snug font-medium text-ink group-hover:underline">
-                            {renderTitle(r, b ? t.parts.fitted.name(p.name, true) : p.name, t)}
+                          <span className="block px-2.5 pt-2 font-sans leading-snug">
+                            <span className="block text-sm font-semibold text-ink group-hover:underline">
+                              {renderModel(r, t)}
+                            </span>
+                            <span className="block text-xs text-ink-mid">
+                              {r.kind
+                                ? t.parts.renderKindShort[r.kind]
+                                : b
+                                  ? upFirst(t.parts.fitted.name(p.name, true), lang)
+                                  : p.name}
+                            </span>
                           </span>
                           {cents !== undefined && (
                             <PartPriceLine
@@ -346,13 +411,15 @@ export default function Part({
                   })}
                 </ul>
                 {showcase.length > shown && (
-                  <button
-                    type="button"
-                    onClick={() => setShown((n) => n + PAGE)}
-                    className={`mt-4 inline-flex min-h-11 items-center rounded-sm border border-ink-soft bg-bg px-4 font-sans text-sm font-medium text-ink hover:border-ink ${FOCUS}`}
-                  >
-                    {t.parts.showcase.more(showcase.length - shown)}
-                  </button>
+                  <Button
+                    label={t.parts.showcase.more(showcase.length - shown)}
+                    variant="secondary"
+                    onClick={() => {
+                      focusFrom.current = shown;
+                      setShown((n) => n + PAGE);
+                    }}
+                    className={`mt-4 px-4 font-sans ${OUTLINE_BUTTON}`}
+                  />
                 )}
                 <ImgNote
                   t={t}
@@ -482,8 +549,9 @@ function ListedCard({ l, ctx }: { l: ListedPart; ctx: Ctx }) {
           className="mt-1 text-base"
         />
         <span className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-1 pt-2 text-sm">
-          <button
-            type="button"
+          <Button
+            label={t.price.add}
+            variant="primary"
             onClick={() => {
               addToCart(
                 {
@@ -498,10 +566,8 @@ function ListedCard({ l, ctx }: { l: ListedPart; ctx: Ctx }) {
               );
               setAdded(true);
             }}
-            className={`min-h-11 cursor-pointer rounded-sm bg-brand px-4 font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
-          >
-            {t.price.add}
-          </button>
+            className="px-4"
+          />
           <a
             href={whatsappHref(partOrderText(t, lang, label, l.breaker, 1, l.cents, path, ctx.fx))}
             {...ORDER_CONVERSION}
@@ -550,42 +616,46 @@ export function QuotePanel({
   /** The page language on an item page: the one-line sale terms (`Terms`). */
   compact?: Lang;
 }) {
+  const box = useRef<HTMLInputElement>(null);
+  useKeepTyped(box, setBreaker);
   return (
     <div className="lg:sticky lg:top-6">
       <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
-        <p className="m-0 text-lg font-bold text-ink">{t.parts.quoteTitle}</p>
+        <h2 className="m-0 text-lg font-bold text-ink">{t.parts.quoteTitle}</h2>
         <p className="m-0 mt-2 text-ink-mid">{t.parts.quoteBody}</p>
-        <label htmlFor="breaker" className="mt-4 block font-semibold text-ink">
-          {t.parts.modelLabel}
-        </label>
-        <input
+        <TextInput
+          ref={box}
           id="breaker"
-          type="text"
+          label={t.parts.modelLabel}
+          size="lg"
           value={breaker}
-          onChange={(e) => setBreaker(e.target.value)}
+          onChange={(v) => setBreaker(v)}
           placeholder={t.parts.modelPlaceholder}
           autoComplete="off"
-          className={`mt-2 w-full rounded-sm border border-ink-soft bg-bg px-3 py-2.5 text-base text-ink placeholder:text-ink-soft ${FOCUS}`}
+          containerClassName="mt-4 [&_label]:font-semibold"
+          controlClassName={`px-3 ${FIELD_TEXT}`}
         />
-        <label htmlFor="qty" className="mb-2 mt-4 block font-semibold text-ink">
+        {/* The stepper's field has this name itself (a hidden label). */}
+        <p aria-hidden="true" className="m-0 mb-2 mt-4 font-semibold text-ink">
           {t.family.qty}
-        </label>
+        </p>
         <QtyStepper id="qty" value={qty} onChange={setQty} label={t.family.qty} t={t} />
         <div className="mt-4 flex flex-col gap-3">
-          <a
+          <Button
             href={whatsappHref(text)}
+            label={t.family.whatsapp}
+            size="lg"
             {...ORDER_CONVERSION}
-            className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
-          >
-            {t.family.whatsapp}
-          </a>
-          <a
+            className={`px-5 ${WHATSAPP_BUTTON}`}
+          />
+          <Button
             href={`mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(breaker.trim() ? `${name} – ${breaker.trim()}` : name)}&body=${encodeURIComponent(text)}`}
+            label={t.family.email}
+            variant="secondary"
+            size="lg"
             {...ORDER_CONVERSION}
-            className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
-          >
-            {t.family.email}
-          </a>
+            className={`px-5 ${OUTLINE_BUTTON}`}
+          />
         </div>
       </div>
       <div className="mt-6">
@@ -675,13 +745,12 @@ export function RenderFigure({
             <PartViewer src={r.model3d} label={caption} t={t} showFitted={withB} />
           </Suspense>
           {choice && <div className="mt-3">{choice}</div>}
-          <button
-            type="button"
+          <Button
+            label={t.parts.viewer.close}
+            variant="ghost"
             onClick={() => setOpen3d(false)}
-            className={`mt-2 cursor-pointer font-sans text-sm text-ink-mid underline hover:text-ink ${FOCUS}`}
-          >
-            {t.parts.viewer.close}
-          </button>
+            className="mt-2 px-0 font-sans font-normal text-ink-mid underline hover:bg-none hover:text-ink"
+          />
         </div>
       ) : (
         <RenderGallery
@@ -697,13 +766,12 @@ export function RenderFigure({
           overlay={(k) =>
             r.model3d &&
             k === 0 && (
-              <button
-                type="button"
+              <Button
+                label={t.parts.viewer.open}
+                variant="primary"
                 onClick={() => setOpen3d(true)}
-                className={`absolute right-3 bottom-3 cursor-pointer rounded-sm bg-brand px-4 py-2.5 font-sans text-sm font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
-              >
-                {t.parts.viewer.open}
-              </button>
+                className="absolute right-3 bottom-3 px-4 font-sans"
+              />
             )
           }
           below={choice}
@@ -889,7 +957,6 @@ function SeriesPicker({
     pick(to, true);
   };
   const id = seriesId(series);
-  const arrow = `cursor-pointer rounded-sm border border-ink-soft bg-bg px-3 py-1.5 text-ink hover:bg-bg-warm ${FOCUS}`;
   return (
     <section aria-labelledby={id} className="mt-4 scroll-mt-4 border-t border-hair pt-6">
       <div className="flex items-end justify-between gap-4">
@@ -900,24 +967,24 @@ function SeriesPicker({
           <p className="m-0 mt-1 font-sans text-sm text-ink-mid">{t.parts.series.hint}</p>
         </div>
         <div className="flex shrink-0 gap-2 font-sans text-sm">
-          <button
-            type="button"
+          <Button
+            label={t.parts.series.prev}
+            icon={<span aria-hidden="true">‹</span>}
+            isIconOnly
+            variant="secondary"
             tabIndex={-1}
             onClick={() => pick(i - 1)}
-            aria-label={t.parts.series.prev}
-            className={arrow}
-          >
-            <span aria-hidden="true">‹</span>
-          </button>
-          <button
-            type="button"
+            className={OUTLINE_BUTTON}
+          />
+          <Button
+            label={t.parts.series.next}
+            icon={<span aria-hidden="true">›</span>}
+            isIconOnly
+            variant="secondary"
             tabIndex={-1}
             onClick={() => pick(i + 1)}
-            aria-label={t.parts.series.next}
-            className={arrow}
-          >
-            <span aria-hidden="true">›</span>
-          </button>
+            className={OUTLINE_BUTTON}
+          />
         </div>
       </div>
       <ul

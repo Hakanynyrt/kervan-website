@@ -275,7 +275,7 @@ export default function PartViewer({
             type="button"
             onClick={() => setCut((c) => !c)}
             aria-pressed={cut}
-            className="cursor-pointer rounded-sm border border-ink-soft bg-bg px-4 py-2 font-medium text-ink hover:bg-bg-warm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            className="min-h-11 cursor-pointer rounded-sm border border-ink-soft bg-bg px-4 py-2 font-medium text-ink hover:bg-bg-warm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
             {cut ? t.parts.viewer.cutOff : t.parts.viewer.cut}
           </button>

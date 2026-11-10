@@ -1,7 +1,8 @@
 import { DICT } from '../lib/dict';
 import { pathForLang } from '../lib/use-lang';
 import type { Lang } from '../types';
-import { BTN_PRIMARY } from '../lib/ui';
+import { Button } from '@astryxdesign/core/Button';
+import { ACTION } from '../lib/ui';
 
 const focusRing =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2';
@@ -52,9 +53,13 @@ export default function NotFound({ lang = 'tr' }: { lang?: Lang }) {
                 </h2>
               )}
               <p className="m-0 font-sans text-[17px] text-ink-mid">{t.body}</p>
-              <a href={pathForLang(l)} className={`${BTN_PRIMARY} ${focusRing}`}>
-                {t.home}
-              </a>
+              <Button
+                href={pathForLang(l)}
+                label={t.home}
+                variant="primary"
+                size="lg"
+                className={ACTION}
+              />
             </section>
           );
         })}

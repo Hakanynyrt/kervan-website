@@ -192,6 +192,14 @@
   }
 }
 
+/* Astryx Selector rows (36 px by default, portalled, so no class of ours reaches them): 44 px tap
+   targets on touch screens. */
+@media (pointer: coarse) {
+  .astryx-selector-option-row {
+    min-height: 44px;
+  }
+}
+
 /* Phones: pages with the fixed quote bar (StickyQuote) keep the footer's last lines clear of it. */
 @media (width < 64rem) {
   body:has([data-sticky-bar]) footer {

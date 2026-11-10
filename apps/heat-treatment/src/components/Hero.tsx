@@ -1,6 +1,7 @@
 import { ORG_PHONE, ORG_PHONE_E164 } from '@kervan/seo';
 import type { DictBlock } from '../types';
-import { BTN_LINE, BTN_PRIMARY, WRAP } from '../lib/ui';
+import { Button } from '@astryxdesign/core/Button';
+import { ACTION, ACTION_LINE, WRAP } from '../lib/ui';
 
 /** The hero photos. A changed picture gets a new file name. Both come from the same owner-approved
  *  frame (photo package, 2026-11): a glowing charge on its fixture at the mouth of our pit furnace.
@@ -81,14 +82,24 @@ export default function Hero({ t }: Props) {
             {h.sub}
           </p>
           <div className="mt-3.5 min-[721px]:mt-[26px] grid grid-cols-2 gap-2.5 min-[721px]:flex min-[721px]:flex-wrap min-[721px]:items-center min-[721px]:gap-3">
-            <a href="#contact" className={`${BTN_PRIMARY} max-[720px]:px-3`}>
-              {h.cta}
-            </a>
-            <a href={`tel:${ORG_PHONE_E164}`} className={`${BTN_LINE} max-[720px]:px-3`}>
-              <PhoneIcon />
+            <Button
+              href="#contact"
+              label={h.cta}
+              variant="primary"
+              size="lg"
+              className={`${ACTION} max-[720px]:px-3`}
+            />
+            <Button
+              href={`tel:${ORG_PHONE_E164}`}
+              label={`${t.contact.phoneLabel} ${ORG_PHONE}`}
+              variant="ghost"
+              size="lg"
+              icon={<PhoneIcon />}
+              className={`${ACTION_LINE} max-[720px]:px-3`}
+            >
               <span className="min-[721px]:hidden">{t.contact.phoneLabel}</span>
               <span className="max-[720px]:hidden">{ORG_PHONE}</span>
-            </a>
+            </Button>
           </div>
         </div>
       </div>

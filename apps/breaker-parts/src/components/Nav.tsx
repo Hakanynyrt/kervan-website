@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { Button } from '@astryxdesign/core/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -20,8 +21,6 @@ interface Props {
   techAuthed: boolean;
 }
 
-const BOX_BTN =
-  'items-center justify-center min-h-11 min-w-11 border border-hair-strong rounded-[2px]';
 const LANG_CELL =
   'min-h-11 min-w-11 inline-flex items-center justify-center px-2 font-sans text-sm font-semibold transition-colors';
 const DESK_LINK =
@@ -98,20 +97,60 @@ export default function Nav({ lang, t, techAuthed }: Props) {
     </a>
   );
 
-  const ctaClass =
-    'inline-flex items-center min-h-11 px-3.5 md:px-[18px] rounded-[2px] bg-brand text-on-brand font-sans text-[15px] font-semibold whitespace-nowrap hover:bg-brand-hi transition-colors';
+  const ctaClass = 'kv-btn-main px-3.5 md:px-[18px] text-[15px] font-semibold whitespace-nowrap';
+
+  const langCells = (['tr', 'en'] as Lang[]).map((l) =>
+    l === lang ? (
+      <Link
+        key={l}
+        to={localePath(stripLang(pathname), l)}
+        lang={l}
+        aria-current="page"
+        className={`${LANG_CELL} text-ink bg-bg-soft`}
+      >
+        {t.nav.langShort[l]}
+      </Link>
+    ) : (
+      <Link
+        key={l}
+        to={otherHref}
+        hrefLang={otherLang}
+        lang={otherLang}
+        onKeyDown={(e: ReactKeyboardEvent<HTMLAnchorElement>) => {
+          // Links activate on Enter natively; Space too, like the button it replaced.
+          if (e.key !== ' ') return;
+          e.preventDefault();
+          e.currentTarget.click();
+        }}
+        onClick={(e) => {
+          rememberLang(otherLang);
+          if (!search && !locHash) return;
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+          e.preventDefault();
+          navigate(otherHref + search + locHash);
+        }}
+        className={`${LANG_CELL} text-ink-mid hover:text-ink`}
+      >
+        {t.nav.langShort[l]}
+      </Link>
+    ),
+  );
 
   return (
     <header className="sticky top-0 z-40 bg-bg border-b border-hair">
       <div className="max-w-[1240px] mx-auto px-4 md:px-8 h-[60px] md:h-[68px] flex items-center gap-1.5 md:gap-5">
-        <Link to={to('/')} className="flex items-center min-h-11 min-w-11" aria-label={t.nav.home}>
+        <Link
+          to={to('/')}
+          className="flex items-center shrink-0 min-h-11 min-w-11"
+          aria-label={t.nav.home}
+        >
           {/* The link's aria-label names it, so the mark itself has no alt text. */}
           <img
             src="/logo-krv-v2.svg"
             alt=""
             width={124}
             height={40}
-            className="h-5 md:h-[26px] w-auto select-none"
+            className="h-5 md:h-[26px] w-auto shrink-0 select-none"
             draggable={false}
           />
         </Link>
@@ -123,93 +162,64 @@ export default function Nav({ lang, t, techAuthed }: Props) {
         </nav>
 
         <div className="ml-auto flex items-center gap-1.5 md:gap-2">
+          {/* Below 340 px the two cells move into the mobile menu. */}
           <div
             role="group"
             aria-label={t.nav.language}
-            className="flex border border-hair-strong rounded-[2px]"
+            className="flex max-[339px]:hidden border border-hair-strong rounded-[2px]"
           >
-            {(['tr', 'en'] as Lang[]).map((l) =>
-              l === lang ? (
-                <Link
-                  key={l}
-                  to={localePath(stripLang(pathname), l)}
-                  lang={l}
-                  aria-current="page"
-                  className={`${LANG_CELL} text-ink bg-bg-soft`}
-                >
-                  {t.nav.langShort[l]}
-                </Link>
-              ) : (
-                <Link
-                  key={l}
-                  to={otherHref}
-                  hrefLang={otherLang}
-                  lang={otherLang}
-                  onKeyDown={(e: ReactKeyboardEvent<HTMLAnchorElement>) => {
-                    // Links activate on Enter natively; Space too, like the button it replaced.
-                    if (e.key !== ' ') return;
-                    e.preventDefault();
-                    e.currentTarget.click();
-                  }}
-                  onClick={(e) => {
-                    rememberLang(otherLang);
-                    if (!search && !locHash) return;
-                    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-                    e.preventDefault();
-                    navigate(otherHref + search + locHash);
-                  }}
-                  className={`${LANG_CELL} text-ink-mid hover:text-ink`}
-                >
-                  {t.nav.langShort[l]}
-                </Link>
-              ),
-            )}
+            {langCells}
           </div>
           {/* Light by day, dark at night (the edge middleware); this overrides it. lg+ only, like the shop's. */}
           <ThemeSelect
             t={t.nav.theme}
             themeColor={THEME_COLOR}
-            className={`hidden lg:flex px-2.5 ${BOX_BTN} [&_select]:normal-case [&_select]:tracking-normal [&_select]:text-sm [&_select]:font-medium [&_select]:min-h-0`}
+            className="hidden lg:flex px-2.5 items-center justify-center min-h-11 min-w-11 border border-hair-strong rounded-[2px]"
           />
-          <a
+          {/* Below 380 px the hero button and the floating button still offer WhatsApp. */}
+          <Button
             href={WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={t.contact.whatsappLabel}
-            className={`flex min-[1100px]:hidden ${BOX_BTN} text-ink`}
-          >
-            <ChatIcon size={20} />
-          </a>
+            label={t.contact.whatsappLabel}
+            icon={<ChatIcon size={20} />}
+            isIconOnly
+            className="kv-btn-box flex min-[1100px]:hidden max-[379px]:hidden"
+          />
           {/* Every width: on phones it is the quickest way to the form. */}
           {onHome ? (
-            <a href="#contact" className={ctaClass}>
-              {t.nav.cta}
-            </a>
+            <Button href="#contact" label={t.nav.cta} variant="primary" className={ctaClass} />
           ) : (
-            <Link to={to('/#contact')} className={ctaClass}>
-              {t.nav.cta}
-            </Link>
+            <Button
+              as={Link}
+              href={to('/#contact')}
+              label={t.nav.cta}
+              variant="primary"
+              className={ctaClass}
+            />
           )}
-          <button
+          <Button
             ref={menuBtn}
-            className={`flex min-[1100px]:hidden ${BOX_BTN} text-ink`}
-            aria-label={t.nav.menu}
+            label={t.nav.menu}
+            isIconOnly
+            className="kv-btn-box flex min-[1100px]:hidden"
             aria-expanded={open}
             aria-controls="mobile-menu"
             onClick={() => setOpen((o) => !o)}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              aria-hidden="true"
-            >
-              <path d="M4 7h16M4 12h16M4 17h16" />
-            </svg>
-          </button>
+            icon={
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                aria-hidden="true"
+              >
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              </svg>
+            }
+          />
         </div>
       </div>
 
@@ -227,6 +237,13 @@ export default function Nav({ lang, t, techAuthed }: Props) {
               {links.map((l) => renderLink(l.hash, l.label, MENU_LINK, close))}
               {techAuthed && renderTechLink(MENU_LINK, close)}
               {renderShopLink(MENU_LINK, close)}
+              <div
+                role="group"
+                aria-label={t.nav.language}
+                className="min-[340px]:hidden flex self-start my-2 border border-hair-strong rounded-[2px]"
+              >
+                {langCells}
+              </div>
             </div>
           </motion.div>
         )}

@@ -10,6 +10,8 @@ import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
 import type { Lang, DictBlock } from '../types';
 import { pathForLang, rememberLang } from '../lib/use-lang';
 import { ThemeSelect } from '@kervan/ui';
+import { Button } from '@astryxdesign/core/Button';
+import { SOLID_HOVER, WRAP } from '../lib/ui';
 
 /** `<meta name="theme-color">` per theme; same values as the inline script in index.html. */
 const THEME_COLOR = { light: '#FFFFFF', dark: '#1A1D20' };
@@ -57,8 +59,8 @@ export default function Nav({ lang, t, techAuthed }: Props) {
   };
 
   const links = [
-    { href: '#hizmetler', label: t.nav.services },
     { href: '#teknik-kapasite', label: t.nav.capacity },
+    { href: '#hizmetler', label: t.nav.services },
     ...(techAuthed ? [{ href: '#teknik-bilgiler', label: t.nav.tech }] : []),
     { href: '#tesisimiz', label: t.nav.craft },
     { href: '#hakkimizda', label: t.nav.about },
@@ -67,12 +69,12 @@ export default function Nav({ lang, t, techAuthed }: Props) {
 
   const langCell =
     'min-h-11 min-w-11 inline-flex items-center justify-center px-2 font-sans text-sm font-semibold transition-colors';
-  const boxBtn =
-    'items-center justify-center min-h-11 min-w-11 border border-hair-strong rounded-[2px]';
 
   return (
     <header className="sticky top-0 z-40 bg-bg border-b border-hair">
-      <div className="max-w-[1240px] mx-auto px-4 md:px-8 h-[60px] md:h-[68px] flex items-center gap-2 md:gap-7">
+      <div
+        className={`${WRAP} h-[60px] min-[721px]:h-[68px] flex items-center gap-2 min-[721px]:gap-7`}
+      >
         <a
           href={pathForLang(lang)}
           className="flex items-center min-h-11 min-w-11"
@@ -84,7 +86,7 @@ export default function Nav({ lang, t, techAuthed }: Props) {
             alt=""
             width={124}
             height={40}
-            className="h-[22px] md:h-[26px] w-auto select-none"
+            className="h-[22px] min-[721px]:h-[26px] w-auto select-none"
             draggable={false}
           />
         </a>
@@ -137,35 +139,39 @@ export default function Nav({ lang, t, techAuthed }: Props) {
           <ThemeSelect
             t={t.nav.theme}
             themeColor={THEME_COLOR}
-            className={`hidden lg:flex px-2.5 ${boxBtn} [&_select]:normal-case [&_select]:tracking-normal [&_select]:text-sm [&_select]:font-medium [&_select]:min-h-0`}
+            // The control is 44 px over the box's 1 px border, so the whole box takes the tap.
+            className="hidden lg:flex items-center justify-center h-11 min-w-11 px-2.5 border border-hair-strong rounded-[2px] [&_.astryx-selector]:min-h-11"
           />
           {/* Every width: on phones it is the quickest way to the form. */}
-          <a
+          <Button
             href="#contact"
-            className="inline-flex items-center min-h-11 px-3.5 md:px-[18px] rounded-[2px] bg-brand text-on-brand font-sans text-[15px] font-semibold whitespace-nowrap hover:bg-brand-hi transition-colors"
-          >
-            {t.nav.cta}
-          </a>
-          <button
+            label={t.nav.cta}
+            variant="primary"
+            className={`px-3.5 min-[721px]:px-[18px] text-[15px] font-semibold ${SOLID_HOVER}`}
+          />
+          <Button
             ref={menuBtn}
-            className={`flex min-[1100px]:hidden ${boxBtn} text-ink`}
-            aria-label={t.nav.menu}
+            label={t.nav.menu}
+            variant="ghost"
+            isIconOnly
+            icon={
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                aria-hidden="true"
+              >
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              </svg>
+            }
             aria-expanded={open}
             aria-controls="mobile-menu"
             onClick={() => setOpen((o) => !o)}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              aria-hidden="true"
-            >
-              <path d="M4 7h16M4 12h16M4 17h16" />
-            </svg>
-          </button>
+            className="min-[1100px]:hidden border border-hair-strong hover:bg-none"
+          />
         </div>
       </div>
 
@@ -179,7 +185,7 @@ export default function Nav({ lang, t, techAuthed }: Props) {
             transition={{ duration: reduced ? 0 : durations.sm, ease: editorialEase }}
             className="min-[1100px]:hidden overflow-hidden bg-bg border-t border-hair"
           >
-            <div className="px-4 md:px-8 py-2 flex flex-col font-sans">
+            <div className={`${WRAP} py-2 flex flex-col font-sans`}>
               {links.map((l) => (
                 <a
                   key={l.href}

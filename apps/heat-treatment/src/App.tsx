@@ -34,8 +34,14 @@ function AppBody({ lang }: Props) {
 
   return (
     <>
+      <a
+        href="#icerik"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:inline-flex focus:items-center focus:min-h-11 focus:px-4 focus:bg-bg focus:border focus:border-hair-strong focus:rounded-[2px] font-sans text-[15px] font-semibold text-ink"
+      >
+        {t.nav.skip}
+      </a>
       <Nav lang={lang} t={t} techAuthed={tech.state === 'authed'} />
-      <main>
+      <main id="icerik" tabIndex={-1} className="outline-none">
         {/* Order (2026-10-28 redesign): hero, capacity table, plant photo, gear, services, … */}
         <Hero t={t} />
         <TechnicalCapacity t={t} />
@@ -49,7 +55,7 @@ function AppBody({ lang }: Props) {
       </main>
       <Footer t={t} lang={lang} />
 
-      {(!isStatic || clientReady) && <WhatsAppFAB />}
+      {(!isStatic || clientReady) && <WhatsAppFAB t={t} />}
       <ConsentBanner t={t.consent} />
     </>
   );

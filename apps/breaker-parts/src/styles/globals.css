@@ -227,6 +227,75 @@ html:not(.js-anim) .min-h-\[70dvh\] {
   min-height: min(70dvh, 700px);
 }
 
+/* Astryx Button and fields in the site's look. In the components layer: above Astryx's own
+   layers, below Tailwind's utilities, so a utility on one button still wins. */
+@layer components {
+  .kv-btn {
+    height: auto;
+    min-height: 48px;
+    padding-inline: 22px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+    /* A long label wraps instead of being cut off (Astryx's default is one line). */
+    white-space: normal;
+    text-align: center;
+  }
+  .kv-btn-main:hover:not([aria-disabled='true'], :disabled) {
+    background-color: var(--color-brand-hi);
+  }
+  .kv-btn-line {
+    border: 1px solid var(--color-field-line);
+    background-color: transparent;
+    color: var(--color-ink);
+  }
+  .kv-btn-line:hover {
+    border-color: var(--color-ink);
+  }
+  /* Square icon button (header, workshop rail). */
+  .kv-btn-box {
+    border: 1px solid var(--color-hair-strong);
+    background-color: transparent;
+    color: var(--color-ink);
+    transition: border-color var(--duration-fast);
+  }
+  .kv-btn-box:hover {
+    border-color: var(--color-ink);
+  }
+  /* A rail arrow at the end of the rail. */
+  .kv-btn-box[aria-disabled='true'] {
+    border-color: var(--color-ink-soft);
+    color: var(--color-ink-soft);
+    cursor: default;
+  }
+  /* 16 px: a smaller field makes iOS zoom the page on focus. */
+  input,
+  textarea {
+    font-size: 16px;
+  }
+  .kv-form {
+    --color-border-emphasized: var(--color-field-line);
+  }
+}
+
+/* The required mark on a form label: seen, not read out (the field itself is `required`). */
+.kv-req label::after {
+  content: ' *';
+  content: ' *' / '';
+  color: var(--color-brand);
+}
+
+/* A ruled grid: the frame draws the top and left lines, each cell its right and bottom lines.
+   Nothing behind the cells, so an odd last cell leaves a clean empty space. */
+.kv-ruled {
+  border-top: 1px solid var(--color-hair-strong);
+  border-left: 1px solid var(--color-hair);
+}
+.kv-ruled > * {
+  border-right: 1px solid var(--color-hair);
+  border-bottom: 1px solid var(--color-hair);
+}
+
 /* Caption chip over a photo (hero, rail video badge). */
 .kv-chip {
   margin: 0;
@@ -528,6 +597,7 @@ html:not(.js-anim) .min-h-\[70dvh\] {
   object-fit: cover;
 }
 .kv-card-bd {
+  flex: 1;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 6px 20px;
@@ -584,7 +654,7 @@ html:not(.js-anim) .min-h-\[70dvh\] {
   font-size: 18px;
   font-weight: 600;
 }
-.kv-shopbar span {
+.kv-shopbar > div span {
   display: block;
   font-size: 15px;
   opacity: 0.85;
@@ -620,6 +690,7 @@ html:not(.js-anim) .min-h-\[70dvh\] {
     line-height: 1.4;
   }
   .kv-card-go {
+    margin-top: auto;
     font-size: 14.5px;
     justify-content: space-between;
   }

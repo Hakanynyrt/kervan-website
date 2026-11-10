@@ -1,14 +1,15 @@
 import { useState } from 'react';
+import { Button } from '@astryxdesign/core/Button';
 import type { FxRate } from '@kervan/tips';
 import { ORDER_CONVERSION } from '../lib/ads';
-import { addToCart } from '../lib/cart';
+import { addToCart, cartQty } from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { fmtDate, fmtGrossTry, fmtTry, fmtUsd, leadsGross, unitText } from '../lib/price';
-import { CART_PATH, type PartKey } from '../lib/routes';
+import type { PartKey } from '../lib/routes';
 import type { Lang } from '../types';
-import { QtyStepper, Terms } from './Bits';
-import { FOCUS, whatsappHref } from './Layout';
+import { AddedNote, QtyStepper, Terms, type Added } from './Bits';
+import { OUTLINE_BUTTON, WHATSAPP_BUTTON, whatsappHref } from './Layout';
 import { ORDER_EMAIL, SITE } from '../lib/site';
 
 /**
@@ -118,7 +119,7 @@ export function PartOrder({
   /** The part group, for its warranty period in the sale terms. */
   part?: PartKey;
 }) {
-  const [added, setAdded] = useState(false);
+  const [added, setAdded] = useState<Added>(null);
   const o = t.parts.order;
   const gross = leadsGross(lang, fx) ? fmtGrossTry(cents, fx, lang) : null;
   const tl = gross ?? fmtTry(cents, fx, lang);
@@ -157,65 +158,60 @@ export function PartOrder({
         )}
         {/* Desktop: the order button right under the price, above the fold (2026-10-27); phones
             keep it in the order box below, next to the sticky bar. */}
-        <a
+        <Button
           href={whatsappHref(text)}
+          label={o.wa}
+          size="lg"
           {...ORDER_CONVERSION}
-          className={`mt-4 hidden rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white lg:block ${FOCUS}`}
-        >
-          {o.wa}
-        </a>
+          className={`mt-4 hidden w-full px-5 lg:flex ${WHATSAPP_BUTTON}`}
+        />
         <p className="m-0 mt-3 border-t border-hair pt-3 text-ink">{o.delivery}</p>
-        <p className="m-0 mt-4 text-lg font-bold text-ink">{o.title}</p>
+        <h2 className="m-0 mt-4 text-lg font-bold text-ink">{o.title}</h2>
         <p className="m-0 mt-2 text-ink-mid">{o.body}</p>
-        <label htmlFor="qty" className="mb-2 mt-4 block font-semibold text-ink">
+        {/* The stepper's field has this name itself (a hidden label). */}
+        <p aria-hidden="true" className="m-0 mb-2 mt-4 font-semibold text-ink">
           {t.family.qty}
-        </label>
+        </p>
         <QtyStepper
           id="qty"
           value={qty}
           onChange={(n) => {
             setQty(n);
-            setAdded(false);
+            setAdded(null);
           }}
           label={t.family.qty}
           t={t}
         />
         <div className="mt-4 flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              addToCart({ id, name: breaker, label, code: null, path, cents }, qty);
-              setAdded(true);
-            }}
-            className={`cursor-pointer rounded-sm bg-brand px-5 py-3 text-center font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
-          >
-            {t.price.add}
-          </button>
-          {added && (
-            <p className="m-0 text-center text-ink" role="status">
-              {t.price.added} ·{' '}
-              <a
-                href={localePath(CART_PATH, lang)}
-                className={`font-medium text-brand-hi underline ${FOCUS}`}
-              >
-                {t.price.goCart}
-              </a>
-            </p>
-          )}
-          <a
+          <div>
+            <Button
+              label={t.price.add}
+              variant="primary"
+              size="lg"
+              width="100%"
+              onClick={() => {
+                addToCart({ id, name: breaker, label, code: null, path, cents }, qty);
+                setAdded({ n: cartQty(id) });
+              }}
+              className="px-5"
+            />
+            <AddedNote added={added} lang={lang} t={t} />
+          </div>
+          <Button
             href={whatsappHref(text)}
+            label={o.wa}
+            size="lg"
             {...ORDER_CONVERSION}
-            className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white lg:hidden ${FOCUS}`}
-          >
-            {o.wa}
-          </a>
-          <a
+            className={`px-5 lg:hidden ${WHATSAPP_BUTTON}`}
+          />
+          <Button
             href={`mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(`${breaker} ${label}`)}&body=${encodeURIComponent(text)}`}
+            label={o.mail}
+            variant="secondary"
+            size="lg"
             {...ORDER_CONVERSION}
-            className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
-          >
-            {o.mail}
-          </a>
+            className={`px-5 ${OUTLINE_BUTTON}`}
+          />
         </div>
       </div>
       <div className="mt-6">

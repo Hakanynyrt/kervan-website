@@ -1,11 +1,13 @@
+import { Button } from '@astryxdesign/core/Button';
 import { motion } from 'framer-motion';
 import { Link, useParams } from 'react-router-dom';
-import { fadeUp, inViewOnce, kenBurns, useReducedMotion } from '@kervan/motion';
+import { fadeUp, kenBurns, useReducedMotion } from '@kervan/motion';
 import { PRODUCT_BY_SLUG } from '../data/products';
 import { BRANDS } from '../data/brands';
 import type { DictBlock, Lang } from '../types';
 import { localePath } from '../lib/locale-path';
 import { SHOP_PATH } from '../lib/shop';
+import { WRAP } from '../lib/ui';
 import ShopLink from '../components/ShopLink';
 
 interface Props {
@@ -43,7 +45,7 @@ export default function ProductDetail({ t, lang }: Props) {
   return (
     <>
       <section className="pt-10 pb-16 md:pt-16 md:pb-24">
-        <div className="max-w-[1280px] mx-auto px-6 md:px-8">
+        <div className={WRAP}>
           <Link
             to={localePath('/urunler', lang)}
             className="inline-flex items-center min-h-11 font-sans text-sm font-medium text-ink-mid hover:text-ink transition-colors mb-6"
@@ -109,71 +111,43 @@ export default function ProductDetail({ t, lang }: Props) {
                 {loc.body}
               </p>
 
-              {/* Sub-types — only chisel has them today */}
-              {product.subTypes && product.subTypes.length > 0 && (
-                <motion.ul
-                  className="flex flex-col divide-y divide-hair border-y border-hair m-0 p-0 list-none"
-                  variants={fadeUp}
-                  initial={reduce ? false : 'hidden'}
-                  whileInView="show"
-                  viewport={inViewOnce}
-                >
-                  {product.subTypes.map((st) => {
-                    const stLoc = st[lang];
-                    return (
-                      <li key={st.slug} className="py-4 flex flex-col gap-1">
-                        <span className="font-sans font-semibold text-xl text-ink">
-                          {stLoc.name}
-                        </span>
-                        <span className="font-sans text-sm text-ink-mid">{stLoc.desc}</span>
-                      </li>
-                    );
-                  })}
-                </motion.ul>
-              )}
+              <div className="flex flex-col items-start gap-2">
+                <Button
+                  as={Link}
+                  href={quoteHref}
+                  label={t.productDetail.quoteCta}
+                  variant="primary"
+                  size="lg"
+                  className="kv-btn kv-btn-main"
+                />
+                {shopPath && <ShopLink lang={lang} path={shopPath} text={t.shop.productCta} />}
+              </div>
 
-              {/* Specs grid */}
-              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 m-0">
-                <div className="flex flex-col gap-2 border-t border-hair pt-4">
-                  <dt className="font-sans text-sm font-medium text-ink-soft">
-                    {t.productDetail.materialsLabel}
-                  </dt>
-                  <dd className="font-sans font-semibold text-lg text-ink m-0">42CrMo · 42CrMoA</dd>
-                </div>
-                <div className="flex flex-col gap-2 border-t border-hair pt-4">
-                  <dt className="font-sans text-sm font-medium text-ink-soft">
-                    {t.productDetail.sizesLabel}
-                  </dt>
-                  <dd className="font-sans text-sm text-ink-mid leading-relaxed m-0">
-                    {t.productDetail.sizesNote}
+              {/* One framed table: sub-types (only the chisel has them today), then the specs. */}
+              <dl className="kv-mat !mt-0">
+                {product.subTypes?.map((st) => (
+                  <div key={st.slug}>
+                    <dt>{st[lang].name}</dt>
+                    <dd>{st[lang].desc}</dd>
+                  </div>
+                ))}
+                <div>
+                  <dt>{t.productDetail.materialsLabel}</dt>
+                  <dd>
+                    <b className="font-semibold">
+                      {t.productionPage.materials.slice(0, 2).join(' · ')}
+                    </b>
                   </dd>
                 </div>
-                <div className="sm:col-span-2 flex flex-col gap-2 border-t border-hair pt-4">
-                  <dt className="font-sans text-sm font-medium text-ink-soft">
-                    {t.productDetail.brandFitsLabel}
-                  </dt>
-                  <dd className="font-sans text-sm text-ink-mid m-0 flex flex-wrap gap-x-3 gap-y-1.5">
-                    {BRANDS.map((b) => (
-                      <span key={b.slug}>{b.name}</span>
-                    ))}
-                  </dd>
+                <div>
+                  <dt>{t.productDetail.sizesLabel}</dt>
+                  <dd>{t.productDetail.sizesNote}</dd>
+                </div>
+                <div>
+                  <dt>{t.productDetail.brandFitsLabel}</dt>
+                  <dd>{BRANDS.map((b) => b.name).join(' · ')}</dd>
                 </div>
               </dl>
-
-              <Link
-                to={quoteHref}
-                className="self-start mt-2 bg-brand text-on-brand rounded-[2px] font-semibold px-7 py-3 font-sans text-sm tracking-wide hover:bg-brand-hi transition-colors"
-              >
-                {t.productDetail.quoteCta}
-              </Link>
-              {shopPath && (
-                <ShopLink
-                  lang={lang}
-                  path={shopPath}
-                  text={t.shop.productCta}
-                  className="self-start"
-                />
-              )}
             </motion.div>
           </div>
         </div>
