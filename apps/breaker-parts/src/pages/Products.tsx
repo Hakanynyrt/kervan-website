@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { fadeUp, inViewOnce, useReducedMotion } from '@kervan/motion';
 import ProductGrid from '../sections/ProductGrid';
 import ShopLink from '../components/ShopLink';
+import { WRAP } from '../lib/ui';
 import type { DictBlock, Lang } from '../types';
 
 interface Props {
@@ -15,7 +16,7 @@ export default function Products({ t, lang }: Props) {
     <>
       <section className="pt-10 pb-12 md:pt-16 md:pb-16">
         <motion.div
-          className="max-w-[1280px] mx-auto px-6 md:px-8 mb-12 md:mb-20 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end"
+          className={`${WRAP} mb-12 md:mb-20 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end`}
           variants={fadeUp}
           initial={reduce ? false : 'hidden'}
           animate="show"
@@ -37,7 +38,7 @@ export default function Products({ t, lang }: Props) {
         </motion.div>
 
         <ProductGrid lang={lang} />
-        <div className="max-w-[1280px] mx-auto px-6 md:px-8 mt-10 md:mt-12">
+        <div className={`${WRAP} mt-10 md:mt-12`}>
           <ShopLink lang={lang} path="/yedek-parca" text={t.shop.listCta} />
         </div>
       </section>

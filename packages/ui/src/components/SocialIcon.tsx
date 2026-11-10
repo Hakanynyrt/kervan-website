@@ -1,10 +1,12 @@
+import type { ReactElement } from 'react';
+
 /** Same keys as `OrgSocialKey` in `@kervan/seo` (kept local: `@kervan/ui` does not depend on it). */
 export type SocialIconName = 'facebook' | 'instagram' | 'youtube' | 'linkedin' | 'x' | 'telegram';
 
 /* Monochrome social glyphs (24×24, currentColor) for the footers' profile links.
    Purely decorative: the surrounding link carries the accessible name (aria-label from dict). */
 
-const PATHS: Record<SocialIconName, JSX.Element> = {
+const PATHS: Record<SocialIconName, ReactElement> = {
   facebook: (
     <path
       fill="currentColor"

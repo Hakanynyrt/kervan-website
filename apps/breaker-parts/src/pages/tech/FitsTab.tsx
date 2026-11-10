@@ -273,7 +273,7 @@ function BreakerView({
   selected: number | null;
   onPick: (i: number) => void;
   onClear: () => void;
-  resultRef: React.RefObject<HTMLHeadingElement>;
+  resultRef: React.RefObject<HTMLHeadingElement | null>;
 }) {
   const c = t.fitsUi;
   const [q, setQ] = useState('');
@@ -489,7 +489,7 @@ function TipView({
   d: number | null;
   onDiameter: (d: number) => void;
   onPick: (i: number) => void;
-  resultRef: React.RefObject<HTMLHeadingElement>;
+  resultRef: React.RefObject<HTMLHeadingElement | null>;
 }) {
   const c = t.fitsUi;
   const [f, setF] = useState('');

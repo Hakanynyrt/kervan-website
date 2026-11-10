@@ -10,6 +10,9 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from 'react';
+import { Button } from '@astryxdesign/core/Button';
+import { useCombobox } from '@astryxdesign/core/Selector';
+import { TextInput } from '@astryxdesign/core/TextInput';
 import type { Dict } from '../lib/dict';
 import {
   exactHit,
@@ -23,8 +26,9 @@ import {
 } from '../lib/finder';
 import { localePath } from '../lib/locale-path';
 import { breakerPath, LIST_PATH } from '../lib/routes';
+import { useFitPlaceholder, useKeepTyped } from '../lib/use-field';
 import type { Lang } from '../types';
-import { FOCUS, FOCUS_INSET, whatsappHref } from './Layout';
+import { FIELD_TEXT, FOCUS_INSET, WHATSAPP_BUTTON, whatsappHref } from './Layout';
 
 /**
  * The make/model search box, in the header of every page (and in the home's breaker panel on
@@ -84,26 +88,6 @@ const loadIndex = (): Promise<Index> =>
       throw e;
     }));
 
-/** Index of the longest example that fits the box, measured in its placeholder font (the last one
- *  when none does). */
-function fitPlaceholder(
-  el: HTMLInputElement,
-  ctx: CanvasRenderingContext2D,
-  examples: readonly string[],
-): number {
-  const box = getComputedStyle(el);
-  let font = box;
-  try {
-    font = getComputedStyle(el, '::placeholder');
-  } catch {
-    /* no placeholder style: the box's own font, a little larger, errs on the short side */
-  }
-  ctx.font = `${font.fontWeight} ${font.fontSize} ${font.fontFamily}`;
-  const room = el.clientWidth - parseFloat(box.paddingLeft) - parseFloat(box.paddingRight) - 2;
-  const i = examples.findIndex((s) => ctx.measureText(s).width <= room);
-  return i < 0 ? examples.length - 1 : i;
-}
-
 export function BreakerSearch({
   lang,
   t,
@@ -131,10 +115,8 @@ export function BreakerSearch({
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState<Index | null>(null);
-  /** The example in the box: the longest of the three that fits (`fitPlaceholder`). */
-  const [ph, setPh] = useState(0);
   const input = useRef<HTMLInputElement>(null);
-  const list = useRef<HTMLDivElement>(null);
+  const list = useRef<HTMLUListElement>(null);
   const data: Index | null = finder ?? index;
   const query = q.trim();
   const found = useMemo(() => (data && query ? findModels(data, query) : null), [data, query]);
@@ -146,25 +128,11 @@ export function BreakerSearch({
     return m ? { brand: h.brand, model: m, name: h.name } : null;
   };
 
-  const examples = [t.search.placeholder, t.search.placeholderMid, t.search.placeholderShort];
-  useEffect(() => {
-    // The prerender has the long example; the box shows the longest one that fits its width, in
-    // the placeholder's own font (measured again when the box or the font changes).
-    const el = input.current;
-    const ctx = document.createElement('canvas').getContext('2d');
-    if (!el || !ctx) return;
-    const fit = () => setPh(fitPlaceholder(el, ctx, examples));
-    fit();
-    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fit);
-    ro?.observe(el);
-    document.fonts?.addEventListener('loadingdone', fit);
-    return () => {
-      ro?.disconnect();
-      document.fonts?.removeEventListener('loadingdone', fit);
-    };
-    // The examples change with the language only (a new page).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [t]);
+  const placeholder = useFitPlaceholder(input, [
+    t.search.placeholder,
+    t.search.placeholderMid,
+    t.search.placeholderShort,
+  ]);
 
   useEffect(() => {
     if (!fromUrl || !finder || !home) return;
@@ -192,16 +160,38 @@ export function BreakerSearch({
     const id = window.setTimeout(() => prepareSearch(data), 0);
     return () => window.clearTimeout(id);
   }, [open, data]);
+  const hits = useMemo(() => (found ? found.hits.slice(0, ROWS) : []), [found]);
+  const options = useMemo(() => hits.map((h) => ({ value: h.model.slug })), [hits]);
+  // Focus stays in the box: the arrows move a highlight over the rows (`aria-activedescendant`).
+  // Enter with a highlight follows that row's link; without one it is the form's submit.
+  const combo = useCombobox({
+    selectableItems: options,
+    isOpen: open && found !== null,
+    onOpen: () => setOpen(true),
+    onClose: () => setOpen(false),
+    onSelect: (slug) => {
+      const i = options.findIndex((o) => o.value === slug);
+      list.current?.querySelectorAll('a')[i]?.click();
+    },
+    listboxId: listId,
+  });
+  const close = () => {
+    setOpen(false);
+    combo.setHighlightedIndex(-1);
+  };
   // Typing only lists models: a model whose name is still being typed ("Furukawa F 2" on the way
-  // to "F22") must not open (owner, 2026-10-22: never a wrong breaker).
+  // to "F22") must not open (owner, 2026-10-22: never a wrong breaker). So a new query also drops
+  // the highlight: Enter is the submit again, which opens only an exact or single match.
   const onType = (v: string) => {
     setQ(v);
     setOpen(true);
+    combo.setHighlightedIndex(-1);
     load();
   };
+  useKeepTyped(input, onType);
   const pick = (h: FinderHit<ModelRef>) => {
     setQ(h.name);
-    setOpen(false);
+    close();
     // The panel's box stays where it is on screen (the chips above it change), with the keyboard.
     if (panel) home?.select(full(h), 'box', input.current?.getBoundingClientRect().top);
     else home?.select(full(h), 'header');
@@ -220,38 +210,36 @@ export function BreakerSearch({
     else window.location.assign(localePath(breakerPath(one.model.slug), lang));
   };
   const onKey = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      // Focus first: the input's focus handler opens the list.
-      input.current?.focus();
-      setOpen(false);
-      return;
-    }
-    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-    const links = [...(list.current?.querySelectorAll('a') ?? [])];
-    if (!links.length) return;
-    e.preventDefault();
-    const i = links.indexOf(document.activeElement as HTMLAnchorElement);
-    const next = e.key === 'ArrowDown' ? Math.min(i + 1, links.length - 1) : i - 1;
-    if (next < 0) input.current?.focus();
-    else links[next].focus();
+    if (e.key !== 'Escape') return;
+    // Focus first: the input's focus handler opens the list.
+    input.current?.focus();
+    close();
   };
   // Closes when the focus moves on to something else (Tab) or a press lands outside the form; a
   // tap on a row must not close the list before its click (Safari does not focus links).
   const onBlur = (e: FocusEvent) => {
     const to = e.relatedTarget as Node | null;
-    if (to && !e.currentTarget.contains(to)) setOpen(false);
+    if (to && !e.currentTarget.contains(to)) close();
   };
   const form = useRef<HTMLFormElement>(null);
   useEffect(() => {
     if (!open) return;
     const away = (e: PointerEvent) => {
-      if (!form.current?.contains(e.target as Node)) setOpen(false);
+      if (!form.current?.contains(e.target as Node)) close();
     };
     document.addEventListener('pointerdown', away);
     return () => document.removeEventListener('pointerdown', away);
+    // `close` only sets state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const hits = found ? found.hits.slice(0, ROWS) : [];
+  /** A row is a real link and its own click navigates: the hook's press handler would click it
+   *  again through `onSelect`. Only the row's identity is taken: the hook's hover highlight would
+   *  let a resting mouse decide what Enter opens. */
+  const rowProps = (i: number) => {
+    const { id: rowId, role, 'aria-selected': selected } = combo.getOptionProps(i);
+    return { id: rowId, role, 'aria-selected': selected };
+  };
   const status = found
     ? found.hits.length
       ? found.guess
@@ -272,60 +260,65 @@ export function BreakerSearch({
       onBlur={onBlur}
       className={`relative flex min-w-0 font-sans ${className}`}
     >
-      <label htmlFor={id} className="sr-only">
-        {t.home.finder.title}
-      </label>
-      <span className="relative flex min-w-0 flex-1 items-center">
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 20 20"
-          className="pointer-events-none absolute left-3.5 hidden size-[18px] text-ink-soft md:block"
-        >
-          <circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" strokeWidth="2" />
-          <path d="M13 13l4.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-        <input
-          ref={input}
-          id={id}
-          name="q"
-          type="search"
-          value={q}
-          onChange={(e) => onType(e.target.value)}
-          onFocus={() => {
-            load();
-            setOpen(true);
-          }}
-          placeholder={examples[ph]}
-          autoComplete="off"
-          aria-controls={open && found ? listId : undefined}
-          className={`h-[46px] w-full min-w-0 rounded-l-sm border border-r-0 border-ink-soft bg-bg pl-3 pr-2.5 text-base text-ink placeholder:text-sm placeholder:text-ink-soft max-[374px]:placeholder:text-[12.5px] md:pl-[42px] lg:placeholder:text-[13.5px] xl:placeholder:text-[15px] ${FOCUS}`}
-        />
-      </span>
-      <button
+      <TextInput
+        ref={input}
+        id={id}
+        htmlName="q"
+        type="search"
+        label={t.home.finder.title}
+        isLabelHidden
+        size="lg"
+        value={q}
+        onChange={(v) => onType(v)}
+        onFocus={() => {
+          load();
+          setOpen(true);
+        }}
+        placeholder={placeholder}
+        autoComplete="off"
+        startIcon={
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 20 20"
+            className="pointer-events-none hidden size-[18px] text-ink-soft md:block"
+          >
+            <circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" strokeWidth="2" />
+            <path d="M13 13l4.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        }
+        {...combo.getFieldProps()}
+        containerClassName="min-w-0 flex-1"
+        controlClassName={`rounded-r-none border-r-0 pl-3 pr-2.5 md:pl-3.5 [&_input]:placeholder:text-sm max-[374px]:[&_input]:placeholder:text-[12.5px] lg:[&_input]:placeholder:text-[13.5px] xl:[&_input]:placeholder:text-[15px] ${FIELD_TEXT}`}
+      />
+      <Button
         type="submit"
-        className={`h-[46px] shrink-0 rounded-r-sm bg-brand px-4 text-[15px] font-semibold text-on-brand hover:bg-brand-hi md:px-6 lg:px-4 min-[73.75rem]:px-6 ${FOCUS}`}
-      >
-        {t.search.button}
-      </button>
+        label={t.search.button}
+        variant="primary"
+        size="lg"
+        className="shrink-0 rounded-l-none px-4 text-[15px] font-semibold md:px-6 lg:px-4 min-[73.75rem]:px-6"
+      />
       <p className="sr-only" aria-live="polite">
         {open && found ? status : ''}
       </p>
       {open && found && (
-        <div
-          id={listId}
-          ref={list}
-          className="absolute inset-x-0 top-[calc(100%+4px)] z-30 overflow-hidden rounded-sm border border-hair-strong bg-bg shadow-[0_6px_18px_rgb(0_0_0/0.12)]"
-        >
+        <div className="absolute inset-x-0 top-[calc(100%+4px)] z-30 overflow-hidden rounded-sm border border-hair-strong bg-bg shadow-[0_6px_18px_rgb(0_0_0/0.12)]">
           <p className="m-0 px-3.5 pb-1.5 pt-2.5 text-[13px] font-semibold text-ink-mid">
             {status}
           </p>
           {hits.length > 0 && (
-            <ul className="m-0 list-none p-0">
-              {hits.map((h) => (
-                <li key={h.model.slug} className="border-t border-hair">
+            <ul
+              ref={list}
+              {...combo.getListboxProps()}
+              aria-label={t.home.finder.title}
+              className="m-0 list-none p-0"
+            >
+              {hits.map((h, i) => (
+                <li key={h.model.slug} role="presentation" className="border-t border-hair">
                   <a
+                    {...rowProps(i)}
                     href={localePath(breakerPath(h.model.slug), lang)}
-                    className={`flex min-h-[46px] items-center justify-between gap-3 px-3.5 text-[15px] text-ink hover:bg-bg-soft focus:bg-bg-soft ${FOCUS_INSET}`}
+                    tabIndex={-1}
+                    className="flex min-h-[46px] items-center justify-between gap-3 px-3.5 text-[15px] text-ink hover:bg-bg-soft aria-selected:bg-bg-soft aria-selected:outline aria-selected:outline-2 aria-selected:-outline-offset-2 aria-selected:outline-brand"
                   >
                     <span className="font-semibold">{h.name}</span>
                     <span className="whitespace-nowrap text-[13.5px] font-medium text-brand-hi">
@@ -346,12 +339,11 @@ export function BreakerSearch({
           )}
           <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-hair bg-bg-soft px-3.5 py-2.5 text-[13.5px] text-ink">
             <span>{t.missing.title}</span>
-            <a
+            <Button
               href={whatsappHref(t.missing.textFor(query))}
-              className={`inline-flex min-h-11 items-center rounded-sm bg-whatsapp px-3 lg:min-h-[34px] font-medium text-white ${FOCUS}`}
-            >
-              {t.missing.button}
-            </a>
+              label={t.missing.button}
+              className={`px-3 text-[13.5px] ${WHATSAPP_BUTTON}`}
+            />
           </div>
         </div>
       )}

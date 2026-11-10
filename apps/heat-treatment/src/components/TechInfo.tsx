@@ -3,16 +3,25 @@ import { motion } from 'framer-motion';
 import { fadeUp, inViewOnce, staggerContainer, useReducedMotion } from '@kervan/motion';
 import type { DictBlock, Lang } from '../types';
 import type { TechAuth } from '../lib/use-tech-auth';
-import { BTN_PRIMARY, H2, SECTION, SEC_HEAD, SEC_LEAD, WRAP } from '../lib/ui';
+import { Button } from '@astryxdesign/core/Button';
+import { TextInput } from '@astryxdesign/core/TextInput';
+import {
+  ACTION,
+  FIELD_CONTROL,
+  FIELD_LABEL,
+  FIELD_SCOPE,
+  H2,
+  SECTION,
+  SEC_HEAD,
+  SEC_LEAD,
+  WRAP,
+} from '../lib/ui';
 
 interface Props {
   t: DictBlock;
   lang: Lang;
   tech: TechAuth;
 }
-
-const focusRing =
-  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2';
 
 /** Owner-only section. Nothing renders for visitors: the login form appears
  *  only at /#giris, and the content only after the server confirmed a session. */
@@ -62,13 +71,12 @@ export default function TechInfo({ t, lang, tech }: Props) {
         </motion.div>
 
         <div className={`${WRAP} mt-6`}>
-          <button
-            type="button"
+          <Button
+            label={t.techUi.logout}
+            variant="ghost"
             onClick={() => void tech.logout()}
-            className={`min-h-11 font-sans text-sm text-ink-mid hover:text-ink underline underline-offset-4 ${focusRing}`}
-          >
-            {t.techUi.logout}
-          </button>
+            className="px-0 text-sm font-normal text-ink-mid hover:text-ink underline underline-offset-4 hover:bg-none"
+          />
         </div>
       </section>
     );
@@ -106,26 +114,29 @@ function LoginForm({ t, tech }: { t: DictBlock; tech: TechAuth }) {
         <h2 id="giris-title" className={H2}>
           {t.techUi.title}
         </h2>
-        <form onSubmit={onSubmit} className="max-w-[420px] mt-6 flex flex-col gap-3">
+        <form
+          onSubmit={onSubmit}
+          className={`max-w-[420px] mt-6 flex flex-col gap-3 ${FIELD_SCOPE}`}
+        >
           <p className="m-0 font-sans text-base text-ink-mid">{t.techUi.loginTitle}</p>
-          <label htmlFor="tech-pw" className="font-sans text-sm font-semibold text-ink">
-            {t.techUi.passwordLabel}
-          </label>
-          <input
-            id="tech-pw"
+          <TextInput
+            label={t.techUi.passwordLabel}
             type="password"
+            size="lg"
             autoComplete="current-password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={`min-h-12 px-3.5 py-3 rounded-[2px] border border-field-line bg-field font-sans text-base text-ink ${focusRing}`}
+            onChange={setPassword}
+            containerClassName={FIELD_LABEL}
+            controlClassName={`h-12 ${FIELD_CONTROL}`}
           />
-          <button
+          <Button
             type="submit"
-            disabled={busy || !password}
-            className={`${BTN_PRIMARY} ${focusRing}`}
-          >
-            {busy ? t.techUi.sending : t.techUi.submit}
-          </button>
+            label={busy ? t.techUi.sending : t.techUi.submit}
+            variant="primary"
+            size="lg"
+            isDisabled={busy || !password}
+            className={`${ACTION} disabled:bg-bg-soft disabled:text-ink-mid disabled:opacity-100 disabled:cursor-not-allowed`}
+          />
           {error && (
             <p role="alert" className="font-sans text-sm text-err m-0">
               {error}

@@ -1,4 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
+import { Button } from '@astryxdesign/core/Button';
+import { Selector } from '@astryxdesign/core/Selector';
+import { TextInput } from '@astryxdesign/core/TextInput';
 import type { FxRate } from '@kervan/tips';
 import {
   applyTipFilter,
@@ -24,34 +27,55 @@ import type { Lang } from '../types';
 import { fmtTry, fmtTryCents, fmtUsd, grossTryCents, leadsGross } from '../lib/price';
 import { cardHref, cardKey, cardName, cardPic } from '../lib/card';
 import { replaceSearch } from '../lib/url-state';
+import { useFitPlaceholder, useKeepTyped } from '../lib/use-field';
 import { chipClass, MissingModel } from './Bits';
-import { FOCUS } from './Layout';
+import { FIELD_RING, FIELD_TEXT, FOCUS, OUTLINE_BUTTON } from './Layout';
 
 /** Search box that sends the visitor to the full list with `?q=` (home page, brand pages). */
 export function SearchForm({ lang, t, value = '' }: { lang: Lang; t: Dict; value?: string }) {
+  const [q, setQ] = useState(value);
+  const box = useRef<HTMLInputElement>(null);
+  useKeepTyped(box, setQ);
+  const placeholder = useFitPlaceholder(box, searchExamples(t));
   return (
-    <form action={localePath(LIST_PATH, lang)} method="get" role="search" className="flex gap-2">
-      <label className="sr-only" htmlFor="q">
-        {t.search.label}
-      </label>
-      <input
+    <form
+      action={localePath(LIST_PATH, lang)}
+      method="get"
+      role="search"
+      className="flex gap-2 font-sans"
+    >
+      <TextInput
+        ref={box}
         id="q"
-        name="q"
+        htmlName="q"
         type="search"
-        defaultValue={value}
-        placeholder={t.search.placeholder}
+        label={t.search.label}
+        isLabelHidden
+        size="lg"
+        value={q}
+        onChange={(v) => setQ(v)}
+        placeholder={placeholder}
         autoComplete="off"
-        className={`min-w-0 flex-1 rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft ${FOCUS}`}
+        containerClassName="min-w-0 flex-1"
+        controlClassName={`px-4 ${FIELD_TEXT}`}
       />
-      <button
+      <Button
         type="submit"
-        className={`rounded-sm bg-brand px-5 py-3 font-sans text-sm font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
-      >
-        {t.search.button}
-      </button>
+        label={t.search.button}
+        variant="primary"
+        size="lg"
+        className="shrink-0 px-5"
+      />
     </form>
   );
 }
+
+/** The three search examples, longest first (`useFitPlaceholder`). */
+export const searchExamples = (t: Dict): readonly string[] => [
+  t.search.placeholder,
+  t.search.placeholderMid,
+  t.search.placeholderShort,
+];
 
 export function BrandChips({
   brands,
@@ -73,7 +97,7 @@ export function BrandChips({
         <a
           href={localePath(LIST_PATH, lang)}
           aria-current={current ? undefined : 'page'}
-          className={`inline-block rounded-sm border px-3 py-1.5 ${current ? 'border-hair bg-bg text-ink hover:border-hair-strong' : 'border-brand bg-brand text-on-brand'} ${FOCUS}`}
+          className={chipClass(!current)}
         >
           {t.search.all}
         </a>
@@ -83,7 +107,7 @@ export function BrandChips({
           <a
             href={localePath(b.path, lang)}
             aria-current={b.name === current ? 'page' : undefined}
-            className={`inline-block rounded-sm border px-3 py-1.5 ${b.name === current ? 'border-brand bg-brand text-on-brand' : 'border-hair bg-bg text-ink hover:border-hair-strong'} ${FOCUS}`}
+            className={chipClass(b.name === current)}
           >
             {b.name}
           </a>
@@ -130,6 +154,8 @@ export function ModelTable({
   all = false,
   cards = false,
   crawlAll = false,
+  quiet = false,
+  hint,
 }: {
   rows: BreakerCard[];
   /** CBRT rate for the cards' TL price (owner: "tl fiyatı da gözüksün"). */
@@ -143,11 +169,16 @@ export function ModelTable({
   /** Every card is in the HTML, those past the current page `hidden` (brand pages): each model
    *  page then has a plain link a crawler follows. Without it only the page's cards are rendered. */
   crawlAll?: boolean;
+  /** Brand pages say the count in their lead: no count here until the box or a filter narrows it. */
+  quiet?: boolean;
+  /** The box's example (brand pages: a model of that make), instead of the header box's. */
+  hint?: string;
 }) {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<TipFilter>(EMPTY_FILTER);
   // Writing the URL waits for the load-time read, so the first render cannot wipe a shared link.
   const [ready, setReady] = useState(false);
+  const box = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     const v = sp.get('q');
@@ -155,6 +186,8 @@ export function ModelTable({
     setFilter(parseTipFilter(sp));
     setReady(true);
   }, []);
+  useKeepTyped(box, setQ);
+  const placeholder = useFitPlaceholder(box, hint ? [hint] : searchExamples(t));
   const query = q.trim();
   useEffect(() => {
     if (!ready) return;
@@ -170,6 +203,19 @@ export function ModelTable({
   // Cards show a page at a time; a new search or filter starts again from the first page.
   const [page, setPage] = useState(PAGE);
   useEffect(() => setPage(PAGE), [query, filter]);
+  // "Daha fazla göster" goes away on the last page and the new cards land above it: the focus moves
+  // to the first new card (WCAG 2.4.3, as the home's "Tüm markalar").
+  const cardList = useRef<HTMLUListElement>(null);
+  const focusFrom = useRef<number | null>(null);
+  useEffect(() => {
+    const from = focusFrom.current;
+    if (from === null) return;
+    focusFrom.current = null;
+    const open = [...(cardList.current?.children ?? [])].filter(
+      (li) => !(li as HTMLElement).hidden,
+    );
+    open[from]?.querySelector('a')?.focus({ preventScroll: false });
+  }, [page]);
   // Nothing found: try the query with a misspelt make fixed and unknown words dropped (on the
   // unfiltered rows, so a filter can never hide the suggestion).
   const guess =
@@ -206,19 +252,22 @@ export function ModelTable({
           <Cards
             rows={crawlAll ? visible : visible.slice(0, page)}
             limit={page}
+            listRef={cardList}
             tip={filter.tip}
             fx={fx}
             lang={lang}
             t={t}
           />
           {visible.length > page && (
-            <button
-              type="button"
-              onClick={() => setPage((n) => n + PAGE)}
-              className={`mt-4 inline-flex min-h-11 items-center rounded-sm border border-ink-soft bg-bg px-4 font-sans text-sm font-medium text-ink hover:border-ink ${FOCUS}`}
-            >
-              {t.list.more(visible.length - page)}
-            </button>
+            <Button
+              label={t.list.more(visible.length - page)}
+              variant="secondary"
+              onClick={() => {
+                focusFrom.current = page;
+                setPage((n) => n + PAGE);
+              }}
+              className={`mt-4 px-4 font-sans ${OUTLINE_BUTTON}`}
+            />
           )}
         </>
       ) : (
@@ -227,34 +276,41 @@ export function ModelTable({
     ) : active && found.length > 0 ? (
       <div className="mt-4 rounded-md border border-hair bg-bg-soft p-4 font-sans text-sm">
         <p className="m-0 text-ink">{t.search.filter.none(found.length)}</p>
-        <button type="button" onClick={clear} className={`mt-3 ${chipClass(false)}`}>
-          {t.search.filter.clear}
-        </button>
+        <Button
+          label={t.search.filter.clear}
+          variant="secondary"
+          onClick={clear}
+          className={`mt-3 ${OUTLINE_BUTTON}`}
+        />
       </div>
     ) : null;
   return (
     <div>
       <div className="flex flex-wrap items-center gap-3">
-        <label className="sr-only" htmlFor="filter">
-          {t.search.label}
-        </label>
-        <input
+        <TextInput
+          ref={box}
           id="filter"
           type="search"
+          label={t.search.label}
+          isLabelHidden
+          size="lg"
           value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder={t.search.placeholder}
+          onChange={(v) => setQ(v)}
+          placeholder={placeholder}
           autoComplete="off"
-          className={`min-w-0 flex-[1_1_22rem] rounded-sm border border-ink-soft bg-bg px-4 py-3 font-sans text-base text-ink placeholder:text-ink-soft sm:max-w-md ${FOCUS}`}
+          containerClassName="min-w-0 flex-[1_1_22rem] font-sans sm:max-w-md"
+          controlClassName={`px-4 ${FIELD_TEXT}`}
         />
-        <p className="m-0 font-sans text-sm text-ink-mid" aria-live="polite">
-          {!query && !all
-            ? t.search.hint
-            : shown.length
-              ? active
-                ? t.search.countFiltered(visible.length, shown.length)
-                : t.search.count(shown.length)
-              : t.search.none(query)}
+        <p className="m-0 font-sans text-sm text-ink-mid empty:absolute" aria-live="polite">
+          {quiet && !query && !active
+            ? ''
+            : !query && !all
+              ? t.search.hint
+              : shown.length
+                ? active
+                  ? t.search.countFiltered(visible.length, shown.length)
+                  : t.search.count(shown.length)
+                : t.search.none(query)}
         </p>
       </div>
       {shown.length > 0 && (
@@ -283,6 +339,9 @@ export function ModelTable({
     </div>
   );
 }
+
+/** The selector's "every band" value (no band has this key). */
+const ANY_BAND = 'all';
 
 /** The narrowing chips over a search's results: only rows that would offer a choice show. */
 function FilterBar({
@@ -349,34 +408,28 @@ function FilterBar({
                     onClick={() => set({ cap: b?.key ?? null })}
                     className={`${chipClass(filter.cap === (b?.key ?? null))} tabular-nums`}
                   >
-                    {b ? label(b) : tf.all}
+                    {b ? tf.bandChip(b.from, b.below, b.tons) : tf.all}
                   </button>
                 </li>
               ))}
             </ul>
           </div>
-          {/* Phones: the bands as one native select (up to ten long labels). */}
+          {/* Phones: the bands as one selector (up to ten long labels), a bottom sheet on touch. */}
           <div className="sm:hidden">
-            <label htmlFor="tf-cap-select" className="mb-2 block font-semibold text-ink">
-              {tf.carrier}
-            </label>
-            <select
-              id="tf-cap-select"
-              value={filter.cap ?? ''}
-              onChange={(e) =>
-                set({
-                  cap: CARRIER_BANDS.find((b) => b.key === e.target.value)?.key ?? null,
-                })
-              }
-              className={`min-h-11 w-full rounded-sm border border-ink-soft bg-bg px-3 text-base text-ink ${FOCUS}`}
-            >
-              <option value="">{tf.all}</option>
-              {bands.map((b) => (
-                <option key={b.key} value={b.key}>
-                  {label(b)}
-                </option>
-              ))}
-            </select>
+            <Selector
+              label={tf.carrier}
+              presentation="adaptive"
+              size="lg"
+              width="100%"
+              containerClassName="[&_label]:font-semibold"
+              controlClassName={FIELD_RING}
+              value={filter.cap ?? ANY_BAND}
+              onChange={(v) => set({ cap: CARRIER_BANDS.find((b) => b.key === v)?.key ?? null })}
+              options={[
+                { value: ANY_BAND, label: tf.all },
+                ...bands.map((b) => ({ value: b.key as string, label: label(b) })),
+              ]}
+            />
           </div>
         </>
       )}
@@ -401,6 +454,7 @@ function FilterBar({
 function Cards({
   rows,
   limit,
+  listRef,
   tip,
   fx,
   lang,
@@ -409,6 +463,7 @@ function Cards({
   rows: BreakerCard[];
   /** Cards past this many are rendered `hidden` (still linked in the HTML). */
   limit: number;
+  listRef: RefObject<HTMLUListElement | null>;
   tip: TipType | null;
   fx: FxRate | null;
   lang: Lang;
@@ -418,7 +473,10 @@ function Cards({
   const dia = (r: BreakerCard) =>
     r.diameterMm === null ? '—' : `Ø${fmtNum(r.diameterMm, lang)} mm`;
   return (
-    <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+    <ul
+      ref={listRef}
+      className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
+    >
       {rows.map((r, i) => {
         const pic = cardPic(r);
         return (

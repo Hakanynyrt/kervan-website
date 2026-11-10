@@ -140,18 +140,21 @@ export function PartGroups({
       </ul>
     );
 
+  // The spans leave no orphan with the eight PART_KEYS plus the tips: the lead takes two cells from
+  // 640 px (ten in two columns) and two by two from 1024 px (twelve in four). A new group: recheck.
   return (
-    <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+    <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-4">
       {groups.map((g) => {
         const lead = g.key === 'tips';
         return (
-          <li key={g.key} className={lead ? 'lg:col-span-2' : undefined}>
+          <li key={g.key} className={lead ? 'sm:col-span-2 lg:row-span-2' : undefined}>
             <a
               href={localePath(g.path, lang)}
-              className={`group flex h-full flex-col overflow-hidden rounded-sm border border-hair bg-bg hover:border-hair-strong ${lead ? 'lg:flex-row' : ''} ${FOCUS}`}
+              className={`group flex h-full overflow-hidden rounded-sm border border-hair bg-bg hover:border-hair-strong sm:flex-col ${FOCUS}`}
             >
+              {/* Phones: a row, picture 38 % on the left (the home's compact rows); wider: on top. */}
               <div
-                className={`relative aspect-[16/9] border-b border-hair bg-pstage ${lead ? 'lg:aspect-auto lg:w-[58%] lg:shrink-0 lg:border-b-0 lg:border-r' : ''}`}
+                className={`relative w-[38%] shrink-0 border-r border-hair bg-pstage sm:w-auto sm:border-b sm:border-r-0 ${lead ? 'sm:aspect-[21/9] lg:aspect-auto lg:flex-1' : 'sm:aspect-[16/9]'}`}
               >
                 {g.hero ? (
                   <img
@@ -161,7 +164,7 @@ export function PartGroups({
                     height={900}
                     sizes={
                       g.xs
-                        ? '(min-width: 1024px) 380px, (min-width: 640px) 50vw, calc(100vw - 2rem)'
+                        ? '(min-width: 1280px) 290px, (min-width: 1024px) 23vw, (min-width: 640px) 50vw, 38vw'
                         : undefined
                     }
                     alt={g.alt}
@@ -183,7 +186,7 @@ export function PartGroups({
                   <img
                     src={photoImg(stock, 'lg')}
                     srcSet={photoSet(stock, ['sm', 480], ['lg', 960])}
-                    sizes="(min-width: 1024px) 760px, (min-width: 640px) 50vw, 100vw"
+                    sizes="(min-width: 1280px) 600px, (min-width: 1024px) 48vw, (min-width: 640px) 100vw, 38vw"
                     width={960}
                     height={720}
                     alt={g.alt}
@@ -193,11 +196,18 @@ export function PartGroups({
                   />
                 ) : null}
               </div>
-              <div className={`flex flex-1 flex-col p-4 ${lead ? 'lg:justify-center lg:p-6' : ''}`}>
-                <h3 className="m-0 font-sans text-lg font-semibold text-ink">{g.name}</h3>
-                <p className="m-0 mt-2 font-sans text-sm text-ink-mid">{g.body}</p>
-                <div className={`mt-auto pt-4 ${lead ? 'lg:mt-6' : ''}`}>
-                  <span className="block border-t border-hair pt-3 font-sans text-sm font-medium text-brand-hi group-hover:underline">
+              <div
+                className={`flex min-w-0 flex-1 flex-col p-3 sm:p-4 ${lead ? 'lg:flex-none lg:p-6' : ''}`}
+              >
+                <h3 className="m-0 font-sans text-base font-semibold text-ink sm:text-lg">
+                  {g.name}
+                </h3>
+                <p className="m-0 mt-1 font-sans text-[13px] leading-snug text-ink-mid sm:hidden">
+                  {g.short}
+                </p>
+                <p className="m-0 mt-2 hidden font-sans text-sm text-ink-mid sm:block">{g.body}</p>
+                <div className="mt-auto pt-2 sm:pt-4">
+                  <span className="block font-sans text-sm font-medium text-brand-hi group-hover:underline sm:border-t sm:border-hair sm:pt-3">
                     {t.parts.view} →
                   </span>
                 </div>

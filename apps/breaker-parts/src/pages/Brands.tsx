@@ -6,6 +6,7 @@ import { useLocale } from '../lib/locale-path';
 import ShopLink from '../components/ShopLink';
 import { SHOP_MAKE_PATH, shopUrl } from '../lib/shop';
 import { KERVAN_SHOP_URL } from '@kervan/seo';
+import { WRAP } from '../lib/ui';
 
 const SHOP_HOST = KERVAN_SHOP_URL.replace(/^https:\/\//, '');
 
@@ -20,7 +21,7 @@ export default function Brands({ t }: Props) {
     <>
       <section className="pt-10 pb-16 md:pt-16 md:pb-24">
         <motion.div
-          className="max-w-[1280px] mx-auto px-6 md:px-8 mb-16 md:mb-20 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end"
+          className={`${WRAP} mb-16 md:mb-20 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end`}
           variants={fadeUp}
           initial={reduce ? false : 'hidden'}
           animate="show"
@@ -35,46 +36,42 @@ export default function Brands({ t }: Props) {
           </p>
         </motion.div>
 
-        <motion.ul
-          className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-px bg-hair list-none m-0 p-0"
-          variants={staggerContainer(0, 0.04)}
-          initial={reduce ? false : 'hidden'}
-          whileInView="show"
-          viewport={inViewOnce}
-        >
-          {BRANDS.map((b) => (
-            <motion.li
-              key={b.slug}
-              variants={fadeUp}
-              className="bg-bg p-6 md:p-8 flex flex-col items-center justify-center gap-3 min-h-[160px]"
-            >
-              {b.logo ? (
-                <img
-                  src={`/brand-logos/${b.logo}.svg`}
-                  alt={b.name}
-                  className="h-10 md:h-12 w-auto opacity-80"
-                  loading="lazy"
-                />
-              ) : (
-                <span className="font-sans font-semibold text-2xl text-ink-mid">{b.name}</span>
-              )}
-              <span className="font-sans text-sm font-medium text-ink-soft mt-2">{b.country}</span>
-              {SHOP_MAKE_PATH[b.slug] && (
-                <a
-                  href={shopUrl(SHOP_MAKE_PATH[b.slug]!, lang)}
-                  hrefLang={lang}
-                  className="inline-flex min-h-11 items-center text-center font-sans text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
-                >
-                  {/* Colour on the span: the global `a { color: inherit }` outranks utilities. */}
-                  <span className="text-brand underline decoration-1 underline-offset-4 hover:text-brand-hi">
-                    {t.shop.makeLink(b.name)} — {SHOP_HOST}
-                  </span>
-                </a>
-              )}
-            </motion.li>
-          ))}
-        </motion.ul>
-        <div className="max-w-[1280px] mx-auto px-6 md:px-8 mt-10 md:mt-12">
+        <div className={WRAP}>
+          <motion.ul
+            className="kv-ruled grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 list-none m-0 p-0"
+            variants={staggerContainer(0, 0.04)}
+            initial={reduce ? false : 'hidden'}
+            whileInView="show"
+            viewport={inViewOnce}
+          >
+            {BRANDS.map((b) => (
+              <motion.li
+                key={b.slug}
+                variants={fadeUp}
+                className="p-3 min-[400px]:p-6 flex flex-col items-center justify-start gap-3 min-h-[160px] text-center"
+              >
+                <span className="font-sans font-semibold text-2xl text-ink">{b.name}</span>
+                <span className="font-sans text-sm font-medium text-ink-mid">
+                  {t.brands.countries[b.slug]}
+                </span>
+                {SHOP_MAKE_PATH[b.slug] && (
+                  <a
+                    href={shopUrl(SHOP_MAKE_PATH[b.slug]!, lang)}
+                    hrefLang={lang}
+                    className="inline-flex min-h-11 items-center text-center font-sans text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
+                  >
+                    {/* Colour on the span: links take their colour from an inner span here. */}
+                    <span className="text-brand underline decoration-1 underline-offset-4 hover:text-brand-hi">
+                      {t.shop.makeLink(b.name)}{' '}
+                      <span className="min-[400px]:whitespace-nowrap">— {SHOP_HOST}</span>
+                    </span>
+                  </a>
+                )}
+              </motion.li>
+            ))}
+          </motion.ul>
+        </div>
+        <div className={`${WRAP} mt-10 md:mt-12`}>
           <ShopLink lang={lang} path="/kirici-ucu" text={t.shop.brandsCta} />
         </div>
       </section>

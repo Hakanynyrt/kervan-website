@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { Button } from '@astryxdesign/core/Button';
 import {
   carrierTons,
   isTipType,
@@ -14,9 +15,9 @@ import type { Dict } from '../lib/dict';
 import { fmtMm, fmtNum } from '../lib/format';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
 import type { SpecialTool } from '../lib/grooved';
-import { addToCart } from '../lib/cart';
+import { addToCart, cartQty } from '../lib/cart';
 import { fmtDate, fmtGrossTry, fmtTry, fmtUsd, leadsGross, unitText } from '../lib/price';
-import { CART_PATH, LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
+import { LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
 import type { PartItemLink } from '../lib/part-links';
 import { distinctLabels } from '../lib/part-caption';
@@ -25,6 +26,8 @@ import { sizeOrdinals, tipOptions, tipVariants } from '../lib/tip-options';
 import { replaceSearch } from '../lib/url-state';
 import type { Lang } from '../types';
 import {
+  AddedNote,
+  type Added,
   Breadcrumb,
   chipClass,
   Chips,
@@ -37,7 +40,7 @@ import {
   StickyQuote,
   Terms,
 } from './Bits';
-import { FOCUS, whatsappHref } from './Layout';
+import { FOCUS, OUTLINE_BUTTON, WHATSAPP_BUTTON, whatsappHref } from './Layout';
 import { ORDER_EMAIL, SITE } from '../lib/site';
 import { cardSet, photoImg, photoSet } from '../lib/photo-url';
 
@@ -129,7 +132,7 @@ export default function TipProduct({
   const name = variant ? `${quoteName} (${sizeLabel(variant)})` : quoteName;
   const [type, setType] = useState<TipType>(types[0]);
   const [qty, setQty] = useState(1);
-  const [added, setAdded] = useState(false);
+  const [added, setAdded] = useState<Added>(null);
   // `?tip=` from a filtered search result preselects that type (after hydration; the
   // prerender always shows the first type).
   useEffect(() => {
@@ -142,6 +145,14 @@ export default function TipProduct({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const opt = opts.get(type) ?? opts.get(types[0])!;
+  // The picture a type's tile shows: its own, else the labelled sample's.
+  const tilePic = (x: TipType): string | null =>
+    opts.get(x)?.sku?.image ??
+    sample?.family.skus.find((y) => y.tipType === x && y.image)?.image ??
+    null;
+  // Tiles only with a picture to show. Then phones pick on the tiles and wide screens also keep
+  // the chips beside the price; without pictures the chips are the one picker at every width.
+  const hasTilePics = types.some((x) => tilePic(x) !== null);
   const sku = opt.sku;
   const f = opt.family;
   const diameter = f ? f.attrs.diameterMm : (extra?.diameterMm ?? null);
@@ -170,9 +181,10 @@ export default function TipProduct({
     opt.cents !== null && leadsGross(lang, fx) ? fmtGrossTry(opt.cents, fx, lang) : null;
   const tl = opt.cents === null ? null : (gross ?? fmtTry(opt.cents, fx, lang));
   const add = () => {
+    const lineId = `${path}${variant ? `|${vi + 1}` : ''}|${opt.tipType}`;
     addToCart(
       {
-        id: `${path}${variant ? `|${vi + 1}` : ''}|${opt.tipType}`,
+        id: lineId,
         name,
         tipType: opt.tipType,
         code: opt.code,
@@ -181,8 +193,20 @@ export default function TipProduct({
       },
       qty,
     );
-    setAdded(true);
+    setAdded({ n: cartQty(lineId) });
   };
+  const picker = (
+    <Chips
+      legend={tf.type}
+      name="type"
+      options={types.map((x) => ({ value: x, label: t.tip[x] }))}
+      value={opt.tipType}
+      onChange={(v) => {
+        setType(v);
+        setAdded(null);
+      }}
+    />
+  );
   const mail = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(name)}&body=${encodeURIComponent(text)}`;
 
   return (
@@ -227,7 +251,7 @@ export default function TipProduct({
                   aria-pressed={i === vi}
                   onClick={() => {
                     setVi(i);
-                    setAdded(false);
+                    setAdded(null);
                     replaceSearch((sp) => sp.set('uc', String(i + 1)));
                   }}
                   className={chipClass(i === vi)}
@@ -239,51 +263,50 @@ export default function TipProduct({
           </ul>
         </div>
       )}
-      <ul
-        aria-label={tf.type}
-        className="m-0 mt-6 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-4 lg:max-w-3xl"
-      >
-        {types.map((x) => {
-          const o = opts.get(x)!;
-          const key =
-            o.sku?.image ??
-            sample?.family.skus.find((y) => y.tipType === x && y.image)?.image ??
-            null;
-          const on = x === opt.tipType;
-          return (
-            <li key={x}>
-              <button
-                type="button"
-                aria-pressed={on}
-                onClick={() => {
-                  setType(x);
-                  setAdded(false);
-                }}
-                className={`block w-full overflow-hidden rounded-md border bg-bg text-left ${on ? 'border-brand ring-1 ring-brand' : 'border-hair hover:border-hair-strong'} ${FOCUS}`}
-              >
-                {key && (
-                  <img
-                    src={tipImg(key)}
-                    width={800}
-                    height={533}
-                    alt={
-                      o.sku?.image || !sample
-                        ? tf.renderAlt(quoteName, t.tip[x])
-                        : tf.sampleAlt(quoteName, sample.name)
-                    }
-                    loading="lazy"
-                    decoding="async"
-                    className="block aspect-[3/2] h-auto w-full bg-stage object-cover"
-                  />
-                )}
-                <span className="block px-3 py-2 font-sans text-sm font-semibold text-ink">
-                  {t.tip[x]}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+      {hasTilePics && (
+        <ul
+          aria-label={tf.type}
+          className="m-0 mt-6 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-4 lg:max-w-3xl"
+        >
+          {types.map((x) => {
+            const o = opts.get(x)!;
+            const key = tilePic(x);
+            const on = x === opt.tipType;
+            return (
+              <li key={x}>
+                <button
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => {
+                    setType(x);
+                    setAdded(null);
+                  }}
+                  className={`block w-full overflow-hidden rounded-md border bg-bg text-left ${on ? 'border-brand ring-1 ring-brand' : 'border-ink-soft hover:bg-bg-warm'} ${FOCUS}`}
+                >
+                  {key && (
+                    <img
+                      src={tipImg(key)}
+                      width={800}
+                      height={533}
+                      alt={
+                        o.sku?.image || !sample
+                          ? tf.renderAlt(quoteName, t.tip[x])
+                          : tf.sampleAlt(quoteName, sample.name)
+                      }
+                      loading="lazy"
+                      decoding="async"
+                      className="block aspect-[3/2] h-auto w-full bg-stage object-cover"
+                    />
+                  )}
+                  <span className="block px-3 py-2 font-sans text-sm font-semibold text-ink">
+                    {t.tip[x]}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
       <div className="mt-6 grid gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
         <div className="flex min-w-0 flex-col gap-6">
@@ -393,18 +416,9 @@ export default function TipProduct({
         </div>
 
         <aside className="flex flex-col gap-6 lg:col-start-2">
-          <Chips
-            legend={tf.type}
-            name="type"
-            options={types.map((x) => ({ value: x, label: t.tip[x] }))}
-            value={opt.tipType}
-            onChange={(v) => {
-              setType(v);
-              setAdded(false);
-            }}
-          />
+          {hasTilePics ? <div className="hidden lg:block">{picker}</div> : picker}
           {special.length > 0 && (
-            <p className="m-0 -mt-3 font-sans text-sm">
+            <p className={`m-0 font-sans text-sm ${hasTilePics ? 'lg:-mt-3' : '-mt-3'}`}>
               <a
                 href={`#${specialId}`}
                 className={`font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
@@ -457,13 +471,13 @@ export default function TipProduct({
                 )}
                 {/* Desktop: the order button right under the price, above the fold (2026-10-27). */}
                 {order && (
-                  <a
+                  <Button
                     href={whatsappHref(text)}
+                    label={tf.orderWa}
+                    size="lg"
                     {...ORDER_CONVERSION}
-                    className={`mt-4 hidden rounded-sm bg-whatsapp px-5 py-3 text-center font-sans font-medium text-white lg:block ${FOCUS}`}
-                  >
-                    {tf.orderWa}
-                  </a>
+                    className={`mt-4 hidden w-full px-5 lg:flex ${WHATSAPP_BUTTON}`}
+                  />
                 )}
               </>
             )}
@@ -489,58 +503,53 @@ export default function TipProduct({
           {tons && <p className="m-0 -mt-3 font-sans text-xs text-ink-soft">{tf.carrierNote}</p>}
 
           <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
-            <p className="m-0 font-sans text-lg font-bold text-ink">
+            <h2 className="m-0 font-sans text-lg font-bold text-ink">
               {order ? tf.orderTitle : tf.quoteTitle}
-            </p>
+            </h2>
             <p className="m-0 mt-2 text-ink-mid">{order ? tf.orderBody : tf.quoteBody}</p>
             <div className="mt-4">
-              <label htmlFor="qty" className="mb-2 block font-semibold text-ink">
+              {/* The stepper's field has this name itself (a hidden label). */}
+              <p aria-hidden="true" className="m-0 mb-2 font-semibold text-ink">
                 {tf.qty}
-              </label>
+              </p>
               <QtyStepper
                 id="qty"
                 value={qty}
                 onChange={(n) => {
                   setQty(n);
-                  setAdded(false);
+                  setAdded(null);
                 }}
                 label={tf.qty}
                 t={t}
               />
             </div>
             <div className="mt-4 flex flex-col gap-3">
-              <button
-                type="button"
-                onClick={add}
-                className={`cursor-pointer rounded-sm bg-brand px-5 py-3 text-center font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
-              >
-                {t.price.add}
-              </button>
-              {added && (
-                <p className="m-0 text-center text-ink" role="status">
-                  {t.price.added} ·{' '}
-                  <a
-                    href={localePath(CART_PATH, lang)}
-                    className={`font-medium text-brand-hi underline ${FOCUS}`}
-                  >
-                    {t.price.goCart}
-                  </a>
-                </p>
-              )}
-              <a
+              <div>
+                <Button
+                  label={t.price.add}
+                  variant="primary"
+                  size="lg"
+                  width="100%"
+                  onClick={add}
+                  className="px-5"
+                />
+                <AddedNote added={added} lang={lang} t={t} />
+              </div>
+              <Button
                 href={whatsappHref(text)}
+                label={order ? tf.orderWa : tf.whatsapp}
+                size="lg"
                 {...ORDER_CONVERSION}
-                className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${order ? 'lg:hidden' : ''} ${FOCUS}`}
-              >
-                {order ? tf.orderWa : tf.whatsapp}
-              </a>
-              <a
+                className={`px-5 ${order ? 'lg:hidden' : ''} ${WHATSAPP_BUTTON}`}
+              />
+              <Button
                 href={mail}
+                label={order ? tf.orderMail : tf.email}
+                variant="secondary"
+                size="lg"
                 {...ORDER_CONVERSION}
-                className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
-              >
-                {order ? tf.orderMail : tf.email}
-              </a>
+                className={`px-5 ${OUTLINE_BUTTON}`}
+              />
             </div>
           </div>
           <Terms t={t} compact={lang} />
@@ -573,12 +582,12 @@ export default function TipProduct({
                   <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
                     {items.map((x, i) => (
                       <li key={x.anchor}>
-                        <a
+                        <Button
                           href={localePath(partItemPath(x.part, x.anchor), lang)}
-                          className={`inline-flex min-h-11 items-center rounded-sm border border-ink-soft bg-bg px-4 font-medium text-ink hover:bg-bg-warm ${FOCUS}`}
-                        >
-                          {labels[i]} →
-                        </a>
+                          label={`${labels[i]}\u00a0→`}
+                          variant="secondary"
+                          className={`px-4 ${OUTLINE_BUTTON}`}
+                        />
                       </li>
                     ))}
                   </ul>
@@ -630,10 +639,15 @@ export default function TipProduct({
           {tf.stockTitle}
         </h2>
         <p className="m-0 mt-1 font-sans text-sm text-ink-mid">{tf.stockNote}</p>
-        <ul className="m-0 mt-4 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-3">
+        {/* Phones: one large and two half-width; all three side by side from `sm`. */}
+        <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 sm:gap-4">
           {STOCK_TIP_PHOTOS.map((base, i) => (
-            <li key={base}>
-              <Photo base={base} alt={tf.stockAlt(i + 1)} />
+            <li key={base} className={i === 0 ? 'col-span-2 sm:col-span-1' : undefined}>
+              <Photo
+                base={base}
+                alt={tf.stockAlt(i + 1)}
+                sizes={`(min-width: 1024px) 400px, (min-width: 640px) 33vw, ${i === 0 ? '100vw' : '50vw'}`}
+              />
             </li>
           ))}
         </ul>

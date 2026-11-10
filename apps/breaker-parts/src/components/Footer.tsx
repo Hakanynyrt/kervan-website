@@ -21,7 +21,10 @@ const linkBox =
 const legal =
   'inline-flex items-center justify-center min-h-11 min-w-11 px-2.5 text-ink-mid hover:text-ink hover:underline underline-offset-2';
 
-/** Footer (kervanheat.com's layout): the mark, the sister sites, e-mail and phone, the social
+const pageLink =
+  'inline-flex items-center min-h-11 min-w-11 px-2.5 font-sans text-[15px] text-ink hover:underline underline-offset-2';
+
+/** Footer (kervanheat.com's layout): the mark, the sister sites, e-mail and phone, the site's pages, the social
  *  profiles, and a legal row with KVKK and a quiet link to the owner's technical page. */
 export default function Footer({ t }: Props) {
   const to = useLocalePath();
@@ -36,6 +39,13 @@ export default function Footer({ t }: Props) {
     { href: shopUrl('/', lang), small: t.shop.contactLabel, text: 'kiriciparca.com', lang },
     { href: `mailto:${ORG_PUBLIC_EMAIL}`, small: t.contact.emailLabel, text: ORG_PUBLIC_EMAIL },
     { href: `tel:${ORG_PHONE_E164}`, small: t.contact.phoneLabel, text: ORG_PHONE },
+  ];
+  const pages = [
+    { path: '/urunler', label: t.footer.pages.products },
+    { path: '/uyumluluk', label: t.footer.pages.brands },
+    { path: '/uretim-kalite', label: t.footer.pages.production },
+    { path: '/hakkimizda', label: t.footer.pages.about },
+    { path: '/iletisim', label: t.footer.pages.contact },
   ];
   return (
     <footer className="bg-bg-soft border-t border-hair">
@@ -69,7 +79,15 @@ export default function Footer({ t }: Props) {
           </nav>
         </div>
 
-        <div className="mt-4 flex flex-wrap -ml-3 gap-1">
+        <nav aria-label={t.footer.pages.label} className="mt-4 flex flex-wrap -ml-2.5 gap-x-2">
+          {pages.map((p) => (
+            <Link key={p.path} to={to(p.path)} className={pageLink}>
+              {p.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="mt-2 flex flex-wrap -ml-3 gap-1">
           {ORG_SOCIALS.map(({ key, url }) => (
             <a
               key={key}

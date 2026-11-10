@@ -1,5 +1,7 @@
 import { StrictMode } from 'react';
-import { renderToString } from 'react-dom/server';
+import type { ReactNode } from 'react';
+import { renderToString as reactRenderToString } from 'react-dom/server';
+import { stripImagePreloads } from '@kervan/seo/head';
 import {
   buildHeadTags,
   buildSitemapIndexXml,
@@ -16,6 +18,9 @@ import type { PageProps } from './lib/page-props';
 import { findRender } from './lib/part-links';
 import { breakerPath, buildPages, groupBreakers, PARTS_PATH } from './lib/routes';
 import type { Lang } from './types';
+
+/* React 19 adds image preload lines to the markup; each site sets its own in the head. */
+const renderToString = (node: ReactNode) => stripImagePreloads(reactRenderToString(node));
 
 /* Build-time only (scripts/prerender.mjs bundles this to dist-ssr/ and deletes it). */
 

@@ -1,9 +1,25 @@
-import { useId, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent, type Ref } from 'react';
 import { motion } from 'framer-motion';
+import { Button } from '@astryxdesign/core/Button';
+import { FileInput } from '@astryxdesign/core/FileInput';
+import { TextArea } from '@astryxdesign/core/TextArea';
+import { TextInput } from '@astryxdesign/core/TextInput';
 import type { DictBlock } from '../types';
 import { fadeUp, inViewOnce, useReducedMotion } from '../lib/motion';
 import { ORG_EMAIL, ORG_PHONE, ORG_PHONE_E164 } from '@kervan/seo';
-import { BTN_LINE, BTN_PRIMARY, H2, SECTION, SEC_HEAD, SEC_LEAD, WRAP } from '../lib/ui';
+import {
+  ACTION,
+  ACTION_LINE,
+  FIELD_CONTROL,
+  FIELD_LABEL,
+  FIELD_SCOPE,
+  H2,
+  LINE,
+  SECTION,
+  SEC_HEAD,
+  SEC_LEAD,
+  WRAP,
+} from '../lib/ui';
 import { trackConversion } from '../lib/ads';
 import { MAPS_URL, WHATSAPP_URL } from '../lib/contact';
 import {
@@ -13,9 +29,13 @@ import {
   extensionOf,
   isAllowedExtension,
 } from '../../functions/_lib/rfq-attachments';
+import { isValidEmail } from '../../functions/_lib/rfq-email';
 
 /** Same list as the server (functions/_lib/rfq-attachments.ts), for the file picker. */
 const ACCEPT = ALLOWED_EXTENSIONS.map((e) => `.${e}`).join(',');
+
+/** The server keeps this many characters of the message (functions/api/rfq.ts). */
+const MAX_MESSAGE = 3000;
 
 type FileProblem = 'tooMany' | 'tooBig' | 'badType';
 
@@ -32,6 +52,22 @@ const formatSize = (bytes: number): string =>
     ? `${Math.max(1, Math.round(bytes / 1024))} KB`
     : `${(bytes / 1048576).toFixed(1)} MB`;
 
+const EMPTY = { name: '', company: '', email: '', phone: '', message: '' };
+type FieldName = keyof typeof EMPTY;
+const FIELD_NAMES = Object.keys(EMPTY) as FieldName[];
+
+type FieldErrors = Partial<Record<FieldName, 'required' | 'email'>>;
+
+/** The same rules as functions/api/rfq.ts, so a refusal there never reaches the visitor. */
+function checkFields(v: typeof EMPTY): FieldErrors {
+  const errors: FieldErrors = {};
+  const email = v.email.trim();
+  if (!v.name.trim()) errors.name = 'required';
+  if (!email) errors.email = 'required';
+  else if (!isValidEmail(email)) errors.email = 'email';
+  return errors;
+}
+
 interface Props {
   t: DictBlock;
 }
@@ -43,34 +79,76 @@ export default function Contact({ t }: Props) {
   const reduce = useReducedMotion();
   const [state, setState] = useState<State>('idle');
   const formRef = useRef<HTMLFormElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [values, setValues] = useState(EMPTY);
+  const [errors, setErrors] = useState<FieldErrors>({});
   const [files, setFiles] = useState<File[]>([]);
   const [fileProblem, setFileProblem] = useState<FileProblem | null>(null);
-  const ids = useId();
-  const fileHintId = `${ids}-file-hint`;
-  const fileErrId = `${ids}-file-err`;
+  const fileErrId = `${useId()}-file-err`;
 
-  function onFiles(e: ChangeEvent<HTMLInputElement>) {
-    const list = Array.from(e.currentTarget.files ?? []);
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+    // Our own checks and messages take over from the browser's once the script runs.
+    form.noValidate = true;
+    // FileInput filters by `accept` itself and would drop a wrong file without showing it; the
+    // attribute alone keeps the picker's filter while checkFiles reports the problem.
+    fileRef.current?.setAttribute('accept', ACCEPT);
+    // Whatever a visitor typed before the script ran.
+    setValues((v) => {
+      const typed = { ...v };
+      for (const k of FIELD_NAMES) {
+        const el = form.elements.namedItem(k);
+        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)
+          typed[k] = el.value;
+      }
+      return FIELD_NAMES.some((k) => typed[k] !== v[k]) ? typed : v;
+    });
+  }, []);
+
+  function setField(k: FieldName, value: string) {
+    setValues((v) => ({ ...v, [k]: value }));
+    setErrors((e) => (e[k] ? { ...e, [k]: undefined } : e));
+  }
+
+  // The focusable control of FileInput is its hidden trigger button, the first one in its box.
+  const focusFilePicker = () => fileRef.current?.parentElement?.querySelector('button')?.focus();
+
+  function chooseFiles(list: File[]) {
     setFiles(list);
     setFileProblem(checkFiles(list));
     if (state === 'rejected') setState('idle');
   }
 
+  function removeFile(index: number) {
+    chooseFiles(files.filter((_, i) => i !== index));
+    focusFilePicker();
+  }
+
+  function onFormInput() {
+    if (state === 'success' || state === 'error') setState('idle');
+  }
+
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (state === 'sending' || !formRef.current) return;
+    const invalid = checkFields(values);
+    if (invalid.name || invalid.email) {
+      setErrors(invalid);
+      (invalid.name ? nameRef : emailRef).current?.focus();
+      return;
+    }
     const problem = checkFiles(files);
     if (problem) {
       setFileProblem(problem);
-      fileRef.current?.focus();
+      focusFilePicker();
       return;
     }
     setState('sending');
     try {
       const fd = new FormData(formRef.current);
-      // An empty picker still posts an empty part; leave it out.
-      fd.delete('attachment');
       for (const f of files) fd.append('attachment', f, f.name);
       const r = await fetch('/api/rfq', { method: 'POST', body: fd });
       const j = (await r.json().catch(() => ({}))) as {
@@ -81,7 +159,7 @@ export default function Contact({ t }: Props) {
       };
       if (r.status === 422 && j.error === 'attachment') {
         setState('rejected');
-        fileRef.current?.focus();
+        focusFilePicker();
         return;
       }
       // `delivered`: the request reached the owner by email. An older
@@ -90,6 +168,8 @@ export default function Contact({ t }: Props) {
       setState(ok ? 'success' : 'error');
       if (ok) {
         formRef.current.reset();
+        setValues(EMPTY);
+        setErrors({});
         setFiles([]);
         setFileProblem(null);
         trackConversion('form');
@@ -100,12 +180,30 @@ export default function Contact({ t }: Props) {
   }
 
   const req = t.marks.required;
-  const label = 'font-sans text-sm font-semibold text-ink';
-  const field =
-    'w-full min-h-12 px-3.5 py-3 rounded-[2px] border border-field-line bg-field font-sans text-base text-ink placeholder:text-ink-soft hover:border-ink transition-colors';
+  const sending = state === 'sending';
+  const fileFailed = Boolean(fileProblem) || state === 'rejected';
+  const errorText = (k: FieldName) => {
+    const code = errors[k];
+    return code ? t.contact.invalid[code] : undefined;
+  };
   const infoLink =
     'inline-flex items-center min-h-11 font-sans font-semibold text-brand hover:underline underline-offset-2';
-  const direct = `${BTN_LINE} w-full justify-start min-h-[60px] px-4 min-[721px]:px-[22px] text-base min-[721px]:text-[17px]`;
+  const direct = `${ACTION_LINE} w-full justify-between h-[60px] px-4 min-[721px]:px-[22px] text-base min-[721px]:text-[17px]`;
+  const directIcon = (path: string) => (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      aria-hidden="true"
+      className="flex-none"
+    >
+      <path d={path} />
+    </svg>
+  );
+  const number = <small className="text-[15px] font-normal text-ink-mid">{ORG_PHONE}</small>;
 
   return (
     <section id="contact" aria-labelledby="contact-title" className={`${SECTION} bg-bg`}>
@@ -117,7 +215,7 @@ export default function Contact({ t }: Props) {
           <p className={SEC_LEAD}>{t.contact.sub}</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 min-[721px]:grid-cols-[4fr_7fr] min-[721px]:gap-14 items-start">
+        <div className="grid grid-cols-1 gap-8 min-[721px]:grid-cols-[4fr_7fr] min-[721px]:gap-14 min-[1081px]:grid-cols-[5fr_7fr] items-start">
           {/* Direct lines and the address */}
           <motion.div
             variants={fadeUp}
@@ -126,38 +224,36 @@ export default function Contact({ t }: Props) {
             viewport={inViewOnce}
           >
             <div className="grid gap-3">
-              <a href={`tel:${ORG_PHONE_E164}`} className={direct}>
-                <svg
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  aria-hidden="true"
-                  className="flex-none"
-                >
-                  <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z" />
-                </svg>
-                {t.contact.phoneLabel}
-                <small className="ml-auto text-[15px] font-normal text-ink-mid">{ORG_PHONE}</small>
-              </a>
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className={direct}>
-                <svg
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  aria-hidden="true"
-                  className="flex-none"
-                >
-                  <path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z" />
-                </svg>
-                {t.contact.whatsappLabel}
-                <small className="ml-auto text-[15px] font-normal text-ink-mid">{ORG_PHONE}</small>
-              </a>
+              <Button
+                href={`tel:${ORG_PHONE_E164}`}
+                label={`${t.contact.phoneLabel} ${ORG_PHONE}`}
+                variant="ghost"
+                size="lg"
+                endContent={number}
+                className={direct}
+              >
+                <span className="inline-flex items-center gap-2.5">
+                  {directIcon(
+                    'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z',
+                  )}
+                  {t.contact.phoneLabel}
+                </span>
+              </Button>
+              <Button
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                label={`${t.contact.whatsappLabel} ${ORG_PHONE}`}
+                variant="ghost"
+                size="lg"
+                endContent={number}
+                className={direct}
+              >
+                <span className="inline-flex items-center gap-2.5">
+                  {directIcon('M4 20l1.3-4A8 8 0 1 1 8 18.7z')}
+                  {t.contact.whatsappLabel}
+                </span>
+              </Button>
             </div>
             <dl className="m-0 mt-7 border-t border-hair font-sans">
               <div className="py-2.5 border-b border-hair">
@@ -188,8 +284,9 @@ export default function Contact({ t }: Props) {
           <motion.form
             ref={formRef}
             onSubmit={onSubmit}
+            onInput={onFormInput}
             aria-labelledby="contact-title"
-            className="bg-bg-soft border border-hair rounded-[4px] px-4 py-5 min-[721px]:p-8 grid grid-cols-1 gap-x-4 gap-y-4 min-[721px]:grid-cols-2"
+            className={`bg-bg-soft border border-hair rounded-[4px] px-4 py-5 min-[721px]:p-8 grid grid-cols-1 gap-x-4 gap-y-4 min-[721px]:grid-cols-2 ${FIELD_SCOPE}`}
             variants={fadeUp}
             initial={reduce ? false : 'hidden'}
             whileInView="show"
@@ -209,117 +306,150 @@ export default function Contact({ t }: Props) {
               />
             </div>
 
-            <Field label={t.contact.fields.name} name="name" required mark={req} maxLength={100} />
-            <Field label={t.contact.fields.company} name="company" mark={req} maxLength={150} />
-            <Field
+            <p className="min-[721px]:col-span-2 m-0 font-sans text-[13px] leading-5 text-ink-mid">
+              {t.contact.requiredNote}
+            </p>
+
+            <ContactField
+              label={t.contact.fields.name}
+              name="name"
+              required
+              mark={req}
+              maxLength={100}
+              value={values.name}
+              onChange={(v) => setField('name', v)}
+              error={errorText('name')}
+              inputRef={nameRef}
+            />
+            <ContactField
+              label={t.contact.fields.company}
+              name="company"
+              mark={req}
+              maxLength={150}
+              value={values.company}
+              onChange={(v) => setField('company', v)}
+            />
+            <ContactField
               label={t.contact.fields.email}
               name="email"
               type="email"
               required
               mark={req}
               maxLength={200}
+              value={values.email}
+              onChange={(v) => setField('email', v)}
+              error={errorText('email')}
+              inputRef={emailRef}
             />
-            <Field
+            <ContactField
               label={t.contact.fields.phone}
               name="phone"
               type="tel"
               mark={req}
               maxLength={30}
+              value={values.phone}
+              onChange={(v) => setField('phone', v)}
             />
 
-            <label className="min-[721px]:col-span-2 grid gap-1.5">
-              <span className={label}>{t.contact.fields.message}</span>
-              <textarea
-                name="message"
-                rows={4}
-                maxLength={3000}
-                className={`${field} min-h-[120px] resize-y`}
-              />
-            </label>
+            {/* No maxLength prop: it would add a character counter this form does not show. */}
+            <TextArea
+              label={t.contact.fields.message}
+              htmlName="message"
+              rows={4}
+              value={values.message}
+              onChange={(v) => setField('message', v.slice(0, MAX_MESSAGE))}
+              containerClassName={`min-[721px]:col-span-2 ${FIELD_LABEL}`}
+              // The control's padding already sets the text in line with the inputs.
+              controlClassName={`min-h-[120px] [--_textarea-inline-padding:0px] [&_textarea]:py-3 ${FIELD_CONTROL}`}
+            />
 
-            {/* Drawing / photo: optional, checked here and again on the server. The input is visually
-                hidden; its label is the button (the focus ring follows the input). */}
-            <div className="min-[721px]:col-span-2 flex flex-wrap items-center gap-x-3.5 gap-y-2">
-              <input
+            {/* Drawing / photo: optional, checked here and again on the server. */}
+            <div className="min-[721px]:col-span-2 grid gap-2">
+              <FileInput
                 ref={fileRef}
-                id={`${ids}-files`}
-                type="file"
-                name="attachment"
-                multiple
-                accept={ACCEPT}
-                onChange={onFiles}
-                aria-describedby={
-                  fileProblem || state === 'rejected' ? `${fileHintId} ${fileErrId}` : fileHintId
-                }
-                aria-invalid={fileProblem || state === 'rejected' ? true : undefined}
-                className="peer sr-only"
+                label={t.contact.files.label}
+                description={t.contact.files.hint}
+                placeholder={t.contact.files.placeholder}
+                isMultiple
+                value={files}
+                onChange={(v) => chooseFiles(Array.isArray(v) ? v : v ? [v] : [])}
+                status={fileFailed ? { type: 'error' } : undefined}
+                aria-describedby={fileFailed ? fileErrId : undefined}
+                containerClassName={FIELD_LABEL}
+                // Each file has its own 44 px remove button below; the 20 px clear-all "x" goes.
+                controlClassName={`h-12 [&_.astryx-input-clear-button]:hidden ${FIELD_CONTROL}`}
               />
-              <label
-                htmlFor={`${ids}-files`}
-                className={`${BTN_LINE} min-h-11 text-[15px] bg-field cursor-pointer peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-brand peer-focus-visible:outline-offset-2`}
-              >
-                {t.contact.files.label}
-              </label>
-              <span id={fileHintId} className="font-sans text-[13px] text-ink-mid">
-                {t.contact.files.hint}
-              </span>
-              {files.length > 0 && !fileProblem && (
-                <ul className="basis-full list-none m-0 p-0 flex flex-col gap-1 font-sans text-sm text-ink">
+              {files.length > 0 && (
+                <ul className="list-none m-0 p-0 flex flex-col gap-1 font-sans text-sm text-ink">
                   {files.map((f, i) => (
-                    <li key={i} className="break-all">
-                      {f.name} <span className="text-ink-mid">· {formatSize(f.size)}</span>
+                    <li key={i} className="flex items-center justify-between gap-3">
+                      <span
+                        className={`break-all ${
+                          fileProblem === 'badType' && !isAllowedExtension(extensionOf(f.name))
+                            ? 'text-err'
+                            : ''
+                        }`}
+                      >
+                        {f.name} <span className="text-ink-mid">· {formatSize(f.size)}</span>
+                      </span>
+                      <Button
+                        label={`${t.contact.files.remove}: ${f.name}`}
+                        variant="ghost"
+                        onClick={() => removeFile(i)}
+                        className={`flex-none px-3 text-sm font-semibold ${LINE}`}
+                      >
+                        {t.contact.files.remove}
+                      </Button>
                     </li>
                   ))}
                 </ul>
               )}
-              {(fileProblem || state === 'rejected') && (
-                <p
-                  id={fileErrId}
-                  role="alert"
-                  className="basis-full m-0 font-sans text-sm text-err"
-                >
+              {fileFailed && (
+                <p id={fileErrId} role="alert" className="m-0 font-sans text-sm text-err">
                   {fileProblem ? t.contact.files[fileProblem] : t.contact.files.rejected}
                 </p>
               )}
             </div>
 
-            <div className="min-[721px]:col-span-2 mt-1 flex flex-wrap items-center justify-between gap-5">
-              <p className="m-0 max-w-[440px] font-sans text-[13px] leading-5 text-ink-mid">
-                {t.contact.requiredNote} {t.contact.kvkk.before}
-                {/* A 44 px tall hit area that does not change the line box. */}
-                <a
-                  href="/kvkk"
-                  className="inline-block -my-3 py-3 min-w-11 font-semibold text-brand underline underline-offset-2"
-                >
-                  {t.contact.kvkk.link}
-                </a>
-                {t.contact.kvkk.after}
-              </p>
-              <button
-                type="submit"
-                disabled={state === 'sending'}
-                className={`${BTN_PRIMARY} w-full min-[721px]:w-auto min-[721px]:min-w-[180px]`}
-              >
-                {state === 'sending' ? t.contact.sending : t.contact.submit}
-              </button>
+            <div className="min-[721px]:col-span-2 mt-1">
+              <div className="flex flex-wrap items-center justify-between gap-5">
+                <p className="m-0 max-w-[440px] font-sans text-[13px] leading-5 text-ink-mid">
+                  {t.contact.kvkk.before}
+                  {/* A 44 px tall hit area that does not change the line box. */}
+                  <a
+                    href="/kvkk"
+                    className="inline-block -my-3 py-3 min-w-11 font-semibold text-brand underline underline-offset-2"
+                  >
+                    {t.contact.kvkk.link}
+                  </a>
+                  {t.contact.kvkk.after}
+                </p>
+                {/* Not disabled while sending: it keeps its colours and keyboard focus; onSubmit
+                    blocks a second send. */}
+                <Button
+                  type="submit"
+                  label={sending ? t.contact.sending : t.contact.submit}
+                  variant="primary"
+                  size="lg"
+                  aria-disabled={sending || undefined}
+                  aria-busy={sending || undefined}
+                  className={`${ACTION} w-full min-[721px]:w-auto min-[721px]:min-w-[180px]`}
+                />
+              </div>
+              {/* Always in the page, empty until there is a result, so screen readers announce it. */}
+              <div aria-live="polite">
+                {state === 'success' && (
+                  <p className="m-0 mt-4 font-sans text-base font-semibold text-ok">
+                    {t.contact.success}
+                  </p>
+                )}
+                {state === 'error' && (
+                  <p className="m-0 mt-4 px-3.5 py-3 border border-err rounded-[4px] font-sans text-base font-semibold text-ink">
+                    {t.contact.error}
+                  </p>
+                )}
+              </div>
             </div>
-
-            {state === 'success' && (
-              <p
-                role="status"
-                className="min-[721px]:col-span-2 m-0 font-sans text-base font-semibold text-ok"
-              >
-                {t.contact.success}
-              </p>
-            )}
-            {state === 'error' && (
-              <p
-                role="alert"
-                className="min-[721px]:col-span-2 m-0 font-sans text-base font-semibold text-ink"
-              >
-                {t.contact.error}
-              </p>
-            )}
           </motion.form>
         </div>
       </div>
@@ -335,33 +465,58 @@ const AUTOCOMPLETE: Record<string, string | undefined> = {
   phone: 'tel',
 };
 
-interface FieldProps {
+interface ContactFieldProps {
   label: string;
-  name: string;
-  type?: string;
+  name: FieldName;
+  type?: 'text' | 'email' | 'tel';
   required?: boolean;
   /** The required mark ("*", from the dict). */
   mark: string;
   maxLength?: number;
+  value: string;
+  onChange: (value: string) => void;
+  /** Translated message under the field; the field turns red while it is set. */
+  error?: string;
+  inputRef?: Ref<HTMLInputElement>;
 }
 
-function Field({ label, name, type = 'text', required, mark, maxLength }: FieldProps) {
+function ContactField({
+  label,
+  name,
+  type = 'text',
+  required,
+  mark,
+  maxLength,
+  value,
+  onChange,
+  error,
+  inputRef,
+}: ContactFieldProps) {
+  const errorId = useId();
   return (
-    <label className="grid gap-1.5">
-      <span className="font-sans text-sm font-semibold text-ink">
-        {label}
-        {/* Visual mark; `required` + `aria-required` tell assistive technology. */}
-        {required && <span aria-hidden="true"> {mark}</span>}
-      </span>
-      <input
+    <div className="grid gap-1.5 content-start">
+      <TextInput
+        ref={inputRef}
+        // The form's "*" mark, not Astryx's isRequired word; `required` tells assistive technology.
+        label={required ? `${label} ${mark}` : label}
         type={type}
-        name={name}
+        size="lg"
+        htmlName={name}
         autoComplete={AUTOCOMPLETE[name]}
-        required={required}
-        aria-required={required || undefined}
-        maxLength={maxLength}
-        className="w-full min-h-12 px-3.5 py-3 rounded-[2px] border border-field-line bg-field font-sans text-base text-ink placeholder:text-ink-soft hover:border-ink transition-colors"
+        value={value}
+        onChange={onChange}
+        status={error ? { type: 'error' } : undefined}
+        aria-describedby={error ? errorId : undefined}
+        containerClassName={FIELD_LABEL}
+        controlClassName={`h-12 ${FIELD_CONTROL}`}
+        // No TextInput prop for these two; they reach the <input> as they are.
+        {...{ required, maxLength }}
       />
-    </label>
+      {error && (
+        <p id={errorId} className="m-0 font-sans text-sm text-err">
+          {error}
+        </p>
+      )}
+    </div>
   );
 }

@@ -35,6 +35,7 @@ import {
   validateAttachments,
   type IncomingFile,
 } from '../_lib/rfq-attachments';
+import { isValidEmail } from '../_lib/rfq-email';
 
 interface Env {
   BREVO_API_KEY?: string;
@@ -148,8 +149,7 @@ async function handleRfq(
     return Response.json({ ok: true, emailSent: false, delivered: false, emailStatus: honeypot });
   }
 
-  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
-  if (!name || !email || !emailValid)
+  if (!name || !email || !isValidEmail(email))
     return Response.json({ ok: false, error: 'validation' }, { status: 422 });
 
   // Attachments (kervanheat.com form: drawings / photos, field "attachment"). Count and total

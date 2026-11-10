@@ -239,3 +239,12 @@ export function buildSitemapIndexXml(sitemaps: { loc: string; lastmod?: string }
     '',
   ].join('\n');
 }
+
+/**
+ * React 19's `renderToString` puts `<link rel="preload" as="image">` lines for the page's first
+ * images in front of the markup. Each site chooses its own preloads in the head, so drop these:
+ * inside `#root` these would compete with the tuned hero picture. Only for the app markup.
+ */
+export function stripImagePreloads(appHtml: string): string {
+  return appHtml.replace(/<link rel="preload" as="image"[^>]*\/>/g, '');
+}

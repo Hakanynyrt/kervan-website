@@ -1,6 +1,9 @@
 import { motion } from 'framer-motion';
 import { fadeUp, inViewOnce, useReducedMotion } from '@kervan/motion';
+import { KERVAN_HEAT_URL } from '@kervan/seo';
 import type { DictBlock } from '../types';
+import { useLocale } from '../lib/locale-path';
+import { WRAP } from '../lib/ui';
 
 interface Props {
   t: DictBlock;
@@ -8,11 +11,13 @@ interface Props {
 
 export default function Production({ t }: Props) {
   const reduce = useReducedMotion();
+  const lang = useLocale();
+  const pp = t.productionPage;
   return (
     <>
       <section className="pt-10 pb-16 md:pt-16 md:pb-24">
         <motion.div
-          className="max-w-[1280px] mx-auto px-6 md:px-8 mb-16 md:mb-20 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end"
+          className={`${WRAP} mb-16 md:mb-20 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-x-8 items-end`}
           variants={fadeUp}
           initial={reduce ? false : 'hidden'}
           animate="show"
@@ -28,61 +33,59 @@ export default function Production({ t }: Props) {
         </motion.div>
 
         <motion.div
-          className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-px bg-hair"
+          className={WRAP}
           variants={fadeUp}
           initial={reduce ? false : 'hidden'}
           whileInView="show"
           viewport={inViewOnce}
         >
-          <article className="bg-bg p-8 md:p-12 flex flex-col gap-5">
-            <h2 className="font-sans font-bold text-2xl md:text-[32px] text-ink leading-tight tracking-[-0.02em]">
-              {t.productionPage.metallurgyHeading}
-            </h2>
-            <p className="font-sans text-base md:text-lg text-ink-mid leading-relaxed">
-              {t.productionPage.metallurgyBody}
-            </p>
-          </article>
+          <div className="kv-ruled grid grid-cols-1 md:grid-cols-2">
+            <article className="p-8 md:p-12 flex flex-col gap-5">
+              <h2 className="font-sans font-bold text-2xl md:text-[32px] text-ink leading-tight tracking-[-0.02em]">
+                {t.productionPage.metallurgyHeading}
+              </h2>
+              <p className="font-sans text-base md:text-lg text-ink-mid leading-relaxed">
+                {t.productionPage.metallurgyBody}
+              </p>
+            </article>
 
-          <article className="bg-bg p-8 md:p-12 flex flex-col gap-5">
-            <h2 className="font-sans font-bold text-2xl md:text-[32px] text-ink leading-tight tracking-[-0.02em]">
-              {t.productionPage.heatHeading}
-            </h2>
-            <p className="font-sans text-base md:text-lg text-ink-mid leading-relaxed">
-              {t.productionPage.heatBody}
-            </p>
-            <a
-              href="https://kervanheat.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-sans text-[15px] font-semibold text-brand hover:text-brand-hi transition-colors mt-2 inline-block"
-            >
-              {t.productionPage.heatLink}
-            </a>
-          </article>
+            <article className="p-8 md:p-12 flex flex-col gap-5">
+              <h2 className="font-sans font-bold text-2xl md:text-[32px] text-ink leading-tight tracking-[-0.02em]">
+                {t.productionPage.heatHeading}
+              </h2>
+              <p className="font-sans text-base md:text-lg text-ink-mid leading-relaxed">
+                {t.productionPage.heatBody}
+              </p>
+              {/* The sister site: same tab, no rel. */}
+              <a
+                href={lang === 'en' ? `${KERVAN_HEAT_URL}/en/` : `${KERVAN_HEAT_URL}/`}
+                hrefLang={lang}
+                className="group inline-flex items-center self-start min-h-11 mt-2 font-sans text-[15px] font-semibold"
+              >
+                <span className="text-brand group-hover:text-brand-hi transition-colors">
+                  {pp.heatLink}
+                </span>
+              </a>
+            </article>
+          </div>
         </motion.div>
 
         <motion.div
-          className="max-w-[1280px] mx-auto px-6 md:px-8 mt-16 md:mt-20 flex flex-col gap-5"
+          className={`${WRAP} mt-16 md:mt-20`}
           variants={fadeUp}
           initial={reduce ? false : 'hidden'}
           whileInView="show"
           viewport={inViewOnce}
         >
-          <span className="font-sans text-sm font-medium text-ink-soft font-medium">
-            {t.productionPage.materialsHeading}
-          </span>
-          <div className="flex flex-wrap gap-x-8 gap-y-2 font-sans font-semibold text-2xl md:text-3xl text-ink">
-            {t.productionPage.materials.map((m, i) => (
-              <span key={i} className="inline-flex items-center gap-3">
-                {i > 0 && (
-                  <span aria-hidden="true" className="text-ink-soft">
-                    ·
-                  </span>
-                )}
-                {m}
-              </span>
-            ))}
-          </div>
+          <dl className="kv-mat !mt-0">
+            <div>
+              <dt>{pp.materialsHeading}</dt>
+              <dd>
+                <b className="font-semibold">{pp.materials.slice(0, 2).join(' · ')}</b>
+                {pp.materials.slice(2).map((m) => ` · ${m}`)}
+              </dd>
+            </div>
+          </dl>
         </motion.div>
       </section>
     </>

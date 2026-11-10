@@ -1,8 +1,9 @@
+import { Button } from '@astryxdesign/core/Button';
 import { Link } from 'react-router-dom';
 import type { DictBlock, Lang } from '../types';
 import { useLocalePath } from '../lib/locale-path';
 import { shopUrl } from '../lib/shop';
-import { BTN, WRAP } from '../lib/ui';
+import { WRAP } from '../lib/ui';
 import { ArrowOut, ArrowRight } from './icons';
 
 interface Props {
@@ -60,16 +61,30 @@ export default function Products({ t, lang }: Props) {
             </Link>
           ))}
         </div>
+        <div className="mt-5">
+          <Button
+            as={Link}
+            href={to('/urunler')}
+            label={p.allCta}
+            size="lg"
+            className="kv-btn kv-btn-line max-[720px]:w-full"
+          />
+        </div>
         <div className="kv-shopbar">
           <div>
             <b>{t.shop.listCta}</b>
             <span>kiriciparca.com</span>
           </div>
           {/* The sister shop: same tab, no rel. */}
-          <a href={shopUrl('/', lang)} hrefLang={lang} className={BTN}>
-            {t.shop.nav}
-            <ArrowOut />
-          </a>
+          <Button
+            href={shopUrl('/', lang)}
+            label={t.shop.nav}
+            variant="primary"
+            size="lg"
+            endContent={<ArrowOut />}
+            className="kv-btn kv-btn-main"
+            {...{ hrefLang: lang }}
+          />
         </div>
         <p className="m-0 mt-3.5 text-[15px] text-ink-mid">{t.productDetail.sizesNote}</p>
       </div>

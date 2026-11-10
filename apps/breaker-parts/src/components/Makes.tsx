@@ -1,6 +1,7 @@
+import { Button } from '@astryxdesign/core/Button';
 import type { DictBlock, Lang } from '../types';
 import { shopUrl } from '../lib/shop';
-import { BTN_LINE, H2, SECTION, SEC_HEAD, SEC_LEAD, WRAP } from '../lib/ui';
+import { H2, SECTION, SEC_HEAD, SEC_LEAD, WRAP } from '../lib/ui';
 
 interface Props {
   t: DictBlock;
@@ -26,9 +27,13 @@ export default function Makes({ t, lang }: Props) {
         </ul>
         <div className="mt-5">
           {/* The sister shop: same tab, no rel. */}
-          <a href={shopUrl('/', lang)} hrefLang={lang} className={`${BTN_LINE} max-[720px]:w-full`}>
-            {t.shop.brandsCta}
-          </a>
+          <Button
+            href={shopUrl('/', lang)}
+            label={t.shop.brandsCta}
+            size="lg"
+            className="kv-btn kv-btn-line max-[720px]:w-full"
+            {...{ hrefLang: lang }}
+          />
         </div>
       </div>
     </section>

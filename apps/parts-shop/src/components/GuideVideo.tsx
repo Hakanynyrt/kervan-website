@@ -115,11 +115,14 @@ export function PartVideos({ part, lang, t }: { part: string; lang: Lang; t: Dic
   const keys = (PART_VIDEOS[part] ?? []).filter((k) => GUIDE_VIDEOS[k]);
   if (!keys.length) return null;
   return (
-    <section aria-labelledby="part-videos" className="mt-12 max-w-3xl border-t border-hair pt-8">
+    <section
+      aria-labelledby="part-videos"
+      className={`mt-12 border-t border-hair pt-8 ${keys.length > 1 ? '' : 'max-w-3xl'}`}
+    >
       <h2 id="part-videos" className="m-0 text-xl font-bold text-ink">
         {t.guideMedia.videoTitle}
       </h2>
-      <div className="mt-4 grid gap-10">
+      <div className={`mt-4 grid ${keys.length > 1 ? 'gap-8 lg:grid-cols-2' : 'gap-10'}`}>
         {keys.map((k) => (
           <GuideVideo key={k} k={k} lang={lang} t={t} compact />
         ))}
