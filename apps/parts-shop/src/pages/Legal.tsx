@@ -1,6 +1,5 @@
-import { Container } from '@kervan/ui';
 import { Breadcrumb, PageTitle } from '../components/Bits';
-import { FOCUS } from '../components/Layout';
+import { FOCUS, WRAP } from '../components/Layout';
 import type { Dict } from '../lib/dict';
 import {
   isSellerSection,
@@ -28,7 +27,7 @@ const splitFacts = (x: string): string[] => x.split(' · ');
 export default function Legal({ doc, lang, t }: { doc: LegalKey; lang: Lang; t: Dict }) {
   const d = LEGAL[lang][doc];
   return (
-    <Container className="py-10">
+    <div className={`${WRAP} py-10`}>
       <Breadcrumb trail={[]} current={t.legal.nav} lang={lang} t={t} />
       <PageTitle>{d.title}</PageTitle>
       <p className="m-0 mt-3 font-sans text-sm text-ink-soft">
@@ -109,6 +108,6 @@ export default function Legal({ doc, lang, t }: { doc: LegalKey; lang: Lang; t: 
           ))}
         </ul>
       </nav>
-    </Container>
+    </div>
   );
 }

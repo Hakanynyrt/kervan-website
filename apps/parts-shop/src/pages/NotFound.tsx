@@ -1,7 +1,6 @@
 import { Button } from '@astryxdesign/core/Button';
-import { Container } from '@kervan/ui';
 import { PageTitle } from '../components/Bits';
-import { OUTLINE_BUTTON, WHATSAPP_BUTTON, whatsappHref } from '../components/Layout';
+import { OUTLINE_BUTTON, WHATSAPP_BUTTON, whatsappHref, WRAP } from '../components/Layout';
 import { SearchForm } from '../components/ModelSearch';
 import { PartGroups } from '../components/PartGroups';
 import type { Dict } from '../lib/dict';
@@ -12,7 +11,7 @@ import type { Lang } from '../types';
 /** 404: the status, a search, the product groups and a way to ask (all static). */
 export default function NotFound({ lang, t }: { lang: Lang; t: Dict }) {
   return (
-    <Container className="py-16 md:py-20">
+    <div className={`${WRAP} py-16 md:py-20`}>
       <PageTitle>{t.notFound.title}</PageTitle>
       <p className="m-0 mt-3 max-w-xl font-sans text-ink-mid">{t.notFound.body}</p>
       <div className="mt-8 max-w-xl">
@@ -44,6 +43,6 @@ export default function NotFound({ lang, t }: { lang: Lang; t: Dict }) {
       <div className="mt-4">
         <PartGroups lang={lang} t={t} compact />
       </div>
-    </Container>
+    </div>
   );
 }

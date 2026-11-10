@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Button } from '@astryxdesign/core/Button';
-import { Container, SocialIcon } from '@kervan/ui';
+import { SocialIcon } from '@kervan/ui';
 import { ORG_PHONE, ORG_PHONE_E164, ORG_SOCIALS, ORG_TRADING_NAME } from '@kervan/seo';
 import type { Dict } from '../lib/dict';
 import type { FinderMake } from '../lib/finder';
@@ -27,8 +27,8 @@ import { SHOP_EMAIL } from '../lib/site';
 export const FOCUS =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2';
 
-/** The column of the header, the footer and the home (design E): 1328 px of content on a 1376 px
- *  band, 24 px gutters (16 px on phones). Other pages keep `Container` for their content. */
+/** The column of every shop page, header and footer (design E; owner, 2026-11-10: one left edge):
+ *  1328 px of content on a 1376 px band, 24 px gutters (16 px on phones). */
 export const WRAP = 'mx-auto w-full max-w-[1376px] px-4 md:px-6';
 
 /** The same ring drawn inside the element, for links inside a clipping box (overflow, scroller). */
@@ -305,7 +305,7 @@ export default function Layout({
         hidden={home}
         className="border-b border-hair bg-bg-soft font-sans text-[13px] text-ink-mid"
       >
-        <Container className="flex items-start gap-x-2.5 py-2">
+        <div className={`${WRAP} flex items-start gap-x-2.5 py-2`}>
           <svg
             aria-hidden="true"
             viewBox="0 0 16 16"
@@ -328,11 +328,11 @@ export default function Layout({
               {t.banner.how}
             </a>
           </p>
-        </Container>
+        </div>
       </div>
       {demo && (
         <div className="bg-brand font-sans text-sm font-medium text-on-brand">
-          <Container className="py-2">{t.banner.demo}</Container>
+          <div className={`${WRAP} py-2`}>{t.banner.demo}</div>
         </div>
       )}
       <main id="icerik" tabIndex={-1}>

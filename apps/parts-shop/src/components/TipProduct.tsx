@@ -9,7 +9,6 @@ import {
   type PublicSku,
   type TipType,
 } from '@kervan/tips';
-import { Container } from '@kervan/ui';
 import { ORDER_CONVERSION } from '../lib/ads';
 import type { Dict } from '../lib/dict';
 import { fmtMm, fmtNum } from '../lib/format';
@@ -40,7 +39,7 @@ import {
   StickyQuote,
   Terms,
 } from './Bits';
-import { FOCUS, OUTLINE_BUTTON, WHATSAPP_BUTTON, whatsappHref } from './Layout';
+import { FOCUS, OUTLINE_BUTTON, WHATSAPP_BUTTON, whatsappHref, WRAP } from './Layout';
 import { ORDER_EMAIL, SITE } from '../lib/site';
 import { cardSet, photoImg, photoSet } from '../lib/photo-url';
 
@@ -210,7 +209,7 @@ export default function TipProduct({
   const mail = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(name)}&body=${encodeURIComponent(text)}`;
 
   return (
-    <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">
+    <div className={`${WRAP} pb-28 pt-8 lg:pb-12 lg:pt-12`}>
       <Breadcrumb
         trail={[[t.parts.title, PARTS_PATH], [t.parts.tips.name, LIST_PATH], ...trail]}
         current={crumb}
@@ -317,7 +316,7 @@ export default function TipProduct({
                   key={base}
                   src={photoImg(base, 'lg')}
                   srcSet={photoSet(base, ['sm', 480], ['lg', 960])}
-                  sizes="(min-width: 1024px) 420px, (min-width: 640px) 50vw, 100vw"
+                  sizes="(min-width: 1024px) 460px, (min-width: 640px) 50vw, 100vw"
                   width={960}
                   height={720}
                   alt={tf.realPhotoAlt(quoteName, i + 1)}
@@ -646,7 +645,7 @@ export default function TipProduct({
               <Photo
                 base={base}
                 alt={tf.stockAlt(i + 1)}
-                sizes={`(min-width: 1024px) 400px, (min-width: 640px) 33vw, ${i === 0 ? '100vw' : '50vw'}`}
+                sizes={`(min-width: 1024px) 436px, (min-width: 640px) 33vw, ${i === 0 ? '100vw' : '50vw'}`}
               />
             </li>
           ))}
@@ -656,6 +655,6 @@ export default function TipProduct({
 
       <MissingModel t={t} />
       <StickyQuote text={text} label={order ? tf.orderWa : undefined} t={t} />
-    </Container>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
+import { WRAP } from '../components/Layout';
 import type { FxRate } from '@kervan/tips';
-import { Container } from '@kervan/ui';
 import { Breadcrumb, Guide, PageTitle } from '../components/Bits';
 import { PartVideos } from '../components/GuideVideo';
 import { BrandChips, ModelTable } from '../components/ModelSearch';
@@ -21,7 +21,7 @@ export default function TipList({
   t: Dict;
 }) {
   return (
-    <Container className="pb-12 pt-8 lg:pt-12">
+    <div className={`${WRAP} pb-12 pt-8 lg:pt-12`}>
       <Breadcrumb
         trail={[[t.parts.title, PARTS_PATH]]}
         current={t.parts.tips.name}
@@ -50,6 +50,6 @@ export default function TipList({
         title={t.list.guide.title}
         body={t.list.guide.body}
       />
-    </Container>
+    </div>
   );
 }
