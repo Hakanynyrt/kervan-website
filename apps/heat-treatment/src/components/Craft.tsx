@@ -8,8 +8,8 @@ interface Props {
 }
 
 /**
- * Tesisimiz (`#tesisimiz`): the heading and one paragraph side by side, then four real photos
- * of our furnaces with captions (two columns on phones).
+ * Tesisimiz (`#tesisimiz`): the heading and one paragraph side by side, then real photos of our
+ * furnaces, charges and checks with captions (two columns on phones).
  */
 export default function Craft({ t }: Props) {
   // Static (prerendered) mode and reduced motion render the final state.

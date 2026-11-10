@@ -25,11 +25,15 @@ export const PRODUCTS: Product[] = [
       name: 'Keski',
       tagline: 'Kırıcının ucu — taşla, betonla, asfaltla ilk temas.',
       body: 'Sahanın en sarf parçası. Sivri uç, yassı keski, asfalt keskisi ve özel ölçülerle stoklarımızda. Aşınmaya karşı 42CrMoA üzeri ısıl işlem disipliniyle dayanım.',
+      metaDescription:
+        "Hidrolik kırıcı keskisi: sivri uç, yassı keski, asfalt keskisi ve özel ölçüler. 42CrMoA alaşım, kendi tesisimizde ısıl işlem. Kocaeli'de üretim.",
     },
     en: {
       name: 'Chisel',
       tagline: 'The point — first contact with stone, concrete, asphalt.',
       body: 'The most consumed part on the field. Moil point, flat chisel, asphalt cutter and custom sizes in stock. Built for wear with 42CrMoA-grade alloy and our heat-treatment discipline.',
+      metaDescription:
+        'Hydraulic breaker chisels: moil point, flat chisel, asphalt cutter and custom sizes. 42CrMoA alloy, heat-treated in our own plant in Kocaeli, Türkiye.',
     },
     subTypes: [
       {
@@ -54,13 +58,19 @@ export const PRODUCTS: Product[] = [
     image: '/photos/pistonlar/pistons-stack-v2-w1280.webp',
     tr: {
       name: 'Piston',
+      seoName: 'Kırıcı Pistonu',
       tagline: 'Darbenin kaynağı. Yüksek frekansla çalışır, yılmaz durur.',
       body: 'Kırıcının kalbi. Hassas tolerans, sertleştirme + temperleme ile yüksek darbe dayanımı. Marka ve model bazlı farklı çap/boy varyasyonları stokludur.',
+      metaDescription:
+        'Hidrolik kırıcı pistonu: hassas tolerans, sertleştirme ve temperleme ile yüksek darbe dayanımı. Marka ve modele göre farklı çap ve boylar stokta.',
     },
     en: {
       name: 'Piston',
+      seoName: 'Breaker Piston',
       tagline: "The source of the strike. High frequency, doesn't flinch.",
       body: 'The heart of the hammer. Tight tolerance, hardened + tempered for high impact endurance. Multiple diameter / length variants per brand and model held in stock.',
+      metaDescription:
+        'Hydraulic breaker pistons: tight tolerance, hardened and tempered for high impact endurance. Diameter and length variants per brand and model in stock.',
     },
   },
   {
@@ -70,11 +80,15 @@ export const PRODUCTS: Product[] = [
       name: 'Burç',
       tagline: 'Sessiz kahraman. Piston ile keski arasında dengeyi kurar.',
       body: 'Üst ve alt burç olmak üzere iki konumlu. Sürtünmeye dayanıklı, ölçülü tolerans. Doğru burç olmazsa keski savrulur, piston yorulur — bu parça denge demek.',
+      metaDescription:
+        'Hidrolik kırıcı üst ve alt burçları: sürtünmeye dayanıklı, ölçülü tolerans. Doğru burç keskiyi dengede tutar, pistonu korur. Marka ve modele göre.',
     },
     en: {
       name: 'Bushing',
       tagline: 'The quiet hero. Holds balance between piston and chisel.',
       body: 'Upper and lower variants. Wear-resistant, measured tolerance. The wrong bushing throws the chisel and tires the piston — this part is balance.',
+      metaDescription:
+        'Upper and lower hydraulic breaker bushings: wear-resistant, measured tolerance. The right bushing keeps the chisel true and protects the piston.',
     },
   },
   {
@@ -87,11 +101,15 @@ export const PRODUCTS: Product[] = [
       name: 'Tie Rod (Gergi çubuğu)',
       tagline: 'Üst ve alt gövdeyi tek beden tutar.',
       body: "Kırıcının iskeletini sıkıştıran çubuk. Yüksek çekme dayanımı, doğru ön gerilme. Aşırı yüklenmiş veya yorulmuş tie rod'u zamanında değiştirmek, gövdeyi de korur.",
+      metaDescription:
+        'Hidrolik kırıcı tie rod (gergi çubuğu): üst ve alt gövdeyi bir arada tutar. Yüksek çekme dayanımı; zamanında değişim gövdeleri de korur.',
     },
     en: {
       name: 'Tie Rod',
       tagline: 'Holds the upper and lower body as one.',
       body: 'The skeleton-fastening rod. High tensile strength, correct preload. Replacing a fatigued tie rod in time also protects the housings.',
+      metaDescription:
+        'Hydraulic breaker tie rods hold the upper and lower body together. High tensile strength; replacing a fatigued rod in time protects the housings.',
     },
   },
   {
@@ -106,11 +124,15 @@ export const PRODUCTS: Product[] = [
       name: 'Tamir Kiti',
       tagline: 'Sızdırmazlık ve bağlantı parçaları. Ayrıntıların tümü.',
       body: 'O-ring, conta, sızdırmazlık seti, küçük bağlantı elemanları — periyodik bakımda tek pakette. Marka ve model bazlı eşleştirilmiş içerik.',
+      metaDescription:
+        'Hidrolik kırıcı tamir kiti: o-ring, conta, sızdırmazlık seti ve küçük bağlantı elemanları tek pakette. Marka ve modele göre eşleştirilmiş içerik.',
     },
     en: {
       name: 'Repair Kit',
       tagline: 'Seals and fasteners. All the small things.',
       body: 'O-rings, gaskets, seal sets, small connectors — every consumable in one pack for periodic maintenance. Matched per brand and model.',
+      metaDescription:
+        'Hydraulic breaker repair kits: o-rings, gaskets, seal sets and small fasteners in one pack for periodic maintenance, matched per brand and model.',
     },
   },
   {
@@ -123,11 +145,15 @@ export const PRODUCTS: Product[] = [
       name: 'Kama (Wedge)',
       tagline: 'Keskiyi kilitleyen sessiz parça.',
       body: 'Keskinin gövde içinde sabit kalmasını sağlayan dayanıklı kama. Aşınma simetrik olmazsa keski darbeyi tek tarafta yer — kamayı zamanında çevirin veya değiştirin.',
+      metaDescription:
+        'Hidrolik kırıcı kaması: keskiyi gövde içinde sabit tutan sertleştirilmiş parça. Aşınma tek tarafta artarsa kamayı çevirin veya değiştirin.',
     },
     en: {
       name: 'Wedge',
       tagline: 'The quiet part that locks the chisel.',
       body: 'The hardened wedge that keeps the chisel in place inside the body. Asymmetric wear means lopsided strikes — rotate or replace in time.',
+      metaDescription:
+        'Hydraulic breaker wedges (retainer keys): the hardened part that keeps the chisel in place. Rotate or replace in time to avoid lopsided strikes.',
     },
   },
   {
@@ -145,11 +171,15 @@ export const PRODUCTS: Product[] = [
       name: 'Alt Gövde (Lower Housing)',
       tagline: 'Burçların ve keskinin yaşadığı yer.',
       body: 'Kırıcının dış kabuğunun alt yarısı. Burç yataklarını barındırır, sahaya çıkar, taşa çarpar. Çok aşınmadan değişimi kırıcının ömrünü uzatır.',
+      metaDescription:
+        'Hidrolik kırıcı alt gövdesi: burç yataklarını taşıyan, sahada taşa çarpan alt kabuk. Çok aşınmadan değiştirmek kırıcının ömrünü uzatır.',
     },
     en: {
       name: 'Lower Housing',
       tagline: 'Where the bushings and chisel live.',
       body: "The lower half of the breaker shell. Holds the bushing seats, takes the field abuse, hits stone. Replacing it before deep wear extends the whole machine's life.",
+      metaDescription:
+        'Hydraulic breaker lower housings (front heads): the lower shell that carries the bushing seats. Replacing it before heavy wear extends breaker life.',
     },
   },
   {
@@ -162,11 +192,15 @@ export const PRODUCTS: Product[] = [
       name: 'Saplama (Stud)',
       tagline: 'Kırıcı gövdesini bir arada tutan saplamalar.',
       body: 'Kırıcının gövdesini bir arada tutan boy saplamalar ve yan saplamalar. Takımlar somunlarıyla, çizimde varsa pullarıyla birlikte gelir; marka ve modele göre eşleştirilir.',
+      metaDescription:
+        'Hidrolik kırıcı saplamaları: gövdeyi bir arada tutan boy ve yan saplamalar. Takımlar somunlarıyla gelir, marka ve modele göre eşleştirilir.',
     },
     en: {
       name: 'Stud',
       tagline: 'The studs that hold the breaker body together.',
       body: 'Tie rods and side bolts that hold the breaker body together. Sets come with their nuts, and with washers where the drawing calls for them; matched per brand and model.',
+      metaDescription:
+        'Hydraulic breaker studs: tie rods and side bolts that hold the body together. Sets come with their nuts and are matched per brand and model.',
     },
   },
   {
@@ -179,11 +213,15 @@ export const PRODUCTS: Product[] = [
       name: 'Yan Saplama (Side Stud)',
       tagline: 'Yan yüzeyleri kilitleyen sabitleyici.',
       body: 'Kırıcının yan paneli ve gövde arasındaki sıkı kavramayı sağlayan saplama. Eşit aşınma için periyodik kontrol ve sıralı değişim önerilir.',
+      metaDescription:
+        'Hidrolik kırıcı yan saplaması: yan paneli gövdeye sıkı bağlar. Eşit aşınma için periyodik kontrol ve sıralı değişim önerilir.',
     },
     en: {
       name: 'Side Stud',
       tagline: 'The fastener that locks the side panels.',
       body: 'The stud that holds the side panel against the breaker body. Periodic inspection and sequenced replacement keep wear even.',
+      metaDescription:
+        'Hydraulic breaker side studs hold the side panel tight against the body. Periodic inspection and sequenced replacement keep the wear even.',
     },
   },
 ];

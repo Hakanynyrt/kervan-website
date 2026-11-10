@@ -587,6 +587,11 @@ export interface ProductLocale {
   name: string;
   tagline: string;
   body: string;
+  /** Search-result description (meta description), 110–160 characters; the tagline is
+   *  too short for it. */
+  metaDescription: string;
+  /** Title for the page head when the plain name is the same in both languages. */
+  seoName?: string;
 }
 
 export interface ProductSubType {

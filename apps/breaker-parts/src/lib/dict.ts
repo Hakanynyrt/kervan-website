@@ -186,6 +186,71 @@ export const DICT: Dict = {
           img: '/videos/stok/casings-01-v3.jpg',
           video: '/videos/stok/casings-01-v3.mp4',
         },
+        {
+          name: 'İşlenmiş pistonlar',
+          desc: 'Taşlama sonrası',
+          img: '/photos/uretim/piston-01-1024.webp',
+        },
+        {
+          name: 'Paletteki parçalar',
+          desc: 'Sevkiyata hazır',
+          img: '/photos/uretim/piston-02-1024.webp',
+        },
+        {
+          name: 'Üretim partisi',
+          desc: 'İşlenmiş parçalar, tek parti',
+          img: '/photos/uretim/saplama-01-1024.webp',
+        },
+        {
+          name: 'Parti ayrımı',
+          desc: 'Ölçüye göre işaretlenmiş',
+          img: '/photos/uretim/saplama-02-1024.webp',
+        },
+        {
+          name: 'Gövde bloğu',
+          desc: 'İşlenmiş yuva ve delikler',
+          img: '/photos/uretim/alt-govde-foto-01-1024.webp',
+        },
+        {
+          name: 'Gövde işleme',
+          desc: 'Tezgâhtan çıkan blok',
+          img: '/photos/uretim/alt-govde-foto-02-1024.webp',
+        },
+        {
+          name: 'Gövde blokları',
+          desc: 'Paletlerde, sevkiyat öncesi',
+          img: '/photos/uretim/alt-govde-foto-03-1024.webp',
+        },
+        {
+          name: 'Keskiler',
+          desc: 'Hazır uçlar',
+          img: '/photos/uretim/uc-01-1024.webp',
+        },
+        {
+          name: 'Yassı keskiler',
+          desc: 'Sehpada',
+          img: '/photos/uretim/uc-02-1024.webp',
+        },
+        {
+          name: 'Uç gövdeleri',
+          desc: 'Kama yuvaları açılmış',
+          img: '/photos/uretim/uc-03-1024.webp',
+        },
+        {
+          name: 'İşlenmiş yüzey',
+          desc: 'Delik ve yuva işçiliği',
+          img: '/photos/uretim/islenmis-parca-01-1024.webp',
+        },
+        {
+          name: 'Ölçüm',
+          desc: 'Kumpasla kontrol',
+          img: '/photos/uretim/kumpas-olcum-01-1024.webp',
+        },
+        {
+          name: 'Keçe takımı',
+          desc: 'Tam set, tek tek paketli',
+          img: '/photos/uretim/kece-takimi-01-1024.webp',
+        },
       ],
     },
     craft: {
@@ -915,6 +980,71 @@ export const DICT: Dict = {
           desc: 'Outer bodies, inspected',
           img: '/videos/stok/casings-01-v3.jpg',
           video: '/videos/stok/casings-01-v3.mp4',
+        },
+        {
+          name: 'Machined pistons',
+          desc: 'After grinding',
+          img: '/photos/uretim/piston-01-1024.webp',
+        },
+        {
+          name: 'Parts on the pallet',
+          desc: 'Ready to ship',
+          img: '/photos/uretim/piston-02-1024.webp',
+        },
+        {
+          name: 'Production batch',
+          desc: 'Machined parts, one batch',
+          img: '/photos/uretim/saplama-01-1024.webp',
+        },
+        {
+          name: 'Sorted batch',
+          desc: 'Marked by size',
+          img: '/photos/uretim/saplama-02-1024.webp',
+        },
+        {
+          name: 'Body block',
+          desc: 'Machined seats and bores',
+          img: '/photos/uretim/alt-govde-foto-01-1024.webp',
+        },
+        {
+          name: 'Body machining',
+          desc: 'Block off the machine',
+          img: '/photos/uretim/alt-govde-foto-02-1024.webp',
+        },
+        {
+          name: 'Body blocks',
+          desc: 'On pallets, before shipping',
+          img: '/photos/uretim/alt-govde-foto-03-1024.webp',
+        },
+        {
+          name: 'Chisels',
+          desc: 'Finished tools',
+          img: '/photos/uretim/uc-01-1024.webp',
+        },
+        {
+          name: 'Flat chisels',
+          desc: 'On the rack',
+          img: '/photos/uretim/uc-02-1024.webp',
+        },
+        {
+          name: 'Tool bodies',
+          desc: 'Key slots machined',
+          img: '/photos/uretim/uc-03-1024.webp',
+        },
+        {
+          name: 'Machined face',
+          desc: 'Bores and seats',
+          img: '/photos/uretim/islenmis-parca-01-1024.webp',
+        },
+        {
+          name: 'Measuring',
+          desc: 'Checked with calipers',
+          img: '/photos/uretim/kumpas-olcum-01-1024.webp',
+        },
+        {
+          name: 'Seal kit',
+          desc: 'Complete set, individually packed',
+          img: '/photos/uretim/kece-takimi-01-1024.webp',
         },
       ],
     },
