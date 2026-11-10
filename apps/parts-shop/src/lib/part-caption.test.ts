@@ -5,6 +5,7 @@ import type { PartRender } from './photos.ts';
 import {
   distinctLabels,
   otherSpelling,
+  otherSpellings,
   partAbout,
   renderFits,
   renderSeoName,
@@ -16,6 +17,13 @@ test('otherSpelling: joins a spaced model, spaces a joined one', () => {
   assert.equal(otherSpelling('Soosan SB50'), 'Soosan SB 50');
   assert.equal(otherSpelling('Krupp HM 560 / 580'), 'Krupp HM560 / 580');
   assert.equal(otherSpelling('Rammer'), null);
+});
+
+test('otherSpellings: the other spelling and the fully spaced one', () => {
+  assert.deepEqual(otherSpellings('Furukawa HB20G'), ['Furukawa HB 20G', 'Furukawa HB 20 G']);
+  assert.deepEqual(otherSpellings('MTB 210'), ['MTB210']);
+  assert.deepEqual(otherSpellings('Soosan SB50'), ['Soosan SB 50']);
+  assert.deepEqual(otherSpellings('Rammer'), []);
 });
 
 test('distinctLabels: adds the model only to labels that repeat', () => {

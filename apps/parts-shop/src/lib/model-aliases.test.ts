@@ -1,6 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { brandNumberSpelling, joinedSpelling, modelAliases } from './model-aliases.ts';
+import {
+  brandNumberSpelling,
+  joinedSpelling,
+  modelAliases,
+  separatedSpelling,
+} from './model-aliases.ts';
 
 test('joinedSpelling joins the letters to the first number only', () => {
   assert.equal(joinedSpelling('HB 20G'), 'HB20G');
@@ -11,17 +16,20 @@ test('joinedSpelling joins the letters to the first number only', () => {
 });
 
 test('modelAliases: the joined form, then merged spellings that differ by more than spacing', () => {
-  assert.deepEqual(modelAliases('HB 20G', ['HB 20G', 'HB20G', 'hb20g']), ['HB20G']);
+  assert.deepEqual(modelAliases('HB 20G', ['HB 20G', 'HB20G', 'hb20g']), ['HB20G', 'HB 20 G']);
   assert.deepEqual(modelAliases('F 22', ['F 22', 'F-22']), ['F22']);
   assert.deepEqual(modelAliases('MTB 215', ['MTB 215']), ['MTB215']);
-  assert.deepEqual(modelAliases('BRV32', ['BRV32']), []);
-  assert.deepEqual(modelAliases('HB 20G', ['HB 20G', 'HB 20 G']), ['HB20G']);
+  assert.deepEqual(modelAliases('BRV32', ['BRV32']), ['BRV 32']);
+  assert.deepEqual(modelAliases('HB 20G', ['HB 20G', 'HB 20 G']), ['HB20G', 'HB 20 G']);
   assert.deepEqual(modelAliases('HM 60', ['HM 60', 'HM 61']), ['HM60', 'HM 61']);
 });
 
 test('modelAliases: near-duplicate spacing variants collapse to the joined form', () => {
-  assert.deepEqual(modelAliases('S 26N', ['S 26N', 'S26 N']), ['S26N']);
-  assert.deepEqual(modelAliases('PMV 90/P 3SH', ['PMV 90/P 3 SH', 'PMV-90/P3SH']), ['PMV90/P 3SH']);
+  assert.deepEqual(modelAliases('S 26N', ['S 26N', 'S26 N']), ['S26N', 'S 26 N']);
+  assert.deepEqual(modelAliases('PMV 90/P 3SH', ['PMV 90/P 3 SH', 'PMV-90/P3SH']), [
+    'PMV90/P 3SH',
+    'PMV 90/P 3 SH',
+  ]);
 });
 
 test('modelAliases: spellings with stray punctuation are left out', () => {
@@ -36,5 +44,13 @@ test('modelAliases: series letters that repeat the make add the make-plus-number
   assert.equal(brandNumberSpelling('Furukawa', 'HB 20G'), null);
   assert.equal(brandNumberSpelling('Furukawa', 'F 22'), null);
   assert.deepEqual(modelAliases('MS 200', ['MS 200'], 'MSB'), ['MS200', '200']);
-  assert.deepEqual(modelAliases('HB 20G', ['HB 20G'], 'Furukawa'), ['HB20G']);
+  assert.deepEqual(modelAliases('HB 20G', ['HB 20G'], 'Furukawa'), ['HB20G', 'HB 20 G']);
+});
+
+test('separatedSpelling spaces every letter-number boundary', () => {
+  assert.equal(separatedSpelling('HB 20G'), 'HB 20 G');
+  assert.equal(separatedSpelling('HB20G'), 'HB 20 G');
+  assert.equal(separatedSpelling('KHB 20G II'), 'KHB 20 G II');
+  assert.equal(separatedSpelling('MTB 215'), null);
+  assert.equal(separatedSpelling('SB50'), 'SB 50');
 });
