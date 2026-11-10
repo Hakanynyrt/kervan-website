@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useReducedMotion } from '@kervan/motion';
+import { ORG_PHONE } from '@kervan/seo';
+import type { DictBlock } from '../types';
 import { WHATSAPP_URL } from '../lib/contact';
 
 /**
@@ -12,7 +14,7 @@ import { WHATSAPP_URL } from '../lib/contact';
  * the copyright / contact links at the bottom of the page.
  * `pointer-events: none` while hidden so it can't be tapped by mistake.
  */
-export default function WhatsAppFAB() {
+export default function WhatsAppFAB({ t }: { t: DictBlock }) {
   const reduced = useReducedMotion();
   const [visible, setVisible] = useState(false);
 
@@ -20,7 +22,7 @@ export default function WhatsAppFAB() {
     const computeVisible = () => {
       // Phones: from the top (the quickest way to reach us there). Wider screens: once the
       // visitor has scrolled half a screen, as before.
-      const phone = window.innerWidth < 768;
+      const phone = window.innerWidth < 721;
       const passedOpening = phone || window.scrollY >= window.innerHeight * 0.5;
       const footer = document.querySelector('footer');
       const footerInView = footer ? footer.getBoundingClientRect().top < window.innerHeight : false;
@@ -45,11 +47,11 @@ export default function WhatsAppFAB() {
       href={WHATSAPP_URL}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="WhatsApp +90 531 669 37 34"
+      aria-label={`${t.contact.whatsappLabel} ${ORG_PHONE}`}
       aria-hidden={!visible}
       tabIndex={visible ? 0 : -1}
       // Phones: 48 px in the 12 px corner, so it stays clear of the 24 px page gutter's buttons.
-      className="fixed bottom-3 right-3 md:bottom-8 md:right-8 z-40 inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-[4px] bg-whatsapp text-white shadow-md"
+      className="fixed bottom-3 right-3 min-[721px]:bottom-8 min-[721px]:right-8 z-40 inline-flex items-center justify-center w-12 h-12 min-[721px]:w-16 min-[721px]:h-16 rounded-[4px] bg-whatsapp text-white shadow-md"
       style={{
         pointerEvents: visible ? 'auto' : 'none',
       }}
@@ -62,7 +64,7 @@ export default function WhatsAppFAB() {
       <svg
         width="28"
         height="28"
-        className="w-6 h-6 md:w-7 md:h-7"
+        className="w-6 h-6 min-[721px]:w-7 min-[721px]:h-7"
         viewBox="0 0 24 24"
         fill="currentColor"
         aria-hidden="true"

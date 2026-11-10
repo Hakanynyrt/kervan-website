@@ -1,0 +1,66 @@
+/* Astryx (@astryxdesign/core) reads these names. They only point at Kervan's own tokens, so Astryx
+   components follow day / night through the same data-theme / data-sun rules as the rest of the
+   site. Unlayered on purpose: it must outrank Astryx's layers. No <Theme> provider: it removes
+   <html data-theme> on hydration. Each app sets --radius-inner / -element / -container. */
+:root {
+  --color-accent: var(--color-brand);
+  --color-accent-muted: var(--color-brand-soft);
+  --color-on-accent: var(--color-on-brand);
+  --color-background-body: var(--color-bg);
+  --color-background-surface: var(--color-bg);
+  --color-background-card: var(--color-bg);
+  --color-background-popover: var(--color-bg);
+  --color-background-muted: var(--color-bg-soft);
+  --color-neutral: var(--color-bg-warm);
+  --color-overlay-hover: color-mix(in srgb, var(--color-ink) 6%, transparent);
+  --color-overlay-pressed: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  --color-text-primary: var(--color-ink);
+  --color-text-secondary: var(--color-ink-mid);
+  --color-text-disabled: var(--color-ink-soft);
+  --color-text-accent: var(--color-brand);
+  --color-icon-primary: var(--color-ink);
+  --color-icon-secondary: var(--color-ink-mid);
+  --color-icon-disabled: var(--color-ink-soft);
+  --color-icon-accent: var(--color-brand);
+  --color-border: var(--color-hair);
+  --color-border-emphasized: var(--color-ink-soft);
+  --color-error: var(--color-err);
+  --color-error-muted: var(--color-bg-soft);
+  --color-on-error-muted: var(--color-err);
+  --color-text-error: var(--color-err);
+  --color-icon-error: var(--color-err);
+  --color-border-error: var(--color-err);
+  --color-success: var(--color-ok);
+  --color-success-muted: var(--color-bg-soft);
+  --color-on-success-muted: var(--color-ok);
+  --color-text-success: var(--color-ok);
+  --color-icon-success: var(--color-ok);
+  --color-border-success: var(--color-ok);
+  --focus-outline-width: 2px;
+  --focus-outline-style: solid;
+  --focus-outline-color: var(--color-brand);
+  --focus-outline-offset: 2px;
+  --font-family-body: var(--font-sans);
+  --font-family-heading: var(--font-sans);
+  --shadow-low: var(--shadow-sm);
+  --shadow-med: var(--shadow-md);
+  --shadow-high: var(--shadow-lg);
+  --ease-standard: var(--ease-editorial);
+  --ease-entrance: var(--ease-editorial);
+  --ease-move: var(--ease-editorial);
+  --ease-exit: var(--ease-editorial);
+  --duration-fast-min: 150ms;
+  --duration-fast: 150ms;
+  --duration-fast-max: 150ms;
+  --duration-medium-min: 250ms;
+  --duration-medium: 250ms;
+  --duration-medium-max: 250ms;
+  --duration-slow-min: 400ms;
+  --duration-slow: 400ms;
+  --duration-slow-max: 400ms;
+  --duration-exit: var(--duration-fast);
+  /* Tap targets: Astryx's 28-36 px defaults are below the 44 px rule. */
+  --size-element-sm: 36px;
+  --size-element-md: 44px;
+  --size-element-lg: 46px;
+}

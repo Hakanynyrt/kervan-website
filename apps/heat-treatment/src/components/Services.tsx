@@ -1,12 +1,15 @@
 import { motion } from 'framer-motion';
 import { fadeUp, inViewOnce, staggerContainer, useReducedMotion } from '@kervan/motion';
 import type { DictBlock, Lang } from '../types';
-import { H2, SECTION, SEC_HEAD, SEC_LEAD, WRAP } from '../lib/ui';
+import { H2, SECTION, SEC_HEAD, SEC_LEAD, SPLIT, WRAP } from '../lib/ui';
+import { ReportIcon } from './TechnicalCapacity';
 
 interface Props {
   t: DictBlock;
   lang: Lang;
 }
+
+const ROW = `grid grid-cols-1 gap-1.5 py-[18px] ${SPLIT} min-[721px]:py-[22px] border-b border-hair`;
 
 /**
  * The processes we offer (a list, owner Oct 2026), the hardness-report quality line, then two
@@ -36,34 +39,16 @@ export default function Services({ t, lang }: Props) {
           viewport={inViewOnce}
         >
           {s.processes.map((p) => (
-            <motion.li
-              key={p.name}
-              variants={fadeUp}
-              className="grid grid-cols-1 gap-1.5 py-[18px] min-[721px]:grid-cols-[340px_1fr] min-[721px]:gap-8 min-[721px]:py-[22px] border-b border-hair"
-            >
+            <motion.li key={p.name} variants={fadeUp} className={ROW}>
               <h3 className="m-0 font-sans text-[19px] min-[721px]:text-[21px] font-bold leading-[1.2] tracking-[-0.015em] text-ink">
                 {p.name}
               </h3>
               <p className="m-0 font-sans text-base text-ink-mid max-w-[640px]">{p.body}</p>
             </motion.li>
           ))}
-          <motion.li
-            variants={fadeUp}
-            className="grid grid-cols-1 gap-1.5 py-[18px] min-[721px]:grid-cols-[340px_1fr] min-[721px]:gap-8 min-[721px]:py-[22px] border-b border-hair"
-          >
+          <motion.li variants={fadeUp} className={ROW}>
             <h3 className="m-0 flex items-center gap-2.5 font-sans text-[17px] font-bold leading-[1.2] text-ink">
-              <svg
-                viewBox="0 0 24 24"
-                width="20"
-                height="20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-                className="flex-none"
-              >
-                <path d="M5 12.5l4.5 4.5L19 7.5" />
-              </svg>
+              <ReportIcon className="w-5 h-5 flex-none" />
               {s.quality.name}
             </h3>
             <p className="m-0 font-sans text-base text-ink-mid max-w-[640px]">{s.quality.body}</p>
@@ -96,17 +81,17 @@ export default function Services({ t, lang }: Props) {
                   typeof b === 'string' ? (
                     <li
                       key={i}
-                      className="py-2.5 border-b border-hair font-sans text-[15px] text-ink"
+                      className="flex items-center min-h-12 py-1.5 border-b border-hair font-sans text-[15px] text-ink"
                     >
                       {b}
                     </li>
                   ) : (
-                    <li key={i} className="border-b border-hair">
+                    <li key={i} className="flex items-center min-h-12 border-b border-hair">
                       {/* Sister site: same tab, no rel. */}
                       <a
                         href={b.href}
                         hrefLang={lang}
-                        className="flex items-center justify-between gap-3 min-h-12 font-sans text-[15px] font-semibold text-brand hover:underline underline-offset-2"
+                        className="flex items-center justify-between gap-3 w-full min-h-12 font-sans text-[15px] font-semibold text-brand hover:underline underline-offset-2"
                       >
                         <span className="font-normal text-ink">{b.label}</span>
                         <span>

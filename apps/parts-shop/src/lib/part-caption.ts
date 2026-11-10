@@ -2,6 +2,10 @@ import type { Dict } from './dict';
 import type { PartRender } from './photos';
 import type { PartKey } from './routes';
 
+/** The first letter in capitals, by the page's language (Turkish i). */
+export const upFirst = (s: string, lang: 'tr' | 'en'): string =>
+  s.charAt(0).toLocaleUpperCase(lang === 'tr' ? 'tr' : 'en') + s.slice(1);
+
 /** The breaker model a render fits, with its variant (e.g. old type) when it has one. */
 export const renderModel = (r: PartRender, t: Dict): string =>
   r.variant ? `${r.model} (${t.parts.renderVariant[r.variant]})` : r.model;

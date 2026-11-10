@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Button } from '@astryxdesign/core/Button';
 import type { DictBlock } from '../types';
 import { H2, SECTION, WRAP } from '../lib/ui';
 import { HERO_PHOTO } from '../lib/home-photos';
@@ -7,9 +8,6 @@ import { ArrowLeft, ArrowRight, PlayIcon } from './icons';
 interface Props {
   t: DictBlock;
 }
-
-const ICON_BTN =
-  'inline-flex items-center justify-center w-11 h-11 rounded-[2px] border border-hair-strong text-ink hover:border-ink transition-colors';
 
 /**
  * The workshop rail (`#atolye`): photos and video posters in a horizontal scroll-snap row
@@ -23,6 +21,8 @@ export default function Workshop({ t }: Props) {
   const items = a.items.filter((i) => i.img !== HERO_PHOTO);
   const [near, setNear] = useState(false);
   const [playing, setPlaying] = useState<number | null>(null);
+  // Which end of the rail is reached. First render: neither, the same on the server.
+  const [ends, setEnds] = useState({ start: false, end: false });
   const railRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,8 +44,26 @@ export default function Workshop({ t }: Props) {
     return () => obs.disconnect();
   }, []);
 
-  /** Scrolls the rail by one card. */
+  useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+    const update = () =>
+      setEnds({
+        start: el.scrollLeft <= 1,
+        end: el.scrollLeft >= el.scrollWidth - el.clientWidth - 1,
+      });
+    update();
+    el.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    return () => {
+      el.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
+  /** Scrolls the rail by one card; does nothing at an end (the button keeps its focus). */
   const step = (dir: 1 | -1) => {
+    if (dir < 0 ? ends.start : ends.end) return;
     const el = railRef.current;
     const card = el?.firstElementChild as HTMLElement | null;
     if (!el || !card) return;
@@ -65,12 +83,22 @@ export default function Workshop({ t }: Props) {
             </p>
           </div>
           <div className="max-[720px]:hidden flex gap-2">
-            <button type="button" className={ICON_BTN} aria-label={a.prev} onClick={() => step(-1)}>
-              <ArrowLeft size={20} />
-            </button>
-            <button type="button" className={ICON_BTN} aria-label={a.next} onClick={() => step(1)}>
-              <ArrowRight size={20} />
-            </button>
+            <Button
+              label={a.prev}
+              icon={<ArrowLeft size={20} />}
+              isIconOnly
+              className="kv-btn-box"
+              aria-disabled={ends.start || undefined}
+              onClick={() => step(-1)}
+            />
+            <Button
+              label={a.next}
+              icon={<ArrowRight size={20} />}
+              isIconOnly
+              className="kv-btn-box"
+              aria-disabled={ends.end || undefined}
+              onClick={() => step(1)}
+            />
           </div>
         </div>
         <div ref={railRef} className="kv-rail" role="region" aria-label={a.title} tabIndex={0}>

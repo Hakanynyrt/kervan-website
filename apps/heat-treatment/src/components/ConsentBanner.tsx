@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
+import { Button } from '@astryxdesign/core/Button';
 import type { DictBlock } from '../types';
+import { LINE, SOLID_HOVER } from '../lib/ui';
 import {
   CONSENT_OPEN_EVENT,
   isAutomatedClient,
@@ -89,20 +91,18 @@ export default function ConsentBanner({ t }: Props) {
         </a>
       </p>
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <button
-          type="button"
+        <Button
+          label={t.reject}
+          variant="ghost"
           onClick={() => choose('denied')}
-          className="min-h-11 rounded-[2px] border border-field-line text-ink px-4 text-sm font-semibold hover:border-ink transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
-        >
-          {t.reject}
-        </button>
-        <button
-          type="button"
+          className={`px-4 text-sm font-semibold ${LINE}`}
+        />
+        <Button
+          label={t.accept}
+          variant="primary"
           onClick={() => choose('granted')}
-          className="min-h-11 rounded-[2px] bg-brand text-on-brand px-4 text-sm font-semibold hover:bg-brand-hi transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2"
-        >
-          {t.accept}
-        </button>
+          className={`px-4 text-sm font-semibold ${SOLID_HOVER}`}
+        />
       </div>
     </motion.div>
   );

@@ -64,6 +64,8 @@ export interface DictBlock {
     cta: string;
     home: string;
     menu: string;
+    /** Skip link, the first stop for keyboard users. */
+    skip: string;
     language: string;
     /** Header theme select: auto (by the sun) / light / dark. */
     theme: { label: string; auto: string; light: string; dark: string };
@@ -165,11 +167,17 @@ export interface DictBlock {
     sending: string;
     success: string;
     error: string;
-    /** "* = required" line above the submit button. */
+    /** "* = required" line at the top of the form. */
     requiredNote: string;
+    /** Inline field errors (the page language, not the browser's). */
+    invalid: { required: string; email: string };
     /** Optional drawing / photo attachments (limits in lib/attachments.ts). */
     files: {
       label: string;
+      /** Text in the picker while nothing is chosen. */
+      placeholder: string;
+      /** Visible text of a file row's remove button. */
+      remove: string;
       hint: string;
       tooMany: string;
       tooBig: string;

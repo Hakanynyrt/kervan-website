@@ -1,4 +1,5 @@
 import { Fragment, useState, type ReactNode } from 'react';
+import { Button } from '@astryxdesign/core/Button';
 import type { FxRate } from '@kervan/tips';
 import { Container } from '@kervan/ui';
 import {
@@ -9,7 +10,7 @@ import {
   PageTitle,
   StickyQuote,
 } from '../components/Bits';
-import { FOCUS } from '../components/Layout';
+import { FOCUS, OUTLINE_BUTTON } from '../components/Layout';
 import { PartOrder, PartPriceLine, partOrderText, priceNote } from '../components/PartOrder';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
@@ -31,7 +32,8 @@ import { QuotePanel, RenderFigure, type Ctx } from './Part';
 
 type Model = Extract<PageModel, { kind: 'partItem' }>;
 
-const LINK = `inline-flex min-h-11 items-center rounded-sm border border-ink-soft bg-bg px-4 font-medium text-ink hover:bg-bg-warm ${FOCUS}`;
+/** Part links: long names wrap instead of being cut off. */
+const LINK = `h-auto min-h-11 whitespace-normal px-4 py-2 ${OUTLINE_BUTTON}`;
 
 /**
  * One modelled part on its own page (e.g. /yedek-parca/piston/montabert-brv-32-piston), so it
@@ -99,7 +101,7 @@ export default function PartItem({
         t={t}
       />
       <PageTitle>{renderSeoName(r, model.part, t)}</PageTitle>
-      <p className="m-0 mt-3 max-w-[60ch] font-sans text-base text-ink-soft">
+      <p className="m-0 mt-3 max-w-[60ch] font-sans text-base text-ink-mid">
         {renderFits(r, t)} {p.body}
       </p>
       <p className="m-0 mt-3 max-w-[60ch] font-sans text-base text-ink-mid">
@@ -126,17 +128,21 @@ export default function PartItem({
           <nav aria-label={t.parts.item.linksLabel} className="font-sans text-sm">
             <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
               <li>
-                <a href={localePath(partPath(model.part), lang)} className={LINK}>
-                  {t.parts.item.back(p.name)}
-                  {'\u00a0'}→
-                </a>
+                <Button
+                  href={localePath(partPath(model.part), lang)}
+                  label={`${t.parts.item.back(p.name)}\u00a0→`}
+                  variant="secondary"
+                  className={LINK}
+                />
               </li>
               {model.tipLink && (
                 <li>
-                  <a href={localePath(model.tipLink, lang)} className={LINK}>
-                    {t.parts.tipLink}
-                    {'\u00a0'}→
-                  </a>
+                  <Button
+                    href={localePath(model.tipLink, lang)}
+                    label={`${t.parts.tipLink}\u00a0→`}
+                    variant="secondary"
+                    className={LINK}
+                  />
                 </li>
               )}
             </ul>
@@ -150,13 +156,16 @@ export default function PartItem({
               <h2 id="related-parts" className="m-0 text-base font-bold text-ink">
                 {t.parts.item.related}
               </h2>
-              <ul className="m-0 mt-3 flex list-none flex-wrap gap-2 p-0 text-sm">
+              <ul className="m-0 mt-3 grid list-none gap-2 p-0 text-sm sm:grid-cols-2">
                 {related.map(({ l, x }) => (
                   <li key={`${l.part}/${l.anchor}`}>
-                    <a href={localePath(partItemPath(l.part, l.anchor), lang)} className={LINK}>
-                      {renderTitle(x, t.parts.items[l.part].name, t)}
-                      {'\u00a0'}→
-                    </a>
+                    <Button
+                      href={localePath(partItemPath(l.part, l.anchor), lang)}
+                      label={renderTitle(x, t.parts.items[l.part].name, t)}
+                      variant="secondary"
+                      endContent={<span aria-hidden="true">→</span>}
+                      className={`w-full justify-between ${LINK}`}
+                    />
                   </li>
                 ))}
               </ul>

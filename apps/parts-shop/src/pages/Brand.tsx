@@ -21,7 +21,7 @@ export default function Brand({
   t: Dict;
 }) {
   return (
-    <Container className="py-12">
+    <Container className="pt-8 pb-12 lg:pt-12">
       <Breadcrumb
         trail={[
           [t.parts.title, PARTS_PATH],
@@ -37,7 +37,17 @@ export default function Brand({
         <BrandChips brands={model.brands} current={model.brand} only="wide" lang={lang} t={t} />
       </div>
       <div className="mt-6 sm:mt-8">
-        <ModelTable rows={model.rows} fx={fx} lang={lang} t={t} all cards crawlAll />
+        <ModelTable
+          rows={model.rows}
+          fx={fx}
+          lang={lang}
+          t={t}
+          all
+          cards
+          crawlAll
+          quiet
+          hint={model.rows.length ? t.brand.filterHint(model.rows[0].name) : undefined}
+        />
       </div>
       <div className="mt-8 sm:hidden">
         <BrandChips brands={model.brands} current={model.brand} only="phone" lang={lang} t={t} />

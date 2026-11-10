@@ -1,8 +1,18 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import type { FxRate } from '@kervan/tips';
+import { Button } from '@astryxdesign/core/Button';
+import { TextArea } from '@astryxdesign/core/TextArea';
+import { TextInput } from '@astryxdesign/core/TextInput';
 import { Container } from '@kervan/ui';
 import { OrderSteps, PageTitle, QtyStepper } from '../components/Bits';
-import { FOCUS, whatsappHref } from '../components/Layout';
+import {
+  FIELD_RING,
+  FIELD_TEXT,
+  FOCUS,
+  OUTLINE_BUTTON,
+  WHATSAPP_BUTTON,
+  whatsappHref,
+} from '../components/Layout';
 import { PartGroups } from '../components/PartGroups';
 import { ORDER_CONVERSION } from '../lib/ads';
 import { CART_EVENT, readCart, writeCart, type CartItem } from '../lib/cart';
@@ -29,6 +39,14 @@ type Field = (typeof FIELDS)[number];
 /** The country is asked on the English cart only (international orders), and required there. */
 const fieldsFor = (lang: Lang): readonly Field[] =>
   lang === 'en' ? FIELDS : FIELDS.filter((k) => k !== 'country');
+const AUTOCOMPLETE: Record<Field, string> = {
+  name: 'name',
+  company: 'organization',
+  phone: 'tel',
+  city: 'address-level2',
+  country: 'country-name',
+  note: 'off',
+};
 
 /**
  * The cart: lines from this browser's storage, quantities, totals in USD and TRY, and the order
@@ -81,8 +99,23 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   };
   const remove = (next: CartItem[], msg: string) => {
     setUndo({ items: items ?? [], msg });
+    setRemovals((n) => n + 1);
     update(next);
   };
+  // The pressed Remove goes away with its line: the focus moves to "Geri al", and after "Geri al"
+  // to the first line once the list is back.
+  const undoBtn = useRef<HTMLButtonElement>(null);
+  const firstLine = useRef<HTMLAnchorElement>(null);
+  const undone = useRef(false);
+  const [removals, setRemovals] = useState(0);
+  useEffect(() => {
+    if (removals) undoBtn.current?.focus();
+  }, [removals]);
+  useEffect(() => {
+    if (!undone.current || !items?.length) return;
+    undone.current = false;
+    firstLine.current?.focus();
+  }, [items]);
 
   const list = items ?? [];
   // Tips name their type through the dict; spare parts carry the label they were added with.
@@ -139,24 +172,25 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   return (
     <Container className="py-12">
       <PageTitle>{c.title}</PageTitle>
-      {undo && (
-        <p
-          role="status"
-          className="m-0 mt-4 flex flex-wrap items-center gap-x-3 font-sans text-sm text-ink"
-        >
-          {undo.msg}
-          <button
-            type="button"
-            onClick={() => {
-              update(undo.items);
-              setUndo(null);
-            }}
-            className={`inline-flex min-h-11 cursor-pointer items-center font-medium text-brand-hi underline ${FOCUS}`}
-          >
-            {c.undo}
-          </button>
-        </p>
-      )}
+      {/* Always in the page, so a removal is announced; empty it adds no space. */}
+      <div role="status">
+        {undo && (
+          <div className="mt-4 flex flex-wrap items-center gap-x-1 font-sans text-sm text-ink">
+            <span>{undo.msg}</span>
+            <Button
+              ref={undoBtn}
+              label={c.undo}
+              variant="ghost"
+              onClick={() => {
+                undone.current = true;
+                update(undo.items);
+                setUndo(null);
+              }}
+              className="px-2 font-medium text-brand-hi underline"
+            />
+          </div>
+        )}
+      </div>
       {items === null ? null : list.length === 0 ? (
         <>
           <div className="mt-6 rounded-sm border border-hair bg-bg-soft p-6 font-sans sm:flex sm:items-center sm:justify-between sm:gap-6">
@@ -164,12 +198,13 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
               <p className="m-0 text-lg font-semibold text-ink">{c.empty}</p>
               <p className="m-0 mt-1 text-sm text-ink-mid">{c.emptyBody}</p>
             </div>
-            <a
+            <Button
               href={localePath(PARTS_PATH, lang)}
-              className={`mt-4 inline-block shrink-0 rounded-sm bg-brand px-5 py-3 text-sm font-medium text-on-brand hover:bg-brand-hi sm:mt-0 ${FOCUS}`}
-            >
-              {c.browse}
-            </a>
+              label={c.browse}
+              variant="primary"
+              size="lg"
+              className="mt-4 shrink-0 px-5 sm:mt-0"
+            />
           </div>
           <h2 className="m-0 mt-10 font-sans text-xl font-bold text-ink">{t.parts.title}</h2>
           <div className="mt-4">
@@ -181,9 +216,15 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
           <div className="min-w-0">
             <ul className="m-0 list-none divide-y divide-hair border-y border-hair p-0 font-sans text-sm">
               {list.map((x, i) => (
-                <li key={x.id} className="flex flex-wrap items-center gap-x-4 gap-y-3 py-4">
-                  <div className="min-w-0 basis-full sm:basis-auto sm:flex-1">
+                // Phones: name and total, then stepper and Remove; the DOM keeps name, stepper,
+                // total, Remove, so Tab follows the screen (the total is not focusable).
+                <li
+                  key={x.id}
+                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 py-4 sm:flex"
+                >
+                  <div className="col-start-1 row-start-1 min-w-0 sm:flex-1">
                     <a
+                      ref={i === 0 ? firstLine : undefined}
                       href={localePath(x.path, lang)}
                       className={`font-semibold text-ink hover:underline ${FOCUS}`}
                     >
@@ -205,33 +246,91 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                       </p>
                     )}
                   </div>
-                  <QtyStepper
-                    id={`q-${i}`}
-                    value={x.qty}
-                    onChange={(n) => setQty(x.id, n)}
-                    label={`${c.qty}: ${x.name}`}
-                    t={t}
-                  />
-                  <p className="m-0 ml-auto min-w-24 text-right font-semibold text-ink tabular-nums">
+                  <div className="col-start-1 row-start-2">
+                    <QtyStepper
+                      id={`q-${i}`}
+                      value={x.qty}
+                      onChange={(n) => setQty(x.id, n)}
+                      label={`${c.qty}: ${x.name}`}
+                      t={t}
+                    />
+                  </div>
+                  <p className="col-start-2 row-start-1 m-0 self-start text-right font-semibold whitespace-nowrap text-ink tabular-nums sm:ml-auto sm:min-w-24 sm:self-center">
                     {lineTotal(x) ?? '—'}
                   </p>
-                  <button
-                    type="button"
-                    aria-label={c.remove(x.name)}
+                  <Button
+                    label={c.remove(x.name)}
+                    variant="ghost"
                     onClick={() =>
                       remove(
                         list.filter((y) => y.id !== x.id),
                         c.removed(x.name),
                       )
                     }
-                    className={`inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center text-ink-mid underline hover:text-ink ${FOCUS}`}
+                    className="col-start-2 row-start-2 justify-self-end px-2 text-ink-mid underline hover:text-ink"
                   >
                     {c.removeShort}
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
-            <div className="mt-6 font-sans">
+            <div className="mt-4 font-sans">
+              <Button
+                label={c.clear}
+                variant="ghost"
+                onClick={() => remove([], c.cleared)}
+                className="-ml-2 px-2 text-sm text-ink-mid underline hover:text-ink"
+              />
+            </div>
+          </div>
+
+          <aside className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
+            <h2 className="m-0 text-lg font-bold text-ink">{c.contactTitle}</h2>
+            {fields.map((k) => (
+              <div key={k} className="mt-3">
+                {k === 'note' ? (
+                  <TextArea
+                    id={`c-${k}`}
+                    label={c[k]}
+                    rows={3}
+                    value={contact[k]}
+                    onChange={(v) => setContact({ ...contact, [k]: v })}
+                    containerClassName="[&_label]:font-medium [&_textarea]:text-base"
+                    controlClassName={FIELD_RING}
+                  />
+                ) : (
+                  <TextInput
+                    id={`c-${k}`}
+                    ref={k === 'country' ? countryRef : undefined}
+                    label={k === 'country' ? `${c[k]} ${c.required}` : c[k]}
+                    size="lg"
+                    status={
+                      k === 'country' && countryError && blocked ? { type: 'error' } : undefined
+                    }
+                    aria-describedby={
+                      k === 'country' && countryError && blocked ? 'c-country-err' : undefined
+                    }
+                    type={k === 'phone' ? 'tel' : 'text'}
+                    autoComplete={AUTOCOMPLETE[k]}
+                    value={contact[k]}
+                    onChange={(v) => setContact({ ...contact, [k]: v })}
+                    containerClassName="[&_label]:font-medium"
+                    controlClassName={`px-3 ${FIELD_TEXT}`}
+                  />
+                )}
+                {k === 'country' && countryError && blocked && (
+                  <p
+                    id="c-country-err"
+                    role="alert"
+                    className="m-0 mt-1 text-sm font-medium text-err"
+                  >
+                    {c.countryMissing}
+                  </p>
+                )}
+              </div>
+            ))}
+            {/* The sum sits right above the send buttons, so it is read before sending. */}
+            <div className="mt-5 border-t border-hair pt-4">
               <dl className="m-0 text-sm tabular-nums">
                 {(vatCents
                   ? ([
@@ -245,20 +344,22 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                     <dd className="m-0 text-right">{money(v)}</dd>
                   </div>
                 ))}
+                <div
+                  className={`flex justify-between gap-4 text-lg font-bold text-ink ${vatCents ? 'mt-2 border-t border-hair pt-3' : ''}`}
+                >
+                  <dt>{c.total}</dt>
+                  <dd className="m-0 whitespace-nowrap">
+                    {totalTry !== null ? fmtTryCents(totalTry, lang) : fmtUsd(grossCents, lang)}
+                  </dd>
+                </div>
               </dl>
-              <p className="m-0 mt-2 flex justify-between gap-4 border-t border-hair pt-3 text-lg font-bold text-ink tabular-nums">
-                <span>{c.total}</span>
-                <span className="whitespace-nowrap">
-                  {totalTry !== null ? fmtTryCents(totalTry, lang) : fmtUsd(grossCents, lang)}
-                </span>
-              </p>
               {totalTry !== null ? (
                 <p className="m-0 mt-1 text-right text-sm text-ink-mid tabular-nums">
                   {fmtUsd(grossCents, lang)}
                 </p>
               ) : (
                 fmtTry(grossCents, fx, lang) && (
-                  <p className="m-0 mt-1 text-right text-lg font-semibold text-ink tabular-nums">
+                  <p className="m-0 mt-1 text-right text-sm text-ink-mid tabular-nums">
                     {fmtTry(grossCents, fx, lang)}
                   </p>
                 )
@@ -272,74 +373,8 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                 <p className="m-0 mt-1 text-right text-xs text-ink-soft">{t.price.note}</p>
               )}
               {anyAsk && <p className="m-0 mt-2 text-sm text-ink-mid">{c.totalNote}</p>}
-              <button
-                type="button"
-                onClick={() => remove([], c.cleared)}
-                className={`mt-4 inline-flex min-h-11 cursor-pointer items-center text-sm text-ink-mid underline hover:text-ink ${FOCUS}`}
-              >
-                {c.clear}
-              </button>
             </div>
-          </div>
-
-          <aside className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
-            <p className="m-0 text-lg font-bold text-ink">{c.contactTitle}</p>
-            {fields.map((k) => (
-              <div key={k} className="mt-3">
-                <label htmlFor={`c-${k}`} className="block font-medium text-ink">
-                  {c[k]}
-                  {k === 'country' && (
-                    <span className="font-normal text-ink-mid"> {c.required}</span>
-                  )}
-                </label>
-                {k === 'note' ? (
-                  <textarea
-                    id={`c-${k}`}
-                    rows={3}
-                    value={contact[k]}
-                    onChange={(e) => setContact({ ...contact, [k]: e.target.value })}
-                    className={`mt-1 w-full rounded-sm border border-ink-soft bg-bg px-3 py-2 text-base text-ink ${FOCUS}`}
-                  />
-                ) : (
-                  <input
-                    id={`c-${k}`}
-                    ref={k === 'country' ? countryRef : undefined}
-                    required={k === 'country' || undefined}
-                    aria-invalid={k === 'country' && countryError && blocked ? true : undefined}
-                    aria-describedby={
-                      k === 'country' && countryError && blocked ? 'c-country-err' : undefined
-                    }
-                    type={k === 'phone' ? 'tel' : 'text'}
-                    autoComplete={
-                      k === 'name'
-                        ? 'name'
-                        : k === 'company'
-                          ? 'organization'
-                          : k === 'phone'
-                            ? 'tel'
-                            : k === 'city'
-                              ? 'address-level2'
-                              : k === 'country'
-                                ? 'country-name'
-                                : 'off'
-                    }
-                    value={contact[k]}
-                    onChange={(e) => setContact({ ...contact, [k]: e.target.value })}
-                    className={`mt-1 w-full rounded-sm border border-ink-soft bg-bg px-3 py-2 text-base text-ink ${FOCUS}`}
-                  />
-                )}
-                {k === 'country' && countryError && blocked && (
-                  <p
-                    id="c-country-err"
-                    role="alert"
-                    className="m-0 mt-1 text-sm font-medium text-brand-hi"
-                  >
-                    {c.countryMissing}
-                  </p>
-                )}
-              </div>
-            ))}
-            <p className="m-0 mt-5 text-xs text-ink-mid">
+            <p className="m-0 mt-4 text-xs text-ink-mid">
               {t.legal.agree}{' '}
               <a
                 href={localePath(legalPath('on-bilgilendirme'), lang)}
@@ -357,24 +392,25 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
               .
             </p>
             <div className="mt-3 flex flex-col gap-3">
-              <a
+              <Button
                 href={whatsappHref(message)}
+                label={c.sendWa}
+                size="lg"
                 {...ORDER_CONVERSION}
                 aria-disabled={blocked || undefined}
                 onClick={guard}
-                className={`rounded-sm bg-whatsapp px-5 py-3 text-center font-medium text-white ${FOCUS}`}
-              >
-                {c.sendWa}
-              </a>
-              <a
+                className={`px-5 ${WHATSAPP_BUTTON}`}
+              />
+              <Button
                 href={`mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`}
+                label={c.sendMail}
+                variant="secondary"
+                size="lg"
                 {...ORDER_CONVERSION}
                 aria-disabled={blocked || undefined}
                 onClick={guard}
-                className={`rounded-sm border border-ink-soft px-5 py-3 text-center text-ink hover:bg-bg-warm ${FOCUS}`}
-              >
-                {c.sendMail}
-              </a>
+                className={`px-5 ${OUTLINE_BUTTON}`}
+              />
             </div>
             {c.intlNote && <p className="m-0 mt-4 text-xs text-ink-mid">{c.intlNote}</p>}
             <p className="m-0 mt-4 text-xs text-ink-mid">{c.info}</p>

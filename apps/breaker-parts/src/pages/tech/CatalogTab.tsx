@@ -1,4 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Selector } from '@astryxdesign/core/Selector';
 import { AnimatePresence, motion } from 'framer-motion';
 import { durations, editorialEase, useReducedMotion } from '@kervan/motion';
 import type {
@@ -334,22 +335,15 @@ export default function CatalogTab({
           />
         </div>
         <div className="md:col-span-3 flex flex-col gap-2">
-          <label htmlFor="vc-brand" className={labelCls}>
-            {c.brandLabel}
-          </label>
-          <select
-            id="vc-brand"
+          <Selector
+            label={c.brandLabel}
             value={brand}
-            onChange={(e) => setBrand(e.target.value)}
-            className={inputCls}
-          >
-            <option value="">{c.brandAll}</option>
-            {brands.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
+            onChange={setBrand}
+            options={[{ value: '', label: c.brandAll }, ...brands]}
+            placeholder={c.brandAll}
+            hasSearch
+            presentation="adaptive"
+          />
         </div>
         <div className="md:col-span-3 flex flex-col gap-2">
           <span className={labelCls} id="vc-tip-l">
@@ -474,39 +468,31 @@ export default function CatalogTab({
                   return [
                     field,
                     <div key="kc" className="flex flex-col gap-2">
-                      <label htmlFor="vc-m-kc" className={labelCls}>
-                        {c.measureKeyCount}
-                      </label>
-                      <select
-                        id="vc-m-kc"
+                      <Selector
+                        label={c.measureKeyCount}
                         value={keyCount}
-                        onChange={(e) => setKeyCount(e.target.value as '' | '1' | '2')}
+                        onChange={(v) => setKeyCount(v as '' | '1' | '2')}
+                        options={[
+                          { value: '', label: c.keyAny },
+                          { value: '1', label: c.keySingle },
+                          { value: '2', label: c.keyDouble },
+                        ]}
+                        placeholder={c.keyAny}
+                        presentation="adaptive"
                         aria-describedby={kcHot ? 'vc-next' : undefined}
-                        className={`${inputCls} ${kcHot ? 'vc-pulse border-brand ring-2 ring-brand/40' : ''}`}
-                      >
-                        <option value="">{c.keyAny}</option>
-                        <option value="1">{c.keySingle}</option>
-                        <option value="2">{c.keyDouble}</option>
-                      </select>
+                        controlClassName={kcHot ? 'vc-pulse ring-2 ring-brand/40' : undefined}
+                      />
                     </div>,
                   ];
                 })}
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="vc-m-tol" className={labelCls}>
-                    {c.tolLabel}
-                  </label>
-                  <select
-                    id="vc-m-tol"
-                    value={tol}
-                    onChange={(e) => setTol(Number(e.target.value))}
-                    className={inputCls}
-                  >
-                    {TOLERANCES.map((n) => (
-                      <option key={n} value={n}>
-                        ±{n} mm
-                      </option>
-                    ))}
-                  </select>
+                  <Selector
+                    label={c.tolLabel}
+                    value={String(tol)}
+                    onChange={(v) => setTol(Number(v))}
+                    options={TOLERANCES.map((n) => ({ value: String(n), label: `±${n} mm` }))}
+                    presentation="adaptive"
+                  />
                 </div>
               </div>
               <div className="mt-5 min-h-11">
@@ -547,49 +533,46 @@ export default function CatalogTab({
               <p className="font-sans text-sm text-ink-mid mt-0 mb-5 max-w-[70ch]">{c.featHint}</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="vc-f-rear" className={labelCls}>
-                    {c.featRear}
-                  </label>
-                  <select
-                    id="vc-f-rear"
+                  <Selector
+                    label={c.featRear}
                     value={rear}
-                    onChange={(e) => setRear(e.target.value as '' | 'yes' | 'no')}
-                    className={inputCls}
-                  >
-                    <option value="">{c.featAny}</option>
-                    <option value="yes">{c.featYes}</option>
-                    <option value="no">{c.featNo}</option>
-                  </select>
+                    onChange={(v) => setRear(v as '' | 'yes' | 'no')}
+                    options={[
+                      { value: '', label: c.featAny },
+                      { value: 'yes', label: c.featYes },
+                      { value: 'no', label: c.featNo },
+                    ]}
+                    placeholder={c.featAny}
+                    presentation="adaptive"
+                  />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="vc-f-slot" className={labelCls}>
-                    {c.featSlot}
-                  </label>
-                  <select
-                    id="vc-f-slot"
+                  <Selector
+                    label={c.featSlot}
                     value={slot}
-                    onChange={(e) => setSlot(e.target.value as '' | 'tapered' | 'rounded')}
-                    className={inputCls}
-                  >
-                    <option value="">{c.featAny}</option>
-                    <option value="tapered">{c.featSlotTapered}</option>
-                    <option value="rounded">{c.featSlotRounded}</option>
-                  </select>
+                    onChange={(v) => setSlot(v as '' | 'tapered' | 'rounded')}
+                    options={[
+                      { value: '', label: c.featAny },
+                      { value: 'tapered', label: c.featSlotTapered },
+                      { value: 'rounded', label: c.featSlotRounded },
+                    ]}
+                    placeholder={c.featAny}
+                    presentation="adaptive"
+                  />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="vc-f-angle" className={labelCls}>
-                    {c.featAngle}
-                  </label>
-                  <select
-                    id="vc-f-angle"
+                  <Selector
+                    label={c.featAngle}
                     value={angle}
-                    onChange={(e) => setAngle(e.target.value as '' | 'yes' | 'no')}
-                    className={inputCls}
-                  >
-                    <option value="">{c.featAny}</option>
-                    <option value="yes">{c.featAngled}</option>
-                    <option value="no">{c.featNotAngled}</option>
-                  </select>
+                    onChange={(v) => setAngle(v as '' | 'yes' | 'no')}
+                    options={[
+                      { value: '', label: c.featAny },
+                      { value: 'yes', label: c.featAngled },
+                      { value: 'no', label: c.featNotAngled },
+                    ]}
+                    placeholder={c.featAny}
+                    presentation="adaptive"
+                  />
                 </div>
                 <div className="flex flex-col gap-2">
                   <label htmlFor="vc-f-tons" className={labelCls}>

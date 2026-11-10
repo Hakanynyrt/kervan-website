@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Button } from '@astryxdesign/core/Button';
 import type { Dict } from '../lib/dict';
 import { legalPath } from '../lib/legal';
 import { localePath } from '../lib/locale-path';
@@ -13,7 +14,7 @@ import {
   writeConsent,
   type ConsentChoice,
 } from '../lib/ads';
-import { FOCUS } from './Layout';
+import { FOCUS, OUTLINE_BUTTON } from './Layout';
 import type { Lang } from '../types';
 
 /**
@@ -81,20 +82,18 @@ export function ConsentBanner({ lang, t }: { lang: Lang; t: Dict }) {
         </a>
       </p>
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <button
-          type="button"
+        <Button
+          label={c.reject}
+          variant="secondary"
           onClick={() => choose('denied')}
-          className={`min-h-11 cursor-pointer rounded-sm border border-ink-soft bg-bg px-4 font-medium text-ink hover:bg-bg-warm ${FOCUS}`}
-        >
-          {c.reject}
-        </button>
-        <button
-          type="button"
+          className={`px-4 ${OUTLINE_BUTTON}`}
+        />
+        <Button
+          label={c.accept}
+          variant="primary"
           onClick={() => choose('granted')}
-          className={`min-h-11 cursor-pointer rounded-sm bg-brand px-4 font-medium text-on-brand hover:bg-brand-hi ${FOCUS}`}
-        >
-          {c.accept}
-        </button>
+          className="px-4"
+        />
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import {
   ORG_PHONE,
   ORG_PHONE_E164,
 } from '@kervan/seo';
+import { Button } from '@astryxdesign/core/Button';
 import type { DictBlock, Lang, ServiceLink } from '../types';
 import { CONSENT_OPEN_EVENT } from '../lib/ads';
 import { WRAP } from '../lib/ui';
@@ -19,6 +20,9 @@ const linkBox =
   'inline-flex flex-col justify-center min-h-12 min-w-11 px-2.5 py-1 font-sans text-[15px] leading-[1.3] text-ink hover:underline underline-offset-2';
 const legal =
   'inline-flex items-center justify-center min-h-11 min-w-11 px-2.5 text-ink-mid hover:text-ink hover:underline underline-offset-2';
+
+/** "@kervanmakina", from the profile address. */
+const INSTAGRAM_HANDLE = `@${ORG_INSTAGRAM.split('/').filter(Boolean).pop()}`;
 
 export default function Footer({ t, lang }: Props) {
   const home = lang === 'en' ? '/en/' : '/';
@@ -65,7 +69,7 @@ export default function Footer({ t, lang }: Props) {
               href={ORG_INSTAGRAM}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Instagram @kervanmakina"
+              aria-label={`${t.contact.instagramLabel} ${INSTAGRAM_HANDLE}`}
               className="self-start inline-flex items-center justify-center min-h-12 min-w-12 text-ink-mid hover:text-ink"
             >
               <svg
@@ -96,13 +100,12 @@ export default function Footer({ t, lang }: Props) {
             <a href="/kvkk" className={legal}>
               {t.footer.kvkk}
             </a>
-            <button
-              type="button"
+            <Button
+              label={t.footer.cookies}
+              variant="ghost"
               onClick={() => window.dispatchEvent(new Event(CONSENT_OPEN_EVENT))}
-              className={legal}
-            >
-              {t.footer.cookies}
-            </button>
+              className="h-11 min-w-11 px-2.5 text-[13px] font-normal text-ink-mid hover:text-ink hover:underline underline-offset-2 hover:bg-none"
+            />
           </span>
         </div>
       </div>

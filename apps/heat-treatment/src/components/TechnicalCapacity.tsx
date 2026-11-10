@@ -44,13 +44,16 @@ export default function TechnicalCapacity({ t }: Props) {
             <h2 id="kapasite-title">{c.eyebrow}</h2>
             <p>{c.title}</p>
           </div>
-          <table>
+          {/* The cells are laid out with grid and flex (globals.css), which can drop table semantics. */}
+          <table role="table">
             <caption className="sr-only">{c.aside}</caption>
-            <tbody>
+            <tbody role="rowgroup">
               {c.items.map((it) => (
-                <tr key={it.label}>
-                  <th scope="row">{it.label}</th>
-                  <td>
+                <tr key={it.label} role="row">
+                  <th scope="row" role="rowheader">
+                    {it.label}
+                  </th>
+                  <td role="cell">
                     <span className="kv-spec-v">
                       {it.value}
                       {/* The space sits in the smaller unit type, so the gap stays narrow. */}

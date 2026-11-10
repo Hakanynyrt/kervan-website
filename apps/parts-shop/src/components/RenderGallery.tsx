@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import type { Dict } from '../lib/dict';
 import type { RenderView } from '../lib/photos';
 import { FOCUS } from './Layout';
@@ -35,6 +35,10 @@ export default function RenderGallery({
   const [k, setK] = useState(0);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const swipe = useRef<number | null>(null);
+  // A group page shows several galleries: the ids are per gallery.
+  const uid = useId();
+  const panelId = `${uid}-panel`;
+  const tabId = (i: number) => `${uid}-tab-${i}`;
   const n = items.length;
   const cur = items[Math.min(k, n - 1)];
   if (!cur) return null;
@@ -70,6 +74,9 @@ export default function RenderGallery({
     >
       <div className="min-w-0 sm:col-start-2">
         <div
+          {...(n > 1
+            ? { role: 'tabpanel', id: panelId, 'aria-labelledby': tabId(Math.min(k, n - 1)) }
+            : null)}
           className="relative aspect-[4/3] touch-pan-y overflow-hidden rounded-t-md border border-hair bg-pstage-deep"
           onPointerDown={(e) => {
             if (e.pointerType !== 'mouse') swipe.current = e.clientX;
@@ -129,6 +136,8 @@ export default function RenderGallery({
               }}
               type="button"
               role="tab"
+              id={tabId(i)}
+              aria-controls={panelId}
               aria-selected={i === k}
               aria-label={`${i + 1}. ${name(it.view)}`}
               tabIndex={i === k ? 0 : -1}

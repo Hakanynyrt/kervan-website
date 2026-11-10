@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { fadeUp, useReducedMotion } from '@kervan/motion';
 import type { DictBlock } from '../types';
+import { WRAP } from '../lib/ui';
 
 interface Props {
   t: DictBlock;
@@ -12,7 +13,7 @@ export default function About({ t }: Props) {
     <>
       <section className="pt-10 pb-16 md:pt-16 md:pb-24">
         <motion.div
-          className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-12 gap-x-0 gap-y-8 md:gap-16 items-start"
+          className={`${WRAP} grid grid-cols-12 gap-x-0 gap-y-8 md:gap-16 items-start`}
           variants={fadeUp}
           initial={reduce ? false : 'hidden'}
           animate="show"

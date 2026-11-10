@@ -16,13 +16,14 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import WhatsAppFAB from './components/WhatsAppFAB';
 import ConsentBanner from './components/ConsentBanner';
+import { AstryxProvider } from '@kervan/ui';
 
 interface Props {
   /** Page language, decided by the URL ("/" = tr, "/en/" = en). */
   lang: Lang;
 }
 
-export default function App({ lang }: Props) {
+function AppBody({ lang }: Props) {
   useLangSync(lang);
   const t = DICT[lang];
   const tech = useTechAuth();
@@ -33,8 +34,14 @@ export default function App({ lang }: Props) {
 
   return (
     <>
+      <a
+        href="#icerik"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:inline-flex focus:items-center focus:min-h-11 focus:px-4 focus:bg-bg focus:border focus:border-hair-strong focus:rounded-[2px] font-sans text-[15px] font-semibold text-ink"
+      >
+        {t.nav.skip}
+      </a>
       <Nav lang={lang} t={t} techAuthed={tech.state === 'authed'} />
-      <main>
+      <main id="icerik" tabIndex={-1} className="outline-none">
         {/* Order (2026-10-28 redesign): hero, capacity table, plant photo, gear, services, … */}
         <Hero t={t} />
         <TechnicalCapacity t={t} />
@@ -48,8 +55,16 @@ export default function App({ lang }: Props) {
       </main>
       <Footer t={t} lang={lang} />
 
-      {(!isStatic || clientReady) && <WhatsAppFAB />}
+      {(!isStatic || clientReady) && <WhatsAppFAB t={t} />}
       <ConsentBanner t={t.consent} />
     </>
+  );
+}
+
+export default function App(props: Parameters<typeof AppBody>[0]) {
+  return (
+    <AstryxProvider lang={props.lang}>
+      <AppBody {...props} />
+    </AstryxProvider>
   );
 }

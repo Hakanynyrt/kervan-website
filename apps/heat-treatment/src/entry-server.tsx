@@ -2,12 +2,17 @@
    Renders each page in STATIC motion mode: final visual state, no intro, no
    hidden in-view styles. It never fetches /api/tech/* and never reads any
    secret; the owner-only section renders nothing without a client session. */
-import { renderToString } from 'react-dom/server';
+import type { ReactNode } from 'react';
+import { renderToString as reactRenderToString } from 'react-dom/server';
+import { stripImagePreloads } from '@kervan/seo/head';
 import { MotionConfig } from 'framer-motion';
 import { StaticMotionProvider } from '@kervan/motion';
 import App from './App';
 import NotFound from './components/NotFound';
 import type { Lang } from './types';
+
+/* React 19 adds image preload lines to the markup; each site sets its own in the head. */
+const renderToString = (node: ReactNode) => stripImagePreloads(reactRenderToString(node));
 
 export { buildHeadTags, injectHead, buildSitemapXml } from '@kervan/seo';
 export {

@@ -17,6 +17,7 @@ import PartItem from './pages/PartItem';
 import Parts from './pages/Parts';
 import Popular from './pages/Popular';
 import TipList from './pages/TipList';
+import { AstryxProvider } from '@kervan/ui';
 
 /** Header quote message on a part's own page: this part for this breaker. */
 function partItemQuote(part: PartKey, anchor: string, t: Dict): string {
@@ -25,7 +26,7 @@ function partItemQuote(part: PartKey, anchor: string, t: Dict): string {
   return t.parts.text(name, r ? renderModel(r, t) : '', 1);
 }
 
-export default function App({ lang, path, model, fx }: PageProps) {
+function AppBody({ lang, path, model, fx }: PageProps) {
   const t = DICT[lang];
   const demo = model.kind !== 'notFound' && model.demo;
   const hasPopular = model.kind !== 'notFound' && model.hasPopular;
@@ -62,5 +63,13 @@ export default function App({ lang, path, model, fx }: PageProps) {
       {model.kind === 'guide' && <Guide doc={model.doc} tips={model.tips} lang={lang} t={t} />}
       {model.kind === 'notFound' && <NotFound lang={lang} t={t} />}
     </Layout>
+  );
+}
+
+export default function App(props: PageProps) {
+  return (
+    <AstryxProvider lang={props.lang}>
+      <AppBody {...props} />
+    </AstryxProvider>
   );
 }
