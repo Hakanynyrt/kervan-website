@@ -83,6 +83,10 @@ export default function PartItem({
     const x = findRender(l.part, l.anchor);
     return x ? [{ l, x }] : [];
   });
+  const nearby = model.nearby.flatMap((l) => {
+    const x = findRender(l.part, l.anchor);
+    return x ? [{ l, x }] : [];
+  });
   return (
     <Container className="pb-28 pt-8 lg:pb-12 lg:pt-12">
       <Breadcrumb
@@ -151,6 +155,23 @@ export default function PartItem({
                   <li key={`${l.part}/${l.anchor}`}>
                     <a href={localePath(partItemPath(l.part, l.anchor), lang)} className={LINK}>
                       {renderTitle(x, t.parts.items[l.part].name, t)}
+                      {'\u00a0'}→
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {nearby.length > 0 && (
+            <section aria-labelledby="nearby-parts" className="font-sans">
+              <h2 id="nearby-parts" className="m-0 text-base font-bold text-ink">
+                {t.parts.item.nearby(p.name)}
+              </h2>
+              <ul className="m-0 mt-3 flex list-none flex-wrap gap-2 p-0 text-sm">
+                {nearby.map(({ l, x }) => (
+                  <li key={`${l.part}/${l.anchor}`}>
+                    <a href={localePath(partItemPath(l.part, l.anchor), lang)} className={LINK}>
+                      {renderTitle(x, p.name, t)}
                       {'\u00a0'}→
                     </a>
                   </li>

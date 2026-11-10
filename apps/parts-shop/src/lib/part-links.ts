@@ -115,3 +115,38 @@ export function tipLinksForPart(
   }
   return out;
 }
+
+/**
+ * The `n` nearest items on each side of this one in its group, ordered by URL (so by make and
+ * model) and wrapping around, skipping the ones `skip` already links (the same breaker's other
+ * parts). Every item page links its neighbours, so each item is reachable by links from the
+ * group's other items, also items whose breaker has no tip page (a part page only the sitemap
+ * knows ranks poorly). A short block, not a per-make list (the owner took that out on
+ * 2026-10-23).
+ */
+export function nearbyParts(
+  part: PartKey,
+  r: PartRender,
+  skip: readonly PartLink[] = [],
+  n = 3,
+): PartLink[] {
+  const list = [...PART_RENDERS[part]]
+    .map((x) => ({ x, anchor: renderAnchor(x) }))
+    .sort((a, b) => a.anchor.localeCompare(b.anchor, 'en'));
+  const i = list.findIndex((e) => e.x === r);
+  if (i < 0) return [];
+  const self = list[i].anchor;
+  const taken = new Set([self, ...skip.filter((l) => l.part === part).map((l) => l.anchor)]);
+  const out: PartLink[] = [];
+  for (const step of [-1, 1]) {
+    let found = 0;
+    for (let d = 1; d < list.length && found < n; d++) {
+      const anchor = list[(i + step * d + list.length * d) % list.length].anchor;
+      if (taken.has(anchor)) continue;
+      taken.add(anchor);
+      out.push({ part, anchor });
+      found++;
+    }
+  }
+  return out;
+}

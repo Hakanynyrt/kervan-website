@@ -23,6 +23,7 @@ import {
 import {
   partItemsForBreaker,
   partsForBreaker,
+  nearbyParts,
   relatedParts,
   renderAnchor,
   tipLinksForPart,
@@ -145,6 +146,8 @@ export type PageModel =
       tipLink: string | null;
       /** Other parts we model for the same breaker (their item pages). */
       related: PartLink[];
+      /** Neighbouring items of the same group by model name (nearbyParts), minus `related`. */
+      nearby: PartLink[];
       /** Net USD cents of this render, and of its burçlu state (front heads); null = quote. */
       price: number | null;
       priceFitted: number | null;
@@ -670,6 +673,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       const tipLinks = tipLinksForPart(part, tipPaths);
       return PART_RENDERS[part].map((r) => {
         const anchor = renderAnchor(r);
+        const related = relatedParts(part, r);
         return {
           path: partItemPath(part, anchor),
           model: {
@@ -677,7 +681,8 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
             part,
             anchor,
             tipLink: tipLinks[anchor] ?? null,
-            related: relatedParts(part, r),
+            related,
+            nearby: nearbyParts(part, r, related),
             price: partPrices.get(`${part}/${anchor}`) ?? null,
             priceFitted: partPrices.get(`${part}/${anchor}#b`) ?? null,
             oem: OEM_NUMBERS[`${part}/${anchor}`] ?? [],

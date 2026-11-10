@@ -21,6 +21,20 @@ export function otherSpelling(model: string): string | null {
   return spaced === model ? null : spaced;
 }
 
+/** The other spelling and the fully spaced one, each once: "Furukawa HB20G" →
+ *  ["Furukawa HB 20G", "Furukawa HB 20 G"] (searches type "20 g boy saplama"). */
+export function otherSpellings(model: string): string[] {
+  // As separatedSpelling in model-aliases.ts (kept here: the node tests load this file alone).
+  const sep = model
+    .replace(/(\d)(?=[A-Za-z])/g, '$1 ')
+    .replace(/([A-Za-z])(?=\d)/g, '$1 ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return [...new Set([otherSpelling(model), sep].filter((x) => x !== null))].filter(
+    (x) => x !== model,
+  );
+}
+
 /** A rock drill part (not a breaker part): its kind's noun names the machine itself. */
 export const isRockDrill = (r: Pick<PartRender, 'kind'>): boolean =>
   !!r.kind?.startsWith('rockDrill');
@@ -39,7 +53,7 @@ export const renderSeoName = (r: PartRender, part: PartKey, t: Dict): string =>
 /** The line under an item page's h1: "Uyduğu kırıcı: Soosan SB50 (Soosan SB 50), eski tip." */
 export const renderFits = (r: PartRender, t: Dict): string =>
   t.parts.item.fits(r.model, {
-    other: otherSpelling(r.model),
+    other: otherSpellings(r.model).join(', ') || null,
     variant: r.variant ? t.parts.renderVariant[r.variant] : null,
     rockDrill: isRockDrill(r),
   });

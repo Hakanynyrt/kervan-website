@@ -26,6 +26,7 @@ import { fmtNum } from './format';
 import {
   isRockDrill,
   otherSpelling,
+  otherSpellings,
   partAbout,
   renderModel,
   renderSeoName,
@@ -382,7 +383,9 @@ export function pageHead({ lang, path, model, fx }: PageProps): HeadInput {
       const alternateName = [
         ...new Set([
           caption,
-          ...(other && r ? [renderSeoName({ ...r, model: other }, model.part, t)] : []),
+          ...(r
+            ? otherSpellings(r.model).map((o) => renderSeoName({ ...r, model: o }, model.part, t))
+            : []),
         ]),
       ].filter((x) => x !== seoName);
       return {

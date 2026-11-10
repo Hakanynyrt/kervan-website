@@ -462,6 +462,8 @@ export interface Dict {
       /** Back to the group page: "Tüm piston modelleri". */
       back: (group: string) => string;
       related: string;
+      /** Heading of the item page's links to neighbouring items of its group (by model name). */
+      nearby: (group: string) => string;
       linksLabel: string;
       /** "MTB 210 kırıcı kaması": the item page's title and h1; a rock drill part's noun
        *  already names the machine ("COP 1032 kaya delici dayama burcu"). */
@@ -1226,7 +1228,7 @@ export const DICT: Record<Lang, Dict> = {
         rockDrillChuckBushing: 'kaya delici şank arka dayama burcu',
         rockDrillHead: 'kaya delici ön kafası',
         retainerKey: 'kama (tool pin)',
-        tieRod: 'boy saplama',
+        tieRod: 'boy saplama (tie rod)',
         piston: 'piston',
         retainerPin: 'kama tutucu pim',
         sideBolt: 'yan saplama',
@@ -1467,6 +1469,7 @@ export const DICT: Record<Lang, Dict> = {
         whatsappSend: "Bu parçayı WhatsApp'ta gönder",
         back: (group) => `Tüm ${group.toLocaleLowerCase('tr')} modelleri`,
         related: 'Bu kırıcı için ürettiğimiz diğer parçalar',
+        nearby: (group) => `Diğer ${group.toLocaleLowerCase('tr')} modelleri`,
         linksLabel: 'Parça bağlantıları',
         seoName: (model, noun, rockDrill) => `${model}${rockDrill ? '' : ' kırıcı'} ${noun}`,
         fits: (model, { other, variant, rockDrill }) =>
@@ -1489,7 +1492,7 @@ export const DICT: Record<Lang, Dict> = {
             burc: 'Kafa burcu alt gövdenin içinde ucu taşır ve yönlendirir; uç her darbede bu burcun içinde kayar. Uçla burç arasındaki boşluk zamanla açılır; boşluk büyüdükçe uç eğik çalışır, erken kırılır ve piston da zarar görebilir. Burç boşluğu her uç değişiminde kontrol edilmeli, sınırı aşan burç yenilenmelidir.',
             kama: 'Kama, ucun üzerindeki kama yuvasından geçerek ucu alt gövdede tutar; ucun düşmesini önler ve ileri geri hareketini sınırlar. Her darbede yük aldığı için zamanla aşınır ya da şekli bozulur. Uç değiştirilirken kama ve tutucu pimi de kontrol edilmeli; aşınmış kama ucun yuvasını da bozar.',
             saplama:
-              'Boy saplamalar kırıcının silindirini, alt gövdesini ve üst kapağını birbirine bağlayıp sıkı tutar. Darbe titreşimi altında gevşeyen saplama gövde parçalarının ayrılmasına ve saplamanın kırılmasına yol açabilir. Somunların sıkılığı düzenli bakımlarda kontrol edilir; kırılan saplama yenisiyle değiştirilir, diğerleri de gözden geçirilir.',
+              'Boy saplamalar (tie rod) kırıcının silindirini, alt gövdesini ve üst kapağını birbirine bağlayıp sıkı tutar. Darbe titreşimi altında gevşeyen saplama gövde parçalarının ayrılmasına ve saplamanın kırılmasına yol açabilir. Somunların sıkılığı düzenli bakımlarda kontrol edilir; kırılan saplama yenisiyle değiştirilir, diğerleri de gözden geçirilir.',
             piston:
               'Piston, hidrolik basınçla ileri geri hareket ederek uca vuran darbe parçasıdır; kırıcının vuruşunu o üretir. Kirlenmiş hidrolik yağ ya da aşınmış burçlar yüzünden eğik çalışma pistonu ve silindiri çizer. Piston, kırıcının revizyonunda silindirle birlikte kontrol edilir; çizik, çatlak ya da ezik uç yüzeyi olan piston değiştirilir.',
             akumulator:
@@ -2511,6 +2514,7 @@ export const DICT: Record<Lang, Dict> = {
         whatsappSend: 'Send this part on WhatsApp',
         back: (group) => `All ${group.toLowerCase()} models`,
         related: 'Other parts we make for this breaker',
+        nearby: (group) => `More ${group.toLowerCase()} models`,
         linksLabel: 'Part links',
         seoName: (model, noun, rockDrill) => `${model}${rockDrill ? '' : ' breaker'} ${noun}`,
         fits: (model, { other, variant }) =>
