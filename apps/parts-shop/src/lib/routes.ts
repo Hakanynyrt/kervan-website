@@ -58,6 +58,10 @@ export interface PopularPart extends PartLink {
   model: string;
   hero: string | null;
   kind: PartRender['kind'] | null;
+  /** Net USD cents as its item page leads with it (`partCents`); null = "Fiyat için sorun". */
+  cents: number | null;
+  /** The price is the burçlu head's (the item page opens Burçlu). */
+  fitted: boolean;
 }
 
 /** A priced product on the home's "Ürettiklerimizden": a tip card, or a modelled part (`#b` = burçlu head). */
@@ -258,8 +262,26 @@ export const TIP_PATHS = [LIST_PATH, '/kirici/', '/marka/', '/urun/'];
 export const breakerName = (b: { brand: string; model: string }): string =>
   `${b.brand} ${b.model}`.trim();
 
+/**
+ * A modelled part's price as its item page leads with it: a front head that has a burçlu price
+ * opens Burçlu, so that price; else the plain one; null when the part has none.
+ */
+function partCents(
+  part: PartKey,
+  anchor: string,
+  r: PartRender,
+  partPrices: Map<string, number>,
+): { cents: number | null; fitted: boolean } {
+  const fittedCents = r.fitted ? partPrices.get(`${part}/${anchor}#b`) : undefined;
+  if (fittedCents !== undefined) return { cents: fittedCents, fitted: true };
+  return { cents: partPrices.get(`${part}/${anchor}`) ?? null, fitted: false };
+}
+
 /** The parts we model for the best-selling breakers, in their order, each render once. */
-function popularParts(cards: BreakerCard[]): PopularPart[] {
+function popularParts(
+  cards: BreakerCard[],
+  partPrices: Map<string, number> = new Map(),
+): PopularPart[] {
   const seen = new Set<string>();
   const out: PopularPart[] = [];
   for (const c of cards)
@@ -275,6 +297,7 @@ function popularParts(cards: BreakerCard[]): PopularPart[] {
         model: r.model,
         hero: r.hero ?? null,
         kind: r.kind ?? null,
+        ...partCents(l.part, l.anchor, r, partPrices),
       });
     }
   return out;
@@ -341,15 +364,14 @@ function madeItems(cards: BreakerCard[], partPrices: Map<string, number>): MadeI
   for (const l of popularParts(cards)) {
     const r = PART_RENDERS[l.part].find((x) => renderAnchor(x) === l.anchor);
     if (!r?.hero) continue;
-    const fittedCents = r.fitted ? partPrices.get(`${l.part}/${l.anchor}#b`) : undefined;
-    const cents = fittedCents ?? partPrices.get(`${l.part}/${l.anchor}`);
-    if (cents === undefined) continue;
+    const { cents, fitted } = partCents(l.part, l.anchor, r, partPrices);
+    if (cents === null) continue;
     (groups.has(l.part) ? rest : first).push({
       kind: 'part',
       part: l.part,
       anchor: l.anchor,
       cents,
-      fitted: fittedCents !== undefined,
+      fitted,
     });
     groups.add(l.part);
   }
@@ -699,9 +721,13 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
             path: POPULAR_PATH,
             model: {
               kind: 'popular' as const,
-              items: popularItems(popular, popularParts(popular), c.fx?.date ?? 'kervan'),
+              items: popularItems(
+                popular,
+                popularParts(popular, partPrices),
+                c.fx?.date ?? 'kervan',
+              ),
               cards: popular,
-              parts: popularParts(popular),
+              parts: popularParts(popular, partPrices),
               demo,
               hasPopular: true as const,
             },

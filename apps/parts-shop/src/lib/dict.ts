@@ -74,16 +74,21 @@ export interface Dict {
     tools: string;
     /** Theme select: the sun decides (auto), or the visitor. */
     theme: { label: string; auto: string; light: string; dark: string };
-    /** How to order, in the header on every page: "Sipariş: WhatsApp · <phone>"; `note` under it
-     *  on phones (home). */
+    /** How to order, in the header on every page: "Sipariş: WhatsApp · <phone>"; `note` (home:
+     *  prices on the site, how to pay) after it, under it on phones. */
     order: { label: string; whatsapp: string; note: string };
   };
   top: { shop: string };
-  banner: { label: string; preview: string; demo: string; how: string };
+  /** The band under the header (not on home). `facts`: how buying works, on every page but the
+   *  cart; the cart keeps the honest `label` + `preview` ("online ödeme henüz yok"). */
+  banner: { label: string; preview: string; facts: string; demo: string; how: string };
   tip: Record<TipType, string>;
   home: {
     title: string;
     lead: string;
+    /** Phones (under 768 px): the short sales line under the h1, in place of `lead`, so the first
+     *  screen carries the headline, the price and the buying wording before the opening picture. */
+    leadShort: string;
     morePopular: string;
     groups: string;
     /** Opening strip: our parts of one breaker side by side, each linking to its group. */
@@ -341,6 +346,11 @@ export interface Dict {
     city: string;
     /** English cart only (international orders): required, goes into the order message. */
     country: string;
+    /** Optional invoice fields (2026-11-13): sent in the order message only when filled. */
+    invoiceTitle: string;
+    email: string;
+    taxOffice: string;
+    taxId: string;
     /** After a required field's label. */
     required: string;
     countryMissing: string;
@@ -353,7 +363,35 @@ export interface Dict {
     info: string;
     message: (lines: string[], total: string, contact: string[]) => string;
     /** One order line: name, type, code, qty × unit = line total, then the page link. */
-    line: (name: string, qty: number, unit: string, total: string | null, url: string) => string;
+    /** One order-message line; `unit` null = a "fiyat sorulacak" line (no price, not in the total). */
+    line: (
+      name: string,
+      qty: number,
+      unit: string | null,
+      total: string | null,
+      url: string,
+    ) => string;
+    /** "Paleti paylaş": a /palet link with the line ids and quantities only (lib/palet-share.ts). */
+    share: {
+      button: string;
+      /** The system share sheet's title. */
+      title: string;
+      /** Under the button: what the link carries. */
+      hint: string;
+      copied: string;
+      copyFailed: (url: string) => string;
+      /** Last line of the order messages: the palet link of this order. */
+      reopen: (url: string) => string;
+      /** Opening a shared link: the question, its buttons and the outcomes. */
+      ask: string;
+      add: string;
+      cancel: string;
+      loading: string;
+      added: (n: number) => string;
+      dropped: (n: number) => string;
+      none: string;
+      failed: string;
+    };
   };
   brand: {
     title: (brand: string) => string;
@@ -372,8 +410,11 @@ export interface Dict {
     /** Where no single product is meant (home order box): both periods. */
     warrantyAll: string;
     note: string;
-    /** The one-line form on item and breaker pages: shipping, payment, this product's warranty
-     *  period and the not-original line; `more` links the full terms (pre-contract information). */
+    /** Payment, e-invoice and reply time (owner-confirmed, 2026-11-13): next to the order
+     *  buttons on item and breaker pages (`Terms compact`) and on /palet. */
+    facts: string;
+    /** The one-line form on item and breaker pages: shipping, this product's warranty period and
+     *  the not-original line, under `facts`; `more` links the full terms (pre-contract information). */
     short: (months: number) => string;
     more: string;
   };
@@ -531,6 +572,8 @@ export interface Dict {
       other: string;
       /** Tie rods are sold as a set (owner): the price includes the nuts and washers. */
       withNuts: string;
+      /** Unpriced item pages: under "Palete yükle", the line goes into the cart as "fiyat sorulacak". */
+      askAdd: string;
     };
     /** Front heads sold with or without their bushings and pins. */
     fitted: {
@@ -673,7 +716,11 @@ export const DICT: Record<Lang, Dict> = {
       langOther: 'EN',
       tools: 'Hızlı erişim',
       theme: { label: 'Tema', auto: 'Otomatik', light: 'Açık', dark: 'Koyu' },
-      order: { label: 'Sipariş:', whatsapp: 'WhatsApp', note: 'Online ödeme henüz yok' },
+      order: {
+        label: 'Sipariş:',
+        whatsapp: 'WhatsApp',
+        note: 'Fiyatlar sitede · Ödeme: kredi kartı (mail order) veya havale/EFT',
+      },
     },
     top: {
       shop: 'Kırıcı yedek parça mağazası',
@@ -682,6 +729,8 @@ export const DICT: Record<Lang, Dict> = {
       label: 'Sipariş talebi:',
       preview:
         'online ödeme henüz yok; paletinizi WhatsApp veya e-posta ile gönderin, size dönelim.',
+      facts:
+        'Fiyatlar sitede · Sipariş: WhatsApp veya e-posta · Ödeme: kredi kartı (mail order) veya havale/EFT',
       how: 'Nasıl sipariş verilir?',
       demo: 'DEMO verisi: bu ürünler gerçek değildir.',
     },
@@ -696,6 +745,8 @@ export const DICT: Record<Lang, Dict> = {
     home: {
       title: 'Hidrolik kırıcı yedek parçaları',
       lead: 'Kırıcı ucu, alt gövde, burç, kama, saplama, piston ve diğer parçalar: kendi tezgâhımızda işlenir, çelik parçalar kendi tesisimizde ısıl işlem görür. Kırıcınızın marka ve modelini arayın, uyan parçayı seçin. Stoktan aynı gün kargo.',
+      leadShort:
+        'Kırıcınızın markasını seçin, uyan parçanın fiyatını görün ve palete yükleyin. Stoktan aynı gün kargo.',
       morePopular: 'Tüm çok satanlar',
       groups: 'Ürün gruplarımız',
       pick: {
@@ -730,7 +781,7 @@ export const DICT: Record<Lang, Dict> = {
       },
       order: {
         title: 'Sipariş talebi',
-        body: 'Online ödeme henüz yok. Kırıcınızı ve parçayı yazın, size hemen dönelim.',
+        body: 'Fiyatlar sitede. Kırıcınızı ve parçayı WhatsApp veya e-posta ile yazın, size hemen dönelim; ödeme kredi kartı (mail order) veya havale/EFT.',
         whatsapp: 'WhatsApp ile sor',
         mail: 'E-posta gönder',
       },
@@ -944,7 +995,7 @@ export const DICT: Record<Lang, Dict> = {
           },
           {
             h: 'Onay ve kargo',
-            p: 'Toplam bedel, kargo ve ödeme bilgilerini içeren sipariş onayını gönderiyoruz; stoktaki ürünler ödemeniz bize ulaştığı gün kargoya verilir.',
+            p: 'İş günlerinde 2 saat içinde size dönüyoruz; sipariş onayında kesin toplam bedeli, kargo ücretini ve ödeme talimatını bildiriyoruz. Kredi kartıyla ödeme mail order ile alınır, e-fatura kesilir. Stoktaki ürünler ödemeniz bize ulaştığı gün kargoya verilir.',
           },
         ],
         note: 'Ayrıntılar:',
@@ -958,7 +1009,8 @@ export const DICT: Record<Lang, Dict> = {
       total: 'Toplam (vergiler dahil, kargo hariç)',
       subtotal: 'Ara toplam (vergiler hariç)',
       vat: (pct) => `Vergiler (%${pct})`,
-      totalNote: 'Fiyatı sorulacak ürünler toplama dahil değildir.',
+      totalNote:
+        'Fiyatı sorulacak ürünler ara toplama, vergilere ve toplama dahil değildir; fiyatlarını yanıtımızda bildiririz.',
       remove: (name) => `${name} ürününü paletten indir`,
       removeShort: 'Kaldır',
       removed: (name) => `${name} paletten indirildi.`,
@@ -972,6 +1024,10 @@ export const DICT: Record<Lang, Dict> = {
       phone: 'Telefon',
       city: 'Şehir',
       country: 'Ülke',
+      invoiceTitle: 'Fatura bilgileri (isteğe bağlı)',
+      email: 'E-posta',
+      taxOffice: 'Vergi dairesi',
+      taxId: 'Vergi no / TC kimlik no',
       required: '(zorunlu)',
       countryMissing: '',
       intlNote: '',
@@ -979,7 +1035,7 @@ export const DICT: Record<Lang, Dict> = {
       sendWa: 'Sipariş talebini WhatsApp ile gönder',
       sendMail: 'E-posta ile gönder',
       clear: 'Paleti boşalt',
-      info: 'Online ödeme henüz yok: sipariş talebinizi alınca size dönüyoruz; ödeme kredi kartı veya havale/EFT ile. Stoktaki ürünler ödemeniz bize ulaştığı gün kargoya verilir; kargo ücreti alıcıya aittir ve tutarı sipariş onayında bildirilir. Bilgileriniz yalnız bu mesaja yazılır, sitede saklanmaz.',
+      info: 'Online ödeme henüz yok: sipariş talebinizi alınca size dönüyoruz. Stoktaki ürünler ödemeniz bize ulaştığı gün kargoya verilir; kargo ücreti alıcıya aittir ve tutarı sipariş onayında bildirilir. Bilgileriniz yalnız bu mesaja yazılır, sitede saklanmaz.',
       message: (lines, total, contact) =>
         [
           'Merhaba, sipariş talebim:',
@@ -989,7 +1045,25 @@ export const DICT: Record<Lang, Dict> = {
           ...(contact.length ? ['', ...contact] : []),
         ].join('\n'),
       line: (name, qty, unit, total, url) =>
-        `- ${name}: ${qty} × ${unit}${total ? ` = ${total}` : ''}\n  ${url}`,
+        unit === null
+          ? `- ${name}: ${qty} adet (fiyat sorulacak)\n  ${url}`
+          : `- ${name}: ${qty} × ${unit}${total ? ` = ${total}` : ''}\n  ${url}`,
+      share: {
+        button: 'Paleti paylaş',
+        title: 'Palet (sipariş listesi)',
+        hint: 'Bağlantı yalnızca ürünleri ve adetleri taşır; iletişim bilgileriniz eklenmez.',
+        copied: 'Palet bağlantısı kopyalandı',
+        copyFailed: (url) => `Bağlantıyı kopyalayın: ${url}`,
+        reopen: (url) => `Bu siparişi tekrar açmak için: ${url}`,
+        ask: 'Bu liste paletinize eklensin mi?',
+        add: 'Ekle',
+        cancel: 'Vazgeç',
+        loading: 'Liste okunuyor…',
+        added: (n) => `${n} ürün paletinize eklendi; fiyatlar sitedeki güncel fiyatlardır.`,
+        dropped: (n) => `${n} ürün artık sitede olmadığı için eklenmedi.`,
+        none: 'Bu bağlantıdaki ürünler artık sitede yok.',
+        failed: 'Liste şu anda açılamadı. Sayfayı yenileyip tekrar deneyin.',
+      },
     },
     brand: {
       title: (brand) => `${brand} kırıcı uçları`,
@@ -1001,14 +1075,18 @@ export const DICT: Record<Lang, Dict> = {
       rows: [
         ['Uyum', 'OEM ölçülerinde üretilir, birebir uyumludur'],
         ['Kargo', 'Alıcıya aittir; tutarı sipariş onayında bildirilir'],
-        ['Ödeme', 'Kredi kartı veya havale/EFT'],
+        ['Ödeme', 'Kredi kartı (mail order) veya havale/EFT'],
+        ['Fatura', 'E-fatura kesilir'],
+        ['Dönüş', 'İş günlerinde 2 saat içinde'],
       ],
       warrantyLabel: 'Garanti',
       warranty: (m) => `Teslimden itibaren ${m} ay, malzeme ve üretim hatalarına karşı`,
       warrantyAll:
         'Teslimden itibaren alt gövde ve pistonlarda 6 ay, burçlarda 3 ay, diğer ürünlerde 2 ay; malzeme ve üretim hatalarına karşı',
       short: (m) =>
-        `Kargo alıcıya aittir; ödeme kredi kartı veya havale/EFT ile; ${m} ay garanti. Kervan Makina üretimidir, orijinal parça değildir; marka ve model adları yalnızca uyumu belirtir.`,
+        `Kargo alıcıya aittir; ${m} ay garanti. Kervan Makina üretimidir, orijinal parça değildir; marka ve model adları yalnızca uyumu belirtir.`,
+      facts:
+        'Kredi kartı (mail order) veya havale/EFT ile ödeme · E-fatura kesilir · İş günlerinde 2 saat içinde dönüş',
       more: 'Tüm satış koşulları ve garanti kapsamı',
       note: 'Ürünlerimiz Kervan Makina üretimidir, kırıcı üreticisinin orijinal parçası değildir; marka ve model adları yalnızca uyumu belirtir. Garanti malzeme ve üretim (ısıl işlem dahil) hatalarını kapsar; normal aşınma, boşta vuruş, ucu levye gibi kullanma, yanal veya eğik vuruş, aşınmış burç ile çalışma, yağlamasız kullanma ve yanlış uç seçiminden doğan hasarlar kapsam dışıdır. İnceleme için kırık parça ve fotoğrafları istenir.',
     },
@@ -1578,6 +1656,8 @@ export const DICT: Record<Lang, Dict> = {
           `Merhaba, ${breaker} ${part}, ${qty} adet sipariş vermek istiyorum (birim ${price}).\n${url}`,
         other: 'Başka bir kırıcı için teklif isteyin',
         withNuts: 'Somunlarıyla birlikte, takım olarak',
+        askAdd:
+          'Palete “fiyat sorulacak” olarak eklenir; diğer ürünlerinizle aynı talepte gönderin, fiyatını yanıtımızda bildiririz.',
       },
       fitted: {
         label: 'Seçenek',
@@ -1726,7 +1806,11 @@ export const DICT: Record<Lang, Dict> = {
       langOther: 'TR',
       tools: 'Quick links',
       theme: { label: 'Theme', auto: 'Auto', light: 'Light', dark: 'Dark' },
-      order: { label: 'Order:', whatsapp: 'WhatsApp', note: 'No online payment yet' },
+      order: {
+        label: 'Order:',
+        whatsapp: 'WhatsApp',
+        note: 'Prices on the site · Payment: credit card (mail order) or bank transfer',
+      },
     },
     top: {
       shop: 'Breaker spare parts shop',
@@ -1735,6 +1819,8 @@ export const DICT: Record<Lang, Dict> = {
       label: 'Order request:',
       preview:
         'no online payment yet; send your cart by WhatsApp or e-mail and we will get back to you.',
+      facts:
+        'Prices on the site · Order: WhatsApp or e-mail · Payment: credit card (mail order) or bank transfer',
       how: 'How to order',
       demo: 'DEMO data: these products are not real.',
     },
@@ -1749,6 +1835,8 @@ export const DICT: Record<Lang, Dict> = {
     home: {
       title: 'Hydraulic breaker spare parts',
       lead: 'Tips, front heads, bushings, retainer keys, tie rods, pistons and other parts, machined on our own lathes, the steel ones heat-treated in our own plant. Search your breaker make and model and pick the part that fits. Ships from stock the same day.',
+      leadShort:
+        'Pick your breaker make, see the price of the part that fits and add it to your cart. Ships from stock the same day.',
       morePopular: 'All best sellers',
       groups: 'Our product groups',
       pick: {
@@ -1784,7 +1872,7 @@ export const DICT: Record<Lang, Dict> = {
       },
       order: {
         title: 'Order request',
-        body: 'No online payment yet. Tell us your breaker and the part, and we will get back to you.',
+        body: 'Prices on the site. Tell us your breaker and the part by WhatsApp or e-mail and we will get back to you; payment by credit card (mail order) or bank transfer.',
         whatsapp: 'Ask on WhatsApp',
         mail: 'Send an e-mail',
       },
@@ -1997,7 +2085,7 @@ export const DICT: Record<Lang, Dict> = {
           },
           {
             h: 'Confirmation and shipping',
-            p: 'We send an order confirmation with the total, shipping and payment details; items in stock ship the day your payment reaches us.',
+            p: 'We reply within 2 hours on business days; the order confirmation gives the final total, the shipping cost and payment instructions. A credit card payment is taken by mail order, and an e-invoice (e-fatura) is issued. Items in stock ship the day your payment reaches us.',
           },
         ],
         note: 'Details:',
@@ -2011,7 +2099,8 @@ export const DICT: Record<Lang, Dict> = {
       total: 'Total (export price, excl. shipping)',
       subtotal: 'Subtotal',
       vat: (pct) => `Taxes (${pct}%)`,
-      totalNote: 'Products priced on request are not in the total.',
+      totalNote:
+        'Products priced on request are not in the subtotal, taxes or total; we price them in our reply.',
       remove: (name) => `Remove ${name} from the cart`,
       removeShort: 'Remove',
       removed: (name) => `${name} removed from the cart.`,
@@ -2025,6 +2114,10 @@ export const DICT: Record<Lang, Dict> = {
       phone: 'Phone',
       city: 'City',
       country: 'Country',
+      invoiceTitle: 'Invoice details (optional)',
+      email: 'E-mail',
+      taxOffice: 'Tax office',
+      taxId: 'Tax number / Turkish ID number',
       required: '(required)',
       countryMissing: 'Please enter your country, so we can quote the shipping.',
       intlNote: 'Orders outside Türkiye: prices are export prices; shipping is not included.',
@@ -2032,7 +2125,7 @@ export const DICT: Record<Lang, Dict> = {
       sendWa: 'Send the order request on WhatsApp',
       sendMail: 'Send by e-mail',
       clear: 'Empty the cart',
-      info: 'No online payment yet: once we receive your request we get back to you; payment by credit card or bank transfer. Items in stock ship the day your payment reaches us; shipping is paid by the buyer and the amount is given in the order confirmation. Your details only go into this message; the site does not store them.',
+      info: 'No online payment yet: once we receive your request we get back to you. Items in stock ship the day your payment reaches us; shipping is paid by the buyer and the amount is given in the order confirmation. Your details only go into this message; the site does not store them.',
       message: (lines, total, contact) =>
         [
           'Hello, my order request:',
@@ -2042,7 +2135,27 @@ export const DICT: Record<Lang, Dict> = {
           ...(contact.length ? ['', ...contact] : []),
         ].join('\n'),
       line: (name, qty, unit, total, url) =>
-        `- ${name}: ${qty} × ${unit}${total ? ` = ${total}` : ''}\n  ${url}`,
+        unit === null
+          ? `- ${name}: ${qty} pcs (price on request)\n  ${url}`
+          : `- ${name}: ${qty} × ${unit}${total ? ` = ${total}` : ''}\n  ${url}`,
+      share: {
+        button: 'Share the cart',
+        title: 'Cart (order list)',
+        hint: 'The link carries only the products and quantities, never your contact details.',
+        copied: 'Cart link copied',
+        copyFailed: (url) => `Copy the link: ${url}`,
+        reopen: (url) => `To open this order again: ${url}`,
+        ask: 'Add this list to your cart?',
+        add: 'Add',
+        cancel: 'Cancel',
+        loading: 'Reading the list…',
+        added: (n) =>
+          `${n} ${n === 1 ? 'item' : 'items'} added to your cart; prices are the current prices on the site.`,
+        dropped: (n) =>
+          `${n} ${n === 1 ? 'item is' : 'items are'} no longer on the site and ${n === 1 ? 'was' : 'were'} not added.`,
+        none: 'The products in this link are no longer on the site.',
+        failed: 'The list could not be opened just now. Reload the page and try again.',
+      },
     },
     brand: {
       title: (brand) => `${brand} breaker tips`,
@@ -2054,14 +2167,18 @@ export const DICT: Record<Lang, Dict> = {
       rows: [
         ['Fit', 'Made to OEM dimensions, a direct fit'],
         ['Shipping', 'Paid by the buyer; the amount is given in the order confirmation'],
-        ['Payment', 'Credit card or bank transfer'],
+        ['Payment', 'Credit card (mail order) or bank transfer'],
+        ['Invoice', 'E-invoice (e-fatura) issued'],
+        ['Reply', 'Within 2 hours on business days'],
       ],
       warrantyLabel: 'Warranty',
       warranty: (m) => `${m} months from delivery, against material and manufacturing defects`,
       warrantyAll:
         'From delivery: 6 months on front heads and pistons, 3 months on bushings, 2 months on all other products; against material and manufacturing defects',
       short: (m) =>
-        `Shipping paid by the buyer; payment by credit card or bank transfer; ${m}-month warranty. Made by Kervan Makina, not an original part; make and model names only show the fit.`,
+        `Shipping paid by the buyer; ${m}-month warranty. Made by Kervan Makina, not an original part; make and model names only show the fit.`,
+      facts:
+        'Payment by credit card (mail order) or bank transfer · E-invoice (e-fatura) issued · Reply within 2 hours on business days',
       more: 'Full terms of sale and warranty scope',
       note: 'Our products are made by Kervan Makina and are not the breaker maker’s original parts; make and model names only show the fit. The warranty covers material and manufacturing (including heat treatment) defects; normal wear, blank firing, prying with the tip, side or angled strikes, working with a worn bushing, running without grease and choosing the wrong tip are not covered. We ask for the broken part and photos to assess a claim.',
     },
@@ -2631,6 +2748,8 @@ export const DICT: Record<Lang, Dict> = {
           `Hello, I would like to order ${qty} × ${breaker} ${part} (unit ${price}, export price).\n${url}`,
         other: 'Request a quote for another breaker',
         withNuts: 'Sold as a set, with its nuts',
+        askAdd:
+          'Goes into the cart as “price on request”; send it with your other items in one request and we price it in our reply.',
       },
       fitted: {
         label: 'Option',

@@ -65,6 +65,9 @@ interface Props {
   hasPopular: boolean;
   /** Header quote button's message (the page's product); the generic tip message without it. */
   quoteText?: string;
+  /** The page shows a price (tip and model pages, priced part items): the cart is the header's
+   *  orange button and the quote a quiet outline link beside it. */
+  priced?: boolean;
   /** Home page: no notice band (the order box is on the page) and, on phones, no category bar
    *  (the names beside the opening link every group). */
   home?: boolean;
@@ -73,8 +76,8 @@ interface Props {
   children: ReactNode;
 }
 
-/** "Sipariş: WhatsApp · +90 …": how to order, in the header of every page; `note` ("Online ödeme
- *  henüz yok", home) after it, on a line of its own on phones; `phoneClass` hides the number where
+/** "Sipariş: WhatsApp · +90 …": how to order, in the header of every page; `note` (home: prices
+ *  on the site, how to pay) after it, on a line of its own on phones; `phoneClass` hides the number where
  *  the bar is short of room. */
 function OrderLine({
   t,
@@ -119,10 +122,25 @@ export default function Layout({
   demo,
   hasPopular,
   quoteText,
+  priced = false,
   home,
   finder,
   children,
 }: Props) {
+  // The header's quote link (WhatsApp, the page's product): orange on pages without a price,
+  // a quiet outline beside the orange cart where the page already shows one.
+  const quote = (
+    <Button
+      href={whatsappHref(quoteText ?? t.nav.quoteText)}
+      label={t.nav.quote}
+      variant={priced ? 'secondary' : 'primary'}
+      className={`shrink-0 px-2.5 min-[23.4375rem]:px-3 sm:px-[18px] ${priced ? `font-medium lg:px-3 xl:px-[18px] ${OUTLINE_BUTTON}` : 'font-semibold'}`}
+    >
+      {/* Short where the row is tight: phones, and beside the search below 1280 px. */}
+      <span className="sm:hidden lg:inline xl:hidden">{t.nav.quoteShort}</span>
+      <span className="hidden sm:inline lg:hidden xl:inline">{t.nav.quote}</span>
+    </Button>
+  );
   const other: Lang = lang === 'tr' ? 'en' : 'tr';
   const barRef = useRef<HTMLUListElement>(null);
   // Phones: the category bar scrolls sideways; bring the current group into view.
@@ -220,17 +238,17 @@ export default function Layout({
               {t.nav.langOther}
             </a>
             <ThemeSelect t={t} />
-            <CartLink lang={lang} t={t} current={path === CART_PATH} />
-            <Button
-              href={whatsappHref(quoteText ?? t.nav.quoteText)}
-              label={t.nav.quote}
-              variant="primary"
-              className="shrink-0 px-2.5 font-semibold min-[23.4375rem]:px-3 sm:px-[18px]"
-            >
-              {/* Short where the row is tight: phones, and beside the search below 1280 px. */}
-              <span className="sm:hidden lg:inline xl:hidden">{t.nav.quoteShort}</span>
-              <span className="hidden sm:inline lg:hidden xl:inline">{t.nav.quote}</span>
-            </Button>
+            {priced ? (
+              <>
+                {quote}
+                <CartLink lang={lang} t={t} current={false} primary />
+              </>
+            ) : (
+              <>
+                <CartLink lang={lang} t={t} current={path === CART_PATH} />
+                {quote}
+              </>
+            )}
           </div>
           <OrderLine
             t={t}
@@ -320,7 +338,15 @@ export default function Layout({
             />
           </svg>
           <p className="m-0">
-            <strong className="font-semibold text-ink">{t.banner.label}</strong> {t.banner.preview}{' '}
+            {/* How buying works; the cart keeps the honest "online ödeme henüz yok". */}
+            {path === CART_PATH ? (
+              <>
+                <strong className="font-semibold text-ink">{t.banner.label}</strong>{' '}
+                {t.banner.preview}
+              </>
+            ) : (
+              t.banner.facts
+            )}{' '}
             <a
               href={`${localePath(CART_PATH, lang)}#siparis-adimlari`}
               className={`ml-1 whitespace-nowrap font-medium text-brand-hi underline underline-offset-2 hover:text-ink ${FOCUS}`}

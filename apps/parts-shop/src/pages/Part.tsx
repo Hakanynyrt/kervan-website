@@ -5,6 +5,7 @@ import { TextInput } from '@astryxdesign/core/TextInput';
 import { matches, matchesOem, rewriteQuery, slugify, type FxRate } from '@kervan/tips';
 import { useReducedMotion } from '@kervan/motion';
 import {
+  AddedNote,
   Breadcrumb,
   ImgNote,
   MissingModel,
@@ -17,6 +18,7 @@ import {
   StickyQuote,
   Terms,
   chipClass,
+  type Added,
 } from '../components/Bits';
 import { PartVideos } from '../components/GuideVideo';
 import {
@@ -34,6 +36,7 @@ import RenderGallery from '../components/RenderGallery';
 import ShareLinks from '../components/ShareLinks';
 import { ORDER_CONVERSION } from '../lib/ads';
 import { addToCart } from '../lib/cart';
+import { listedLineId } from '../lib/palet-share';
 import type { Dict } from '../lib/dict';
 import type { ListedPart } from '../lib/listed-parts';
 import { localePath } from '../lib/locale-path';
@@ -555,7 +558,7 @@ function ListedCard({ l, ctx }: { l: ListedPart; ctx: Ctx }) {
             onClick={() => {
               addToCart(
                 {
-                  id: `listed:${ctx.part}/${slugify(l.breaker)}/${l.type}`,
+                  id: listedLineId(ctx.part, slugify(l.breaker), l.type),
                   name: l.breaker,
                   label,
                   code: null,
@@ -603,6 +606,7 @@ export function QuotePanel({
   t,
   part,
   compact,
+  onAdd,
 }: {
   name: string;
   breaker: string;
@@ -615,9 +619,12 @@ export function QuotePanel({
   part?: PartKey;
   /** The page language on an item page: the one-line sale terms (`Terms`). */
   compact?: Lang;
+  /** Unpriced item page: put it on the palet as a "fiyat sorulacak" line; returns the line's quantity. */
+  onAdd?: () => number | null;
 }) {
   const box = useRef<HTMLInputElement>(null);
   useKeepTyped(box, setBreaker);
+  const [added, setAdded] = useState<Added>(null);
   return (
     <div className="lg:sticky lg:top-6">
       <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
@@ -639,7 +646,16 @@ export function QuotePanel({
         <p aria-hidden="true" className="m-0 mb-2 mt-4 font-semibold text-ink">
           {t.family.qty}
         </p>
-        <QtyStepper id="qty" value={qty} onChange={setQty} label={t.family.qty} t={t} />
+        <QtyStepper
+          id="qty"
+          value={qty}
+          onChange={(n) => {
+            setQty(n);
+            setAdded(null);
+          }}
+          label={t.family.qty}
+          t={t}
+        />
         <div className="mt-4 flex flex-col gap-3">
           <Button
             href={whatsappHref(text)}
@@ -648,6 +664,21 @@ export function QuotePanel({
             {...ORDER_CONVERSION}
             className={`px-5 ${WHATSAPP_BUTTON}`}
           />
+          {onAdd && (
+            <div>
+              <Button
+                label={t.price.add}
+                variant="secondary"
+                size="lg"
+                width="100%"
+                onClick={() => setAdded({ n: onAdd() })}
+                className={`px-5 ${OUTLINE_BUTTON}`}
+              />
+              <p className="m-0 mt-2 text-xs text-ink-mid">{t.parts.order.askAdd}</p>
+              {/* Item pages pass their language as `compact`. */}
+              <AddedNote added={added} lang={compact ?? 'tr'} t={t} />
+            </div>
+          )}
           <Button
             href={`mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(breaker.trim() ? `${name} – ${breaker.trim()}` : name)}&body=${encodeURIComponent(text)}`}
             label={t.family.email}
