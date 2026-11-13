@@ -26,6 +26,23 @@ function partItemQuote(part: PartKey, anchor: string, t: Dict): string {
   return t.parts.text(name, r ? renderModel(r, t) : '', 1);
 }
 
+/** The page shows a price: tip and model pages with a priced tip, part items with a price. */
+function showsPrice(model: PageProps['model']): boolean {
+  switch (model.kind) {
+    case 'breaker':
+      return (
+        model.families.some((f) => f.skus.some((s) => s.priceUsdNetCents !== null)) ||
+        (model.extra?.priceUsdNetCents ?? null) !== null
+      );
+    case 'family':
+      return model.family.skus.some((s) => s.priceUsdNetCents !== null);
+    case 'partItem':
+      return model.price !== null || model.priceFitted !== null;
+    default:
+      return false;
+  }
+}
+
 function AppBody({ lang, path, model, fx }: PageProps) {
   const t = DICT[lang];
   const demo = model.kind !== 'notFound' && model.demo;
@@ -46,12 +63,13 @@ function AppBody({ lang, path, model, fx }: PageProps) {
       demo={demo}
       hasPopular={hasPopular}
       quoteText={quoteText}
+      priced={showsPrice(model)}
       home={model.kind === 'home'}
       finder={model.kind === 'home' ? model.finder : undefined}
     >
       {model.kind === 'home' && <Home model={model} fx={fx} lang={lang} t={t} />}
       {model.kind === 'list' && <TipList model={model} fx={fx} lang={lang} t={t} />}
-      {model.kind === 'popular' && <Popular model={model} lang={lang} t={t} />}
+      {model.kind === 'popular' && <Popular model={model} fx={fx} lang={lang} t={t} />}
       {model.kind === 'brand' && <Brand model={model} fx={fx} lang={lang} t={t} />}
       {model.kind === 'parts' && <Parts model={model} lang={lang} t={t} />}
       {model.kind === 'part' && <Part model={model} fx={fx} lang={lang} t={t} />}

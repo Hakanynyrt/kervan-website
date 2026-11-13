@@ -205,6 +205,10 @@
   body:has([data-sticky-bar]) footer {
     padding-bottom: 5rem;
   }
+  /* With its "Palete yüklendi" line the bar is about 100 px, 120 px when that line wraps. */
+  body:has([data-sticky-bar][data-added]) footer {
+    padding-bottom: 8rem;
+  }
 }
 
 /* Home opening (ExplodedPicker): <html data-kv-open> is set before paint by index.html when the

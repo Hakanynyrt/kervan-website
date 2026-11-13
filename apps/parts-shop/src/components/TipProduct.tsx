@@ -15,6 +15,7 @@ import { fmtMm, fmtNum } from '../lib/format';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
 import type { SpecialTool } from '../lib/grooved';
 import { addToCart, cartQty } from '../lib/cart';
+import { tipLineId } from '../lib/palet-share';
 import { fmtDate, fmtGrossTry, fmtTry, fmtUsd, leadsGross, unitText } from '../lib/price';
 import { LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
@@ -180,7 +181,7 @@ export default function TipProduct({
     opt.cents !== null && leadsGross(lang, fx) ? fmtGrossTry(opt.cents, fx, lang) : null;
   const tl = opt.cents === null ? null : (gross ?? fmtTry(opt.cents, fx, lang));
   const add = () => {
-    const lineId = `${path}${variant ? `|${vi + 1}` : ''}|${opt.tipType}`;
+    const lineId = tipLineId(path, variant ? vi + 1 : null, opt.tipType);
     addToCart(
       {
         id: lineId,
@@ -654,7 +655,15 @@ export default function TipProduct({
       </section>
 
       <MissingModel t={t} />
-      <StickyQuote text={text} label={order ? tf.orderWa : undefined} t={t} />
+      {/* Priced: the bar's "Palete yükle" is the order box's own `add` (same type, size, qty). */}
+      <StickyQuote
+        text={text}
+        label={order ? tf.orderWa : undefined}
+        t={t}
+        onAdd={order ? add : undefined}
+        added={added}
+        lang={lang}
+      />
     </div>
   );
 }

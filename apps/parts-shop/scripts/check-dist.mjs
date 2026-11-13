@@ -18,6 +18,8 @@
 //   never a price, in the output;
 // - every guide video is a visitor-started player with its files, captions and VideoObject
 //   (design.md "Motion"); caption files are served as text/vtt;
+// - no prerendered link to a shared palet (`/palet?p=`), and no JSON file carries a price (prices
+//   ship only in each page's own props, never in bulk);
 // - at most MAX_FILES files (Pages limit).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -164,6 +166,10 @@ for (const f of files) {
   const s = fs.readFileSync(f, 'utf8');
   const rel = path.relative(DIST, f);
   for (const re of FORBIDDEN) if (re.test(s)) problems.push(`${rel}: forbidden ${re}`);
+  // Prices ship one page at a time, in that page's props; a JSON file with them would be a
+  // machine-readable price list (a shared palet link fetches its pages instead).
+  if (f.endsWith('.json') && /"(?:cents|price|priceFitted|prices)":\s*[[{\d]/.test(s))
+    problems.push(`${rel}: JSON file carries prices`);
   if (f.endsWith('.html')) {
     pages++;
     const out = new Set();
@@ -172,6 +178,8 @@ for (const f of files) {
       if (u) out.add(u);
     }
     if (!s.includes('id="kv-page"')) problems.push(`${rel}: no page props`);
+    // Shared palet links (`/palet?p=`) are built in the browser only: never a crawlable link.
+    if (/<a\b[^>]*?\shref="[^"]*\/palet\?/.test(s)) problems.push(`${rel}: link to /palet?…`);
     const offers = [];
     for (const m of s.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
       try {

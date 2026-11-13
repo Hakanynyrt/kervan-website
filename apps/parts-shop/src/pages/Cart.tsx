@@ -14,6 +14,7 @@ import {
   WRAP,
 } from '../components/Layout';
 import { PartGroups } from '../components/PartGroups';
+import { SHARE_ICON, useShare } from '../components/ShareLinks';
 import { ORDER_CONVERSION } from '../lib/ads';
 import { CART_EVENT, readCart, writeCart, type CartItem } from '../lib/cart';
 import type { Dict } from '../lib/dict';
@@ -30,12 +31,35 @@ import {
   vatOf,
 } from '../lib/price';
 import { LEGAL, legalPath } from '../lib/legal';
-import { PARTS_PATH } from '../lib/routes';
+import {
+  decodePalet,
+  mergeShared,
+  paletLink,
+  paletParam,
+  withoutPalet,
+  type PaletLines,
+  type SharedLine,
+} from '../lib/palet-share';
+import { sharedPaletLines } from '../lib/palet-lines';
+import { CART_PATH, PARTS_PATH } from '../lib/routes';
 import type { Lang } from '../types';
 import { ORDER_EMAIL, SITE } from '../lib/site';
 
-const FIELDS = ['name', 'company', 'phone', 'city', 'country', 'note'] as const;
+const FIELDS = [
+  'name',
+  'company',
+  'phone',
+  'city',
+  'country',
+  'email',
+  'taxOffice',
+  'taxId',
+  'note',
+] as const;
 type Field = (typeof FIELDS)[number];
+/** Optional invoice details (2026-11-13), grouped under their own legend; like every field they
+ *  go into the order message only when filled. */
+const INVOICE: readonly Field[] = ['email', 'taxOffice', 'taxId'];
 /** The country is asked on the English cart only (international orders), and required there. */
 const fieldsFor = (lang: Lang): readonly Field[] =>
   lang === 'en' ? FIELDS : FIELDS.filter((k) => k !== 'country');
@@ -45,6 +69,9 @@ const AUTOCOMPLETE: Record<Field, string> = {
   phone: 'tel',
   city: 'address-level2',
   country: 'country-name',
+  email: 'email',
+  taxOffice: 'off',
+  taxId: 'off',
   note: 'off',
 };
 
@@ -62,6 +89,9 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
     phone: '',
     city: '',
     country: '',
+    email: '',
+    taxOffice: '',
+    taxId: '',
     note: '',
   });
   const fields = fieldsFor(lang);
@@ -87,6 +117,82 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
       window.removeEventListener('storage', load);
     };
   }, []);
+  // A shared palet link (`?p=`, lib/palet-share.ts): asked once, then merged with the names and
+  // prices its product pages show now (one fetch per page, lib/palet-lines.ts); the query leaves the address bar once it is handled, so a
+  // reload does not add the lines again.
+  const [incoming, setIncoming] = useState<
+    | { state: 'loading' }
+    | {
+        state: 'ask';
+        shared: SharedLine[];
+        lines: PaletLines;
+        preview: CartItem[];
+        dropped: number;
+      }
+    | { state: 'failed' }
+    | null
+  >(null);
+  const [sharedNote, setSharedNote] = useState('');
+  const askHeading = useRef<HTMLHeadingElement>(null);
+  const dropQuery = () => {
+    try {
+      const { pathname, search, hash } = window.location;
+      window.history.replaceState(window.history.state, '', pathname + withoutPalet(search) + hash);
+    } catch {
+      /* no history API: the query stays */
+    }
+  };
+  useEffect(() => {
+    const raw = paletParam(window.location.search);
+    if (raw === null) return;
+    const { lines: shared, bad } = decodePalet(raw);
+    if (!shared.length) {
+      setSharedNote(c.share.none);
+      dropQuery();
+      return;
+    }
+    let live = true;
+    setIncoming({ state: 'loading' });
+    sharedPaletLines(
+      shared.map((x) => x.id),
+      lang,
+    )
+      .then((lines) => {
+        if (!live) return;
+        const { added, dropped } = mergeShared([], shared, lines);
+        if (!added.length) {
+          setIncoming(null);
+          setSharedNote(c.share.none);
+          dropQuery();
+        } else setIncoming({ state: 'ask', shared, lines, preview: added, dropped: dropped + bad });
+      })
+      .catch(() => live && setIncoming({ state: 'failed' }));
+    return () => {
+      live = false;
+    };
+    // Once, on load: the link is read from the address bar.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (incoming?.state === 'ask') askHeading.current?.focus();
+  }, [incoming?.state]);
+  const acceptShared = () => {
+    if (incoming?.state !== 'ask') return;
+    const { items: next, added } = mergeShared(readCart(), incoming.shared, incoming.lines);
+    setUndo(null);
+    update(next);
+    setIncoming(null);
+    setSharedNote(
+      [c.share.added(added.length), incoming.dropped ? c.share.dropped(incoming.dropped) : '']
+        .filter(Boolean)
+        .join(' '),
+    );
+    dropQuery();
+  };
+  const declineShared = () => {
+    setIncoming(null);
+    dropQuery();
+  };
   // The last removal (one line or the whole cart), undoable until the next change.
   const [undo, setUndo] = useState<{ items: CartItem[]; msg: string } | null>(null);
   const update = (next: CartItem[]) => {
@@ -124,7 +230,9 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   // Taxes are added on Turkish pages only; English pages show the export price.
   const vatCents = lang === 'tr' ? vatOf(totalCents) : 0;
   const grossCents = totalCents + vatCents;
+  // "Fiyat sorulacak" lines (unpriced parts): no price, left out of the subtotal, taxes and total.
   const anyAsk = list.some((x) => x.cents === null);
+  const anyPriced = list.some((x) => x.cents !== null);
   // Turkish with a rate (owner, G2): each line is its unit's tax-inclusive TL price (the product
   // pages' figure) × quantity, and the total is the sum of those lines, so the cart never
   // differs from the pages. The subtotal and tax rows stay in net USD.
@@ -148,7 +256,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
     c.line(
       `${x.name}, ${lineLabel(x)}${x.code ? ` (${x.code})` : ''}`,
       x.qty,
-      x.cents === null ? c.ask : unitText(x.cents, fx, lang, t),
+      x.cents === null ? null : unitText(x.cents, fx, lang, t),
       lineTotal(x),
       SITE + localePath(x.path, lang),
     ),
@@ -158,15 +266,60 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
       ? `${fmtTryCents(totalTry, lang)} / ${fmtUsd(grossCents, lang)}`
       : money(grossCents);
   const subject = list.length ? c.subject(list[0].name, list.length - 1) : c.title;
-  const message = c.message(
+  // "Paleti paylaş" and the order messages' last line: ids and quantities only.
+  const shareUrl = paletLink(SITE, localePath(CART_PATH, lang), list);
+  const { status: shareStatus, share } = useShare(c.share);
+  const body = c.message(
     lines,
-    [
-      ...(vatCents
-        ? [`${c.subtotal}: ${money(totalCents)}`, `${c.vat(VAT_PERCENT)}: ${money(vatCents)}`]
-        : []),
-      `${c.total}: ${totalText}${anyAsk ? ` (${c.totalNote})` : ''}`,
-    ].join('\n'),
+    anyPriced
+      ? [
+          ...(vatCents
+            ? [`${c.subtotal}: ${money(totalCents)}`, `${c.vat(VAT_PERCENT)}: ${money(vatCents)}`]
+            : []),
+          `${c.total}: ${totalText}`,
+          ...(anyAsk ? [c.totalNote] : []),
+        ].join('\n')
+      : `${c.total}: ${c.ask}`,
     fields.filter((k) => contact[k].trim()).map((k) => `${c[k]}: ${contact[k].trim()}`),
+  );
+  const message = list.length ? `${body}\n\n${c.share.reopen(shareUrl)}` : body;
+
+  const field = (k: Field) => (
+    <div key={k} className="mt-3">
+      {k === 'note' ? (
+        <TextArea
+          id={`c-${k}`}
+          label={c[k]}
+          rows={3}
+          value={contact[k]}
+          onChange={(v) => setContact({ ...contact, [k]: v })}
+          containerClassName="[&_label]:font-medium [&_textarea]:text-base"
+          controlClassName={FIELD_RING}
+        />
+      ) : (
+        <TextInput
+          id={`c-${k}`}
+          ref={k === 'country' ? countryRef : undefined}
+          label={k === 'country' ? `${c[k]} ${c.required}` : c[k]}
+          size="lg"
+          status={k === 'country' && countryError && blocked ? { type: 'error' } : undefined}
+          aria-describedby={
+            k === 'country' && countryError && blocked ? 'c-country-err' : undefined
+          }
+          type={k === 'phone' ? 'tel' : k === 'email' ? 'email' : 'text'}
+          autoComplete={AUTOCOMPLETE[k]}
+          value={contact[k]}
+          onChange={(v) => setContact({ ...contact, [k]: v })}
+          containerClassName="[&_label]:font-medium"
+          controlClassName={`px-3 ${FIELD_TEXT}`}
+        />
+      )}
+      {k === 'country' && countryError && blocked && (
+        <p id="c-country-err" role="alert" className="m-0 mt-1 text-sm font-medium text-err">
+          {c.countryMissing}
+        </p>
+      )}
+    </div>
   );
 
   return (
@@ -191,6 +344,58 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
           </div>
         )}
       </div>
+      {/* The outcome of a shared palet link. */}
+      <p role="status" className="m-0 font-sans text-sm text-ink">
+        {sharedNote && <span className="mt-4 block">{sharedNote}</span>}
+      </p>
+      {incoming?.state === 'loading' && (
+        <p className="m-0 mt-4 font-sans text-sm text-ink-mid">{c.share.loading}</p>
+      )}
+      {incoming?.state === 'failed' && (
+        <p role="alert" className="m-0 mt-4 font-sans text-sm font-medium text-err">
+          {c.share.failed}
+        </p>
+      )}
+      {incoming?.state === 'ask' && (
+        <section
+          aria-labelledby="shared-h"
+          className="mt-6 rounded-sm border border-hair-strong bg-bg-soft p-5 font-sans text-sm"
+        >
+          <h2
+            id="shared-h"
+            ref={askHeading}
+            tabIndex={-1}
+            className="m-0 text-lg font-semibold text-ink outline-none"
+          >
+            {c.share.ask}
+          </h2>
+          <ul className="m-0 mt-3 list-none divide-y divide-hair border-y border-hair p-0">
+            {incoming.preview.map((x) => (
+              <li key={x.id} className="flex justify-between gap-4 py-2">
+                <span className="min-w-0">
+                  <span className="font-semibold text-ink">{x.name}</span>{' '}
+                  <span className="text-ink-mid">{lineLabel(x)}</span>
+                </span>
+                <span className="whitespace-nowrap text-ink tabular-nums">
+                  {c.qty}: {x.qty}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {incoming.dropped > 0 && (
+            <p className="m-0 mt-2 text-ink-mid">{c.share.dropped(incoming.dropped)}</p>
+          )}
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button label={c.share.add} variant="primary" onClick={acceptShared} className="px-5" />
+            <Button
+              label={c.share.cancel}
+              variant="secondary"
+              onClick={declineShared}
+              className={`px-5 ${OUTLINE_BUTTON}`}
+            />
+          </div>
+        </section>
+      )}
       {items === null ? null : list.length === 0 ? (
         <>
           <div className="mt-6 rounded-sm border border-hair bg-bg-soft p-6 font-sans sm:flex sm:items-center sm:justify-between sm:gap-6">
@@ -231,7 +436,8 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                       {x.name}
                     </a>
                     <p className="m-0 text-ink-mid">{lineLabel(x)}</p>
-                    {gross && x.cents !== null ? (
+                    {/* A "fiyat sorulacak" line says so in its amount column only. */}
+                    {x.cents === null ? null : gross ? (
                       <>
                         <p className="m-0 text-ink-mid tabular-nums">
                           {c.unitGross}: {fmtTryCents(grossTryCents(x.cents, fx) ?? 0, lang)}
@@ -242,7 +448,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                       </>
                     ) : (
                       <p className="m-0 text-ink-mid tabular-nums">
-                        {c.unit}: {x.cents === null ? c.ask : fmtUsd(x.cents, lang)}
+                        {c.unit}: {fmtUsd(x.cents, lang)}
                       </p>
                     )}
                   </div>
@@ -256,7 +462,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                     />
                   </div>
                   <p className="col-start-2 row-start-1 m-0 self-start text-right font-semibold whitespace-nowrap text-ink tabular-nums sm:ml-auto sm:min-w-24 sm:self-center">
-                    {lineTotal(x) ?? '—'}
+                    {lineTotal(x) ?? <span className="font-medium text-ink-mid">{c.ask}</span>}
                   </p>
                   <Button
                     label={c.remove(x.name)}
@@ -274,61 +480,39 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                 </li>
               ))}
             </ul>
-            <div className="mt-4 font-sans">
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 font-sans">
+              <Button
+                label={c.share.button}
+                variant="secondary"
+                onClick={() => void share(shareUrl, c.share.title)}
+                icon={SHARE_ICON}
+                className={`px-4 ${OUTLINE_BUTTON}`}
+              />
               <Button
                 label={c.clear}
                 variant="ghost"
                 onClick={() => remove([], c.cleared)}
-                className="-ml-2 px-2 text-sm text-ink-mid underline hover:text-ink"
+                className="px-2 text-sm text-ink-mid underline hover:text-ink"
               />
             </div>
+            <p className="m-0 mt-2 font-sans text-xs text-ink-mid">{c.share.hint}</p>
+            <p
+              role="status"
+              aria-live="polite"
+              className="m-0 mt-1 break-all font-sans text-sm text-ink-mid"
+            >
+              {shareStatus}
+            </p>
           </div>
 
           <aside className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
             <h2 className="m-0 text-lg font-bold text-ink">{c.contactTitle}</h2>
-            {fields.map((k) => (
-              <div key={k} className="mt-3">
-                {k === 'note' ? (
-                  <TextArea
-                    id={`c-${k}`}
-                    label={c[k]}
-                    rows={3}
-                    value={contact[k]}
-                    onChange={(v) => setContact({ ...contact, [k]: v })}
-                    containerClassName="[&_label]:font-medium [&_textarea]:text-base"
-                    controlClassName={FIELD_RING}
-                  />
-                ) : (
-                  <TextInput
-                    id={`c-${k}`}
-                    ref={k === 'country' ? countryRef : undefined}
-                    label={k === 'country' ? `${c[k]} ${c.required}` : c[k]}
-                    size="lg"
-                    status={
-                      k === 'country' && countryError && blocked ? { type: 'error' } : undefined
-                    }
-                    aria-describedby={
-                      k === 'country' && countryError && blocked ? 'c-country-err' : undefined
-                    }
-                    type={k === 'phone' ? 'tel' : 'text'}
-                    autoComplete={AUTOCOMPLETE[k]}
-                    value={contact[k]}
-                    onChange={(v) => setContact({ ...contact, [k]: v })}
-                    containerClassName="[&_label]:font-medium"
-                    controlClassName={`px-3 ${FIELD_TEXT}`}
-                  />
-                )}
-                {k === 'country' && countryError && blocked && (
-                  <p
-                    id="c-country-err"
-                    role="alert"
-                    className="m-0 mt-1 text-sm font-medium text-err"
-                  >
-                    {c.countryMissing}
-                  </p>
-                )}
-              </div>
-            ))}
+            {fields.filter((k) => k !== 'note' && !INVOICE.includes(k)).map(field)}
+            <fieldset className="m-0 mt-5 border-0 p-0">
+              <legend className="p-0 font-semibold text-ink">{c.invoiceTitle}</legend>
+              {INVOICE.map(field)}
+            </fieldset>
+            {field('note')}
             {/* The sum sits right above the send buttons, so it is read before sending. */}
             <div className="mt-5 border-t border-hair pt-4">
               <dl className="m-0 text-sm tabular-nums">
@@ -349,11 +533,15 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                 >
                   <dt>{c.total}</dt>
                   <dd className="m-0 whitespace-nowrap">
-                    {totalTry !== null ? fmtTryCents(totalTry, lang) : fmtUsd(grossCents, lang)}
+                    {!anyPriced
+                      ? c.ask
+                      : totalTry !== null
+                        ? fmtTryCents(totalTry, lang)
+                        : fmtUsd(grossCents, lang)}
                   </dd>
                 </div>
               </dl>
-              {totalTry !== null ? (
+              {!anyPriced ? null : totalTry !== null ? (
                 <p className="m-0 mt-1 text-right text-sm text-ink-mid tabular-nums">
                   {fmtUsd(grossCents, lang)}
                 </p>
@@ -364,7 +552,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                   </p>
                 )
               )}
-              {fx && (
+              {fx && anyPriced && (
                 <p className="m-0 mt-1 text-right text-xs text-ink-soft">
                   {t.price.fxNote(fmtDate(fx.date, lang))}
                 </p>
@@ -412,6 +600,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                 className={`px-5 ${OUTLINE_BUTTON}`}
               />
             </div>
+            <p className="m-0 mt-4 text-sm text-ink">{t.terms.facts}</p>
             {c.intlNote && <p className="m-0 mt-4 text-xs text-ink-mid">{c.intlNote}</p>}
             <p className="m-0 mt-4 text-xs text-ink-mid">{c.info}</p>
           </aside>
