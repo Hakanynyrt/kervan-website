@@ -1,14 +1,7 @@
 import { Fragment, useState, type ReactNode } from 'react';
 import { Button } from '@astryxdesign/core/Button';
 import type { FxRate } from '@kervan/tips';
-import {
-  Breadcrumb,
-  ImgNote,
-  OemLine,
-  OemNumbers,
-  PageTitle,
-  StickyQuote,
-} from '../components/Bits';
+import { Breadcrumb, ImgNote, OemLine, OemNumbers, PageTitle } from '../components/Bits';
 import { FOCUS, OUTLINE_BUTTON, WRAP } from '../components/Layout';
 import { PartOrder, PartPriceLine, priceNote } from '../components/PartOrder';
 import { addToCart, cartQty } from '../lib/cart';
@@ -209,6 +202,7 @@ export default function PartItem({
           )}
         </div>
         <aside className="lg:col-start-2">
+          {/* Either panel renders the phones' bottom bar itself, with its own "Palete yükle". */}
           {cents !== null ? (
             <PartOrder
               id={lineId}
@@ -240,8 +234,6 @@ export default function PartItem({
           )}
         </aside>
       </div>
-      {/* Priced items: `PartOrder` renders the bar itself, with its "Palete yükle". */}
-      {cents === null && <StickyQuote text={text} t={t} />}
     </div>
   );
 }

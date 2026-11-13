@@ -626,6 +626,8 @@ export function QuotePanel({
   const box = useRef<HTMLInputElement>(null);
   useKeepTyped(box, setBreaker);
   const [added, setAdded] = useState<Added>(null);
+  // "Palete yükle": the panel's button and the phones' sticky bar both call this.
+  const add = onAdd && (() => setAdded({ n: onAdd() }));
   return (
     <div className="lg:sticky lg:top-6">
       <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
@@ -665,14 +667,14 @@ export function QuotePanel({
             {...ORDER_CONVERSION}
             className={`px-5 ${WHATSAPP_BUTTON}`}
           />
-          {onAdd && (
+          {add && (
             <div>
               <Button
                 label={t.price.add}
                 variant="secondary"
                 size="lg"
                 width="100%"
-                onClick={() => setAdded({ n: onAdd() })}
+                onClick={add}
                 className={`px-5 ${OUTLINE_BUTTON}`}
               />
               <p className="m-0 mt-2 text-xs text-ink-mid">{t.parts.order.askAdd}</p>
@@ -694,6 +696,9 @@ export function QuotePanel({
       <div className="mt-6">
         <Terms t={t} part={part} compact={compact} />
       </div>
+      {/* Item pages, phones: the bottom bar with "Palete yükle" (this panel's `add`), WhatsApp
+          and Telefon, as on the priced pages (`PartOrder`); the group page renders its own. */}
+      {add && <StickyQuote text={text} t={t} onAdd={add} added={added} lang={compact ?? 'tr'} />}
     </div>
   );
 }

@@ -18,7 +18,8 @@ export interface CartItem {
   code: string | null;
   /** Neutral path of the product page. */
   path: string;
-  /** Unit price at the time it was added (net USD cents), null = ask. */
+  /** Unit price at the time it was added (net USD cents), null = ask; /palet reads it again from
+   *  the product page when it loads (`refreshLines`). */
   cents: number | null;
   qty: number;
 }

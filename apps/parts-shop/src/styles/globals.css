@@ -211,6 +211,41 @@
   }
 }
 
+/*
+ * "Teklifi yazdır" (/palet, PaletQuote): the quote is in the page only while the palet has lines
+ * and shows in print alone. A print then leaves out every box that neither holds the quote nor is
+ * part of it (header, footer, form, buttons, banners, anything added later), and the boxes round
+ * it lose their page padding and column width. Black on white whatever the theme; the paper and
+ * its margins are the browser's. A browser without `:has()` prints the page as before.
+ */
+.kv-quote {
+  display: none;
+}
+@media print {
+  html:has(.kv-quote),
+  html:has(.kv-quote) body {
+    background: #fff !important;
+    color: #000 !important;
+    color-scheme: light !important;
+  }
+  html:has(.kv-quote) body *:not(:has(.kv-quote), .kv-quote, .kv-quote *) {
+    display: none !important;
+  }
+  html:has(.kv-quote) body :has(.kv-quote) {
+    display: block !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    padding: 0 !important;
+    background: none !important;
+  }
+  html:has(.kv-quote) .kv-quote {
+    display: block;
+    color: #000;
+  }
+}
+
 /* Home opening (ExplodedPicker): <html data-kv-open> is set before paint by index.html when the
    opening will play (assembled frame first, final picture and callouts hidden), 'play' while the
    frames run on the canvas; without the mark the final picture shows. */

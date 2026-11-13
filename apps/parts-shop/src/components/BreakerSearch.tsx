@@ -37,9 +37,10 @@ import { FIELD_TEXT, FOCUS_INSET, WHATSAPP_BUTTON, whatsappHref } from './Layout
  * for it. "Ara" (Enter) opens the model the query names, or its only hit: on the home in the
  * "Kırıcınızı seçin" panel (`FinderPick`), as the make and model chips there do, elsewhere its
  * page. Typing alone never opens a model. The home has the finder data in its page props; the
- * other pages fetch the names only (`MODEL_INDEX_PATH`) the first time the box is used. Without JS
- * (or without a hit) the form sends `?q=` to the tip list, whose search suggests a spelling and
- * offers "model not listed".
+ * other pages fetch the names only (`MODEL_INDEX_PATH`) the first time the box is used. With
+ * several hits, a corrected spelling, no hit or no JS the form sends `?q=` to the tip list: the
+ * results as cards in the order listed here (`byNameFit`), where the search also suggests a
+ * spelling and offers "model not listed".
  */
 
 /** Model rows under the box before "n models →". */
@@ -197,16 +198,17 @@ export function BreakerSearch({
     else home?.select(full(h), 'header');
   };
   const submit = (e: FormEvent) => {
-    // Nothing found (or the index not here): the tip list's search takes over.
-    if (!found?.hits.length) return;
+    // "Ara" opens the model the query names, or the only one it finds (owner, 2026-10-22: never
+    // open a wrong breaker).
+    const one =
+      !found?.hits.length || found.guess
+        ? null
+        : (exactHit(found.hits, query) ?? (found.hits.length === 1 ? found.hits[0] : null));
+    // Anything else (several hits, a corrected guess, nothing found, the index not here yet) is
+    // the form's own submit: the tip list with `?q=`, its results as cards.
+    if (!one) return;
     e.preventDefault();
-    // "Ara" opens the model the query names, or the only one it finds; a corrected guess or
-    // several hits stay listed to pick from (owner, 2026-10-22: never open a wrong breaker).
-    const one = found.guess
-      ? null
-      : (exactHit(found.hits, query) ?? (found.hits.length === 1 ? found.hits[0] : null));
-    if (!one) setOpen(true);
-    else if (home) pick(one);
+    if (home) pick(one);
     else window.location.assign(localePath(breakerPath(one.model.slug), lang));
   };
   const onKey = (e: KeyboardEvent) => {

@@ -43,28 +43,43 @@ export interface LegalDoc {
 
 export const UPDATED = '2026-11-13';
 
-const sellerTr: LegalSection = {
-  h: 'Satıcı bilgileri',
-  p: [
-    `Unvan: ${SELLER.name}`,
-    `MERSİS No: ${SELLER.mersis}`,
-    `Adres: ${SELLER.address}`,
-    `Vergi dairesi ve numarası: ${SELLER.tax}`,
-    `Telefon: ${SELLER.phone} · Mobil / WhatsApp: ${SELLER.mobile} · Faks: ${SELLER.fax}`,
-    `E-posta: ${SELLER.email} · İnternet sitesi: ${SELLER.web}`,
-  ],
+/** The seller block's lines by what they hold, in the block's order. */
+interface SellerLines {
+  name: string;
+  mersis: string;
+  address: string;
+  tax: string;
+  phone: string;
+  email: string;
+}
+const SELLER_TR: SellerLines = {
+  name: `Unvan: ${SELLER.name}`,
+  mersis: `MERSİS No: ${SELLER.mersis}`,
+  address: `Adres: ${SELLER.address}`,
+  tax: `Vergi dairesi ve numarası: ${SELLER.tax}`,
+  phone: `Telefon: ${SELLER.phone} · Mobil / WhatsApp: ${SELLER.mobile} · Faks: ${SELLER.fax}`,
+  email: `E-posta: ${SELLER.email} · İnternet sitesi: ${SELLER.web}`,
 };
-const sellerEn: LegalSection = {
-  h: 'Seller',
-  p: [
-    `Company: ${SELLER.name}`,
-    `MERSIS No: ${SELLER.mersis}`,
-    `Address: ${SELLER.address}, Türkiye`,
-    `Tax office and number: ${SELLER.tax}`,
-    `Phone: ${SELLER.phone} · Mobile / WhatsApp: ${SELLER.mobile} · Fax: ${SELLER.fax}`,
-    `E-mail: ${SELLER.email} · Website: ${SELLER.web}`,
-  ],
+const SELLER_EN: SellerLines = {
+  name: `Company: ${SELLER.name}`,
+  mersis: `MERSIS No: ${SELLER.mersis}`,
+  address: `Address: ${SELLER.address}, Türkiye`,
+  tax: `Tax office and number: ${SELLER.tax}`,
+  phone: `Phone: ${SELLER.phone} · Mobile / WhatsApp: ${SELLER.mobile} · Fax: ${SELLER.fax}`,
+  email: `E-mail: ${SELLER.email} · Website: ${SELLER.web}`,
 };
+const sellerSection = (h: string, l: SellerLines): LegalSection => ({
+  h,
+  p: [l.name, l.mersis, l.address, l.tax, l.phone, l.email],
+});
+const sellerTr = sellerSection('Satıcı bilgileri', SELLER_TR);
+const sellerEn = sellerSection('Seller', SELLER_EN);
+/** The seller block of a language (heading and lines): the legal pages' own, and the head of
+ *  /palet's printed quote (`PaletQuote`). */
+export const sellerBlock = (lang: Lang): LegalSection => (lang === 'tr' ? sellerTr : sellerEn);
+/** The returns page's contact block: the seller's own lines (picked by name: a line added to the
+ *  seller block once shifted an index here and dropped the e-mail). */
+const contactLines = (l: SellerLines): string[] => [l.name, l.address, l.tax, l.phone, l.email];
 
 const TR: Record<LegalKey, LegalDoc> = {
   'on-bilgilendirme': {
@@ -212,7 +227,7 @@ const TR: Record<LegalKey, LegalDoc> = {
           'Normal aşınma, boşta vuruş, ucu levye gibi kullanma, yanal veya eğik vuruş, aşınmış burç ile çalışma, yağlamasız kullanma ve yanlış uç seçiminden doğan hasarlar garanti kapsamında değildir.',
         ],
       },
-      { h: 'İletişim', p: [sellerTr.p[0], sellerTr.p[3], sellerTr.p[4]] },
+      { h: 'İletişim', p: contactLines(SELLER_TR) },
     ],
   },
   kvkk: {
@@ -374,7 +389,7 @@ const EN: Record<LegalKey, LegalDoc> = {
           'Tell us with photos if an item arrives damaged or wrong or has a material or manufacturing defect (warranty from delivery: 6 months on front heads, bushed sets included, and pistons; 3 months on bushings sold on their own; 2 months on all other products). For faulty items we pay the shipping both ways and repair, replace or refund. Wear and misuse (blank firing, prying, side strikes, worn bushing, no grease, wrong tip) are not covered.',
         ],
       },
-      { h: 'Contact', p: [sellerEn.p[0], sellerEn.p[3], sellerEn.p[4]] },
+      { h: 'Contact', p: contactLines(SELLER_EN) },
     ],
   },
   kvkk: {

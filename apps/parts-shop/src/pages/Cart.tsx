@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { flushSync } from 'react-dom';
 import type { FxRate } from '@kervan/tips';
 import { Button } from '@astryxdesign/core/Button';
 import { TextArea } from '@astryxdesign/core/TextArea';
@@ -13,6 +14,7 @@ import {
   whatsappHref,
   WRAP,
 } from '../components/Layout';
+import { PaletQuote, PRINT_ICON, type QuoteLine } from '../components/PaletQuote';
 import { PartGroups } from '../components/PartGroups';
 import { SHARE_ICON, useShare } from '../components/ShareLinks';
 import { ORDER_CONVERSION } from '../lib/ads';
@@ -28,19 +30,21 @@ import {
   leadsGross,
   unitText,
   VAT_PERCENT,
-  vatOf,
 } from '../lib/price';
 import { LEGAL, legalPath } from '../lib/legal';
 import {
   decodePalet,
+  lineHref,
   mergeShared,
   paletLink,
   paletParam,
+  refreshLines,
   withoutPalet,
   type PaletLines,
   type SharedLine,
 } from '../lib/palet-share';
 import { sharedPaletLines } from '../lib/palet-lines';
+import { lineTryCents, localDay, paletSum } from '../lib/palet-quote';
 import { CART_PATH, PARTS_PATH } from '../lib/routes';
 import type { Lang } from '../types';
 import { ORDER_EMAIL, SITE } from '../lib/site';
@@ -77,8 +81,9 @@ const AUTOCOMPLETE: Record<Field, string> = {
 
 /**
  * The cart: lines from this browser's storage, quantities, totals in USD and TRY, and the order
- * request sent as a WhatsApp or e-mail message. Prerendered as an empty shell; the lines appear
- * after hydration.
+ * request sent as a WhatsApp or e-mail message, or printed as a quote (`PaletQuote`). Prerendered
+ * as an empty shell; the lines appear after hydration, and their names and prices are then read
+ * again from their product pages.
  */
 export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t: Dict }) {
   const c = t.cart;
@@ -199,6 +204,29 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
     setItems(next);
     writeCart(next);
   };
+  // The stored lines carry the name and price of the day they were added: on load they are read
+  // again from their product pages, as a shared link's are, and written back, so the totals, the
+  // order message and the printed quote show what the site shows now (review, 2026-11-13: a
+  // dated quote must not carry an old price). A line whose page cannot be read stays as stored.
+  useEffect(() => {
+    const ids = readCart().map((x) => x.id);
+    if (!ids.length) return;
+    let live = true;
+    sharedPaletLines(ids, lang)
+      .then((lines) => {
+        if (!live) return;
+        const { items: next, changed } = refreshLines(readCart(), lines);
+        if (!changed) return;
+        setUndo((u) => u && { ...u, items: refreshLines(u.items, lines).items });
+        update(next);
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+    // Once, on load: lines added later come with their page's price.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const setQty = (id: string, qty: number) => {
     setUndo(null);
     update((items ?? []).map((x) => (x.id === id ? { ...x, qty } : x)));
@@ -223,35 +251,70 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
     firstLine.current?.focus();
   }, [items]);
 
+  // The printed quote's date (PaletQuote): today in this browser, read again when a print starts
+  // (the button or the browser's own Print), so a palet left open overnight is dated the day it
+  // is printed.
+  const [printDay, setPrintDay] = useState('');
+  useEffect(() => {
+    const read = () => setPrintDay(localDay(new Date()));
+    read();
+    // Before the print's snapshot is taken, not after it.
+    const stamp = () => flushSync(read);
+    window.addEventListener('beforeprint', stamp);
+    return () => window.removeEventListener('beforeprint', stamp);
+  }, []);
+
   const list = items ?? [];
   // Tips name their type through the dict; spare parts carry the label they were added with.
   const lineLabel = (x: CartItem) => (x.tipType ? t.tip[x.tipType] : (x.label ?? ''));
-  const totalCents = list.reduce((n, x) => n + (x.cents ?? 0) * x.qty, 0);
-  // Taxes are added on Turkish pages only; English pages show the export price.
-  const vatCents = lang === 'tr' ? vatOf(totalCents) : 0;
-  const grossCents = totalCents + vatCents;
-  // "Fiyat sorulacak" lines (unpriced parts): no price, left out of the subtotal, taxes and total.
-  const anyAsk = list.some((x) => x.cents === null);
-  const anyPriced = list.some((x) => x.cents !== null);
+  // One sum for the totals, the order message and the printed quote (lib/palet-quote.ts). Taxes
+  // are added on Turkish pages only; English pages show the export price. "Fiyat sorulacak"
+  // lines (unpriced parts) have no price and are left out of the subtotal, taxes and total.
+  const { totalCents, vatCents, grossCents, anyAsk, anyPriced, totalTry } = paletSum(
+    list,
+    lang,
+    fx,
+  );
   // Turkish with a rate (owner, G2): each line is its unit's tax-inclusive TL price (the product
   // pages' figure) × quantity, and the total is the sum of those lines, so the cart never
   // differs from the pages. The subtotal and tax rows stay in net USD.
   const gross = leadsGross(lang, fx);
-  const lineTry = (x: CartItem) =>
-    x.cents === null ? null : (grossTryCents(x.cents, gross ? fx : null) ?? 0) * x.qty;
-  const totalTry = gross ? list.reduce((n, x) => n + (lineTry(x) ?? 0), 0) : null;
   const money = (cents: number) =>
     gross
       ? fmtUsd(cents, lang)
       : [fmtUsd(cents, lang), fmtTry(cents, fx, lang)].filter(Boolean).join(' / ');
   const lineTotal = (x: CartItem) => {
-    const l = lineTry(x);
-    return x.cents === null
-      ? null
-      : gross && l !== null
-        ? fmtTryCents(l, lang)
-        : fmtUsd(x.cents * x.qty, lang);
+    if (x.cents === null) return null;
+    const l = lineTryCents(x, lang, fx);
+    return l !== null ? fmtTryCents(l, lang) : fmtUsd(x.cents * x.qty, lang);
   };
+  // A priced line's unit price as its row leads with it, and that price's label.
+  const unitLabel = gross ? c.unitGross : c.unit;
+  const unitShown = (cents: number) =>
+    gross ? fmtTryCents(grossTryCents(cents, fx) ?? 0, lang) : fmtUsd(cents, lang);
+  // The totals as the page shows them above the send buttons; the order message and the printed
+  // quote take the same rows.
+  const sumRows: [string, string][] = vatCents
+    ? [
+        [c.subtotal, money(totalCents)],
+        [c.vat(VAT_PERCENT), money(vatCents)],
+      ]
+    : [];
+  const totalShown = !anyPriced
+    ? c.ask
+    : totalTry !== null
+      ? fmtTryCents(totalTry, lang)
+      : fmtUsd(grossCents, lang);
+  // Under it: the gross USD of a TL total, or the TL amount of a USD one.
+  const totalAlt = !anyPriced
+    ? null
+    : totalTry !== null
+      ? fmtUsd(grossCents, lang)
+      : fmtTry(grossCents, fx, lang);
+  const priceNotes = [
+    fx && anyPriced ? t.price.fxNote(fmtDate(fx.date, lang)) : '',
+    t.price.note,
+  ].filter(Boolean);
   const lines = list.map((x) =>
     c.line(
       `${x.name}, ${lineLabel(x)}${x.code ? ` (${x.code})` : ''}`,
@@ -269,20 +332,31 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   // "Paleti paylaş" and the order messages' last line: ids and quantities only.
   const shareUrl = paletLink(SITE, localePath(CART_PATH, lang), list);
   const { status: shareStatus, share } = useShare(c.share);
+  // The filled contact fields, "Firma: …".
+  const filled = (keys: readonly Field[]) =>
+    keys.filter((k) => contact[k].trim()).map((k) => `${c[k]}: ${contact[k].trim()}`);
   const body = c.message(
     lines,
     anyPriced
       ? [
-          ...(vatCents
-            ? [`${c.subtotal}: ${money(totalCents)}`, `${c.vat(VAT_PERCENT)}: ${money(vatCents)}`]
-            : []),
+          ...sumRows.map(([k, v]) => `${k}: ${v}`),
           `${c.total}: ${totalText}`,
           ...(anyAsk ? [c.totalNote] : []),
         ].join('\n')
       : `${c.total}: ${c.ask}`,
-    fields.filter((k) => contact[k].trim()).map((k) => `${c[k]}: ${contact[k].trim()}`),
+    filled(fields),
   );
   const message = list.length ? `${body}\n\n${c.share.reopen(shareUrl)}` : body;
+  // "Teklifi yazdır": the lines as their rows show them.
+  const quoteLines: QuoteLine[] = list.map((x) => ({
+    id: x.id,
+    name: x.name,
+    label: lineLabel(x),
+    qty: x.qty,
+    unit: x.cents === null ? null : unitShown(x.cents),
+    unitNet: x.cents !== null && gross ? `${fmtUsd(x.cents, lang)} ${t.price.plus}` : undefined,
+    total: lineTotal(x),
+  }));
 
   const field = (k: Field) => (
     <div key={k} className="mt-3">
@@ -417,7 +491,8 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
           </div>
         </>
       ) : (
-        <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_24rem]">
+        // One shrinkable column on phones: the form's inputs no longer widen the page at 320 px.
+        <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1fr)_24rem]">
           <div className="min-w-0">
             <ul className="m-0 list-none divide-y divide-hair border-y border-hair p-0 font-sans text-sm">
               {list.map((x, i) => (
@@ -430,26 +505,24 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                   <div className="col-start-1 row-start-1 min-w-0 sm:flex-1">
                     <a
                       ref={i === 0 ? firstLine : undefined}
-                      href={localePath(x.path, lang)}
+                      href={localePath(lineHref(x), lang)}
                       className={`font-semibold text-ink hover:underline ${FOCUS}`}
                     >
                       {x.name}
                     </a>
                     <p className="m-0 text-ink-mid">{lineLabel(x)}</p>
                     {/* A "fiyat sorulacak" line says so in its amount column only. */}
-                    {x.cents === null ? null : gross ? (
+                    {x.cents !== null && (
                       <>
                         <p className="m-0 text-ink-mid tabular-nums">
-                          {c.unitGross}: {fmtTryCents(grossTryCents(x.cents, fx) ?? 0, lang)}
+                          {unitLabel}: {unitShown(x.cents)}
                         </p>
-                        <p className="m-0 text-xs text-ink-soft tabular-nums">
-                          {fmtUsd(x.cents, lang)} {t.price.plus}
-                        </p>
+                        {gross && (
+                          <p className="m-0 text-xs text-ink-soft tabular-nums">
+                            {fmtUsd(x.cents, lang)} {t.price.plus}
+                          </p>
+                        )}
                       </>
-                    ) : (
-                      <p className="m-0 text-ink-mid tabular-nums">
-                        {c.unit}: {fmtUsd(x.cents, lang)}
-                      </p>
                     )}
                   </div>
                   <div className="col-start-1 row-start-2">
@@ -461,7 +534,9 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                       t={t}
                     />
                   </div>
-                  <p className="col-start-2 row-start-1 m-0 self-start text-right font-semibold whitespace-nowrap text-ink tabular-nums sm:ml-auto sm:min-w-24 sm:self-center">
+                  {/* sm:min-w-32: "Fiyat sorulacak" / "Price on request" fit it too, so every
+                    line's stepper stands in one column. */}
+                  <p className="col-start-2 row-start-1 m-0 self-start text-right font-semibold whitespace-nowrap text-ink tabular-nums sm:ml-auto sm:min-w-32 sm:self-center">
                     {lineTotal(x) ?? <span className="font-medium text-ink-mid">{c.ask}</span>}
                   </p>
                   <Button
@@ -486,6 +561,13 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                 variant="secondary"
                 onClick={() => void share(shareUrl, c.share.title)}
                 icon={SHARE_ICON}
+                className={`px-4 ${OUTLINE_BUTTON}`}
+              />
+              <Button
+                label={c.print.button}
+                variant="secondary"
+                onClick={() => window.print()}
+                icon={PRINT_ICON}
                 className={`px-4 ${OUTLINE_BUTTON}`}
               />
               <Button
@@ -516,50 +598,27 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
             {/* The sum sits right above the send buttons, so it is read before sending. */}
             <div className="mt-5 border-t border-hair pt-4">
               <dl className="m-0 text-sm tabular-nums">
-                {(vatCents
-                  ? ([
-                      [c.subtotal, totalCents],
-                      [c.vat(VAT_PERCENT), vatCents],
-                    ] as [string, number][])
-                  : []
-                ).map(([k, v]) => (
+                {sumRows.map(([k, v]) => (
                   <div key={k} className="flex justify-between gap-4 py-1 text-ink-mid">
                     <dt>{k}</dt>
-                    <dd className="m-0 text-right">{money(v)}</dd>
+                    <dd className="m-0 text-right">{v}</dd>
                   </div>
                 ))}
                 <div
-                  className={`flex justify-between gap-4 text-lg font-bold text-ink ${vatCents ? 'mt-2 border-t border-hair pt-3' : ''}`}
+                  className={`flex justify-between gap-4 text-lg font-bold text-ink ${sumRows.length ? 'mt-2 border-t border-hair pt-3' : ''}`}
                 >
                   <dt>{c.total}</dt>
-                  <dd className="m-0 whitespace-nowrap">
-                    {!anyPriced
-                      ? c.ask
-                      : totalTry !== null
-                        ? fmtTryCents(totalTry, lang)
-                        : fmtUsd(grossCents, lang)}
-                  </dd>
+                  <dd className="m-0 whitespace-nowrap">{totalShown}</dd>
                 </div>
               </dl>
-              {!anyPriced ? null : totalTry !== null ? (
-                <p className="m-0 mt-1 text-right text-sm text-ink-mid tabular-nums">
-                  {fmtUsd(grossCents, lang)}
+              {totalAlt && (
+                <p className="m-0 mt-1 text-right text-sm text-ink-mid tabular-nums">{totalAlt}</p>
+              )}
+              {priceNotes.map((x) => (
+                <p key={x} className="m-0 mt-1 text-right text-xs text-ink-soft">
+                  {x}
                 </p>
-              ) : (
-                fmtTry(grossCents, fx, lang) && (
-                  <p className="m-0 mt-1 text-right text-sm text-ink-mid tabular-nums">
-                    {fmtTry(grossCents, fx, lang)}
-                  </p>
-                )
-              )}
-              {fx && anyPriced && (
-                <p className="m-0 mt-1 text-right text-xs text-ink-soft">
-                  {t.price.fxNote(fmtDate(fx.date, lang))}
-                </p>
-              )}
-              {t.price.note && (
-                <p className="m-0 mt-1 text-right text-xs text-ink-soft">{t.price.note}</p>
-              )}
+              ))}
               {anyAsk && <p className="m-0 mt-2 text-sm text-ink-mid">{c.totalNote}</p>}
             </div>
             <p className="m-0 mt-4 text-xs text-ink-mid">
@@ -605,6 +664,23 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
             <p className="m-0 mt-4 text-xs text-ink-mid">{c.info}</p>
           </aside>
         </div>
+      )}
+      {/* Print only ("Teklifi yazdır"); the contact fields without the note. */}
+      {list.length > 0 && (
+        <PaletQuote
+          lang={lang}
+          t={t}
+          day={printDay}
+          buyer={filled(fields.filter((k) => k !== 'note'))}
+          lines={quoteLines}
+          unitLabel={unitLabel}
+          sums={sumRows}
+          total={totalShown}
+          totalAlt={totalAlt}
+          notes={priceNotes}
+          anyAsk={anyAsk}
+          shareUrl={shareUrl}
+        />
       )}
       <section
         id="siparis-adimlari"

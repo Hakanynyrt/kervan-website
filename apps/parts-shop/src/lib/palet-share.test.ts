@@ -4,6 +4,7 @@ import { MAX_QTY, type CartItem } from './cart.ts';
 import {
   decodePalet,
   encodePalet,
+  lineHref,
   linePagePath,
   listedLineId,
   MAX_SHARED_LINES,
@@ -11,6 +12,7 @@ import {
   paletLink,
   paletParam,
   partLineId,
+  refreshLines,
   tipLineId,
   withoutPalet,
   type PaletLines,
@@ -162,6 +164,75 @@ test('merge: names and prices from the catalogue, unknown ids dropped, quantitie
   assert.equal(stored[0].qty, MAX_QTY - 1, 'the stored palet is not changed in place');
 });
 
+test('refresh: stored lines take the name and price of their page, quantities and order stay', () => {
+  const catalogue: PaletLines = {
+    [TIP]: {
+      name: 'Ornek M-1',
+      tipType: 'chisel',
+      code: 'K1',
+      path: '/kirici/ornek/m-1',
+      cents: 200,
+    },
+    [LISTED]: {
+      name: 'Ornek M-3',
+      label: 'kafa burcu',
+      code: null,
+      path: '/yedek-parca/burc',
+      cents: null,
+    },
+  };
+  const stored: CartItem[] = [
+    // Not in the catalogue (its page was not read): as stored.
+    {
+      id: ITEM,
+      name: 'Ornek M-1',
+      label: 'ön kafa',
+      code: null,
+      path: '/yedek-parca/on-kafa/ornek-m-1-on-kafa',
+      cents: 300,
+      qty: 2,
+    },
+    // Added at another price.
+    {
+      id: TIP,
+      name: 'Ornek M-1',
+      tipType: 'chisel',
+      code: 'K1',
+      path: '/kirici/ornek/m-1',
+      cents: 100,
+      qty: 5,
+    },
+    // Priced when it was added, "fiyat sorulacak" on its page now.
+    {
+      id: LISTED,
+      name: 'Ornek M-3',
+      label: 'kafa burcu',
+      code: null,
+      path: '/yedek-parca/burc',
+      cents: 100,
+      qty: 1,
+    },
+  ];
+  const { items, changed } = refreshLines(stored, catalogue);
+  assert.equal(changed, true);
+  assert.deepEqual(
+    items.map((x) => [x.id, x.qty, x.cents]),
+    [
+      [ITEM, 2, 300],
+      [TIP, 5, 200],
+      [LISTED, 1, null],
+    ],
+  );
+  assert.equal(stored[1].cents, 100, 'the stored palet is not changed in place');
+  // Nothing differs: no write is needed.
+  const again = refreshLines(items, catalogue);
+  assert.equal(again.changed, false);
+  assert.deepEqual(again.items, items);
+  assert.equal(refreshLines(stored, {}).changed, false);
+  // An id that is an Object.prototype key is no catalogue line.
+  assert.equal(refreshLines([{ ...stored[0], id: '__proto__' }], catalogue).changed, false);
+});
+
 test('withoutPalet drops only the palet parameter', () => {
   assert.equal(withoutPalet('?p=a*1'), '');
   assert.equal(withoutPalet('?p=a*1&utm_source=x'), '?utm_source=x');
@@ -180,4 +251,34 @@ test('each line id names the same-site page that sells it, nothing else', () => 
   assert.equal(linePagePath('/kirici/../palet|chisel', '/yedek-parca'), null);
   assert.equal(linePagePath('/|chisel', '/yedek-parca'), null);
   assert.equal(linePagePath('listed:../x/y', '/yedek-parca'), null);
+});
+
+test('a line links its page opened on the size and type it was added with', () => {
+  // A tip: the type always, the size from the second one on (the first is the page's default).
+  assert.equal(
+    lineHref({ id: TIP, name: 'Ornek M-1', path: '/kirici/ornek/m-1' }),
+    '/kirici/ornek/m-1?tip=chisel',
+  );
+  assert.equal(
+    lineHref({ id: TIP2, name: 'Ornek M-2 (Ø120 mm)', path: '/kirici/ornek/m-2' }),
+    '/kirici/ornek/m-2?uc=2&tip=moil',
+  );
+  assert.equal(
+    lineHref({
+      id: tipLineId('/kirici/ornek/m-2', 1, 'blunt'),
+      name: 'Ornek M-2 (Ø100 mm)',
+      path: '/kirici/ornek/m-2',
+    }),
+    '/kirici/ornek/m-2?tip=blunt',
+  );
+  // A modelled part: its own page (a burçlu head has no query of its own).
+  assert.equal(
+    lineHref({ id: ITEM, name: 'Ornek M-1', path: '/yedek-parca/on-kafa/ornek-m-1-on-kafa' }),
+    '/yedek-parca/on-kafa/ornek-m-1-on-kafa',
+  );
+  // A listed part: its group page, searched for its breaker.
+  assert.equal(
+    lineHref({ id: LISTED, name: 'Örnek M-3', path: '/yedek-parca/burc' }),
+    '/yedek-parca/burc?q=%C3%96rnek+M-3',
+  );
 });

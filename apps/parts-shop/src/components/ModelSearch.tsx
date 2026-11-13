@@ -20,6 +20,7 @@ import {
   type TipType,
 } from '@kervan/tips';
 import type { Dict } from '../lib/dict';
+import { byNameFit } from '../lib/finder';
 import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
 import { LIST_PATH, type BrandLink, type BreakerCard } from '../lib/routes';
@@ -199,7 +200,17 @@ export function ModelTable({
       for (const [k, v] of merged) sp.append(k, v);
     });
   }, [ready, query, filter]);
-  const shown = query ? rows.filter((r) => matches(query, searchName(r.name))) : all ? rows : [];
+  // A typed search lists the closest names first, as the header box does (`byNameFit`: the model
+  // the text names, then names that start with it); alike rows and the unfiltered list keep the
+  // rows' order (best-sellers first, then by diameter).
+  const shown = query
+    ? byNameFit(
+        rows.filter((r) => matches(query, searchName(r.name))),
+        query,
+      )
+    : all
+      ? rows
+      : [];
   // Cards show a page at a time; a new search or filter starts again from the first page.
   const [page, setPage] = useState(PAGE);
   useEffect(() => setPage(PAGE), [query, filter]);
@@ -226,11 +237,16 @@ export function ModelTable({
           [...new Set(rows.map((r) => r.brand))],
         )
       : null;
-  const near = guess ? rows.filter((r) => matches(guess, searchName(r.name))) : [];
+  const near = guess
+    ? byNameFit(
+        rows.filter((r) => matches(guess, searchName(r.name))),
+        guess,
+      )
+    : [];
   const found = shown.length ? shown : near;
   const facets = facetsOf(found);
   const active = isFilterActive(filter);
-  // Rows come sorted best-sellers first, then by diameter; the filter keeps that order.
+  // The filter keeps the results' order.
   const visible = applyTipFilter(found, filter);
   const band = filter.cap ? CARRIER_BANDS.find((b) => b.key === filter.cap) : undefined;
   const summary = [
@@ -479,6 +495,8 @@ function Cards({
     >
       {rows.map((r, i) => {
         const pic = cardPic(r);
+        // Under a picture; a size card's name already says it ("BT 810 · Ø135 mm").
+        const below = pic && !(r.variant && r.diameterMm !== null) ? dia(r) : '';
         return (
           <li key={cardKey(r)} hidden={i >= limit}>
             <a
@@ -523,10 +541,10 @@ function Cards({
                   {cardName(r, lang, t)}
                 </span>
                 {/* without a picture the diameter is already set large above: only the badge here */}
-                {(pic || r.grooved) && (
+                {(below || r.grooved) && (
                   <span className="text-sm text-ink-mid tabular-nums">
-                    {pic ? dia(r) : ''}
-                    {r.grooved && `${pic ? ' · ' : ''}${t.list.groovedBadge}`}
+                    {below}
+                    {r.grooved && `${below ? ' · ' : ''}${t.list.groovedBadge}`}
                   </span>
                 )}
                 <CardPrice price={r.price} fx={fx} lang={lang} t={t} />

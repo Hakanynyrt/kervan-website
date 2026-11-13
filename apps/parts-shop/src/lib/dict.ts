@@ -124,7 +124,7 @@ export interface Dict {
       tipN: (n: number) => string;
     };
     /** "Ürettiklerimizden": priced tips and parts, linked to their pages. */
-    made: { title: string; lead: string };
+    made: string;
     /** The order box under the opening and "Nasıl sipariş verilir?" (with cart.steps). */
     order: { title: string; whatsapp: string; mail: string };
     trust: { title: string; body: string }[];
@@ -387,6 +387,10 @@ export interface Dict {
       none: string;
       failed: string;
     };
+    /** "Teklifi yazdır" (2026-11-13): the palet printed as a quote from the browser's print
+     *  dialog (`PaletQuote`). Only the labels the page did not have; the rest of the print is
+     *  the page's own strings. */
+    print: { button: string; title: string; date: string; buyer: string };
   };
   brand: {
     title: (brand: string) => string;
@@ -433,6 +437,8 @@ export interface Dict {
     plant: {
       title: string;
       lead: string;
+      /** The home's phones: link to the `/yedek-parca` gallery (they show the hall photo only). */
+      all: string;
       note: string;
       items: { caption: string; alt: string }[];
       /** PLANT_WIDE: the landscape grid under the four (same order). */
@@ -767,10 +773,7 @@ export const DICT: Record<Lang, Dict> = {
         noParts: 'Bu kırıcının diğer parçaları için modelinizi WhatsApp’tan yazın, size dönelim.',
         tipN: (n) => `${n}. uç`,
       },
-      made: {
-        title: 'Ürettiklerimizden',
-        lead: 'Ürettiğimiz uç ve parçalardan bir seçki.',
-      },
+      made: 'Ürettiklerimizden',
       order: {
         title: 'Sipariş talebi',
         whatsapp: 'WhatsApp ile sor',
@@ -1052,6 +1055,12 @@ export const DICT: Record<Lang, Dict> = {
         none: 'Bu bağlantıdaki ürünler artık sitede yok.',
         failed: 'Liste şu anda açılamadı. Sayfayı yenileyip tekrar deneyin.',
       },
+      print: {
+        button: 'Teklifi yazdır',
+        title: 'Fiyat teklifi',
+        date: 'Tarih',
+        buyer: 'Alıcı bilgileri',
+      },
     },
     brand: {
       title: (brand) => `${brand} kırıcı uçları`,
@@ -1208,7 +1217,8 @@ export const DICT: Record<Lang, Dict> = {
         'Ürünlerimiz Kervan Makina üretimidir; marka ve model adları yalnızca uyumu belirtir.',
       plant: {
         title: 'Tesisimiz',
-        lead: 'Parçalarımızı Kartepe’deki tesisimizde işliyor, ısıl işlemini kendi fırınlarımızda yapıyoruz.',
+        lead: 'Üretim ve ısıl işlem Kartepe’deki kendi tesisimizde.',
+        all: 'Tüm fotoğraflar',
         note: 'Fotoğraflar tesisimizde çekilmiştir.',
         items: [
           {
@@ -1848,10 +1858,7 @@ export const DICT: Record<Lang, Dict> = {
           'For this breaker’s other parts, send us your model on WhatsApp and we will get back to you.',
         tipN: (n) => `Tool ${n}`,
       },
-      made: {
-        title: 'From our production',
-        lead: 'A selection of the tips and parts we make, at export prices.',
-      },
+      made: 'From our production',
       order: {
         title: 'Order request',
         whatsapp: 'Ask on WhatsApp',
@@ -2134,6 +2141,12 @@ export const DICT: Record<Lang, Dict> = {
         none: 'The products in this link are no longer on the site.',
         failed: 'The list could not be opened just now. Reload the page and try again.',
       },
+      print: {
+        button: 'Print quote',
+        title: 'Quotation',
+        date: 'Date',
+        buyer: 'Buyer',
+      },
     },
     brand: {
       title: (brand) => `${brand} breaker tips`,
@@ -2290,7 +2303,8 @@ export const DICT: Record<Lang, Dict> = {
       fitNote: 'Our products are made by Kervan Makina; make and model names only show the fit.',
       plant: {
         title: 'Our plant',
-        lead: 'We machine our parts in our plant in Kartepe and heat-treat them in our own furnaces.',
+        lead: 'Machined and heat-treated in our own plant in Kartepe.',
+        all: 'All photos',
         note: 'Photos taken at our plant.',
         items: [
           {
