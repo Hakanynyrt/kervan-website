@@ -11,7 +11,7 @@ import { Button } from '@astryxdesign/core/Button';
 import type { FxRate } from '@kervan/tips';
 import { ORG_PHONE, ORG_PHONE_E164 } from '@kervan/seo';
 import { useReducedMotion } from '@kervan/motion';
-import { OrderSteps, PlantPhotos } from '../components/Bits';
+import { Chevron, OrderFacts, OrderSteps, PlantPhotos, SUMMARY } from '../components/Bits';
 import { BreakerSearch, FinderPick } from '../components/BreakerSearch';
 import ExplodedPicker from '../components/ExplodedPicker';
 import { PartGroups } from '../components/PartGroups';
@@ -400,7 +400,6 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
               </ul>
             </section>
           )}
-          <p className="m-0 mt-3 max-w-3xl font-sans text-[12.5px] text-ink-soft">{f.note}</p>
         </div>
 
         <aside
@@ -551,8 +550,7 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
               <h2 id="order-box" className="m-0 text-base font-bold text-ink">
                 {h.order.title}
               </h2>
-              <p className="m-0 mt-0.5 text-sm text-ink-mid">
-                {h.order.body}{' '}
+              <p className="m-0 mt-0.5 text-sm">
                 <a
                   href="#siparis-adimlari"
                   className={`font-medium text-brand-hi hover:underline ${FOCUS}`}
@@ -574,6 +572,8 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                 className={`px-0.5 min-[23.4375rem]:px-2 md:px-[18px] ${OUTLINE_BUTTON}`}
               />
             </div>
+            {/* The page's one payment / e-invoice / reply-time line (owner, 2026-11-13). */}
+            <OrderFacts t={t} className="md:col-span-2" />
           </aside>
 
           <ul className="m-0 mt-[18px] grid list-none grid-cols-2 gap-x-4 gap-y-2.5 border-t border-hair p-0 pt-3.5 font-sans md:mt-[22px] md:gap-x-8 md:gap-y-3.5 md:pt-[18px]">
@@ -772,19 +772,26 @@ export default function Home({
         <div className={`${WRAP} py-8`}>
           <SectionHead id="order" title={t.cart.steps.title} />
           <OrderSteps lang={lang} t={t} note={false} className="md:grid-cols-3" />
-          <dl className="m-0 mt-[18px] grid grid-cols-[minmax(0,1fr)] gap-x-7 font-sans text-sm md:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1.6fr]">
-            {terms.map(([k, v]) => (
-              <div
-                key={k}
-                className="flex gap-3.5 border-t border-hair py-2 md:block md:pb-0 md:pt-2.5"
-              >
-                <dt className="w-16 shrink-0 text-ink-mid md:w-auto md:font-semibold md:text-ink">
-                  {k}
-                </dt>
-                <dd className="m-0 text-ink md:mt-0.5 md:text-ink-mid">{v}</dd>
-              </div>
-            ))}
-          </dl>
+          {/* Closed (owner, 2026-11-13): the terms stay in the page; payment is the order box's line. */}
+          <details className="group mt-[18px] border-y border-hair font-sans text-sm">
+            <summary className={SUMMARY}>
+              {t.terms.title}
+              <Chevron />
+            </summary>
+            <dl className="m-0 grid grid-cols-[minmax(0,1fr)] gap-x-7 pb-3 md:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1.6fr]">
+              {terms.map(([k, v]) => (
+                <div
+                  key={k}
+                  className="flex gap-3.5 border-t border-hair py-2 md:block md:pb-0 md:pt-2.5"
+                >
+                  <dt className="w-16 shrink-0 text-ink-mid md:w-auto md:font-semibold md:text-ink">
+                    {k}
+                  </dt>
+                  <dd className="m-0 text-ink md:mt-0.5 md:text-ink-mid">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </details>
           <div className="mt-4 flex flex-col gap-2.5 font-sans text-sm md:flex-row md:flex-wrap md:items-center md:gap-x-3 md:gap-y-2.5">
             <Button
               href={whatsappHref(t.nav.quoteText)}

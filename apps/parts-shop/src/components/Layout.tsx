@@ -68,25 +68,22 @@ interface Props {
   /** The page shows a price (tip and model pages, priced part items): the cart is the header's
    *  orange button and the quote a quiet outline link beside it. */
   priced?: boolean;
-  /** Home page: no notice band (the order box is on the page) and, on phones, no category bar
-   *  (the names beside the opening link every group). */
+  /** Home page: on phones, no category bar (the names beside the opening link every group). */
   home?: boolean;
   /** Home: the finder data, so the header search picks into the page's panel without a fetch. */
   finder?: readonly FinderMake[];
   children: ReactNode;
 }
 
-/** "Sipariş: WhatsApp · +90 …": how to order, in the header of every page; `note` (home: prices
- *  on the site, how to pay) after it, on a line of its own on phones; `phoneClass` hides the number where
- *  the bar is short of room. */
+/** "Sipariş: WhatsApp · +90 …": how to order, in the header of every page (only that since
+ *  2026-11-13: payment is told once, under the page's order buttons); `phoneClass` hides the
+ *  number where the bar is short of room. */
 function OrderLine({
   t,
-  note,
   phoneClass = '',
   className = '',
 }: {
   t: Dict;
-  note?: string;
   phoneClass?: string;
   className?: string;
 }) {
@@ -105,12 +102,6 @@ function OrderLine({
           {ORG_PHONE}
         </a>
       </span>
-      {note && (
-        <span className="text-ink-soft max-md:block">
-          <span className="max-md:hidden"> · </span>
-          {note}
-        </span>
-      )}
     </p>
   );
 }
@@ -252,7 +243,6 @@ export default function Layout({
           </div>
           <OrderLine
             t={t}
-            note={home ? t.nav.order.note : undefined}
             className="order-4 -mt-0.5 basis-full text-[12.5px] leading-snug md:text-[13px] lg:hidden"
           />
         </div>
@@ -319,43 +309,37 @@ export default function Layout({
           </div>
         </nav>
       </header>
-      <div
-        hidden={home}
-        className="border-b border-hair bg-bg-soft font-sans text-[13px] text-ink-mid"
-      >
-        <div className={`${WRAP} flex items-start gap-x-2.5 py-2`}>
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 16 16"
-            className="mt-0.5 size-4 shrink-0 text-ink-soft"
-          >
-            <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            <path
-              d="M8 7v4M8 5h.01"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-          <p className="m-0">
-            {/* How buying works; the cart keeps the honest "online ödeme henüz yok". */}
-            {path === CART_PATH ? (
-              <>
-                <strong className="font-semibold text-ink">{t.banner.label}</strong>{' '}
-                {t.banner.preview}
-              </>
-            ) : (
-              t.banner.facts
-            )}{' '}
-            <a
-              href={`${localePath(CART_PATH, lang)}#siparis-adimlari`}
-              className={`ml-1 whitespace-nowrap font-medium text-brand-hi underline underline-offset-2 hover:text-ink ${FOCUS}`}
+      {/* /palet only (owner, 2026-11-13): the honest "online ödeme henüz yok" with the way to
+          order; the other pages tell how to pay once, under their order buttons. */}
+      {path === CART_PATH && (
+        <div className="border-b border-hair bg-bg-soft font-sans text-[13px] text-ink-mid">
+          <div className={`${WRAP} flex items-start gap-x-2.5 py-2`}>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 16 16"
+              className="mt-0.5 size-4 shrink-0 text-ink-soft"
             >
-              {t.banner.how}
-            </a>
-          </p>
+              <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <path
+                d="M8 7v4M8 5h.01"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+            <p className="m-0">
+              <strong className="font-semibold text-ink">{t.banner.label}</strong>{' '}
+              {t.banner.preview}{' '}
+              <a
+                href={`${localePath(CART_PATH, lang)}#siparis-adimlari`}
+                className={`ml-1 whitespace-nowrap font-medium text-brand-hi underline underline-offset-2 hover:text-ink ${FOCUS}`}
+              >
+                {t.banner.how}
+              </a>
+            </p>
+          </div>
         </div>
-      </div>
+      )}
       {demo && (
         <div className="bg-brand font-sans text-sm font-medium text-on-brand">
           <div className={`${WRAP} py-2`}>{t.banner.demo}</div>
