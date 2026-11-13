@@ -360,12 +360,42 @@ export function PageTitle({ children }: { children: ReactNode }) {
   return <h1 className="m-0 mt-5 font-sans text-3xl font-bold text-ink md:text-4xl">{children}</h1>;
 }
 
+/** Summary row of a closed disclosure (`<details>`): a full-width 44 px row with a chevron that
+ *  turns when it opens; the content stays in the prerendered HTML. */
+export const SUMMARY = `flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 py-2 font-semibold text-ink hover:text-brand-hi [&::-webkit-details-marker]:hidden ${FOCUS}`;
+
+export function Chevron() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      className="size-4 shrink-0 text-ink-soft transition-transform group-open:rotate-180 motion-reduce:transition-none"
+    >
+      <path
+        d="M4 6l4 4 4-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** Payment, e-invoice and reply time: the one small line under a page's order buttons (owner,
+ *  2026-11-13: once per page, nowhere else on it). */
+export function OrderFacts({ t, className = '' }: { t: Dict; className?: string }) {
+  return <p className={`m-0 font-sans text-xs text-ink-mid ${className}`}>{t.terms.facts}</p>;
+}
+
 /**
- * Quality, shipping, payment and warranty lines, with the warranty scope below. `compact` (part
- * item and breaker pages, thousands of them): the payment / e-invoice / reply-time line
- * (`terms.facts`), then one short line with this product's warranty period
- * and the not-original disclaimer, linking the pre-contract information page that carries the full
- * terms and the warranty scope (`legal.ts`); the full block stays on the group pages.
+ * Quality, shipping, payment and warranty, behind one closed "Satış koşulları ve garanti"
+ * disclosure (owner, 2026-11-13: the text stays in the page, off the screen until opened; the
+ * payment line itself is `OrderFacts`). `compact` (part item and breaker pages, thousands of
+ * them): one short line with this product's warranty period and the not-original disclaimer,
+ * linking the pre-contract information page that carries the full terms and the warranty scope
+ * (`legal.ts`); the group pages hold the full rows and the scope.
  */
 export function Terms({
   t,
@@ -377,14 +407,18 @@ export function Terms({
   /** The page language, for the terms link: set it for the one-line form. */
   compact?: Lang;
 }) {
-  if (compact)
-    return (
-      <section aria-labelledby="terms" className="font-sans text-sm">
-        <h2 id="terms" className="m-0 text-base font-bold text-ink">
-          {t.terms.title}
-        </h2>
-        <p className="m-0 mt-2 text-ink">{t.terms.facts}</p>
-        <p className="m-0 mt-1 text-ink-mid">
+  const rows: [string, string][] = [
+    ...t.terms.rows,
+    [t.terms.warrantyLabel, t.terms.warranty(warrantyMonths(part))],
+  ];
+  return (
+    <details className="group border-y border-hair font-sans text-sm">
+      <summary className={SUMMARY}>
+        {t.terms.title}
+        <Chevron />
+      </summary>
+      {compact ? (
+        <p className="m-0 pb-3 text-ink-mid">
           {t.terms.short(warrantyMonths(part))}{' '}
           <a
             href={localePath(legalPath('on-bilgilendirme'), compact)}
@@ -393,30 +427,23 @@ export function Terms({
             {t.terms.more}
           </a>
         </p>
-      </section>
-    );
-  const rows: [string, string][] = [
-    ...t.terms.rows,
-    [t.terms.warrantyLabel, t.terms.warranty(warrantyMonths(part))],
-  ];
-  return (
-    <section aria-labelledby="terms" className="font-sans text-sm">
-      <h2 id="terms" className="m-0 text-base font-bold text-ink">
-        {t.terms.title}
-      </h2>
-      <dl className="m-0 mt-2">
-        {rows.map(([k, v]) => (
-          <div
-            key={k}
-            className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-3 border-t border-hair py-2.5"
-          >
-            <dt className="text-ink-mid">{k}</dt>
-            <dd className="m-0 text-ink">{v}</dd>
-          </div>
-        ))}
-      </dl>
-      <p className="m-0 mt-2 text-xs text-ink-mid">{t.terms.note}</p>
-    </section>
+      ) : (
+        <div className="pb-3">
+          <dl className="m-0">
+            {rows.map(([k, v]) => (
+              <div
+                key={k}
+                className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-3 border-t border-hair py-2.5"
+              >
+                <dt className="text-ink-mid">{k}</dt>
+                <dd className="m-0 text-ink">{v}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="m-0 mt-2 text-xs text-ink-mid">{t.terms.note}</p>
+        </div>
+      )}
+    </details>
   );
 }
 

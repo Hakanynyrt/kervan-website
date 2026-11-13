@@ -8,7 +8,7 @@ import { localePath } from '../lib/locale-path';
 import { fmtDate, fmtGrossTry, fmtTry, fmtUsd, leadsGross, unitText } from '../lib/price';
 import type { PartKey } from '../lib/routes';
 import type { Lang } from '../types';
-import { AddedNote, QtyStepper, StickyQuote, Terms, type Added } from './Bits';
+import { AddedNote, OrderFacts, QtyStepper, StickyQuote, Terms, type Added } from './Bits';
 import { OUTLINE_BUTTON, WHATSAPP_BUTTON, whatsappHref } from './Layout';
 import { ORDER_EMAIL, SITE } from '../lib/site';
 
@@ -173,7 +173,6 @@ export function PartOrder({
         />
         <p className="m-0 mt-3 border-t border-hair pt-3 text-ink">{o.delivery}</p>
         <h2 className="m-0 mt-4 text-lg font-bold text-ink">{o.title}</h2>
-        <p className="m-0 mt-2 text-ink-mid">{o.body}</p>
         {/* The stepper's field has this name itself (a hidden label). */}
         <p aria-hidden="true" className="m-0 mb-2 mt-4 font-semibold text-ink">
           {t.family.qty}
@@ -216,6 +215,7 @@ export function PartOrder({
             className={`px-5 ${OUTLINE_BUTTON}`}
           />
         </div>
+        <OrderFacts t={t} className="mt-3" />
       </div>
       <div className="mt-6">
         <Terms t={t} part={part} compact={lang} />

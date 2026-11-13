@@ -74,14 +74,13 @@ export interface Dict {
     tools: string;
     /** Theme select: the sun decides (auto), or the visitor. */
     theme: { label: string; auto: string; light: string; dark: string };
-    /** How to order, in the header on every page: "Sipariş: WhatsApp · <phone>"; `note` (home:
-     *  prices on the site, how to pay) after it, under it on phones. */
-    order: { label: string; whatsapp: string; note: string };
+    /** How to order, in the header on every page: "Sipariş: WhatsApp · <phone>". */
+    order: { label: string; whatsapp: string };
   };
   top: { shop: string };
-  /** The band under the header (not on home). `facts`: how buying works, on every page but the
-   *  cart; the cart keeps the honest `label` + `preview` ("online ödeme henüz yok"). */
-  banner: { label: string; preview: string; facts: string; demo: string; how: string };
+  /** The band under the header, on /palet only: the honest `label` + `preview` ("online ödeme
+   *  henüz yok") and `how` to the order steps (2026-11-13: gone from the other pages). */
+  banner: { label: string; preview: string; demo: string; how: string };
   tip: Record<TipType, string>;
   home: {
     title: string;
@@ -113,8 +112,6 @@ export interface Dict {
       models: (make: string) => string;
       allModels: (make: string, n: number) => string;
       found: string;
-      /** Under the model chips: the names only show the fit. */
-      note: string;
       /** Panel before a model is picked. */
       startTitle: string;
       startBody: string;
@@ -129,7 +126,7 @@ export interface Dict {
     /** "Ürettiklerimizden": priced tips and parts, linked to their pages. */
     made: { title: string; lead: string };
     /** The order box under the opening and "Nasıl sipariş verilir?" (with cart.steps). */
-    order: { title: string; body: string; whatsapp: string; mail: string };
+    order: { title: string; whatsapp: string; mail: string };
     trust: { title: string; body: string }[];
   };
   card: { view: string };
@@ -218,12 +215,10 @@ export interface Dict {
     carrierValue: (min: number, max: number) => string;
     carrierNote: string;
     quoteTitle: string;
-    quoteBody: string;
     whatsapp: string;
     email: string;
     /** Priced products: the box orders instead of asking for a quote. */
     orderTitle: string;
-    orderBody: string;
     orderWa: string;
     orderMail: string;
     /** Price on request: a quote request. */
@@ -399,7 +394,8 @@ export interface Dict {
     /** Example in the page's filter box, from the page's first model. */
     filterHint: (model: string) => string;
   };
-  /** Sales terms shown on every product page: quality, shipping, payment, warranty. */
+  /** Sales terms shown on every product page: quality, shipping, payment, warranty. `title` is
+   *  the summary of the closed disclosure that holds them (`Terms`, 2026-11-13). */
   terms: {
     title: string;
     /** Fit, shipping, payment; the warranty row follows (`warranty` / `warrantyAll`). */
@@ -410,11 +406,12 @@ export interface Dict {
     /** Where no single product is meant (home order box): both periods. */
     warrantyAll: string;
     note: string;
-    /** Payment, e-invoice and reply time (owner-confirmed, 2026-11-13): next to the order
-     *  buttons on item and breaker pages (`Terms compact`) and on /palet. */
+    /** Payment, e-invoice and reply time (owner-confirmed, 2026-11-13): the one line under the
+     *  order buttons of every page that has them (`OrderFacts`), and only there. */
     facts: string;
-    /** The one-line form on item and breaker pages: shipping, this product's warranty period and
-     *  the not-original line, under `facts`; `more` links the full terms (pre-contract information). */
+    /** The one-line form inside the closed terms on item and breaker pages: shipping, this
+     *  product's warranty period and the not-original line; `more` links the full terms
+     *  (pre-contract information). */
     short: (months: number) => string;
     more: string;
   };
@@ -562,7 +559,6 @@ export interface Dict {
     /** Priced parts: order instead of a quote. */
     order: {
       title: string;
-      body: string;
       wa: string;
       mail: string;
       delivery: string;
@@ -719,7 +715,6 @@ export const DICT: Record<Lang, Dict> = {
       order: {
         label: 'Sipariş:',
         whatsapp: 'WhatsApp',
-        note: 'Fiyatlar sitede · Ödeme: kredi kartı (mail order) veya havale/EFT',
       },
     },
     top: {
@@ -729,8 +724,6 @@ export const DICT: Record<Lang, Dict> = {
       label: 'Sipariş talebi:',
       preview:
         'online ödeme henüz yok; paletinizi WhatsApp veya e-posta ile gönderin, size dönelim.',
-      facts:
-        'Fiyatlar sitede · Sipariş: WhatsApp veya e-posta · Ödeme: kredi kartı (mail order) veya havale/EFT',
       how: 'Nasıl sipariş verilir?',
       demo: 'DEMO verisi: bu ürünler gerçek değildir.',
     },
@@ -765,7 +758,6 @@ export const DICT: Record<Lang, Dict> = {
         models: (make) => `${make} modelleri`,
         allModels: (make, n) => `Tüm ${make} modelleri (${n})`,
         found: 'Bulunan modeller',
-        note: 'Ürünlerimiz Kervan Makina üretimidir, kırıcı üreticisinin orijinal parçası değildir; marka ve model adları yalnızca uyumu belirtir.',
         startTitle: 'Kırıcınızı seçin',
         startBody:
           'Markayı seçin ya da modeli yazın; burada o kırıcı için ürettiğimiz uç ve yedek parçalar, sayfalarının bağlantılarıyla listelenir.',
@@ -781,7 +773,6 @@ export const DICT: Record<Lang, Dict> = {
       },
       order: {
         title: 'Sipariş talebi',
-        body: 'Fiyatlar sitede. Kırıcınızı ve parçayı WhatsApp veya e-posta ile yazın, size hemen dönelim; ödeme kredi kartı (mail order) veya havale/EFT.',
         whatsapp: 'WhatsApp ile sor',
         mail: 'E-posta gönder',
       },
@@ -884,14 +875,11 @@ export const DICT: Record<Lang, Dict> = {
       askLead: 'Stoktan aynı gün kargo',
       carrier: 'Taşıyıcı (yaklaşık)',
       carrierValue: (min, max) => `${min}–${max} t ekskavatör`,
-      carrierNote: 'Yaklaşık değerdir; kırıcı üreticisinin önerisi geçerlidir.',
+      carrierNote: 'Kırıcı üreticisinin önerisi geçerlidir.',
       quoteTitle: 'Fiyat teklifi isteyin',
-      quoteBody: 'Kırıcınız ve seçtiğiniz uç mesaja yazılır; size hemen dönelim.',
       whatsapp: 'WhatsApp ile sor',
       email: 'E-posta gönder',
       orderTitle: 'Sipariş verin',
-      orderBody:
-        'Kırıcınız, seçtiğiniz uç, adet ve fiyat mesaja yazılır; ödeme ve kargo bilgisiyle size dönelim.',
       orderWa: 'WhatsApp ile sipariş ver',
       orderMail: 'E-posta ile sipariş ver',
       quoteText: (name, type, code, qty, url) =>
@@ -966,7 +954,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     price: {
       label: 'Fiyat',
-      fxNote: (date) => `TL fiyatı TCMB döviz satış kuruyla (${date}) hesaplanır.`,
+      fxNote: (date) => `TL: TCMB döviz satış kuru, ${date}.`,
       add: 'Palete yükle',
       added: 'Palete yüklendi',
       addedQty: (n) => `Palete yüklendi, paletinizde ${n} adet`,
@@ -995,7 +983,7 @@ export const DICT: Record<Lang, Dict> = {
           },
           {
             h: 'Onay ve kargo',
-            p: 'İş günlerinde 2 saat içinde size dönüyoruz; sipariş onayında kesin toplam bedeli, kargo ücretini ve ödeme talimatını bildiriyoruz. Kredi kartıyla ödeme mail order ile alınır, e-fatura kesilir. Stoktaki ürünler ödemeniz bize ulaştığı gün kargoya verilir.',
+            p: 'Sipariş onayında kesin toplam bedeli, kargo ücretini ve ödeme talimatını bildiriyoruz. Stoktaki ürünler ödemeniz bize ulaştığı gün kargoya verilir.',
           },
         ],
         note: 'Ayrıntılar:',
@@ -1071,7 +1059,7 @@ export const DICT: Record<Lang, Dict> = {
       filterHint: (model) => `Bu markada arayın, ör. ${model}`,
     },
     terms: {
-      title: 'Satış koşulları',
+      title: 'Satış koşulları ve garanti',
       rows: [
         ['Uyum', 'OEM ölçülerinde üretilir, birebir uyumludur'],
         ['Kargo', 'Alıcıya aittir; tutarı sipariş onayında bildirilir'],
@@ -1085,8 +1073,7 @@ export const DICT: Record<Lang, Dict> = {
         'Teslimden itibaren alt gövde ve pistonlarda 6 ay, burçlarda 3 ay, diğer ürünlerde 2 ay; malzeme ve üretim hatalarına karşı',
       short: (m) =>
         `Kargo alıcıya aittir; ${m} ay garanti. Kervan Makina üretimidir, orijinal parça değildir; marka ve model adları yalnızca uyumu belirtir.`,
-      facts:
-        'Kredi kartı (mail order) veya havale/EFT ile ödeme · E-fatura kesilir · İş günlerinde 2 saat içinde dönüş',
+      facts: 'Kart (mail order) veya havale/EFT · E-fatura · İş günlerinde 2 saatte dönüş',
       more: 'Tüm satış koşulları ve garanti kapsamı',
       note: 'Ürünlerimiz Kervan Makina üretimidir, kırıcı üreticisinin orijinal parçası değildir; marka ve model adları yalnızca uyumu belirtir. Garanti malzeme ve üretim (ısıl işlem dahil) hatalarını kapsar; normal aşınma, boşta vuruş, ucu levye gibi kullanma, yanal veya eğik vuruş, aşınmış burç ile çalışma, yağlamasız kullanma ve yanlış uç seçiminden doğan hasarlar kapsam dışıdır. İnceleme için kırık parça ve fotoğrafları istenir.',
     },
@@ -1648,7 +1635,6 @@ export const DICT: Record<Lang, Dict> = {
       },
       order: {
         title: 'Sipariş verin',
-        body: 'Parça, adet ve fiyat mesaja yazılır; ödeme ve kargo bilgisiyle size dönelim.',
         wa: 'WhatsApp ile sipariş ver',
         mail: 'E-posta ile sipariş ver',
         delivery: 'Stoktan aynı gün kargo',
@@ -1809,7 +1795,6 @@ export const DICT: Record<Lang, Dict> = {
       order: {
         label: 'Order:',
         whatsapp: 'WhatsApp',
-        note: 'Prices on the site · Payment: credit card (mail order) or bank transfer',
       },
     },
     top: {
@@ -1819,8 +1804,6 @@ export const DICT: Record<Lang, Dict> = {
       label: 'Order request:',
       preview:
         'no online payment yet; send your cart by WhatsApp or e-mail and we will get back to you.',
-      facts:
-        'Prices on the site · Order: WhatsApp or e-mail · Payment: credit card (mail order) or bank transfer',
       how: 'How to order',
       demo: 'DEMO data: these products are not real.',
     },
@@ -1855,7 +1838,6 @@ export const DICT: Record<Lang, Dict> = {
         models: (make) => `${make} models`,
         allModels: (make, n) => `All ${make} models (${n})`,
         found: 'Models found',
-        note: 'Our products are made by Kervan Makina and are not the breaker maker’s original parts; make and model names only show the fit.',
         startTitle: 'Choose your breaker',
         startBody:
           'Pick the make or type the model; the tips and spare parts we make for that breaker are listed here, with links to their pages.',
@@ -1872,7 +1854,6 @@ export const DICT: Record<Lang, Dict> = {
       },
       order: {
         title: 'Order request',
-        body: 'Prices on the site. Tell us your breaker and the part by WhatsApp or e-mail and we will get back to you; payment by credit card (mail order) or bank transfer.',
         whatsapp: 'Ask on WhatsApp',
         mail: 'Send an e-mail',
       },
@@ -1975,14 +1956,11 @@ export const DICT: Record<Lang, Dict> = {
       askLead: 'Ships from stock the same day',
       carrier: 'Carrier (approx.)',
       carrierValue: (min, max) => `${min}–${max} t excavator`,
-      carrierNote: 'Approximate; the breaker maker’s recommendation wins.',
+      carrierNote: 'The breaker maker’s recommendation wins.',
       quoteTitle: 'Request a quote',
-      quoteBody: 'Your breaker and the tip you chose go into the message; we reply right away.',
       whatsapp: 'Ask on WhatsApp',
       email: 'Send an e-mail',
       orderTitle: 'Place an order',
-      orderBody:
-        'Your breaker, the tip, quantity and price go into the message; we reply with payment and shipping details.',
       orderWa: 'Order on WhatsApp',
       orderMail: 'Order by e-mail',
       quoteText: (name, type, code, qty, url) =>
@@ -2057,7 +2035,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     price: {
       label: 'Price',
-      fxNote: (date) => `TRY prices use the CBRT USD selling rate of ${date}.`,
+      fxNote: (date) => `TRY: CBRT USD selling rate, ${date}.`,
       add: 'Add to cart',
       added: 'Added to cart',
       addedQty: (n) => `Added to cart, ${n} in your cart`,
@@ -2085,7 +2063,7 @@ export const DICT: Record<Lang, Dict> = {
           },
           {
             h: 'Confirmation and shipping',
-            p: 'We reply within 2 hours on business days; the order confirmation gives the final total, the shipping cost and payment instructions. A credit card payment is taken by mail order, and an e-invoice (e-fatura) is issued. Items in stock ship the day your payment reaches us.',
+            p: 'The order confirmation gives the final total, the shipping cost and payment instructions. Items in stock ship the day your payment reaches us.',
           },
         ],
         note: 'Details:',
@@ -2163,7 +2141,7 @@ export const DICT: Record<Lang, Dict> = {
       filterHint: (model) => `Search this make, e.g. ${model}`,
     },
     terms: {
-      title: 'Terms of sale',
+      title: 'Terms of sale and warranty',
       rows: [
         ['Fit', 'Made to OEM dimensions, a direct fit'],
         ['Shipping', 'Paid by the buyer; the amount is given in the order confirmation'],
@@ -2178,7 +2156,7 @@ export const DICT: Record<Lang, Dict> = {
       short: (m) =>
         `Shipping paid by the buyer; ${m}-month warranty. Made by Kervan Makina, not an original part; make and model names only show the fit.`,
       facts:
-        'Payment by credit card (mail order) or bank transfer · E-invoice (e-fatura) issued · Reply within 2 hours on business days',
+        'Card (mail order) or bank transfer · E-invoice (e-fatura) · Reply within 2 hours on business days',
       more: 'Full terms of sale and warranty scope',
       note: 'Our products are made by Kervan Makina and are not the breaker maker’s original parts; make and model names only show the fit. The warranty covers material and manufacturing (including heat treatment) defects; normal wear, blank firing, prying with the tip, side or angled strikes, working with a worn bushing, running without grease and choosing the wrong tip are not covered. We ask for the broken part and photos to assess a claim.',
     },
@@ -2740,7 +2718,6 @@ export const DICT: Record<Lang, Dict> = {
       },
       order: {
         title: 'Order',
-        body: 'The part, quantity and price go into the message; we reply with payment and shipping details.',
         wa: 'Order on WhatsApp',
         mail: 'Order by e-mail',
         delivery: 'Ships from stock the same day',

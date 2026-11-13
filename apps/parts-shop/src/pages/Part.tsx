@@ -11,6 +11,7 @@ import {
   MissingModel,
   OemLine,
   OemNumbers,
+  OrderFacts,
   Guide,
   PageTitle,
   Photo,
@@ -688,6 +689,7 @@ export function QuotePanel({
             className={`px-5 ${OUTLINE_BUTTON}`}
           />
         </div>
+        <OrderFacts t={t} className="mt-3" />
       </div>
       <div className="mt-6">
         <Terms t={t} part={part} compact={compact} />

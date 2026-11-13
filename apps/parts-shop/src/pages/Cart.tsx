@@ -3,7 +3,7 @@ import type { FxRate } from '@kervan/tips';
 import { Button } from '@astryxdesign/core/Button';
 import { TextArea } from '@astryxdesign/core/TextArea';
 import { TextInput } from '@astryxdesign/core/TextInput';
-import { OrderSteps, PageTitle, QtyStepper } from '../components/Bits';
+import { OrderFacts, OrderSteps, PageTitle, QtyStepper } from '../components/Bits';
 import {
   FIELD_RING,
   FIELD_TEXT,
@@ -615,6 +615,8 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
           {c.steps.title}
         </h2>
         <OrderSteps lang={lang} t={t} className="mt-6 sm:grid-cols-3" />
+        {/* No send buttons yet (empty palet, and the prerendered page): the payment line here. */}
+        {list.length === 0 && <OrderFacts t={t} className="mt-3" />}
       </section>
     </div>
   );
