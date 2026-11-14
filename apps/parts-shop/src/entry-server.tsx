@@ -35,7 +35,7 @@ export interface PrerenderPage {
   appHtml: string;
   props: PageProps;
   /** Listed in the sitemap (everything but the cart, the /urun/ code pages, 404 and, while
-   *  HOLD_EN_PART_ITEMS is on, the English part item pages). */
+   *  the English part item pages `enItemOpen` holds). */
   indexable: boolean;
 }
 
@@ -176,7 +176,7 @@ export function sitemapFiles(
     list.push({
       loc: SITE + localePath(p.props.path, p.lang),
       ...(date ? { lastmod: date } : {}),
-      // No hreflang where the other language is held out of the index (HOLD_EN_PART_ITEMS).
+      // No hreflang where the other language is held out of the index (`enItemOpen`).
       ...(hasAlternates(p.props)
         ? {
             alternates: {

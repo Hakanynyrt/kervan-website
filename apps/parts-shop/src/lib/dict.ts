@@ -2664,9 +2664,10 @@ export const DICT: Record<Lang, Dict> = {
         copied: 'Link copied',
         copyFailed: (url) => `Copy the link: ${url}`,
         whatsappSend: 'Send this part on WhatsApp',
-        back: (group) => `All ${group.toLowerCase()} models`,
+        // The group names are plurals but "Front head".
+        back: (group) => `All ${group.toLowerCase()}${/s$/i.test(group) ? '' : 's'}`,
         related: 'Other parts we make for this breaker',
-        nearby: (group) => `More ${group.toLowerCase()} models`,
+        nearby: (group) => `More ${group.toLowerCase()}${/s$/i.test(group) ? '' : 's'}`,
         linksLabel: 'Part links',
         seoName: (model, noun, rockDrill) => `${model}${rockDrill ? '' : ' breaker'} ${noun}`,
         fits: (model, { other, variant }) =>

@@ -55,21 +55,38 @@ const NOINDEX_KINDS = new Set<PageProps['model']['kind']>(['cart', 'notFound', '
 const NOINDEX = 'noindex, follow';
 
 /**
- * The switch (owner, 2026-10-27, after the SEO audit): while on, the ENGLISH part item pages
- * (/en/yedek-parca/<group>/<item>) are `noindex, follow` and out of the sitemaps, and no item
- * page, Turkish or English, carries hreflang (a Turkish page must not point at a noindexed
- * alternate). The English home, model, tip, group and legal pages stay indexable. Turn it off
- * (false) to index the English item pages again; check-dist reads this line.
+ * The ENGLISH part item pages (/en/yedek-parca/<group>/<item>). They were all held out of the
+ * index after the SEO audit (owner, 2026-10-27: near-twin pages, a young site). Since 2026-11-14
+ * (owner: "açalım", the pilot) the ones a foreign buyer can act on and search by are open
+ * (`enItemOpen`); the rest stay `noindex, follow`, out of the sitemaps and without hreflang.
+ * 'held' closes them all again. check-dist reads this line. The English home, model, tip, group
+ * and legal pages are indexable either way.
  */
-export const HOLD_EN_PART_ITEMS = true;
+export const EN_PART_ITEMS = 'pilot' as 'held' | 'pilot';
 
-/** An English part item page held out of the index by HOLD_EN_PART_ITEMS. */
+/**
+ * Whether a part item's English page is open to search engines: the page shows a price, the part
+ * has its own picture (so it carries a Product with an Offer, below), and it has something to
+ * search by, a confirmed OEM number or a repair kit's contents table. Language-independent: the
+ * Turkish twin of an open page carries hreflang, the twin of a held one does not (a page must
+ * not point at a noindexed alternate).
+ */
+export const enItemOpen = (model: PageProps['model']): boolean => {
+  if (EN_PART_ITEMS === 'held' || model.kind !== 'partItem') return false;
+  const r = findRender(model.part, model.anchor);
+  const pic = r && !r.representative ? (r.hero ?? r.views[0]?.base) : undefined;
+  const cents = r?.fitted ? model.priceFitted : model.price;
+  return cents !== null && !!pic && (model.oem.length > 0 || model.part === 'tamir-takimi');
+};
+
+/** An English part item page held out of the index. */
 const heldEn = (p: Pick<PageProps, 'lang' | 'model'>): boolean =>
-  HOLD_EN_PART_ITEMS && p.lang === 'en' && p.model.kind === 'partItem';
+  p.lang === 'en' && p.model.kind === 'partItem' && !enItemOpen(p.model);
 
-/** Whether a page has tr / en hreflang alternates (head and sitemap): not the held item pages. */
+/** Whether a page has tr / en hreflang alternates (head and sitemap): not the item pages whose
+ *  English twin is held. */
 export const hasAlternates = (p: Pick<PageProps, 'model'>): boolean =>
-  !(HOLD_EN_PART_ITEMS && p.model.kind === 'partItem');
+  p.model.kind !== 'partItem' || enItemOpen(p.model);
 
 /** Whether a page belongs in the sitemap (scripts/prerender.mjs). */
 export const isIndexable = (p: PageProps): boolean =>
