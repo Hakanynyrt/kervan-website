@@ -144,6 +144,8 @@ export function pageInputs(p: PrerenderPage): string[] {
       return (m.photos ?? []).flatMap(pic);
     case 'legal':
       return ['src/lib/legal.ts'];
+    case 'intl':
+      return ['src/lib/intl-orders.ts'];
     case 'guide':
       // The article, its narrated steps and its video entry (the index page: the articles only).
       return m.doc

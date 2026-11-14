@@ -40,6 +40,7 @@ import {
   unitText,
   VAT_PERCENT,
 } from '../lib/price';
+import { INTL_PATH } from '../lib/intl-orders';
 import { LEGAL, legalPath } from '../lib/legal';
 import {
   decodePalet,
@@ -714,7 +715,14 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
               />
             </div>
             <p className="m-0 mt-4 text-sm text-ink">{t.terms.facts}</p>
-            {c.intlNote && <p className="m-0 mt-4 text-xs text-ink-mid">{c.intlNote}</p>}
+            {c.intlNote && (
+              <p className="m-0 mt-4 text-xs text-ink-mid">
+                {c.intlNote}{' '}
+                <a href={localePath(INTL_PATH, lang)} className="text-ink underline">
+                  {t.intl.link}
+                </a>
+              </p>
+            )}
             <p className="m-0 mt-4 text-xs text-ink-mid">{c.info}</p>
           </aside>
         </div>

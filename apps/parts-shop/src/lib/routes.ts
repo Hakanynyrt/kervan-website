@@ -11,6 +11,7 @@ import {
   type PublicFamily,
   type TipType,
 } from '@kervan/tips';
+import { INTL_PATH } from './intl-orders';
 import { LEGAL_KEYS, legalPath, type LegalKey } from './legal';
 import {
   GUIDE_KEYS,
@@ -195,6 +196,8 @@ export type PageModel =
   | { kind: 'family'; family: PublicFamily; demo: boolean; hasPopular: boolean }
   | { kind: 'cart'; demo: boolean; hasPopular: boolean }
   | { kind: 'legal'; doc: LegalKey; demo: boolean; hasPopular: boolean }
+  /** International orders (intl-orders.ts). */
+  | { kind: 'intl'; demo: boolean; hasPopular: boolean }
   /** "Rehber" (guides.ts): the index (`doc` null) and one article per guide. */
   | {
       kind: 'guide';
@@ -678,6 +681,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       path: legalPath(doc),
       model: { kind: 'legal' as const, doc, demo, hasPopular },
     })),
+    { path: INTL_PATH, model: { kind: 'intl' as const, demo, hasPopular } },
     { path: GUIDES_PATH, model: { kind: 'guide' as const, doc: null, tips: {}, demo, hasPopular } },
     ...GUIDE_KEYS.map((doc) => ({
       path: guidePath(doc),

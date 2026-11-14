@@ -612,6 +612,13 @@ export interface Dict {
     binding: string;
     others: string;
   };
+  /** The international orders page (its texts are in intl-orders.ts). */
+  intl: {
+    wa: string;
+    mail: string;
+    /** Link to the page from the English cart note. */
+    link: string;
+  };
   footer: {
     legal: string;
     docs: string;
@@ -1690,6 +1697,11 @@ export const DICT: Record<Lang, Dict> = {
       binding: '',
       others: 'Diğer yasal metinler',
     },
+    intl: {
+      wa: 'WhatsApp ile proforma isteyin',
+      mail: 'E-posta ile isteyin',
+      link: 'İhracat koşulları',
+    },
     footer: {
       legal: 'Üretici ve satıcı',
       docs: 'Yasal',
@@ -2164,7 +2176,7 @@ export const DICT: Record<Lang, Dict> = {
       rows: [
         ['Fit', 'Made to OEM dimensions, a direct fit'],
         ['Shipping', 'Paid by the buyer; the amount is given in the order confirmation'],
-        ['Payment', 'Credit card (mail order) or bank transfer'],
+        ['Payment', 'Bank transfer in advance'],
         ['Invoice', 'E-invoice (e-fatura) issued'],
         ['Reply', 'Within 2 hours on business days'],
       ],
@@ -2175,7 +2187,7 @@ export const DICT: Record<Lang, Dict> = {
       short: (m) =>
         `Shipping paid by the buyer; ${m}-month warranty. Made by Kervan Makina, not an original part; make and model names only show the fit.`,
       facts:
-        'Card (mail order) or bank transfer · E-invoice (e-fatura) · Reply within 2 hours on business days',
+        'Bank transfer in advance · E-invoice (e-fatura) · Reply within 2 hours on business days',
       more: 'Full terms of sale and warranty scope',
       note: 'Our products are made by Kervan Makina and are not the breaker maker’s original parts; make and model names only show the fit. The warranty covers material and manufacturing (including heat treatment) defects; normal wear, blank firing, prying with the tip, side or angled strikes, working with a worn bushing, running without grease and choosing the wrong tip are not covered. We ask for the broken part and photos to assess a claim.',
     },
@@ -2778,6 +2790,11 @@ export const DICT: Record<Lang, Dict> = {
       updated: (d) => `Last updated: ${d}`,
       binding: 'This is a translation; the Turkish text is binding.',
       others: 'Other legal texts',
+    },
+    intl: {
+      wa: 'Ask for a proforma on WhatsApp',
+      mail: 'Ask by e-mail',
+      link: 'How international orders work',
     },
     footer: {
       legal: 'Manufacturer and seller',

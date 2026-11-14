@@ -20,6 +20,7 @@ import {
   type GuideKey,
 } from './guides';
 import { GUIDE_VIDEOS, PART_VIDEOS, videoFiles } from './guide-videos';
+import { INTL } from './intl-orders';
 import { LEGAL, legalPath, SELLER } from './legal';
 import { localePath } from './locale-path';
 import { joinedSpelling } from './model-aliases';
@@ -285,6 +286,16 @@ export function pageHead({ lang, path, model, fx }: PageProps): HeadInput {
         description: d.desc,
         ...ogOf(lang, GENERAL_OG),
         jsonLd: crumbs([], t.legal.nav),
+      };
+    }
+    case 'intl': {
+      const d = INTL[lang];
+      return {
+        ...page,
+        title: `${d.title} | ${m.brand}`,
+        description: d.desc,
+        ...ogOf(lang, GENERAL_OG),
+        jsonLd: crumbs([], d.title),
       };
     }
     case 'guide': {
