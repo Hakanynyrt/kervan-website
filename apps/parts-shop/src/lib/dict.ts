@@ -612,6 +612,13 @@ export interface Dict {
     binding: string;
     others: string;
   };
+  /** The international orders page (its texts are in intl-orders.ts). */
+  intl: {
+    wa: string;
+    mail: string;
+    /** Link to the page from the English cart note. */
+    link: string;
+  };
   footer: {
     legal: string;
     docs: string;
@@ -1689,6 +1696,11 @@ export const DICT: Record<Lang, Dict> = {
       updated: (d) => `Son güncelleme: ${d}`,
       binding: '',
       others: 'Diğer yasal metinler',
+    },
+    intl: {
+      wa: 'WhatsApp ile proforma isteyin',
+      mail: 'E-posta ile isteyin',
+      link: 'İhracat koşulları',
     },
     footer: {
       legal: 'Üretici ve satıcı',
@@ -2778,6 +2790,11 @@ export const DICT: Record<Lang, Dict> = {
       updated: (d) => `Last updated: ${d}`,
       binding: 'This is a translation; the Turkish text is binding.',
       others: 'Other legal texts',
+    },
+    intl: {
+      wa: 'Ask for a proforma on WhatsApp',
+      mail: 'Ask by e-mail',
+      link: 'How international orders work',
     },
     footer: {
       legal: 'Manufacturer and seller',

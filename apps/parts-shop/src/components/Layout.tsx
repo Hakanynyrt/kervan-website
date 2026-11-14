@@ -14,6 +14,7 @@ import {
   POPULAR_PATH,
   TIP_PATHS,
 } from '../lib/routes';
+import { INTL, INTL_PATH } from '../lib/intl-orders';
 import { LEGAL, LEGAL_KEYS, legalPath, SELLER } from '../lib/legal';
 import { GUIDES_PATH } from '../lib/guides';
 import { CONSENT_OPEN_EVENT } from '../lib/ads';
@@ -409,6 +410,11 @@ export default function Layout({
               <li>
                 <a href={localePath(CART_PATH, lang)} className={`hover:text-ink ${FOCUS}`}>
                   {t.nav.cart}
+                </a>
+              </li>
+              <li>
+                <a href={localePath(INTL_PATH, lang)} className={`hover:text-ink ${FOCUS}`}>
+                  {INTL[lang].title}
                 </a>
               </li>
             </ul>
