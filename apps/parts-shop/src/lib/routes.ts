@@ -255,6 +255,9 @@ export const familyPath = (code: string): string => `/urun/${code.toLowerCase()}
 export const breakerPath = (slug: string): string => `/kirici/${slug}`;
 export const brandPath = (brand: string): string => `/marka/${slugify(brand)}`;
 export const LIST_PATH = '/kirici-ucu';
+/** `id` of the list's search box and results (`ModelTable`), in both languages: a search sent
+ *  from another page opens the list there (`/kirici-ucu?q=…#sonuclar`), the cards in view. */
+export const LIST_RESULTS_ID = 'sonuclar';
 export const POPULAR_PATH = '/cok-satanlar';
 /** Path prefixes of the tip pages (one spare-part group, listed under "Yedek parçalar"). */
 export const TIP_PATHS = [LIST_PATH, '/kirici/', '/marka/', '/urun/'];
@@ -535,7 +538,9 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
           ...(sample ? { sample } : {}),
           ...(photo ? { photo } : {}),
           popularTier: null,
-          price: null,
+          // The price the breaker page shows: an extra product's types all sell at its one price
+          // (review, 2026-11-13: these cards said "Fiyat için sorun" above a priced page).
+          price: priceSpan([...tipOptions([], e.extra).opts.values()].map((o) => o.cents)),
         },
       ];
     }

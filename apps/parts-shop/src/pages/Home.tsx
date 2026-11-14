@@ -62,32 +62,33 @@ const MODEL_ROWS = 2;
 const MODELS_MAX = 40;
 /** The chips are measured before paint in the browser; the prerender never shows them. */
 const useLayoutEffectSafe = typeof window === 'undefined' ? useEffect : useLayoutEffect;
-/** Best-selling breakers listed in the empty panel. */
+/** Best-selling breakers listed in the empty panel; the first PANEL_SHORT of them on phones
+ *  (the rest stay in the page; "Ürettiklerimizden" under the panel opens with the same ones). */
 const PANEL_POPULAR = 6;
+const PANEL_SHORT = 3;
+/** "Ürettiklerimizden" shows two rows of cards: this many below 1180 px (two columns), all of
+ *  them from there (four columns). The rest stay in the page, behind "Tüm çok satanlar". */
+const MADE_SHORT = 4;
 
-/** One heading pattern for every home section: h2, optional lead, optional link on the right. */
+/** One heading pattern for every home section: h2, optional link on the right (no lead
+ *  sentence: owner, 2026-11-13, less text). */
 function SectionHead({
   id,
   title,
-  lead,
   link,
 }: {
   id: string;
   title: string;
-  lead?: string;
   link?: { href: string; label: string };
 }) {
   return (
     <div className="mb-3.5 flex flex-wrap items-end justify-between gap-x-6 gap-y-2 md:mb-[18px]">
-      <div>
-        <h2
-          id={id}
-          className="m-0 font-sans text-[22px] font-bold leading-tight text-ink md:text-[26px]"
-        >
-          {title}
-        </h2>
-        {lead && <p className="m-0 mt-1.5 max-w-2xl font-sans text-ink-mid">{lead}</p>}
-      </div>
+      <h2
+        id={id}
+        className="m-0 font-sans text-[22px] font-bold leading-tight text-ink md:text-[26px]"
+      >
+        {title}
+      </h2>
       {link && (
         <a
           href={link.href}
@@ -124,6 +125,7 @@ function PanelRow({
   sub,
   action,
   onClick,
+  className = '',
 }: {
   href: string;
   img: string | null;
@@ -133,9 +135,10 @@ function PanelRow({
   sub?: string;
   action: string;
   onClick?: (e: MouseEvent) => void;
+  className?: string;
 }) {
   return (
-    <li className="border-b border-hair last:border-b-0">
+    <li className={`border-b border-hair last:border-b-0 ${className}`}>
       <a
         href={href}
         onClick={onClick}
@@ -174,12 +177,14 @@ function PanelRow({
 
 /**
  * Under the opening: the h1 and the lead, the make chips (a make lists two rows of its models),
- * the order box and the trust points; beside them (between the chips and the order box below
- * 1024 px, in the page's order too, so reading and Tab order follow the screen; design E has the
- * order box first on tablets, here the result shows right under the chips there too) the panel:
- * the best-selling breakers until a model is picked, then that model's tip and the parts we make
- * for it. A model is picked here (make, model and best-seller rows), with "Ara" in the header
- * search or in the panel's own box on small screens (`FinderPick`, shared through the layout).
+ * the order box and the trust points (neither on phones: the header's order line, the panel's
+ * WhatsApp button and "Sipariş nasıl verilir?" say it there); beside them (between the chips and
+ * the order box below 1024 px, in the page's order too, so reading and Tab order follow the
+ * screen; design E has the order box first on tablets, here the result shows right under the
+ * chips there too) the panel: the best-selling breakers until a model is picked (three of them on
+ * phones), then that model's tip and the parts we make for it. A model is picked here (make,
+ * model and best-seller rows), with "Ara" in the header search or in the panel's own box on small
+ * screens (`FinderPick`, shared through the layout).
  * The prerender (and a visitor without JS) gets the empty state: the make chips link to the make
  * pages, the best-selling breakers to their pages.
  */
@@ -298,8 +303,8 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
       <div
         className={`${WRAP} grid grid-cols-[minmax(0,1fr)] max-md:contents pb-7 pt-[18px] lg:grid-cols-[minmax(0,1fr)_24rem] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-9 lg:pb-[30px] lg:pt-6 xl:grid-cols-[minmax(0,1fr)_27rem] xl:gap-x-12`}
       >
-        {/* Phones and tablets: one column, in the page's order (h1 … makes, the panel, the order
-            box and the trust points; phones put the opening after the makes, see Home);
+        {/* Phones and tablets: one column, in the page's order (h1 … makes, the panel, from 768 px
+            the order box and the trust points; phones put the opening after the makes, see Home);
             desktop: the panel on the right of both blocks. */}
         <div className="contents max-md:order-1 max-md:block max-md:px-4 max-md:pb-1 max-md:pt-[18px] lg:col-start-1 lg:row-start-1 lg:block lg:min-w-0">
           <h1
@@ -441,7 +446,10 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                 >
                   {f.startTitle}
                 </h2>
-                <p className="m-0 mt-1 max-w-[60ch] text-[13.5px] text-ink-mid">{f.startBody}</p>
+                {/* Not on phones: the line under the h1 says it there. */}
+                <p className="m-0 mt-1 max-w-[60ch] text-[13.5px] text-ink-mid max-md:hidden">
+                  {f.startBody}
+                </p>
               </div>
             )}
             {/* Small screens: the header box is far above, so the panel has its own. It stays in
@@ -504,9 +512,16 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                     {f.popular}
                   </h3>
                   <ul className="m-0 list-none p-0">
-                    {model.featured.slice(0, PANEL_POPULAR).map((c) => (
+                    {model.featured.slice(0, PANEL_POPULAR).map((c, i) => (
                       <PanelRow
                         key={cardKey(c)}
+                        className={
+                          i >= PANEL_SHORT
+                            ? 'max-md:hidden'
+                            : i === PANEL_SHORT - 1
+                              ? 'max-md:border-b-0'
+                              : ''
+                        }
                         href={cardHref(c, lang)}
                         onClick={(e) => {
                           const hit = hitFor(c.brand, c.slug);
@@ -541,10 +556,14 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
           </div>
         </aside>
 
+        {/* Phones (owner, 2026-11-13: less text on the home): neither the order box nor the trust
+            points show; the header's order line, the panel's WhatsApp button and "Sipariş nasıl
+            verilir?" (with the page's facts line there) already say it. The block stays as the
+            band's bottom edge. */}
         <div className="contents max-md:order-3 max-md:block max-md:border-b max-md:border-hair max-md:px-4 max-md:pb-7 lg:col-start-1 lg:row-start-2 lg:block lg:min-w-0">
           <aside
             aria-labelledby="order-box"
-            className="mt-4 grid grid-cols-[minmax(0,1fr)] items-center gap-x-6 gap-y-2.5 rounded-md border border-hair bg-bg px-3.5 py-3.5 font-sans md:mt-5 md:grid-cols-[minmax(0,1fr)_auto] md:px-4"
+            className="mt-4 grid grid-cols-[minmax(0,1fr)] items-center gap-x-6 gap-y-2.5 rounded-md border border-hair bg-bg px-3.5 py-3.5 font-sans max-md:hidden md:mt-5 md:grid-cols-[minmax(0,1fr)_auto] md:px-4"
           >
             <div>
               <h2 id="order-box" className="m-0 text-base font-bold text-ink">
@@ -572,11 +591,12 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                 className={`px-0.5 min-[23.4375rem]:px-2 md:px-[18px] ${OUTLINE_BUTTON}`}
               />
             </div>
-            {/* The page's one payment / e-invoice / reply-time line (owner, 2026-11-13). */}
+            {/* The page's one payment / e-invoice / reply-time line (owner, 2026-11-13); on phones
+                it stands under the buttons of "Sipariş nasıl verilir?". */}
             <OrderFacts t={t} className="md:col-span-2" />
           </aside>
 
-          <ul className="m-0 mt-[18px] grid list-none grid-cols-2 gap-x-4 gap-y-2.5 border-t border-hair p-0 pt-3.5 font-sans md:mt-[22px] md:gap-x-8 md:gap-y-3.5 md:pt-[18px]">
+          <ul className="m-0 mt-[22px] grid list-none grid-cols-2 gap-x-8 gap-y-3.5 border-t border-hair p-0 pt-[18px] font-sans max-md:hidden">
             {h.trust.map((x) => (
               <li key={x.title} className="grid grid-cols-[18px_minmax(0,1fr)] gap-x-2.5 gap-y-0.5">
                 <svg aria-hidden="true" viewBox="0 0 16 16" className="mt-[3px] size-4 text-brand">
@@ -589,10 +609,8 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                     strokeLinejoin="round"
                   />
                 </svg>
-                <span className="text-[13.5px] font-semibold text-ink md:text-sm">{x.title}</span>
-                <span className="col-start-2 hidden text-[13px] text-ink-mid md:block">
-                  {x.body}
-                </span>
+                <span className="text-sm font-semibold text-ink">{x.title}</span>
+                <span className="col-start-2 text-[13px] text-ink-mid">{x.body}</span>
               </li>
             ))}
           </ul>
@@ -703,8 +721,11 @@ export default function Home({
       {/* Owner's choice (2026-10-25, "Birleşik"): the opening first, edge to edge, its parts
           named on it; then the h1, the makes and the breaker panel. Phones (under 768 px,
           2026-11-13): the h1, the short sales line and the makes first, then the opening, then
-          the panel and the order box (Finder's blocks are flex items here through
-          `display: contents`; `reading-flow` lets the Tab key follow, Chromium). */}
+          the panel (Finder's blocks are flex items here through `display: contents`). The Tab
+          key does not follow the screen there in any browser: with `reading-flow` Chromium
+          takes Finder's blocks as one group at its first block (makes, panel, then back up to
+          the opening's part links; Chrome 153, review 2026-11-13), the others keep the DOM
+          order (the opening first). */}
       <div className="flex flex-col [reading-flow:flex-visual] md:block">
         <div className="max-md:order-2">
           <ExplodedPicker lang={lang} t={t} />
@@ -722,8 +743,7 @@ export default function Home({
             <div className={`${WRAP} py-8`}>
               <SectionHead
                 id="made"
-                title={h.made.title}
-                lead={h.made.lead}
+                title={h.made}
                 link={
                   model.featuredArePopular
                     ? { href: localePath(POPULAR_PATH, lang), label: h.morePopular }
@@ -731,8 +751,15 @@ export default function Home({
                 }
               />
               <ul className="m-0 grid list-none grid-cols-2 gap-2.5 p-0 sm:gap-4 min-[73.75rem]:grid-cols-4">
-                {model.made.map((x) => (
-                  <li key={x.kind === 'tip' ? `tip-${cardKey(x.card)}` : `${x.part}-${x.anchor}`}>
+                {model.made.map((x, i) => (
+                  <li
+                    key={x.kind === 'tip' ? `tip-${cardKey(x.card)}` : `${x.part}-${x.anchor}`}
+                    className={
+                      model.featuredArePopular && i >= MADE_SHORT
+                        ? 'max-[73.75rem]:hidden'
+                        : undefined
+                    }
+                  >
                     <MadeCard x={x} fx={fx} lang={lang} t={t} />
                   </li>
                 ))}
@@ -764,15 +791,21 @@ export default function Home({
 
       <div className="border-y border-hair bg-bg-soft">
         <div className={`${WRAP} py-8`}>
-          <PlantPhotos t={t} hall />
+          <PlantPhotos t={t} hall={lang} />
         </div>
       </div>
 
       <section id="siparis-adimlari" aria-labelledby="order" className="scroll-mt-6 bg-bg">
         <div className={`${WRAP} py-8`}>
           <SectionHead id="order" title={t.cart.steps.title} />
-          <OrderSteps lang={lang} t={t} note={false} className="md:grid-cols-3" />
-          {/* Closed (owner, 2026-11-13): the terms stay in the page; payment is the order box's line. */}
+          <OrderSteps
+            lang={lang}
+            t={t}
+            note={false}
+            compact
+            className="max-md:gap-2.5 md:grid-cols-3"
+          />
+          {/* Closed (owner, 2026-11-13): the terms stay in the page; payment is the facts line. */}
           <details className="group mt-[18px] border-y border-hair font-sans text-sm">
             <summary className={SUMMARY}>
               {t.terms.title}
@@ -804,7 +837,10 @@ export default function Home({
               variant="secondary"
               className={`h-auto min-h-11 whitespace-normal px-5 py-2 ${OUTLINE_BUTTON}`}
             />
-            <p className="m-0 text-[13px] text-ink-mid md:ml-2">
+            {/* Phones: the page's facts line (the order box does not show there); the phones and
+                the details link from 768 px, the footer right under them has both. */}
+            <OrderFacts t={t} className="md:hidden" />
+            <p className="m-0 text-[13px] text-ink-mid max-md:hidden md:ml-2">
               {t.cart.phone}:{' '}
               <a href={`tel:${ORG_PHONE_E164}`} className={`${line} whitespace-nowrap`}>
                 {ORG_PHONE}

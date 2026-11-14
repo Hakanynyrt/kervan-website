@@ -124,7 +124,7 @@ export interface Dict {
       tipN: (n: number) => string;
     };
     /** "Ürettiklerimizden": priced tips and parts, linked to their pages. */
-    made: { title: string; lead: string };
+    made: string;
     /** The order box under the opening and "Nasıl sipariş verilir?" (with cart.steps). */
     order: { title: string; whatsapp: string; mail: string };
     trust: { title: string; body: string }[];
@@ -177,7 +177,8 @@ export interface Dict {
     sampleBadge: string;
     /** A model card's picture: its own tip, or (`sample`) another breaker's as a sample. */
     cardAlt: (name: string, sample: boolean) => string;
-    /** Under a page of model cards: shows the next page. */
+    /** Under a page of model cards: shows the next page. `left` counts cards (a breaker with two
+     *  tip sizes has two), so it says results, not models. */
     more: (left: number) => string;
     groovedBadgeLabel: (name: string) => string;
   };
@@ -248,12 +249,15 @@ export interface Dict {
   };
   search: {
     label: string;
-    /** The search box's example: the longest of the three that fits the box is shown. */
+    /** The search box's example: the longest of the four that fits the box is shown. */
     placeholder: string;
     placeholderMid: string;
     placeholderShort: string;
+    placeholderTiny: string;
     button: string;
     none: (q: string) => string;
+    /** The models a search found (the tip lists count breaker pages, as the header list does,
+     *  not the cards: a breaker with two tip sizes has two). */
     count: (n: number) => string;
     brands: string;
     all: string;
@@ -262,7 +266,7 @@ export interface Dict {
     didYouMean: (q: string) => string;
     /** Under an empty search box: nothing is listed until something is typed. */
     hint: string;
-    /** Results narrowed by the filters: n of the total the typed search found. */
+    /** Results narrowed by the filters: n of the total the typed search found (models both). */
     countFiltered: (n: number, total: number) => string;
     /** Narrowing filters, shown only for a typed search's results. */
     filter: {
@@ -278,7 +282,7 @@ export interface Dict {
       grooved: string;
       all: string;
       clear: string;
-      /** The filters leave nothing of the n results the typed search found. */
+      /** The filters leave nothing of the n models the typed search found (the count's number). */
       none: (n: number) => string;
     };
   };
@@ -387,6 +391,10 @@ export interface Dict {
       none: string;
       failed: string;
     };
+    /** "Teklifi yazdır" (2026-11-13): the palet printed as a quote from the browser's print
+     *  dialog (`PaletQuote`). Only the labels the page did not have; the rest of the print is
+     *  the page's own strings. */
+    print: { button: string; title: string; date: string; buyer: string };
   };
   brand: {
     title: (brand: string) => string;
@@ -433,6 +441,8 @@ export interface Dict {
     plant: {
       title: string;
       lead: string;
+      /** The home's phones: link to the `/yedek-parca` gallery (they show the hall photo only). */
+      all: string;
       note: string;
       items: { caption: string; alt: string }[];
       /** PLANT_WIDE: the landscape grid under the four (same order). */
@@ -767,10 +777,7 @@ export const DICT: Record<Lang, Dict> = {
         noParts: 'Bu kırıcının diğer parçaları için modelinizi WhatsApp’tan yazın, size dönelim.',
         tipN: (n) => `${n}. uç`,
       },
-      made: {
-        title: 'Ürettiklerimizden',
-        lead: 'Ürettiğimiz uç ve parçalardan bir seçki.',
-      },
+      made: 'Ürettiklerimizden',
       order: {
         title: 'Sipariş talebi',
         whatsapp: 'WhatsApp ile sor',
@@ -834,7 +841,7 @@ export const DICT: Record<Lang, Dict> = {
       sampleBadge: 'Temsili görsel',
       cardAlt: (name, sample) =>
         sample ? `${name} kırıcı ucu için temsili görsel` : `${name} kırıcı ucu`,
-      more: (left) => `Daha fazla göster (${left} model daha)`,
+      more: (left) => `Daha fazla göster (${left} sonuç daha)`,
       groovedBadgeLabel: (name) => `${name} için toz kanallı uçlar`,
     },
     popular: {
@@ -902,6 +909,7 @@ export const DICT: Record<Lang, Dict> = {
       placeholder: 'Kırıcınızın marka ve modeli, ör. Furukawa HB 20G',
       placeholderMid: 'Marka ve model, ör. Furukawa HB 20G',
       placeholderShort: 'Marka ve model, ör. HB 20G',
+      placeholderTiny: 'ör. HB 20G',
       button: 'Ara',
       none: (q) => `"${q}" için model bulunamadı.`,
       count: (n) => `${n} model`,
@@ -910,7 +918,7 @@ export const DICT: Record<Lang, Dict> = {
       changeMake: (n) => `Marka değiştir (${n})`,
       didYouMean: (q) => `Bunu mu demek istediniz: ${q}`,
       hint: 'Kırıcınızın marka ve modelini yazın; uyan ürünler burada listelenir.',
-      countFiltered: (n, total) => `${n} model (${total} sonuçtan)`,
+      countFiltered: (n, total) => `${n} model (${total} modelden)`,
       filter: {
         label: 'Sonuçları daralt',
         type: 'Uç tipi',
@@ -936,7 +944,7 @@ export const DICT: Record<Lang, Dict> = {
         grooved: 'Toz kanallı',
         all: 'Tümü',
         clear: 'Filtreleri temizle',
-        none: (n) => `Bu seçimlerle sonuç yok (yazdığınızla ${n} sonuç var).`,
+        none: (n) => `Bu seçimlerle sonuç yok (yazdığınızla ${n} model var).`,
       },
     },
     missing: {
@@ -1051,6 +1059,12 @@ export const DICT: Record<Lang, Dict> = {
         dropped: (n) => `${n} ürün artık sitede olmadığı için eklenmedi.`,
         none: 'Bu bağlantıdaki ürünler artık sitede yok.',
         failed: 'Liste şu anda açılamadı. Sayfayı yenileyip tekrar deneyin.',
+      },
+      print: {
+        button: 'Teklifi yazdır',
+        title: 'Fiyat teklifi',
+        date: 'Tarih',
+        buyer: 'Alıcı bilgileri',
       },
     },
     brand: {
@@ -1208,7 +1222,8 @@ export const DICT: Record<Lang, Dict> = {
         'Ürünlerimiz Kervan Makina üretimidir; marka ve model adları yalnızca uyumu belirtir.',
       plant: {
         title: 'Tesisimiz',
-        lead: 'Parçalarımızı Kartepe’deki tesisimizde işliyor, ısıl işlemini kendi fırınlarımızda yapıyoruz.',
+        lead: 'Üretim ve ısıl işlem Kartepe’deki kendi tesisimizde.',
+        all: 'Tüm fotoğraflar',
         note: 'Fotoğraflar tesisimizde çekilmiştir.',
         items: [
           {
@@ -1747,7 +1762,7 @@ export const DICT: Record<Lang, Dict> = {
         'The most ordered breaker tips and the parts we make for the same breakers, by breaker make and model.',
       brandTitle: (brand) => `${brand} breaker tips | Kervan Makina`,
       brandDesc: (brand, n) =>
-        `${brand} hydraulic breaker tips: Kervan tips for ${n} ${brand} breaker models, with working diameter and tip types. Same-day shipping from stock.`,
+        `${brand} hydraulic breaker tips: Kervan tips for ${n} ${brand} breaker ${n === 1 ? 'model' : 'models'}, with working diameter and tip types. Same-day shipping from stock.`,
       partsTitle: 'Hydraulic breaker spare parts | Kervan Makina',
       partsDesc:
         'Hydraulic breaker spare parts: tips, front heads, bushings, retainer keys, tie rods, pistons, accumulator parts, wear plates and repair kits, by make and model.',
@@ -1848,10 +1863,7 @@ export const DICT: Record<Lang, Dict> = {
           'For this breaker’s other parts, send us your model on WhatsApp and we will get back to you.',
         tipN: (n) => `Tool ${n}`,
       },
-      made: {
-        title: 'From our production',
-        lead: 'A selection of the tips and parts we make, at export prices.',
-      },
+      made: 'From our production',
       order: {
         title: 'Order request',
         whatsapp: 'Ask on WhatsApp',
@@ -1915,7 +1927,7 @@ export const DICT: Record<Lang, Dict> = {
       sampleBadge: 'Sample picture',
       cardAlt: (name, sample) =>
         sample ? `Sample picture for the ${name} breaker tip` : `${name} breaker tip`,
-      more: (left) => `Show more (${left} more models)`,
+      more: (left) => `Show more (${left} more ${left === 1 ? 'result' : 'results'})`,
       groovedBadgeLabel: (name) => `Tools with dust grooves for the ${name}`,
     },
     popular: {
@@ -1983,15 +1995,16 @@ export const DICT: Record<Lang, Dict> = {
       placeholder: 'Your breaker make and model, e.g. Furukawa HB 20G',
       placeholderMid: 'Make and model, e.g. Furukawa HB 20G',
       placeholderShort: 'Make and model, e.g. HB 20G',
+      placeholderTiny: 'e.g. HB 20G',
       button: 'Search',
       none: (q) => `No model found for "${q}".`,
-      count: (n) => `${n} models`,
+      count: (n) => `${n} ${n === 1 ? 'model' : 'models'}`,
       brands: 'Makes',
       all: 'All makes',
       changeMake: (n) => `Change make (${n})`,
       didYouMean: (q) => `Did you mean: ${q}`,
       hint: 'Type your breaker make and model; the matching products are listed here.',
-      countFiltered: (n, total) => `${n} models (of ${total} results)`,
+      countFiltered: (n, total) => `${n} of ${total} ${total === 1 ? 'model' : 'models'}`,
       filter: {
         label: 'Narrow the results',
         type: 'Tip type',
@@ -2134,10 +2147,16 @@ export const DICT: Record<Lang, Dict> = {
         none: 'The products in this link are no longer on the site.',
         failed: 'The list could not be opened just now. Reload the page and try again.',
       },
+      print: {
+        button: 'Print quote',
+        title: 'Quotation',
+        date: 'Date',
+        buyer: 'Buyer',
+      },
     },
     brand: {
       title: (brand) => `${brand} breaker tips`,
-      lead: (n) => `${n} models. Pick your breaker model.`,
+      lead: (n) => `${n} ${n === 1 ? 'model' : 'models'}. Pick your breaker model.`,
       filterHint: (model) => `Search this make, e.g. ${model}`,
     },
     terms: {
@@ -2290,7 +2309,8 @@ export const DICT: Record<Lang, Dict> = {
       fitNote: 'Our products are made by Kervan Makina; make and model names only show the fit.',
       plant: {
         title: 'Our plant',
-        lead: 'We machine our parts in our plant in Kartepe and heat-treat them in our own furnaces.',
+        lead: 'Machined and heat-treated in our own plant in Kartepe.',
+        all: 'All photos',
         note: 'Photos taken at our plant.',
         items: [
           {
@@ -2622,7 +2642,7 @@ export const DICT: Record<Lang, Dict> = {
       showcase: {
         title: 'What we make',
         lead: 'The parts we make. Type your make and model to open that breaker’s parts.',
-        more: (left) => `Show more (${left} more parts)`,
+        more: (left) => `Show more (${left} more ${left === 1 ? 'part' : 'parts'})`,
       },
       tipLink: 'Tip for this breaker',
       quoteThis: 'Request a quote for this model',

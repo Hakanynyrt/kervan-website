@@ -20,26 +20,29 @@ import {
   type TipType,
 } from '@kervan/tips';
 import type { Dict } from '../lib/dict';
+import { byNameFit, clipQuery } from '../lib/finder';
 import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
-import { LIST_PATH, type BrandLink, type BreakerCard } from '../lib/routes';
+import { LIST_PATH, LIST_RESULTS_ID, type BrandLink, type BreakerCard } from '../lib/routes';
 import type { Lang } from '../types';
 import { fmtTry, fmtTryCents, fmtUsd, grossTryCents, leadsGross } from '../lib/price';
-import { cardHref, cardKey, cardName, cardPic } from '../lib/card';
+import { cardHref, cardKey, cardName, cardPic, modelCount } from '../lib/card';
 import { replaceSearch } from '../lib/url-state';
 import { useFitPlaceholder, useKeepTyped } from '../lib/use-field';
 import { chipClass, MissingModel } from './Bits';
 import { FIELD_RING, FIELD_TEXT, FOCUS, OUTLINE_BUTTON } from './Layout';
 
-/** Search box that sends the visitor to the full list with `?q=` (home page, brand pages). */
+/** Search box that sends the visitor to the full list with `?q=`, at its results (the
+ *  best-sellers and "not found" pages). */
 export function SearchForm({ lang, t, value = '' }: { lang: Lang; t: Dict; value?: string }) {
   const [q, setQ] = useState(value);
+  const onType = (v: string) => setQ(clipQuery(v));
   const box = useRef<HTMLInputElement>(null);
-  useKeepTyped(box, setQ);
+  useKeepTyped(box, onType);
   const placeholder = useFitPlaceholder(box, searchExamples(t));
   return (
     <form
-      action={localePath(LIST_PATH, lang)}
+      action={`${localePath(LIST_PATH, lang)}#${LIST_RESULTS_ID}`}
       method="get"
       role="search"
       className="flex gap-2 font-sans"
@@ -53,7 +56,7 @@ export function SearchForm({ lang, t, value = '' }: { lang: Lang; t: Dict; value
         isLabelHidden
         size="lg"
         value={q}
-        onChange={(v) => setQ(v)}
+        onChange={onType}
         placeholder={placeholder}
         autoComplete="off"
         containerClassName="min-w-0 flex-1"
@@ -70,11 +73,12 @@ export function SearchForm({ lang, t, value = '' }: { lang: Lang; t: Dict; value
   );
 }
 
-/** The three search examples, longest first (`useFitPlaceholder`). */
+/** The four search examples, longest first (`useFitPlaceholder`). */
 export const searchExamples = (t: Dict): readonly string[] => [
   t.search.placeholder,
   t.search.placeholderMid,
   t.search.placeholderShort,
+  t.search.placeholderTiny,
 ];
 
 export function BrandChips({
@@ -175,6 +179,8 @@ export function ModelTable({
   hint?: string;
 }) {
   const [q, setQ] = useState('');
+  // Typed, pasted or from the address: the box keeps the first `QUERY_MAX` characters.
+  const onType = (v: string) => setQ(clipQuery(v));
   const [filter, setFilter] = useState<TipFilter>(EMPTY_FILTER);
   // Writing the URL waits for the load-time read, so the first render cannot wipe a shared link.
   const [ready, setReady] = useState(false);
@@ -182,11 +188,11 @@ export function ModelTable({
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     const v = sp.get('q');
-    if (v) setQ(v);
+    if (v) setQ(clipQuery(v));
     setFilter(parseTipFilter(sp));
     setReady(true);
   }, []);
-  useKeepTyped(box, setQ);
+  useKeepTyped(box, onType);
   const placeholder = useFitPlaceholder(box, hint ? [hint] : searchExamples(t));
   const query = q.trim();
   useEffect(() => {
@@ -199,7 +205,18 @@ export function ModelTable({
       for (const [k, v] of merged) sp.append(k, v);
     });
   }, [ready, query, filter]);
-  const shown = query ? rows.filter((r) => matches(query, searchName(r.name))) : all ? rows : [];
+  // A typed search lists the closest names first, by the header list's name-fit tiers (`byNameFit`:
+  // the model the text names, then names that start with it). Only the tiers agree with the header
+  // list: inside one, and unfiltered, the rows keep their own order (best-sellers first, then by
+  // diameter), the header list its make A–Z order.
+  const shown = query
+    ? byNameFit(
+        rows.filter((r) => matches(query, searchName(r.name))),
+        query,
+      )
+    : all
+      ? rows
+      : [];
   // Cards show a page at a time; a new search or filter starts again from the first page.
   const [page, setPage] = useState(PAGE);
   useEffect(() => setPage(PAGE), [query, filter]);
@@ -226,11 +243,16 @@ export function ModelTable({
           [...new Set(rows.map((r) => r.brand))],
         )
       : null;
-  const near = guess ? rows.filter((r) => matches(guess, searchName(r.name))) : [];
+  const near = guess
+    ? byNameFit(
+        rows.filter((r) => matches(guess, searchName(r.name))),
+        guess,
+      )
+    : [];
   const found = shown.length ? shown : near;
   const facets = facetsOf(found);
   const active = isFilterActive(filter);
-  // Rows come sorted best-sellers first, then by diameter; the filter keeps that order.
+  // The filter keeps the results' order.
   const visible = applyTipFilter(found, filter);
   const band = filter.cap ? CARRIER_BANDS.find((b) => b.key === filter.cap) : undefined;
   const summary = [
@@ -275,7 +297,7 @@ export function ModelTable({
       )
     ) : active && found.length > 0 ? (
       <div className="mt-4 rounded-md border border-hair bg-bg-soft p-4 font-sans text-sm">
-        <p className="m-0 text-ink">{t.search.filter.none(found.length)}</p>
+        <p className="m-0 text-ink">{t.search.filter.none(modelCount(found))}</p>
         <Button
           label={t.search.filter.clear}
           variant="secondary"
@@ -284,8 +306,11 @@ export function ModelTable({
         />
       </div>
     ) : null;
+  // The header search and the other pages' boxes land on the wrapper (`#sonuclar`): the box with
+  // what was typed and the count on top, the cards under it (review, 2026-11-13: on a laptop the
+  // first card started below the fold). Not the input's own id: the fragment would focus it.
   return (
-    <div>
+    <div id={LIST_RESULTS_ID} className="scroll-mt-4">
       <div className="flex flex-wrap items-center gap-3">
         <TextInput
           ref={box}
@@ -295,7 +320,7 @@ export function ModelTable({
           isLabelHidden
           size="lg"
           value={q}
-          onChange={(v) => setQ(v)}
+          onChange={onType}
           placeholder={placeholder}
           autoComplete="off"
           containerClassName="min-w-0 flex-[1_1_22rem] font-sans sm:max-w-md"
@@ -308,8 +333,8 @@ export function ModelTable({
               ? t.search.hint
               : shown.length
                 ? active
-                  ? t.search.countFiltered(visible.length, shown.length)
-                  : t.search.count(shown.length)
+                  ? t.search.countFiltered(modelCount(visible), modelCount(shown))
+                  : t.search.count(modelCount(shown))
                 : t.search.none(query)}
         </p>
       </div>
@@ -479,6 +504,8 @@ function Cards({
     >
       {rows.map((r, i) => {
         const pic = cardPic(r);
+        // Under a picture; a size card's name already says it ("BT 810 · Ø135 mm").
+        const below = pic && !(r.variant && r.diameterMm !== null) ? dia(r) : '';
         return (
           <li key={cardKey(r)} hidden={i >= limit}>
             <a
@@ -523,10 +550,10 @@ function Cards({
                   {cardName(r, lang, t)}
                 </span>
                 {/* without a picture the diameter is already set large above: only the badge here */}
-                {(pic || r.grooved) && (
+                {(below || r.grooved) && (
                   <span className="text-sm text-ink-mid tabular-nums">
-                    {pic ? dia(r) : ''}
-                    {r.grooved && `${pic ? ' · ' : ''}${t.list.groovedBadge}`}
+                    {below}
+                    {r.grooved && `${below ? ' · ' : ''}${t.list.groovedBadge}`}
                   </span>
                 )}
                 <CardPrice price={r.price} fx={fx} lang={lang} t={t} />

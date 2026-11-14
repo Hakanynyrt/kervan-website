@@ -15,6 +15,7 @@ import { useCombobox } from '@astryxdesign/core/Selector';
 import { TextInput } from '@astryxdesign/core/TextInput';
 import type { Dict } from '../lib/dict';
 import {
+  clipQuery,
   exactHit,
   findModels,
   MODEL_INDEX_PATH,
@@ -25,7 +26,7 @@ import {
   type ModelRef,
 } from '../lib/finder';
 import { localePath } from '../lib/locale-path';
-import { breakerPath, LIST_PATH } from '../lib/routes';
+import { breakerPath, LIST_PATH, LIST_RESULTS_ID } from '../lib/routes';
 import { useFitPlaceholder, useKeepTyped } from '../lib/use-field';
 import type { Lang } from '../types';
 import { FIELD_TEXT, FOCUS_INSET, WHATSAPP_BUTTON, whatsappHref } from './Layout';
@@ -37,9 +38,12 @@ import { FIELD_TEXT, FOCUS_INSET, WHATSAPP_BUTTON, whatsappHref } from './Layout
  * for it. "Ara" (Enter) opens the model the query names, or its only hit: on the home in the
  * "Kırıcınızı seçin" panel (`FinderPick`), as the make and model chips there do, elsewhere its
  * page. Typing alone never opens a model. The home has the finder data in its page props; the
- * other pages fetch the names only (`MODEL_INDEX_PATH`) the first time the box is used. Without JS
- * (or without a hit) the form sends `?q=` to the tip list, whose search suggests a spelling and
- * offers "model not listed".
+ * other pages fetch the names only (`MODEL_INDEX_PATH`) the first time the box is used. With
+ * several hits, a corrected spelling, no hit or no JS the form sends `?q=` to the tip list, at its
+ * results (`LIST_RESULTS_ID`): cards with the closest names first by the same name-fit tiers as
+ * here (`byNameFit`; inside a tier the cards keep the list's best-sellers order, the rows here
+ * the make A–Z order), where the search also suggests a spelling and offers "model not listed".
+ * The box keeps the first `QUERY_MAX` characters of what is typed, pasted or read from `?q=`.
  */
 
 /** Model rows under the box before "n models →". */
@@ -132,11 +136,12 @@ export function BreakerSearch({
     t.search.placeholder,
     t.search.placeholderMid,
     t.search.placeholderShort,
+    t.search.placeholderTiny,
   ]);
 
   useEffect(() => {
     if (!fromUrl || !finder || !home) return;
-    const v = new URLSearchParams(window.location.search).get('q');
+    const v = clipQuery(new URLSearchParams(window.location.search).get('q') ?? '');
     if (!v) return;
     setQ(v);
     const r = findModels(finder, v);
@@ -183,7 +188,7 @@ export function BreakerSearch({
   // to "F22") must not open (owner, 2026-10-22: never a wrong breaker). So a new query also drops
   // the highlight: Enter is the submit again, which opens only an exact or single match.
   const onType = (v: string) => {
-    setQ(v);
+    setQ(clipQuery(v));
     setOpen(true);
     combo.setHighlightedIndex(-1);
     load();
@@ -197,16 +202,22 @@ export function BreakerSearch({
     else home?.select(full(h), 'header');
   };
   const submit = (e: FormEvent) => {
-    // Nothing found (or the index not here): the tip list's search takes over.
-    if (!found?.hits.length) return;
+    // "Ara" opens the model the query names, or the only one it finds (owner, 2026-10-22: never
+    // open a wrong breaker).
+    const one =
+      !found?.hits.length || found.guess
+        ? null
+        : (exactHit(found.hits, query) ?? (found.hits.length === 1 ? found.hits[0] : null));
+    // Anything else (several hits, a corrected guess, nothing found, the index not here yet) is
+    // the form's own submit: the tip list with `?q=`, at its results (the action's fragment). On
+    // the tip list with the same `?q=` that loads no page, it only jumps to the results: the list
+    // must not stay open over them.
+    if (!one) {
+      close();
+      return;
+    }
     e.preventDefault();
-    // "Ara" opens the model the query names, or the only one it finds; a corrected guess or
-    // several hits stay listed to pick from (owner, 2026-10-22: never open a wrong breaker).
-    const one = found.guess
-      ? null
-      : (exactHit(found.hits, query) ?? (found.hits.length === 1 ? found.hits[0] : null));
-    if (!one) setOpen(true);
-    else if (home) pick(one);
+    if (home) pick(one);
     else window.location.assign(localePath(breakerPath(one.model.slug), lang));
   };
   const onKey = (e: KeyboardEvent) => {
@@ -251,7 +262,7 @@ export function BreakerSearch({
   return (
     <form
       ref={form}
-      action={localePath(LIST_PATH, lang)}
+      action={`${localePath(LIST_PATH, lang)}#${LIST_RESULTS_ID}`}
       method="get"
       role={panel ? undefined : 'search'}
       aria-label={panel ? undefined : t.search.label}
@@ -331,7 +342,8 @@ export function BreakerSearch({
           )}
           {found.hits.length > hits.length && (
             <a
-              href={`${localePath(LIST_PATH, lang)}?q=${encodeURIComponent(query)}`}
+              href={`${localePath(LIST_PATH, lang)}?q=${encodeURIComponent(query)}#${LIST_RESULTS_ID}`}
+              onClick={close}
               className={`block border-t border-hair px-3.5 py-2.5 text-sm font-medium text-brand-hi hover:underline ${FOCUS_INSET}`}
             >
               {t.search.count(found.hits.length)} →

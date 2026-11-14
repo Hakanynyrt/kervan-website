@@ -119,13 +119,14 @@ export default function Layout({
   children,
 }: Props) {
   // The header's quote link (WhatsApp, the page's product): orange on pages without a price,
-  // a quiet outline beside the orange cart where the page already shows one.
+  // a quiet outline beside the orange cart where the page already shows one (below 640 px a
+  // plain link like EN: the outline box does not fit the logo's row beside the cart button).
   const quote = (
     <Button
       href={whatsappHref(quoteText ?? t.nav.quoteText)}
       label={t.nav.quote}
       variant={priced ? 'secondary' : 'primary'}
-      className={`shrink-0 px-2.5 min-[23.4375rem]:px-3 sm:px-[18px] ${priced ? `font-medium lg:px-3 xl:px-[18px] ${OUTLINE_BUTTON}` : 'font-semibold'}`}
+      className={`shrink-0 sm:px-[18px] ${priced ? `font-medium max-sm:border-0 max-sm:bg-transparent max-sm:px-0 lg:px-3 xl:px-[18px] ${OUTLINE_BUTTON}` : 'px-2.5 font-semibold min-[23.4375rem]:px-3'}`}
     >
       {/* Short where the row is tight: phones, and beside the search below 1280 px. */}
       <span className="sm:hidden lg:inline xl:hidden">{t.nav.quoteShort}</span>
@@ -190,7 +191,8 @@ export default function Layout({
               className="h-6 w-auto sm:h-8"
             />
             <span className="flex flex-col leading-tight">
-              <span className="whitespace-nowrap font-sans text-[13.5px] font-bold text-ink min-[23.4375rem]:text-[14.5px] sm:text-base">
+              {/* Below 360 px the name stands on two lines, so the tools keep the logo's row. */}
+              <span className="whitespace-nowrap font-sans text-[13.5px] font-bold text-ink max-[22.5rem]:w-min max-[22.5rem]:whitespace-normal max-[22.5rem]:leading-[1.15] min-[23.4375rem]:text-[14.5px] sm:text-base">
                 {ORG_TRADING_NAME}
               </span>
               <span className="hidden font-sans text-xs text-ink-mid min-[73.75rem]:inline">
@@ -348,9 +350,13 @@ export default function Layout({
       <main id="icerik" tabIndex={-1}>
         {children}
       </main>
-      <footer className="mt-24 border-t-2 border-ink bg-bg-soft">
+      {/* Phones (below 640 px; owner, 2026-11-13: shorter): the link lists stand in two columns
+          (the shop's groups beside the corporate sites and the legal texts, the contact lines
+          beside the social profiles), the seller block across both. The seller's name is in that
+          block only; the last line is the © / image-rights note. */}
+      <footer className="mt-12 border-t-2 border-ink bg-bg-soft md:mt-24">
         <div className={WRAP}>
-          <div className="flex flex-col gap-4 border-b border-hair py-8 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-b border-hair py-6 sm:flex-row sm:items-center sm:justify-between sm:py-8">
             <a href={localePath('/', lang)} className={`flex items-center gap-3 ${FOCUS}`}>
               <img
                 src="/logo-krv-v2.svg"
@@ -371,16 +377,16 @@ export default function Layout({
           </div>
         </div>
         <div
-          className={`${WRAP} grid gap-8 py-10 font-sans text-sm text-ink-mid sm:grid-cols-2 lg:grid-cols-5`}
+          className={`${WRAP} grid grid-cols-2 gap-8 py-8 font-sans text-sm text-ink-mid max-sm:grid-rows-[auto_auto_1fr_auto] max-sm:gap-x-4 sm:py-10 lg:grid-cols-5`}
         >
-          <div>
+          <div className="max-sm:col-span-2">
             <p className={HEAD}>{t.footer.legal}</p>
             <p className="m-0 mt-3">{SELLER.name}</p>
             <p className="m-0">{SELLER.address}</p>
             <p className="m-0">{SELLER.tax}</p>
             <p className="m-0">{t.footer.mersis}</p>
           </div>
-          <div>
+          <div className="max-sm:row-span-2">
             <p className={HEAD}>{t.footer.shop}</p>
             <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0">
               {nav.map((n) => (
@@ -409,7 +415,10 @@ export default function Layout({
           </div>
           <div>
             <p className={HEAD}>{t.footer.company}</p>
-            <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0">
+            {/* Phones: this is the page's right-hand column, and a domain name is one word. With
+                wider text spacing at 320 px it is longer than the column: it breaks there, rather
+                than widen the page. */}
+            <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0 max-sm:[overflow-wrap:anywhere]">
               <li>
                 <a href={corporate} className={`hover:text-ink ${FOCUS}`}>
                   kervanbreaker.com
@@ -442,38 +451,40 @@ export default function Layout({
               </li>
             </ul>
           </div>
-          <div>
-            <p className={HEAD}>{t.footer.contact}</p>
-            <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0">
-              <li>
-                <a
-                  href={SELLER_TEL}
-                  className={`hover:text-ink max-lg:inline-flex max-lg:min-h-11 max-lg:items-center ${FOCUS}`}
-                >
-                  {SELLER.phone}
-                </a>
-              </li>
-              <li>
-                <a
-                  href={`tel:${ORG_PHONE_E164}`}
-                  className={`hover:text-ink max-lg:inline-flex max-lg:min-h-11 max-lg:items-center ${FOCUS}`}
-                >
-                  {ORG_PHONE}
-                </a>
-              </li>
-              <li className="max-lg:flex max-lg:min-h-11 max-lg:items-center">
-                {t.footer.fax}: {SELLER.fax}
-              </li>
-              <li>
-                <a
-                  href={`mailto:${SHOP_EMAIL}`}
-                  className={`hover:text-ink max-lg:inline-flex max-lg:min-h-11 max-lg:items-center ${FOCUS}`}
-                >
-                  {SHOP_EMAIL}
-                </a>
-              </li>
-            </ul>
-            <div className="mt-6">
+          <div className="max-sm:col-span-2 max-sm:grid max-sm:grid-cols-2 max-sm:gap-x-4">
+            <div>
+              <p className={HEAD}>{t.footer.contact}</p>
+              <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0">
+                <li>
+                  <a
+                    href={SELLER_TEL}
+                    className={`hover:text-ink max-lg:inline-flex max-lg:min-h-11 max-lg:items-center ${FOCUS}`}
+                  >
+                    {SELLER.phone}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={`tel:${ORG_PHONE_E164}`}
+                    className={`hover:text-ink max-lg:inline-flex max-lg:min-h-11 max-lg:items-center ${FOCUS}`}
+                  >
+                    {ORG_PHONE}
+                  </a>
+                </li>
+                <li className="max-lg:flex max-lg:min-h-11 max-lg:items-center">
+                  {t.footer.fax}: {SELLER.fax}
+                </li>
+                <li>
+                  <a
+                    href={`mailto:${SHOP_EMAIL}`}
+                    className={`hover:text-ink max-lg:inline-flex max-lg:min-h-11 max-lg:items-center ${FOCUS}`}
+                  >
+                    {SHOP_EMAIL}
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div className="mt-6 max-sm:mt-0">
               <p className={HEAD}>{t.footer.social}</p>
               <ul className="m-0 mt-2 -ml-3 flex list-none flex-wrap gap-0 p-0">
                 {ORG_SOCIALS.map((s) => (
@@ -494,12 +505,7 @@ export default function Layout({
           </div>
         </div>
         <div className="border-t border-hair">
-          <div
-            className={`${WRAP} flex flex-col gap-1 py-5 font-sans text-xs text-ink-soft sm:flex-row sm:justify-between sm:gap-6`}
-          >
-            <p className="m-0">{t.footer.images}</p>
-            <p className="m-0">{SELLER.name}</p>
-          </div>
+          <p className={`${WRAP} my-0 py-5 font-sans text-xs text-ink-soft`}>{t.footer.images}</p>
         </div>
       </footer>
       <ConsentBanner lang={lang} t={t} />

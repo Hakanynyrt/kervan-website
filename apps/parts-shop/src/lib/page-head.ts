@@ -9,6 +9,7 @@ import {
   ORG_TRADING_NAME,
   type HeadInput,
 } from '@kervan/seo';
+import { modelCount } from './card';
 import { DICT } from './dict';
 import {
   GUIDE_PICS,
@@ -269,7 +270,8 @@ export function pageHead({ lang, path, model, fx }: PageProps): HeadInput {
       return {
         ...page,
         title: m.brandTitle(model.brand),
-        description: m.brandDesc(model.brand, model.rows.length),
+        // Models, not cards (a breaker with two tip sizes has two), as the page's lead says.
+        description: m.brandDesc(model.brand, modelCount(model.rows)),
         ...ogOf(lang, GENERAL_OG),
         jsonLd: crumbs([partsCrumb, tipsCrumb], model.brand),
       };

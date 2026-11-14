@@ -1,18 +1,11 @@
-import { Fragment, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { Button } from '@astryxdesign/core/Button';
 import type { FxRate } from '@kervan/tips';
-import {
-  Breadcrumb,
-  ImgNote,
-  OemLine,
-  OemNumbers,
-  PageTitle,
-  StickyQuote,
-} from '../components/Bits';
+import { Breadcrumb, ImgNote, OemLine, OemNumbers, PageTitle } from '../components/Bits';
 import { FOCUS, OUTLINE_BUTTON, WRAP } from '../components/Layout';
 import { PartOrder, PartPriceLine, priceNote } from '../components/PartOrder';
 import { addToCart, cartQty } from '../lib/cart';
-import { partLineId } from '../lib/palet-share';
+import { opensUnfitted, partLineId } from '../lib/palet-share';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { fmtNum } from '../lib/format';
@@ -59,6 +52,15 @@ export default function PartItem({
   // Front heads: the Burçsuz / Burçlu choice made in the figure goes into the quote message.
   // Front heads open Burçlu (owner), as RenderFigure does.
   const [withB, setWithB] = useState(!!r?.fitted);
+  // `?burc=0` (a palet line of the head without its bushings, `lineHref`) opens the page on
+  // Burçsuz, after hydration: the prerender and the canonical stay the plain page's, as with a
+  // tip's `?tip=`. The figure takes the choice from here (`withB`), so its switch, pictures and
+  // 3D view follow with the price and the order box. A head without a Burçlu set ignores it.
+  useEffect(() => {
+    if (r?.fitted && opensUnfitted(window.location.search)) setWithB(false);
+    // Only on load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   if (!r) return null;
   const partName = r.kind
     ? t.parts.renderKind[r.kind]
@@ -129,9 +131,11 @@ export default function PartItem({
       <OemLine t={t} kit={model.part === 'tamir-takimi'} />
       <OemNumbers numbers={model.oem} t={t} note className="mt-3" />
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
+      {/* Phones: one column no wider than the page (the quote panel's field would widen an
+          automatic column by 2 px at 320 px). */}
+      <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
         <div className="flex min-w-0 flex-col gap-6">
-          <RenderFigure r={r} ctx={ctx} item onWithB={setWithB} />
+          <RenderFigure r={r} ctx={ctx} item withB={withB} onWithB={setWithB} />
           {cents !== null && (
             <PartPriceLine
               cents={cents}
@@ -198,7 +202,11 @@ export default function PartItem({
               <ul className="m-0 mt-3 flex list-none flex-wrap gap-2 p-0 text-sm">
                 {nearby.map(({ l, x }) => (
                   <li key={`${l.part}/${l.anchor}`}>
-                    <a href={localePath(partItemPath(l.part, l.anchor), lang)} className={LINK}>
+                    {/* A box, not inline text: the 44 px height holds and the rows keep apart. */}
+                    <a
+                      href={localePath(partItemPath(l.part, l.anchor), lang)}
+                      className={`inline-flex items-center ${LINK}`}
+                    >
                       {renderTitle(x, p.name, t)}
                       {'\u00a0'}→
                     </a>
@@ -209,6 +217,7 @@ export default function PartItem({
           )}
         </div>
         <aside className="lg:col-start-2">
+          {/* Either panel renders the phones' bottom bar itself, with its own "Palete yükle". */}
           {cents !== null ? (
             <PartOrder
               id={lineId}
@@ -240,8 +249,6 @@ export default function PartItem({
           )}
         </aside>
       </div>
-      {/* Priced items: `PartOrder` renders the bar itself, with its "Palete yükle". */}
-      {cents === null && <StickyQuote text={text} t={t} />}
     </div>
   );
 }
