@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { Button } from '@astryxdesign/core/Button';
 import { Selector } from '@astryxdesign/core/Selector';
 import { TextInput } from '@astryxdesign/core/TextInput';
@@ -20,7 +20,7 @@ import {
   type TipType,
 } from '@kervan/tips';
 import type { Dict } from '../lib/dict';
-import { byNameFit, clipQuery } from '../lib/finder';
+import { byNameFit, clipQuery, splitTip } from '../lib/finder';
 import { fmtNum } from '../lib/format';
 import { localePath } from '../lib/locale-path';
 import { LIST_PATH, LIST_RESULTS_ID, type BrandLink, type BreakerCard } from '../lib/routes';
@@ -181,7 +181,7 @@ export function ModelTable({
   const [q, setQ] = useState('');
   // Typed, pasted or from the address: the box keeps the first `QUERY_MAX` characters.
   const onType = (v: string) => setQ(clipQuery(v));
-  const [filter, setFilter] = useState<TipFilter>(EMPTY_FILTER);
+  const [picked, setFilter] = useState<TipFilter>(EMPTY_FILTER);
   // Writing the URL waits for the load-time read, so the first render cannot wipe a shared link.
   const [ready, setReady] = useState(false);
   const box = useRef<HTMLInputElement>(null);
@@ -194,7 +194,20 @@ export function ModelTable({
   }, []);
   useKeepTyped(box, onType);
   const placeholder = useFitPlaceholder(box, hint ? [hint] : searchExamples(t));
-  const query = q.trim();
+  // A tip type word in the box ("20g keski") is no part of the name: the search runs without it
+  // and it counts as the tip type choice until a type is picked below (`onFilter`).
+  const typed = useMemo(() => splitTip(q), [q]);
+  const query = typed.text;
+  const filter = useMemo<TipFilter>(
+    () => (typed.tip && !picked.tip ? { ...picked, tip: typed.tip } : picked),
+    [typed.tip, picked],
+  );
+  // A choice below replaces the typed word: the box keeps the model text only, so "Tümü" can
+  // show every type again.
+  const onFilter = (next: TipFilter) => {
+    if (typed.tip) setQ(typed.text);
+    setFilter(next);
+  };
   useEffect(() => {
     if (!ready) return;
     replaceSearch((sp) => {
@@ -262,10 +275,10 @@ export function ModelTable({
   ]
     .filter(Boolean)
     .join(', ');
-  const clear = () => setFilter(EMPTY_FILTER);
+  const clear = () => onFilter(EMPTY_FILTER);
   const bar =
     found.length > 0 ? (
-      <FilterBar facets={facets} filter={filter} onChange={setFilter} t={t} />
+      <FilterBar facets={facets} filter={filter} onChange={onFilter} t={t} />
     ) : null;
   const table =
     visible.length > 0 ? (

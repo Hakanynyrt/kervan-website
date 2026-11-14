@@ -8,6 +8,7 @@ import {
   makesByModels,
   modelIndex,
   QUERY_MAX,
+  splitTip,
   type FinderMake,
 } from './finder.ts';
 
@@ -359,4 +360,20 @@ test('rows are put in the order the search lists its hits, alike rows as they ca
   // Nothing typed: the rows as they are, in a new list.
   assert.deepEqual(byNameFit(rows, ' '), rows);
   assert.notEqual(byNameFit(rows, ''), rows);
+});
+
+test('splitTip takes a tip type word out of the typed text', () => {
+  assert.deepEqual(splitTip('20g keski'), { text: '20g', tip: 'chisel' });
+  assert.deepEqual(splitTip('Keski HB 20G'), { text: 'HB 20G', tip: 'chisel' });
+  assert.deepEqual(splitTip('hb 20g küt uç'), { text: 'hb 20g', tip: 'blunt' });
+  assert.deepEqual(splitTip('F22 moil'), { text: 'F22', tip: 'moil' });
+  assert.deepEqual(splitTip('sb 50 PİRAMİT'), { text: 'sb 50', tip: 'pyramid' });
+});
+
+test('splitTip leaves other texts as typed', () => {
+  assert.deepEqual(splitTip(' HB 20G '), { text: 'HB 20G', tip: null });
+  assert.deepEqual(splitTip('keski'), { text: 'keski', tip: null });
+  assert.deepEqual(splitTip('keski uç'), { text: 'keski uç', tip: null });
+  assert.deepEqual(splitTip('20g keski sivri'), { text: '20g keski sivri', tip: null });
+  assert.deepEqual(splitTip('hb 20g uç'), { text: 'hb 20g uç', tip: null });
 });
