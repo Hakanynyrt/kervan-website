@@ -17,6 +17,7 @@ import type { Dict } from '../lib/dict';
 import {
   clipQuery,
   exactHit,
+  splitTip,
   findModels,
   MODEL_INDEX_PATH,
   prepareSearch,
@@ -123,7 +124,12 @@ export function BreakerSearch({
   const list = useRef<HTMLUListElement>(null);
   const data: Index | null = finder ?? index;
   const query = q.trim();
-  const found = useMemo(() => (data && query ? findModels(data, query) : null), [data, query]);
+  // A tip type word in the text ("20g keski") is no part of the name: the models are searched
+  // without it and their links open with that type chosen.
+  const { text, tip } = useMemo(() => splitTip(query), [query]);
+  const found = useMemo(() => (data && text ? findModels(data, text) : null), [data, text]);
+  const pageOf = (slug: string) =>
+    `${localePath(breakerPath(slug), lang)}${tip ? `?tip=${tip}` : ''}`;
   const listId = `${id}-models`;
 
   /** The full finder entry of a hit (home), for the panel. */
@@ -144,9 +150,10 @@ export function BreakerSearch({
     const v = clipQuery(new URLSearchParams(window.location.search).get('q') ?? '');
     if (!v) return;
     setQ(v);
-    const r = findModels(finder, v);
+    const name = splitTip(v).text;
+    const r = findModels(finder, name);
     // Only a query that names one model exactly opens it, never a corrected guess.
-    home.select(r.guess ? null : exactHit(r.hits, v));
+    home.select(r.guess ? null : exactHit(r.hits, name));
     // Only on load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -207,7 +214,7 @@ export function BreakerSearch({
     const one =
       !found?.hits.length || found.guess
         ? null
-        : (exactHit(found.hits, query) ?? (found.hits.length === 1 ? found.hits[0] : null));
+        : (exactHit(found.hits, text) ?? (found.hits.length === 1 ? found.hits[0] : null));
     // Anything else (several hits, a corrected guess, nothing found, the index not here yet) is
     // the form's own submit: the tip list with `?q=`, at its results (the action's fragment). On
     // the tip list with the same `?q=` that loads no page, it only jumps to the results: the list
@@ -218,7 +225,7 @@ export function BreakerSearch({
     }
     e.preventDefault();
     if (home) pick(one);
-    else window.location.assign(localePath(breakerPath(one.model.slug), lang));
+    else window.location.assign(pageOf(one.model.slug));
   };
   const onKey = (e: KeyboardEvent) => {
     if (e.key !== 'Escape') return;
@@ -256,7 +263,7 @@ export function BreakerSearch({
       ? found.guess
         ? t.search.didYouMean(found.guess)
         : `${t.home.finder.found}: ${t.search.count(found.hits.length)}`
-      : t.search.none(query)
+      : t.search.none(text)
     : '';
 
   return (
@@ -327,7 +334,7 @@ export function BreakerSearch({
                 <li key={h.model.slug} role="presentation" className="border-t border-hair">
                   <a
                     {...rowProps(i)}
-                    href={localePath(breakerPath(h.model.slug), lang)}
+                    href={pageOf(h.model.slug)}
                     tabIndex={-1}
                     className="flex min-h-[46px] items-center justify-between gap-3 px-3.5 text-[15px] text-ink hover:bg-bg-soft aria-selected:bg-bg-soft aria-selected:outline aria-selected:outline-2 aria-selected:-outline-offset-2 aria-selected:outline-brand"
                   >

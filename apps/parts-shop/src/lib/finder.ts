@@ -1,4 +1,11 @@
-import { breakerKeys, fold, queryWords, rewriteQuery, searchName } from '@kervan/tips';
+import {
+  breakerKeys,
+  fold,
+  queryWords,
+  rewriteQuery,
+  searchName,
+  type TipType,
+} from '@kervan/tips';
 
 /**
  * The make/model search of the header (every page) and the home page's finder: every breaker of
@@ -64,6 +71,35 @@ export const clipQuery = (text: string): string => {
   const cut = text.slice(0, QUERY_MAX);
   return /[\uD800-\uDBFF]$/.test(cut) ? cut.slice(0, -1) : cut;
 };
+
+/** The words a buyer types for a tip type, folded (Turkish and English), and the type each means. */
+const TIP_WORDS: Record<string, TipType> = {
+  keski: 'chisel',
+  chisel: 'chisel',
+  sivri: 'moil',
+  moil: 'moil',
+  kut: 'blunt',
+  blunt: 'blunt',
+  piramit: 'pyramid',
+  pyramid: 'pyramid',
+};
+/** "uç", "ucu", "tip": dropped beside a tip type word ("20g keski uç"), kept otherwise. */
+const TIP_NOUNS = new Set(['uc', 'ucu', 'tip']);
+
+/**
+ * A typed search with its tip type word taken out: "20g keski" → the model text "20g" and the
+ * type chisel (owner, 2026-11-14: "20g keski" said "model bulunamadı" and the word was not
+ * used). No catalogue name holds such a word. Only when one type is named and a model text is
+ * left; anything else comes back as typed, with no type.
+ */
+export function splitTip(query: string): { text: string; tip: TipType | null } {
+  const words = query.trim().split(/\s+/).filter(Boolean);
+  const kinds = new Set(words.map((w) => TIP_WORDS[fold(w)]).filter(Boolean));
+  if (kinds.size !== 1) return { text: query.trim(), tip: null };
+  const rest = words.filter((w) => !TIP_WORDS[fold(w)] && !TIP_NOUNS.has(fold(w)));
+  if (!rest.length) return { text: query.trim(), tip: null };
+  return { text: rest.join(' '), tip: [...kinds][0] };
+}
 
 /** The names-only index of the header search (the home's finder without its tip data). */
 export const modelIndex = (makes: readonly FinderMake[]): MakeModels<ModelRef>[] =>
