@@ -18,7 +18,16 @@ import { PaletQuote, PRINT_ICON, type QuoteLine } from '../components/PaletQuote
 import { PartGroups } from '../components/PartGroups';
 import { SHARE_ICON, useShare } from '../components/ShareLinks';
 import { ORDER_CONVERSION } from '../lib/ads';
-import { CART_EVENT, readCart, writeCart, type CartItem } from '../lib/cart';
+import {
+  CART_EVENT,
+  readCart,
+  readRefreshStamp,
+  refreshIsFresh,
+  refreshStamp,
+  writeCart,
+  writeRefreshStamp,
+  type CartItem,
+} from '../lib/cart';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import {
@@ -43,7 +52,7 @@ import {
   type PaletLines,
   type SharedLine,
 } from '../lib/palet-share';
-import { sharedPaletLines } from '../lib/palet-lines';
+import { PAGE_FETCH_MS, sharedPaletLines } from '../lib/palet-lines';
 import { lineTryCents, localDay, paletSum } from '../lib/palet-quote';
 import { CART_PATH, PARTS_PATH } from '../lib/routes';
 import type { Lang } from '../types';
@@ -64,6 +73,11 @@ type Field = (typeof FIELDS)[number];
 /** Optional invoice details (2026-11-13), grouped under their own legend; like every field they
  *  go into the order message only when filled. */
 const INVOICE: readonly Field[] = ['email', 'taxOffice', 'taxId'];
+/** The longest "Teklifi yazdır" waits for the lines to be read again from their pages: one batch
+ *  of pages at its time limit, and a little more. The wait ends there even if the read has not
+ *  (several slow batches, a browser whose fetch has no time limit), so the button never stays
+ *  disabled. */
+const REFRESH_WAIT_MS = PAGE_FETCH_MS + 2000;
 /** The country is asked on the English cart only (international orders), and required there. */
 const fieldsFor = (lang: Lang): readonly Field[] =>
   lang === 'en' ? FIELDS : FIELDS.filter((k) => k !== 'country');
@@ -208,21 +222,46 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   // again from their product pages, as a shared link's are, and written back, so the totals, the
   // order message and the printed quote show what the site shows now (review, 2026-11-13: a
   // dated quote must not carry an old price). A line whose page cannot be read stays as stored.
+  // "Teklifi yazdır" waits for that read (`checking`), REFRESH_WAIT_MS at most. A read that
+  // covered every line is remembered for this tab (`refreshIsFresh`, lib/cart.ts): a reload
+  // within ten minutes, in the same language and with the same lines, fetches nothing.
+  const [checking, setChecking] = useState(false);
   useEffect(() => {
     const ids = readCart().map((x) => x.id);
-    if (!ids.length) return;
+    if (!ids.length || refreshIsFresh(readRefreshStamp(), Date.now(), lang, ids)) return;
     let live = true;
-    sharedPaletLines(ids, lang)
+    setChecking(true);
+    const wait = window.setTimeout(() => setChecking(false), REFRESH_WAIT_MS);
+    sharedPaletLines(ids, lang, PAGE_FETCH_MS)
       .then((lines) => {
         if (!live) return;
-        const { items: next, changed } = refreshLines(readCart(), lines);
-        if (!changed) return;
-        setUndo((u) => u && { ...u, items: refreshLines(u.items, lines).items });
-        update(next);
+        const stored = readCart();
+        const { items: next, changed } = refreshLines(stored, lines);
+        // The lines "Geri al" would bring back too, also when no line still on the palet changed
+        // (the one stale line may be the one just removed).
+        setUndo((u) => {
+          if (!u) return u;
+          const r = refreshLines(u.items, lines);
+          return r.changed ? { ...u, items: r.items } : u;
+        });
+        if (changed) update(next);
+        if (stored.length && stored.every((x) => Object.prototype.hasOwnProperty.call(lines, x.id)))
+          writeRefreshStamp(
+            refreshStamp(
+              Date.now(),
+              lang,
+              stored.map((x) => x.id),
+            ),
+          );
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => {
+        window.clearTimeout(wait);
+        if (live) setChecking(false);
+      });
     return () => {
       live = false;
+      window.clearTimeout(wait);
     };
     // Once, on load: lines added later come with their page's price.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -321,7 +360,8 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
       x.qty,
       x.cents === null ? null : unitText(x.cents, fx, lang, t),
       lineTotal(x),
-      SITE + localePath(x.path, lang),
+      // A stored line without a path (damaged storage, `readCart`): the site itself.
+      SITE + localePath(x.path || '/', lang),
     ),
   );
   const totalText =
@@ -470,7 +510,11 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
           </div>
         </section>
       )}
-      {items === null ? null : list.length === 0 ? (
+      {items === null ? (
+        // Until the palet is read (and in the prerendered page): one screen held open, so the
+        // steps below do not jump down when the lines arrive.
+        <div className="min-h-screen" />
+      ) : list.length === 0 ? (
         <>
           <div className="mt-6 rounded-sm border border-hair bg-bg-soft p-6 font-sans sm:flex sm:items-center sm:justify-between sm:gap-6">
             <div>
@@ -503,13 +547,18 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                   className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 py-4 sm:flex"
                 >
                   <div className="col-start-1 row-start-1 min-w-0 sm:flex-1">
-                    <a
-                      ref={i === 0 ? firstLine : undefined}
-                      href={localePath(lineHref(x), lang)}
-                      className={`font-semibold text-ink hover:underline ${FOCUS}`}
-                    >
-                      {x.name}
-                    </a>
+                    {x.path ? (
+                      <a
+                        ref={i === 0 ? firstLine : undefined}
+                        href={localePath(lineHref(x), lang)}
+                        className={`font-semibold text-ink hover:underline ${FOCUS}`}
+                      >
+                        {x.name}
+                      </a>
+                    ) : (
+                      // A stored line without a path (damaged storage): its name, no link.
+                      <span className="font-semibold text-ink">{x.name}</span>
+                    )}
                     <p className="m-0 text-ink-mid">{lineLabel(x)}</p>
                     {/* A "fiyat sorulacak" line says so in its amount column only. */}
                     {x.cents !== null && (
@@ -568,6 +617,8 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                 variant="secondary"
                 onClick={() => window.print()}
                 icon={PRINT_ICON}
+                // Not before the lines are read again: a quote dated today carries today's price.
+                isDisabled={checking}
                 className={`px-4 ${OUTLINE_BUTTON}`}
               />
               <Button
@@ -646,7 +697,10 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                 {...ORDER_CONVERSION}
                 aria-disabled={blocked || undefined}
                 onClick={guard}
-                className={`px-5 ${WHATSAPP_BUTTON}`}
+                // Its label wraps below about 360 px (as the home page's mail button does) and
+                // stays centred, like the one-line labels. On one line the button keeps the `lg`
+                // height (46 px), as the mail button under it.
+                className={`h-auto min-h-[46px] px-5 py-2 text-center whitespace-normal ${WHATSAPP_BUTTON}`}
               />
               <Button
                 href={`mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`}

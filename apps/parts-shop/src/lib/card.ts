@@ -11,6 +11,14 @@ import { tipImg } from './tip-img';
 export const cardKey = (c: BreakerCard): string =>
   c.variant ? `${c.slug}~${c.variant.n}` : c.slug;
 
+/**
+ * How many breaker pages some cards stand for: a breaker with two tip sizes has two cards and
+ * counts once. What the pages call "n model" is this number, as the header search's count is
+ * (review, 2026-11-13: the header's "35 model" opened a page that said "41 model").
+ */
+export const modelCount = (cards: readonly Pick<BreakerCard, 'slug'>[]): number =>
+  new Set(cards.map((c) => c.slug)).size;
+
 /** A card's name: the breaker, plus the tip size (diameter, never length) when it takes more than one. */
 export const cardName = (c: BreakerCard, lang: Lang, t: Dict): string =>
   c.variant && c.diameterMm !== null

@@ -177,7 +177,8 @@ export interface Dict {
     sampleBadge: string;
     /** A model card's picture: its own tip, or (`sample`) another breaker's as a sample. */
     cardAlt: (name: string, sample: boolean) => string;
-    /** Under a page of model cards: shows the next page. */
+    /** Under a page of model cards: shows the next page. `left` counts cards (a breaker with two
+     *  tip sizes has two), so it says results, not models. */
     more: (left: number) => string;
     groovedBadgeLabel: (name: string) => string;
   };
@@ -248,12 +249,15 @@ export interface Dict {
   };
   search: {
     label: string;
-    /** The search box's example: the longest of the three that fits the box is shown. */
+    /** The search box's example: the longest of the four that fits the box is shown. */
     placeholder: string;
     placeholderMid: string;
     placeholderShort: string;
+    placeholderTiny: string;
     button: string;
     none: (q: string) => string;
+    /** The models a search found (the tip lists count breaker pages, as the header list does,
+     *  not the cards: a breaker with two tip sizes has two). */
     count: (n: number) => string;
     brands: string;
     all: string;
@@ -262,7 +266,7 @@ export interface Dict {
     didYouMean: (q: string) => string;
     /** Under an empty search box: nothing is listed until something is typed. */
     hint: string;
-    /** Results narrowed by the filters: n of the total the typed search found. */
+    /** Results narrowed by the filters: n of the total the typed search found (models both). */
     countFiltered: (n: number, total: number) => string;
     /** Narrowing filters, shown only for a typed search's results. */
     filter: {
@@ -278,7 +282,7 @@ export interface Dict {
       grooved: string;
       all: string;
       clear: string;
-      /** The filters leave nothing of the n results the typed search found. */
+      /** The filters leave nothing of the n models the typed search found (the count's number). */
       none: (n: number) => string;
     };
   };
@@ -837,7 +841,7 @@ export const DICT: Record<Lang, Dict> = {
       sampleBadge: 'Temsili görsel',
       cardAlt: (name, sample) =>
         sample ? `${name} kırıcı ucu için temsili görsel` : `${name} kırıcı ucu`,
-      more: (left) => `Daha fazla göster (${left} model daha)`,
+      more: (left) => `Daha fazla göster (${left} sonuç daha)`,
       groovedBadgeLabel: (name) => `${name} için toz kanallı uçlar`,
     },
     popular: {
@@ -905,6 +909,7 @@ export const DICT: Record<Lang, Dict> = {
       placeholder: 'Kırıcınızın marka ve modeli, ör. Furukawa HB 20G',
       placeholderMid: 'Marka ve model, ör. Furukawa HB 20G',
       placeholderShort: 'Marka ve model, ör. HB 20G',
+      placeholderTiny: 'ör. HB 20G',
       button: 'Ara',
       none: (q) => `"${q}" için model bulunamadı.`,
       count: (n) => `${n} model`,
@@ -913,7 +918,7 @@ export const DICT: Record<Lang, Dict> = {
       changeMake: (n) => `Marka değiştir (${n})`,
       didYouMean: (q) => `Bunu mu demek istediniz: ${q}`,
       hint: 'Kırıcınızın marka ve modelini yazın; uyan ürünler burada listelenir.',
-      countFiltered: (n, total) => `${n} model (${total} sonuçtan)`,
+      countFiltered: (n, total) => `${n} model (${total} modelden)`,
       filter: {
         label: 'Sonuçları daralt',
         type: 'Uç tipi',
@@ -939,7 +944,7 @@ export const DICT: Record<Lang, Dict> = {
         grooved: 'Toz kanallı',
         all: 'Tümü',
         clear: 'Filtreleri temizle',
-        none: (n) => `Bu seçimlerle sonuç yok (yazdığınızla ${n} sonuç var).`,
+        none: (n) => `Bu seçimlerle sonuç yok (yazdığınızla ${n} model var).`,
       },
     },
     missing: {
@@ -1757,7 +1762,7 @@ export const DICT: Record<Lang, Dict> = {
         'The most ordered breaker tips and the parts we make for the same breakers, by breaker make and model.',
       brandTitle: (brand) => `${brand} breaker tips | Kervan Makina`,
       brandDesc: (brand, n) =>
-        `${brand} hydraulic breaker tips: Kervan tips for ${n} ${brand} breaker models, with working diameter and tip types. Same-day shipping from stock.`,
+        `${brand} hydraulic breaker tips: Kervan tips for ${n} ${brand} breaker ${n === 1 ? 'model' : 'models'}, with working diameter and tip types. Same-day shipping from stock.`,
       partsTitle: 'Hydraulic breaker spare parts | Kervan Makina',
       partsDesc:
         'Hydraulic breaker spare parts: tips, front heads, bushings, retainer keys, tie rods, pistons, accumulator parts, wear plates and repair kits, by make and model.',
@@ -1922,7 +1927,7 @@ export const DICT: Record<Lang, Dict> = {
       sampleBadge: 'Sample picture',
       cardAlt: (name, sample) =>
         sample ? `Sample picture for the ${name} breaker tip` : `${name} breaker tip`,
-      more: (left) => `Show more (${left} more models)`,
+      more: (left) => `Show more (${left} more ${left === 1 ? 'result' : 'results'})`,
       groovedBadgeLabel: (name) => `Tools with dust grooves for the ${name}`,
     },
     popular: {
@@ -1990,15 +1995,16 @@ export const DICT: Record<Lang, Dict> = {
       placeholder: 'Your breaker make and model, e.g. Furukawa HB 20G',
       placeholderMid: 'Make and model, e.g. Furukawa HB 20G',
       placeholderShort: 'Make and model, e.g. HB 20G',
+      placeholderTiny: 'e.g. HB 20G',
       button: 'Search',
       none: (q) => `No model found for "${q}".`,
-      count: (n) => `${n} models`,
+      count: (n) => `${n} ${n === 1 ? 'model' : 'models'}`,
       brands: 'Makes',
       all: 'All makes',
       changeMake: (n) => `Change make (${n})`,
       didYouMean: (q) => `Did you mean: ${q}`,
       hint: 'Type your breaker make and model; the matching products are listed here.',
-      countFiltered: (n, total) => `${n} models (of ${total} results)`,
+      countFiltered: (n, total) => `${n} of ${total} ${total === 1 ? 'model' : 'models'}`,
       filter: {
         label: 'Narrow the results',
         type: 'Tip type',
@@ -2150,7 +2156,7 @@ export const DICT: Record<Lang, Dict> = {
     },
     brand: {
       title: (brand) => `${brand} breaker tips`,
-      lead: (n) => `${n} models. Pick your breaker model.`,
+      lead: (n) => `${n} ${n === 1 ? 'model' : 'models'}. Pick your breaker model.`,
       filterHint: (model) => `Search this make, e.g. ${model}`,
     },
     terms: {
@@ -2636,7 +2642,7 @@ export const DICT: Record<Lang, Dict> = {
       showcase: {
         title: 'What we make',
         lead: 'The parts we make. Type your make and model to open that breaker’s parts.',
-        more: (left) => `Show more (${left} more parts)`,
+        more: (left) => `Show more (${left} more ${left === 1 ? 'part' : 'parts'})`,
       },
       tipLink: 'Tip for this breaker',
       quoteThis: 'Request a quote for this model',

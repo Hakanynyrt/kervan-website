@@ -253,7 +253,11 @@ export function MissingModel({
  * what the order box would) and its `added` result: the bar then leads with "Palete yükle",
  * WhatsApp shortened to its name (the full "WhatsApp ile sipariş ver" / "WhatsApp ile sor" stays
  * the accessible name), and shows the result above the buttons. That line is visual only: the
- * page's `AddedNote` (always in the DOM) announces it.
+ * page's `AddedNote` (always in the DOM) announces it. On a screen 17rem (272 px) high or less (a
+ * desktop window at 400 % zoom; a phone held sideways is taller and keeps the line) the bar keeps
+ * its buttons only: with the line it took over half of it.
+ * "Palete yükle" wraps onto a second line rather than being cut when its room is short (wider
+ * text spacing at 320 px).
  */
 export function StickyQuote({
   text,
@@ -278,7 +282,7 @@ export function StickyQuote({
       className="fixed inset-x-0 bottom-0 z-20 border-t border-hair bg-bg p-3 font-sans text-sm font-medium lg:hidden"
     >
       {onAdd && added && (
-        <p className="m-0 mb-2 text-center text-ink">
+        <p className="m-0 mb-2 text-center text-ink [@media(max-height:17rem)]:hidden">
           <span aria-hidden="true">
             {added.n === null ? t.price.added : t.price.addedQty(added.n)} ·{' '}
           </span>
@@ -297,7 +301,7 @@ export function StickyQuote({
             variant="primary"
             size="lg"
             onClick={onAdd}
-            className="min-w-0 flex-1 px-3"
+            className="h-auto min-h-11 min-w-0 flex-1 whitespace-normal px-3 py-1"
           />
         )}
         <Button

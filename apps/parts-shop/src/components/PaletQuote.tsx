@@ -18,6 +18,9 @@ export interface QuoteLine {
   total: string | null;
 }
 
+/** The quote's title names its lines table. */
+const TITLE_ID = 'kv-quote-title';
+
 /** The print button's printer icon. */
 export const PRINT_ICON = (
   <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" fill="none">
@@ -37,9 +40,10 @@ export const PRINT_ICON = (
  * else in print), so the browser's print dialog gives a plain A4 document the buyer can save as
  * PDF. Seller, title and date, buyer, lines, totals, terms, then the palet link. Every figure and
  * sentence is /palet's own (the page passes its lines and totals, whose prices it reads again
- * from the product pages when it loads; a line whose page could not be read then keeps the price
- * it was added with); the quote adds no term of its own: no validity period, number, signature or
- * bank details. No colour classes: the text is black on white whatever the theme.
+ * from the product pages when it loads, and its print button waits for that read; a line whose
+ * page could not be read then keeps the price it was added with); the quote adds no term of its
+ * own: no validity period, number, signature or bank details. No colour classes: the text is
+ * black on white whatever the theme.
  */
 export function PaletQuote({
   lang,
@@ -81,7 +85,7 @@ export function PaletQuote({
   return (
     <div className="kv-quote font-sans text-[13px] leading-normal">
       <div>
-        <p className="m-0 font-semibold">{seller.h}</p>
+        <h3 className="m-0 font-semibold">{seller.h}</h3>
         {seller.p.map((x) => (
           <p key={x} className="m-0">
             {x}
@@ -89,7 +93,9 @@ export function PaletQuote({
         ))}
       </div>
       <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-        <h2 className="m-0 text-[22px] font-bold">{c.print.title}</h2>
+        <h2 id={TITLE_ID} className="m-0 text-[22px] font-bold">
+          {c.print.title}
+        </h2>
         {day && (
           <p className="m-0 tabular-nums">
             {c.print.date}: {fmtDate(day, lang)}
@@ -98,7 +104,7 @@ export function PaletQuote({
       </div>
       {buyer.length > 0 && (
         <div className="mt-4">
-          <p className="m-0 font-semibold">{c.print.buyer}</p>
+          <h3 className="m-0 font-semibold">{c.print.buyer}</h3>
           {buyer.map((x) => (
             <p key={x} className="m-0 break-words">
               {x}
@@ -106,7 +112,10 @@ export function PaletQuote({
           ))}
         </div>
       )}
-      <table className="mt-5 w-full border-collapse border-t border-current text-left leading-snug tabular-nums">
+      <table
+        aria-labelledby={TITLE_ID}
+        className="mt-5 w-full border-collapse border-t border-current text-left leading-snug tabular-nums"
+      >
         <thead>
           <tr>
             {/* Half the width for the names; the figures share the rest. */}
@@ -127,10 +136,11 @@ export function PaletQuote({
         <tbody>
           {lines.map((x) => (
             <tr key={x.id} className="break-inside-avoid">
-              <td className={`${cell} pr-3`}>
+              {/* The row's header, looking like the cell it was: plain weight, left aligned. */}
+              <th scope="row" className={`${cell} pr-3 text-left font-normal`}>
                 <span className="block font-semibold">{x.name}</span>
                 {x.label}
-              </td>
+              </th>
               <td className={`${cell} px-2 text-right`}>{x.qty}</td>
               {x.total === null ? (
                 <td colSpan={2} className={`${cell} pl-2 text-right`}>

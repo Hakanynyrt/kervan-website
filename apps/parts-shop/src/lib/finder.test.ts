@@ -2,10 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   byNameFit,
+  clipQuery,
   exactHit,
   findModels,
   makesByModels,
   modelIndex,
+  QUERY_MAX,
   type FinderMake,
 } from './finder.ts';
 
@@ -213,6 +215,13 @@ const LISTS: FinderMake[] = [
     ],
   },
   {
+    brand: 'Montabert',
+    models: [
+      { model: 'BRH 130', slug: 'montabert-brh-130', tips: [] },
+      { model: 'BRH 501', slug: 'montabert-brh-501', tips: [] },
+    ],
+  },
+  {
     brand: 'Socomec',
     models: [
       { model: 'DMS 210', slug: 'socomec-dms-210', tips: [] },
@@ -235,6 +244,93 @@ test('each model of a list or bracket name counts as the model the text names', 
   // The name as written still names it, and a list is still no exact hit to open by itself.
   assert.deepEqual(listSlugs('MES 121/150'), ['indeco-mes-121-150']);
   assert.equal(exactHit(findModels(LISTS, 'mes 150').hits, 'mes 150'), null);
+});
+
+test('a list or bracket name does not hold a number across its slash or bracket', () => {
+  // Review, 2026-11-13: "501" listed MES 1050/ 1200 ("…050/ 1…", earlier in the list) first.
+  assert.deepEqual(listSlugs('501'), ['montabert-brh-501', 'indeco-mes-1050-1200']);
+  // "HM 301 (300)" holds "130" only across its bracket.
+  assert.deepEqual(listSlugs('130'), ['montabert-brh-130', 'krupp-hm-301-300']);
+  // Inside one model of the list the number still counts, and the list order holds.
+  assert.deepEqual(listSlugs('050'), ['indeco-mes-1050-1200']);
+  assert.deepEqual(listSlugs('30'), ['krupp-hm-3000', 'krupp-hm-301-300', 'montabert-brh-130']);
+  // The tip list's cards follow the same rule.
+  const rows = [
+    { brand: 'Indeco', name: 'Indeco MES 1050/ 1200' },
+    { brand: 'Krupp', name: 'Krupp HM 301 (300)' },
+    { brand: 'Montabert', name: 'Montabert BRH 501' },
+  ];
+  assert.equal(byNameFit(rows, '501')[0].name, 'Montabert BRH 501');
+  assert.equal(byNameFit(rows, '301')[0].name, 'Krupp HM 301 (300)');
+  // Typed with its slash or bracket, the text is held by the list name as it is written.
+  assert.deepEqual(listSlugs('50/ 1').slice(0, 2), ['indeco-mes-1050-1200', 'montabert-brh-501']);
+  assert.equal(byNameFit(rows, '301 (3')[0].name, 'Krupp HM 301 (300)');
+});
+
+// Both names of one model as entries of their own, and a model that a bracket name also carries.
+const TWINS: FinderMake[] = [
+  {
+    brand: 'Krupp',
+    models: [
+      { model: 'HM 60 (61 , 62)', slug: 'krupp-hm-60-61-62', tips: [] },
+      { model: 'HM 61', slug: 'krupp-hm-61', tips: [] },
+    ],
+  },
+  {
+    brand: 'MTB',
+    models: [
+      { model: '210 II', slug: 'mtb-210-ii', tips: [] },
+      { model: '215', slug: 'mtb-215', tips: [] },
+      { model: '2150', slug: 'mtb-2150', tips: [] },
+    ],
+  },
+];
+const twinSlugs = (q: string) => findModels(TWINS, q).hits.map((h) => h.model.slug);
+const twinOpens = (q: string) => exactHit(findModels(TWINS, q).hits, q)?.model.slug ?? null;
+
+test('an exact own name opens its own page though another entry carries the name', () => {
+  // Review, 2026-11-13: neither name opened a page, both entries being named so.
+  assert.equal(twinOpens('MTB 215'), 'mtb-215');
+  assert.equal(twinOpens('mtb 210 ii'), 'mtb-210-ii');
+  assert.equal(twinOpens('mtb210-II'), 'mtb-210-ii');
+  // The model alone, and a model a bracket name carries too.
+  assert.equal(twinOpens('215'), 'mtb-215');
+  assert.equal(twinOpens('Krupp HM 61'), 'krupp-hm-61');
+  assert.equal(twinOpens('hm 61'), 'krupp-hm-61');
+  // Still no partial match, and a bracket name's other models open nothing by themselves.
+  assert.equal(twinOpens('mtb 21'), null);
+  assert.equal(twinOpens('hm 62'), null);
+});
+
+test('among the hits the text names, the one whose own name it is comes first', () => {
+  // MTB 210 II is listed first and carries the name "MTB 215" too.
+  assert.deepEqual(twinSlugs('mtb 215'), ['mtb-215', 'mtb-210-ii', 'mtb-2150']);
+  assert.deepEqual(twinSlugs('215'), ['mtb-215', 'mtb-210-ii', 'mtb-2150']);
+  assert.deepEqual(twinSlugs('MTB 210 II'), ['mtb-210-ii', 'mtb-215']);
+  assert.deepEqual(twinSlugs('hm 61'), ['krupp-hm-61', 'krupp-hm-60-61-62']);
+  // A name the text does not name whole keeps the list order.
+  assert.deepEqual(twinSlugs('hm 6'), ['krupp-hm-60-61-62', 'krupp-hm-61']);
+  // The tip list's cards, best-sellers first: the same.
+  const rows = [
+    { brand: 'MTB', name: 'MTB 210 II', d: 120 },
+    { brand: 'MTB', name: 'MTB 215', d: 120 },
+  ];
+  const order = (q: string) => byNameFit(rows, q).map((r) => r.name);
+  assert.deepEqual(order('mtb 215'), ['MTB 215', 'MTB 210 II']);
+  assert.deepEqual(order('mtb 210 ii'), ['MTB 210 II', 'MTB 215']);
+  assert.deepEqual(order('mtb 21'), ['MTB 210 II', 'MTB 215']);
+});
+
+test('a search text is kept to its first characters', () => {
+  assert.equal(QUERY_MAX, 80);
+  assert.equal(clipQuery('Furukawa HB 20G'), 'Furukawa HB 20G');
+  assert.equal(clipQuery('x'.repeat(3000)), 'x'.repeat(80));
+  assert.equal(clipQuery(''), '');
+  // A character pair is not cut in half: the "n model" link encodes the text.
+  const cut = clipQuery(`${'x'.repeat(79)}\u{1F600}`);
+  assert.equal(cut, 'x'.repeat(79));
+  assert.doesNotThrow(() => encodeURIComponent(cut));
+  assert.equal(clipQuery(`${'x'.repeat(78)}\u{1F600}y`), `${'x'.repeat(78)}\u{1F600}`);
 });
 
 test('rows are put in the order the search lists its hits, alike rows as they came', () => {

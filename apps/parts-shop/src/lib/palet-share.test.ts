@@ -9,24 +9,29 @@ import {
   listedLineId,
   MAX_SHARED_LINES,
   mergeShared,
+  opensUnfitted,
   paletLink,
   paletParam,
   partLineId,
   refreshLines,
   tipLineId,
+  UNFITTED_PARAM,
   withoutPalet,
   type PaletLines,
 } from './palet-share.ts';
 
 const TIP = tipLineId('/kirici/ornek/m-1', null, 'chisel');
 const TIP2 = tipLineId('/kirici/ornek/m-2', 2, 'moil');
-const ITEM = partLineId('/yedek-parca/on-kafa/ornek-m-1-on-kafa', true);
+/** A front head's item page: the one group with the Burçsuz / Burçlu choice. */
+const HEAD = '/yedek-parca/alt-govde/ornek-m-1';
+const ITEM = partLineId(HEAD, true);
 const LISTED = listedLineId('burc', 'ornek-m-3', 'KAFA_BURCU');
 
 test('line ids keep the shapes the pages have always stored', () => {
   assert.equal(TIP, '/kirici/ornek/m-1|chisel');
   assert.equal(TIP2, '/kirici/ornek/m-2|2|moil');
-  assert.equal(ITEM, '/yedek-parca/on-kafa/ornek-m-1-on-kafa#b');
+  assert.equal(ITEM, '/yedek-parca/alt-govde/ornek-m-1#b');
+  assert.equal(partLineId(HEAD, false), HEAD);
   assert.equal(partLineId('/yedek-parca/piston/x', false), '/yedek-parca/piston/x');
   assert.equal(LISTED, 'listed:burc/ornek-m-3/KAFA_BURCU');
 });
@@ -188,7 +193,7 @@ test('refresh: stored lines take the name and price of their page, quantities an
       name: 'Ornek M-1',
       label: 'ön kafa',
       code: null,
-      path: '/yedek-parca/on-kafa/ornek-m-1-on-kafa',
+      path: HEAD,
       cents: 300,
       qty: 2,
     },
@@ -245,7 +250,8 @@ test('withoutPalet drops only the palet parameter', () => {
 test('each line id names the same-site page that sells it, nothing else', () => {
   assert.equal(linePagePath(TIP, '/yedek-parca'), '/kirici/ornek/m-1');
   assert.equal(linePagePath(TIP2, '/yedek-parca'), '/kirici/ornek/m-2');
-  assert.equal(linePagePath(ITEM, '/yedek-parca'), '/yedek-parca/on-kafa/ornek-m-1-on-kafa');
+  assert.equal(linePagePath(ITEM, '/yedek-parca'), HEAD);
+  assert.equal(linePagePath(partLineId(HEAD, false), '/yedek-parca'), HEAD);
   assert.equal(linePagePath(LISTED, '/yedek-parca'), '/yedek-parca/burc');
   assert.equal(linePagePath('//evil.example/x|chisel', '/yedek-parca'), null);
   assert.equal(linePagePath('/kirici/../palet|chisel', '/yedek-parca'), null);
@@ -271,14 +277,51 @@ test('a line links its page opened on the size and type it was added with', () =
     }),
     '/kirici/ornek/m-2?tip=blunt',
   );
-  // A modelled part: its own page (a burçlu head has no query of its own).
+  // A modelled part: its own page.
+  const PISTON = '/yedek-parca/piston/ornek-m-1-piston';
   assert.equal(
-    lineHref({ id: ITEM, name: 'Ornek M-1', path: '/yedek-parca/on-kafa/ornek-m-1-on-kafa' }),
-    '/yedek-parca/on-kafa/ornek-m-1-on-kafa',
+    lineHref({ id: partLineId(PISTON, false), name: 'Ornek M-1', path: PISTON }),
+    PISTON,
+  );
+  // A front head: Burçlu is what its page opens on, so only the burçsuz line names its choice.
+  assert.equal(lineHref({ id: ITEM, name: 'Ornek M-1', path: HEAD }), HEAD);
+  assert.equal(
+    lineHref({ id: partLineId(HEAD, false), name: 'Ornek M-1', path: HEAD }),
+    `${HEAD}?burc=0`,
   );
   // A listed part: its group page, searched for its breaker.
   assert.equal(
     lineHref({ id: LISTED, name: 'Örnek M-3', path: '/yedek-parca/burc' }),
     '/yedek-parca/burc?q=%C3%96rnek+M-3',
   );
+});
+
+test('only a front head stored without its bushings links with burc=0', () => {
+  const href = (id: string, path: string) => lineHref({ id, name: 'Ornek M-1', path });
+  // Every other group's item, whatever its anchor is called, keeps its plain page link.
+  for (const part of ['burc', 'kama', 'saplama', 'piston', 'akumulator', 'tamir-takimi'])
+    for (const anchor of ['ornek-m-1', 'alt-govde', 'ornek-alt-govde-burc']) {
+      const page = `/yedek-parca/${part}/${anchor}`;
+      assert.equal(href(partLineId(page, false), page), page, page);
+    }
+  // A tip and a listed part of a breaker or group named like the head group do not take it.
+  const tip = href(tipLineId('/kirici/alt-govde/m-1', null, 'chisel'), '/kirici/alt-govde/m-1');
+  assert.equal(tip, '/kirici/alt-govde/m-1?tip=chisel');
+  const listed = href(
+    listedLineId('alt-govde', 'ornek-m-3', 'ALT_GOVDE'),
+    '/yedek-parca/alt-govde',
+  );
+  assert.ok(!listed.includes('burc='), listed);
+  // The link's query is the one the item page reads, and its path is still the page's own.
+  const url = new URL(href(partLineId(HEAD, false), HEAD), 'https://example.test');
+  assert.equal(url.pathname, HEAD);
+  assert.equal(url.searchParams.get(UNFITTED_PARAM), '0');
+  assert.equal(opensUnfitted(url.search), true);
+});
+
+test('the item page opens Burçsuz only for burc=0', () => {
+  assert.equal(opensUnfitted('?burc=0'), true);
+  assert.equal(opensUnfitted('?gclid=1&burc=0'), true);
+  for (const search of ['', '?', '?burc', '?burc=', '?burc=1', '?burc=00', '?q=burc', '?tip=0'])
+    assert.equal(opensUnfitted(search), false, search);
 });

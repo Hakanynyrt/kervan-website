@@ -1,4 +1,5 @@
 import { MAX_QTY, type CartItem } from './cart.ts';
+import type { PartKey } from './routes.ts';
 
 /**
  * "Paleti paylaş": a /palet link that carries only the palet's line ids and quantities
@@ -45,11 +46,23 @@ export function linePagePath(id: string, partsPath: string): string | null {
   return PAGE_PATH.test(p) && !p.includes('..') && p.length > 1 ? p : null;
 }
 
+/** The part group whose item pages have the Burçsuz / Burçlu choice: front heads (`partLineId`). */
+const FITTED_PART: PartKey = 'alt-govde';
+/** The query that opens a front head's page on Burçsuz (`?burc=0`): `lineHref` writes it, the
+ *  page reads it once after it loads. */
+export const UNFITTED_PARAM = 'burc';
+
+/** A part item page's query asks for the head without its bushings. */
+export const opensUnfitted = (search: string): boolean =>
+  new URLSearchParams(search).get(UNFITTED_PARAM) === '0';
+
 /**
  * The neutral path of a palet line's page, opened on what the line was added with, in the query
  * that page already reads: a tip's size (`?uc=`, from the second size on, as the list cards link
  * it) and type (`?tip=`), a listed part's breaker (`?q=`, the search that shows it on its group
- * page). A modelled part's item page needs none.
+ * page), a front head stored without its bushings (`?burc=0`: its page opens Burçlu; a head that
+ * has no Burçlu set ignores it). Any other modelled part's item page, and the burçlu head's,
+ * needs none.
  */
 export function lineHref(x: Pick<CartItem, 'id' | 'name' | 'path'>): string {
   const sp = new URLSearchParams();
@@ -61,6 +74,9 @@ export function lineHref(x: Pick<CartItem, 'id' | 'name' | 'path'>): string {
     const type = b ?? a;
     if (Number.isInteger(size) && size > 1) sp.set('uc', String(size));
     if (type) sp.set('tip', type);
+  } else if (!x.id.endsWith('#b') && x.id.split('/')[2] === FITTED_PART) {
+    // A modelled part's id is its item path (`/<parts>/<group>/<anchor>`), `#b` added when burçlu.
+    sp.set(UNFITTED_PARAM, '0');
   }
   const q = sp.toString();
   return q ? `${x.path}?${q}` : x.path;

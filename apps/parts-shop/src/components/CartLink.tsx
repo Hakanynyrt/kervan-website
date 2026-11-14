@@ -34,6 +34,11 @@ const CART_ICON = (
  * Below 640 px that button is the icon alone, 44 px square, the count on its corner: its width
  * never changes with the count, so the logo and the tools stay on one row (review, 2026-11-13:
  * "Palet 12" pushed the tools onto a row of their own). The accessible name is the same.
+ * The plain link is a 44 px target on phones too: 8 px of padding on each side, taken back by
+ * the same negative margin, so the row keeps its places and its height. "Palet" is 28 px wide;
+ * the shorter "Cart" is held at 44 px, and the English row's language link stands 4 px further
+ * left for it. Below 640 px its focus ring is drawn inside the box: outside it ran 2 px into the
+ * language link and the quote button at 320-360 px.
  */
 export function CartLink({
   lang,
@@ -83,7 +88,7 @@ export function CartLink({
       href={localePath(CART_PATH, lang)}
       aria-current={current ? 'page' : undefined}
       aria-label={t.nav.cartLabel(n)}
-      className={`relative inline-flex min-h-11 flex-col items-center justify-center gap-px text-xs leading-none text-ink hover:text-brand-hi aria-[current=page]:text-brand-hi sm:flex-row sm:gap-2 sm:text-sm sm:leading-tight ${FOCUS}`}
+      className={`relative inline-flex min-h-11 flex-col items-center justify-center gap-px text-xs leading-none text-ink hover:text-brand-hi aria-[current=page]:text-brand-hi max-sm:-mx-2 max-sm:min-w-11 max-sm:px-2 max-sm:focus-visible:-outline-offset-2 sm:flex-row sm:gap-2 sm:text-sm sm:leading-tight ${FOCUS}`}
     >
       {CART_ICON}
       <span className="flex flex-col leading-tight">
@@ -98,10 +103,11 @@ export function CartLink({
         )}
       </span>
       {n > 0 && (
-        // Phones: on the icon's corner as the orange button's count is, 6 px past the link, so
-        // it stands clear of the quote button beside it (review, 2026-11-13: flush against
-        // "Teklif", same colour, below 375 px), with a rim in the page colour over the icon.
-        <span className="rounded-sm bg-brand px-1.5 text-xs font-semibold text-on-brand tabular-nums max-sm:absolute max-sm:-right-1.5 max-sm:-top-1 max-sm:px-1 max-sm:ring-2 max-sm:ring-bg">
+        // Phones: on the icon's corner as the orange button's count is, 2 px inside the link's
+        // padded edge (6 px past the row place the link takes), so it stands clear of the quote
+        // button beside it (review, 2026-11-13: flush against "Teklif", same colour, below
+        // 375 px), with a rim in the page colour over the icon.
+        <span className="rounded-sm bg-brand px-1.5 text-xs font-semibold text-on-brand tabular-nums max-sm:absolute max-sm:right-0.5 max-sm:-top-1 max-sm:px-1 max-sm:ring-2 max-sm:ring-bg">
           {n}
         </span>
       )}

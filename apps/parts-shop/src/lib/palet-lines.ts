@@ -97,14 +97,31 @@ export function paletLinesOf(
 
 /** Pages fetched at once while a shared palet link is read. */
 const FETCH_BATCH = 6;
+/** The longest one page may take to answer and be read while /palet reads its stored lines again,
+ *  so a slow page holds its batch (and the batches after it) back by this much at most. */
+export const PAGE_FETCH_MS = 8000;
+
+/** The time limit of one page fetch, when there is one. Browsers from before 2022 (Safari 15 and
+ *  older) have no `AbortSignal.timeout`: there the page is fetched without a limit, as before. */
+const fetchLimit = (ms?: number): RequestInit | undefined =>
+  ms && typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function'
+    ? { signal: AbortSignal.timeout(ms) }
+    : undefined;
 
 /**
  * In the browser: the current lines of the pages a shared palet link names, one fetch per page
  * (its prerendered HTML, whose embedded props carry only what that page already shows; there is
- * deliberately no file with every line's price). A page that cannot be read leaves its ids out;
- * rejects only when no page could be fetched at all (offline).
+ * deliberately no file with every line's price). A page that cannot be read (not there, too slow,
+ * not a page) leaves its ids out; rejects only when no page could be fetched at all (offline).
+ * `limitMs` is for the palet's own refresh, where a line left out keeps its stored values. A
+ * shared link is read without it: there a line left out is reported as no longer on the site
+ * (review, 2026-11-13: a page slower than the limit was).
  */
-export async function sharedPaletLines(ids: readonly string[], lang: Lang): Promise<PaletLines> {
+export async function sharedPaletLines(
+  ids: readonly string[],
+  lang: Lang,
+  limitMs?: number,
+): Promise<PaletLines> {
   const paths = [
     ...new Set(ids.map((id) => linePagePath(id, PARTS_PATH)).filter((p): p is string => !!p)),
   ];
@@ -114,15 +131,19 @@ export async function sharedPaletLines(ids: readonly string[], lang: Lang): Prom
     await Promise.all(
       paths.slice(i, i + FETCH_BATCH).map(async (path) => {
         try {
-          const r = await fetch(localePath(path, lang));
+          const r = await fetch(localePath(path, lang), fetchLimit(limitMs));
           reached++;
-          if (!r.ok) return;
+          if (!r.ok) {
+            // The 404 page's body is not read: let go of it, so the request ends.
+            void r.body?.cancel().catch(() => undefined);
+            return;
+          }
           const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
           const props = readPageProps(doc);
           if (!props || props.lang !== lang || props.path !== path) return;
           Object.assign(out, paletLinesOf([{ path, model: props.model }], lang));
         } catch {
-          /* offline or not a page: its ids are dropped */
+          /* offline, over the time limit or not a page: its ids are dropped */
         }
       }),
     );

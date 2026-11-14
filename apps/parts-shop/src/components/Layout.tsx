@@ -415,7 +415,10 @@ export default function Layout({
           </div>
           <div>
             <p className={HEAD}>{t.footer.company}</p>
-            <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0">
+            {/* Phones: this is the page's right-hand column, and a domain name is one word. With
+                wider text spacing at 320 px it is longer than the column: it breaks there, rather
+                than widen the page. */}
+            <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0 max-sm:[overflow-wrap:anywhere]">
               <li>
                 <a href={corporate} className={`hover:text-ink ${FOCUS}`}>
                   kervanbreaker.com

@@ -2,6 +2,7 @@ import { WRAP } from '../components/Layout';
 import type { FxRate } from '@kervan/tips';
 import { Breadcrumb, PageTitle } from '../components/Bits';
 import { BrandChips, ModelTable } from '../components/ModelSearch';
+import { modelCount } from '../lib/card';
 import type { Dict } from '../lib/dict';
 import { LIST_PATH, PARTS_PATH, type PageModel } from '../lib/routes';
 import type { Lang } from '../types';
@@ -32,7 +33,8 @@ export default function Brand({
         t={t}
       />
       <PageTitle>{t.brand.title(model.brand)}</PageTitle>
-      <p className="m-0 mt-3 font-sans text-ink-mid">{t.brand.lead(model.rows.length)}</p>
+      {/* Models, not cards: a breaker with two tip sizes has two cards (as the list's count). */}
+      <p className="m-0 mt-3 font-sans text-ink-mid">{t.brand.lead(modelCount(model.rows))}</p>
       <div className="mt-6 hidden sm:block">
         <BrandChips brands={model.brands} current={model.brand} only="wide" lang={lang} t={t} />
       </div>
