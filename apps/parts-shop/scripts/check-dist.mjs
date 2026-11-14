@@ -1,6 +1,6 @@
 // Last build step: fails the build if a page could leak, or is indexed (or hidden) by mistake.
 // - every HTML page has the embedded page props;
-// - only the cart (/palet), the /urun/<code> tip pages, 404 pages and (HOLD_EN_PART_ITEMS in
+// - only the cart (/palet), the /urun/<code> tip pages, 404 pages and (EN_PART_ITEMS in
 //   page-head.ts) the English part item pages carry meta robots noindex, and they must; no
 //   noindex page is in a sitemap or the target of an hreflang (indexable page or sitemap); every other page is indexable, has a self canonical on SITE, is listed in the
 //   sitemap, is reachable from the home page through plain <a href> links to its clean URL (no
@@ -68,13 +68,19 @@ count(DIST);
 
 const SITE = 'https://kiriciparca.com';
 // Pages kept out of search results (src/lib/page-head.ts NOINDEX_KINDS): cart, /urun/ and 404;
-// and, while page-head.ts's HOLD_EN_PART_ITEMS switch is on, the English part item pages.
-const HOLD_EN_PART_ITEMS = /export const HOLD_EN_PART_ITEMS = true;/.test(
+const NOINDEX_PAGES = /^((en\/)?(404|palet|urun\/[^/]+))\.html$/;
+// The English part item pages: all noindex while page-head.ts's EN_PART_ITEMS is 'held'; in
+// 'pilot' the open ones (`enItemOpen`: priced, own picture, an OEM number or a kit table) are
+// indexable and the rest noindex. An open one must carry a Product Offer, and its Turkish twin
+// carries hreflang exactly when it is open.
+const EN_ITEMS_HELD = /export const EN_PART_ITEMS = 'held' as/.test(
   fs.readFileSync(path.join(DIST, '..', 'src', 'lib', 'page-head.ts'), 'utf8'),
 );
-const NOINDEX_PAGES = new RegExp(
-  `^((en/)?(404|palet|urun/[^/]+)${HOLD_EN_PART_ITEMS ? '|en/yedek-parca/[^/]+/[^/]+' : ''})\\.html$`,
-);
+const EN_ITEM = /^en\/yedek-parca\/[^/]+\/[^/]+\.html$/;
+const TR_ITEM = /^yedek-parca\/[^/]+\/[^/]+\.html$/;
+/** English item file → open (indexable); Turkish item file → carries hreflang. */
+const enItemOpen = new Map();
+const trItemHreflang = new Map();
 // The sitemaps (src/entry-server.tsx sitemapFiles): robots.txt names the index, sitemap.xml is
 // the same index, every child it lists ships, and every <url> of the children is collected. A
 // <lastmod> must be a YYYY-MM-DD date no later than today, and not one shared by every dated URL
@@ -235,9 +241,17 @@ for (const f of files) {
         problems.push(`${rel}: og:image ${m[1]} not in dist`);
     const noindex = /<meta name="robots" content="[^"]*noindex/.test(s);
     if (noindex) noindexUrls.add(urlOf(rel));
-    if (NOINDEX_PAGES.test(rel.replace(/\\/g, '/'))) {
+    const file = rel.replace(/\\/g, '/');
+    if (NOINDEX_PAGES.test(file)) {
       if (!noindex) problems.push(`${rel}: should be noindex`);
       continue;
+    }
+    if (TR_ITEM.test(file)) trItemHreflang.set(file, /<link rel="alternate" hreflang=/.test(s));
+    if (EN_ITEM.test(file)) {
+      enItemOpen.set(file, !noindex);
+      if (noindex) continue;
+      if (EN_ITEMS_HELD) problems.push(`${rel}: should be noindex (EN_PART_ITEMS is 'held')`);
+      if (!/"@type":\s*"Offer"/.test(s)) problems.push(`${rel}: open English item without an Offer`);
     }
     indexable++;
     // hreflang of indexable pages only (the cart and /urun/ pages pair with each other, noindex).
@@ -283,6 +297,13 @@ for (const [u, where] of hreflangTargets)
   if (noindexUrls.has(u)) problems.push(`${where}: hreflang to noindex page ${u}`);
 if (sitemapLocs.size !== indexable)
   problems.push(`sitemap: ${sitemapLocs.size} URLs for ${indexable} indexable pages`);
+// A Turkish item page carries hreflang exactly when its English twin is open.
+for (const [en, open] of enItemOpen) {
+  const tr = en.slice('en/'.length);
+  if (trItemHreflang.has(tr) && trItemHreflang.get(tr) !== open)
+    problems.push(`${tr}: hreflang ${open ? 'missing' : 'to a held English page'}`);
+}
+const enOpen = [...enItemOpen.values()].filter(Boolean).length;
 // With the R2 base set (CI on main) the part photos must be out of dist except the opening
 // frames, and no page may still point at one of them on this host.
 if (process.env.VITE_TIP_IMG_BASE) {
@@ -333,6 +354,9 @@ if (problems.length) {
 }
 process.stdout.write(
   `check-dist: offers match the shown price: ${offerCounts.TRY} in TRY (Turkish, taxes included), ${offerCounts.USD} in USD (net)\n`,
+);
+process.stdout.write(
+  `check-dist: English part items: ${enOpen} open, ${enItemOpen.size - enOpen} held\n`,
 );
 process.stdout.write(
   `check-dist: ${pages} pages ok (${indexable} indexable, all in the sitemaps, ${lastmods.length} with lastmod; reachable by links except the part items warned about), ${total} files\n`,
