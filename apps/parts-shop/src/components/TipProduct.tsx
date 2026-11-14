@@ -153,8 +153,7 @@ export default function TipProduct({
     opts.get(x)?.sku?.image ??
     sample?.family.skus.find((y) => y.tipType === x && y.image)?.image ??
     null;
-  // Tiles only with a picture to show. Then phones pick on the tiles and wide screens also keep
-  // the chips beside the price; without pictures the chips are the one picker at every width.
+  // Tiles only with a picture to show; without pictures the chips are the one picker.
   const hasTilePics = types.some((x) => tilePic(x) !== null);
   const sku = opt.sku;
   const f = opt.family;
@@ -211,6 +210,50 @@ export default function TipProduct({
     />
   );
   const mail = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(name)}&body=${encodeURIComponent(text)}`;
+  const showSample = Boolean(sampleSku?.image && sample && !photos.length);
+  // Every tip type of the model as a photo tile (owner, 2026-10-16: "uçlar fotoğraflı gözüksün"),
+  // one row right under the main picture, which a tile switches (owner, 2026-11-10).
+  const typeTiles = hasTilePics && (
+    <ul aria-label={tf.type} className="m-0 grid list-none grid-cols-4 gap-2 p-0 sm:gap-3">
+      {types.map((x) => {
+        const o = opts.get(x)!;
+        const key = tilePic(x);
+        const on = x === opt.tipType;
+        return (
+          <li key={x}>
+            <button
+              type="button"
+              aria-pressed={on}
+              onClick={() => {
+                setType(x);
+                setAdded(null);
+              }}
+              className={`block w-full overflow-hidden rounded-md border bg-bg text-left ${on ? 'border-brand ring-1 ring-brand' : 'border-hair hover:border-hair-strong'} ${FOCUS}`}
+            >
+              {key && (
+                <img
+                  src={tipImg(key)}
+                  width={800}
+                  height={533}
+                  alt={
+                    o.sku?.image || !sample
+                      ? tf.renderAlt(quoteName, t.tip[x])
+                      : tf.sampleAlt(quoteName, sample.name)
+                  }
+                  loading="lazy"
+                  decoding="async"
+                  className="block aspect-[3/2] h-auto w-full bg-stage object-cover"
+                />
+              )}
+              <span className="block px-1.5 py-1.5 text-center font-sans text-xs font-semibold text-ink sm:px-3 sm:py-2 sm:text-left sm:text-sm">
+                {t.tip[x]}
+              </span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
 
   return (
     <div className={`${WRAP} pb-28 pt-8 lg:pb-12 lg:pt-12`}>
@@ -242,7 +285,6 @@ export default function TipProduct({
         </p>
       )}
 
-      {/* Every tip type of the model as a photo tile (owner, 2026-10-16: "uçlar fotoğraflı gözüksün"); a tile picks the type like the chips below. */}
       {variant && (
         <div role="group" aria-label={tf.size} className="mt-6 font-sans text-sm">
           <p className="m-0 mb-2 font-semibold text-ink">{tf.size}</p>
@@ -265,50 +307,6 @@ export default function TipProduct({
             ))}
           </ul>
         </div>
-      )}
-      {hasTilePics && (
-        <ul
-          aria-label={tf.type}
-          className="m-0 mt-6 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-4 lg:max-w-3xl"
-        >
-          {types.map((x) => {
-            const o = opts.get(x)!;
-            const key = tilePic(x);
-            const on = x === opt.tipType;
-            return (
-              <li key={x}>
-                <button
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() => {
-                    setType(x);
-                    setAdded(null);
-                  }}
-                  className={`block w-full overflow-hidden rounded-md border bg-bg text-left ${on ? 'border-brand ring-1 ring-brand' : 'border-ink-soft hover:bg-bg-warm'} ${FOCUS}`}
-                >
-                  {key && (
-                    <img
-                      src={tipImg(key)}
-                      width={800}
-                      height={533}
-                      alt={
-                        o.sku?.image || !sample
-                          ? tf.renderAlt(quoteName, t.tip[x])
-                          : tf.sampleAlt(quoteName, sample.name)
-                      }
-                      loading="lazy"
-                      decoding="async"
-                      className="block aspect-[3/2] h-auto w-full bg-stage object-cover"
-                    />
-                  )}
-                  <span className="block px-3 py-2 font-sans text-sm font-semibold text-ink">
-                    {t.tip[x]}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
       )}
 
       <div className="mt-6 grid gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
@@ -334,7 +332,8 @@ export default function TipProduct({
               </figcaption>
             </figure>
           )}
-          {sampleSku?.image && sample && !photos.length && (
+          {!sku?.image && !showSample && typeTiles}
+          {sampleSku?.image && sample && showSample && (
             <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
               <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage">
                 <img
@@ -350,6 +349,7 @@ export default function TipProduct({
                   {tf.sample(sample.name)}
                 </figcaption>
               </figure>
+              {typeTiles}
               <ImgNote t={t} />
             </div>
           )}
@@ -380,7 +380,8 @@ export default function TipProduct({
                   )}
                 </figure>
               )}
-              {/* Phones: the side and rear views as two small pictures under the main one. */}
+              {sku?.image && typeTiles}
+              {/* Phones: the side and rear views as two small pictures under the tiles. */}
               <div className="grid grid-cols-2 items-start gap-3 sm:block">
                 {sku?.imageSide && (
                   <figure className="m-0 overflow-hidden rounded-md border border-hair bg-stage sm:hidden">
@@ -419,9 +420,9 @@ export default function TipProduct({
         </div>
 
         <aside className="flex flex-col gap-6 lg:col-start-2">
-          {hasTilePics ? <div className="hidden lg:block">{picker}</div> : picker}
+          {!hasTilePics && picker}
           {special.length > 0 && (
-            <p className={`m-0 font-sans text-sm ${hasTilePics ? 'lg:-mt-3' : '-mt-3'}`}>
+            <p className={`m-0 font-sans text-sm ${hasTilePics ? '' : '-mt-3'}`}>
               <a
                 href={`#${specialId}`}
                 className={`font-medium text-brand-hi underline decoration-hair-strong underline-offset-4 hover:decoration-brand ${FOCUS}`}
