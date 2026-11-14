@@ -227,6 +227,9 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
   // covered every line is remembered for this tab (`refreshIsFresh`, lib/cart.ts): a reload
   // within ten minutes, in the same language and with the same lines, fetches nothing.
   const [checking, setChecking] = useState(false);
+  // Priced lines the last read could not refresh (page gone, renamed or too slow): they keep the
+  // stored price and say so (review, 2026-11-13: such a line looked current).
+  const [stale, setStale] = useState<ReadonlySet<string>>(new Set());
   useEffect(() => {
     const ids = readCart().map((x) => x.id);
     if (!ids.length || refreshIsFresh(readRefreshStamp(), Date.now(), lang, ids)) return;
@@ -246,6 +249,13 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
           return r.changed ? { ...u, items: r.items } : u;
         });
         if (changed) update(next);
+        setStale(
+          new Set(
+            stored
+              .filter((x) => !Object.prototype.hasOwnProperty.call(lines, x.id))
+              .map((x) => x.id),
+          ),
+        );
         if (stored.length && stored.every((x) => Object.prototype.hasOwnProperty.call(lines, x.id)))
           writeRefreshStamp(
             refreshStamp(
@@ -572,6 +582,7 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                             {fmtUsd(x.cents, lang)} {t.price.plus}
                           </p>
                         )}
+                        {stale.has(x.id) && <p className="m-0 text-xs text-ink-mid">{c.stale}</p>}
                       </>
                     )}
                   </div>

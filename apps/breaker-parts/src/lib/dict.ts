@@ -313,6 +313,7 @@ export const DICT: Dict = {
     exports: {
       title: '{count}+ ülkeye yol aldık.',
       aside: "Kocaeli'den çıkıp Avrupa, MENA, Orta Asya ve Amerika'ya yol alan parçalar.",
+      terms: 'İhracat koşulları',
       regions: { europe: 'Avrupa', mena: 'MENA', asia: 'Orta Asya', americas: 'Amerika' },
     },
     techUi: {
@@ -1108,6 +1109,7 @@ export const DICT: Dict = {
     exports: {
       title: 'Shipped to {count}+ countries.',
       aside: 'Parts shipped from Kocaeli to Europe, MENA, Central Asia and the Americas.',
+      terms: 'International order terms',
       regions: { europe: 'Europe', mena: 'MENA', asia: 'Central Asia', americas: 'Americas' },
     },
     techUi: {

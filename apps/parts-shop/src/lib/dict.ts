@@ -355,6 +355,8 @@ export interface Dict {
     countryMissing: string;
     /** English cart only: one line on international shipping, from facts stated elsewhere. */
     intlNote: string;
+    /** Under a line whose price could not be read again from its page. */
+    stale: string;
     note: string;
     sendWa: string;
     sendMail: string;
@@ -460,6 +462,9 @@ export interface Dict {
     /** Under the model in a series strip, so the bushings of one breaker tell apart. */
     renderKindShort: Record<NonNullable<PartRender['kind']>, string>;
     renderVariant: Record<NonNullable<PartRender['variant']>, string>;
+    /** The Turkish version words in repair-kit names (repair-kits.ts `variant`) in this language;
+     *  empty in Turkish (`modelText` in part-caption.ts). */
+    kitWords: Record<string, string>;
     /** "Parça türü" chips on a group page (`part-filters.ts`). */
     filter: { label: string; all: string; items: Record<PartFilter, string> };
     /** RenderGallery: a part's pictures in one frame with thumbnails. */
@@ -1034,6 +1039,7 @@ export const DICT: Record<Lang, Dict> = {
       required: '(zorunlu)',
       countryMissing: '',
       intlNote: '',
+      stale: 'Fiyat güncellenemedi; sipariş onayında bildirilir.',
       note: 'Not',
       sendWa: 'Sipariş talebini WhatsApp ile gönder',
       sendMail: 'E-posta ile gönder',
@@ -1475,6 +1481,7 @@ export const DICT: Record<Lang, Dict> = {
           sets: 'Setler',
         },
       },
+      kitWords: {},
       renderVariant: {
         oldType: 'eski tip',
         newType: 'yeni tip',
@@ -2124,6 +2131,7 @@ export const DICT: Record<Lang, Dict> = {
       required: '(required)',
       countryMissing: 'Please enter your country, so we can quote the shipping.',
       intlNote: 'Orders outside Türkiye: prices are export prices; shipping is not included.',
+      stale: 'Price could not be refreshed; the order confirmation states it.',
       note: 'Note',
       sendWa: 'Send the order request on WhatsApp',
       sendMail: 'Send by e-mail',
@@ -2567,6 +2575,14 @@ export const DICT: Record<Lang, Dict> = {
           buffers: 'Buffers',
           sets: 'Sets',
         },
+      },
+      kitWords: {
+        'eski tip': 'old type',
+        'yeni tip': 'new type',
+        'eski model': 'old model',
+        'yeni model': 'new model',
+        'yeni sistem': 'new system',
+        'İnan Makina yapımı': 'made by İnan Makina',
       },
       renderVariant: {
         oldType: 'old type',

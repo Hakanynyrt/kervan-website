@@ -1,5 +1,6 @@
 import type { DictBlock, ExportRegion, Lang } from '../types';
 import { EXPORTS, ORIGIN } from '../lib/exports';
+import { shopUrl } from '../lib/shop';
 import { H2, SECTION, WRAP } from '../lib/ui';
 
 interface Props {
@@ -23,6 +24,16 @@ export default function Exports({ t, lang }: Props) {
           </h2>
           <p className="m-0 mt-3.5 text-base min-[721px]:text-[17px] text-ink-mid max-w-[440px]">
             {e.aside}
+          </p>
+          {/* The sister shop's international orders page: same tab, no rel. */}
+          <p className="m-0 mt-3 text-base">
+            <a
+              href={shopUrl('/ihracat', lang)}
+              hrefLang={lang}
+              className="inline-flex min-h-11 items-center font-medium text-ink underline underline-offset-4"
+            >
+              {e.terms} →
+            </a>
           </p>
         </div>
         <div className="kv-regions">

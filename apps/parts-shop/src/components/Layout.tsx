@@ -381,14 +381,14 @@ export default function Layout({
           className={`${WRAP} grid grid-cols-2 gap-8 py-8 font-sans text-sm text-ink-mid max-sm:grid-rows-[auto_auto_1fr_auto] max-sm:gap-x-4 sm:py-10 lg:grid-cols-5`}
         >
           <div className="max-sm:col-span-2">
-            <p className={HEAD}>{t.footer.legal}</p>
+            <h2 className={HEAD}>{t.footer.legal}</h2>
             <p className="m-0 mt-3">{SELLER.name}</p>
             <p className="m-0">{SELLER.address}</p>
             <p className="m-0">{SELLER.tax}</p>
             <p className="m-0">{t.footer.mersis}</p>
           </div>
           <div className="max-sm:row-span-2">
-            <p className={HEAD}>{t.footer.shop}</p>
+            <h2 className={HEAD}>{t.footer.shop}</h2>
             <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0">
               {nav.map((n) => (
                 <li key={n.href}>
@@ -420,7 +420,7 @@ export default function Layout({
             </ul>
           </div>
           <div>
-            <p className={HEAD}>{t.footer.company}</p>
+            <h2 className={HEAD}>{t.footer.company}</h2>
             {/* Phones: this is the page's right-hand column, and a domain name is one word. With
                 wider text spacing at 320 px it is longer than the column: it breaks there, rather
                 than widen the page. */}
@@ -438,7 +438,7 @@ export default function Layout({
             </ul>
           </div>
           <div>
-            <p className={HEAD}>{t.footer.docs}</p>
+            <h2 className={HEAD}>{t.footer.docs}</h2>
             <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0">
               {LEGAL_KEYS.map((k) => (
                 <li key={k}>
@@ -459,7 +459,7 @@ export default function Layout({
           </div>
           <div className="max-sm:col-span-2 max-sm:grid max-sm:grid-cols-2 max-sm:gap-x-4">
             <div>
-              <p className={HEAD}>{t.footer.contact}</p>
+              <h2 className={HEAD}>{t.footer.contact}</h2>
               <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0">
                 <li>
                   <a
@@ -491,7 +491,7 @@ export default function Layout({
               </ul>
             </div>
             <div className="mt-6 max-sm:mt-0">
-              <p className={HEAD}>{t.footer.social}</p>
+              <h2 className={HEAD}>{t.footer.social}</h2>
               <ul className="m-0 mt-2 -ml-3 flex list-none flex-wrap gap-0 p-0">
                 {ORG_SOCIALS.map((s) => (
                   <li key={s.key}>

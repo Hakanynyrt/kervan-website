@@ -146,6 +146,8 @@ export interface DictBlock {
     /** `{count}` placeholder is replaced with destination count. */
     title: string;
     aside: string;
+    /** Link to the shop's international orders page (kiriciparca.com/ihracat). */
+    terms: string;
     /** Region headings of the destination list (lib/exports.ts `region`). */
     regions: Record<ExportRegion, string>;
   };
