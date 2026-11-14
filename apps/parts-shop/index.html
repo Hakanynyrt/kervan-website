@@ -47,7 +47,11 @@
             var l = document.createElement('link');
             l.rel = 'preload';
             l.as = 'image';
-            l.setAttribute('fetchpriority', 'high');
+            // High priority only where it opens the page: phones (under 768 px) show the h1,
+            // the sales line and the makes above it (Home.tsx), so there the browser ranks it.
+            if (!window.matchMedia('(max-width: 767px)').matches) {
+              l.setAttribute('fetchpriority', 'high');
+            }
             // Whole file names, not a base + suffix: Googlebot reads path-like strings in
             // inline scripts as links, and a bare base is a 404 in Search Console.
             l.href = window.matchMedia('(max-width: 900px)').matches

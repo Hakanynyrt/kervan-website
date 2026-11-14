@@ -10,7 +10,9 @@ import {
   StickyQuote,
 } from '../components/Bits';
 import { FOCUS, OUTLINE_BUTTON, WRAP } from '../components/Layout';
-import { PartOrder, PartPriceLine, partOrderText, priceNote } from '../components/PartOrder';
+import { PartOrder, PartPriceLine, priceNote } from '../components/PartOrder';
+import { addToCart, cartQty } from '../lib/cart';
+import { partLineId } from '../lib/palet-share';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import { fmtNum } from '../lib/format';
@@ -68,6 +70,24 @@ export default function PartItem({
   const fittedNow = !!r.fitted && withB;
   const cents = fittedNow ? model.priceFitted : model.price;
   const itemPath = partItemPath(model.part, model.anchor);
+  const lineId = partLineId(itemPath, fittedNow);
+  const cartLabel = partName.toLocaleLowerCase(lang === 'tr' ? 'tr' : 'en');
+  // Unpriced: still onto the palet, as a "fiyat sorulacak" line (no price, out of the totals), so
+  // a tip, priced parts and small unpriced parts go out in one order request.
+  const addAsk = () => {
+    addToCart(
+      {
+        id: lineId,
+        name: renderModel(r, t),
+        label: cartLabel,
+        code: null,
+        path: itemPath,
+        cents: null,
+      },
+      qty,
+    );
+    return cartQty(lineId);
+  };
   const about = partAbout(r, model.part, t, lang);
   const ctx: Ctx = {
     part: model.part,
@@ -191,9 +211,9 @@ export default function PartItem({
         <aside className="lg:col-start-2">
           {cents !== null ? (
             <PartOrder
-              id={fittedNow ? `${itemPath}#b` : itemPath}
+              id={lineId}
               breaker={renderModel(r, t)}
-              label={partName.toLocaleLowerCase(lang === 'tr' ? 'tr' : 'en')}
+              label={cartLabel}
               cents={cents}
               path={itemPath}
               qty={qty}
@@ -215,28 +235,13 @@ export default function PartItem({
               t={t}
               part={model.part}
               compact={lang}
+              onAdd={addAsk}
             />
           )}
         </aside>
       </div>
-      {cents !== null ? (
-        <StickyQuote
-          text={partOrderText(
-            t,
-            lang,
-            partName.toLocaleLowerCase(lang === 'tr' ? 'tr' : 'en'),
-            renderModel(r, t),
-            qty,
-            cents,
-            itemPath,
-            fx,
-          )}
-          label={t.parts.order.wa}
-          t={t}
-        />
-      ) : (
-        <StickyQuote text={text} t={t} />
-      )}
+      {/* Priced items: `PartOrder` renders the bar itself, with its "Palete yükle". */}
+      {cents === null && <StickyQuote text={text} t={t} />}
     </div>
   );
 }

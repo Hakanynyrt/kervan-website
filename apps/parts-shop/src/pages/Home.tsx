@@ -11,7 +11,7 @@ import { Button } from '@astryxdesign/core/Button';
 import type { FxRate } from '@kervan/tips';
 import { ORG_PHONE, ORG_PHONE_E164 } from '@kervan/seo';
 import { useReducedMotion } from '@kervan/motion';
-import { OrderSteps, PlantPhotos } from '../components/Bits';
+import { Chevron, OrderFacts, OrderSteps, PlantPhotos, SUMMARY } from '../components/Bits';
 import { BreakerSearch, FinderPick } from '../components/BreakerSearch';
 import ExplodedPicker from '../components/ExplodedPicker';
 import { PartGroups } from '../components/PartGroups';
@@ -294,20 +294,24 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
   return (
     // No label on this band: the panel and the order box are landmarks of their own (asides),
     // which must not sit inside another one (axe landmark-complementary-is-top-level).
-    <section className="border-b border-hair bg-bg">
+    <section className="border-b border-hair bg-bg max-md:contents">
       <div
-        className={`${WRAP} grid grid-cols-[minmax(0,1fr)] pb-7 pt-[18px] lg:grid-cols-[minmax(0,1fr)_24rem] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-9 lg:pb-[30px] lg:pt-6 xl:grid-cols-[minmax(0,1fr)_27rem] xl:gap-x-12`}
+        className={`${WRAP} grid grid-cols-[minmax(0,1fr)] max-md:contents pb-7 pt-[18px] lg:grid-cols-[minmax(0,1fr)_24rem] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-9 lg:pb-[30px] lg:pt-6 xl:grid-cols-[minmax(0,1fr)_27rem] xl:gap-x-12`}
       >
         {/* Phones and tablets: one column, in the page's order (h1 … makes, the panel, the order
-            box and the trust points); desktop: the panel on the right of both blocks. */}
-        <div className="contents lg:col-start-1 lg:row-start-1 lg:block lg:min-w-0">
+            box and the trust points; phones put the opening after the makes, see Home);
+            desktop: the panel on the right of both blocks. */}
+        <div className="contents max-md:order-1 max-md:block max-md:px-4 max-md:pb-1 max-md:pt-[18px] lg:col-start-1 lg:row-start-1 lg:block lg:min-w-0">
           <h1
             id="home-title"
             className="m-0 font-sans text-[21px] font-normal leading-tight text-ink md:text-[26px]"
           >
             {h.title}
           </h1>
-          <p className="m-0 mt-1.5 max-w-[60ch] font-sans text-sm text-ink-mid md:text-[15px]">
+          <p className="m-0 mt-1.5 max-w-[60ch] font-sans text-[15px] text-ink md:hidden">
+            {h.leadShort}
+          </p>
+          <p className="m-0 mt-1.5 max-w-[60ch] font-sans text-sm text-ink-mid max-md:hidden md:text-[15px]">
             {h.lead}
           </p>
 
@@ -396,13 +400,12 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
               </ul>
             </section>
           )}
-          <p className="m-0 mt-3 max-w-3xl font-sans text-[12.5px] text-ink-soft">{f.note}</p>
         </div>
 
         <aside
           ref={panel}
           aria-labelledby="finder-panel"
-          className="mt-[18px] scroll-mt-4 rounded-md border border-hair bg-bg font-sans lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0"
+          className="mt-[18px] scroll-mt-4 rounded-md border border-hair bg-bg font-sans max-md:order-3 max-md:mx-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0"
         >
           <p className="sr-only" aria-live="polite">
             {sel ? `${sel.name}: ${f.forModel}` : ''}
@@ -538,7 +541,7 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
           </div>
         </aside>
 
-        <div className="contents lg:col-start-1 lg:row-start-2 lg:block lg:min-w-0">
+        <div className="contents max-md:order-3 max-md:block max-md:border-b max-md:border-hair max-md:px-4 max-md:pb-7 lg:col-start-1 lg:row-start-2 lg:block lg:min-w-0">
           <aside
             aria-labelledby="order-box"
             className="mt-4 grid grid-cols-[minmax(0,1fr)] items-center gap-x-6 gap-y-2.5 rounded-md border border-hair bg-bg px-3.5 py-3.5 font-sans md:mt-5 md:grid-cols-[minmax(0,1fr)_auto] md:px-4"
@@ -547,8 +550,7 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
               <h2 id="order-box" className="m-0 text-base font-bold text-ink">
                 {h.order.title}
               </h2>
-              <p className="m-0 mt-0.5 text-sm text-ink-mid">
-                {h.order.body}{' '}
+              <p className="m-0 mt-0.5 text-sm">
                 <a
                   href="#siparis-adimlari"
                   className={`font-medium text-brand-hi hover:underline ${FOCUS}`}
@@ -570,6 +572,8 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                 className={`px-0.5 min-[23.4375rem]:px-2 md:px-[18px] ${OUTLINE_BUTTON}`}
               />
             </div>
+            {/* The page's one payment / e-invoice / reply-time line (owner, 2026-11-13). */}
+            <OrderFacts t={t} className="md:col-span-2" />
           </aside>
 
           <ul className="m-0 mt-[18px] grid list-none grid-cols-2 gap-x-4 gap-y-2.5 border-t border-hair p-0 pt-3.5 font-sans md:mt-[22px] md:gap-x-8 md:gap-y-3.5 md:pt-[18px]">
@@ -697,9 +701,16 @@ export default function Home({
   return (
     <>
       {/* Owner's choice (2026-10-25, "Birleşik"): the opening first, edge to edge, its parts
-          named on it; then the h1, the makes and the breaker panel. */}
-      <ExplodedPicker lang={lang} t={t} />
-      <Finder model={model} lang={lang} t={t} />
+          named on it; then the h1, the makes and the breaker panel. Phones (under 768 px,
+          2026-11-13): the h1, the short sales line and the makes first, then the opening, then
+          the panel and the order box (Finder's blocks are flex items here through
+          `display: contents`; `reading-flow` lets the Tab key follow, Chromium). */}
+      <div className="flex flex-col [reading-flow:flex-visual] md:block">
+        <div className="max-md:order-2">
+          <ExplodedPicker lang={lang} t={t} />
+        </div>
+        <Finder model={model} lang={lang} t={t} />
+      </div>
 
       {/* Phones: the names beside the opening already link every group, so the priced parts
           come before the group cards (design E). The DOM has the phone order, right in every
@@ -761,19 +772,26 @@ export default function Home({
         <div className={`${WRAP} py-8`}>
           <SectionHead id="order" title={t.cart.steps.title} />
           <OrderSteps lang={lang} t={t} note={false} className="md:grid-cols-3" />
-          <dl className="m-0 mt-[18px] grid grid-cols-[minmax(0,1fr)] gap-x-7 font-sans text-sm md:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1.6fr]">
-            {terms.map(([k, v]) => (
-              <div
-                key={k}
-                className="flex gap-3.5 border-t border-hair py-2 md:block md:pb-0 md:pt-2.5"
-              >
-                <dt className="w-16 shrink-0 text-ink-mid md:w-auto md:font-semibold md:text-ink">
-                  {k}
-                </dt>
-                <dd className="m-0 text-ink md:mt-0.5 md:text-ink-mid">{v}</dd>
-              </div>
-            ))}
-          </dl>
+          {/* Closed (owner, 2026-11-13): the terms stay in the page; payment is the order box's line. */}
+          <details className="group mt-[18px] border-y border-hair font-sans text-sm">
+            <summary className={SUMMARY}>
+              {t.terms.title}
+              <Chevron />
+            </summary>
+            <dl className="m-0 grid grid-cols-[minmax(0,1fr)] gap-x-7 pb-3 md:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1.6fr]">
+              {terms.map(([k, v]) => (
+                <div
+                  key={k}
+                  className="flex gap-3.5 border-t border-hair py-2 md:block md:pb-0 md:pt-2.5"
+                >
+                  <dt className="w-16 shrink-0 text-ink-mid md:w-auto md:font-semibold md:text-ink">
+                    {k}
+                  </dt>
+                  <dd className="m-0 text-ink md:mt-0.5 md:text-ink-mid">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </details>
           <div className="mt-4 flex flex-col gap-2.5 font-sans text-sm md:flex-row md:flex-wrap md:items-center md:gap-x-3 md:gap-y-2.5">
             <Button
               href={whatsappHref(t.nav.quoteText)}

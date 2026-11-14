@@ -1,17 +1,31 @@
+import type { FxRate } from '@kervan/tips';
 import { Breadcrumb, PageTitle } from '../components/Bits';
 import FamilyCardView from '../components/FamilyCardView';
 import { FOCUS, WRAP } from '../components/Layout';
-import { SearchForm } from '../components/ModelSearch';
+import { CardPrice, SearchForm } from '../components/ModelSearch';
+import { priceNote } from '../components/PartOrder';
 import { cardKey } from '../lib/card';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
+import { upFirst } from '../lib/part-caption';
+import { fmtDate } from '../lib/price';
 import { partItemPath, type PageModel, type PopularPart } from '../lib/routes';
 import type { Lang } from '../types';
 import { cardSet, photoImg } from '../lib/photo-url';
 
 type Model = Extract<PageModel, { kind: 'popular' }>;
 
-export default function Popular({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
+export default function Popular({
+  model,
+  fx,
+  lang,
+  t,
+}: {
+  model: Model;
+  fx: FxRate | null;
+  lang: Lang;
+  t: Dict;
+}) {
   const p = t.popular;
   return (
     <div className={`${WRAP} pb-12 pt-8 lg:pt-12`}>
@@ -25,23 +39,35 @@ export default function Popular({ model, lang, t }: { model: Model; lang: Lang; 
         {model.items.map((it) =>
           it.kind === 'tip' ? (
             <li key={`tip-${cardKey(it.card)}`}>
-              <FamilyCardView c={it.card} lang={lang} t={t} />
+              <FamilyCardView c={it.card} fx={fx} lang={lang} t={t} />
             </li>
           ) : (
             <li key={`part-${it.part.part}-${it.part.anchor}`}>
-              <PartCard x={it.part} lang={lang} t={t} />
+              <PartCard x={it.part} fx={fx} lang={lang} t={t} />
             </li>
           ),
         )}
       </ul>
-      <p className="m-0 mt-6 max-w-3xl font-sans text-sm text-ink-mid">{p.partsLead}</p>
+      <p className="m-0 mt-6 max-w-3xl font-sans text-sm text-ink-mid">
+        {fx && t.price.fxNote(fmtDate(fx.date, lang))} {t.price.note} {p.partsLead}
+      </p>
     </div>
   );
 }
 
-/** A modelled part for a best-selling breaker: picture, breaker, part name. */
-function PartCard({ x, lang, t }: { x: PopularPart; lang: Lang; t: Dict }) {
+/**
+ * A modelled part for a best-selling breaker: picture, breaker, part name and its price as the
+ * home's priced part cards show it (a burçlu head's price names it burçlu), "Fiyat için sorun" without.
+ */
+function PartCard({ x, fx, lang, t }: { x: PopularPart; fx: FxRate | null; lang: Lang; t: Dict }) {
   const k = x.part;
+  const name = t.parts.items[k].name;
+  const label = x.kind
+    ? t.parts.renderKindShort[x.kind]
+    : x.fitted
+      ? upFirst(t.parts.fitted.name(name, true), lang)
+      : name;
+  const note = x.cents !== null ? priceNote(x.kind ?? undefined, t) : null;
   return (
     <a
       href={localePath(partItemPath(k, x.anchor), lang)}
@@ -58,7 +84,7 @@ function PartCard({ x, lang, t }: { x: PopularPart; lang: Lang; t: Dict }) {
             alt={
               x.kind
                 ? `${x.model} ${t.parts.renderKind[x.kind]}`
-                : t.parts.renderCaption(x.model, t.parts.items[k].name)
+                : t.parts.renderCaption(x.model, name)
             }
             loading="lazy"
             decoding="async"
@@ -66,12 +92,24 @@ function PartCard({ x, lang, t }: { x: PopularPart; lang: Lang; t: Dict }) {
           />
         )}
       </div>
-      <span className="flex flex-col px-3 py-2 font-sans">
+      <span className="flex flex-1 flex-col px-3 py-2 font-sans">
         <span className="text-base font-semibold text-ink group-hover:text-brand-hi sm:text-lg">
           {x.model}
         </span>
-        <span className="text-xs text-ink-mid">
-          {x.kind ? t.parts.renderKindShort[x.kind] : t.parts.items[k].name}
+        <span className="text-xs text-ink-mid">{label}</span>
+        <span className="mt-auto flex flex-col gap-x-2 sm:flex-row sm:items-end sm:justify-between">
+          <span className="flex flex-col">
+            <CardPrice
+              price={x.cents === null ? null : [x.cents, x.cents]}
+              fx={fx}
+              lang={lang}
+              t={t}
+            />
+            {note && <span className="text-xs text-ink-mid">{note}</span>}
+          </span>
+          <span className="pt-1 text-sm font-medium text-brand-hi group-hover:underline">
+            {t.parts.view} →
+          </span>
         </span>
       </span>
     </a>

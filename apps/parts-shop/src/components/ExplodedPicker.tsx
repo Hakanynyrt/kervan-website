@@ -49,13 +49,21 @@ const src = (kind: 'kabin' | 'kare', i: number, size: 'md' | 'lg' = 'lg') =>
   `${BASE}-${kind}-06-${String(i).padStart(2, '0')}-${size}.webp`;
 const SMALL_MQ = '(max-width: 900px)';
 /** The final picture's sources, shared with its `<link rel="preload">` in the prerendered head
- *  of the home (`openingPreload`, entry-server.tsx): it is the home's LCP image on phones. */
+ *  of the home (`openingPreload`, entry-server.tsx): the home's first large picture (on phones it
+ *  follows the h1 and the makes). */
 const FINAL_SRCSET = `${FINAL}-sm.webp 1000w, ${FINAL}-lg.webp 1600w, ${BASE}-kare-06-47-lg.webp 2864w`;
 /** React 18 does not know `fetchPriority`; the lowercase attribute goes through as it is. */
 const HIGH = { fetchPriority: 'high' } as const;
 const FINAL_SIZES = `(max-width: 767px) ${PHONE_L}px, 100vw`;
+/** From 768 px the picture opens the page: high priority. Phones (2026-11-13) show the h1, the
+ *  sales line and the makes above it, so there it is preloaded at the browser's own priority
+ *  (raised once it is laid out in view) and does not compete with the CSS and font of that text. */
+const PHONE_MQ = '(max-width: 767px)';
 export const openingPreload = (): string =>
-  `<link rel="preload" as="image" href="${FINAL}-lg.webp" imagesrcset="${FINAL_SRCSET}" imagesizes="${FINAL_SIZES}" fetchpriority="high" />`;
+  [
+    `<link rel="preload" as="image" href="${FINAL}-lg.webp" imagesrcset="${FINAL_SRCSET}" imagesizes="${FINAL_SIZES}" media="(min-width: 768px)" fetchpriority="high" />`,
+    `<link rel="preload" as="image" href="${FINAL}-lg.webp" imagesrcset="${FINAL_SRCSET}" imagesizes="${FINAL_SIZES}" media="${PHONE_MQ}" />`,
+  ].join('\n    ');
 /** Width of the `-md` frames. */
 const FRAME_MD_PX = 1280;
 /** Timeline (ms): pause on the housed breaker, housing slide, cylinder fade, opening. */

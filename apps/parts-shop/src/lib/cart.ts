@@ -56,7 +56,9 @@ export function writeCart(items: CartItem[]): void {
 export function addToCart(item: Omit<CartItem, 'qty'>, qty: number): void {
   const items = readCart();
   const hit = items.find((x) => x.id === item.id);
-  if (hit) hit.qty = Math.min(MAX_QTY, hit.qty + qty);
+  // The line takes the page's current name and price: a part stored while it was "fiyat
+  // sorulacak" (cents null) is priced once its page is, and a changed price follows the page.
+  if (hit) Object.assign(hit, item, { qty: Math.min(MAX_QTY, hit.qty + qty) });
   else items.push({ ...item, qty: Math.min(MAX_QTY, qty) });
   writeCart(items);
 }

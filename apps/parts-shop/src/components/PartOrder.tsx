@@ -8,7 +8,7 @@ import { localePath } from '../lib/locale-path';
 import { fmtDate, fmtGrossTry, fmtTry, fmtUsd, leadsGross, unitText } from '../lib/price';
 import type { PartKey } from '../lib/routes';
 import type { Lang } from '../types';
-import { AddedNote, QtyStepper, Terms, type Added } from './Bits';
+import { AddedNote, OrderFacts, QtyStepper, StickyQuote, Terms, type Added } from './Bits';
 import { OUTLINE_BUTTON, WHATSAPP_BUTTON, whatsappHref } from './Layout';
 import { ORDER_EMAIL, SITE } from '../lib/site';
 
@@ -85,7 +85,8 @@ export const partOrderText = (
  * A priced spare part's order panel (item page): the price like the tip pages (Turkish: the
  * tax-inclusive TL price, then the net USD price "+ vergiler"; English: the net export price and
  * its TL amount, with the export note), same-day delivery, quantity, "Palete yükle", and the WhatsApp / e-mail
- * order. The cart line keeps the price it was added at.
+ * order, and on phones the sticky bottom bar with the same "Palete yükle". The cart line keeps
+ * the price it was added at.
  */
 export function PartOrder({
   id,
@@ -124,6 +125,11 @@ export function PartOrder({
   const gross = leadsGross(lang, fx) ? fmtGrossTry(cents, fx, lang) : null;
   const tl = gross ?? fmtTry(cents, fx, lang);
   const text = partOrderText(t, lang, label, breaker, qty, cents, path, fx);
+  // "Palete yükle": the order box's button and the phones' sticky bar both call this.
+  const add = () => {
+    addToCart({ id, name: breaker, label, code: null, path, cents }, qty);
+    setAdded({ n: cartQty(id) });
+  };
   return (
     <div className="lg:sticky lg:top-6">
       <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
@@ -167,7 +173,6 @@ export function PartOrder({
         />
         <p className="m-0 mt-3 border-t border-hair pt-3 text-ink">{o.delivery}</p>
         <h2 className="m-0 mt-4 text-lg font-bold text-ink">{o.title}</h2>
-        <p className="m-0 mt-2 text-ink-mid">{o.body}</p>
         {/* The stepper's field has this name itself (a hidden label). */}
         <p aria-hidden="true" className="m-0 mb-2 mt-4 font-semibold text-ink">
           {t.family.qty}
@@ -189,10 +194,7 @@ export function PartOrder({
               variant="primary"
               size="lg"
               width="100%"
-              onClick={() => {
-                addToCart({ id, name: breaker, label, code: null, path, cents }, qty);
-                setAdded({ n: cartQty(id) });
-              }}
+              onClick={add}
               className="px-5"
             />
             <AddedNote added={added} lang={lang} t={t} />
@@ -213,10 +215,13 @@ export function PartOrder({
             className={`px-5 ${OUTLINE_BUTTON}`}
           />
         </div>
+        <OrderFacts t={t} className="mt-3" />
       </div>
       <div className="mt-6">
         <Terms t={t} part={part} compact={lang} />
       </div>
+      {/* Phones: the bottom bar with "Palete yükle" (this box's `add`), WhatsApp and Telefon. */}
+      <StickyQuote text={text} label={o.wa} t={t} onAdd={add} added={added} lang={lang} />
     </div>
   );
 }

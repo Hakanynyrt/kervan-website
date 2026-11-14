@@ -41,7 +41,7 @@ export interface LegalDoc {
   sections: LegalSection[];
 }
 
-export const UPDATED = '2026-10-24';
+export const UPDATED = '2026-11-13';
 
 const sellerTr: LegalSection = {
   h: 'Satıcı bilgileri',
@@ -91,7 +91,8 @@ const TR: Record<LegalKey, LegalDoc> = {
         h: 'Siparişin verilmesi ve ödeme',
         p: [
           'Sitede online ödeme yoktur. Paletteki (sepetteki) ürünler WhatsApp ya da e-posta ile sipariş talebi olarak Satıcı’ya iletilir. Satıcı, stok ve fiyatı teyit ederek sipariş onayını gönderir; Alıcı’nın onayı ve ödemesiyle sözleşme kurulur.',
-          'Ödeme kredi kartı veya banka havalesi/EFT ile yapılır. Kart ödemesinde kullanılacak yöntem sipariş onayında bildirilir; kart bilgileri bu siteye girilmez ve site tarafından saklanmaz.',
+          'Ödeme kredi kartı veya banka havalesi/EFT ile yapılır. Kredi kartı ödemesi mail order yöntemiyle alınır; kart bilgileri bu siteye girilmez ve site tarafından saklanmaz.',
+          'Satış için e-fatura düzenlenir.',
         ],
       },
       {
@@ -145,7 +146,8 @@ const TR: Record<LegalKey, LegalDoc> = {
       {
         h: 'Ödeme',
         p: [
-          'Bedel, sipariş onayında bildirilen yöntemle kredi kartı veya banka havalesi/EFT ile ödenir. Havale/EFT’de açıklamaya sipariş onayındaki ad veya firma adı yazılmalıdır. Kargo ücreti Alıcı’ya aittir.',
+          'Bedel, sipariş onayında bildirilen yöntemle kredi kartı veya banka havalesi/EFT ile ödenir. Kredi kartı ödemesi mail order yöntemiyle alınır. Havale/EFT’de açıklamaya sipariş onayındaki ad veya firma adı yazılmalıdır. Kargo ücreti Alıcı’ya aittir.',
+          'Satış için e-fatura düzenlenir.',
         ],
       },
       {
@@ -227,7 +229,7 @@ const TR: Record<LegalKey, LegalDoc> = {
         h: 'Hangi veriler işlenir',
         p: [
           'Site bir üyelik veya form sistemi içermez ve kişisel veri saklamaz. Paletiniz (sepetiniz) yalnızca kendi tarayıcınızın yerel belleğinde tutulur; bize gönderilmez. Çerezler yalnızca çerez bandında onay verirseniz yüklenir (bkz. “Çerezler ve reklam ölçümü”).',
-          'Sipariş talebini WhatsApp veya e-posta ile gönderdiğinizde, mesajda yazan bilgiler (ad, firma, telefon, şehir, not, sipariş içeriği) ve mesajı gönderdiğiniz numara veya e-posta adresi tarafımıza ulaşır. Sipariş onayında teslimat adresi ve fatura bilgileri de istenir.',
+          'Sipariş talebini WhatsApp veya e-posta ile gönderdiğinizde, mesajda yazan bilgiler (ad, firma, telefon, şehir, e-posta, vergi dairesi, vergi no veya TC kimlik no, not, sipariş içeriği) ve mesajı gönderdiğiniz numara veya e-posta adresi tarafımıza ulaşır. Sipariş onayında teslimat adresi ve fatura bilgileri de istenir.',
           'Siteyi barındıran Cloudflare, güvenlik ve işletim amacıyla IP adresi ve tarayıcı bilgisi gibi teknik kayıtları tutar. Ziyaret istatistikleri çerezsiz ve kişiyi tanımlamayan biçimde ölçülebilir.',
         ],
       },
@@ -299,7 +301,8 @@ const EN: Record<LegalKey, LegalDoc> = {
       {
         h: 'Ordering and payment',
         p: [
-          'There is no online payment on the site. The cart is sent to the Seller as an order request by WhatsApp or e-mail; the Seller confirms stock and price, and the contract is made when the buyer accepts the confirmation and pays. Payment by credit card or bank transfer; card details are never entered on or stored by this site.',
+          'There is no online payment on the site. The cart is sent to the Seller as an order request by WhatsApp or e-mail; the Seller confirms stock and price, and the contract is made when the buyer accepts the confirmation and pays. Payment by credit card or bank transfer. Card payments are taken by mail order; card details are never entered on or stored by this site.',
+          'An e-invoice (e-fatura) is issued for the sale.',
         ],
       },
       {
@@ -331,7 +334,7 @@ const EN: Record<LegalKey, LegalDoc> = {
       {
         h: 'Formation, payment and delivery',
         p: [
-          'The contract is made when the buyer accepts the Seller’s order confirmation and pays by credit card or bank transfer. Shipping is paid by the buyer. Items in stock ship the day payment arrives; others within the time in the confirmation and never later than 30 days. The Seller sends this contract and the pre-contract information to the buyer by e-mail or message.',
+          'The contract is made when the buyer accepts the Seller’s order confirmation and pays by credit card or bank transfer; card payments are taken by mail order. An e-invoice (e-fatura) is issued. Shipping is paid by the buyer. Items in stock ship the day payment arrives; others within the time in the confirmation and never later than 30 days. The Seller sends this contract and the pre-contract information to the buyer by e-mail or message.',
         ],
       },
       {

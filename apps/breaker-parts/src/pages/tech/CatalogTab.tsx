@@ -684,55 +684,56 @@ export default function CatalogTab({
           <button type="button" onClick={() => setLimit((n) => n + PAGE)} className={btnCls}>
             {c.more}
           </button>
-          {compared.length > 0 && (
-            <CompareTable
-              items={compared}
-              t={t}
-              lang={lang}
-              onRemove={(id) => {
-                setSel((s) => s.filter((x) => x !== id));
-                if (sel.length <= 1) statusRef.current?.focus();
-              }}
-              onClose={() => {
-                setSel([]);
-                statusRef.current?.focus();
-              }}
-            />
-          )}
-
-          <details className="border border-hair rounded-[14px] px-5 md:px-6 py-3 group">
-            <summary
-              className={`cursor-pointer min-h-11 flex items-center font-sans font-semibold text-xl text-ink ${focusRing} rounded-md`}
-            >
-              {c.useTitle}
-            </summary>
-            <p className="font-sans text-sm text-ink-mid mt-2 mb-4 max-w-[70ch]">{c.useNote}</p>
-            <ul className="list-none p-0 m-0 grid grid-cols-1 md:grid-cols-2 gap-4 pb-3">
-              {TIP_TYPES.map((k) => (
-                <li key={k} className="rounded-[14px] border border-hair p-4 flex flex-col gap-2">
-                  <span className="font-sans font-semibold text-lg text-ink">{c.tipLabels[k]}</span>
-                  <dl className="m-0 flex flex-col gap-2 font-sans text-sm">
-                    {(
-                      [
-                        [c.useRock, c.useTips[k].rock],
-                        [c.useWhere, c.useTips[k].where],
-                        [c.useWatch, c.useTips[k].watch],
-                      ] as const
-                    ).map(([dt, dd]) => (
-                      <div key={dt}>
-                        <dt className={labelCls}>{dt}</dt>
-                        <dd className="m-0 text-ink">{dd}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                </li>
-              ))}
-            </ul>
-          </details>
-
-          {guide?.breakage && <BreakageGuide g={guide.breakage} t={t} lang={lang} />}
         </div>
       )}
+
+      {compared.length > 0 && (
+        <CompareTable
+          items={compared}
+          t={t}
+          lang={lang}
+          onRemove={(id) => {
+            setSel((s) => s.filter((x) => x !== id));
+            if (sel.length <= 1) statusRef.current?.focus();
+          }}
+          onClose={() => {
+            setSel([]);
+            statusRef.current?.focus();
+          }}
+        />
+      )}
+
+      <details className="border border-hair rounded-[14px] px-5 md:px-6 py-3 group">
+        <summary
+          className={`cursor-pointer min-h-11 flex items-center font-sans font-semibold text-xl text-ink ${focusRing} rounded-md`}
+        >
+          {c.useTitle}
+        </summary>
+        <p className="font-sans text-sm text-ink-mid mt-2 mb-4 max-w-[70ch]">{c.useNote}</p>
+        <ul className="list-none p-0 m-0 grid grid-cols-1 md:grid-cols-2 gap-4 pb-3">
+          {TIP_TYPES.map((k) => (
+            <li key={k} className="rounded-[14px] border border-hair p-4 flex flex-col gap-2">
+              <span className="font-sans font-semibold text-lg text-ink">{c.tipLabels[k]}</span>
+              <dl className="m-0 flex flex-col gap-2 font-sans text-sm">
+                {(
+                  [
+                    [c.useRock, c.useTips[k].rock],
+                    [c.useWhere, c.useTips[k].where],
+                    [c.useWatch, c.useTips[k].watch],
+                  ] as const
+                ).map(([dt, dd]) => (
+                  <div key={dt}>
+                    <dt className={labelCls}>{dt}</dt>
+                    <dd className="m-0 text-ink">{dd}</dd>
+                  </div>
+                ))}
+              </dl>
+            </li>
+          ))}
+        </ul>
+      </details>
+
+      {guide?.breakage && <BreakageGuide g={guide.breakage} t={t} lang={lang} />}
     </div>
   );
 }

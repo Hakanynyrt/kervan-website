@@ -15,6 +15,7 @@ import { fmtMm, fmtNum } from '../lib/format';
 import { STOCK_TIP_PHOTOS } from '../lib/photos';
 import type { SpecialTool } from '../lib/grooved';
 import { addToCart, cartQty } from '../lib/cart';
+import { tipLineId } from '../lib/palet-share';
 import { fmtDate, fmtGrossTry, fmtTry, fmtUsd, leadsGross, unitText } from '../lib/price';
 import { LIST_PATH, PARTS_PATH, partItemPath } from '../lib/routes';
 import { localePath } from '../lib/locale-path';
@@ -29,14 +30,17 @@ import {
   type Added,
   Breadcrumb,
   chipClass,
+  Chevron,
   Chips,
   ImgNote,
   MissingModel,
   OemLine,
+  OrderFacts,
   PageTitle,
   Photo,
   QtyStepper,
   StickyQuote,
+  SUMMARY,
   Terms,
 } from './Bits';
 import { FOCUS, OUTLINE_BUTTON, WHATSAPP_BUTTON, whatsappHref, WRAP } from './Layout';
@@ -179,7 +183,7 @@ export default function TipProduct({
     opt.cents !== null && leadsGross(lang, fx) ? fmtGrossTry(opt.cents, fx, lang) : null;
   const tl = opt.cents === null ? null : (gross ?? fmtTry(opt.cents, fx, lang));
   const add = () => {
-    const lineId = `${path}${variant ? `|${vi + 1}` : ''}|${opt.tipType}`;
+    const lineId = tipLineId(path, variant ? vi + 1 : null, opt.tipType);
     addToCart(
       {
         id: lineId,
@@ -506,7 +510,6 @@ export default function TipProduct({
             <h2 className="m-0 font-sans text-lg font-bold text-ink">
               {order ? tf.orderTitle : tf.quoteTitle}
             </h2>
-            <p className="m-0 mt-2 text-ink-mid">{order ? tf.orderBody : tf.quoteBody}</p>
             <div className="mt-4">
               {/* The stepper's field has this name itself (a hidden label). */}
               <p aria-hidden="true" className="m-0 mb-2 font-semibold text-ink">
@@ -551,6 +554,7 @@ export default function TipProduct({
                 className={`px-5 ${OUTLINE_BUTTON}`}
               />
             </div>
+            <OrderFacts t={t} className="mt-3" />
           </div>
           <Terms t={t} compact={lang} />
         </aside>
@@ -559,13 +563,15 @@ export default function TipProduct({
       {parts.length > 0 && (
         <section
           aria-labelledby="our-parts"
-          className="mt-12 rounded-md border border-hair bg-bg-soft p-5 font-sans"
+          className="mt-12 rounded-md border border-hair bg-bg-soft px-5 pb-2 pt-5 font-sans"
         >
           <h2 id="our-parts" className="m-0 text-base font-bold text-ink">
             {tf.partsTitle}
           </h2>
-          {/* Every item page we have for this breaker, one row per group, so none is an orphan. */}
-          <ul className="m-0 mt-3 flex list-none flex-col gap-3 p-0 text-sm">
+          {/* Every item page we have for this breaker, one closed group each ("Burç (5)", owner
+              2026-11-13: the open list took two phone screens); the links stay plain <a> in the
+              prerendered HTML, so no item page is an orphan. */}
+          <ul className="m-0 mt-2 list-none p-0 text-sm">
             {[...new Set(parts.map((x) => x.part))].map((g) => {
               const items = parts.filter((x) => x.part === g);
               const labels = distinctLabels(
@@ -575,22 +581,28 @@ export default function TipProduct({
                 })),
               );
               return (
-                <li key={g}>
-                  <span className="mb-1.5 block font-semibold text-ink">
-                    {t.parts.items[g].name}
-                  </span>
-                  <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-                    {items.map((x, i) => (
-                      <li key={x.anchor}>
-                        <Button
-                          href={localePath(partItemPath(x.part, x.anchor), lang)}
-                          label={`${labels[i]}\u00a0→`}
-                          variant="secondary"
-                          className={`px-4 ${OUTLINE_BUTTON}`}
-                        />
-                      </li>
-                    ))}
-                  </ul>
+                <li key={g} className="border-t border-hair first:border-t-0">
+                  <details className="group">
+                    <summary className={SUMMARY}>
+                      <span>
+                        {t.parts.items[g].name}{' '}
+                        <span className="font-normal text-ink-mid">({items.length})</span>
+                      </span>
+                      <Chevron />
+                    </summary>
+                    <ul className="m-0 flex list-none flex-wrap gap-2 p-0 pb-3">
+                      {items.map((x, i) => (
+                        <li key={x.anchor}>
+                          <Button
+                            href={localePath(partItemPath(x.part, x.anchor), lang)}
+                            label={`${labels[i]}\u00a0→`}
+                            variant="secondary"
+                            className={`px-4 ${OUTLINE_BUTTON}`}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
                 </li>
               );
             })}
@@ -655,7 +667,15 @@ export default function TipProduct({
       </section>
 
       <MissingModel t={t} />
-      <StickyQuote text={text} label={order ? tf.orderWa : undefined} t={t} />
+      {/* Priced: the bar's "Palete yükle" is the order box's own `add` (same type, size, qty). */}
+      <StickyQuote
+        text={text}
+        label={order ? tf.orderWa : undefined}
+        t={t}
+        onAdd={order ? add : undefined}
+        added={added}
+        lang={lang}
+      />
     </div>
   );
 }
