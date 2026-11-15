@@ -53,7 +53,7 @@ deploy's `verify` job runs the same four and blocks every deploy.
 - A PR gets Pages previews (`https://<branch>.<project>.pages.dev`) of the changed apps;
   `packages/**`, the lockfile or root configs rebuild every app.
 - `.github/workflows/quality.yml` reports Lighthouse and pa11y scores after each Deploy run (never blocks).
-- `.github/workflows/uptime.yml` runs the smoke probe every 15 minutes; `shop-daily.yml` rebuilds
+- `.github/workflows/uptime.yml` runs the smoke probe a few times a day (GitHub delays its cron); `shop-daily.yml` rebuilds
   the shop each morning.
 - `.github/workflows/app.yml` builds and e2e-tests the iPhone app's web bundle on shop/packages PRs
   (report only, never blocks).

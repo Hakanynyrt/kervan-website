@@ -215,9 +215,9 @@ monolit site repodan kaldırıldı.
 
 ## Zamanlanmış ve yardımcı workflow'lar
 
-| Workflow          | Ne zaman        | Ne yapar                                                   |
-| ----------------- | --------------- | ---------------------------------------------------------- |
-| `uptime.yml`      | her 15 dakikada | üç sitenin ayakta olduğunu ve yönlendirmeleri kontrol eder |
-| `shop-daily.yml`  | her sabah       | mağazayı yeniden üretip yayınlar (güncel kur ile)          |
-| `shop-import.yml` | elle            | katalogu D1'e aktarır, sonra mağazayı yayınlar             |
-| `shop-prices.yml` | elle            | fiyatları D1'e aktarır, sonra mağazayı yayınlar            |
+| Workflow          | Ne zaman         | Ne yapar                                                                                                                                |
+| ----------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `uptime.yml`      | günde birkaç kez | üç sitenin ayakta olduğunu, yönlendirmeleri ve mağaza kurunun güncelliğini kontrol eder (GitHub zamanlamayı geciktirir: 4–8 saatte bir) |
+| `shop-daily.yml`  | her sabah        | mağazayı yeniden üretip yayınlar (güncel kur ile)                                                                                       |
+| `shop-import.yml` | elle             | katalogu D1'e aktarır, sonra mağazayı yayınlar                                                                                          |
+| `shop-prices.yml` | elle             | fiyatları D1'e aktarır, sonra mağazayı yayınlar                                                                                         |

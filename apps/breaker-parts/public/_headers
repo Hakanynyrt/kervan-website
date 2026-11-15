@@ -65,9 +65,19 @@
 /en/teknik-bilgiler
   X-Robots-Tag: noindex, nofollow
 
-# Apply security headers globally.
+# Apply security headers globally. HSTS (2026-11-15): HTTPS only for a year, on every answer.
+# No includeSubDomains and no preload: magaza. and shop. are Redirect Rule hosts of this zone,
+# outside this file's reach.
 /*
+  Strict-Transport-Security: max-age=31536000
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
   Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# The *.pages.dev hosts (production alias and branch previews) stay out of search results;
+# only kervanbreaker.com is indexed. smoke.sh checks the real domain carries no noindex.
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex

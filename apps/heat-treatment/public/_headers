@@ -69,3 +69,10 @@
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
   Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# The *.pages.dev hosts (production alias and branch previews) stay out of search results;
+# only kervanheat.com is indexed. smoke.sh checks the real domain carries no noindex.
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex

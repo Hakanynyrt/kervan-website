@@ -1,10 +1,10 @@
 name: Uptime
 
-# Probes both production sites and the RFQ endpoint every 15 minutes
-# (GET/OPTIONS only — see .github/scripts/smoke.sh). A failed run emails
-# the repo owner. GitHub cron is best-effort (runs can be late) and is
-# disabled after 60 days without repo activity, so keep an external
-# monitor as the primary alerting layer.
+# Probes the three production sites and the RFQ endpoint (GET/OPTIONS only — see
+# .github/scripts/smoke.sh). A failed run emails the repo owner. The schedule asks for
+# every 15 minutes, but GitHub cron is best-effort: in November 2026 the runs came 4 to
+# 8 hours apart. It is also disabled after 60 days without repo activity. So this is a
+# periodic deep check, not a downtime alarm; an outside monitor is needed for that.
 on:
   schedule:
     - cron: '*/15 * * * *'
