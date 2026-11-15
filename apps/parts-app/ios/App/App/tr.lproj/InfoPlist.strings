@@ -1,0 +1,2 @@
+/* Home-screen name of the app (docs/agent/app.md). The full name "Kervan Kırıcı Parça" does not fit under the icon. */
+"CFBundleDisplayName" = "Kervan Parça";

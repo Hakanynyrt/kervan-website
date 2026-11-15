@@ -545,7 +545,7 @@ describe('iPhone app (web build) against the DEMO site', { timeout: 300_000 }, (
     await page.getByRole('button', { name: 'English' }).click();
     await page.getByRole('heading', { name: 'Search breaker models' }).waitFor();
     const nav = page.getByRole('navigation', { name: 'App sections' });
-    for (const label of ['Home', 'Guides', 'Scan', 'My machines', 'Palet'])
+    for (const label of ['Home', 'Guides', 'Scan', 'My machines', 'Cart'])
       assert.equal(await nav.getByText(label, { exact: true }).count(), 1, label);
     await shot(page, 'start-en');
     // Back after the switch: the page before Start, at its English address.

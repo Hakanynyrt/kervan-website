@@ -1,0 +1,115 @@
+name: App (iPhone build)
+
+# The iPhone app's native build (docs/agent/app.md, M2): the shop's app build pointed at the live
+# site (https://kiriciparca.com), check:app, copied into apps/parts-app/www, `cap sync ios`, then
+# an unsigned Release build for real iPhones on GitHub's macOS runner, packed as an .ipa and kept
+# as a workflow artifact for 14 days. The owner installs it with SideStore (which signs it with
+# his free Apple ID). No signing, no certificates, no secrets: signing and TestFlight are M3.
+# Report only: Deploy does not wait for it, and it deploys nothing.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apps/parts-app/**'
+      - 'apps/parts-shop/src/app/**'
+      - 'apps/parts-shop/app.html'
+      - 'apps/parts-shop/vite.app.config.ts'
+      - '.github/workflows/app-ios.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    name: iPhone build (unsigned .ipa)
+    # macOS 26 on Apple silicon (runner-images: macos-26 = macos-latest since the macOS 26 GA).
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      # Capacitor 8 needs Xcode 26+; App Store uploads need the iOS 26 SDK. Picked explicitly so a
+      # change of the image's default does not change the build silently.
+      XCODE_APP: /Applications/Xcode_26.6.app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s "$XCODE_APP/Contents/Developer"
+          xcodebuild -version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The production app build: no DEMO catalogue, no VITE_SITE_ORIGIN (pages are read from
+      # https://kiriciparca.com at run time; the bundle carries no catalogue and no prices).
+      - name: Build the app's web layer
+        run: pnpm --filter @kervan/parts-shop build:app
+
+      - name: Check the app bundle
+        run: pnpm --filter @kervan/parts-shop check:app
+
+      # copy-web refuses a dist-app built for another origin; cap sync writes Package.swift,
+      # capacitor.config.json and ios/App/App/public.
+      - name: Copy into the native project (cap sync ios)
+        run: pnpm --filter @kervan/parts-app sync
+
+      - name: Build for iPhone (Release, unsigned)
+        working-directory: apps/parts-app/ios/App
+        run: |
+          xcodebuild \
+            -project App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
+            -quiet \
+            build
+
+      # Payload/App.app zipped is an .ipa. Prints counts, sizes and the plist values only.
+      - name: Pack the .ipa
+        id: ipa
+        working-directory: apps/parts-app/ios/App
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          app=build/Build/Products/Release-iphoneos/App.app
+          test -d "$app" || { echo "App.app not found"; exit 1; }
+          for f in Info.plist PrivacyInfo.xcprivacy public/index.html tr.lproj/InfoPlist.strings en.lproj/InfoPlist.strings; do
+            test -e "$app/$f" || { echo "missing in App.app: $f"; exit 1; }
+          done
+          echo "bundle id: $(plutil -extract CFBundleIdentifier raw "$app/Info.plist")"
+          echo "version: $(plutil -extract CFBundleShortVersionString raw "$app/Info.plist") ($(plutil -extract CFBundleVersion raw "$app/Info.plist"))"
+          echo "minimum iOS: $(plutil -extract MinimumOSVersion raw "$app/Info.plist")"
+          echo "device family: $(plutil -extract UIDeviceFamily json -o - "$app/Info.plist")"
+          name="KervanKiriciParca-${HEAD_SHA:0:7}.ipa"
+          out="$RUNNER_TEMP/ipa"
+          rm -rf "$out" && mkdir -p "$out/Payload"
+          cp -R "$app" "$out/Payload/"
+          (cd "$out" && zip -qry "$name" Payload)
+          echo "App.app: $(find "$app" -type f | wc -l | tr -d ' ') files, $(du -sk "$app" | cut -f1) KB"
+          echo "$name: $(( $(stat -f %z "$out/$name") / 1024 )) KB"
+          echo "path=$out/$name" >> "$GITHUB_OUTPUT"
+
+      # archive: false uploads the .ipa as it is (no .zip around it); the artifact is named after
+      # the file, KervanKiriciParca-<short sha>.ipa, and downloads as that file.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: ${{ steps.ipa.outputs.path }}
+          archive: false
+          retention-days: 14
+          if-no-files-found: error

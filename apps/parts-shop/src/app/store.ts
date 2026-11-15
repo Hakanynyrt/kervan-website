@@ -1,12 +1,14 @@
 import type { Lang } from '../types';
+import { isNativeApp } from './native.ts';
 
 /**
  * The app's device state: the saved machines and the language. Nothing leaves the phone. Behind
  * a small async key-value interface: the web build keeps it in localStorage, the iPhone build
- * (M2) swaps in @capacitor/preferences without touching the screens.
+ * keeps it in @capacitor/preferences (iOS UserDefaults, declared in the app's privacy manifest)
+ * without touching the screens.
  */
 
-/** An async string store (localStorage here; @capacitor/preferences in the native build). */
+/** An async string store (localStorage on the web; @capacitor/preferences on the iPhone). */
 export interface KV {
   get(key: string): Promise<string | null>;
   set(key: string, value: string): Promise<void>;
@@ -90,6 +92,52 @@ export const localKV: KV = {
   },
 };
 
+/** The part of @capacitor/preferences the store uses. */
+export interface Prefs {
+  get(o: { key: string }): Promise<{ value: string | null }>;
+  set(o: { key: string; value: string }): Promise<void>;
+  remove(o: { key: string }): Promise<void>;
+}
+
+/**
+ * @capacitor/preferences as a `KV` (iPhone build): the plugin is loaded on first use, so the web
+ * build never runs it. Failures read as empty and drop the write, as `localKV` does.
+ */
+export function preferencesKV(
+  load: () => Promise<Prefs> = () => import('@capacitor/preferences').then((m) => m.Preferences),
+): KV {
+  let req: Promise<Prefs> | undefined;
+  // A failed load is asked again next time (not cached).
+  const prefs = () =>
+    (req ??= load().catch((e: unknown) => {
+      req = undefined;
+      throw e;
+    }));
+  return {
+    async get(key) {
+      try {
+        return (await (await prefs()).get({ key })).value;
+      } catch {
+        return null;
+      }
+    },
+    async set(key, value) {
+      try {
+        await (await prefs()).set({ key, value });
+      } catch {
+        /* not saved */
+      }
+    },
+    async remove(key) {
+      try {
+        await (await prefs()).remove({ key });
+      } catch {
+        /* not removed */
+      }
+    },
+  };
+}
+
 /** An in-memory `KV` (tests). */
 export function memoryKV(init: Record<string, string> = {}): KV & { data: Map<string, string> } {
   const data = new Map(Object.entries(init));
@@ -160,5 +208,5 @@ export function createStore(kv: KV): AppStore {
   };
 }
 
-/** The app's store (web build: localStorage). */
-export const store: AppStore = createStore(localKV);
+/** The app's store: @capacitor/preferences inside the iPhone app, localStorage elsewhere. */
+export const store: AppStore = createStore(isNativeApp() ? preferencesKV() : localKV);

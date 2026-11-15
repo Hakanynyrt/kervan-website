@@ -21,7 +21,7 @@ All apps are Vite 5 + React 19 + TypeScript + Tailwind v4 + Framer Motion, shari
 | Area                                                                                        | Read                           |
 | ------------------------------------------------------------------------------------------- | ------------------------------ |
 | kiriciparca.com shop: pages, parts and renders, prices, cart, search, SEO, D1 data, opening | `docs/agent/parts-shop.md`     |
-| iPhone app (kiriciparca.com): app build, shell, seams in the shop, contract, checks         | `docs/agent/app.md`            |
+| iPhone app (kiriciparca.com): app build, shell, seams, contract, native project, .ipa build | `docs/agent/app.md`            |
 | kervanbreaker.com: pages, 3D scene, shop links, private VEGA catalog                        | `docs/agent/breaker-parts.md`  |
 | kervanheat.com: sections, hero and plant photos, service links                              | `docs/agent/heat-treatment.md` |
 | Packages, deploying, RFQ form, Google Ads, owner login, i18n, prerender/sitemap, media      | `docs/agent/platform.md`       |
@@ -37,6 +37,7 @@ pnpm install                                   # whole workspace
 pnpm --filter @kervan/heat-treatment dev       # http://localhost:5173
 pnpm --filter @kervan/breaker-parts dev        # http://localhost:5174
 pnpm --filter @kervan/parts-shop dev           # http://localhost:5175 (DEMO catalog)
+pnpm --filter @kervan/parts-app sync           # iPhone app: copy dist-app + cap sync ios
 pnpm turbo build --filter=@kervan/<app>
 pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
 pnpm format                                    # Prettier (.prettierrc.json)
@@ -56,6 +57,8 @@ deploy's `verify` job runs the same four and blocks every deploy.
   the shop each morning.
 - `.github/workflows/app.yml` builds and e2e-tests the iPhone app's web bundle on shop/packages PRs
   (report only, never blocks).
+- `.github/workflows/app-ios.yml` builds the unsigned iPhone `.ipa` (`apps/parts-app`, Capacitor) on a
+  macOS runner, by hand or on app PRs, as a 14-day artifact (report only, never blocks, no secrets).
 
 ## Rules that always apply
 

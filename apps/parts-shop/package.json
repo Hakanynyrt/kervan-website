@@ -14,6 +14,9 @@
   },
   "dependencies": {
     "@astryxdesign/core": "0.7.11",
+    "@capacitor/browser": "8.0.5",
+    "@capacitor/core": "8.6.2",
+    "@capacitor/preferences": "8.0.1",
     "@kervan/motion": "workspace:*",
     "@kervan/seo": "workspace:*",
     "@kervan/tips": "workspace:*",

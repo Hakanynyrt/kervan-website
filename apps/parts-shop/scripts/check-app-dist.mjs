@@ -40,8 +40,17 @@ export const LINK_HOSTS = [
   'wa.me', // order and question links (WhatsApp)
   'www.youtube.com', // "Watch on YouTube" under a guide video
 ];
-/** Names in library code that are never requested (XML namespace, licence and error links). */
-export const NAME_HOSTS = ['www.w3.org', 'react.dev', 'jcgt.org', 'tailwindcss.com'];
+/**
+ * Names in library code that are never requested (XML namespace, licence and error links;
+ * capacitorjs.com: the licence banner of @capacitor/core, in the iPhone build's plugin chunks).
+ */
+export const NAME_HOSTS = [
+  'www.w3.org',
+  'react.dev',
+  'jcgt.org',
+  'tailwindcss.com',
+  'capacitorjs.com',
+];
 
 /** Reserved names that never resolve (RFC 6761), e.g. the router's URL-parsing base. */
 const RESERVED = /\.invalid$/;

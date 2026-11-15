@@ -57,6 +57,14 @@ merge et
 
 CI bitmediyse bekleyip yeşil olunca birleştirir, sonra canlı sitede kontrol eder.
 
+**A7. iPhone uygulamasının yeni deneme sürümü** (düşük)
+
+```
+Uygulamanın yeni deneme sürümünü hazırla: "App (iPhone build)" iş akışını <main veya PR numarası> için çalıştır, bitince .ipa'nın indirme bağlantısını ve boyutunu yaz.
+```
+
+İndirdiğiniz dosya doğrudan .ipa'dır (zip açmak gerekmez): iPhone'da Dosyalar / iCloud Drive'a koyun, LocalDevVPN açıkken SideStore'da `+` ile kurun. Ücretsiz Apple kimliğiyle kurulan uygulama 7 günde bir SideStore'dan yenilenir.
+
 ---
 
 ## B. Toplu işler: "workflow kullan" (yüksek; yalnız büyük işlerde)

@@ -15,3 +15,6 @@ pnpm-lock.yaml
 .impeccable
 .anthropic-skills
 incoming/
+# iPhone app: www/ is a copy of the app build; ios/ is the Xcode project (Xcode's own formatting)
+apps/parts-app/www
+apps/parts-app/ios

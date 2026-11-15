@@ -11,6 +11,9 @@ export default tseslint.config(
       '**/dist-ssr/**',
       // iPhone app web build (apps/parts-shop/dist-app, gitignored)
       '**/dist-app/**',
+      // iPhone app: www/ is a copy of dist-app; ios/ is the Xcode project (its public/ is a copy too)
+      'apps/parts-app/www/**',
+      'apps/parts-app/ios/**',
       '**/node_modules/**',
       '.impeccable/**',
       '.anthropic-skills/**',
