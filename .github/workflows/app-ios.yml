@@ -26,13 +26,15 @@ concurrency:
 jobs:
   ios:
     name: iPhone build (unsigned .ipa)
-    # macOS 26 on Apple silicon (runner-images: macos-26 = macos-latest since the macOS 26 GA).
-    runs-on: macos-26
+    # The Xcode 27 image (runner-images: `xcode-27`, Apple silicon, public preview), the only
+    # one with Xcode 27.1. iPhone Duo (the foldable) shows an app full-screen on its inner display
+    # only when it is built with the iOS 27.1 SDK; an Xcode 26 build runs there in a black frame.
+    runs-on: xcode-27
     timeout-minutes: 45
     env:
-      # Capacitor 8 needs Xcode 26+; App Store uploads need the iOS 26 SDK. Picked explicitly so a
-      # change of the image's default does not change the build silently.
-      XCODE_APP: /Applications/Xcode_26.6.app
+      # Xcode 27.1 (iOS 27.1 SDK), picked explicitly so a change of the image's default does not
+      # change the build silently. Capacitor 8 needs Xcode 26+.
+      XCODE_APP: /Applications/Xcode_27.1.app
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
