@@ -73,14 +73,42 @@ preflight "$RFQ" https://kervanbreaker.com yes
 preflight "$RFQ" https://www.kervanbreaker.com yes
 preflight "$RFQ" https://evil.example no
 
-# Parts shop: up, and open to search engines (no noindex header; robots.txt names the sitemap).
+# All three real domains: open to search engines (no noindex header: the *.pages.dev copies carry
+# one in _headers, and a wrong host pattern there would hide the real site) and HTTPS only (HSTS).
 check https://kiriciparca.com/ 200 text/html
-robots=$("${CURL[@]}" -o /dev/null -D - https://kiriciparca.com/ | tr -d '\r' |
-  awk -F': ' 'tolower($1) == "x-robots-tag" { print $2 }')
-if [[ $robots != *noindex* ]]; then
-  echo "ok    X-Robots-Tag '$robots'  https://kiriciparca.com/"
+for url in https://kiriciparca.com/ https://kervanbreaker.com/ https://kervanheat.com/; do
+  headers=$("${CURL[@]}" -o /dev/null -D - "$url" | tr -d '\r')
+  robots=$(awk -F': ' 'tolower($1) == "x-robots-tag" { print $2 }' <<<"$headers")
+  if [[ $robots != *noindex* ]]; then
+    echo "ok    X-Robots-Tag '$robots'  $url"
+  else
+    echo "FAIL  X-Robots-Tag '$robots'  $url  (want no noindex)"
+    fail=1
+  fi
+  hsts=$(awk -F': ' 'tolower($1) == "strict-transport-security" { print $2 }' <<<"$headers" | tail -n 1)
+  if [[ $hsts == max-age=* ]]; then
+    echo "ok    HSTS '$hsts'  $url"
+  else
+    echo "FAIL  HSTS '$hsts'  $url  (want a Strict-Transport-Security header)"
+    fail=1
+  fi
+done
+
+# The shop is rebuilt every day (shop-daily.yml) and takes the week's exchange rate on the first
+# build after Monday's bulletin (scripts/fx.ts). If the rebuilds stop, the old site stays up by
+# design, so the rate's date on the home page is the sign: from Wednesday (UTC) it must be later
+# than the Monday of the week before (a holiday Monday steps back to an earlier day of that
+# week); Monday and Tuesday still accept last week's. Prints the date only, never the rate.
+fxdate=$("${CURL[@]}" https://kiriciparca.com/ | grep -o '"fx":{[^}]*}' | head -n 1 |
+  grep -o '"date":"[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}"' | cut -d'"' -f4)
+# SMOKE_NOW (a YYYY-MM-DD date, no time) stands in for today when trying the rule by hand.
+ref=$(date -u -d "${SMOKE_NOW:-today} -2 days" +%F)
+monday=$(date -u -d "$ref -$(($(date -u -d "$ref" +%u) - 1)) days" +%F)
+oldest=$(date -u -d "$monday -6 days" +%F)
+if [[ -n $fxdate && ! $fxdate < $oldest ]]; then
+  echo "ok    exchange-rate date $fxdate  https://kiriciparca.com/  (oldest accepted $oldest)"
 else
-  echo "FAIL  X-Robots-Tag '$robots'  https://kiriciparca.com/  (want no noindex)"
+  echo "FAIL  exchange-rate date '${fxdate}'  https://kiriciparca.com/  (want $oldest or later: the daily shop rebuild has stopped?)"
   fail=1
 fi
 robotstxt=$("${CURL[@]}" https://kiriciparca.com/robots.txt | tr -d '\r')
