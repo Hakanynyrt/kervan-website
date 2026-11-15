@@ -2,15 +2,80 @@
  * The app's frame around the shop's pages (AppShell): a fixed top bar and tab bar clear of the
  * phone's notch and home indicator (safe-area insets, app.html has viewport-fit=cover), the
  * page's own fixed order bar (StickyQuote, `data-sticky-bar`) above the tab bar.
+ *
+ * The tab bar is glass (owner, 2026-11-15: "diğer tüm uygulamaların yaptığı gibi"): a floating,
+ * rounded, translucent bar that blurs the page under it, at the bottom on phones and as a rail on
+ * the right edge on a large screen (iPhone Duo's inner display, both orientations). The app's
+ * chrome only; the shop's pages keep their flat look.
  */
 :root {
   --kv-top: 3.25rem;
-  /* The tab bar: its 3.5rem row and its 1px top border. */
-  --kv-tab: calc(3.5rem + 1px);
+  /* The tab bar's height (its border inside it). */
+  --kv-tab: 3.5rem;
   --kv-safe-top: env(safe-area-inset-top, 0px);
   --kv-safe-bottom: env(safe-area-inset-bottom, 0px);
   --kv-safe-left: env(safe-area-inset-left, 0px);
   --kv-safe-right: env(safe-area-inset-right, 0px);
+  /* The floating bar's gap to the screen's bottom edge: over the home indicator's strip, as the
+     system's own bars sit, and never closer than 0.5rem. */
+  --kv-tab-bottom: max(0.5rem, calc(var(--kv-safe-bottom) - 0.75rem));
+  /* What the bar takes from the bottom of the page: the bar, its gap and 0.5rem air above it. */
+  --kv-tab-space: calc(var(--kv-tab) + var(--kv-tab-bottom) + 0.5rem);
+  /* The rail (large screens): its width, its gap to the screen's right edge and what it takes
+     from the right of the page. The gap ignores the right safe-area inset: on iPhone Duo's inner
+     display that inset is the status corner's width at the top, and the rail, centred top to
+     bottom, sat a whole status column away from the edge (owner, 2026-11-15: "Yer yanlış"). */
+  --kv-rail: 5rem;
+  --kv-rail-gap: 0.75rem;
+  --kv-rail-space: calc(var(--kv-rail) + var(--kv-rail-gap) + 0.75rem);
+  --kv-glass: color-mix(in srgb, var(--color-bg) 62%, transparent);
+  --kv-glass-edge: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  --kv-glass-shine: rgb(255 255 255 / 0.55);
+  --kv-glass-shadow: 0 0.5rem 1.75rem rgb(0 0 0 / 0.14), 0 1px 0.25rem rgb(0 0 0 / 0.08);
+  /* The drop over the open tab: clear glass, no tint (owner, 2026-11-15: "turuncu görünüyor",
+     "şeffaf damla"): a faint neutral body (on a near-white bar a white one would vanish), a
+     hairline edge, light on its top edge, a faint shade on its bottom edge and a very soft
+     shadow. */
+  --kv-drop: color-mix(in srgb, var(--color-ink) 6%, transparent);
+  --kv-drop-edge: color-mix(in srgb, var(--color-ink) 12%, rgb(255 255 255 / 0.6));
+  --kv-drop-rim: color-mix(in srgb, var(--color-ink) 9%, transparent);
+  --kv-drop-shine: rgb(255 255 255 / 0.85);
+  --kv-drop-shade: rgb(0 0 0 / 0.07);
+  --kv-drop-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 0.08), 0 1px 2px rgb(0 0 0 / 0.06);
+  /* Without the glass (no blur, "Reduce transparency"): a solid neutral bubble. */
+  --kv-drop-solid: color-mix(in srgb, var(--color-ink) 8%, var(--color-bg));
+}
+
+:root[data-theme='dark'],
+:root[data-sun='night']:not([data-theme='light']) {
+  --kv-glass: color-mix(in srgb, var(--color-bg) 58%, transparent);
+  --kv-glass-edge: rgb(255 255 255 / 0.12);
+  --kv-glass-shine: rgb(255 255 255 / 0.1);
+  --kv-glass-shadow: 0 0.5rem 1.75rem rgb(0 0 0 / 0.45);
+  --kv-drop: rgb(255 255 255 / 0.07);
+  --kv-drop-edge: rgb(255 255 255 / 0.22);
+  --kv-drop-rim: rgb(255 255 255 / 0.06);
+  --kv-drop-shine: rgb(255 255 255 / 0.28);
+  --kv-drop-shade: rgb(0 0 0 / 0.25);
+  --kv-drop-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 0.3);
+  --kv-drop-solid: color-mix(in srgb, var(--color-ink) 14%, var(--color-bg));
+}
+/* The device's dark mode where nothing marks the page (the iPhone app: no edge `data-sun`), as
+   globals.css does for its own tokens. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-sun]):not([data-theme='light']) {
+    --kv-glass: color-mix(in srgb, var(--color-bg) 58%, transparent);
+    --kv-glass-edge: rgb(255 255 255 / 0.12);
+    --kv-glass-shine: rgb(255 255 255 / 0.1);
+    --kv-glass-shadow: 0 0.5rem 1.75rem rgb(0 0 0 / 0.45);
+    --kv-drop: rgb(255 255 255 / 0.07);
+    --kv-drop-edge: rgb(255 255 255 / 0.22);
+    --kv-drop-rim: rgb(255 255 255 / 0.06);
+    --kv-drop-shine: rgb(255 255 255 / 0.28);
+    --kv-drop-shade: rgb(0 0 0 / 0.25);
+    --kv-drop-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 0.3);
+    --kv-drop-solid: color-mix(in srgb, var(--color-ink) 14%, var(--color-bg));
+  }
 }
 
 /* Anchors (`#…`) land below the top bar. */
@@ -30,25 +95,191 @@ body {
   padding-right: var(--kv-safe-right);
 }
 
+/* The glass: translucent, blurring what scrolls under it, a hairline edge, a light top edge. */
 .kv-tabbar {
-  padding-bottom: var(--kv-safe-bottom);
-  padding-left: var(--kv-safe-left);
-  padding-right: var(--kv-safe-right);
+  box-sizing: border-box;
+  border: 1px solid var(--kv-glass-edge);
+  border-radius: 1.75rem;
+  background: var(--kv-glass);
+  -webkit-backdrop-filter: blur(1.25rem) saturate(1.8);
+  backdrop-filter: blur(1.25rem) saturate(1.8);
+  box-shadow:
+    var(--kv-glass-shadow),
+    inset 0 1px 0 var(--kv-glass-shine);
+}
+
+/* Without blur, or with "Reduce transparency" on, a solid bar (the text stays readable). The
+   drop's own fallback follows its rules below (same specificity, so it must come after them). */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .kv-tabbar {
+    background: var(--color-bg);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .kv-tabbar {
+    background: var(--color-bg);
+  }
+}
+
+/* Phones: a floating bar over the bottom, clear of the screen's edges and the notch sideways. */
+.kv-tabbar {
+  left: calc(var(--kv-safe-left) + 0.5rem);
+  right: calc(var(--kv-safe-right) + 0.5rem);
+  bottom: var(--kv-tab-bottom);
+  height: var(--kv-tab);
+  margin-inline: auto;
+  max-width: 34rem;
+  padding: 0 0.25rem;
+}
+
+.kv-tabs {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  height: 100%;
+  /* A finger slides along the bar to pick a tab (TabBar.tsx): no page scroll, no link callout,
+     no text selection while it does. */
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.kv-tab {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  border-radius: 1.5rem;
+  -webkit-user-drag: none;
+}
+
+/*
+ * The drop: one element that slides to the open tab (`--kv-i`, the tab's index; fractional while
+ * a finger carries it) and swells a little while a finger is on the bar, like a lifted drop of
+ * water. The box is one tab's cell; the glass is its ::before. Behind the links, never over them.
+ * No backdrop-filter of its own: inside the blurred bar (a backdrop root) it would only filter the
+ * bar's flat fill, so the drop's look is its body, a light top-edge gradient, its edge and shadows.
+ */
+.kv-drop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 20%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(calc(var(--kv-i, 0) * 100%));
+  transition:
+    transform 0.26s cubic-bezier(0.3, 1.35, 0.5, 1),
+    opacity 0.15s ease;
+}
+.kv-drop[data-show] {
+  opacity: 1;
+}
+.kv-drop[data-swipe] {
+  transition: opacity 0.15s ease;
+}
+.kv-drop::before {
+  content: '';
+  position: absolute;
+  inset: 0.25rem 0.125rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--kv-drop-edge);
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--kv-drop-shine) 40%, transparent),
+      transparent 50%
+    ),
+    var(--kv-drop);
+  box-shadow:
+    inset 0 1px 0.5px var(--kv-drop-shine),
+    inset 0 -1px 1px var(--kv-drop-shade),
+    0 0 0 0.5px var(--kv-drop-rim),
+    var(--kv-drop-shadow);
+  transition: transform 0.26s cubic-bezier(0.3, 1.35, 0.5, 1);
+}
+.kv-drop[data-lift]::before {
+  transform: scale(1.1);
+}
+
+/* Without blur, or with "Reduce transparency" on: a solid neutral bubble. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .kv-drop::before {
+    background: var(--kv-drop-solid);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .kv-drop::before {
+    background: var(--kv-drop-solid);
+  }
 }
 
 .kv-main {
   display: block;
   padding-top: calc(var(--kv-top) + var(--kv-safe-top));
-  padding-bottom: calc(var(--kv-tab) + var(--kv-safe-bottom));
+  padding-bottom: var(--kv-tab-space);
   padding-left: var(--kv-safe-left);
   padding-right: var(--kv-safe-right);
 }
 
-/* The page's order bar sits on the tab bar, not under it, and clear of the notch sideways. */
+/* The page's order bar sits above the tab bar, not under it, and clear of the notch sideways. */
 .kv-main [data-sticky-bar] {
-  bottom: calc(var(--kv-tab) + var(--kv-safe-bottom));
+  bottom: var(--kv-tab-space);
   padding-left: calc(0.75rem + var(--kv-safe-left));
   padding-right: calc(0.75rem + var(--kv-safe-right));
+}
+
+/*
+ * Large screens (iPhone Duo's inner display: about 669 x 951 pt, either way round; not a phone in
+ * landscape, which is under 480px tall; the Duo's outer display is under 480px too): the tabs move to a glass rail on the right edge, centred
+ * top to bottom, and the page keeps clear of it on the right instead of at the bottom.
+ */
+@media (width >= 640px) and (height >= 480px) {
+  .kv-tabbar {
+    left: auto;
+    bottom: auto;
+    top: 50%;
+    right: var(--kv-rail-gap);
+    transform: translateY(-50%);
+    width: var(--kv-rail);
+    height: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0.375rem;
+    border-radius: 2rem;
+  }
+  .kv-tabs {
+    grid-template-columns: none;
+    grid-auto-rows: 4.25rem;
+    gap: 0.25rem;
+  }
+  .kv-tab {
+    border-radius: 1.625rem;
+  }
+  .kv-drop {
+    width: 100%;
+    height: 4.25rem;
+    /* one row and its gap per tab */
+    transform: translateY(calc(var(--kv-i, 0) * 4.5rem));
+  }
+  .kv-drop::before {
+    inset: 0;
+    border-radius: 1.625rem;
+  }
+  .kv-main {
+    padding-bottom: calc(var(--kv-safe-bottom) + 1.5rem);
+    padding-right: var(--kv-rail-space);
+  }
+  .kv-main [data-sticky-bar] {
+    bottom: 0;
+    right: var(--kv-rail-space);
+    padding-bottom: calc(0.75rem + var(--kv-safe-bottom));
+    padding-right: 0.75rem;
+  }
 }
 
 /* A picture that could not load (offline): an empty frame, not the broken-picture mark. */
@@ -64,16 +295,20 @@ body {
 /* Phones: pages with that bar keep their last lines clear of it (the site pads its footer). */
 @media (width < 64rem) {
   .kv-main:has([data-sticky-bar]) {
-    padding-bottom: calc(var(--kv-tab) + var(--kv-safe-bottom) + 5rem);
+    padding-bottom: calc(var(--kv-tab-space) + 5rem);
   }
   .kv-main:has([data-sticky-bar][data-added]) {
-    padding-bottom: calc(var(--kv-tab) + var(--kv-safe-bottom) + 8rem);
+    padding-bottom: calc(var(--kv-tab-space) + 8rem);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+  .kv-drop,
+  .kv-drop::before {
+    transition: none;
   }
   .kv-app *,
   .kv-app *::before,
