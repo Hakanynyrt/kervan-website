@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { assetUrl } from '../lib/asset-base';
 import type { Dict } from '../lib/dict';
 import { localePath } from '../lib/locale-path';
 import {
@@ -34,7 +35,8 @@ import { FOCUS, WRAP } from './Layout';
  *  final picture), this component plays the frames on a canvas once the picture is in view and
  *  removes the mark. The prerendered markup is the final, opened state. */
 
-const BASE = '/photos/parca/acilis';
+/** On Pages, never R2 (they are fetch()ed); the app's build loads them from the site (asset-base.ts). */
+const BASE = assetUrl('/photos/parca/acilis');
 /** Final (opened) picture, `-{sm,lg}.webp`; the frames are `<BASE>-kabin-06-NN` (top cover off,
  *  housing sliding away, KABIN of them) and `<BASE>-kare-06-NN` (our parts opening, FRAMES of
  *  them). All are transparent (part, contact shadow, faint floor reflection): the stage behind

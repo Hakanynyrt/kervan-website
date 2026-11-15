@@ -1,4 +1,5 @@
 import { FOCUS } from './Layout';
+import { assetUrl } from '../lib/asset-base';
 import type { Dict } from '../lib/dict';
 import { GUIDE_STEPS } from '../lib/guide-steps';
 import { GUIDE_VIDEOS, PART_VIDEOS, videoFiles } from '../lib/guide-videos';
@@ -28,7 +29,14 @@ export function GuideVideo({
 }) {
   const v = GUIDE_VIDEOS[k];
   if (!v) return null;
-  const f = videoFiles(v);
+  const files = videoFiles(v);
+  // Site paths; the app's build loads them from the site (asset-base.ts).
+  const f = {
+    mp4: assetUrl(files.mp4),
+    jpg: assetUrl(files.jpg),
+    tr: assetUrl(files.tr),
+    en: assetUrl(files.en),
+  };
   const m = t.guideMedia;
   const d = GUIDE_STEPS[k];
   const title = GUIDES[lang].items[k].title;

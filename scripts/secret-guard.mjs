@@ -23,6 +23,11 @@ export const FILE_RULES = [
   [/vega-(catalog|drawings?)[^/]*\.json$/i, 'VEGA catalogue data'],
   [/(^|\/)\.env(\.|$)|(^|\/)\.dev\.vars/, 'environment / secrets file'],
   [/\.(pem|key|p12|pfx|jks)$/i, 'private key file'],
+  // iPhone app (docs/agent/app.md): signing material lives only in the GitHub environment.
+  [
+    /\.(p8|p12|mobileprovision|provisionprofile|cer|certSigningRequest)$|(^|\/)AuthKey_[^/]*$/i,
+    'Apple signing file (key, certificate or profile)',
+  ],
 ];
 
 /** Content of added lines. Test files may carry made-up price rows (`cents`). */

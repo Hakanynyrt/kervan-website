@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- The iPhone app's page (vite.app.config.ts writes it as dist-app/index.html). No analytics,
+         no ads tag, no third-party script: the page loads only its own bundle. The site and its
+         picture host are the only other places it reads from (the build fills in their origins
+         and the app's name). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: %KV_CSP_HOSTS%; media-src 'self' blob: %KV_CSP_HOSTS%; connect-src 'self' blob: %KV_CSP_HOSTS%; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1c1f23" media="(prefers-color-scheme: dark)" />
+    <title>%KV_APP_NAME%</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/app/main.tsx"></script>
+  </body>
+</html>

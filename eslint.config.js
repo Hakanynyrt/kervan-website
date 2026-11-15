@@ -9,6 +9,8 @@ export default tseslint.config(
     ignores: [
       '**/dist/**',
       '**/dist-ssr/**',
+      // iPhone app web build (apps/parts-shop/dist-app, gitignored)
+      '**/dist-app/**',
       '**/node_modules/**',
       '.impeccable/**',
       '.anthropic-skills/**',

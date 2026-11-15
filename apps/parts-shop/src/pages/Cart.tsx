@@ -265,7 +265,18 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
             ),
           );
       })
-      .catch(() => undefined)
+      // No page could be read (no connection): every priced line keeps its stored price and
+      // says so, as a line whose own page failed does.
+      .catch(() => {
+        if (live)
+          setStale(
+            new Set(
+              readCart()
+                .filter((x) => x.cents !== null)
+                .map((x) => x.id),
+            ),
+          );
+      })
       .finally(() => {
         window.clearTimeout(wait);
         if (live) setChecking(false);

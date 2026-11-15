@@ -1,23 +1,10 @@
 import Layout from './components/Layout';
+import PageView, { showsPrice } from './PageView';
 import { DICT, type Dict } from './lib/dict';
 import { renderModel } from './lib/part-caption';
 import { findRender } from './lib/part-links';
 import type { PartKey } from './lib/routes';
 import type { PageProps } from './lib/page-props';
-import Brand from './pages/Brand';
-import Cart from './pages/Cart';
-import Breaker from './pages/Breaker';
-import Family from './pages/Family';
-import Guide from './pages/Guide';
-import Home from './pages/Home';
-import IntlOrders from './pages/IntlOrders';
-import Legal from './pages/Legal';
-import NotFound from './pages/NotFound';
-import Part from './pages/Part';
-import PartItem from './pages/PartItem';
-import Parts from './pages/Parts';
-import Popular from './pages/Popular';
-import TipList from './pages/TipList';
 import { AstryxProvider } from '@kervan/ui';
 
 /** Header quote message on a part's own page: this part for this breaker. */
@@ -25,23 +12,6 @@ function partItemQuote(part: PartKey, anchor: string, t: Dict): string {
   const r = findRender(part, anchor);
   const name = r?.kind ? t.parts.renderKind[r.kind] : t.parts.items[part].name;
   return t.parts.text(name, r ? renderModel(r, t) : '', 1);
-}
-
-/** The page shows a price: tip and model pages with a priced tip, part items with a price. */
-function showsPrice(model: PageProps['model']): boolean {
-  switch (model.kind) {
-    case 'breaker':
-      return (
-        model.families.some((f) => f.skus.some((s) => s.priceUsdNetCents !== null)) ||
-        (model.extra?.priceUsdNetCents ?? null) !== null
-      );
-    case 'family':
-      return model.family.skus.some((s) => s.priceUsdNetCents !== null);
-    case 'partItem':
-      return model.price !== null || model.priceFitted !== null;
-    default:
-      return false;
-  }
 }
 
 function AppBody({ lang, path, model, fx }: PageProps) {
@@ -68,24 +38,15 @@ function AppBody({ lang, path, model, fx }: PageProps) {
       home={model.kind === 'home'}
       finder={model.kind === 'home' ? model.finder : undefined}
     >
-      {model.kind === 'home' && <Home model={model} fx={fx} lang={lang} t={t} />}
-      {model.kind === 'list' && <TipList model={model} fx={fx} lang={lang} t={t} />}
-      {model.kind === 'popular' && <Popular model={model} fx={fx} lang={lang} t={t} />}
-      {model.kind === 'brand' && <Brand model={model} fx={fx} lang={lang} t={t} />}
-      {model.kind === 'parts' && <Parts model={model} lang={lang} t={t} />}
-      {model.kind === 'part' && <Part model={model} fx={fx} lang={lang} t={t} />}
-      {model.kind === 'partItem' && <PartItem model={model} fx={fx} lang={lang} t={t} />}
-      {model.kind === 'breaker' && <Breaker model={model} path={path} fx={fx} lang={lang} t={t} />}
-      {model.kind === 'family' && <Family model={model} path={path} fx={fx} lang={lang} t={t} />}
-      {model.kind === 'cart' && <Cart fx={fx} lang={lang} t={t} />}
-      {model.kind === 'legal' && <Legal doc={model.doc} lang={lang} t={t} />}
-      {model.kind === 'intl' && <IntlOrders lang={lang} t={t} />}
-      {model.kind === 'guide' && <Guide doc={model.doc} tips={model.tips} lang={lang} t={t} />}
-      {model.kind === 'notFound' && <NotFound lang={lang} t={t} />}
+      <PageView lang={lang} path={path} model={model} fx={fx} />
     </Layout>
   );
 }
 
+/**
+ * The site's page: the site frame (`Layout`: header, footer, consent) around the page itself
+ * (`PageView`, which the iPhone app renders in its own shell).
+ */
 export default function App(props: PageProps) {
   return (
     <AstryxProvider lang={props.lang}>

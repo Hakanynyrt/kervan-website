@@ -1,0 +1,68 @@
+name: App (web build)
+
+# The iPhone app's web build (docs/agent/app.md) on every PR that touches the shop or the shared
+# packages: the DEMO catalogue, the shop's own site build as a local stand-in for kiriciparca.com,
+# build:app pointed at that stand-in, check:app (no prices, catalogue values, DEMO markers,
+# ads/analytics ids or foreign hosts; size budget) and the Playwright e2e at iPhone size.
+# Report only: Deploy does not wait for it. No secrets, no Apple steps (those come in M2/M3).
+on:
+  pull_request:
+    paths:
+      - 'apps/parts-shop/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/app.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: App web build + e2e
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # No data token here: build-catalog writes the DEMO catalogue (prints counts only).
+      - name: DEMO catalogue
+        run: node --experimental-strip-types --no-warnings apps/parts-shop/scripts/build-catalog.ts
+
+      # The stand-in site the app reads in the e2e: the shop's normal build (with check-dist).
+      - name: Build the shop (stand-in site)
+        run: pnpm turbo build --filter=@kervan/parts-shop
+
+      # Pointed at the local stand-in the e2e serves (dist/ above) instead of production. Only
+      # these steps get VITE_SITE_ORIGIN: the site build above must not see it.
+      - name: Build the app
+        env:
+          VITE_SITE_ORIGIN: http://127.0.0.1:4173
+        run: pnpm --filter @kervan/parts-shop build:app
+
+      - name: Check the app bundle
+        env:
+          VITE_SITE_ORIGIN: http://127.0.0.1:4173
+        run: pnpm --filter @kervan/parts-shop check:app
+
+      - name: Install Chromium
+        run: pnpm --filter @kervan/parts-shop exec playwright install --with-deps chromium
+
+      - name: e2e (iPhone size)
+        working-directory: apps/parts-shop
+        env:
+          VITE_SITE_ORIGIN: http://127.0.0.1:4173
+        run: node --experimental-strip-types --no-warnings --test e2e/app.spec.ts

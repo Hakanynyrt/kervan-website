@@ -28,3 +28,7 @@ vega-catalog*.json
 apps/parts-shop/.catalog/
 apps/parts-shop/.renders/
 apps/parts-shop/.render-app/
+
+# iPhone app web build (docs/agent/app.md): rebuilt by `pnpm --filter @kervan/parts-shop build:app`;
+# M2 copies it into the native project.
+apps/parts-shop/dist-app/
