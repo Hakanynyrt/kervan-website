@@ -8,6 +8,7 @@ import {
 } from '@kervan/seo';
 import { SocialIcon } from '@kervan/ui';
 import type { DictBlock } from '../types';
+import { CATALOGUE_PDF } from '../lib/catalogue';
 import { useLocale, useLocalePath } from '../lib/locale-path';
 import { shopUrl } from '../lib/shop';
 import { WRAP } from '../lib/ui';
@@ -85,6 +86,16 @@ export default function Footer({ t }: Props) {
               {p.label}
             </Link>
           ))}
+          {/* The catalogue PDF of the page's language: new tab, saved under its own name. */}
+          <a
+            href={CATALOGUE_PDF[lang]}
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+            className={pageLink}
+          >
+            {t.footer.catalogue}
+          </a>
         </nav>
 
         <div className="mt-2 flex flex-wrap -ml-3 gap-1">

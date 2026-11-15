@@ -49,6 +49,11 @@
 /og.png
   Cache-Control: public, max-age=86400
 
+# Catalogue PDFs (src/lib/catalogue.ts): the file name carries the edition, so a changed PDF
+# gets a new name.
+/katalog/*
+  Cache-Control: public, max-age=31536000, immutable
+
 # HTML — always revalidate so deploys propagate immediately.
 /*.html
   Cache-Control: public, max-age=0, must-revalidate

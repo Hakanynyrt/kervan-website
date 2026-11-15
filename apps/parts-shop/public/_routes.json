@@ -5,6 +5,7 @@
   "exclude": [
     "/assets/*",
     "/fonts/*",
+    "/katalog/*",
     "/photos/*",
     "/og/*",
     "/tips/*",
