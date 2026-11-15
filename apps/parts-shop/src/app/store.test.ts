@@ -8,6 +8,7 @@ import {
   memoryKV,
   parseLang,
   parseMachines,
+  preferencesKV,
   STORE_KEYS,
 } from './store.ts';
 
@@ -103,4 +104,42 @@ test("lang: the first run takes the phone's and saves it; a choice is kept", asy
   await s.setLang('tr');
   assert.equal(await s.lang('en-US'), 'tr');
   assert.equal(await createStore(memoryKV({ [STORE_KEYS.lang]: 'xx' })).lang('tr'), 'tr');
+});
+
+test('preferencesKV: the plugin is loaded once, on first use, and failures read as empty', async () => {
+  const data = new Map<string, string>();
+  let loads = 0;
+  const kv = preferencesKV(async () => {
+    loads++;
+    return {
+      async get({ key }) {
+        return { value: data.get(key) ?? null };
+      },
+      async set({ key, value }) {
+        data.set(key, value);
+      },
+      async remove({ key }) {
+        data.delete(key);
+      },
+    };
+  });
+  assert.equal(loads, 0);
+  const s = createStore(kv);
+  assert.equal(await s.lang('tr-TR'), 'tr');
+  assert.equal(data.get(STORE_KEYS.lang), 'tr');
+  await s.addMachine({ path: '/kirici/a/b', name: 'B' });
+  assert.deepEqual(await s.machines(), [{ path: '/kirici/a/b', name: 'B' }]);
+  await kv.remove(STORE_KEYS.lang);
+  assert.equal(data.has(STORE_KEYS.lang), false);
+  assert.equal(loads, 1);
+
+  let tries = 0;
+  const broken = preferencesKV(async () => {
+    tries++;
+    throw new Error('no plugin');
+  });
+  assert.equal(await broken.get('k'), null);
+  await broken.set('k', 'v');
+  await broken.remove('k');
+  assert.equal(tries, 3, 'a failed load is tried again');
 });

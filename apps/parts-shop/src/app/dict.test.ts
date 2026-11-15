@@ -35,7 +35,7 @@ test('the functions take their numbers', () => {
     assert.match(d.finder.more(12), /12/);
     assert.match(d.priceDate('14 Kasım 2026'), /14 Kasım 2026/);
   }
-  assert.equal(APP_DICT.en.tabs.paletCount(1), 'Palet, 1 item');
+  assert.equal(APP_DICT.en.tabs.paletCount(1), 'Cart, 1 item');
 });
 
 test('the app name and the tabs as agreed', () => {
@@ -46,7 +46,7 @@ test('the app name and the tabs as agreed', () => {
     return [t.home, t.guides, t.scan, t.machines, t.palet];
   };
   assert.deepEqual(tabs('tr'), ['Ana ekran', 'Rehber', 'Tara', 'Makinelerim', 'Palet']);
-  assert.deepEqual(tabs('en'), ['Home', 'Guides', 'Scan', 'My machines', 'Palet']);
+  assert.deepEqual(tabs('en'), ['Home', 'Guides', 'Scan', 'My machines', 'Cart']);
   assert.equal(APP_DICT.tr.scan.notKervan, 'Bu bir Kervan bağlantısı değil');
   assert.match(
     APP_DICT.tr.priceDate('x'),

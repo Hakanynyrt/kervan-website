@@ -1,0 +1,8 @@
+# The iPhone app (docs/agent/app.md). www/ is a copy of apps/parts-shop/dist-app (scripts/copy-web.mjs);
+# ios/.gitignore keeps out what `cap sync` regenerates (ios/App/App/public, capacitor.config.json, config.xml).
+www/
+*.ipa
+*.xcarchive
+*.dSYM.zip
+ios/App/build/
+ios/build/
