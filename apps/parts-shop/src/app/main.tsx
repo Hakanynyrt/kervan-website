@@ -13,6 +13,7 @@ import { langRef } from './lang-ref';
 import { openExternal } from './native';
 import { Router } from './router';
 import { firstLang, store } from './store';
+import { LANG_WAIT_MS, withTimeout } from './timeout';
 
 /**
  * The iPhone app's entry (app.html, vite.app.config.ts): the shop's pages in the app's own shell,
@@ -20,7 +21,14 @@ import { firstLang, store } from './store';
  * page head.
  */
 async function boot() {
-  langRef.current = await store.lang(navigator.language).catch(() => firstLang(navigator.language));
+  // The phone's storage answers at once; if it does not (a plugin that never replies), the app
+  // starts in the phone's language rather than stay blank (2026-11-15: the first iPhone build
+  // opened white).
+  langRef.current = await withTimeout(
+    store.lang(navigator.language),
+    LANG_WAIT_MS,
+    firstLang(navigator.language),
+  ).catch(() => firstLang(navigator.language));
   const loader = createLoader({
     origin: SITE_ORIGIN,
     cache: safeCache(idbCache()),

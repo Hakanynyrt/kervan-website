@@ -89,3 +89,11 @@ cd apps/parts-shop && VITE_SITE_ORIGIN=http://127.0.0.1:4173 node --experimental
   One app paragraph in the privacy/KVKK text; `check-dist.mjs` checks the file is valid JSON and price-free.
 - **M6 — store listing and submission.** Listing texts TR/EN, simulator screenshots, review notes and the metadata lane; first submission and one review round.
   Store texts are checked by a unit test (length limits, no makers' names, no prices); submission happens only on the owner's word.
+
+## Blank start guard (2026-11-15)
+
+The first iPhone build opened on a white screen. Two guards since:
+
+- `src/app/main.tsx` waits at most `LANG_WAIT_MS` (1.5 s, `src/app/timeout.ts`) for the stored language; a plugin call that never answers no longer keeps the app blank.
+- `src/app/boot-guard.js` (emitted as `dist-app/boot-guard.js` by `vite.app.config.ts`, loaded as a plain script before the bundle, allowed by the CSP as a same-origin file) writes `bootFail` (dict) and the errors it saw on the screen when `#root` is still empty after 8 s, so a blank start on the phone can be read from a screenshot.
+- WebKit can be run here for checks: download Playwright's WebKit into a scratch `PLAYWRIGHT_BROWSERS_PATH` and install its system libraries with apt; the shared Chromium is not touched.
