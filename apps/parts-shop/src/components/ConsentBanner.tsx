@@ -6,11 +6,13 @@ import { localePath } from '../lib/locale-path';
 import {
   CONSENT_OPEN_EVENT,
   conversionsForLink,
+  eventForLink,
   isAutomatedClient,
   loadAdsTag,
   readConsent,
   revokeAdsConsent,
   trackConversion,
+  trackEvent,
   writeConsent,
   type ConsentChoice,
 } from '../lib/ads';
@@ -40,7 +42,11 @@ export function ConsentBanner({ lang, t }: { lang: Lang; t: Dict }) {
     // ORDER_CONVERSION (order requests, quotes) only as `form`; no-op until the tag is loaded.
     const onClick = (e: MouseEvent) => {
       const a = (e.target as Element | null)?.closest?.('a[href]');
-      if (a) for (const kind of conversionsForLink(a)) trackConversion(kind);
+      if (!a) return;
+      for (const kind of conversionsForLink(a)) trackConversion(kind);
+      // The catalogue PDF link: a plain `catalogue_download` event, not a conversion.
+      const event = eventForLink(a);
+      if (event) trackEvent(event, (a.getAttribute('href') ?? '').split('/').pop() ?? '');
     };
     document.addEventListener('click', onClick, true);
 

@@ -733,6 +733,7 @@ export const DICT: Dict = {
       instagramLabel: 'Instagram',
       hoursLabel: 'Çalışma',
       hours: 'Pzt–Cmt · 08:00–18:00',
+      catalogueLabel: 'Katalog',
       quotePrefix: 'Teklif talebi —',
     },
     notFound: {
@@ -780,6 +781,7 @@ export const DICT: Dict = {
       rights: '© 2026 Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti. Tüm hakları saklıdır.',
       mersis: `MERSİS No: ${ORG_MERSIS}`,
       kvkk: 'KVKK',
+      catalogue: 'Kataloğu indir (PDF, 2,8 MB)',
       pages: {
         label: 'Sayfalar',
         products: 'Ürünler',
@@ -1527,6 +1529,7 @@ export const DICT: Dict = {
       instagramLabel: 'Instagram',
       hoursLabel: 'Hours',
       hours: 'Mon–Sat · 08:00–18:00',
+      catalogueLabel: 'Catalogue',
       quotePrefix: 'Quote request —',
     },
     notFound: {
@@ -1574,6 +1577,7 @@ export const DICT: Dict = {
       rights: '© 2026 Kervan Isıl İşlem ve Makine San. Tic. Ltd. Şti. All rights reserved.',
       mersis: `MERSIS No: ${ORG_MERSIS}`,
       kvkk: 'Privacy',
+      catalogue: 'Download catalogue (PDF, 2.8 MB)',
       pages: {
         label: 'Pages',
         products: 'Products',

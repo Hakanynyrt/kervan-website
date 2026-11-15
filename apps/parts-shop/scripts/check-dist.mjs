@@ -293,6 +293,19 @@ if (itemOrphans.length)
     `check-dist: warning: ${itemOrphans.length} part item pages are reached only through search and the sitemap\n`,
   );
 for (const u of noindexUrls) if (sitemapLocs.has(u)) problems.push(`sitemap: noindex page ${u}`);
+// The catalogue PDFs (src/lib/catalogue.ts): each home page's footer links its language's file,
+// the file is shipped, and no PDF is in a sitemap.
+for (const [home, lang] of [
+  ['index.html', 'tr'],
+  ['en/index.html', 'en'],
+]) {
+  const file = path.join(DIST, home);
+  const html = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
+  const href = /href="(\/katalog\/[^"]+\.pdf)"/.exec(html)?.[1];
+  if (!href || !href.endsWith(`-${lang}.pdf`)) problems.push(`${home}: no catalogue PDF link`);
+  else if (!fs.existsSync(path.join(DIST, href))) problems.push(`${href}: linked but not shipped`);
+}
+for (const u of sitemapLocs) if (/\.pdf$/i.test(u)) problems.push(`sitemap: PDF listed ${u}`);
 for (const [u, where] of hreflangTargets)
   if (noindexUrls.has(u)) problems.push(`${where}: hreflang to noindex page ${u}`);
 if (sitemapLocs.size !== indexable)

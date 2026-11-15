@@ -40,6 +40,17 @@ const OAI_EVENT: Record<Conversion, [string, Record<string, string>, Record<stri
  */
 export const ORDER_CONVERSION = { 'data-kv-conversion': 'form' } as const;
 
+/**
+ * Plain events (not conversions) a link can send to the Google tag, by `data-kv-event`. Only the
+ * names listed here are sent. `catalogue_download`: a click on the catalogue PDF link (footer).
+ * Google Ads shows such an event only once a conversion action is set up for it there; until
+ * then it is sent and ignored.
+ */
+const LINK_EVENTS = ['catalogue_download'] as const;
+export type LinkEvent = (typeof LINK_EVENTS)[number];
+/** Spread onto the catalogue PDF link. */
+export const CATALOGUE_EVENT = { 'data-kv-event': 'catalogue_download' } as const;
+
 export type ConsentChoice = 'granted' | 'denied';
 /** Bump the suffix if the banner's wording/purpose changes, to ask again (per origin). */
 const CONSENT_KEY = 'kv_ads_consent_v2'; // v2: the OpenAI pixel joined the banner's purpose
@@ -105,6 +116,12 @@ export function conversionsForLink(a: Element): Conversion[] {
   return byHref ? [byHref] : [];
 }
 
+/** The plain event one click on this link sends (`data-kv-event`, known names only), or null. */
+export function eventForLink(a: Element): LinkEvent | null {
+  const name = a.getAttribute('data-kv-event');
+  return (LINK_EVENTS as readonly string[]).includes(name ?? '') ? (name as LinkEvent) : null;
+}
+
 /** Injects gtag.js and the OpenAI pixel once. Call only after consent. */
 export function loadAdsTag(): void {
   if (loaded || typeof document === 'undefined') return;
@@ -168,6 +185,15 @@ export function trackConversion(kind: Conversion): void {
     const [name, data, options] = OAI_EVENT[kind];
     window.oaiq('measure', name, data, { ...options, event_id: eventId() });
   }
+}
+
+/**
+ * A plain event to the Google tag only (no OpenAI event: its pixel takes conversions). No-op
+ * unless the tag was loaded, i.e. the visitor consented. `file` is the link's file name.
+ */
+export function trackEvent(name: LinkEvent, file: string): void {
+  if (!loaded || !window.gtag) return;
+  window.gtag('event', name, { send_to: AW_ID, file_name: file, transport_type: 'beacon' });
 }
 
 function eventId(): string {

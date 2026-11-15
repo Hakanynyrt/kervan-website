@@ -5,6 +5,7 @@ import { TextInput } from '@astryxdesign/core/TextInput';
 import { ORG_PHONE, ORG_PHONE_E164, ORG_PUBLIC_EMAIL } from '@kervan/seo';
 import type { DictBlock, Lang } from '../types';
 import { WRAP } from '../lib/ui';
+import { CATALOGUE_PDF } from '../lib/catalogue';
 import { WHATSAPP_URL } from '../lib/contact';
 import { shopUrl } from '../lib/shop';
 import { ArrowOut, ArrowRight } from './icons';
@@ -123,6 +124,22 @@ export default function ContactBlock({ t, lang, titleId, head, prefill = '' }: P
           {row(t.contact.emailLabel, ORG_PUBLIC_EMAIL, `mailto:${ORG_PUBLIC_EMAIL}`)}
           {/* The sister shop: same tab, no rel. */}
           {row(t.shop.contactLabel, 'kiriciparca.com', shopUrl('/', lang))}
+          {/* The catalogue PDF of the page's language: new tab, saved under its own name. */}
+          <a
+            href={CATALOGUE_PDF[lang]}
+            className="kv-qpanel-row"
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+          >
+            <span>
+              <b>{t.contact.catalogueLabel}</b>
+              <span className="kv-qpanel-v">{t.footer.catalogue}</span>
+            </span>
+            <span className="kv-qpanel-go">
+              <ArrowOut />
+            </span>
+          </a>
           <div className="kv-qpanel-row">
             <span>
               <b>{t.contact.addressLabel}</b>

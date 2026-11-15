@@ -629,6 +629,8 @@ export interface Dict {
     docs: string;
     /** Link to the /rehber guides. */
     guides: string;
+    /** Download link of the catalogue PDF (lib/catalogue.ts); the size is checked against the file. */
+    catalogue: string;
     images: string;
     shop: string;
     company: string;
@@ -1713,6 +1715,7 @@ export const DICT: Record<Lang, Dict> = {
       legal: 'Üretici ve satıcı',
       docs: 'Yasal',
       guides: 'Rehber',
+      catalogue: 'Kataloğu indir (PDF, 2,8 MB)',
       shop: 'Mağaza',
       company: 'Kurumsal',
       contact: 'İletişim',
@@ -2817,6 +2820,7 @@ export const DICT: Record<Lang, Dict> = {
       legal: 'Manufacturer and seller',
       docs: 'Legal',
       guides: 'Guides',
+      catalogue: 'Download catalogue (PDF, 2.8 MB)',
       shop: 'Shop',
       company: 'Company',
       contact: 'Contact',

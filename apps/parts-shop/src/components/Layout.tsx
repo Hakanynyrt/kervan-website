@@ -17,7 +17,8 @@ import {
 import { INTL, INTL_PATH } from '../lib/intl-orders';
 import { LEGAL, LEGAL_KEYS, legalPath, SELLER } from '../lib/legal';
 import { GUIDES_PATH } from '../lib/guides';
-import { CONSENT_OPEN_EVENT } from '../lib/ads';
+import { CATALOGUE_EVENT, CONSENT_OPEN_EVENT } from '../lib/ads';
+import { CATALOGUE_PDF } from '../lib/catalogue';
 import { BreakerSearch, FinderPickProvider } from './BreakerSearch';
 import { CartLink } from './CartLink';
 import { ConsentBanner } from './ConsentBanner';
@@ -486,6 +487,19 @@ export default function Layout({
                     className={`hover:text-ink max-lg:inline-flex max-lg:min-h-11 max-lg:items-center ${FOCUS}`}
                   >
                     {SHOP_EMAIL}
+                  </a>
+                </li>
+                {/* The catalogue PDF of the page's language: new tab, saved under its own name. */}
+                <li>
+                  <a
+                    href={CATALOGUE_PDF[lang]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
+                    {...CATALOGUE_EVENT}
+                    className={`hover:text-ink max-lg:inline-flex max-lg:min-h-11 max-lg:items-center ${FOCUS}`}
+                  >
+                    {t.footer.catalogue}
                   </a>
                 </li>
               </ul>

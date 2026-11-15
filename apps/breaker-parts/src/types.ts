@@ -500,6 +500,8 @@ export interface DictBlock {
     instagramLabel: string;
     hoursLabel: string;
     hours: string;
+    /** Label of the catalogue row in the quote panel; its value is `footer.catalogue`. */
+    catalogueLabel: string;
     /** Sent by ProductDetail "Get a quote" CTA — prefilled subject line. */
     quotePrefix: string;
   };
@@ -546,6 +548,8 @@ export interface DictBlock {
     /** "MERSİS No: …" under the rights line (TTK md. 1524). */
     mersis: string;
     kvkk: string;
+    /** Download link of the catalogue PDF (lib/catalogue.ts); the size is checked against the file. */
+    catalogue: string;
     /** The row of page links; `label` names the nav for screen readers. */
     pages: {
       label: string;
