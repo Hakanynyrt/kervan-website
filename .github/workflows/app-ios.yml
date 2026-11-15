@@ -8,12 +8,29 @@ name: App (iPhone build)
 # Report only: Deploy does not wait for it, and it deploys nothing.
 on:
   workflow_dispatch:
+  # Every change that reaches main and can change the app (its own code, the shop pages and
+  # libraries it bundles, the shared packages, the lockfile) builds a new .ipa, so the newest
+  # build of main is always the one to install (owner, 2026-11-15: "hep son sürüm olsun").
+  push:
+    branches: [main]
+    paths:
+      - 'apps/parts-app/**'
+      - 'apps/parts-shop/src/**'
+      - 'apps/parts-shop/app.html'
+      - 'apps/parts-shop/vite.app.config.ts'
+      - 'apps/parts-shop/package.json'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/app-ios.yml'
   pull_request:
     paths:
       - 'apps/parts-app/**'
-      - 'apps/parts-shop/src/app/**'
+      - 'apps/parts-shop/src/**'
       - 'apps/parts-shop/app.html'
       - 'apps/parts-shop/vite.app.config.ts'
+      - 'apps/parts-shop/package.json'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
       - '.github/workflows/app-ios.yml'
 
 permissions:
