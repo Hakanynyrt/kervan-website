@@ -260,7 +260,7 @@ export const DICT: Dict = {
           caption: 'Parça üzerinde sertlik ölçümü',
         },
         {
-          base: 'surec-ekran-01',
+          base: 'surec-ekran-02',
           alt: 'Fırın kontrol panelinde süreç şeması',
           caption: 'Süreç ekranı',
         },
@@ -597,7 +597,7 @@ export const DICT: Dict = {
           caption: 'Hardness check on a part',
         },
         {
-          base: 'surec-ekran-01',
+          base: 'surec-ekran-02',
           alt: 'Process diagram on the furnace control panel',
           caption: 'Process screen',
         },
