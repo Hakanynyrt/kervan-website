@@ -36,7 +36,11 @@ function usePaletCount(): number {
   return n;
 }
 
-/** The bottom tab bar: Ana ekran, Rehber, Tara, Makinelerim, Palet (links; the router opens them). */
+/**
+ * The tab bar: Ana ekran, Rehber, Tara, Makinelerim, Palet (links; the router opens them). A
+ * floating glass bar at the bottom; on a large screen (iPhone Duo's inner display) a glass rail on
+ * the right edge (app.css).
+ */
 export function TabBar({ lang, d, route }: { lang: Lang; d: AppDict; route: Route }) {
   const cur = tabOf(route);
   const n = usePaletCount();
@@ -48,11 +52,8 @@ export function TabBar({ lang, d, route }: { lang: Lang; d: AppDict; route: Rout
     { key: 'palet', href: localePath(CART_PATH, lang), label: d.tabs.palet, icon: 'palet' },
   ];
   return (
-    <nav
-      aria-label={d.tabs.label}
-      className="kv-tabbar fixed inset-x-0 bottom-0 z-30 border-t border-hair bg-bg font-sans"
-    >
-      <ul className="mx-auto m-0 grid max-w-[720px] list-none grid-cols-5 p-0">
+    <nav aria-label={d.tabs.label} className="kv-tabbar fixed z-30 font-sans">
+      <ul className="kv-tabs m-0 list-none p-0">
         {tabs.map((t) => {
           const on = t.key === cur;
           const count = t.key === 'palet' && n > 0 ? n : null;
@@ -62,12 +63,9 @@ export function TabBar({ lang, d, route }: { lang: Lang; d: AppDict; route: Rout
                 href={t.href}
                 aria-current={on ? 'page' : undefined}
                 aria-label={count !== null ? d.tabs.paletCount(count) : undefined}
-                className={`relative flex h-14 flex-col items-center justify-center gap-0.5 px-0 pb-1 pt-1.5 text-[10px] font-medium leading-tight min-[400px]:px-1 min-[400px]:text-[11px] ${on ? 'text-brand-hi' : 'text-ink-mid hover:text-ink'} ${FOCUS_INSET}`}
+                className={`kv-tab relative flex flex-col items-center justify-center gap-0.5 px-0 text-[10px] font-medium leading-tight min-[400px]:px-1 min-[400px]:text-[11px] ${on ? 'text-brand-hi' : 'text-ink-mid hover:text-ink'} ${FOCUS_INSET}`}
               >
-                <span
-                  aria-hidden="true"
-                  className={`absolute inset-x-3 top-0 h-0.5 ${on ? 'bg-brand' : 'bg-transparent'}`}
-                />
+                {on && <span aria-hidden="true" className="kv-tab-on" />}
                 <span className="relative">
                   <Icon name={t.icon} />
                   {count !== null && (
