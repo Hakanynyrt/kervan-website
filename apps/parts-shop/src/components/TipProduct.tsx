@@ -650,14 +650,14 @@ export default function TipProduct({
           {tf.stockTitle}
         </h2>
         <p className="m-0 mt-1 font-sans text-sm text-ink-mid">{tf.stockNote}</p>
-        {/* Phones: one large and two half-width; all three side by side from `sm`. */}
+        {/* Two per row on phones, three from `sm`: six photos fill whole rows on both. */}
         <ul className="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 sm:gap-4">
           {STOCK_TIP_PHOTOS.map((base, i) => (
-            <li key={base} className={i === 0 ? 'col-span-2 sm:col-span-1' : undefined}>
+            <li key={base}>
               <Photo
                 base={base}
                 alt={tf.stockAlt(i + 1)}
-                sizes={`(min-width: 1024px) 436px, (min-width: 640px) 33vw, ${i === 0 ? '100vw' : '50vw'}`}
+                sizes="(min-width: 1024px) 436px, (min-width: 640px) 33vw, 50vw"
               />
             </li>
           ))}
