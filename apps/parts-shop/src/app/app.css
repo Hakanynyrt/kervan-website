@@ -32,7 +32,18 @@
   --kv-glass-edge: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --kv-glass-shine: rgb(255 255 255 / 0.55);
   --kv-glass-shadow: 0 0.5rem 1.75rem rgb(0 0 0 / 0.14), 0 1px 0.25rem rgb(0 0 0 / 0.08);
-  --kv-tab-on: color-mix(in srgb, var(--color-brand) 13%, transparent);
+  /* The drop over the open tab: clear glass, no tint (owner, 2026-11-15: "turuncu görünüyor",
+     "şeffaf damla"): a faint neutral body (on a near-white bar a white one would vanish), a
+     hairline edge, light on its top edge, a faint shade on its bottom edge and a very soft
+     shadow. */
+  --kv-drop: color-mix(in srgb, var(--color-ink) 6%, transparent);
+  --kv-drop-edge: color-mix(in srgb, var(--color-ink) 12%, rgb(255 255 255 / 0.6));
+  --kv-drop-rim: color-mix(in srgb, var(--color-ink) 9%, transparent);
+  --kv-drop-shine: rgb(255 255 255 / 0.85);
+  --kv-drop-shade: rgb(0 0 0 / 0.07);
+  --kv-drop-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 0.08), 0 1px 2px rgb(0 0 0 / 0.06);
+  /* Without the glass (no blur, "Reduce transparency"): a solid neutral bubble. */
+  --kv-drop-solid: color-mix(in srgb, var(--color-ink) 8%, var(--color-bg));
 }
 
 :root[data-theme='dark'],
@@ -41,7 +52,30 @@
   --kv-glass-edge: rgb(255 255 255 / 0.12);
   --kv-glass-shine: rgb(255 255 255 / 0.1);
   --kv-glass-shadow: 0 0.5rem 1.75rem rgb(0 0 0 / 0.45);
-  --kv-tab-on: color-mix(in srgb, var(--color-brand) 22%, transparent);
+  --kv-drop: rgb(255 255 255 / 0.07);
+  --kv-drop-edge: rgb(255 255 255 / 0.22);
+  --kv-drop-rim: rgb(255 255 255 / 0.06);
+  --kv-drop-shine: rgb(255 255 255 / 0.28);
+  --kv-drop-shade: rgb(0 0 0 / 0.25);
+  --kv-drop-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 0.3);
+  --kv-drop-solid: color-mix(in srgb, var(--color-ink) 14%, var(--color-bg));
+}
+/* The device's dark mode where nothing marks the page (the iPhone app: no edge `data-sun`), as
+   globals.css does for its own tokens. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-sun]):not([data-theme='light']) {
+    --kv-glass: color-mix(in srgb, var(--color-bg) 58%, transparent);
+    --kv-glass-edge: rgb(255 255 255 / 0.12);
+    --kv-glass-shine: rgb(255 255 255 / 0.1);
+    --kv-glass-shadow: 0 0.5rem 1.75rem rgb(0 0 0 / 0.45);
+    --kv-drop: rgb(255 255 255 / 0.07);
+    --kv-drop-edge: rgb(255 255 255 / 0.22);
+    --kv-drop-rim: rgb(255 255 255 / 0.06);
+    --kv-drop-shine: rgb(255 255 255 / 0.28);
+    --kv-drop-shade: rgb(0 0 0 / 0.25);
+    --kv-drop-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 0.3);
+    --kv-drop-solid: color-mix(in srgb, var(--color-ink) 14%, var(--color-bg));
+  }
 }
 
 /* Anchors (`#…`) land below the top bar. */
@@ -74,7 +108,8 @@ body {
     inset 0 1px 0 var(--kv-glass-shine);
 }
 
-/* Without blur, or with "Reduce transparency" on, a solid bar (the text stays readable). */
+/* Without blur, or with "Reduce transparency" on, a solid bar (the text stays readable). The
+   drop's own fallback follows its rules below (same specificity, so it must come after them). */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .kv-tabbar {
     background: var(--color-bg);
@@ -98,24 +133,89 @@ body {
 }
 
 .kv-tabs {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   height: 100%;
+  /* A finger slides along the bar to pick a tab (TabBar.tsx): no page scroll, no link callout,
+     no text selection while it does. */
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .kv-tab {
+  position: relative;
+  z-index: 1;
   height: 100%;
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
   border-radius: 1.5rem;
+  -webkit-user-drag: none;
 }
 
-/* The open tab: a tinted bubble behind its icon and label. */
-.kv-tab-on {
+/*
+ * The drop: one element that slides to the open tab (`--kv-i`, the tab's index; fractional while
+ * a finger carries it) and swells a little while a finger is on the bar, like a lifted drop of
+ * water. The box is one tab's cell; the glass is its ::before. Behind the links, never over them.
+ * No backdrop-filter of its own: inside the blurred bar (a backdrop root) it would only filter the
+ * bar's flat fill, so the drop's look is its body, a light top-edge gradient, its edge and shadows.
+ */
+.kv-drop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 20%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(calc(var(--kv-i, 0) * 100%));
+  transition:
+    transform 0.26s cubic-bezier(0.3, 1.35, 0.5, 1),
+    opacity 0.15s ease;
+}
+.kv-drop[data-show] {
+  opacity: 1;
+}
+.kv-drop[data-swipe] {
+  transition: opacity 0.15s ease;
+}
+.kv-drop::before {
+  content: '';
   position: absolute;
   inset: 0.25rem 0.125rem;
   border-radius: 1.25rem;
-  background: var(--kv-tab-on);
+  border: 1px solid var(--kv-drop-edge);
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--kv-drop-shine) 40%, transparent),
+      transparent 50%
+    ),
+    var(--kv-drop);
+  box-shadow:
+    inset 0 1px 0.5px var(--kv-drop-shine),
+    inset 0 -1px 1px var(--kv-drop-shade),
+    0 0 0 0.5px var(--kv-drop-rim),
+    var(--kv-drop-shadow);
+  transition: transform 0.26s cubic-bezier(0.3, 1.35, 0.5, 1);
+}
+.kv-drop[data-lift]::before {
+  transform: scale(1.1);
+}
+
+/* Without blur, or with "Reduce transparency" on: a solid neutral bubble. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .kv-drop::before {
+    background: var(--kv-drop-solid);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .kv-drop::before {
+    background: var(--kv-drop-solid);
+  }
 }
 
 .kv-main {
@@ -160,7 +260,13 @@ body {
   .kv-tab {
     border-radius: 1.625rem;
   }
-  .kv-tab-on {
+  .kv-drop {
+    width: 100%;
+    height: 4.25rem;
+    /* one row and its gap per tab */
+    transform: translateY(calc(var(--kv-i, 0) * 4.5rem));
+  }
+  .kv-drop::before {
     inset: 0;
     border-radius: 1.625rem;
   }
@@ -199,6 +305,10 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+  .kv-drop,
+  .kv-drop::before {
+    transition: none;
   }
   .kv-app *,
   .kv-app *::before,
