@@ -135,10 +135,10 @@ body {
 
 /*
  * Large screens (iPhone Duo's inner display: about 669 x 951 pt, either way round; not a phone in
- * landscape, which is under 36rem tall): the tabs move to a glass rail on the right edge, centred
+ * landscape, which is under 480px tall; the Duo's outer display is under 480px too): the tabs move to a glass rail on the right edge, centred
  * top to bottom, and the page keeps clear of it on the right instead of at the bottom.
  */
-@media (width >= 40rem) and (height >= 36rem) {
+@media (width >= 640px) and (height >= 480px) {
   .kv-tabbar {
     left: auto;
     bottom: auto;
