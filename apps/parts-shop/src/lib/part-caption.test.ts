@@ -4,6 +4,7 @@ import { DICT } from './dict.ts';
 import type { PartRender } from './photos.ts';
 import {
   distinctLabels,
+  modelText,
   otherSpelling,
   otherSpellings,
   partAbout,
@@ -86,4 +87,11 @@ test('partAbout: fit sentence names the model, every group has its own text, no 
     }
     for (const k of Object.keys(DICT[lang].parts.items)) assert.ok(a.groups[k as 'kama']);
   }
+});
+
+test("modelText: a kit name's Turkish version word is English on English pages", () => {
+  assert.equal(modelText('Krupp HM 960 (eski tip)', DICT.en), 'Krupp HM 960 (old type)');
+  assert.equal(modelText('Krupp HM 960 (eski tip)', DICT.tr), 'Krupp HM 960 (eski tip)');
+  assert.equal(modelText('Rammer S 26 (1 CS)', DICT.en), 'Rammer S 26 (1 CS)');
+  assert.equal(modelText('Krupp HM 301 (300)', DICT.en), 'Krupp HM 301 (300)');
 });

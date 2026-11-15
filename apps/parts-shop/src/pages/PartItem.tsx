@@ -11,6 +11,7 @@ import { localePath } from '../lib/locale-path';
 import { fmtNum } from '../lib/format';
 import {
   isRockDrill,
+  modelText,
   otherSpelling,
   partAbout,
   renderFits,
@@ -296,12 +297,14 @@ function Facts({
               {x.name}
             </a>
           ) : (
-            x.name
+            modelText(x.name, t)
           )}
         </Fragment>
       )),
     ],
-    ...(aliases.length ? [[f.aliases, aliases.join(', ')] as [string, ReactNode]] : []),
+    ...(aliases.length
+      ? [[f.aliases, aliases.map((x) => modelText(x, t)).join(', ')] as [string, ReactNode]]
+      : []),
     ...(r.variant ? [[f.variant, t.parts.renderVariant[r.variant]] as [string, ReactNode]] : []),
     ...(sizes.length ? [[f.diameter, sizes.join('; ')] as [string, ReactNode]] : []),
   ];

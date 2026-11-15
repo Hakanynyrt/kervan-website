@@ -224,7 +224,9 @@ export function BreakerSearch({
       return;
     }
     e.preventDefault();
-    if (home) pick(one);
+    // A tip type word goes to the model's page, where that type is chosen: the home's panel has
+    // no type choice.
+    if (home && !tip) pick(one);
     else window.location.assign(pageOf(one.model.slug));
   };
   const onKey = (e: KeyboardEvent) => {

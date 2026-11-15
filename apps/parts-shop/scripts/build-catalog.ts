@@ -131,18 +131,24 @@ if (db && process.env.CLOUDFLARE_API_TOKEN) {
     );
     log(`${own.applied} families from Kervan's own drawings`);
     const c = toPublicCatalog(own.families, own.skus, query<FitRow>(db, FITS_SQL));
-    // The extras table comes with migration 0002; before it exists there are none.
+    // The extras table comes with migration 0002 and the part prices with migration 0003: a
+    // database without them (a fresh preview) has none. In production both exist, so a failed
+    // query there, or a price list that comes back empty, is a failure: a site without part
+    // prices would ship quietly, and every English part page would leave the index for that
+    // build (`enItemOpen` in page-head.ts). The build fails and production keeps the last deploy.
     try {
       c.extras = publicExtras(query<ExtraRow>(db, EXTRAS_SQL));
-    } catch {
+    } catch (e) {
+      if (required) throw new Error('extras query failed', { cause: e });
       c.extras = [];
     }
-    // Part prices come with migration 0003 and the first parts sheet; until then none.
     try {
       c.partPrices = publicPartPrices(query<PartPriceRow>(db, PART_PRICES_SQL));
-    } catch {
+    } catch (e) {
+      if (required) throw new Error('part prices query failed', { cause: e });
       c.partPrices = [];
     }
+    if (required && c.partPrices.length === 0) throw new Error('no part prices');
     // An empty D1 (before the first import) must not ship an empty shop: DEMO, or fail on main.
     if (c.families.length === 0) throw new Error('empty catalog');
     write(c, 'D1');
