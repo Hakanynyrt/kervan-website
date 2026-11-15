@@ -602,13 +602,19 @@ describe('iPhone app (web build) against the DEMO site', { timeout: 300_000 }, (
       locale: 'tr-TR',
     });
     try {
+      // A routed request is fetched by Playwright itself, which setOffline does not cut: the
+      // route answers as the network would while this context is offline.
+      let off = false;
       if (propsOf(ITEM).model.price === null)
-        await c2.route(SITE + ITEM, (r) => editProps(r, (p) => (p.model.price = 6100)));
+        await c2.route(SITE + ITEM, (r) =>
+          off ? r.abort('internetdisconnected') : editProps(r, (p) => (p.model.price = 6100)),
+        );
       const p3 = await c2.newPage();
       watch(p3);
       await p3.goto(APP + ITEM);
       await p3.locator('main button:visible', { hasText: 'Palete yükle' }).first().click();
       await p3.locator('nav.kv-tabbar a[aria-label="Palet, 1 ürün"]').waitFor();
+      off = true;
       await c2.setOffline(true);
       try {
         await tab(p3, '/palet');
@@ -621,6 +627,7 @@ describe('iPhone app (web build) against the DEMO site', { timeout: 300_000 }, (
         await shot(p3, 'offline-palet-new');
       } finally {
         await c2.setOffline(false);
+        off = false;
       }
       // Online: /palet is read once (saved), then a new session with a slow site.
       await p3.goto(APP + '/palet');
