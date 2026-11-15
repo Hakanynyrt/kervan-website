@@ -10,6 +10,8 @@
     "functions",
     "scripts/**/*.ts",
     "vite.config.ts",
-    "vite.render.config.ts"
+    "vite.app.config.ts",
+    "vite.render.config.ts",
+    "e2e"
   ]
 }

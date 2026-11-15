@@ -4,8 +4,11 @@
  * docs/agent/platform.md) so they stay out of the Pages file count; with the base empty
  * (previews, local builds) every URL stays a plain path. The opening frames (`acilis-*`) are
  * fetch()ed by ExplodedPicker and always stay on Pages. Bases stay path-only everywhere else
- * (versions, page props); the host is added only where an <img> URL is written.
+ * (versions, page props); the host is added only where an <img> URL is written. In the app's build
+ * the files that stay on Pages get the site's origin (`ASSET_BASE`, asset-base.ts; '' on the site).
  */
+import { ASSET_BASE } from './asset-base';
+
 /** `md` (800 px) exists only for render heroes, the pictures with an `-xs` thumbnail (cards). */
 export type PhotoSize = 'xs' | 'sm' | 'md' | 'lg';
 type Size = PhotoSize;
@@ -17,7 +20,7 @@ const moved = (base: string | undefined): boolean =>
 
 /** One image URL for a published base (`/photos/parca/<stem>-<view>-<NN>`) and size. */
 export const photoImg = (base: string | undefined, size: Size): string =>
-  `${moved(base) ? BASE : ''}${base}-${size}.webp`;
+  `${moved(base) ? BASE : ASSET_BASE}${base}-${size}.webp`;
 
 /** A srcset, e.g. photoSet(base, ['xs', 320], ['lg', 1600]). */
 export const photoSet = (base: string | undefined, ...sizes: [Size, number][]): string =>

@@ -5,6 +5,7 @@ import { fmtNum } from './format';
 import { renderModel } from './part-caption';
 import { findRender } from './part-links';
 import { localePath } from './locale-path';
+import { sourceUrl } from './page-source';
 import { readPageProps } from './page-props';
 import { linePagePath, listedLineId, partLineId, tipLineId, type PaletLines } from './palet-share';
 import { PARTS_PATH, partItemPath, partPath, type PageModel } from './routes';
@@ -131,7 +132,7 @@ export async function sharedPaletLines(
     await Promise.all(
       paths.slice(i, i + FETCH_BATCH).map(async (path) => {
         try {
-          const r = await fetch(localePath(path, lang), fetchLimit(limitMs));
+          const r = await fetch(sourceUrl(localePath(path, lang)), fetchLimit(limitMs));
           reached++;
           if (!r.ok) {
             // The 404 page's body is not read: let go of it, so the request ends.

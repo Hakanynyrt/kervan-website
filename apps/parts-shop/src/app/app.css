@@ -1,0 +1,85 @@
+/*
+ * The app's frame around the shop's pages (AppShell): a fixed top bar and tab bar clear of the
+ * phone's notch and home indicator (safe-area insets, app.html has viewport-fit=cover), the
+ * page's own fixed order bar (StickyQuote, `data-sticky-bar`) above the tab bar.
+ */
+:root {
+  --kv-top: 3.25rem;
+  /* The tab bar: its 3.5rem row and its 1px top border. */
+  --kv-tab: calc(3.5rem + 1px);
+  --kv-safe-top: env(safe-area-inset-top, 0px);
+  --kv-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --kv-safe-left: env(safe-area-inset-left, 0px);
+  --kv-safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* Anchors (`#…`) land below the top bar. */
+html {
+  scroll-padding-top: calc(var(--kv-top) + var(--kv-safe-top) + 0.5rem);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-bg);
+  overscroll-behavior-y: none;
+}
+
+.kv-topbar {
+  padding-top: var(--kv-safe-top);
+  padding-left: var(--kv-safe-left);
+  padding-right: var(--kv-safe-right);
+}
+
+.kv-tabbar {
+  padding-bottom: var(--kv-safe-bottom);
+  padding-left: var(--kv-safe-left);
+  padding-right: var(--kv-safe-right);
+}
+
+.kv-main {
+  display: block;
+  padding-top: calc(var(--kv-top) + var(--kv-safe-top));
+  padding-bottom: calc(var(--kv-tab) + var(--kv-safe-bottom));
+  padding-left: var(--kv-safe-left);
+  padding-right: var(--kv-safe-right);
+}
+
+/* The page's order bar sits on the tab bar, not under it, and clear of the notch sideways. */
+.kv-main [data-sticky-bar] {
+  bottom: calc(var(--kv-tab) + var(--kv-safe-bottom));
+  padding-left: calc(0.75rem + var(--kv-safe-left));
+  padding-right: calc(0.75rem + var(--kv-safe-right));
+}
+
+/* A picture that could not load (offline): an empty frame, not the broken-picture mark. */
+.kv-main img[data-broken] {
+  visibility: hidden;
+}
+
+/* An anchor target that took the focus from an in-page link (router.ts scrollToHash). */
+.kv-main [data-kv-anchor]:focus {
+  outline: none;
+}
+
+/* Phones: pages with that bar keep their last lines clear of it (the site pads its footer). */
+@media (width < 64rem) {
+  .kv-main:has([data-sticky-bar]) {
+    padding-bottom: calc(var(--kv-tab) + var(--kv-safe-bottom) + 5rem);
+  }
+  .kv-main:has([data-sticky-bar][data-added]) {
+    padding-bottom: calc(var(--kv-tab) + var(--kv-safe-bottom) + 8rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .kv-app *,
+  .kv-app *::before,
+  .kv-app *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -27,6 +27,8 @@ import {
   type ModelRef,
 } from '../lib/finder';
 import { localePath } from '../lib/locale-path';
+import { go } from '../lib/nav';
+import { sourceUrl } from '../lib/page-source';
 import { breakerPath, LIST_PATH, LIST_RESULTS_ID } from '../lib/routes';
 import { useFitPlaceholder, useKeepTyped } from '../lib/use-field';
 import type { Lang } from '../types';
@@ -86,7 +88,7 @@ type Index = readonly MakeModels<ModelRef>[];
 let indexReq: Promise<Index> | null = null;
 /** The names-only index, fetched once per page (a failure is retried on the next use). */
 const loadIndex = (): Promise<Index> =>
-  (indexReq ??= fetch(MODEL_INDEX_PATH)
+  (indexReq ??= fetch(sourceUrl(MODEL_INDEX_PATH))
     .then((r) => (r.ok ? (r.json() as Promise<Index>) : Promise.reject(new Error(`${r.status}`))))
     .catch((e: unknown) => {
       indexReq = null;
@@ -227,7 +229,7 @@ export function BreakerSearch({
     // A tip type word goes to the model's page, where that type is chosen: the home's panel has
     // no type choice.
     if (home && !tip) pick(one);
-    else window.location.assign(pageOf(one.model.slug));
+    else go(pageOf(one.model.slug));
   };
   const onKey = (e: KeyboardEvent) => {
     if (e.key !== 'Escape') return;

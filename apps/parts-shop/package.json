@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "node --experimental-strip-types --no-warnings scripts/build-catalog.ts && vite",
     "build": "node --experimental-strip-types --no-warnings scripts/build-catalog.ts && tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs && node scripts/check-dist.mjs",
+    "build:app": "node scripts/build-app.mjs",
+    "check:app": "node scripts/check-app-dist.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "node --experimental-strip-types --no-warnings --test \"functions/**/*.test.ts\" \"scripts/**/*.test.ts\" \"src/**/*.test.ts\" \"render/**/*.test.ts\""

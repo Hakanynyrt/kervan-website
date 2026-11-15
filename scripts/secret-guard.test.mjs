@@ -22,6 +22,39 @@ test('blocks private files by name', () => {
     assert.ok(rules([{ path, added: [] }]).some((r) => r.includes(rule)), path);
 });
 
+test('blocks Apple signing files (iPhone app)', () => {
+  for (const path of [
+    'AuthKey_ABC123XYZ9.p8',
+    'apps/parts-app/AuthKey_ABC123XYZ9',
+    'apps/parts-app/ios/keys/api.p8',
+    'apps/parts-app/ios/dist.p12',
+    'apps/parts-app/ios/App/Kervan_AppStore.mobileprovision',
+    'apps/parts-app/ios/App/Kervan.provisionprofile',
+    'certs/distribution.cer',
+    'certs/CertificateSigningRequest.certSigningRequest',
+    'certs/request.CERTSIGNINGREQUEST',
+  ])
+    assert.ok(
+      rules([{ path, added: [] }]).some((r) => r.includes('Apple signing')),
+      path,
+    );
+});
+
+test('lets the app project files through', () => {
+  for (const path of [
+    'apps/parts-app/ios/App/App/Info.plist',
+    'apps/parts-app/ios/App/App/App.entitlements',
+    'apps/parts-app/ios/ExportOptions.plist',
+    'apps/parts-app/ios/App/App/PrivacyInfo.xcprivacy',
+    'apps/parts-app/capacitor.config.ts',
+    'docs/agent/app.md',
+    'apps/parts-shop/src/app/screens/Scan.tsx',
+    'apps/parts-shop/scripts/check-app-dist.mjs',
+    'apps/parts-shop/public/certificate.webp',
+  ])
+    assert.deepEqual(scan([{ path, added: [] }]), [], path);
+});
+
 test('blocks secrets and private data in added lines', () => {
   const fakes = [
     ['-----BEGIN RSA ' + 'PRIVATE KEY-----', 'private key'],

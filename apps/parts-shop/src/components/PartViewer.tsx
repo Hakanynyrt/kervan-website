@@ -5,6 +5,7 @@ import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.j
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { useReducedMotion } from '@kervan/motion';
+import { assetUrl } from '../lib/asset-base';
 import type { Dict } from '../lib/dict';
 
 /** Brand "Forge Ember": the rim light of every render (render-only colour). */
@@ -161,8 +162,9 @@ export default function PartViewer({
 
     let model: THREE.Object3D | null = null;
     // bushing models are meshopt-compressed (gltf-transform optimize): 25–180 kB instead of MBs
+    // A site path; the app's build loads it from the site (asset-base.ts).
     new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(
-      src,
+      assetUrl(src),
       (gltf) => {
         model = gltf.scene;
         const b = new THREE.Box3().setFromObject(model);
