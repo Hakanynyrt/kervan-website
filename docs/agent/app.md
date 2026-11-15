@@ -97,3 +97,7 @@ The first iPhone build opened on a white screen. Two guards since:
 - `src/app/main.tsx` waits at most `LANG_WAIT_MS` (1.5 s, `src/app/timeout.ts`) for the stored language; a plugin call that never answers no longer keeps the app blank.
 - `src/app/boot-guard.js` (emitted as `dist-app/boot-guard.js` by `vite.app.config.ts`, loaded as a plain script before the bundle, allowed by the CSP as a same-origin file) writes `bootFail` (dict) and the errors it saw on the screen when `#root` is still empty after 8 s, so a blank start on the phone can be read from a screenshot.
 - WebKit can be run here for checks: download Playwright's WebKit into a scratch `PLAYWRIGHT_BROWSERS_PATH` and install its system libraries with apt; the shared Chromium is not touched.
+
+## Always the newest build (2026-11-15)
+
+`app-ios.yml` also runs on every push to `main` that can change the app (the app's own code, `apps/parts-shop/src/**` which the app bundles, `app.html`, `vite.app.config.ts`, the shop's `package.json`, `packages/**`, the lockfile, the workflow), as on pull requests touching the same paths. The newest successful run on `main` is the build to install (owner: "hep son sürüm olsun"); a newer push cancels a running one.
