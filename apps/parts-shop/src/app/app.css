@@ -21,9 +21,13 @@
   --kv-tab-bottom: max(0.5rem, calc(var(--kv-safe-bottom) - 0.75rem));
   /* What the bar takes from the bottom of the page: the bar, its gap and 0.5rem air above it. */
   --kv-tab-space: calc(var(--kv-tab) + var(--kv-tab-bottom) + 0.5rem);
-  /* The rail (large screens): its width and what it takes from the right of the page. */
+  /* The rail (large screens): its width, its gap to the screen's right edge and what it takes
+     from the right of the page. The gap ignores the right safe-area inset: on iPhone Duo's inner
+     display that inset is the status corner's width at the top, and the rail, centred top to
+     bottom, sat a whole status column away from the edge (owner, 2026-11-15: "Yer yanlış"). */
   --kv-rail: 5rem;
-  --kv-rail-space: calc(var(--kv-rail) + var(--kv-safe-right) + 1.5rem);
+  --kv-rail-gap: 0.75rem;
+  --kv-rail-space: calc(var(--kv-rail) + var(--kv-rail-gap) + 0.75rem);
   --kv-glass: color-mix(in srgb, var(--color-bg) 62%, transparent);
   --kv-glass-edge: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --kv-glass-shine: rgb(255 255 255 / 0.55);
@@ -139,7 +143,7 @@ body {
     left: auto;
     bottom: auto;
     top: 50%;
-    right: calc(var(--kv-safe-right) + 0.75rem);
+    right: var(--kv-rail-gap);
     transform: translateY(-50%);
     width: var(--kv-rail);
     height: auto;
