@@ -1,4 +1,5 @@
 import { MAX_QTY, type CartItem } from './cart.ts';
+import type { PartKey } from './routes.ts';
 
 /**
  * "Paleti paylaş": a /palet link that carries only the palet's line ids and quantities
@@ -43,6 +44,42 @@ export function linePagePath(id: string, partsPath: string): string | null {
   else if (id.includes('|')) p = id.slice(0, id.indexOf('|'));
   else p = id.replace(/#b$/, '');
   return PAGE_PATH.test(p) && !p.includes('..') && p.length > 1 ? p : null;
+}
+
+/** The part group whose item pages have the Burçsuz / Burçlu choice: front heads (`partLineId`). */
+const FITTED_PART: PartKey = 'alt-govde';
+/** The query that opens a front head's page on Burçsuz (`?burc=0`): `lineHref` writes it, the
+ *  page reads it once after it loads. */
+export const UNFITTED_PARAM = 'burc';
+
+/** A part item page's query asks for the head without its bushings. */
+export const opensUnfitted = (search: string): boolean =>
+  new URLSearchParams(search).get(UNFITTED_PARAM) === '0';
+
+/**
+ * The neutral path of a palet line's page, opened on what the line was added with, in the query
+ * that page already reads: a tip's size (`?uc=`, from the second size on, as the list cards link
+ * it) and type (`?tip=`), a listed part's breaker (`?q=`, the search that shows it on its group
+ * page), a front head stored without its bushings (`?burc=0`: its page opens Burçlu; a head that
+ * has no Burçlu set ignores it). Any other modelled part's item page, and the burçlu head's,
+ * needs none.
+ */
+export function lineHref(x: Pick<CartItem, 'id' | 'name' | 'path'>): string {
+  const sp = new URLSearchParams();
+  if (x.id.startsWith('listed:')) sp.set('q', x.name);
+  else if (x.id.includes('|')) {
+    // `path|type`, or `path|size|type` for a breaker with two tip sizes (`tipLineId`).
+    const [, a, b] = x.id.split('|');
+    const size = b === undefined ? 1 : Number(a);
+    const type = b ?? a;
+    if (Number.isInteger(size) && size > 1) sp.set('uc', String(size));
+    if (type) sp.set('tip', type);
+  } else if (!x.id.endsWith('#b') && x.id.split('/')[2] === FITTED_PART) {
+    // A modelled part's id is its item path (`/<parts>/<group>/<anchor>`), `#b` added when burçlu.
+    sp.set(UNFITTED_PARAM, '0');
+  }
+  const q = sp.toString();
+  return q ? `${x.path}?${q}` : x.path;
 }
 
 /* Ids are percent-encoded, keeping `/` and `:` readable; `*` and `,` (the separators) and `|`,
@@ -137,6 +174,31 @@ export function mergeShared(
     else items.push(fresh);
   }
   return { items, added, dropped };
+}
+
+/** What a stored line takes from its page. */
+const PAGE_FIELDS = ['name', 'tipType', 'label', 'code', 'path', 'cents'] as const;
+
+/**
+ * The stored palet with each line's name, type or label, code, path and price as its product page
+ * shows them now (`catalogue`, read as a shared link's lines are); the quantities and the order
+ * stay. /palet does this on load, so its totals, order message and printed quote do not carry the
+ * price of the day a line was added. A line the catalogue does not have (its page could not be
+ * read, or no longer lists it) stays as stored.
+ */
+export function refreshLines(
+  stored: readonly CartItem[],
+  catalogue: PaletLines,
+): { items: CartItem[]; changed: boolean } {
+  let changed = false;
+  const items = stored.map((x) => {
+    const line = Object.prototype.hasOwnProperty.call(catalogue, x.id) ? catalogue[x.id] : null;
+    if (!line) return { ...x };
+    const next: CartItem = { ...x, ...line };
+    if (PAGE_FIELDS.some((k) => next[k] !== x[k])) changed = true;
+    return next;
+  });
+  return { items, changed };
 }
 
 /** The query string without the palet parameter ('' or '?…'), for history.replaceState. */

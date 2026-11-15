@@ -93,6 +93,23 @@ fi
 # Any XML content type (application/xml or text/xml).
 check https://kiriciparca.com/sitemap-index.xml 200 ''
 check https://kiriciparca.com/sitemap.xml 200 ''
+# The English part item pages open to search engines (page-head.ts enItemOpen): the first one the
+# live sitemap lists answers 200 without a noindex. None listed is a warning only: the set
+# follows the price sheet.
+item=$("${CURL[@]}" https://kiriciparca.com/sitemap-yedek-parca-en.xml | tr -d '\r' |
+  grep -o '<loc>https://kiriciparca.com/en/yedek-parca/[^/<]*/[^/<]*</loc>' | head -1 |
+  sed 's/<[^>]*>//g')
+if [[ -z $item ]]; then
+  echo "warn  no English part item in sitemap-yedek-parca-en.xml"
+else
+  check "$item" 200 text/html
+  if "${CURL[@]}" "$item" | grep -q '<meta name="robots" content="[^"]*noindex'; then
+    echo "FAIL  noindex on an English part item of the sitemap  $item"
+    fail=1
+  else
+    echo "ok    indexable English part item  $item"
+  fi
+fi
 # The old shop hosts 301 to the new domain, path kept (zone Redirect Rules).
 for old in https://magaza.kervanbreaker.com https://shop.kervanbreaker.com https://www.kiriciparca.com; do
   loc=$("${CURL[@]}" -o /dev/null -D - "$old/kirici-ucu" | tr -d '\r' |

@@ -13,7 +13,8 @@ import { cardSet, photoImg, photoSet } from '../lib/photo-url';
  * its description; no counts (owner). `compact` is the small variant for the empty cart and the
  * 404 page: thumbnails and names only. `numbered` makes the home's cards: the groups in the order
  * of the opening picture's numbers, each with its number, a small picture, the name and one line
- * (`short`); the groups not on the picture follow without a number.
+ * (`short`; phones show the number, a smaller picture and the name only); the groups not on the
+ * picture follow without a number.
  */
 export function PartGroups({
   lang,
@@ -65,7 +66,7 @@ export function PartGroups({
               <li key={g.key}>
                 <a
                   href={localePath(g.path, lang)}
-                  className={`group grid h-full grid-cols-[auto_104px_minmax(0,1fr)] items-center gap-3 rounded-md border border-hair bg-bg px-2.5 py-2 font-sans hover:border-hair-strong lg:grid-cols-[auto_150px_minmax(0,1fr)] lg:gap-3.5 lg:py-2.5 lg:pl-3 lg:pr-3.5 ${FOCUS}`}
+                  className={`group grid h-full grid-cols-[auto_80px_minmax(0,1fr)] items-center gap-3 rounded-md border border-hair bg-bg px-2.5 py-1.5 font-sans hover:border-hair-strong md:grid-cols-[auto_104px_minmax(0,1fr)] md:py-2 lg:grid-cols-[auto_150px_minmax(0,1fr)] lg:gap-3.5 lg:py-2.5 lg:pl-3 lg:pr-3.5 ${FOCUS}`}
                 >
                   <span
                     aria-hidden="true"
@@ -96,7 +97,7 @@ export function PartGroups({
                     <span className="text-[15px] font-semibold leading-snug text-ink group-hover:text-brand-hi lg:text-base">
                       {g.name}
                     </span>
-                    <span className="mt-0.5 text-[12.5px] leading-snug text-ink-mid lg:text-[13px]">
+                    <span className="mt-0.5 text-[12.5px] leading-snug text-ink-mid max-md:hidden lg:text-[13px]">
                       {g.short}
                     </span>
                     <span className="mt-1 hidden text-[13px] font-medium text-brand-hi group-hover:underline md:block">

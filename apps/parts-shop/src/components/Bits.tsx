@@ -7,7 +7,7 @@ import type { Dict } from '../lib/dict';
 import { LEGAL, legalPath } from '../lib/legal';
 import { localePath } from '../lib/locale-path';
 import { PLANT_PHOTOS, PLANT_WIDE } from '../lib/photos';
-import { CART_PATH, type PartKey } from '../lib/routes';
+import { CART_PATH, PARTS_PATH, type PartKey } from '../lib/routes';
 import { warrantyMonths } from '../lib/warranty';
 import type { Lang } from '../types';
 import { FOCUS, FIELD_TEXT, OUTLINE_BUTTON, WHATSAPP_BUTTON, whatsappHref } from './Layout';
@@ -248,11 +248,16 @@ export function MissingModel({
 }
 
 /**
- * Phones only: quote and call buttons fixed at the bottom of the screen. Priced pages pass `onAdd`
- * (the page's own "Palete yükle" handler, so the bar adds exactly what the order box would) and
- * its `added` result: the bar then leads with "Palete yükle", WhatsApp shortened to its name (the
- * full "WhatsApp ile sipariş ver" stays the accessible name), and shows the result above the
- * buttons. That line is visual only: the page's `AddedNote` (always in the DOM) announces it.
+ * Phones only: quote and call buttons fixed at the bottom of the screen. Priced pages and unpriced
+ * part item pages pass `onAdd` (the page's own "Palete yükle" handler, so the bar adds exactly
+ * what the order box would) and its `added` result: the bar then leads with "Palete yükle",
+ * WhatsApp shortened to its name (the full "WhatsApp ile sipariş ver" / "WhatsApp ile sor" stays
+ * the accessible name), and shows the result above the buttons. That line is visual only: the
+ * page's `AddedNote` (always in the DOM) announces it. On a screen 17rem (272 px) high or less (a
+ * desktop window at 400 % zoom; a phone held sideways is taller and keeps the line) the bar keeps
+ * its buttons only: with the line it took over half of it.
+ * "Palete yükle" wraps onto a second line rather than being cut when its room is short (wider
+ * text spacing at 320 px).
  */
 export function StickyQuote({
   text,
@@ -277,7 +282,7 @@ export function StickyQuote({
       className="fixed inset-x-0 bottom-0 z-20 border-t border-hair bg-bg p-3 font-sans text-sm font-medium lg:hidden"
     >
       {onAdd && added && (
-        <p className="m-0 mb-2 text-center text-ink">
+        <p className="m-0 mb-2 text-center text-ink [@media(max-height:17rem)]:hidden">
           <span aria-hidden="true">
             {added.n === null ? t.price.added : t.price.addedQty(added.n)} ·{' '}
           </span>
@@ -296,7 +301,7 @@ export function StickyQuote({
             variant="primary"
             size="lg"
             onClick={onAdd}
-            className="min-w-0 flex-1 px-3"
+            className="h-auto min-h-11 min-w-0 flex-1 whitespace-normal px-3 py-1"
           />
         )}
         <Button
@@ -514,12 +519,15 @@ export function OrderSteps({
   lang,
   t,
   note = true,
+  compact = false,
   className = '',
 }: {
   lang: Lang;
   t: Dict;
   /** "Ayrıntılar: Ön bilgilendirme formu" under the steps (the home has it with its phones). */
   note?: boolean;
+  /** The home's phones: the number beside the step's title, less padding. */
+  compact?: boolean;
   className?: string;
 }) {
   const c = t.cart;
@@ -527,15 +535,24 @@ export function OrderSteps({
     <>
       <ol className={`m-0 grid list-none gap-4 p-0 font-sans ${className}`}>
         {c.steps.items.map((s, i) => (
-          <li key={s.h} className="rounded-sm border border-hair bg-bg p-5">
+          <li
+            key={s.h}
+            className={`rounded-sm border border-hair bg-bg p-5 ${compact ? 'max-md:grid max-md:grid-cols-[2rem_minmax(0,1fr)] max-md:gap-x-3 max-md:px-3.5 max-md:py-3' : ''}`}
+          >
             <span
               aria-hidden="true"
               className="flex size-8 items-center justify-center rounded-sm bg-bg-warm text-sm font-bold text-ink"
             >
               {i + 1}
             </span>
-            <p className="m-0 mt-3 font-semibold text-ink">{s.h}</p>
-            <p className="m-0 mt-1 text-sm text-ink-mid">{s.p}</p>
+            <p
+              className={`m-0 mt-3 font-semibold text-ink ${compact ? 'max-md:mt-0 max-md:self-center' : ''}`}
+            >
+              {s.h}
+            </p>
+            <p className={`m-0 mt-1 text-sm text-ink-mid ${compact ? 'max-md:col-start-2' : ''}`}>
+              {s.p}
+            </p>
           </li>
         ))}
       </ol>
@@ -558,17 +575,20 @@ export function OrderSteps({
 const HALL = 1;
 
 /**
- * "Tesisimiz": our four plant photos (4:5) with captions (`/yedek-parca`). `hall` is the home's
- * layout: the heat-treatment hall large beside the title, the sentence and the other three (on
- * phones under the sentence).
+ * "Tesisimiz": our four plant photos (4:5) with captions (`/yedek-parca`, id `plant`). `hall` is
+ * the home's layout: the heat-treatment hall large beside the title, the sentence and the other
+ * three. Phones (under 768 px) show the hall only: the three stay in the page, and "Tüm
+ * fotoğraflar" beside the title opens the `/yedek-parca` gallery (owner, 2026-11-13: less on the
+ * phone home).
  */
 export function PlantPhotos({
   t,
-  hall = false,
+  hall,
   className = '',
 }: {
   t: Dict;
-  hall?: boolean;
+  /** The home's layout; the page language, for the gallery link. */
+  hall?: Lang;
   className?: string;
 }) {
   const pl = t.parts.plant;
@@ -596,13 +616,21 @@ export function PlantPhotos({
           </figcaption>
         </figure>
         <div className="contents lg:block">
-          <h2 id="plant" className="order-1 m-0 text-[22px] font-bold text-ink md:text-[26px]">
-            {pl.title}
-          </h2>
+          <div className="order-1 flex flex-wrap items-end justify-between gap-x-6 gap-y-1">
+            <h2 id="plant" className="m-0 text-[22px] font-bold text-ink md:text-[26px]">
+              {pl.title}
+            </h2>
+            <a
+              href={`${localePath(PARTS_PATH, hall)}#plant`}
+              className={`text-sm font-medium text-brand-hi hover:underline md:hidden ${FOCUS}`}
+            >
+              {pl.all} →
+            </a>
+          </div>
           <p className="order-2 m-0 mt-2 max-w-[34em] text-[16.5px] leading-snug text-ink lg:mt-2.5 lg:text-[19px]">
             {pl.lead}
           </p>
-          <ul className="order-4 m-0 mt-4 grid list-none grid-cols-3 gap-2 p-0 lg:mt-[22px] lg:gap-3.5">
+          <ul className="order-4 m-0 mt-4 grid list-none grid-cols-3 gap-2 p-0 max-md:hidden lg:mt-[22px] lg:gap-3.5">
             {PLANT_PHOTOS.map((p, i) =>
               i === HALL ? null : (
                 <li key={p}>

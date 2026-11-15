@@ -124,7 +124,7 @@ export interface Dict {
       tipN: (n: number) => string;
     };
     /** "Ürettiklerimizden": priced tips and parts, linked to their pages. */
-    made: { title: string; lead: string };
+    made: string;
     /** The order box under the opening and "Nasıl sipariş verilir?" (with cart.steps). */
     order: { title: string; whatsapp: string; mail: string };
     trust: { title: string; body: string }[];
@@ -177,7 +177,8 @@ export interface Dict {
     sampleBadge: string;
     /** A model card's picture: its own tip, or (`sample`) another breaker's as a sample. */
     cardAlt: (name: string, sample: boolean) => string;
-    /** Under a page of model cards: shows the next page. */
+    /** Under a page of model cards: shows the next page. `left` counts cards (a breaker with two
+     *  tip sizes has two), so it says results, not models. */
     more: (left: number) => string;
     groovedBadgeLabel: (name: string) => string;
   };
@@ -248,12 +249,15 @@ export interface Dict {
   };
   search: {
     label: string;
-    /** The search box's example: the longest of the three that fits the box is shown. */
+    /** The search box's example: the longest of the four that fits the box is shown. */
     placeholder: string;
     placeholderMid: string;
     placeholderShort: string;
+    placeholderTiny: string;
     button: string;
     none: (q: string) => string;
+    /** The models a search found (the tip lists count breaker pages, as the header list does,
+     *  not the cards: a breaker with two tip sizes has two). */
     count: (n: number) => string;
     brands: string;
     all: string;
@@ -262,7 +266,7 @@ export interface Dict {
     didYouMean: (q: string) => string;
     /** Under an empty search box: nothing is listed until something is typed. */
     hint: string;
-    /** Results narrowed by the filters: n of the total the typed search found. */
+    /** Results narrowed by the filters: n of the total the typed search found (models both). */
     countFiltered: (n: number, total: number) => string;
     /** Narrowing filters, shown only for a typed search's results. */
     filter: {
@@ -278,7 +282,7 @@ export interface Dict {
       grooved: string;
       all: string;
       clear: string;
-      /** The filters leave nothing of the n results the typed search found. */
+      /** The filters leave nothing of the n models the typed search found (the count's number). */
       none: (n: number) => string;
     };
   };
@@ -351,6 +355,8 @@ export interface Dict {
     countryMissing: string;
     /** English cart only: one line on international shipping, from facts stated elsewhere. */
     intlNote: string;
+    /** Under a line whose price could not be read again from its page. */
+    stale: string;
     note: string;
     sendWa: string;
     sendMail: string;
@@ -387,6 +393,10 @@ export interface Dict {
       none: string;
       failed: string;
     };
+    /** "Teklifi yazdır" (2026-11-13): the palet printed as a quote from the browser's print
+     *  dialog (`PaletQuote`). Only the labels the page did not have; the rest of the print is
+     *  the page's own strings. */
+    print: { button: string; title: string; date: string; buyer: string };
   };
   brand: {
     title: (brand: string) => string;
@@ -433,6 +443,8 @@ export interface Dict {
     plant: {
       title: string;
       lead: string;
+      /** The home's phones: link to the `/yedek-parca` gallery (they show the hall photo only). */
+      all: string;
       note: string;
       items: { caption: string; alt: string }[];
       /** PLANT_WIDE: the landscape grid under the four (same order). */
@@ -450,6 +462,9 @@ export interface Dict {
     /** Under the model in a series strip, so the bushings of one breaker tell apart. */
     renderKindShort: Record<NonNullable<PartRender['kind']>, string>;
     renderVariant: Record<NonNullable<PartRender['variant']>, string>;
+    /** The Turkish version words in repair-kit names (repair-kits.ts `variant`) in this language;
+     *  empty in Turkish (`modelText` in part-caption.ts). */
+    kitWords: Record<string, string>;
     /** "Parça türü" chips on a group page (`part-filters.ts`). */
     filter: { label: string; all: string; items: Record<PartFilter, string> };
     /** RenderGallery: a part's pictures in one frame with thumbnails. */
@@ -601,6 +616,13 @@ export interface Dict {
     /** EN only: the Turkish text is binding. */
     binding: string;
     others: string;
+  };
+  /** The international orders page (its texts are in intl-orders.ts). */
+  intl: {
+    wa: string;
+    mail: string;
+    /** Link to the page from the English cart note. */
+    link: string;
   };
   footer: {
     legal: string;
@@ -767,10 +789,7 @@ export const DICT: Record<Lang, Dict> = {
         noParts: 'Bu kırıcının diğer parçaları için modelinizi WhatsApp’tan yazın, size dönelim.',
         tipN: (n) => `${n}. uç`,
       },
-      made: {
-        title: 'Ürettiklerimizden',
-        lead: 'Ürettiğimiz uç ve parçalardan bir seçki.',
-      },
+      made: 'Ürettiklerimizden',
       order: {
         title: 'Sipariş talebi',
         whatsapp: 'WhatsApp ile sor',
@@ -834,7 +853,7 @@ export const DICT: Record<Lang, Dict> = {
       sampleBadge: 'Temsili görsel',
       cardAlt: (name, sample) =>
         sample ? `${name} kırıcı ucu için temsili görsel` : `${name} kırıcı ucu`,
-      more: (left) => `Daha fazla göster (${left} model daha)`,
+      more: (left) => `Daha fazla göster (${left} sonuç daha)`,
       groovedBadgeLabel: (name) => `${name} için toz kanallı uçlar`,
     },
     popular: {
@@ -902,6 +921,7 @@ export const DICT: Record<Lang, Dict> = {
       placeholder: 'Kırıcınızın marka ve modeli, ör. Furukawa HB 20G',
       placeholderMid: 'Marka ve model, ör. Furukawa HB 20G',
       placeholderShort: 'Marka ve model, ör. HB 20G',
+      placeholderTiny: 'ör. HB 20G',
       button: 'Ara',
       none: (q) => `"${q}" için model bulunamadı.`,
       count: (n) => `${n} model`,
@@ -910,7 +930,7 @@ export const DICT: Record<Lang, Dict> = {
       changeMake: (n) => `Marka değiştir (${n})`,
       didYouMean: (q) => `Bunu mu demek istediniz: ${q}`,
       hint: 'Kırıcınızın marka ve modelini yazın; uyan ürünler burada listelenir.',
-      countFiltered: (n, total) => `${n} model (${total} sonuçtan)`,
+      countFiltered: (n, total) => `${n} model (${total} modelden)`,
       filter: {
         label: 'Sonuçları daralt',
         type: 'Uç tipi',
@@ -936,7 +956,7 @@ export const DICT: Record<Lang, Dict> = {
         grooved: 'Toz kanallı',
         all: 'Tümü',
         clear: 'Filtreleri temizle',
-        none: (n) => `Bu seçimlerle sonuç yok (yazdığınızla ${n} sonuç var).`,
+        none: (n) => `Bu seçimlerle sonuç yok (yazdığınızla ${n} model var).`,
       },
     },
     missing: {
@@ -1019,6 +1039,7 @@ export const DICT: Record<Lang, Dict> = {
       required: '(zorunlu)',
       countryMissing: '',
       intlNote: '',
+      stale: 'Fiyat güncellenemedi; sipariş onayında bildirilir.',
       note: 'Not',
       sendWa: 'Sipariş talebini WhatsApp ile gönder',
       sendMail: 'E-posta ile gönder',
@@ -1051,6 +1072,12 @@ export const DICT: Record<Lang, Dict> = {
         dropped: (n) => `${n} ürün artık sitede olmadığı için eklenmedi.`,
         none: 'Bu bağlantıdaki ürünler artık sitede yok.',
         failed: 'Liste şu anda açılamadı. Sayfayı yenileyip tekrar deneyin.',
+      },
+      print: {
+        button: 'Teklifi yazdır',
+        title: 'Fiyat teklifi',
+        date: 'Tarih',
+        buyer: 'Alıcı bilgileri',
       },
     },
     brand: {
@@ -1208,7 +1235,8 @@ export const DICT: Record<Lang, Dict> = {
         'Ürünlerimiz Kervan Makina üretimidir; marka ve model adları yalnızca uyumu belirtir.',
       plant: {
         title: 'Tesisimiz',
-        lead: 'Parçalarımızı Kartepe’deki tesisimizde işliyor, ısıl işlemini kendi fırınlarımızda yapıyoruz.',
+        lead: 'Üretim ve ısıl işlem Kartepe’deki kendi tesisimizde.',
+        all: 'Tüm fotoğraflar',
         note: 'Fotoğraflar tesisimizde çekilmiştir.',
         items: [
           {
@@ -1453,6 +1481,7 @@ export const DICT: Record<Lang, Dict> = {
           sets: 'Setler',
         },
       },
+      kitWords: {},
       renderVariant: {
         oldType: 'eski tip',
         newType: 'yeni tip',
@@ -1675,6 +1704,11 @@ export const DICT: Record<Lang, Dict> = {
       binding: '',
       others: 'Diğer yasal metinler',
     },
+    intl: {
+      wa: 'WhatsApp ile proforma isteyin',
+      mail: 'E-posta ile isteyin',
+      link: 'İhracat koşulları',
+    },
     footer: {
       legal: 'Üretici ve satıcı',
       docs: 'Yasal',
@@ -1747,7 +1781,7 @@ export const DICT: Record<Lang, Dict> = {
         'The most ordered breaker tips and the parts we make for the same breakers, by breaker make and model.',
       brandTitle: (brand) => `${brand} breaker tips | Kervan Makina`,
       brandDesc: (brand, n) =>
-        `${brand} hydraulic breaker tips: Kervan tips for ${n} ${brand} breaker models, with working diameter and tip types. Same-day shipping from stock.`,
+        `${brand} hydraulic breaker tips: Kervan tips for ${n} ${brand} breaker ${n === 1 ? 'model' : 'models'}, with working diameter and tip types. Same-day shipping from stock.`,
       partsTitle: 'Hydraulic breaker spare parts | Kervan Makina',
       partsDesc:
         'Hydraulic breaker spare parts: tips, front heads, bushings, retainer keys, tie rods, pistons, accumulator parts, wear plates and repair kits, by make and model.',
@@ -1848,10 +1882,7 @@ export const DICT: Record<Lang, Dict> = {
           'For this breaker’s other parts, send us your model on WhatsApp and we will get back to you.',
         tipN: (n) => `Tool ${n}`,
       },
-      made: {
-        title: 'From our production',
-        lead: 'A selection of the tips and parts we make, at export prices.',
-      },
+      made: 'From our production',
       order: {
         title: 'Order request',
         whatsapp: 'Ask on WhatsApp',
@@ -1915,7 +1946,7 @@ export const DICT: Record<Lang, Dict> = {
       sampleBadge: 'Sample picture',
       cardAlt: (name, sample) =>
         sample ? `Sample picture for the ${name} breaker tip` : `${name} breaker tip`,
-      more: (left) => `Show more (${left} more models)`,
+      more: (left) => `Show more (${left} more ${left === 1 ? 'result' : 'results'})`,
       groovedBadgeLabel: (name) => `Tools with dust grooves for the ${name}`,
     },
     popular: {
@@ -1983,15 +2014,16 @@ export const DICT: Record<Lang, Dict> = {
       placeholder: 'Your breaker make and model, e.g. Furukawa HB 20G',
       placeholderMid: 'Make and model, e.g. Furukawa HB 20G',
       placeholderShort: 'Make and model, e.g. HB 20G',
+      placeholderTiny: 'e.g. HB 20G',
       button: 'Search',
       none: (q) => `No model found for "${q}".`,
-      count: (n) => `${n} models`,
+      count: (n) => `${n} ${n === 1 ? 'model' : 'models'}`,
       brands: 'Makes',
       all: 'All makes',
       changeMake: (n) => `Change make (${n})`,
       didYouMean: (q) => `Did you mean: ${q}`,
       hint: 'Type your breaker make and model; the matching products are listed here.',
-      countFiltered: (n, total) => `${n} models (of ${total} results)`,
+      countFiltered: (n, total) => `${n} of ${total} ${total === 1 ? 'model' : 'models'}`,
       filter: {
         label: 'Narrow the results',
         type: 'Tip type',
@@ -2099,6 +2131,7 @@ export const DICT: Record<Lang, Dict> = {
       required: '(required)',
       countryMissing: 'Please enter your country, so we can quote the shipping.',
       intlNote: 'Orders outside Türkiye: prices are export prices; shipping is not included.',
+      stale: 'Price could not be refreshed; the order confirmation states it.',
       note: 'Note',
       sendWa: 'Send the order request on WhatsApp',
       sendMail: 'Send by e-mail',
@@ -2134,10 +2167,16 @@ export const DICT: Record<Lang, Dict> = {
         none: 'The products in this link are no longer on the site.',
         failed: 'The list could not be opened just now. Reload the page and try again.',
       },
+      print: {
+        button: 'Print quote',
+        title: 'Quotation',
+        date: 'Date',
+        buyer: 'Buyer',
+      },
     },
     brand: {
       title: (brand) => `${brand} breaker tips`,
-      lead: (n) => `${n} models. Pick your breaker model.`,
+      lead: (n) => `${n} ${n === 1 ? 'model' : 'models'}. Pick your breaker model.`,
       filterHint: (model) => `Search this make, e.g. ${model}`,
     },
     terms: {
@@ -2145,7 +2184,7 @@ export const DICT: Record<Lang, Dict> = {
       rows: [
         ['Fit', 'Made to OEM dimensions, a direct fit'],
         ['Shipping', 'Paid by the buyer; the amount is given in the order confirmation'],
-        ['Payment', 'Credit card (mail order) or bank transfer'],
+        ['Payment', 'Bank transfer in advance'],
         ['Invoice', 'E-invoice (e-fatura) issued'],
         ['Reply', 'Within 2 hours on business days'],
       ],
@@ -2156,7 +2195,7 @@ export const DICT: Record<Lang, Dict> = {
       short: (m) =>
         `Shipping paid by the buyer; ${m}-month warranty. Made by Kervan Makina, not an original part; make and model names only show the fit.`,
       facts:
-        'Card (mail order) or bank transfer · E-invoice (e-fatura) · Reply within 2 hours on business days',
+        'Bank transfer in advance · E-invoice (e-fatura) · Reply within 2 hours on business days',
       more: 'Full terms of sale and warranty scope',
       note: 'Our products are made by Kervan Makina and are not the breaker maker’s original parts; make and model names only show the fit. The warranty covers material and manufacturing (including heat treatment) defects; normal wear, blank firing, prying with the tip, side or angled strikes, working with a worn bushing, running without grease and choosing the wrong tip are not covered. We ask for the broken part and photos to assess a claim.',
     },
@@ -2290,7 +2329,8 @@ export const DICT: Record<Lang, Dict> = {
       fitNote: 'Our products are made by Kervan Makina; make and model names only show the fit.',
       plant: {
         title: 'Our plant',
-        lead: 'We machine our parts in our plant in Kartepe and heat-treat them in our own furnaces.',
+        lead: 'Machined and heat-treated in our own plant in Kartepe.',
+        all: 'All photos',
         note: 'Photos taken at our plant.',
         items: [
           {
@@ -2536,6 +2576,14 @@ export const DICT: Record<Lang, Dict> = {
           sets: 'Sets',
         },
       },
+      kitWords: {
+        'eski tip': 'old type',
+        'yeni tip': 'new type',
+        'eski model': 'old model',
+        'yeni model': 'new model',
+        'yeni sistem': 'new system',
+        'İnan Makina yapımı': 'made by İnan Makina',
+      },
       renderVariant: {
         oldType: 'old type',
         newType: 'new type',
@@ -2622,7 +2670,7 @@ export const DICT: Record<Lang, Dict> = {
       showcase: {
         title: 'What we make',
         lead: 'The parts we make. Type your make and model to open that breaker’s parts.',
-        more: (left) => `Show more (${left} more parts)`,
+        more: (left) => `Show more (${left} more ${left === 1 ? 'part' : 'parts'})`,
       },
       tipLink: 'Tip for this breaker',
       quoteThis: 'Request a quote for this model',
@@ -2632,9 +2680,10 @@ export const DICT: Record<Lang, Dict> = {
         copied: 'Link copied',
         copyFailed: (url) => `Copy the link: ${url}`,
         whatsappSend: 'Send this part on WhatsApp',
-        back: (group) => `All ${group.toLowerCase()} models`,
+        // The group names are plurals but "Front head".
+        back: (group) => `All ${group.toLowerCase()}${/s$/i.test(group) ? '' : 's'}`,
         related: 'Other parts we make for this breaker',
-        nearby: (group) => `More ${group.toLowerCase()} models`,
+        nearby: (group) => `More ${group.toLowerCase()}${/s$/i.test(group) ? '' : 's'}`,
         linksLabel: 'Part links',
         seoName: (model, noun, rockDrill) => `${model}${rockDrill ? '' : ' breaker'} ${noun}`,
         fits: (model, { other, variant }) =>
@@ -2758,6 +2807,11 @@ export const DICT: Record<Lang, Dict> = {
       updated: (d) => `Last updated: ${d}`,
       binding: 'This is a translation; the Turkish text is binding.',
       others: 'Other legal texts',
+    },
+    intl: {
+      wa: 'Ask for a proforma on WhatsApp',
+      mail: 'Ask by e-mail',
+      link: 'How international orders work',
     },
     footer: {
       legal: 'Manufacturer and seller',

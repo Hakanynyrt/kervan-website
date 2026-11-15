@@ -39,6 +39,7 @@ import { ORDER_CONVERSION } from '../lib/ads';
 import { addToCart } from '../lib/cart';
 import { listedLineId } from '../lib/palet-share';
 import type { Dict } from '../lib/dict';
+import { clipQuery } from '../lib/finder';
 import type { ListedPart } from '../lib/listed-parts';
 import { localePath } from '../lib/locale-path';
 import { renderModel, renderTitle, upFirst } from '../lib/part-caption';
@@ -166,7 +167,7 @@ export default function Part({
       chosen.current = true;
       setFilter(named);
     }
-    const v = sp.get('q');
+    const v = clipQuery(sp.get('q') ?? '');
     if (v) {
       if (!explicit) setFilter(null);
       setQ(v);
@@ -181,7 +182,9 @@ export default function Part({
     // Only on load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const search = (v: string) => {
+  // Typed or pasted, as from `?q=` above: the box keeps the first `QUERY_MAX` characters.
+  const search = (text: string) => {
+    const v = clipQuery(text);
     setQ(v);
     // Typing searches every kind ("Tümü"); clearing the box goes back to the default chip.
     if (!chosen.current) setFilter(v.trim() ? null : defaultFilter);
@@ -626,6 +629,8 @@ export function QuotePanel({
   const box = useRef<HTMLInputElement>(null);
   useKeepTyped(box, setBreaker);
   const [added, setAdded] = useState<Added>(null);
+  // "Palete yükle": the panel's button and the phones' sticky bar both call this.
+  const add = onAdd && (() => setAdded({ n: onAdd() }));
   return (
     <div className="lg:sticky lg:top-6">
       <div className="rounded-md border border-hair-strong bg-bg p-5 font-sans text-sm">
@@ -665,14 +670,14 @@ export function QuotePanel({
             {...ORDER_CONVERSION}
             className={`px-5 ${WHATSAPP_BUTTON}`}
           />
-          {onAdd && (
+          {add && (
             <div>
               <Button
                 label={t.price.add}
                 variant="secondary"
                 size="lg"
                 width="100%"
-                onClick={() => setAdded({ n: onAdd() })}
+                onClick={add}
                 className={`px-5 ${OUTLINE_BUTTON}`}
               />
               <p className="m-0 mt-2 text-xs text-ink-mid">{t.parts.order.askAdd}</p>
@@ -694,6 +699,9 @@ export function QuotePanel({
       <div className="mt-6">
         <Terms t={t} part={part} compact={compact} />
       </div>
+      {/* Item pages, phones: the bottom bar with "Palete yükle" (this panel's `add`), WhatsApp
+          and Telefon, as on the priced pages (`PartOrder`); the group page renders its own. */}
+      {add && <StickyQuote text={text} t={t} onAdd={add} added={added} lang={compact ?? 'tr'} />}
     </div>
   );
 }
@@ -712,6 +720,7 @@ export function RenderFigure({
   id,
   lazy = false,
   item = false,
+  withB: held,
   onWithB,
 }: {
   r: PartRender;
@@ -721,13 +730,17 @@ export function RenderFigure({
   lazy?: boolean;
   /** On the part's own page: the page has the title and links, the caption only shares. */
   item?: boolean;
+  /** The Burçsuz / Burçlu choice when the page holds it (the item page: its `?burc=0` and its
+   *  order box); without it the figure holds its own. */
+  withB?: boolean;
   /** Tells the page when the Burçsuz / Burçlu choice changes (the page's quote names it). */
   onWithB?: (withB: boolean) => void;
 }) {
   const { t } = ctx;
   const [open3d, setOpen3d] = useState(false);
   // Front heads: Burçlu (bushings and pins fitted; owner: opens so, also the prerendered state) or Burçsuz.
-  const [withB, setWithB] = useState(!!r.fitted);
+  const [own, setOwn] = useState(!!r.fitted);
+  const withB = held ?? own;
   const shown: { hero?: string; views: PartRender['views'] } =
     withB && r.fitted ? r.fitted : { hero: r.hero, views: r.views };
   const model = renderModel(r, t);
@@ -751,7 +764,7 @@ export function RenderFigure({
             type="button"
             aria-pressed={withB === on}
             onClick={() => {
-              setWithB(on);
+              setOwn(on);
               onWithB?.(on);
             }}
             className={`min-h-11 cursor-pointer px-4 font-medium first:rounded-l-sm last:rounded-r-sm aria-pressed:bg-ink aria-pressed:text-bg ${on ? 'border-l border-hair-strong' : ''} text-ink hover:bg-bg-warm aria-pressed:hover:bg-ink ${FOCUS}`}

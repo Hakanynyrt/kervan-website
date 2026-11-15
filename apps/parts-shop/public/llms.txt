@@ -22,6 +22,7 @@ Hidrolik kırıcı yedek parça mağazası: kırıcı ucu, alt gövde, burç, ka
 - There is no online payment. Find the part by breaker make and model, then send the order by WhatsApp or e-mail from the part page, or collect several parts in the cart (/palet) and send them together by WhatsApp or e-mail.
 - We reply with payment and shipping details. Parts without a price on the page are quoted on request.
 - Make and model names on the site only state fit; the parts are Kervan's own production.
+- International orders (outside Türkiye), terms and documents: https://kiriciparca.com/en/ihracat
 
 ## Contact
 

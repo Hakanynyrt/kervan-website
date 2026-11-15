@@ -6,9 +6,20 @@ import type { PartKey } from './routes';
 export const upFirst = (s: string, lang: 'tr' | 'en'): string =>
   s.charAt(0).toLocaleUpperCase(lang === 'tr' ? 'tr' : 'en') + s.slice(1);
 
+/**
+ * A render's model name in the page's language. Repair-kit names carry the owner's own words
+ * for a kit's version in brackets ("… (eski tip)", repair-kits.ts): `kitWords` has their English
+ * (2026-11-14: they stood untranslated in English titles). Anything else is left as written.
+ */
+export const modelText = (model: string, t: Dict): string =>
+  model.replace(/\(([^()]+)\)$/, (whole, inner: string) => {
+    const word = t.parts.kitWords[inner];
+    return word ? `(${word})` : whole;
+  });
+
 /** The breaker model a render fits, with its variant (e.g. old type) when it has one. */
 export const renderModel = (r: PartRender, t: Dict): string =>
-  r.variant ? `${r.model} (${t.parts.renderVariant[r.variant]})` : r.model;
+  r.variant ? `${r.model} (${t.parts.renderVariant[r.variant]})` : modelText(r.model, t);
 
 /** A render's caption ("Montabert BRV 32 piston"); `partName` is the group (or fitted) name. */
 export const renderTitle = (r: PartRender, partName: string, t: Dict): string =>
@@ -56,8 +67,11 @@ export const renderSeoName = (r: PartRender, part: PartKey, t: Dict): string =>
 
 /** The line under an item page's h1: "Uyduğu kırıcı: Soosan SB50 (Soosan SB 50), eski tip." */
 export const renderFits = (r: PartRender, t: Dict): string =>
-  t.parts.item.fits(r.model, {
-    other: otherSpellings(r.model).join(', ') || null,
+  t.parts.item.fits(modelText(r.model, t), {
+    other:
+      otherSpellings(r.model)
+        .map((o) => modelText(o, t))
+        .join(', ') || null,
     variant: r.variant ? t.parts.renderVariant[r.variant] : null,
     rockDrill: isRockDrill(r),
   });

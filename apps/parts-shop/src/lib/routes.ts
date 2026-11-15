@@ -11,6 +11,7 @@ import {
   type PublicFamily,
   type TipType,
 } from '@kervan/tips';
+import { INTL_PATH } from './intl-orders';
 import { LEGAL_KEYS, legalPath, type LegalKey } from './legal';
 import {
   GUIDE_KEYS,
@@ -195,6 +196,8 @@ export type PageModel =
   | { kind: 'family'; family: PublicFamily; demo: boolean; hasPopular: boolean }
   | { kind: 'cart'; demo: boolean; hasPopular: boolean }
   | { kind: 'legal'; doc: LegalKey; demo: boolean; hasPopular: boolean }
+  /** International orders (intl-orders.ts). */
+  | { kind: 'intl'; demo: boolean; hasPopular: boolean }
   /** "Rehber" (guides.ts): the index (`doc` null) and one article per guide. */
   | {
       kind: 'guide';
@@ -255,6 +258,9 @@ export const familyPath = (code: string): string => `/urun/${code.toLowerCase()}
 export const breakerPath = (slug: string): string => `/kirici/${slug}`;
 export const brandPath = (brand: string): string => `/marka/${slugify(brand)}`;
 export const LIST_PATH = '/kirici-ucu';
+/** `id` of the list's search box and results (`ModelTable`), in both languages: a search sent
+ *  from another page opens the list there (`/kirici-ucu?q=…#sonuclar`), the cards in view. */
+export const LIST_RESULTS_ID = 'sonuclar';
 export const POPULAR_PATH = '/cok-satanlar';
 /** Path prefixes of the tip pages (one spare-part group, listed under "Yedek parçalar"). */
 export const TIP_PATHS = [LIST_PATH, '/kirici/', '/marka/', '/urun/'];
@@ -535,7 +541,9 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
           ...(sample ? { sample } : {}),
           ...(photo ? { photo } : {}),
           popularTier: null,
-          price: null,
+          // The price the breaker page shows: an extra product's types all sell at its one price
+          // (review, 2026-11-13: these cards said "Fiyat için sorun" above a priced page).
+          price: priceSpan([...tipOptions([], e.extra).opts.values()].map((o) => o.cents)),
         },
       ];
     }
@@ -673,6 +681,7 @@ export function buildPages(c: PublicCatalog): BuiltPage[] {
       path: legalPath(doc),
       model: { kind: 'legal' as const, doc, demo, hasPopular },
     })),
+    { path: INTL_PATH, model: { kind: 'intl' as const, demo, hasPopular } },
     { path: GUIDES_PATH, model: { kind: 'guide' as const, doc: null, tips: {}, demo, hasPopular } },
     ...GUIDE_KEYS.map((doc) => ({
       path: guidePath(doc),
