@@ -249,7 +249,7 @@ export const DICT: Dict = {
         {
           name: 'Keçe takımı',
           desc: 'Tam set, tek tek paketli',
-          img: '/photos/uretim/kece-takimi-01-1024.webp',
+          img: '/photos/uretim/kece-takimi-02-1024.webp',
         },
       ],
     },
@@ -1045,7 +1045,7 @@ export const DICT: Dict = {
         {
           name: 'Seal kit',
           desc: 'Complete set, individually packed',
-          img: '/photos/uretim/kece-takimi-01-1024.webp',
+          img: '/photos/uretim/kece-takimi-02-1024.webp',
         },
       ],
     },

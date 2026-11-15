@@ -245,6 +245,11 @@ export const DICT: Dict = {
           caption: 'Katlı fikstürde küçük parçalar',
         },
         {
+          base: 'sarj-vinc-01',
+          alt: 'Vince asılı, kuyu tipi fırına indirilmeyi bekleyen katlı şarj fikstürü',
+          caption: 'Vinçte bekleyen şarj',
+        },
+        {
           base: 'sertlik-olcum-01',
           alt: 'Isıl işlem görmüş parçalar üzerinde el tipi cihazla sertlik ölçümü',
           caption: 'Sertlik ölçümü',
@@ -575,6 +580,11 @@ export const DICT: Dict = {
           base: 'sarj-raf-01',
           alt: 'Small parts arranged on a tiered fixture',
           caption: 'Small parts on a tiered fixture',
+        },
+        {
+          base: 'sarj-vinc-01',
+          alt: 'A tiered charge fixture hanging from the crane, waiting to go into the pit furnace',
+          caption: 'Charge waiting on the crane',
         },
         {
           base: 'sertlik-olcum-01',
