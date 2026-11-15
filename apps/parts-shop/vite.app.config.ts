@@ -1,4 +1,11 @@
-import { copyFileSync, existsSync, mkdirSync, readdirSync, renameSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+} from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
@@ -91,6 +98,25 @@ function appHtml(): Plugin {
   };
 }
 
+/**
+ * boot-guard.js: a plain script that runs before the bundle. If the app has drawn nothing after
+ * BOOT_WAIT_MS (the bundle failed to load, threw, or waited on the phone), it writes the error it
+ * saw on the screen, so a blank start can be read from a screenshot on the phone (2026-11-15: the
+ * first iPhone build opened white). Texts from the app dict.
+ */
+function bootGuard(): Plugin {
+  return {
+    name: 'kv-app-boot-guard',
+    apply: 'build',
+    generateBundle() {
+      const src = readFileSync(join(ROOT, 'src', 'app', 'boot-guard.js'), 'utf8')
+        .replace("'__KV_BOOT_FAIL_TR__'", JSON.stringify(APP_DICT.tr.bootFail))
+        .replace("'__KV_BOOT_FAIL_EN__'", JSON.stringify(APP_DICT.en.bootFail));
+      this.emitFile({ type: 'asset', fileName: 'boot-guard.js', source: src });
+    },
+  };
+}
+
 /** The fonts globals.css loads from `/fonts` (the only public files the app ships). */
 function appFonts(): Plugin {
   return {
@@ -108,7 +134,7 @@ function appFonts(): Plugin {
 
 export default defineConfig({
   root: ROOT,
-  plugins: [react(), tailwindcss(), astryxPrune(), appHtml(), appFonts()],
+  plugins: [react(), tailwindcss(), astryxPrune(), appHtml(), appFonts(), bootGuard()],
   build: {
     outDir: OUT,
     emptyOutDir: true,

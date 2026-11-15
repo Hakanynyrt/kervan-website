@@ -8,6 +8,8 @@ import type { Lang } from '../types';
  */
 export interface AppDict {
   appName: string;
+  /** boot-guard.js: shown when the app has not started after a few seconds, with the error. */
+  bootFail: string;
   /** The tab bar's landmark name and its five tabs. */
   tabs: {
     label: string;
@@ -88,6 +90,7 @@ export interface AppDict {
 export const APP_DICT: Record<Lang, AppDict> = {
   tr: {
     appName: 'Kervan Kırıcı Parça',
+    bootFail: 'Uygulama açılamadı. Bu ekranın görüntüsünü bize gönderin.',
     tabs: {
       label: 'Uygulama bölümleri',
       home: 'Ana ekran',
@@ -158,6 +161,7 @@ export const APP_DICT: Record<Lang, AppDict> = {
   },
   en: {
     appName: 'Kervan Breaker Parts',
+    bootFail: 'The app could not start. Please send us a screenshot of this screen.',
     tabs: {
       label: 'App sections',
       home: 'Home',
