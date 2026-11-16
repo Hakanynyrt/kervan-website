@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { flushSync } from 'react-dom';
 import type { FxRate } from '@kervan/tips';
 import { Button } from '@astryxdesign/core/Button';
+import { MailButton } from '../components/MailButton';
 import { TextArea } from '@astryxdesign/core/TextArea';
 import { TextInput } from '@astryxdesign/core/TextInput';
 import { OrderFacts, OrderSteps, PageTitle, QtyStepper } from '../components/Bits';
@@ -57,7 +58,7 @@ import { PAGE_FETCH_MS, sharedPaletLines } from '../lib/palet-lines';
 import { lineTryCents, localDay, paletSum } from '../lib/palet-quote';
 import { CART_PATH, PARTS_PATH } from '../lib/routes';
 import type { Lang } from '../types';
-import { ORDER_EMAIL, SITE } from '../lib/site';
+import { SITE } from '../lib/site';
 
 const FIELDS = [
   'name',
@@ -725,10 +726,11 @@ export default function Cart({ fx, lang, t }: { fx: FxRate | null; lang: Lang; t
                 // height (46 px), as the mail button under it.
                 className={`h-auto min-h-[46px] px-5 py-2 text-center whitespace-normal ${WHATSAPP_BUTTON}`}
               />
-              <Button
-                href={`mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`}
+              <MailButton
+                t={t}
                 label={c.sendMail}
-                variant="secondary"
+                subject={subject}
+                body={message}
                 size="lg"
                 {...ORDER_CONVERSION}
                 aria-disabled={blocked || undefined}

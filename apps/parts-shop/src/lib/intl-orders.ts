@@ -86,7 +86,7 @@ export const INTL: Record<Lang, IntlText> = {
         ],
       ],
     ],
-    ask: 'Merhaba, yurt dışı sipariş için proforma fatura istiyorum.\nFirma / ülke:\nKırıcı marka ve modeli:\nParçalar ve adetler:',
+    ask: 'Merhaba, yurt dışı sipariş için proforma fatura istiyorum.\nFirma / ülke:\nKırıcı marka ve modeli:\nParçalar ve adetler:\nMarkanız listemizde yoksa uç ölçüleri (çap, boy; mm) ve fotoğraf:',
     subject: 'Yurt dışı sipariş: proforma talebi',
   },
   en: {
@@ -151,7 +151,7 @@ export const INTL: Record<Lang, IntlText> = {
         ],
       ],
     ],
-    ask: 'Hello, I would like a proforma invoice for an international order.\nCompany / country:\nBreaker make and model:\nParts and quantities:',
+    ask: 'Hello, I would like a proforma invoice for an international order.\nCompany / country:\nBreaker make and model:\nParts and quantities:\nIf your make is not on our list, the tool dimensions (diameter, length; mm) and a photo:',
     subject: 'International order: proforma request',
   },
 };

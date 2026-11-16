@@ -1,16 +1,15 @@
 import { Button } from '@astryxdesign/core/Button';
 import { Breadcrumb, PageTitle } from '../components/Bits';
+import { MailButton } from '../components/MailButton';
 import { OUTLINE_BUTTON, WHATSAPP_BUTTON, WRAP, whatsappHref } from '../components/Layout';
 import { ORDER_CONVERSION } from '../lib/ads';
 import type { Dict } from '../lib/dict';
 import { INTL } from '../lib/intl-orders';
-import { ORDER_EMAIL } from '../lib/site';
 import type { Lang } from '../types';
 
 /** The international orders page: the export terms as one table, then the proforma request. */
 export default function IntlOrders({ lang, t }: { lang: Lang; t: Dict }) {
   const d = INTL[lang];
-  const mail = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(d.subject)}&body=${encodeURIComponent(d.ask)}`;
   return (
     <div className={`${WRAP} py-10`}>
       <Breadcrumb trail={[]} current={d.title} lang={lang} t={t} />
@@ -38,10 +37,11 @@ export default function IntlOrders({ lang, t }: { lang: Lang; t: Dict }) {
           {...ORDER_CONVERSION}
           className={`h-auto min-h-11 whitespace-normal px-5 py-2 ${WHATSAPP_BUTTON}`}
         />
-        <Button
-          href={mail}
+        <MailButton
+          t={t}
           label={t.intl.mail}
-          variant="secondary"
+          subject={d.subject}
+          body={d.ask}
           size="lg"
           {...ORDER_CONVERSION}
           className={`h-auto min-h-11 whitespace-normal px-5 py-2 ${OUTLINE_BUTTON}`}

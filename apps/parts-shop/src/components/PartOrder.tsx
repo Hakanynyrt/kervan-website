@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@astryxdesign/core/Button';
+import { MailButton } from './MailButton';
 import type { FxRate } from '@kervan/tips';
 import { ORDER_CONVERSION } from '../lib/ads';
 import { addToCart, cartQty } from '../lib/cart';
@@ -10,7 +11,7 @@ import type { PartKey } from '../lib/routes';
 import type { Lang } from '../types';
 import { AddedNote, OrderFacts, QtyStepper, StickyQuote, Terms, type Added } from './Bits';
 import { OUTLINE_BUTTON, WHATSAPP_BUTTON, whatsappHref } from './Layout';
-import { ORDER_EMAIL, SITE } from '../lib/site';
+import { SITE } from '../lib/site';
 
 /**
  * One line under a priced part (group page, phones): "97.200 TL (vergiler dahil) · 1.850 USD +
@@ -206,10 +207,11 @@ export function PartOrder({
             {...ORDER_CONVERSION}
             className={`px-5 lg:hidden ${WHATSAPP_BUTTON}`}
           />
-          <Button
-            href={`mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(`${breaker} ${label}`)}&body=${encodeURIComponent(text)}`}
+          <MailButton
+            t={t}
             label={o.mail}
-            variant="secondary"
+            subject={`${breaker} ${label}`}
+            body={text}
             size="lg"
             {...ORDER_CONVERSION}
             className={`px-5 ${OUTLINE_BUTTON}`}

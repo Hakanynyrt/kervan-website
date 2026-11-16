@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Button } from '@astryxdesign/core/Button';
+import { MailButton } from './MailButton';
 import {
   carrierTons,
   isTipType,
@@ -44,7 +45,7 @@ import {
   Terms,
 } from './Bits';
 import { FOCUS, OUTLINE_BUTTON, WHATSAPP_BUTTON, whatsappHref, WRAP } from './Layout';
-import { ORDER_EMAIL, SITE } from '../lib/site';
+import { SITE } from '../lib/site';
 import { cardSet, photoImg, photoSet } from '../lib/photo-url';
 
 function availabilityText(s: PublicSku, t: Dict): string {
@@ -209,7 +210,6 @@ export default function TipProduct({
       }}
     />
   );
-  const mail = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(name)}&body=${encodeURIComponent(text)}`;
   const showSample = Boolean(sampleSku?.image && sample && !photos.length);
   // Every tip type of the model as a photo tile (owner, 2026-10-16: "uçlar fotoğraflı gözüksün"),
   // one row right under the main picture, which a tile switches (owner, 2026-11-10).
@@ -545,10 +545,11 @@ export default function TipProduct({
                 {...ORDER_CONVERSION}
                 className={`px-5 ${order ? 'lg:hidden' : ''} ${WHATSAPP_BUTTON}`}
               />
-              <Button
-                href={mail}
+              <MailButton
+                t={t}
                 label={order ? tf.orderMail : tf.email}
-                variant="secondary"
+                subject={name}
+                body={text}
                 size="lg"
                 {...ORDER_CONVERSION}
                 className={`px-5 ${OUTLINE_BUTTON}`}
