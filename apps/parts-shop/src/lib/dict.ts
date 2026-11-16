@@ -624,6 +624,8 @@ export interface Dict {
     /** Link to the page from the English cart note. */
     link: string;
   };
+  /** The line an e-mail button shows after a click, for computers with no mail program (MailButton). */
+  mailHelp: { note: string; copyAddr: string; copyText: string; copied: string };
   footer: {
     legal: string;
     docs: string;
@@ -1708,6 +1710,12 @@ export const DICT: Record<Lang, Dict> = {
       wa: 'WhatsApp ile proforma isteyin',
       mail: 'E-posta ile isteyin',
       link: 'İhracat koşulları',
+    },
+    mailHelp: {
+      note: 'E-posta programınız açılmadıysa şu adrese yazın:',
+      copyAddr: 'Adresi kopyala',
+      copyText: 'İstek metnini kopyala',
+      copied: 'Kopyalandı',
     },
     footer: {
       legal: 'Üretici ve satıcı',
@@ -2812,6 +2820,12 @@ export const DICT: Record<Lang, Dict> = {
       wa: 'Ask for a proforma on WhatsApp',
       mail: 'Ask by e-mail',
       link: 'How international orders work',
+    },
+    mailHelp: {
+      note: 'If your mail program did not open, write to:',
+      copyAddr: 'Copy the address',
+      copyText: 'Copy the request text',
+      copied: 'Copied',
     },
     footer: {
       legal: 'Manufacturer and seller',

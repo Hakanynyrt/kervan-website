@@ -8,6 +8,7 @@ import {
   type MouseEvent,
 } from 'react';
 import { Button } from '@astryxdesign/core/Button';
+import { MailButton } from '../components/MailButton';
 import type { FxRate } from '@kervan/tips';
 import { ORG_PHONE, ORG_PHONE_E164 } from '@kervan/seo';
 import { useReducedMotion } from '@kervan/motion';
@@ -584,10 +585,9 @@ function Finder({ model, lang, t }: { model: Model; lang: Lang; t: Dict }) {
                 label={h.order.whatsapp}
                 className={`px-0.5 min-[23.4375rem]:px-2 md:px-[18px] ${WHATSAPP_BUTTON}`}
               />
-              <Button
-                href={`mailto:${ORDER_EMAIL}`}
+              <MailButton
+                t={t}
                 label={h.order.mail}
-                variant="secondary"
                 className={`px-0.5 min-[23.4375rem]:px-2 md:px-[18px] ${OUTLINE_BUTTON}`}
               />
             </div>
@@ -831,10 +831,9 @@ export default function Home({
               label={h.order.whatsapp}
               className={`px-5 ${WHATSAPP_BUTTON}`}
             />
-            <Button
-              href={`mailto:${ORDER_EMAIL}`}
+            <MailButton
+              t={t}
               label={`${h.order.mail} · ${ORDER_EMAIL}`}
-              variant="secondary"
               className={`h-auto min-h-11 whitespace-normal px-5 py-2 ${OUTLINE_BUTTON}`}
             />
             {/* Phones: the page's facts line (the order box does not show there); the phones and
