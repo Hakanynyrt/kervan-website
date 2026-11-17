@@ -159,8 +159,7 @@ set_angle() {
       a=$(angle_now)
       if [ -n "$a" ] && python3 -c "import sys; sys.exit(0 if abs(float(sys.argv[1]) - $deg) <= 2 else 1)" "$a" 2>/dev/null; then
         sleep 2
-        echo "  posture: $(posture | tr '
-' ' ')"
+        echo "  posture: $(posture | tr '\n' ' ')"
         return 0
       fi
       sleep 1
