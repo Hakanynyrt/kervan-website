@@ -144,6 +144,7 @@ jobs:
           echo "bid=$bid" >> "$GITHUB_OUTPUT"
 
       - name: Screenshots
+        timeout-minutes: 20
         env:
           UDID: ${{ steps.sim.outputs.udid }}
           BID: ${{ steps.app.outputs.bid }}

@@ -32,56 +32,58 @@ echo "::group::Displays (simctl io enumerate)"
 xcrun simctl io "$UDID" enumerate 2>&1 || true
 echo "::endgroup::"
 
-# Every display id simctl answers for, with its size, so a pose shot picks the display that is lit.
-# Outer display 1398x2034, inner 2007x2853 (portrait; swapped in landscape). The ids change between
-# Xcode builds, so they are probed, not fixed.
+# The integrated displays' screen ids and sizes, from enumerate (outer 1398x2034, inner 2007x2853 on
+# Xcode 27.1; the ids change between Xcode builds, so they are read, not fixed). Probing other ids
+# (TV-out, CarPlay, resizable) makes simctl wait about a minute each, so only these are shot.
+SCREENS=$(xcrun simctl io "$UDID" enumerate 2>/dev/null | awk '
+  /Screen ID:/ {id=$3}
+  /Pixel Size:/ {gsub(/[{},]/, "", $0); w=$3; h=$4; m=(w>h?w:h); if (m==2034) print id, "outer"; if (m==2853) print id, "inner"}')
+echo "integrated displays (id kind):"
+echo "$SCREENS" | sed 's/^/  /'
 probe_dir="$RUNNER_TEMP/duo-probe"
 rm -rf "$probe_dir" && mkdir -p "$probe_dir"
 
-# shot <file name> <outer|inner>: the largest non-blank screenshot of a display of that kind.
+# active_kind: outer or inner, the display that hosts the UI (hinge posture), empty without hinge.
+active_kind() {
+  [ -n "${HINGE:-}" ] || return 0
+  "$HINGE" posture --json 2>/dev/null | python3 -c '
+import json, sys
+d = json.load(sys.stdin)
+for x in d.get("displays", []):
+    if x.get("active"):
+        print("inner" if max(x.get("size", [0, 0])) == 2853 else "outer")
+        break
+' 2>/dev/null || true
+}
+
+# shot <file name> <outer|inner>: a screenshot of that display, kept only when it is the active
+# one (when hinge can tell) and not blank or black.
 shot() {
-  local name="$1" want="$2" best="" best_size=0 id f s d w h kind
-  rm -f "$probe_dir"/*.png
-  for id in 0 1 2 3 4 5; do
-    f="$probe_dir/d$id.png"
-    xcrun simctl io "$UDID" screenshot --display="$id" "$f" >/dev/null 2>&1 || continue
-    s=$(size_of "$f")
-    d=$(dims_of "$f")
-    w=${d%x*}
-    h=${d#*x}
-    kind=other
-    if [ "$w" -gt 0 ]; then
-      case "$(( w > h ? w : h ))" in
-        2034) kind=outer ;;
-        2853) kind=inner ;;
-      esac
-    fi
-    echo "  display $id: $d, $s bytes, $kind"
-    if [ "$kind" = "$want" ] && [ "$s" -gt "$best_size" ]; then
-      best="$f"
-      best_size=$s
-    fi
-  done
-  if [ -z "$best" ]; then
-    # Fallback: simctl's default display.
-    f="$probe_dir/default.png"
-    if xcrun simctl io "$UDID" screenshot "$f" >/dev/null 2>&1; then
-      s=$(size_of "$f")
-      echo "  default display: $(dims_of "$f"), $s bytes"
-      best="$f"
-      best_size=$s
-    fi
+  local name="$1" want="$2" id f s act
+  act=$(active_kind)
+  if [ -n "$act" ] && [ "$act" != "$want" ]; then
+    echo "  the active display is $act, not $want"
+    return 3
   fi
-  if [ -z "$best" ]; then
-    echo "  no screenshot of the $want display"
+  id=$(echo "$SCREENS" | awk -v k="$want" '$2 == k {print $1; exit}')
+  f="$probe_dir/$name"
+  if [ -n "$id" ]; then
+    xcrun simctl io "$UDID" screenshot --display="$id" "$f" >/dev/null 2>&1 || rm -f "$f"
+  else
+    xcrun simctl io "$UDID" screenshot "$f" >/dev/null 2>&1 || rm -f "$f"
+  fi
+  if [ ! -s "$f" ]; then
+    echo "  no screenshot of the $want display (id ${id:-default})"
     return 1
   fi
-  if [ "$best_size" -lt "$MIN_BYTES" ]; then
-    echo "  the $want display is blank or black ($best_size bytes)"
+  s=$(size_of "$f")
+  echo "  $want display (id ${id:-default}): $(dims_of "$f"), $s bytes"
+  if [ "$s" -lt "$MIN_BYTES" ]; then
+    echo "  the $want display is blank or black"
     return 2
   fi
-  cp "$best" "$OUT/$name"
-  echo "  saved $name ($(dims_of "$OUT/$name"), $best_size bytes)"
+  cp "$f" "$OUT/$name"
+  echo "  saved $name"
   return 0
 }
 
@@ -145,6 +147,7 @@ if run_pose "closed, landscape" orient landscape-left; then
   case $? in
     0) ;;
     2) skip 1-kapali-yatay "after 'hinge orient landscape-left' the outer display was blank" ;;
+    3) skip 1-kapali-yatay "closed in landscape, hinge reports the inner display as active" ;;
     *) skip 1-kapali-yatay "no screenshot of the outer display after 'hinge orient landscape-left'" ;;
   esac
   run_pose "back to portrait" orient portrait || true
@@ -154,16 +157,17 @@ fi
 
 # Half open: Device Hub's own half-open preset is 130 degrees. A jump from 0 reaches the inner
 # display more reliably through 90.
-run_pose "towards half open" hinge 90 || true
-if run_pose "half open" hinge 130; then
-  shot 2-yari-acik.png inner
+run_pose "towards half open" set 90 || true
+if run_pose "half open" set 130; then
+  half=$(active_kind)
+  shot 2-yari-acik.png "${half:-inner}"
   case $? in
     0) ;;
-    2) skip 2-yari-acik "at 130 degrees the inner display was blank or black" ;;
-    *) skip 2-yari-acik "no screenshot of the inner display at 130 degrees" ;;
+    2) skip 2-yari-acik "at 130 degrees the ${half:-inner} display was blank or black" ;;
+    *) skip 2-yari-acik "no screenshot of the ${half:-inner} display at 130 degrees" ;;
   esac
 else
-  skip 2-yari-acik "'hinge hinge 130' failed"
+  skip 2-yari-acik "'hinge set 130' failed"
 fi
 
 # Fully open, portrait and landscape.
@@ -172,6 +176,7 @@ if run_pose "open" open; then
   case $? in
     0) ;;
     2) skip 3-acik-dikey "fully open (180 degrees) the inner display was blank or black" ;;
+    3) skip 3-acik-dikey "fully open, hinge reports the outer display as active" ;;
     *) skip 3-acik-dikey "no screenshot of the inner display fully open" ;;
   esac
   if run_pose "open, landscape" orient landscape-left; then
@@ -179,6 +184,7 @@ if run_pose "open" open; then
     case $? in
       0) ;;
       2) skip 4-acik-yatay "open and in landscape the inner display was blank or black" ;;
+      3) skip 4-acik-yatay "open in landscape, hinge reports the outer display as active" ;;
       *) skip 4-acik-yatay "no screenshot of the inner display open in landscape" ;;
     esac
     run_pose "back to portrait" orient portrait || true
