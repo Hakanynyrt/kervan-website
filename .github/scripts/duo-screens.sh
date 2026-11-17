@@ -156,19 +156,35 @@ else
   skip 1-kapali-yatay "'hinge orient landscape-left' failed"
 fi
 
-# Half open: Device Hub's own half-open preset is 130 degrees. A jump from 0 reaches the inner
-# display more reliably through 90.
-run_pose "towards half open" set 90 || true
+# Half open: Device Hub's own half-open preset is 130 degrees, hinge's `half` is 90. On the runner
+# 130 has not been confirmed within 10 s, so the shot falls back to 90 (still half open, the inner
+# display lit); the log says which angle it is.
+half_deg=""
+if run_pose "towards half open" set 90; then
+  half_deg=90
+fi
 if run_pose "half open" set 130; then
+  half_deg=130
+else
+  echo "  hinge reports $("$HINGE" get 2>&1 | tr '
+' ' ')after 'set 130'"
+  if [ -n "$half_deg" ] && run_pose "half open, back to 90" set 90; then
+    half_deg=90
+  else
+    half_deg=""
+  fi
+fi
+if [ -n "$half_deg" ]; then
   half=$(active_kind)
+  echo "half open at $half_deg degrees, active display: ${half:-unknown}"
   shot 2-yari-acik.png "${half:-inner}"
   case $? in
     0) ;;
-    2) skip 2-yari-acik "at 130 degrees the ${half:-inner} display was blank or black" ;;
-    *) skip 2-yari-acik "no screenshot of the ${half:-inner} display at 130 degrees" ;;
+    2) skip 2-yari-acik "at $half_deg degrees the ${half:-inner} display was blank or black" ;;
+    *) skip 2-yari-acik "no screenshot of the ${half:-inner} display at $half_deg degrees" ;;
   esac
 else
-  skip 2-yari-acik "'hinge set 130' failed"
+  skip 2-yari-acik "hinge could not confirm 90 or 130 degrees"
 fi
 
 # Fully open, portrait and landscape.
