@@ -127,12 +127,13 @@ hinge --help 2>&1 | head -40 || true
 
 posture() { hinge posture --json 2>&1 || true; }
 
-# run_pose <label> <command...>: runs a hinge command, waits, prints the posture.
+# run_pose <label> <command...>: runs a hinge command (10 s to confirm a new angle; the default 2 s
+# is too short on the CI runner), waits, prints the posture.
 run_pose() {
   local label="$1"
   shift
   echo "hinge $* ($label)"
-  if ! "$HINGE" "$@" 2>&1; then
+  if ! "$HINGE" -t 10 "$@" 2>&1; then
     echo "  hinge $* failed"
     return 1
   fi
