@@ -59,6 +59,8 @@ deploy's `verify` job runs the same four and blocks every deploy.
   (report only, never blocks).
 - `.github/workflows/app-ios.yml` builds the unsigned iPhone `.ipa` (`apps/parts-app`, Capacitor) on a
   macOS runner, by hand or on app PRs, as a 14-day artifact (report only, never blocks, no secrets).
+- `.github/workflows/app-duo-screens.yml` builds the app for the simulator and keeps iPhone Duo
+  screenshots (closed, half open, open; portrait and landscape) as a 14-day artifact (report only).
 
 ## Rules that always apply
 

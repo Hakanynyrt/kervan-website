@@ -1,0 +1,182 @@
+name: App (iPhone Duo screenshots)
+
+# Screenshots of the iPhone app on the iPhone Duo simulator (docs/agent/app.md), so the owner sees
+# the app on his foldable without a Mac: the same web layer and native project as app-ios.yml, built
+# for the simulator (Debug, unsigned), installed on an iPhone Duo (iOS 27.1 runtime), then closed
+# (outer display), half open and fully open, portrait and landscape where it can be driven headless.
+# simctl has no fold or rotate command, so poses go through the community tool `hinge`; a pose that
+# cannot be reached is listed as skipped with the reason, never faked. PNGs are kept 14 days as the
+# artifact "iphone-duo-ekranlar". Report only: Deploy does not wait for it, it deploys nothing and
+# needs no secrets.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/parts-app/**'
+      - 'apps/parts-shop/src/**'
+      - 'apps/parts-shop/app.html'
+      - 'apps/parts-shop/vite.app.config.ts'
+      - 'apps/parts-shop/package.json'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/app-duo-screens.yml'
+      - '.github/scripts/duo-screens.sh'
+  pull_request:
+    paths:
+      - 'apps/parts-app/**'
+      - 'apps/parts-shop/src/**'
+      - 'apps/parts-shop/app.html'
+      - 'apps/parts-shop/vite.app.config.ts'
+      - 'apps/parts-shop/package.json'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/app-duo-screens.yml'
+      - '.github/scripts/duo-screens.sh'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-duo-screens-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  duo:
+    name: iPhone Duo screenshots (simulator)
+    # The Xcode 27 image: its iOS 27.1 simulator runtime is the one that runs iPhone Duo (and only
+    # it); the iOS 27.0 runtime runs every other iPhone.
+    runs-on: xcode-27
+    timeout-minutes: 60
+    env:
+      XCODE_APP: /Applications/Xcode_27.1.app
+      DUO_RUNTIME: com.apple.CoreSimulator.SimRuntime.iOS-27-1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s "$XCODE_APP/Contents/Developer"
+          xcodebuild -version
+          echo "runner image: ${ImageOS:-?} ${ImageVersion:-?}"
+
+      # Printed so a failure further down can be read from the log: device types, runtimes, and
+      # whether this simctl offers any fold/posture/hinge command.
+      - name: Simulator discovery
+        run: |
+          echo "::group::Device types (Duo)"
+          xcrun simctl list devicetypes | grep -i duo || echo "no Duo device type"
+          echo "::endgroup::"
+          echo "::group::Runtimes"
+          xcrun simctl list runtimes
+          echo "::endgroup::"
+          echo "::group::simctl help"
+          xcrun simctl help
+          echo "::endgroup::"
+          echo "::group::simctl help ui / io"
+          xcrun simctl help ui || true
+          xcrun simctl help io || true
+          echo "::endgroup::"
+          if xcrun simctl help 2>&1 | grep -Eiq 'posture|hinge|fold'; then
+            echo "simctl lists a fold/posture command"
+          else
+            echo "simctl lists no fold/posture/hinge command"
+          fi
+
+      # Created and booted now, so the boot runs while the app builds.
+      - name: Create and boot an iPhone Duo simulator
+        id: sim
+        run: |
+          dt=$(xcrun simctl list devicetypes | grep -i 'iPhone Duo' | head -1 | sed -E 's/.*\((com\.apple\.[^)]*)\).*/\1/')
+          test -n "$dt" || { echo "no iPhone Duo device type on this image"; exit 1; }
+          echo "device type: $dt"
+          udid=$(xcrun simctl create ci-duo "$dt" "$DUO_RUNTIME")
+          echo "simulator: $udid"
+          xcrun simctl boot "$udid"
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the app's web layer
+        run: pnpm --filter @kervan/parts-shop build:app
+
+      - name: Check the app bundle
+        run: pnpm --filter @kervan/parts-shop check:app
+
+      - name: Copy into the native project (cap sync ios)
+        run: pnpm --filter @kervan/parts-app sync
+
+      - name: Build for the simulator (Debug, unsigned)
+        working-directory: apps/parts-app/ios/App
+        run: |
+          xcodebuild \
+            -project App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            -quiet \
+            build
+
+      - name: Install and launch on iPhone Duo
+        id: app
+        working-directory: apps/parts-app/ios/App
+        env:
+          UDID: ${{ steps.sim.outputs.udid }}
+        run: |
+          app=build/Build/Products/Debug-iphonesimulator/App.app
+          test -d "$app" || { echo "App.app not found"; exit 1; }
+          bid=$(plutil -extract CFBundleIdentifier raw "$app/Info.plist")
+          echo "bundle id: $bid"
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl install "$UDID" "$app"
+          xcrun simctl launch "$UDID" "$bid"
+          echo "bid=$bid" >> "$GITHUB_OUTPUT"
+
+      - name: Screenshots
+        env:
+          UDID: ${{ steps.sim.outputs.udid }}
+          BID: ${{ steps.app.outputs.bid }}
+        run: bash .github/scripts/duo-screens.sh "$UDID" "$BID" "$RUNNER_TEMP/duo/iphone-duo-ekranlar"
+
+      - name: Job summary
+        if: always()
+        run: |
+          dir="$RUNNER_TEMP/duo/iphone-duo-ekranlar"
+          {
+            echo "## iPhone Duo screenshots"
+            echo
+            echo "Artifact \`iphone-duo-ekranlar\` (14 days):"
+            echo
+            if ls "$dir"/*.png >/dev/null 2>&1; then
+              for f in "$dir"/*.png; do echo "- $(basename "$f")"; done
+            else
+              echo "- (none)"
+            fi
+            if [ -s "$RUNNER_TEMP/duo/duo-skipped.txt" ]; then
+              echo
+              echo "Skipped:"
+              echo
+              sed 's/^/- /' "$RUNNER_TEMP/duo/duo-skipped.txt"
+            fi
+            echo
+            echo "The Rehber tab is not shot: the app registers no URL scheme (universal links are M5), so simctl openurl cannot open it."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: iphone-duo-ekranlar
+          path: ${{ runner.temp }}/duo/iphone-duo-ekranlar
+          retention-days: 14
+          if-no-files-found: error
