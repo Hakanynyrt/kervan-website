@@ -138,7 +138,16 @@ jobs:
           test -d "$app" || { echo "App.app not found"; exit 1; }
           bid=$(plutil -extract CFBundleIdentifier raw "$app/Info.plist")
           echo "bundle id: $bid"
-          xcrun simctl bootstatus "$UDID" -b
+          # A first boot sometimes ends in "Data Migration Failed" with the device shut down: erase it
+          # and boot again, up to two more times.
+          for try in 1 2 3; do
+            xcrun simctl bootstatus "$UDID" -b && break
+            echo "boot $try failed; erasing and booting again"
+            xcrun simctl shutdown "$UDID" 2>/dev/null || true
+            xcrun simctl erase "$UDID"
+            xcrun simctl boot "$UDID" || true
+          done
+          xcrun simctl list devices | grep "$UDID"
           xcrun simctl install "$UDID" "$app"
           xcrun simctl launch "$UDID" "$bid"
           echo "bid=$bid" >> "$GITHUB_OUTPUT"
