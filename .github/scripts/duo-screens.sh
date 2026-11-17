@@ -142,6 +142,34 @@ run_pose() {
   return 0
 }
 
+# angle_now: the hinge angle hinge reports (posture JSON), empty when it does not answer.
+angle_now() {
+  "$HINGE" posture --json 2>/dev/null | python3 -c 'import json, sys; print(json.load(sys.stdin).get("angle", ""))' 2>/dev/null || true
+}
+
+# set_angle <degrees> <label>: hinge's own confirmation (-t) times out at random on the runner even
+# when the angle is reached, so it is skipped (-t 0) and the angle is read back here: up to three
+# tries, each polled for 15 s, within 2 degrees.
+set_angle() {
+  local deg="$1" label="$2" try i a=""
+  for try in 1 2 3; do
+    echo "hinge set $deg ($label, try $try)"
+    "$HINGE" -t 0 set "$deg" 2>&1 || echo "  hinge set $deg returned an error"
+    for i in $(seq 15); do
+      a=$(angle_now)
+      if [ -n "$a" ] && python3 -c "import sys; sys.exit(0 if abs(float(sys.argv[1]) - $deg) <= 2 else 1)" "$a" 2>/dev/null; then
+        sleep 2
+        echo "  posture: $(posture | tr '
+' ' ')"
+        return 0
+      fi
+      sleep 1
+    done
+    echo "  the angle is ${a:-unknown}, not $deg"
+  done
+  return 1
+}
+
 # Closed, landscape.
 if run_pose "closed, landscape" orient landscape-left; then
   shot 1-kapali-yatay.png outer
@@ -156,39 +184,24 @@ else
   skip 1-kapali-yatay "'hinge orient landscape-left' failed"
 fi
 
-# Half open: Device Hub's own half-open preset is 130 degrees, hinge's `half` is 90. On the runner
-# 130 has not been confirmed within 10 s, so the shot falls back to 90 (still half open, the inner
-# display lit); the log says which angle it is.
-half_deg=""
-if run_pose "towards half open" set 90; then
-  half_deg=90
-fi
-if run_pose "half open" set 130; then
-  half_deg=130
-else
-  echo "  hinge reports $("$HINGE" get 2>&1 | tr '
-' ' ')after 'set 130'"
-  if [ -n "$half_deg" ] && run_pose "half open, back to 90" set 90; then
-    half_deg=90
-  else
-    half_deg=""
-  fi
-fi
-if [ -n "$half_deg" ]; then
+# Half open at Device Hub's own half-open preset, 130 degrees, through 90 (a jump from 0 reaches the
+# inner display less reliably).
+set_angle 90 "towards half open" || true
+if set_angle 130 "half open"; then
   half=$(active_kind)
-  echo "half open at $half_deg degrees, active display: ${half:-unknown}"
+  echo "half open at 130 degrees, active display: ${half:-unknown}"
   shot 2-yari-acik.png "${half:-inner}"
   case $? in
     0) ;;
-    2) skip 2-yari-acik "at $half_deg degrees the ${half:-inner} display was blank or black" ;;
-    *) skip 2-yari-acik "no screenshot of the ${half:-inner} display at $half_deg degrees" ;;
+    2) skip 2-yari-acik "at 130 degrees the ${half:-inner} display was blank or black" ;;
+    *) skip 2-yari-acik "no screenshot of the ${half:-inner} display at 130 degrees" ;;
   esac
 else
-  skip 2-yari-acik "hinge could not confirm 90 or 130 degrees"
+  skip 2-yari-acik "hinge did not reach 130 degrees in three tries"
 fi
 
 # Fully open, portrait and landscape.
-if run_pose "open" open; then
+if set_angle 180 "open"; then
   shot 3-acik-dikey.png inner
   case $? in
     0) ;;
@@ -209,8 +222,8 @@ if run_pose "open" open; then
     skip 4-acik-yatay "'hinge orient landscape-left' failed while open"
   fi
 else
-  skip 3-acik-dikey "'hinge open' failed"
-  skip 4-acik-yatay "'hinge open' failed"
+  skip 3-acik-dikey "hinge did not reach 180 degrees in three tries"
+  skip 4-acik-yatay "hinge did not reach 180 degrees in three tries"
 fi
 
 exit 0
