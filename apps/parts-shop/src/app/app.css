@@ -5,8 +5,8 @@
  *
  * The tab bar is glass (owner, 2026-11-15: "diğer tüm uygulamaların yaptığı gibi"): a floating,
  * rounded, translucent bar that blurs the page under it, at the bottom on phones and as a rail on
- * the right edge on a large screen (iPhone Duo's inner display, both orientations). The app's
- * chrome only; the shop's pages keep their flat look.
+ * the right edge on iPhone Duo (see the rail block below). The app's chrome only; the shop's
+ * pages keep their flat look.
  */
 :root {
   --kv-top: 3.25rem;
@@ -234,11 +234,20 @@ body {
 }
 
 /*
- * Large screens (iPhone Duo's inner display: about 669 x 951 pt, either way round; not a phone in
- * landscape, which is under 480px tall; the Duo's outer display is under 480px too): the tabs move to a glass rail on the right edge, centred
- * top to bottom, and the page keeps clear of it on the right instead of at the bottom.
+ * The rail (owner, 2026-11-18: "Sağda olmalı kapalı dikeyken. Ekran açık yatay sağda. Ekran açık
+ * dikey aşağıda. Ekran kapalı yatay sağda."): on iPhone Duo the tabs move to a glass rail on the
+ * right edge, centred top to bottom, and the page keeps clear of it on the right instead of at
+ * the bottom. Both sides at least 450px and at most 800px wide: the outer display either way
+ * round (about 466 x 678 pt) and the inner display when it is tall (about 669 x 951 pt). The
+ * inner display when it is wide (about 951 x 669 pt, also half open) keeps the bottom bar, and so
+ * does every other phone (under 450px wide upright, under 450px tall on its side). The rail's
+ * space takes the place of the right safe-area inset (the Duo's status corner), which would
+ * otherwise leave an empty column beside it.
  */
-@media (width >= 640px) and (height >= 480px) {
+@media (width >= 450px) and (width <= 800px) and (height >= 450px) {
+  :root {
+    padding-right: 0;
+  }
   .kv-tabbar {
     left: auto;
     bottom: auto;
